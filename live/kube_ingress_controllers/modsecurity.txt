@@ -1,0 +1,29 @@
+# https://systemweakness.com/nginx-ingress-waf-with-modsecurity-from-zero-to-hero-fa284cb6f54a
+
+# Instead of using the configmap to import the owasp-crs rulesets,
+# we MUST include them here so we can alter its configuration (i.e., to disable certain rules)
+Include /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
+
+# Enable enforcement
+SecRuleEngine DetectionOnly # TODO: Turn on enforcement
+
+# Scan JSON and XML request bodies
+SecRequestBodyAccess On
+SecRule REQUEST_HEADERS:Content-Type "(?:application(?:/soap\+|/)|text/)xml" "id:\'200000\',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML"
+SecRule REQUEST_HEADERS:Content-Type "application/json" "id:\'200001\',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
+
+# Size limits
+SecRequestBodyLimit 20971520
+SecRequestBodyNoFilesLimit 1048576
+SecRequestBodyLimitAction Reject
+
+# Add additional allowable methods
+SecAction "id:900200,phase:1,nolog,pass,t:none,setvar:tx.allowed_methods=GET HEAD POST OPTIONS PUT PATCH DELETE"
+
+# Log to stdout so captured in Datadog
+SecAuditLog /dev/stderr
+SecAuditLogFormat JSON
+SecAuditEngine RelevantOnly # could be On/Off/RelevantOnly
+
+# Disable security rules
+SecRule REQUEST_HEADERS:Host "@rx ^[\d.:]+$" "id:\'1000001\',phase:1,t:none,nolog,pass,ctl:ruleRemoveById=920350" # Allows for use of IP addresses in host headers
