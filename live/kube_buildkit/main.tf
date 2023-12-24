@@ -28,7 +28,7 @@ locals {
 
   scale_down_submodule = "buildkit-scaledown"
   scale_down_labels = merge(var.kube_labels, {
-    service = local.scaledown_submodule
+    service = local.scale_down_submodule
   })
 
   port = 1234
