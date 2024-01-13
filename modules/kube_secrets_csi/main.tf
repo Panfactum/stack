@@ -14,17 +14,22 @@ terraform {
 locals {
 
   service = "secrets-csi"
-
-  // Extract values from the enforced kubernetes labels
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-
-  labels = merge(var.kube_labels, {
-    service = local.service
-  })
-
   namespace = module.namespace.namespace
+
+}
+
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    service = local.service
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
@@ -48,7 +53,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   linkerd_inject    = false
   app = var.app
   environment = var.environment
@@ -108,7 +112,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "secrets-csi-secrets-store-csi-driver"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {

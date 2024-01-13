@@ -16,14 +16,6 @@ locals {
   name      = "linkerd"
   namespace = module.namespace.namespace
 
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-
-  labels = merge(var.kube_labels, {
-    service = local.name
-  })
-
   linkerd_vault_issuer                     = "linkerd-vault-issuer"
   linkerd_root_ca_secret                   = "linkerd-identity-trust-roots" # MUST be named this
   linkerd_root_issuer                      = "linkerd-root-issuer"
@@ -34,14 +26,28 @@ locals {
   linkerd_profile_validator_webhook_secret = "linkerd-sp-validator-k8s-tls"     # MUST be named this
 
   linkerd_submodule = "linkerd"
-  linkerd_labels = merge(local.labels, {
+  linkerd_labels = merge(module.kube_labels.kube_labels, {
     submodule = local.linkerd_submodule
   })
 
   linkerd_cni_submodule = "linkerd-cni"
-  linkerd_cni_labels = merge(local.labels, {
+  linkerd_cni_labels = merge(module.kube_labels.kube_labels, {
     submodule = local.linkerd_cni_submodule
   })
+}
+
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    service = local.name
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
@@ -65,7 +71,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -154,7 +159,7 @@ resource "kubernetes_manifest" "linkerd_vault_issuer" {
     kind       = "Issuer"
     metadata = {
       name      = local.linkerd_vault_issuer
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
       namespace = var.cert_manager_namespace
     }
     spec = {
@@ -226,7 +231,7 @@ resource "kubernetes_manifest" "linkerd_root_issuer" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.linkerd_root_issuer
-      labels = local.labels
+      labels = module.kube_labels.kube_labels
     }
     spec = {
       ca = {
@@ -573,7 +578,7 @@ resource "kubernetes_manifest" "vpa_identity" {
     metadata = {
       name      = "linkerd-identity"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -593,7 +598,7 @@ resource "kubernetes_manifest" "vpa_destination" {
     metadata = {
       name      = "linkerd-destination"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -613,7 +618,7 @@ resource "kubernetes_manifest" "vpa_proxy_injectory" {
     metadata = {
       name      = "linkerd-proxy-injector"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {

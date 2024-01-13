@@ -16,14 +16,20 @@ locals {
   name      = "metrics-server"
   namespace = module.namespace.namespace
 
-  // Extract values from the enforced kubernetes labels
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
+}
 
-  labels = merge(var.kube_labels, {
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
     service = local.name
-  })
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
@@ -50,7 +56,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -77,8 +82,8 @@ resource "helm_release" "metrics_server" {
         repository = "registry.k8s.io/metrics-server/metrics-server"
         tag        = var.metrics_server_version
       }
-      commonLabels = local.labels
-      podLabels    = local.labels
+      commonLabels = module.kube_labels.kube_labels
+      podLabels    = module.kube_labels.kube_labels
 
       deploymentAnnotations = {
         "reloader.stakater.com/auto" = "true"
@@ -120,7 +125,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = var.kube_labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {

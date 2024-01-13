@@ -27,20 +27,6 @@ locals {
   bastion_name = "bastion"
   namespace    = module.namespace.namespace
 
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-
-  nginx_labels = merge(var.kube_labels, {
-    submodule = local.nginx_name
-  })
-  alb_labels = merge(var.kube_labels, {
-    submodule = local.alb_name
-  })
-  bastion_labels = merge(var.kube_labels, {
-    submodule = local.bastion_name
-  })
-
   nginx_selector = {
     "app.kubernetes.io/component" = "controller"
     "app.kubernetes.io/instance"  = "ingress-nginx"
@@ -50,7 +36,7 @@ locals {
     "app.kubernetes.io/name" = "aws-load-balancer-controller"
   }
   bastion_selector = {
-    module    = local.module
+    module    = var.module
     submodule = local.bastion_name
   }
 
@@ -119,6 +105,48 @@ locals {
   }
 }
 
+module "nginx_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    submodule = local.nginx_name
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
+module "alb_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    submodule = local.alb_name
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
+module "bastion_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    submodule = local.bastion_name
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
 module "constants" {
   source = "../constants"
   app = var.app
@@ -136,7 +164,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = var.kube_labels
   linkerd_inject    = false
   app = var.app
   environment = var.environment
@@ -361,7 +388,7 @@ resource "kubernetes_service_account" "alb_controller" {
   metadata {
     name      = local.alb_name
     namespace = local.namespace
-    labels    = local.alb_labels
+    labels    = module.alb_labels.kube_labels
   }
 }
 
@@ -436,7 +463,7 @@ resource "helm_release" "alb_controller" {
       clusterName              = var.eks_cluster_name
       region                   = data.aws_region.main.name
       vpcId                    = var.vpc_id
-      additionalLabels = merge(local.alb_labels, {
+      additionalLabels = merge(module.alb_labels.kube_labels, {
         customizationHash = md5(join("", [for filename in sort(fileset(path.module, "alb_kustomize/*")) : filesha256(filename)]))
       })
       deploymentAnnotations = {
@@ -454,7 +481,7 @@ resource "helm_release" "alb_controller" {
       webhookNamespaceSelectors = [{
         key      = "module"
         operator = "In"
-        values   = [local.module]
+        values   = [var.module]
       }]
 
       // This is necessary for zero-downtime rollovers of the nginx ingress pods
@@ -482,7 +509,7 @@ resource "kubernetes_service" "alb_controller_healthcheck" {
   metadata {
     name      = "alb-controller-healthcheck"
     namespace = local.namespace
-    labels    = local.alb_labels
+    labels    = module.alb_labels.kube_labels
   }
   spec {
     type = "ClusterIP"
@@ -504,7 +531,7 @@ resource "kubernetes_manifest" "vpa_alb" {
     metadata = {
       name      = "eks-aws-load-balancer-controller"
       namespace = local.namespace
-      labels    = var.kube_labels
+      labels    = module.alb_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -525,7 +552,7 @@ module "webhook_cert" {
   service_names = ["ingress-nginx-controller-admission"]
   secret_name   = local.webhook_secret
   namespace     = local.namespace
-  labels        = local.nginx_labels
+  labels        = module.nginx_labels.kube_labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -579,7 +606,7 @@ resource "kubernetes_secret" "dhparam" {
     name      = "ingress-nginx-dhparam"
     namespace = local.namespace
     labels = merge(
-      local.nginx_labels,
+      module.nginx_labels.kube_labels,
       {
         "app.kubernetes.io/name"    = "ingress-nginx"
         "app.kubernetes.io/part-of" = "ingress-nginx"
@@ -606,7 +633,7 @@ resource "helm_release" "nginx_ingress" {
 
   values = [
     yamlencode({
-      commonLabels = merge(local.nginx_labels,
+      commonLabels = merge(module.nginx_labels.kube_labels,
         {
           customizationHash = md5(join("", [for filename in sort(fileset(path.module, "nginx_kustomize/*")) : filesha256(filename)]))
         }
@@ -880,7 +907,7 @@ resource "kubernetes_service" "nginx_healthcheck" {
   metadata {
     name      = "nginx-healthcheck"
     namespace = local.namespace
-    labels    = local.nginx_labels
+    labels    = module.nginx_labels.kube_labels
   }
   spec {
     type = "ClusterIP"
@@ -898,7 +925,7 @@ resource "kubernetes_service" "nginx_status" {
   metadata {
     name      = "nginx-status"
     namespace = local.namespace
-    labels    = local.nginx_labels
+    labels    = module.nginx_labels.kube_labels
   }
   spec {
     type = "ClusterIP"
@@ -920,7 +947,7 @@ resource "kubernetes_manifest" "vpa_nginx" {
     metadata = {
       name      = "ingress-nginx-controller"
       namespace = local.namespace
-      labels    = local.nginx_labels
+      labels    = module.nginx_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -940,7 +967,7 @@ resource "kubernetes_service_account" "bastion" {
   metadata {
     name      = local.bastion_name
     namespace = local.namespace
-    labels    = local.bastion_labels
+    labels    = module.bastion_labels.kube_labels
   }
 }
 
@@ -948,7 +975,7 @@ resource "kubernetes_secret" "bastion_ca" {
   metadata {
     name      = "${local.bastion_name}-ca"
     namespace = local.namespace
-    labels    = local.bastion_labels
+    labels    = module.bastion_labels.kube_labels
   }
   data = {
     "trusted-user-ca-keys.pem" = var.bastion_ca_keys
@@ -965,7 +992,7 @@ resource "kubernetes_secret" "bastion_host" {
   metadata {
     name      = "${local.bastion_name}-host"
     namespace = local.namespace
-    labels    = local.bastion_labels
+    labels    = module.bastion_labels.kube_labels
   }
   data = {
     id_rsa       = tls_private_key.host.private_key_openssh
@@ -978,7 +1005,6 @@ module "bastion" {
   namespace       = module.namespace.namespace
   service_name    = local.bastion_name
   service_account = kubernetes_service_account.bastion.metadata[0].name
-  kube_labels     = local.bastion_labels
 
   min_replicas        = 2
   max_replicas        = 2
@@ -1052,7 +1078,7 @@ resource "kubernetes_service" "bastion" {
   metadata {
     name      = "${local.bastion_name}-ingress"
     namespace = local.namespace
-    labels    = local.bastion_labels
+    labels    = module.bastion_labels.kube_labels
     annotations = merge(local.nlb_common_annotations, {
       "service.beta.kubernetes.io/aws-load-balancer-name" = "bastion",
       "external-dns.alpha.kubernetes.io/hostname"         = var.bastion_domain

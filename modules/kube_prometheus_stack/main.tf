@@ -28,16 +28,6 @@ locals {
   name      = "prometheus"
   namespace = module.namespace.namespace
 
-  // Extract values from the enforced kubernetes labels
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-  region      = var.region
-
-  labels = merge(var.kube_labels, {
-    service = local.name
-  })
-
   grafana_domain = "grafana.${var.environment_domain}"
 
   all_groups = toset(concat(var.admin_groups, var.reader_groups, var.editor_groups))
@@ -68,7 +58,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -225,8 +214,8 @@ data "azuread_group" "groups" {
 
 module "oauth_app" {
   source                  = "../aad_oauth_application"
-  display_name            = "grafana-${local.environment}-${local.region}"
-  description             = "Used to authenticate users to grafana in the ${local.environment} environment in ${local.region}"
+  display_name            = "grafana-${var.environment}-${var.region}"
+  description             = "Used to authenticate users to grafana in the ${var.environment} environment in ${var.region}"
   redirect_uris           = local.oauth_redirect_uris
   admin_role_value        = "GrafanaAdmin"
   editor_role_value       = "Editor"
@@ -251,7 +240,6 @@ module "oauth_app" {
 module "ingress" {
   source       = "../kube_ingress"
   namespace    = local.namespace
-  kube_labels  = local.labels
   ingress_name = "grafana"
   ingress_configs = [{
     domains      = [local.grafana_domain]

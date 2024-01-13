@@ -11,6 +11,20 @@ locals {
   service = "reloader"
 }
 
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    service = local.service
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
 module "constants" {
   source = "../constants"
   app = var.app
@@ -28,7 +42,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = var.kube_labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -40,7 +53,7 @@ module "namespace" {
 
 resource "kubernetes_cluster_role" "reloader" {
   metadata {
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
     name   = local.service
   }
   rule {
@@ -67,7 +80,7 @@ resource "kubernetes_cluster_role" "reloader" {
 
 resource "kubernetes_cluster_role_binding" "reloader" {
   metadata {
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
     name   = local.service
   }
   role_ref {
@@ -84,7 +97,7 @@ resource "kubernetes_cluster_role_binding" "reloader" {
 
 resource "kubernetes_role" "reloader" {
   metadata {
-    labels    = var.kube_labels
+    labels    = module.kube_labels.kube_labels
     name      = local.service
     namespace = module.namespace.namespace
   }
@@ -97,7 +110,7 @@ resource "kubernetes_role" "reloader" {
 
 resource "kubernetes_role_binding" "reloader" {
   metadata {
-    labels    = var.kube_labels
+    labels    = module.kube_labels.kube_labels
     name      = local.service
     namespace = module.namespace.namespace
   }
@@ -162,7 +175,6 @@ module "deployment" {
     }
   }
 
-  kube_labels = var.kube_labels
   vpa_enabled = var.vpa_enabled
 
   app = var.app

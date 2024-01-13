@@ -21,38 +21,47 @@ locals {
   name      = "vault"
   namespace = module.namespace.namespace
 
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-
-  labels = merge(var.kube_labels, {
-    service = local.name
-  })
-
-  injector_labels = merge(local.labels, {
-    submodule = "injector"
-  })
-
   server_submodule = "server"
-  server_labels = merge(local.labels, {
-    submodule = local.server_submodule
-  })
   server_match = {
-    module    = local.module
+    module    = var.module
     submodule = local.server_submodule
   }
 
   csi_submodule = "csi"
-  csi_labels = merge(local.labels, {
-    submodule = local.csi_submodule
-  })
   csi_match = {
-    module    = local.module
+    module    = var.module
     submodule = local.csi_submodule
   }
 
-
   vault_domain = "vault.${var.environment_domain}"
+}
+
+module "server_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    submodule = local.server_submodule
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
+module "csi_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    submodule = local.csi_submodule
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
@@ -79,7 +88,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -156,7 +164,7 @@ resource "kubernetes_service_account" "vault" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.server_labels.kube_labels
   }
 }
 
@@ -216,7 +224,7 @@ resource "helm_release" "vault" {
         pod = {
           affinity    = module.constants.controller_node_affinity_helm
           tolerations = module.constants.spot_node_toleration_helm
-          extraLabels = local.csi_labels
+          extraLabels = module.csi_labels.kube_labels
         }
         priorityClassName = "system-node-critical"
       }
@@ -231,7 +239,7 @@ resource "helm_release" "vault" {
             "reloader.stakater.com/auto" = "true"
           }
         }
-        extraLabels = local.server_labels
+        extraLabels = module.server_labels.kube_labels
         serviceAccount = {
           create = false,
           name   = kubernetes_service_account.vault.metadata[0].name
@@ -298,7 +306,7 @@ resource "kubernetes_manifest" "vpa_csi" {
     metadata = {
       name      = "vault-csi-provider"
       namespace = local.namespace
-      labels    = local.injector_labels
+      labels    = module.csi_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -319,7 +327,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = "vault"
       namespace = local.namespace
-      labels    = local.server_labels
+      labels    = module.server_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -339,7 +347,6 @@ resource "kubernetes_manifest" "vpa_server" {
 module "ingress" {
   source       = "../kube_ingress"
   namespace    = local.namespace
-  kube_labels  = local.server_labels
   ingress_name = local.server_submodule
   ingress_configs = [{
     domains      = [local.vault_domain]

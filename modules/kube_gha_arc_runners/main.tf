@@ -24,15 +24,25 @@ locals {
   name      = "arc-runners"
   namespace = module.namespace.namespace
 
-  labels = merge(var.kube_labels, {
-    service = local.name
-  })
-
   runners = {
     "${var.gha_runner_env_prefix}-small"  = var.small_runner_config
     "${var.gha_runner_env_prefix}-medium" = var.medium_runner_config
     "${var.gha_runner_env_prefix}-large"  = var.large_runner_config
   }
+}
+
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    service = local.name
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
@@ -56,7 +66,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -74,7 +83,7 @@ resource "kubernetes_service_account" "runners" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
 }
 
@@ -83,7 +92,7 @@ resource "kubernetes_service_account" "runners" {
 // as they need to be able to deploy IaC
 resource "kubernetes_cluster_role_binding" "runners" {
   metadata {
-    labels = local.labels
+    labels = module.kube_labels.kube_labels
     name   = kubernetes_service_account.runners.metadata[0].name
   }
   role_ref {
@@ -187,7 +196,7 @@ resource "kubernetes_secret" "github_app" {
   metadata {
     name      = "github-app"
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
   data = {
     github_app_id              = var.github_app_id
@@ -199,7 +208,7 @@ resource "kubernetes_secret" "secrets" {
   metadata {
     name      = "runner-secrets"
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
   data = var.extra_env_secrets
 }
@@ -388,7 +397,7 @@ resource "kubernetes_pod_disruption_budget_v1" "runners" {
   metadata {
     name      = each.key
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
   spec {
     min_available = "100%"

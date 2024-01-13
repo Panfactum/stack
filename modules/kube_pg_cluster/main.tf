@@ -28,6 +28,17 @@ locals {
   pooler-label  = "${local.cluster-label}-pooler-rw"
 }
 
+module "kube_labels" {
+  source = "../kube_labels"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
 module "constants" {
   source = "../constants"
   app = var.app
@@ -113,7 +124,7 @@ module "server_certs" {
   source      = "../kube_internal_cert"
   secret_name = random_id.server_certs_secret.hex
   namespace   = var.pg_cluster_namespace
-  labels      = var.kube_labels
+  labels      = module.kube_labels.kube_labels
   service_names = [
     var.pg_cluster_name,
     "${var.pg_cluster_name}-rw",
@@ -151,7 +162,7 @@ module "client_certs" {
   source      = "../kube_internal_cert"
   secret_name = random_id.client_certs_secret.hex
   namespace   = var.pg_cluster_namespace
-  labels      = var.kube_labels
+  labels      = module.kube_labels.kube_labels
   usages      = ["client auth"]
   common_name = "streaming_replica"
   app = var.app
@@ -215,7 +226,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
     metadata = {
       name      = var.pg_cluster_name
       namespace = var.pg_cluster_namespace
-      labels    = var.kube_labels
+      labels    = module.kube_labels.kube_labels
       annotations = {
         // We cannot disable native postgres tls encryption in this operator
         // so we will disable our service mesh overlay
@@ -240,7 +251,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       }
 
       inheritedMetadata = {
-        labels = merge(var.kube_labels, {
+        labels = merge(module.kube_labels.kube_labels, {
           pg-cluster = local.cluster-label
         })
       }
@@ -377,7 +388,7 @@ resource "kubernetes_manifest" "scheduled_backup" {
 #    metadata = {
 #      name = var.pg_cluster_name
 #      namespace = var.pg_cluster_namespace
-#      labels = var.kube_labels
+#      labels = module.kube_labels.kube_labels
 #    }
 #    spec = {
 #      targetRef = {
@@ -655,7 +666,7 @@ resource "vault_database_secret_backend_connection" "postgres" {
 #    metadata = {
 #      name = "${var.pg_cluster_name}-pooler-rw"
 #      namespace = var.pg_cluster_namespace
-#      labels = var.kube_labels
+#      labels = module.kube_labels.kube_labels
 #    }
 #    spec = {
 #      targetRef = {

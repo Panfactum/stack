@@ -82,7 +82,7 @@ resource "helm_release" "azwi" {
 
   values = [
     yamlencode({
-      azureTenantID     = var.azuread_tenant_id // @Jack, take a look at this please, might just be an outright bug
+      azureTenantID     = var.azuread_tenant_id 
       priorityClassName = module.constants.cluster_important_priority_class_name
       replicaCount      = 2
       affinity = merge(

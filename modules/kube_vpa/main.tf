@@ -16,15 +16,22 @@ locals {
   name      = "vertical-pod-autoscaler"
   namespace = module.namespace.namespace
 
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-
-  labels = merge(var.kube_labels, {
-    service = local.name
-  })
-
   webhook_secret = "va-webhook-certs"
+
+}
+
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
+    service = local.name
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
@@ -48,7 +55,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -67,7 +73,7 @@ module "webhook_cert" {
   service_names = ["vertical-pod-autoscaler-vpa-webhook"]
   secret_name   = local.webhook_secret
   namespace     = local.namespace
-  labels        = local.labels
+  labels        = module.kube_labels.kube_labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -91,7 +97,7 @@ resource "helm_release" "vpa" {
   values = [
     yamlencode({
 
-      podLabels = merge(local.labels, {
+      podLabels = merge(module.kube_labels.kube_labels, {
         customizationHash = md5(join("", [for filename in fileset(path.module, "vpa_kustomize/*") : filesha256(filename)]))
       })
 
@@ -219,7 +225,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     metadata = {
       name      = "vertical-pod-autoscaler-vpa-admission-controller"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -239,7 +245,7 @@ resource "kubernetes_manifest" "vpa_recommender" {
     metadata = {
       name      = "vertical-pod-autoscaler-vpa-recommender"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       resourcePolicy = {
@@ -267,7 +273,7 @@ resource "kubernetes_manifest" "vpa_updater" {
     metadata = {
       name      = "vertical-pod-autoscaler-vpa-updater"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {

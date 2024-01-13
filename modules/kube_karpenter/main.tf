@@ -20,14 +20,20 @@ locals {
   name      = "karpenter"
   namespace = module.namespace.namespace
 
-  // Extract values from the enforced kubernetes labels
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
+}
 
-  labels = merge(var.kube_labels, {
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
     service = local.name
-  })
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 data "aws_region" "main" {}
@@ -35,7 +41,7 @@ data "aws_caller_identity" "main" {}
 
 module "constants" {
   source          = "../constants"
-  matching_labels = local.labels
+  matching_labels = module.kube_labels.kube_labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -51,7 +57,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -335,7 +340,7 @@ resource "kubernetes_service_account" "karpenter" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
 }
 
@@ -370,7 +375,7 @@ resource "helm_release" "karpenter" {
     yamlencode({
       nameOverride     = local.name
       fullnameOverride = local.name
-      podLabels        = local.labels
+      podLabels        = module.kube_labels.kube_labels
 
       // For some reason, the default DNS policy is not the kubernetes default
       // (it is "Default" but the kubernetes default is "ClusterFirst")
@@ -408,7 +413,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {

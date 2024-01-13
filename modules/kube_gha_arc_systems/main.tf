@@ -16,14 +16,25 @@ locals {
   name      = "arc-systems"
   namespace = module.namespace.namespace
 
-  labels = merge(var.kube_labels, {
+}
+
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
     service = local.name
-  })
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "constants" {
   source          = "../constants"
-  matching_labels = local.labels
+  matching_labels = module.kube_labels.kube_labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -43,7 +54,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  kube_labels       = local.labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -61,7 +71,7 @@ resource "kubernetes_service_account" "arc" {
   metadata {
     name      = "gha-runner-scale-set-controller"
     namespace = local.namespace
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
 }
 
@@ -79,8 +89,8 @@ resource "helm_release" "arc" {
   values = [
     yamlencode({
       replicaCount = 2
-      labels       = local.labels
-      podLabels    = local.labels // This won't work until 0.6.2
+      labels       = module.kube_labels.kube_labels
+      podLabels    = module.kube_labels.kube_labels // This won't work until 0.6.2
 
       serviceAccount = {
         create = false
@@ -125,7 +135,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "arc-controller"
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -145,11 +155,11 @@ resource "kubernetes_manifest" "pdb_controller" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       selector = {
-        matchLabels = local.labels
+        matchLabels = module.kube_labels.kube_labels
       }
       maxUnavailable = 1
     }

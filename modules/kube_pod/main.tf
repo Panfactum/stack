@@ -16,15 +16,6 @@ locals {
   /************************************************
   * Label Creation
   ************************************************/
-  // Extract values from the enforced kubernetes labels
-  environment = var.kube_labels["environment"]
-  module      = var.kube_labels["module"]
-  version     = var.kube_labels["version_tag"]
-
-  labels = merge({
-    pod-template-id = random_id.pod_template_id.hex
-  }, var.extra_pod_labels, var.kube_labels)
-
   match_labels = {
     pod-template-id = random_id.pod_template_id.hex
   }
@@ -255,7 +246,7 @@ locals {
 
   pod = {
     metadata = { for k, v in {
-      labels      = local.labels
+      labels      = module.kube_labels.kube_labels
       annotations = length(keys(var.pod_annotations)) == 0 ? null : var.pod_annotations
     } : k => v if v != null }
     spec = { for k, v in {
@@ -370,6 +361,20 @@ locals {
   }
 }
 
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = merge({
+    pod-template-id = random_id.pod_template_id.hex
+  }, var.extra_pod_labels)
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
 module "constants" {
   source          = "../constants"
   matching_labels = local.match_labels
@@ -383,7 +388,7 @@ module "constants" {
 }
 
 resource "random_id" "pod_template_id" {
-  prefix      = "${local.module}-"
+  prefix      = "${var.module}-"
   byte_length = 8
 }
 
@@ -391,7 +396,7 @@ resource "kubernetes_secret" "secrets" {
   metadata {
     namespace = var.namespace
     name      = replace(random_id.pod_template_id.hex, "_", "-")
-    labels    = local.labels
+    labels    = module.kube_labels.kube_labels
   }
   data = var.secrets
 }

@@ -14,6 +14,17 @@ locals {
   superusers_group  = "system:superusers"
 }
 
+module "kube_labels" {
+  source = "../kube_labels"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
 ////////////////////////////////////////////////////////////
 // User Authentication
 // See https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
@@ -25,7 +36,7 @@ locals {
 resource "kubernetes_cluster_role_binding" "superusers" {
   metadata {
     name   = local.superusers_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -46,7 +57,7 @@ resource "kubernetes_cluster_role_binding" "superusers" {
 resource "kubernetes_cluster_role" "admins" {
   metadata {
     name   = local.admins_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   rule {
     api_groups = [""]
@@ -89,7 +100,7 @@ resource "kubernetes_cluster_role" "admins" {
 resource "kubernetes_cluster_role_binding" "admins" {
   metadata {
     name   = local.admins_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -110,7 +121,7 @@ resource "kubernetes_cluster_role_binding" "admins" {
 resource "kubernetes_cluster_role" "readers" {
   metadata {
     name   = local.readers_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   rule {
     api_groups = [""]
@@ -157,7 +168,7 @@ resource "kubernetes_cluster_role" "readers" {
 resource "kubernetes_cluster_role_binding" "readers" {
   metadata {
     name   = local.readers_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -178,7 +189,7 @@ resource "kubernetes_cluster_role_binding" "readers" {
 resource "kubernetes_cluster_role" "bot_readers" {
   metadata {
     name   = local.bot_readers_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   rule {
     api_groups = [""]
@@ -200,7 +211,7 @@ resource "kubernetes_cluster_role" "bot_readers" {
 resource "kubernetes_cluster_role_binding" "bot_readers" {
   metadata {
     name   = local.bot_readers_group
-    labels = var.kube_labels
+    labels = module.kube_labels.kube_labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -221,7 +232,7 @@ resource "kubernetes_config_map" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
-    labels    = var.kube_labels
+    labels    = module.kube_labels.kube_labels
   }
   data = {
     mapRoles = yamlencode(concat(

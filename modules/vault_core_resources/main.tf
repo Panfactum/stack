@@ -24,19 +24,7 @@ terraform {
 }
 
 locals {
-
-  name = "vault"
-
-  environment = var.environment
-  module      = var.module
-  version     = var.version_tag
-  region      = var.region
-
-  labels = merge(var.kube_labels, {
-    service = local.name
-  })
-
-  all_groups = toset(concat(var.admin_groups, var.reader_groups))
+  all_groups = toset(concat(var.admin_groups, var.reader_groups)) 
 }
 
 module "constants" {
@@ -72,8 +60,8 @@ data "azuread_group" "groups" {
 
 module "oidc_app" {
   source               = "../aad_oidc_application"
-  display_name         = "vault-${local.environment}-${local.region}"
-  description          = "Used to authenticate users with the vault instance for the ${local.environment} environment in ${local.region}"
+  display_name         = "vault-${var.environment}-${var.region}"
+  description          = "Used to authenticate users with the vault instance for the ${var.environment} environment in ${var.region}"
   redirect_uris        = local.redirect_uris
   group_object_ids     = [for group in data.azuread_group.groups : group.object_id]
   aad_sp_object_owners = var.aad_sp_object_owners
