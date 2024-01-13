@@ -373,6 +373,13 @@ locals {
 module "constants" {
   source          = "../constants"
   matching_labels = local.match_labels
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 resource "random_id" "pod_template_id" {

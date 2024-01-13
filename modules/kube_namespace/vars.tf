@@ -26,8 +26,3 @@ variable "bot_reader_groups" {
   type        = list(string)
   default     = []
 }
-
-variable "kube_labels" {
-  description = "The default labels to use for Kubernetes resources"
-  type        = map(string)
-}

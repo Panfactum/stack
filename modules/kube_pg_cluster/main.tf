@@ -30,6 +30,13 @@ locals {
 
 module "constants" {
   source = "../constants"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 /***************************************
@@ -51,6 +58,13 @@ module "s3_bucket" {
   audit_log_enabled               = true
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 data "aws_iam_policy_document" "s3_access" {
@@ -77,6 +91,13 @@ module "irsa" {
   // Due to a limitation in the cluster resource api, the cluster resource is the one that creates
   // the service account for us, so we let it to the annotations
   annotate_service_account = false
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 /***************************************
@@ -99,6 +120,13 @@ module "server_certs" {
     "${var.pg_cluster_name}-r",
     "${var.pg_cluster_name}-ro"
   ]
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 resource "kubernetes_labels" "server_certs" {
@@ -126,6 +154,13 @@ module "client_certs" {
   labels      = var.kube_labels
   usages      = ["client auth"]
   common_name = "streaming_replica"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 resource "kubernetes_labels" "client_certs" {

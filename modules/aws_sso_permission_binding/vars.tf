@@ -8,11 +8,6 @@ variable "identity_store_id" {
   type        = string
 }
 
-variable "environment" {
-  description = "The environment this permission binding is for"
-  type        = string
-}
-
 variable "aws_account_id" {
   description = "The AWS account ID associated with the environment"
   type        = string

@@ -95,11 +95,6 @@ variable "restart_policy" {
   default     = "OnFailure"
 }
 
-variable "kube_labels" {
-  description = "The default labels to use for Kubernetes resources"
-  type        = map(string)
-}
-
 variable "tmp_directories" {
   description = "A list of paths that contain empty temporary directories"
   type = map(object({
