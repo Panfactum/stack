@@ -3,11 +3,6 @@ variable "namespace" {
   type        = string
 }
 
-variable "kube_labels" {
-  description = "Labels to apply to the certificate"
-  type        = map(string)
-}
-
 variable "ingress_name" {
   description = "The name prefix of the ingresses that will get created"
   type        = string

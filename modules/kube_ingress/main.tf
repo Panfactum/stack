@@ -12,7 +12,6 @@ terraform {
 }
 
 locals {
-  environment = var.kube_labels["environment"]
   cors_envs   = ["dev", "ops", "prod"]
   common_annotations = merge({
     // Since we use regex in all our ingress routing, this MUST be set to true
@@ -53,7 +52,7 @@ locals {
         "https://*.${join(".", slice(split(".", domain), 1, length(split(".", domain))))}",
       ]]],
 
-      // Main websites
+      // Main websites TODO: Make website domain configurable
       [for env in local.cors_envs : [
         "https://${env}.panfactum.com",
         "https://*.${env}.panfactum.com",
@@ -73,6 +72,17 @@ locals {
 
   rewrite_configs = flatten([for config in var.ingress_configs : [for rewrite_rule in config.rewrite_rules : merge(config, rewrite_rule)]])
 
+}
+
+module "kube_labels" {
+  source = "../kube_labels"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 /********************************************************************************************************************
@@ -130,7 +140,7 @@ resource "kubernetes_manifest" "ingress" {
     metadata = {
       name      = random_id.ingress_id[count.index].hex
       namespace = var.namespace
-      labels    = var.kube_labels
+      labels    = module.kube_labels.kube_labels
       annotations = merge(
         local.common_annotations,
         {
@@ -193,7 +203,7 @@ resource "kubernetes_manifest" "ingress_rewrites" {
     metadata = {
       name      = random_id.rewrite_id[count.index].hex
       namespace = var.namespace
-      labels    = var.kube_labels
+      labels    = module.kube_labels.kube_labels
       annotations = merge(
         local.common_annotations,
         {

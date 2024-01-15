@@ -8,11 +8,6 @@ variable "public_outbound_ips" {
   type        = list(string)
 }
 
-variable "kube_labels" {
-  description = "The labels to apply to the kubernetes resources"
-  type        = map(string)
-}
-
 variable "pg_cluster_name" {
   description = "The name of the postgres cluster"
   type        = string

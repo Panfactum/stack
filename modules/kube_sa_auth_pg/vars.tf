@@ -8,11 +8,6 @@ variable "service_account" {
   type        = string
 }
 
-variable "kube_labels" {
-  description = "Labels to apply to Kubernetes resources"
-  type        = map(string)
-}
-
 variable "database_role" {
   description = "The database role to use"
   type        = string

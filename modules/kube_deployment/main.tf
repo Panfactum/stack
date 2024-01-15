@@ -7,21 +7,27 @@ terraform {
   }
 }
 
-locals {
-  service_labels = merge(var.kube_labels, {
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
     service = var.service_name
-  })
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "pod_template" {
   source       = "../kube_pod"
   allowed_spot = true
-  is_local     = var.is_local
 
   namespace           = var.namespace
   service_account     = var.service_account
   priority_class_name = var.priority_class_name
-  kube_labels         = var.kube_labels
   pod_annotations     = var.pod_annotations
 
   containers = var.containers
@@ -38,6 +44,14 @@ module "pod_template" {
   node_requirements = var.node_requirements
   tolerations       = var.tolerations
   restart_policy    = var.restart_policy
+
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 resource "kubernetes_manifest" "deployment" {
@@ -47,7 +61,7 @@ resource "kubernetes_manifest" "deployment" {
     metadata = {
       namespace = var.namespace
       name      = var.service_name
-      labels    = local.service_labels
+      labels    = module.kube_labels.kube_labels
       annotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -108,7 +122,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = var.service_name
       namespace = var.namespace
-      labels    = var.kube_labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -140,7 +154,7 @@ resource "kubernetes_manifest" "vpa_server" {
 #  metadata {
 #    name = var.service_name
 #    namespace = var.namespace
-#    labels = local.service_labels
+#    labels = module.kube_labels.kube_labels
 #  }
 #  spec {
 #    scale_target_ref {
@@ -201,7 +215,7 @@ resource "kubernetes_service" "service" {
     name      = var.service_name
     namespace = var.namespace
     labels = merge(
-      local.service_labels,
+      module.kube_labels.kube_labels,
       {}
     )
   }
@@ -227,7 +241,7 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "${var.service_name}-pdb"
       namespace = var.namespace
-      labels    = local.service_labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       selector = {

@@ -15,8 +15,26 @@ locals {
   role_name = "pg-auth-${md5("${var.namespace}${var.service_account}${var.database_role}")}"
 }
 
+module "kube_labels" {
+  source = "../kube_labels"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
+}
+
 module "constants" {
   source = "../constants"
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 /***************************************
@@ -52,7 +70,7 @@ resource "kubernetes_manifest" "creds" {
     metadata = {
       name      = local.role_name
       namespace = var.namespace
-      labels    = var.kube_labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       provider = "vault"

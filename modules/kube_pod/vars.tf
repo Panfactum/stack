@@ -43,11 +43,6 @@ variable "common_env" {
   default     = {}
 }
 
-variable "kube_labels" {
-  description = "The default labels to use for Kubernetes resources"
-  type        = map(string)
-}
-
 variable "pod_annotations" {
   description = "Annotations to add to the pods in the deployment"
   type        = map(string)
@@ -85,12 +80,6 @@ variable "mount_owner" {
   description = "The ID of the group that owns the mounted volumes"
   type        = number
   default     = 1000
-}
-
-variable "is_local" {
-  description = "Whether this module is a part of a local development deployment"
-  type        = bool
-  default     = false
 }
 
 variable "dynamic_secrets" {

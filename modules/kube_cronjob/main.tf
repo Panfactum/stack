@@ -7,21 +7,27 @@ terraform {
   }
 }
 
-locals {
-  labels = merge(var.kube_labels, {
+module "kube_labels" {
+  source = "../kube_labels"
+  additional_labels = {
     service = var.name
-  })
+  }
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 module "pod_template" {
   source       = "../kube_pod"
   allowed_spot = true
-  is_local     = var.is_local
 
   namespace           = var.namespace
   service_account     = var.service_account
   priority_class_name = var.priority_class_name
-  kube_labels         = var.kube_labels
   pod_annotations     = var.pod_annotations
 
   containers = var.containers
@@ -38,6 +44,14 @@ module "pod_template" {
   node_requirements = var.node_requirements
   tolerations       = var.tolerations
   restart_policy    = var.restart_policy
+
+  app = var.app
+  environment = var.environment
+  module = var.module
+  region = var.region
+  version_tag = var.version_tag
+  version_hash = var.version_hash
+  is_local = var.is_local
 }
 
 resource "kubernetes_manifest" "cronjob" {
@@ -47,7 +61,7 @@ resource "kubernetes_manifest" "cronjob" {
     metadata = {
       namespace = var.namespace
       name      = var.name
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       concurrencyPolicy          = var.concurrency_policy
@@ -58,7 +72,7 @@ resource "kubernetes_manifest" "cronjob" {
       timeZone                   = "UTC"
       jobTemplate = {
         metadata = {
-          labels = local.labels
+          labels = module.kube_labels.kube_labels
         }
         spec = {
           activeDeadlineSeconds   = var.timeout_seconds
@@ -113,7 +127,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = var.name
       namespace = var.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -146,7 +160,7 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "${var.name}-pdb"
       namespace = var.namespace
-      labels    = local.labels
+      labels    = module.kube_labels.kube_labels
     }
     spec = {
       selector = {
