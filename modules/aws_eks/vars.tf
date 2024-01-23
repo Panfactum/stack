@@ -21,12 +21,6 @@ variable "kube_control_plane_subnets" {
   type        = set(string)
 }
 
-variable "kube_control_plane_legacy_role_name" {
-  description = "A legacy role name for the kubernetes cluster IAM role. Useful as impossible to change the name of existing roles."
-  type        = string
-  default     = ""
-}
-
 variable "kube_control_plane_logging" {
   description = "Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)"
   type        = set(string)

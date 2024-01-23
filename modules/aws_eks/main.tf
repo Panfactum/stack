@@ -13,7 +13,7 @@ terraform {
 
 locals {
   vpc_id = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
-  common_tags = merge(local.default_tags, {
+  common_tags = merge(local.aws_default_tags, {
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   })
   controller_nodes_description = "Nodes for cluster-critical components and bootstrapping processes. Not autoscaled."
@@ -114,7 +114,7 @@ resource "aws_security_group_rule" "control_plane_egress" {
 }
 
 resource "aws_iam_role" "eks_cluster_role" {
-  name               = var.kube_control_plane_legacy_role_name == "" ? var.cluster_name : var.kube_control_plane_legacy_role_name
+  name               = var.cluster_name
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
@@ -157,6 +157,9 @@ module "aws_cloudwatch_log_group" {
   source      = "../aws_cloudwatch_log_group"
   name        = "/aws/eks/${var.cluster_name}/cluster"
   description = "Collects logs for our AWS EKS Cluster"
+  aws_region = var.aws_region
+  aws_account_id = var.aws_account_id
+  aws_profile = var.aws_profile
   app = var.app
   environment = var.environment
   module = var.module
