@@ -4,9 +4,9 @@ let
 in
 {
   env = with pkgs.lib; {
-    TERRAFORM_COMMON_FILES_DIR = "${config.env.DEVENV_ROOT}/common_files";
-    TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/modules";
-    TERRAFORM_LIVE_DIR = "${config.env.DEVENV_ROOT}/live";
+    TERRAFORM_COMMON_FILES_DIR = "${config.env.DEVENV_ROOT}/terraform/common_files";
+    TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/terraform/modules";
+    TERRAFORM_LIVE_DIR = "${config.env.DEVENV_ROOT}/terraform/live";
   };
 
   pre-commit.hooks = {
