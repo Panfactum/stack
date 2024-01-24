@@ -18,10 +18,8 @@ terraform {
 }
 
 locals {
-
   name      = "cilium"
   namespace = module.namespace.namespace
-
 }
 
 module "base_labels" {
