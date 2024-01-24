@@ -84,6 +84,8 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
+  kube_config_context = var.kube_config_context
+  kube_api_server = var.kube_api_server
   app = var.app
   environment = var.environment
   module = var.module
@@ -127,6 +129,11 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.cilium.json
   public_outbound_ips       = var.public_outbound_ips
+  aws_region = var.aws_region
+  aws_account_id = var.aws_account_id
+  aws_profile = var.aws_profile
+  kube_config_context = var.kube_config_context
+  kube_api_server = var.kube_api_server
   app = var.app
   environment = var.environment
   module = var.module

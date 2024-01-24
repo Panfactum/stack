@@ -71,6 +71,8 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
+  kube_config_context = var.kube_config_context
+  kube_api_server = var.kube_api_server
   app = var.app
   environment = var.environment
   module = var.module

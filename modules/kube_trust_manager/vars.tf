@@ -1,7 +1,7 @@
-variable "cert_manager_version" {
-  description = "The version of cert-manager to deploy"
+variable "trust_manager_version" {
+  description = "The version of trust-manager to deploy"
   type        = string
-  default     = "1.12.0"
+  default     = "0.5.0"
 }
 
 variable "vpa_enabled" {

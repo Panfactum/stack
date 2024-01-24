@@ -54,6 +54,8 @@ module "namespace" {
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
   linkerd_inject    = false
+  kube_config_context = var.kube_config_context
+  kube_api_server = var.kube_api_server
   app = var.app
   environment = var.environment
   module = var.module

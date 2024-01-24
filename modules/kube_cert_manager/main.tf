@@ -71,20 +71,6 @@ module "ca_injector_labels" {
   is_local = var.is_local
 }
 
-module "trust_manager_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = "${local.name}-trust-manager"
-  }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
-}
-
 module "constants_controller" {
   source          = "../constants"
   matching_labels = module.controller_labels.kube_labels
@@ -131,6 +117,8 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
+  kube_config_context = var.kube_config_context
+  kube_api_server = var.kube_api_server
   app = var.app
   environment = var.environment
   module = var.module
@@ -328,44 +316,4 @@ resource "kubernetes_manifest" "pdb_ca_injector" {
     }
   }
   depends_on = [helm_release.cert_manager]
-}
-
-/***************************************
-* Trust-manager
-***************************************/
-
-resource "helm_release" "trust_manager" {
-  namespace       = local.namespace
-  name            = "trust-manager"
-  repository      = "https://charts.jetstack.io"
-  chart           = "trust-manager"
-  version         = var.trust_manager_version
-  recreate_pods   = true
-  cleanup_on_fail = true
-  wait            = true
-  wait_for_jobs   = true
-
-  values = [
-    yamlencode({
-      crds = {
-        enabled = true
-      }
-      app = {
-        trust = {
-          namespace = local.namespace
-        }
-      }
-
-      // Does not need to be highly available
-      replicaCount = 1
-      tolerations  = module.constants_controller.spot_node_toleration_helm
-      affinity     = module.constants_controller.controller_node_with_spot_affinity_helm
-    })
-  ]
-
-  // We want to use our secured internal certificate issuer
-  // instead of the default self-signed one
-  postrender {
-    binary_path = "${path.module}/trust_manager_kustomize/kustomize.sh"
-  }
 }
