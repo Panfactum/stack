@@ -14,19 +14,11 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.10"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "2.41.0"
-    }
     time = {
       source  = "hashicorp/time"
       version = "0.9.1"
     }
   }
-}
-
-locals {
-  all_groups = toset(concat(var.admin_groups, var.reader_groups)) 
 }
 
 module "constants" {
@@ -51,60 +43,8 @@ locals {
 }
 
 /***************************************
-* Setup AAD Application for User Auth
+* Setup Vault for User Auth
 ***************************************/
-
-data "azuread_group" "groups" {
-  for_each         = toset(local.all_groups)
-  display_name     = each.key
-  security_enabled = true
-}
-
-module "oidc_app" {
-  source               = "../../modules/aad_oidc_application"
-  display_name         = "vault-${var.environment}-${var.region}"
-  description          = "Used to authenticate users with the vault instance for the ${var.environment} environment in ${var.region}"
-  redirect_uris        = local.redirect_uris
-  group_object_ids     = [for group in data.azuread_group.groups : group.object_id]
-  aad_sp_object_owners = var.aad_sp_object_owners
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
-}
-
-/***************************************
-* Setup Vault for User Auth via AAD
-***************************************/
-
-resource "vault_jwt_auth_backend" "oidc" {
-  description        = "Authentication against Azure AD"
-  path               = "oidc"
-  oidc_client_id     = module.oidc_app.application_id
-  oidc_client_secret = module.oidc_app.client_secret
-  oidc_discovery_url = "https://login.microsoftonline.com/${var.azuread_tenant_id}/v2.0"
-  default_role       = "default"
-  tune {
-    max_lease_ttl     = "${var.oidc_auth_token_lifetime_seconds}s"
-    default_lease_ttl = "${var.oidc_auth_token_lifetime_seconds}s"
-    token_type        = "default-service"
-  }
-}
-
-resource "vault_jwt_auth_backend_role" "default" {
-  backend                = vault_jwt_auth_backend.oidc.path
-  role_name              = "default"
-  user_claim             = "sub"
-  groups_claim           = "groups"
-  allowed_redirect_uris  = local.redirect_uris
-  oidc_scopes            = ["https://graph.microsoft.com/.default"]
-  max_age                = 60 * 60 * 8
-  token_explicit_max_ttl = var.oidc_auth_token_lifetime_seconds
-}
-
 
 data "vault_policy_document" "admins" {
   rule {
@@ -154,20 +94,6 @@ resource "vault_policy" "admins" {
   policy = data.vault_policy_document.admins.hcl
 }
 
-resource "vault_identity_group" "admins" {
-  for_each = toset(var.admin_groups)
-  name     = each.key
-  type     = "external"
-  policies = [vault_policy.admins.name]
-}
-
-resource "vault_identity_group_alias" "admins" {
-  for_each       = toset(var.admin_groups)
-  canonical_id   = vault_identity_group.admins[each.key].id
-  mount_accessor = vault_jwt_auth_backend.oidc.accessor
-  name           = data.azuread_group.groups[each.key].object_id
-}
-
 data "vault_policy_document" "readers" {
   rule {
     path         = "secret/*"
@@ -204,20 +130,6 @@ data "vault_policy_document" "readers" {
 resource "vault_policy" "readers" {
   name   = "reader"
   policy = data.vault_policy_document.readers.hcl
-}
-
-resource "vault_identity_group" "readers" {
-  for_each = toset(var.reader_groups)
-  name     = each.key
-  type     = "external"
-  policies = [vault_policy.readers.name]
-}
-
-resource "vault_identity_group_alias" "readers" {
-  for_each       = toset(var.reader_groups)
-  canonical_id   = vault_identity_group.readers[each.key].id
-  mount_accessor = vault_jwt_auth_backend.oidc.accessor
-  name           = data.azuread_group.groups[each.key].object_id
 }
 
 /***************************************

@@ -25,12 +25,12 @@ variable "vpa_enabled" {
   default     = false
 }
 
-variable "ingress_enabled" {
-  description = "Whether or not to enable the ingress for routing traffic to vault"
-  type        = bool
-}
-
 variable "public_outbound_ips" {
   description = "A list of the public ips for outbound cluster traffic"
   type        = list(string)
+}
+
+variable "ingress_enabled" {
+  description = "Whether or not to enable the ingress for routing traffic to vault"
+  type        = bool
 }
