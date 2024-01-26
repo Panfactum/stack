@@ -90,6 +90,13 @@ data "aws_subnet" "control_plane_subnets" {
   }
 }
 
+resource "aws_ec2_tag" "vpc_tag" {
+  for_each = var.kube_control_plane_subnets
+  resource_id = data.aws_subnet.control_plane_subnets[each.key].id
+  key = "kubernetes.io/cluster/${var.cluster_name}"
+  value = "owned"
+}
+
 resource "aws_security_group" "control_plane" {
   description = "Security group for the ${var.cluster_name} EKS control plane."
   vpc_id      = local.vpc_id

@@ -13,16 +13,10 @@ terraform {
   }
 }
 
-locals {
-
-  namespace      = "cert-manager"
-
-}
-
 module "trust_manager_labels" {
   source = "../../modules/kube_labels"
   additional_labels = {
-    service = "${local.namespace}-trust-manager"
+    service = "${var.namespace}-trust-manager"
   }
   app = var.app
   environment = var.environment
@@ -50,7 +44,7 @@ module "trust_manager_constants" {
 ***************************************/
 
 resource "helm_release" "trust_manager" {
-  namespace       = local.namespace
+  namespace       = var.namespace
   name            = "trust-manager"
   repository      = "https://charts.jetstack.io"
   chart           = "trust-manager"
@@ -67,7 +61,7 @@ resource "helm_release" "trust_manager" {
       }
       app = {
         trust = {
-          namespace = local.namespace
+          namespace = var.namespace
         }
         podLabels = module.trust_manager_labels.kube_labels
       }
@@ -86,4 +80,22 @@ resource "helm_release" "trust_manager" {
   }
 }
 
-// TODO: Add VPA
+resource "kubernetes_manifest" "vpa" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "trust-manager"
+      namespace = var.namespace
+      labels    = module.trust_manager_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "trust-manager"
+      }
+    }
+  }
+}

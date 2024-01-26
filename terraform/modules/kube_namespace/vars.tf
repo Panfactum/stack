@@ -26,3 +26,9 @@ variable "bot_reader_groups" {
   type        = list(string)
   default     = []
 }
+
+variable "loadbalancer_enabled" {
+  description = "Whether the namespace is going to create LoadBalancer services"
+  type = bool
+  default = false
+}

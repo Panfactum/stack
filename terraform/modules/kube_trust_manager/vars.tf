@@ -9,3 +9,8 @@ variable "vpa_enabled" {
   type        = bool
   default     = false
 }
+
+variable "namespace" {
+  description = "The name of the cert-manager namespace."
+  type        = string
+}

@@ -130,12 +130,6 @@ variable "secret_mounts" {
   default     = {}
 }
 
-variable "is_local" {
-  description = "Whether this module is a part of a local development deployment"
-  type        = bool
-  default     = false
-}
-
 variable "pod_annotations" {
   description = "Annotations to add to the pods in the deployment"
   type        = map(string)

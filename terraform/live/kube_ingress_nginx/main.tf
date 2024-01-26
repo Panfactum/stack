@@ -10,36 +10,18 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.10.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.10"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "4.0.4"
-    }
   }
 }
 
 locals {
 
-  name         = "ingress"
-  nginx_name   = "ingress-nginx"
-  alb_name     = "alb-controller"
-  bastion_name = "bastion"
+  name = "ingress-nginx"
   namespace    = module.namespace.namespace
 
   nginx_selector = {
     "app.kubernetes.io/component" = "controller"
     "app.kubernetes.io/instance"  = "ingress-nginx"
     "app.kubernetes.io/name"      = "ingress-nginx"
-  }
-  alb_selector = {
-    "app.kubernetes.io/name" = "aws-load-balancer-controller"
-  }
-  bastion_selector = {
-    module    = var.module
-    submodule = local.bastion_name
   }
 
   // This has to be THIS name in order for it to
@@ -79,6 +61,7 @@ locals {
     style-src = ["'self'", "https:", "'unsafe-inline'"]
   }
 
+  // TODO: Modularize since used in Bastion
   nlb_common_annotations = {
     "service.beta.kubernetes.io/aws-load-balancer-type"                            = "external"
     "service.beta.kubernetes.io/aws-load-balancer-backend-protocol"                = "tcp"
@@ -107,39 +90,9 @@ locals {
   }
 }
 
-module "nginx_labels" {
+module "labels" {
   source = "../../modules/kube_labels"
-  additional_labels = {
-    submodule = local.nginx_name
-  }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
-}
-
-module "alb_labels" {
-  source = "../../modules/kube_labels"
-  additional_labels = {
-    submodule = local.alb_name
-  }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
-}
-
-module "bastion_labels" {
-  source = "../../modules/kube_labels"
-  additional_labels = {
-    submodule = local.bastion_name
-  }
+  additional_labels = {}
   app = var.app
   environment = var.environment
   module = var.module
@@ -167,6 +120,7 @@ module "namespace" {
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
   linkerd_inject    = false
+  loadbalancer_enabled = true
   app = var.app
   environment = var.environment
   module = var.module
@@ -174,375 +128,6 @@ module "namespace" {
   version_tag = var.version_tag
   version_hash = var.version_hash
   is_local = var.is_local
-}
-
-/********************************************************************************************************************
-* AWS Load Balancer Controller
-*********************************************************************************************************************/
-
-data "aws_region" "main" {}
-
-data "aws_vpc" "vpc" {
-  id = var.vpc_id
-}
-
-data "aws_iam_policy_document" "alb" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "iam:CreateServiceLinkedRole"
-    ]
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      values   = ["elasticloadbalancing.amazonaws.com"]
-      variable = "iam:AWSServiceName"
-    }
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:DescribeAccountAttributes",
-      "ec2:DescribeAddresses",
-      "ec2:DescribeAvailabilityZones",
-      "ec2:DescribeInternetGateways",
-      "ec2:DescribeVpcs",
-      "ec2:DescribeVpcPeeringConnections",
-      "ec2:DescribeSubnets",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeInstances",
-      "ec2:DescribeNetworkInterfaces",
-      "ec2:DescribeTags",
-      "ec2:GetCoipPoolUsage",
-      "ec2:DescribeCoipPools",
-      "elasticloadbalancing:DescribeLoadBalancers",
-      "elasticloadbalancing:DescribeLoadBalancerAttributes",
-      "elasticloadbalancing:DescribeListeners",
-      "elasticloadbalancing:DescribeListenerCertificates",
-      "elasticloadbalancing:DescribeSSLPolicies",
-      "elasticloadbalancing:DescribeRules",
-      "elasticloadbalancing:DescribeTargetGroups",
-      "elasticloadbalancing:DescribeTargetGroupAttributes",
-      "elasticloadbalancing:DescribeTargetHealth",
-      "elasticloadbalancing:DescribeTags"
-    ]
-    resources = ["*"]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "cognito-idp:DescribeUserPoolClient",
-      "acm:ListCertificates",
-      "acm:DescribeCertificate",
-      "iam:ListServerCertificates",
-      "iam:GetServerCertificate",
-      "waf-regional:GetWebACL",
-      "waf-regional:GetWebACLForResource",
-      "waf-regional:AssociateWebACL",
-      "waf-regional:DisassociateWebACL",
-      "wafv2:GetWebACL",
-      "wafv2:GetWebACLForResource",
-      "wafv2:AssociateWebACL",
-      "wafv2:DisassociateWebACL",
-      "shield:GetSubscriptionState",
-      "shield:DescribeProtection",
-      "shield:CreateProtection",
-      "shield:DeleteProtection"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:AuthorizeSecurityGroupIngress",
-      "ec2:RevokeSecurityGroupIngress"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:CreateSecurityGroup",
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:CreateTags"
-    ]
-    resources = ["arn:aws:ec2:*:*:security-group/*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:CreateTags",
-      "ec2:DeleteTags"
-    ]
-    resources = ["arn:aws:ec2:*:*:security-group/*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:AuthorizeSecurityGroupIngress",
-      "ec2:RevokeSecurityGroupIngress",
-      "ec2:DeleteSecurityGroup"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:CreateLoadBalancer",
-      "elasticloadbalancing:CreateTargetGroup"
-    ]
-    resources = ["*"]
-    condition {
-      test     = "Null"
-      values   = ["false"]
-      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
-    }
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:CreateListener",
-      "elasticloadbalancing:DeleteListener",
-      "elasticloadbalancing:CreateRule",
-      "elasticloadbalancing:DeleteRule"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:AddTags",
-      "elasticloadbalancing:RemoveTags"
-    ]
-    resources = [
-      "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-      "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-      "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:AddTags",
-      "elasticloadbalancing:RemoveTags"
-    ]
-    resources = [
-      "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
-      "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
-      "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
-      "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:ModifyLoadBalancerAttributes",
-      "elasticloadbalancing:SetIpAddressType",
-      "elasticloadbalancing:SetSecurityGroups",
-      "elasticloadbalancing:SetSubnets",
-      "elasticloadbalancing:DeleteLoadBalancer",
-      "elasticloadbalancing:ModifyTargetGroup",
-      "elasticloadbalancing:ModifyTargetGroupAttributes",
-      "elasticloadbalancing:DeleteTargetGroup"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:RegisterTargets",
-      "elasticloadbalancing:DeregisterTargets"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "elasticloadbalancing:SetWebAcl",
-      "elasticloadbalancing:ModifyListener",
-      "elasticloadbalancing:AddListenerCertificates",
-      "elasticloadbalancing:RemoveListenerCertificates",
-      "elasticloadbalancing:ModifyRule"
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "kubernetes_service_account" "alb_controller" {
-  metadata {
-    name      = local.alb_name
-    namespace = local.namespace
-    labels    = module.alb_labels.kube_labels
-  }
-}
-
-module "aws_permissions" {
-  source                    = "../../modules/kube_sa_auth_aws"
-  service_account           = kubernetes_service_account.alb_controller.metadata[0].name
-  service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.alb.json
-  public_outbound_ips       = var.public_outbound_ips
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
-}
-
-resource "helm_release" "alb_controller" {
-  namespace       = local.namespace
-  name            = "eks"
-  repository      = "https://aws.github.io/eks-charts"
-  chart           = "aws-load-balancer-controller"
-  version         = var.alb_controller_helm_version
-  recreate_pods   = false
-  force_update    = true
-  cleanup_on_fail = true
-  wait            = true
-  wait_for_jobs   = true
-  max_history     = 3
-
-  values = [
-    yamlencode({
-
-      ingressClass = "alb"
-      image = {
-        tag = var.alb_controller_version
-      }
-      serviceAccount = {
-        create = false
-        name   = kubernetes_service_account.alb_controller.metadata[0].name
-      }
-
-      // DOES need to be highly available to avoid ingress disruptions
-      replicaCount = 2
-      affinity = merge({
-        podAntiAffinity = {
-          requiredDuringSchedulingIgnoredDuringExecution = [{
-            topologyKey = "kubernetes.io/hostname"
-            labelSelector = {
-              matchLabels = {
-                "app.kubernetes.io/name" = "aws-load-balancer-controller"
-              }
-            }
-          }]
-        }
-      }, module.constants.controller_node_affinity_helm)
-
-      updateStrategy = {
-        type = "RollingUpdate"
-        rollingUpdate = {
-          maxSurge       = "50%"
-          maxUnavailable = 0
-        }
-      }
-      podDisruptionBudget = {
-        maxUnavailable = 1
-      }
-      configureDefaultAffinity = true
-      priorityClassName        = module.constants.cluster_important_priority_class_name
-      clusterName              = var.eks_cluster_name
-      region                   = data.aws_region.main.name
-      vpcId                    = var.vpc_id
-      additionalLabels = merge(module.alb_labels.kube_labels, {
-        customizationHash = md5(join("", [for filename in sort(fileset(path.module, "alb_kustomize/*")) : filesha256(filename)]))
-      })
-      deploymentAnnotations = {
-        "reloader.stakater.com/auto" = "true"
-      }
-      podAnnotations = {
-        "linkerd.io/inject" = "enabled"
-      }
-
-      // The ONLY alb ingress in our system should be the LB services in the repo;
-      // EVERYTHING else should go through NGINX.
-      // That means we can scope this controller to this namespace which will
-      // limit the blast radius if the webhooks in this chart go down
-      watchNamespace = local.namespace
-      webhookNamespaceSelectors = [{
-        key      = "module"
-        operator = "In"
-        values   = [var.module]
-      }]
-
-      // This is necessary for zero-downtime rollovers of the nginx ingress pods
-      // https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/deploy/pod_readiness_gate/
-      enablePodReadinessGateInject = true
-
-      // This appears to be the only way to use cert-manager for the certificate generation;
-      // manually spinning up certificates does not work
-      enableCertManager = true
-    })
-  ]
-
-  // We want to use our secured internal certs rather than their
-  // default self-signed one
-  postrender {
-    binary_path = "${path.module}/alb_kustomize/kustomize.sh"
-  }
-
-  depends_on = [
-    module.aws_permissions
-  ]
-}
-
-resource "kubernetes_service" "alb_controller_healthcheck" {
-  metadata {
-    name      = "alb-controller-healthcheck"
-    namespace = local.namespace
-    labels    = module.alb_labels.kube_labels
-  }
-  spec {
-    type = "ClusterIP"
-    port {
-      port        = 80
-      target_port = 61779 // healthcheck port
-      protocol    = "TCP"
-    }
-    selector = local.alb_selector
-  }
-  depends_on = [helm_release.alb_controller]
-}
-
-resource "kubernetes_manifest" "vpa_alb" {
-  count = var.vpa_enabled ? 1 : 0
-  manifest = {
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "eks-aws-load-balancer-controller"
-      namespace = local.namespace
-      labels    = module.alb_labels.kube_labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "apps/v1"
-        kind       = "Deployment"
-        name       = "eks-aws-load-balancer-controller"
-      }
-    }
-  }
 }
 
 /***********************************************
@@ -554,7 +139,7 @@ module "webhook_cert" {
   service_names = ["ingress-nginx-controller-admission"]
   secret_name   = local.webhook_secret
   namespace     = local.namespace
-  labels        = module.nginx_labels.kube_labels
+  labels        = module.labels.kube_labels
   app = var.app
   environment = var.environment
   module = var.module
@@ -608,7 +193,7 @@ resource "kubernetes_secret" "dhparam" {
     name      = "ingress-nginx-dhparam"
     namespace = local.namespace
     labels = merge(
-      module.nginx_labels.kube_labels,
+      module.labels.kube_labels,
       {
         "app.kubernetes.io/name"    = "ingress-nginx"
         "app.kubernetes.io/part-of" = "ingress-nginx"
@@ -618,6 +203,11 @@ resource "kubernetes_secret" "dhparam" {
   data = {
     "dhparam.pem" = var.dhparam
   }
+}
+
+resource "random_id" "ingress_name" {
+  byte_length = 8
+  prefix      = "nginx-ingress-"
 }
 
 resource "helm_release" "nginx_ingress" {
@@ -635,7 +225,7 @@ resource "helm_release" "nginx_ingress" {
 
   values = [
     yamlencode({
-      commonLabels = merge(module.nginx_labels.kube_labels,
+      commonLabels = merge(module.labels.kube_labels,
         {
           customizationHash = md5(join("", [for filename in sort(fileset(path.module, "nginx_kustomize/*")) : filesha256(filename)]))
         }
@@ -760,10 +350,10 @@ resource "helm_release" "nginx_ingress" {
           http-snippet = file("${path.module}/nginx_status_snippet.txt")
         }
         service = {
-          name              = local.nginx_name
+          name              = local.name
           loadBalancerClass = "service.k8s.aws/nlb"
           annotations = merge(local.nlb_common_annotations, {
-            "service.beta.kubernetes.io/aws-load-balancer-name"           = "ingress-nginx",
+            "service.beta.kubernetes.io/aws-load-balancer-name"           = random_id.ingress_name.hex,
             "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol" = "*"
           })
         }
@@ -902,14 +492,14 @@ resource "helm_release" "nginx_ingress" {
   #  }
 
   timeout    = 30 * 60
-  depends_on = [module.webhook_cert, helm_release.alb_controller]
+  depends_on = [module.webhook_cert]
 }
 
 resource "kubernetes_service" "nginx_healthcheck" {
   metadata {
     name      = "nginx-healthcheck"
     namespace = local.namespace
-    labels    = module.nginx_labels.kube_labels
+    labels    = module.labels.kube_labels
   }
   spec {
     type = "ClusterIP"
@@ -927,7 +517,7 @@ resource "kubernetes_service" "nginx_status" {
   metadata {
     name      = "nginx-status"
     namespace = local.namespace
-    labels    = module.nginx_labels.kube_labels
+    labels    = module.labels.kube_labels
   }
   spec {
     type = "ClusterIP"
@@ -949,7 +539,7 @@ resource "kubernetes_manifest" "vpa_nginx" {
     metadata = {
       name      = "ingress-nginx-controller"
       namespace = local.namespace
-      labels    = module.nginx_labels.kube_labels
+      labels    = module.labels.kube_labels
     }
     spec = {
       targetRef = {
@@ -959,147 +549,4 @@ resource "kubernetes_manifest" "vpa_nginx" {
       }
     }
   }
-}
-
-/***********************************************
-* Bastion
-************************************************/
-
-resource "kubernetes_service_account" "bastion" {
-  metadata {
-    name      = local.bastion_name
-    namespace = local.namespace
-    labels    = module.bastion_labels.kube_labels
-  }
-}
-
-resource "kubernetes_secret" "bastion_ca" {
-  metadata {
-    name      = "${local.bastion_name}-ca"
-    namespace = local.namespace
-    labels    = module.bastion_labels.kube_labels
-  }
-  data = {
-    "trusted-user-ca-keys.pem" = var.bastion_ca_keys
-  }
-}
-
-// This doesn't get rotated so no need to use cert-manager
-resource "tls_private_key" "host" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "kubernetes_secret" "bastion_host" {
-  metadata {
-    name      = "${local.bastion_name}-host"
-    namespace = local.namespace
-    labels    = module.bastion_labels.kube_labels
-  }
-  data = {
-    id_rsa       = tls_private_key.host.private_key_openssh
-    "id_rsa.pub" = tls_private_key.host.public_key_openssh
-  }
-}
-
-module "bastion" {
-  source          = "../../modules/kube_deployment"
-  namespace       = module.namespace.namespace
-  service_name    = local.bastion_name
-  service_account = kubernetes_service_account.bastion.metadata[0].name
-
-  min_replicas        = 2
-  max_replicas        = 2
-  tolerations         = module.constants.spot_node_toleration_helm
-  priority_class_name = module.constants.cluster_important_priority_class_name
-
-  containers = [
-    {
-      name    = "bastion"
-      image   = var.bastion_image
-      version = var.bastion_image_version
-      command = [
-        "/usr/sbin/sshd",
-        "-D", // run in foreground
-        "-e", // print logs to stderr
-        "-o", "LogLevel=INFO",
-        "-q", // Don't log connections (we do that at the NLB level and these logs are polluted by healthchecks)
-        "-o", "TrustedUserCAKeys=/etc/ssh/vault/trusted-user-ca-keys.pem",
-        "-o", "HostKey=/run/sshd/id_rsa",
-        "-o", "PORT=${var.bastion_port}"
-      ]
-      run_as_root        = true                               // SSHD requires root to run
-      linux_capabilities = ["SYS_CHROOT", "SETGID", "SETUID"] // capabilities to allow sshd's sandboxing functionality
-      healthcheck_port   = var.bastion_port
-      healthcheck_type   = "TCP"
-    },
-    // SSHD requires that root be the only
-    // writer to /run/sshd and the private host key
-    {
-      name    = "permission-init"
-      init    = true
-      image   = var.bastion_image
-      version = var.bastion_image_version
-      command = [
-        "/usr/bin/bash",
-        "-c",
-        "cp /etc/ssh/host/id_rsa /run/sshd/id_rsa && chmod -R 700 /run/sshd"
-      ]
-      run_as_root = true
-    }
-  ]
-
-  secret_mounts = {
-    "${kubernetes_secret.bastion_ca.metadata[0].name}"   = "/etc/ssh/vault"
-    "${kubernetes_secret.bastion_host.metadata[0].name}" = "/etc/ssh/host"
-  }
-
-  tmp_directories = { "/run/sshd" = {} }
-  mount_owner     = 0
-
-  ports = {
-    ssh = {
-      service_port = var.bastion_port
-      pod_port     = var.bastion_port
-    }
-  }
-
-  vpa_enabled = var.vpa_enabled
-
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
-}
-
-
-resource "kubernetes_service" "bastion" {
-  metadata {
-    name      = "${local.bastion_name}-ingress"
-    namespace = local.namespace
-    labels    = module.bastion_labels.kube_labels
-    annotations = merge(local.nlb_common_annotations, {
-      "service.beta.kubernetes.io/aws-load-balancer-name" = "bastion",
-      "external-dns.alpha.kubernetes.io/hostname"         = var.bastion_domain
-    })
-  }
-  spec {
-    type                    = "LoadBalancer"
-    load_balancer_class     = "service.k8s.aws/nlb"
-    external_traffic_policy = "Cluster"
-    internal_traffic_policy = "Cluster"
-    ip_families             = ["IPv4"]
-    ip_family_policy        = "SingleStack"
-    selector                = local.bastion_selector
-    port {
-      name        = "ssh"
-      port        = var.bastion_port
-      target_port = var.bastion_port
-      protocol    = "TCP"
-    }
-  }
-  depends_on = [module.bastion]
 }

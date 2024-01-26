@@ -19,6 +19,11 @@ variable "eks_node_instance_profile" {
   type        = string
 }
 
+variable "node_subnets" {
+  description = "List of subnet names to deploy karpenter Nodes into."
+  type        = set(string)
+}
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool

@@ -68,6 +68,21 @@ module "namespace" {
   is_local = var.is_local
 }
 
+// Tagging to enable Karpenter autodiscovery
+data "aws_subnet" "nlb_subnets" {
+  for_each = var.node_subnets
+  filter {
+    name   = "tag:Name"
+    values = [each.value]
+  }
+}
+
+resource "aws_ec2_tag" "vpc_tag" {
+  for_each = var.node_subnets
+  resource_id = data.aws_subnet.nlb_subnets[each.key].id
+  key = "karpenter.sh/discovery"
+  value = var.eks_cluster_name
+}
 
 
 /********************************************************************************************************************
