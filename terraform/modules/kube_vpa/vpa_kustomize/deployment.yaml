@@ -1,0 +1,6 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vertical-pod-autoscaler-vpa-admission-controller
+  annotations:
+      reloader.stakater.com/auto: "true"
