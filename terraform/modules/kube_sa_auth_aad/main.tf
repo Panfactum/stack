@@ -102,7 +102,7 @@ resource "azuread_group_member" "main" {
 resource "azuread_named_location" "main" {
   display_name = "${var.eks_cluster_name}-${var.service_account_namespace}-${local.name}"
   ip {
-    ip_ranges = [for ip in var.public_outbound_ips : "${ip}/32"]
+    ip_ranges = [for ip in var.ip_allow_list : "${ip}/32"]
   }
 }
 

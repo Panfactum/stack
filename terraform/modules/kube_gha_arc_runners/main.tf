@@ -127,7 +127,7 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.runners.json
-  public_outbound_ips       = var.public_outbound_ips
+  ip_allow_list       = var.ip_allow_list
   app = var.app
   environment = var.environment
   module = var.module
@@ -176,7 +176,7 @@ module "aad_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   aad_sp_object_owners      = var.aad_sp_object_owners
-  public_outbound_ips       = var.public_outbound_ips
+  ip_allow_list       = var.ip_allow_list
   service_principal_groups  = [var.aad_group]
   msgraph_roles             = ["Policy.Read.All", "Policy.ReadWrite.ConditionalAccess", "Application.Read.All"]
   app = var.app

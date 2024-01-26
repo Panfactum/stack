@@ -99,7 +99,7 @@ module "irsa" {
   service_account           = var.pg_cluster_name
   service_account_namespace = var.pg_cluster_namespace
   iam_policy_json           = data.aws_iam_policy_document.s3_access[0].json
-  public_outbound_ips       = var.public_outbound_ips
+  ip_allow_list       = var.ip_allow_list
 
   // Due to a limitation in the cluster resource api, the cluster resource is the one that creates
   // the service account for us, so we let it to the annotations

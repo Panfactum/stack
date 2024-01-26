@@ -19,7 +19,7 @@ locals {
   namespace    = module.namespace.namespace
 
   bastion_selector = {
-    module = name
+    module = var.module
   }
 
   // Number of seconds it takes to de-register targets from the NLB
@@ -210,6 +210,10 @@ module "bastion" {
   is_local = var.is_local
 }
 
+resource "random_id" "bastion_name" {
+  byte_length = 8
+  prefix      = "bastion-"
+}
 
 resource "kubernetes_service" "bastion" {
   metadata {
@@ -217,7 +221,7 @@ resource "kubernetes_service" "bastion" {
     namespace = local.namespace
     labels    = module.labels.kube_labels
     annotations = merge(local.nlb_common_annotations, {
-      "service.beta.kubernetes.io/aws-load-balancer-name" = "bastion",
+      "service.beta.kubernetes.io/aws-load-balancer-name" = random_id.bastion_name.hex,
       "external-dns.alpha.kubernetes.io/hostname"         = var.bastion_domain
     })
   }

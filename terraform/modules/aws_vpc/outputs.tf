@@ -10,3 +10,7 @@ output "vpc_id" {
 output "nat_ips" {
   value = [for eip in aws_eip.nat_ips : eip.public_ip]
 }
+
+output "vpc_cidr" {
+  value = var.vpc_cidr
+}

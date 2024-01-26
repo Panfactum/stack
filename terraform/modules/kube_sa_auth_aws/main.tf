@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "ip_blocks" {
     // Only allow access from inside our cluster
     condition {
       test     = "NotIpAddress"
-      values   = concat(["10.0.0.0/16"], var.public_outbound_ips)
+      values   = var.ip_allow_list
       variable = "aws:SourceIp"
     }
   }
@@ -92,7 +92,7 @@ data "aws_iam_policy_document" "ip_blocks" {
     // Only allow access from inside our cluster
     condition {
       test     = "NotIpAddress"
-      values   = concat(["10.0.0.0/16"], var.public_outbound_ips)
+      values   = var.ip_allow_list
       variable = "aws:VpcSourceIp"
     }
   }

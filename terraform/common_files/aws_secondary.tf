@@ -36,4 +36,7 @@ provider "aws" {
   default_tags {
     tags = local.aws_secondary_default_tags
   }
+  ignore_tags {
+    key_prefixes = [ "kubernetes.io", "karpenter.sh" ] // TODO: Must be updated both here and in aws.tf
+  }
 }

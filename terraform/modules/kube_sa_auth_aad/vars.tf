@@ -24,8 +24,8 @@ variable "aad_sp_object_owners" {
   type        = list(string)
 }
 
-variable "public_outbound_ips" {
-  description = "A list of the public ips for outbound cluster traffic"
+variable "ip_allow_list" {
+  description = "A list of IPs that can use the service account token to authneticate with AWS API"
   type        = list(string)
 }
 

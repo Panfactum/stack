@@ -99,7 +99,7 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.permissions[each.key].json
-  public_outbound_ips       = var.public_outbound_ips
+  ip_allow_list       = var.ip_allow_list
   app = var.app
   environment = var.environment
   module = var.module
