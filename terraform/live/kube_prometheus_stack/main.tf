@@ -40,14 +40,14 @@ locals {
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 /***************************************
@@ -60,13 +60,13 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 /***************************************
@@ -226,13 +226,13 @@ module "oauth_app" {
   editor_group_object_ids = [for group in var.editor_groups : data.azuread_group.groups[group].object_id]
   reader_group_object_ids = [for group in var.reader_groups : data.azuread_group.groups[group].object_id]
   aad_sp_object_owners    = var.aad_sp_object_owners
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app                     = var.app
+  environment             = var.environment
+  module                  = var.module
+  region                  = var.region
+  version_tag             = var.version_tag
+  version_hash            = var.version_hash
+  is_local                = var.is_local
 }
 
 /***************************************
@@ -248,12 +248,12 @@ module "ingress" {
     service      = "prometheus-grafana"
     service_port = 80
   }]
-  depends_on = [helm_release.prometheus_stack]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  depends_on   = [helm_release.prometheus_stack]
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }

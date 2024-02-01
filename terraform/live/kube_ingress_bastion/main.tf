@@ -15,8 +15,8 @@ terraform {
 
 locals {
 
-  name = "bastion"
-  namespace    = module.namespace.namespace
+  name      = "bastion"
+  namespace = module.namespace.namespace
 
   bastion_selector = {
     module = var.module
@@ -57,43 +57,43 @@ locals {
 }
 
 module "labels" {
-  source = "../../modules/kube_labels"
+  source            = "../../modules/kube_labels"
   additional_labels = {}
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "namespace" {
-  source            = "../../modules/kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  linkerd_inject    = false
+  source               = "../../modules/kube_namespace"
+  namespace            = local.name
+  admin_groups         = ["system:admins"]
+  reader_groups        = ["system:readers"]
+  bot_reader_groups    = ["system:bot-readers"]
+  linkerd_inject       = false
   loadbalancer_enabled = true
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app                  = var.app
+  environment          = var.environment
+  module               = var.module
+  region               = var.region
+  version_tag          = var.version_tag
+  version_hash         = var.version_hash
+  is_local             = var.is_local
 }
 
 /***********************************************
@@ -201,13 +201,13 @@ module "bastion" {
 
   vpa_enabled = var.vpa_enabled
 
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 resource "random_id" "bastion_name" {

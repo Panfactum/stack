@@ -19,8 +19,8 @@ terraform {
 
 locals {
 
-  name     = "ingress-alb"
-  namespace    = module.namespace.namespace
+  name      = "ingress-alb"
+  namespace = module.namespace.namespace
   selector = {
     "app.kubernetes.io/name" = "aws-load-balancer-controller"
   }
@@ -28,26 +28,26 @@ locals {
 }
 
 module "labels" {
-  source = "../../modules/kube_labels"
+  source            = "../../modules/kube_labels"
   additional_labels = {}
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "namespace" {
@@ -57,13 +57,13 @@ module "namespace" {
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
   linkerd_inject    = false
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 /********************************************************************************************************************
@@ -85,10 +85,10 @@ data "aws_subnet" "nlb_subnets" {
 }
 
 resource "aws_ec2_tag" "vpc_tag" {
-  for_each = var.nlb_subnets
+  for_each    = var.nlb_subnets
   resource_id = data.aws_subnet.nlb_subnets[each.key].id
-  key = "kubernetes.io/role/elb"
-  value = "1"
+  key         = "kubernetes.io/role/elb"
+  value       = "1"
 }
 
 data "aws_iam_policy_document" "alb" {
@@ -305,14 +305,14 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.alb.json
-  ip_allow_list       = var.ip_allow_list
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  ip_allow_list             = var.ip_allow_list
+  app                       = var.app
+  environment               = var.environment
+  module                    = var.module
+  region                    = var.region
+  version_tag               = var.version_tag
+  version_hash              = var.version_hash
+  is_local                  = var.is_local
 }
 
 resource "helm_release" "alb_controller" {

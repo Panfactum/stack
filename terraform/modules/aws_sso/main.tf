@@ -26,13 +26,13 @@ module "aws_core_permissions" {
   protected_dynamodb_arns = var.protected_dynamodb_arns
   protected_kms_arns      = var.protected_kms_arns
   protected_s3_arns       = var.protected_s3_arns
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app                     = var.app
+  environment             = var.environment
+  module                  = var.module
+  region                  = var.region
+  version_tag             = var.version_tag
+  version_hash            = var.version_hash
+  is_local                = var.is_local
 }
 
 ###########################################################################
@@ -104,11 +104,11 @@ module "permission_bindings" {
   superuser_permission_set_arn = aws_ssoadmin_permission_set.superuser.arn
   admin_permission_set_arn     = aws_ssoadmin_permission_set.admin.arn
   reader_permission_set_arn    = aws_ssoadmin_permission_set.reader.arn
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app                          = var.app
+  environment                  = var.environment
+  module                       = var.module
+  region                       = var.region
+  version_tag                  = var.version_tag
+  version_hash                 = var.version_hash
+  is_local                     = var.is_local
 }

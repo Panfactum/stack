@@ -15,8 +15,8 @@ terraform {
 
 locals {
 
-  name = "ingress-nginx"
-  namespace    = module.namespace.namespace
+  name      = "ingress-nginx"
+  namespace = module.namespace.namespace
 
   nginx_selector = {
     "app.kubernetes.io/component" = "controller"
@@ -91,43 +91,43 @@ locals {
 }
 
 module "labels" {
-  source = "../../modules/kube_labels"
+  source            = "../../modules/kube_labels"
   additional_labels = {}
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "namespace" {
-  source            = "../../modules/kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  linkerd_inject    = false
+  source               = "../../modules/kube_namespace"
+  namespace            = local.name
+  admin_groups         = ["system:admins"]
+  reader_groups        = ["system:readers"]
+  bot_reader_groups    = ["system:bot-readers"]
+  linkerd_inject       = false
   loadbalancer_enabled = true
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app                  = var.app
+  environment          = var.environment
+  module               = var.module
+  region               = var.region
+  version_tag          = var.version_tag
+  version_hash         = var.version_hash
+  is_local             = var.is_local
 }
 
 /***********************************************
@@ -140,13 +140,13 @@ module "webhook_cert" {
   secret_name   = local.webhook_secret
   namespace     = local.namespace
   labels        = module.labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app           = var.app
+  environment   = var.environment
+  module        = var.module
+  region        = var.region
+  version_tag   = var.version_tag
+  version_hash  = var.version_hash
+  is_local      = var.is_local
 }
 
 resource "kubernetes_manifest" "ingress_cert" {

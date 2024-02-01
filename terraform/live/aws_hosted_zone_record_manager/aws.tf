@@ -32,6 +32,6 @@ provider "aws" {
     tags = local.aws_default_tags
   }
   ignore_tags {
-    key_prefixes = [ "kubernetes.io", "karpenter.sh" ]
+    key_prefixes = ["kubernetes.io", "karpenter.sh"]
   }
 }

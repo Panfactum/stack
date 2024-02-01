@@ -15,16 +15,16 @@ terraform {
 
 locals {
 
-  name        = "buildkit"
-  namespace   = module.namespace.namespace
+  name      = "buildkit"
+  namespace = module.namespace.namespace
 
   match_labels = {
     service = local.name
     module  = var.module
   }
-  
+
   port = 1234
-  
+
 }
 
 module "kube_labels" {
@@ -32,24 +32,24 @@ module "kube_labels" {
   additional_labels = {
     service = local.name
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 /***************************************
@@ -62,13 +62,13 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 /***************************************
@@ -86,13 +86,13 @@ module "cache_bucket" {
   description        = "Used for buildkit layer caches"
   expire_after_days  = 7
   versioning_enabled = false
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app                = var.app
+  environment        = var.environment
+  module             = var.module
+  region             = var.region
+  version_tag        = var.version_tag
+  version_hash       = var.version_hash
+  is_local           = var.is_local
 }
 
 /***************************************
@@ -117,14 +117,14 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.buildkit.json
-  ip_allow_list       = var.ip_allow_list
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  ip_allow_list             = var.ip_allow_list
+  app                       = var.app
+  environment               = var.environment
+  module                    = var.module
+  region                    = var.region
+  version_tag               = var.version_tag
+  version_hash              = var.version_hash
+  is_local                  = var.is_local
 }
 
 /***************************************

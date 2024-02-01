@@ -27,37 +27,37 @@ module "base_labels" {
   additional_labels = {
     customizationHash = md5(join("", [for filename in fileset(path.module, "cilium_kustomize/*") : filesha256(filename)]))
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "operator_labels" {
-  source = "../../modules/kube_labels"
-  additional_labels = merge(module.base_labels.kube_labels, {service = "operator"})
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  source            = "../../modules/kube_labels"
+  additional_labels = merge(module.base_labels.kube_labels, { service = "operator" })
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 module "agent_labels" {
-  source = "../../modules/kube_labels"
-  additional_labels = merge(module.base_labels.kube_labels, {service = "agent"})
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  source            = "../../modules/kube_labels"
+  additional_labels = merge(module.base_labels.kube_labels, { service = "agent" })
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 data "aws_region" "region" {}
@@ -65,13 +65,13 @@ data "aws_region" "region" {}
 module "constants" {
   source          = "../../modules/constants"
   matching_labels = module.operator_labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 /***************************************
@@ -84,13 +84,13 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 /***************************************
@@ -126,14 +126,14 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.cilium.json
-  ip_allow_list       = var.ip_allow_list
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  ip_allow_list             = var.ip_allow_list
+  app                       = var.app
+  environment               = var.environment
+  module                    = var.module
+  region                    = var.region
+  version_tag               = var.version_tag
+  version_hash              = var.version_hash
+  is_local                  = var.is_local
 
   // The helm chart creates the service account
   annotate_service_account = false
@@ -257,7 +257,7 @@ resource "helm_release" "cilium" {
     })
   ]
 
-    // Be default, the init container
+  // Be default, the init container
   // has way too many resources and ends up
   // utilizing all of the resource request allocations
   // on each node.

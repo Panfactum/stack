@@ -3,13 +3,12 @@
 set -eo pipefail
 
 SCRIPT=$(realpath "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
+SCRIPT_PATH=$(dirname "$SCRIPT")
 
 # save incoming YAML to file
-cat <&0 > "$SCRIPTPATH/all.yaml"
+cat >"$SCRIPT_PATH/all.yaml"
 
 # (1) Set the cpu requests to a more reasonable 10m (down from 100m)
-cat "$SCRIPTPATH/all.yaml" \
-  | sed 's/cpu: 100m/cpu: 10m/g'
+sed 's/cpu: 100m/cpu: 10m/g' <"$SCRIPT_PATH/all.yaml"
 
-rm -f "$SCRIPTPATH/all.yaml"
+rm -f "$SCRIPT_PATH/all.yaml"

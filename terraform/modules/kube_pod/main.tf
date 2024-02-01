@@ -366,25 +366,25 @@ module "kube_labels" {
   additional_labels = merge({
     pod-template-id = random_id.pod_template_id.hex
   }, var.extra_pod_labels)
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "constants" {
   source          = "../../modules/constants"
   matching_labels = local.match_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 resource "random_id" "pod_template_id" {

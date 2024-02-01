@@ -3,10 +3,10 @@ locals {
     app         = var.app
     environment = var.environment
     module      = var.module
-      region      = var.region
-      terraform   = "true"
-      version     = var.version_tag
-    }, 
+    region      = var.region
+    terraform   = "true"
+    version     = var.version_tag
+    },
     {
       region = var.aws_secondary_region
     }

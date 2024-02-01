@@ -37,14 +37,14 @@ locals {
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "node_settings" {
@@ -52,13 +52,13 @@ module "node_settings" {
   cluster_name     = var.eks_cluster_name
   cluster_endpoint = var.eks_cluster_endpoint
   cluster_ca_data  = var.eks_cluster_ca_data
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app              = var.app
+  environment      = var.environment
+  module           = var.module
+  region           = var.region
+  version_tag      = var.version_tag
+  version_hash     = var.version_hash
+  is_local         = var.is_local
 }
 
 /********************************************************************************************************************

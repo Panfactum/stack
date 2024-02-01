@@ -5,7 +5,7 @@ variable "azuread_tenant_id" {
 
 variable "aad_sp_object_owners" {
   description = "The object ids for service principals that should own objects created in AAD"
-  type = list(string)
+  type        = list(string)
 }
 
 provider "azuread" {

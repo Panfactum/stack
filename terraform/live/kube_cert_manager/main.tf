@@ -21,14 +21,14 @@ locals {
 }
 
 module "base_labels" {
-  source = "../../modules/kube_labels"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/kube_labels"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "controller_labels" {
@@ -36,13 +36,13 @@ module "controller_labels" {
   additional_labels = {
     service = local.name
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "webhook_labels" {
@@ -50,13 +50,13 @@ module "webhook_labels" {
   additional_labels = {
     service = "${local.name}-webhook"
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "ca_injector_labels" {
@@ -64,49 +64,49 @@ module "ca_injector_labels" {
   additional_labels = {
     service = "${local.name}-ca-injector"
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "constants_controller" {
   source          = "../../modules/constants"
   matching_labels = module.controller_labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 module "constants_webhook" {
   source          = "../../modules/constants"
   matching_labels = module.webhook_labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 module "constants_ca_injector" {
   source          = "../../modules/constants"
   matching_labels = module.ca_injector_labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 /***************************************
@@ -119,13 +119,13 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 /***************************************

@@ -18,25 +18,25 @@ module "trust_manager_labels" {
   additional_labels = {
     service = "${var.namespace}-trust-manager"
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "trust_manager_constants" {
   source          = "../../modules/constants"
   matching_labels = module.trust_manager_labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 /***************************************

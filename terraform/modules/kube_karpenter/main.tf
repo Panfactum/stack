@@ -29,13 +29,13 @@ module "kube_labels" {
   additional_labels = {
     service = local.name
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 data "aws_region" "main" {}
@@ -44,13 +44,13 @@ data "aws_caller_identity" "main" {}
 module "constants" {
   source          = "../../modules/constants"
   matching_labels = module.kube_labels.kube_labels
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app             = var.app
+  environment     = var.environment
+  module          = var.module
+  region          = var.region
+  version_tag     = var.version_tag
+  version_hash    = var.version_hash
+  is_local        = var.is_local
 }
 
 module "namespace" {
@@ -59,13 +59,13 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 // Tagging to enable Karpenter autodiscovery
@@ -78,10 +78,10 @@ data "aws_subnet" "nlb_subnets" {
 }
 
 resource "aws_ec2_tag" "vpc_tag" {
-  for_each = var.node_subnets
+  for_each    = var.node_subnets
   resource_id = data.aws_subnet.nlb_subnets[each.key].id
-  key = "karpenter.sh/discovery"
-  value = var.eks_cluster_name
+  key         = "karpenter.sh/discovery"
+  value       = var.eks_cluster_name
 }
 
 
@@ -367,14 +367,14 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.karpenter.json
-  ip_allow_list       = var.ip_allow_list
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  ip_allow_list             = var.ip_allow_list
+  app                       = var.app
+  environment               = var.environment
+  module                    = var.module
+  region                    = var.region
+  version_tag               = var.version_tag
+  version_hash              = var.version_hash
+  is_local                  = var.is_local
 }
 
 resource "helm_release" "karpenter" {

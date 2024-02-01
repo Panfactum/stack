@@ -43,13 +43,13 @@ module "server_labels" {
   additional_labels = {
     submodule = local.server_submodule
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "csi_labels" {
@@ -57,24 +57,24 @@ module "csi_labels" {
   additional_labels = {
     submodule = local.csi_submodule
   }
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 data "aws_region" "region" {}
@@ -90,13 +90,13 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app               = var.app
+  environment       = var.environment
+  module            = var.module
+  region            = var.region
+  version_tag       = var.version_tag
+  version_hash      = var.version_hash
+  is_local          = var.is_local
 }
 
 /***************************************
@@ -176,14 +176,14 @@ module "aws_permissions" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.sa.json
-  ip_allow_list       = var.ip_allow_list
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  ip_allow_list             = var.ip_allow_list
+  app                       = var.app
+  environment               = var.environment
+  module                    = var.module
+  region                    = var.region
+  version_tag               = var.version_tag
+  version_hash              = var.version_hash
+  is_local                  = var.is_local
 }
 
 /***************************************
@@ -347,7 +347,7 @@ resource "kubernetes_manifest" "vpa_server" {
 ***************************************/
 
 module "ingress" {
-  count = var.ingress_enabled ? 1 : 0
+  count        = var.ingress_enabled ? 1 : 0
   source       = "../../modules/kube_ingress"
   namespace    = local.namespace
   ingress_name = local.server_submodule
@@ -356,14 +356,14 @@ module "ingress" {
     service      = "vault-active"
     service_port = 8200
   }]
-  depends_on = [helm_release.vault]
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  depends_on   = [helm_release.vault]
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 

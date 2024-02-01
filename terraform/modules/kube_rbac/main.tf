@@ -17,14 +17,14 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../../modules/kube_labels"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/kube_labels"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 ////////////////////////////////////////////////////////////

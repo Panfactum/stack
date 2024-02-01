@@ -22,36 +22,36 @@ locals {
     region      = var.region
     terraform   = "true"
     version     = var.version_tag
-  }, 
-  {
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    },
+    {
+      "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   })
   controller_nodes_description = "Nodes for cluster-critical components and bootstrapping processes. Not autoscaled."
 }
 
 data "aws_region" "region" {}
 module "constants" {
-  source = "../../modules/constants"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/constants"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 module "node_settings" {
   source           = "../../modules/kube_node_settings"
   cluster_name     = aws_eks_cluster.cluster.name
   cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_endpoint = aws_eks_cluster.cluster.endpoint
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
-  version_hash = var.version_hash
-  is_local = var.is_local
+  app              = var.app
+  environment      = var.environment
+  module           = var.module
+  region           = var.region
+  version_tag      = var.version_tag
+  version_hash     = var.version_hash
+  is_local         = var.is_local
 }
 
 ##########################################################################
@@ -91,10 +91,10 @@ data "aws_subnet" "control_plane_subnets" {
 }
 
 resource "aws_ec2_tag" "vpc_tag" {
-  for_each = var.kube_control_plane_subnets
+  for_each    = var.kube_control_plane_subnets
   resource_id = data.aws_subnet.control_plane_subnets[each.key].id
-  key = "kubernetes.io/cluster/${var.cluster_name}"
-  value = "owned"
+  key         = "kubernetes.io/cluster/${var.cluster_name}"
+  value       = "owned"
 }
 
 resource "aws_security_group" "control_plane" {
@@ -171,16 +171,16 @@ resource "aws_eks_addon" "coredns" {
 // TODO: https://github.com/aws/containers-roadmap/issues/1141
 ////////////////////////////////////////////////////////////
 module "aws_cloudwatch_log_group" {
-  source      = "../../modules/aws_cloudwatch_log_group"
-  name        = "/aws/eks/${var.cluster_name}/cluster"
-  description = "Collects logs for our AWS EKS Cluster"
-  app = var.app
-  environment = var.environment
-  module = var.module
-  region = var.region
-  version_tag = var.version_tag
+  source       = "../../modules/aws_cloudwatch_log_group"
+  name         = "/aws/eks/${var.cluster_name}/cluster"
+  description  = "Collects logs for our AWS EKS Cluster"
+  app          = var.app
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
   version_hash = var.version_hash
-  is_local = var.is_local
+  is_local     = var.is_local
 }
 
 ##########################################################################
