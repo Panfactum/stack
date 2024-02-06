@@ -108,7 +108,7 @@ locals {
   }]
 
   // Static env variables (secret)
-  common_static_secret_env = [for k in var.secrets : {
+  common_static_secret_env = [for k, v in var.secrets : {
     name = k
     valueFrom = {
       secretKeyRef = {
