@@ -104,11 +104,11 @@ locals {
   // Static env variables (non-secret)
   common_static_env = [for k, v in merge(var.common_env, local.static_env) : {
     name  = k
-    value = v
+    value = v == "" ? null : v
   }]
 
   // Static env variables (secret)
-  common_static_secret_env = [for k, v in var.secrets : {
+  common_static_secret_env = [for k in keys(var.secrets) : {
     name = k
     valueFrom = {
       secretKeyRef = {
