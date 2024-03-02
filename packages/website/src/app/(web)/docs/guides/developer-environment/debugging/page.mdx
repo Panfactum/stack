@@ -1,0 +1,26 @@
+# Debugging
+
+Below are some common steps to take when facing issues with the developer environment.
+
+## Reload the Developer Environment
+
+If your developer environment either fails to launch or does not pick up a desired change,
+simply run `direnv reload` to trigger a reload.
+
+## Nested Shells
+
+Sometimes `direnv` may not load and unload the shell properly. This can lead to starting multiple
+nested shells which can break some utilities. If you are unsure whether you are in this state,
+simply exit and relaunch the terminal.
+
+## New File Not Found
+
+If you are adding new files into your developer environment, you MUST first track them with `git` via
+`git add <file>` in order for them to visible to the `nix` build system.
+
+## Hash Mismatch
+
+When you are fetching files or archives remotely, you generally need to provide a SHA for checksum purposes.
+If the hash is mismatched, you will receive an error. This can occur if you are updating source urls
+or commit hashes. The error message should print the correct hash. Simply replace the outdated hash
+in your code to resolve this issue.

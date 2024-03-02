@@ -1,0 +1,21 @@
+[settings.kubernetes]
+api-server = "${API_SERVER_ADDR}"
+cluster-certificate = "${CLUSTER_CA_DATA}"
+cluster-name = "${CLUSTER_NAME}"
+max-pods = ${MAX_PODS}
+shutdown-grace-period = "${SHUTDOWN_GRACE_PERIOD}"
+image-gc-high-threshold-percent = ${IMAGE_GC_HIGH_THRESHOLD_PERCENT}
+image-gc-low-threshold-percent = ${IMAGE_GC_LOW_THRESHOLD_PERCENT}
+
+[settings.kubernetes.eviction-hard]
+"memory.available" = "${EVICTION_HARD_MEMORY_AVAILABLE}"
+"nodefs.available" = "${EVICTION_HARD_NODEFS_AVAILABLE}"
+"nodefs.inodesFree" = "${EVICTION_HARD_INODES_FREE}"
+[settings.kubernetes.eviction-soft]
+"memory.available" = "${EVICTION_SOFT_MEMORY_AVAILABLE}"
+"nodefs.available" = "${EVICTION_SOFT_NODEFS_AVAILABLE}"
+"nodefs.inodesFree" = "${EVICTION_SOFT_INODES_FREE}"
+[settings.kubernetes.eviction-soft-grace-period]
+"memory.available" = "${EVICTION_SOFT_GRACE_PERIOD_MEMORY_AVAILABLE}"
+"nodefs.available" = "${EVICTION_SOFT_GRACE_PERIOD_NODEFS_AVAILABLE}"
+"nodefs.inodesFree" = "${EVICTION_SOFT_GRACE_PERIOD_INODES_FREE}"

@@ -1,0 +1,11 @@
+{
+  "name": "panfactum",
+  "private": true,
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
+  },
+  "devDependencies": {
+    "check-dependency-version-consistency": "4.1.0"
+  }
+}

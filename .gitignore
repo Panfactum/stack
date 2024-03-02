@@ -1,0 +1,8 @@
+.devenv.flake.nix
+.devenv/
+.idea
+.pre-commit-config.yaml
+.env
+.direnv/
+.pnpm/
+node_modules/

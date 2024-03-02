@@ -1,0 +1,211 @@
+# Developing First-party Modules
+
+First-party terraform modules are those modules that are unique to your organization.
+
+## Setting up the Terraform Directory
+
+It is assumed that your infrastructure modules will live in your stack repository under a single
+directory.
+
+Set `PF_TERRAFORM_DIR` to that directory per the [reference docs](../../reference/repo-variables).
+
+For example, if `PF_TERRAFORM_DIR` is set to `terraform`, it is expected your filesystem layout
+will look as follows:
+
+```txt
+terraform/
+   - [module_1]/
+     - main.tf
+     - vars.tf
+     - outputs.tf
+   - [module_2]/
+   - [module_3]/
+   ***
+```
+
+All of the normal conventions for developing terraform modules apply.
+
+## Deploying Modules
+
+### Sourcing
+
+We provide convenience functionality for sourcing first-party modules in your terragrunt configuration.
+This takes care of common issues around versioning and caching that can often hinder engineers.
+
+In your `terragrunt.hcl`, you should source your module as follows:
+
+```hcl
+terraform {
+   source = include.panfactum.locals.source
+}
+```
+
+By default, the source will be the terraform module with the same directory name as the directory containing
+the `terragrunt.hcl`.
+
+For example, consider the following repository layout:
+
+```txt
+environments/
+   - development/
+     - us-east-2/
+        - aws_eks/
+          - terragrunt.hcl
+          - module.yaml
+terraform/
+   - aws_eks/
+   - aws_eks_alternative/
+```
+
+The `environments/development/us-east-2/aws_eks/terragrunt.hcl` configuration will automatically
+source the `terraform/aws_eks` module since the `terragrunt.hcl` is in a directory called `aws_eks`.
+
+### Overriding Default Source
+
+You can override this behavior by setting the `module` key in the `module.yaml`.
+
+Consider the above example again. This time, the `module.yaml` has the following contents:
+
+```yaml
+module: aws_eks_alternative
+```
+
+Now the sourced terraform module will be `terraform/aws_eks_alternative`.
+
+### Versioning
+
+By default, the local version of the terraform module will be sourced. This can be ideal
+for local testing and/or an integration environment where you always want the latest module code to be
+deployed. However, this is not ideal for higher environments where you want a more controlled release process.
+
+You likely already have some strategy for creating versioned releases in your repositories. Perhaps you use
+[semantic versioning](https://semver.org/) via git tags.
+
+You can pin terragrunt to a particular version of your terraform module by setting the `version` key to your desired
+[git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in one of the `environment.yaml`, `region.yaml`, or `module.yaml` files.
+A git ref can be a tag, a branch name, or even a specific commit sha.
+
+For example, consider a stack repo that has the git tags `v1.0.0`, `v1.1.0`, and `v2.0.0` representing versioned
+releases of code.
+
+Your repo has the following layout:
+
+```txt
+environments/
+   - development/
+     - environment.yaml
+     - us-east-2/
+        - aws_eks/
+        - aws_vpc/
+   - staging/
+     - environment.yaml
+     - us-east-2/
+        - aws_eks/
+        - aws_vpc/
+   - production/
+     - environment.yaml
+     - us-east-2/
+        - aws_eks/
+        - aws_vpc/
+     - us-west-2/
+        - region.yaml
+        - aws_eks/
+        - aws_vpc/
+terraform/
+   - aws_eks/
+   - aws_vpc/
+```
+
+Each `environment.yaml` as the following `version` keys:
+
+- `development`: `main`
+- `staging`: `v2.0.0`
+- `production`: `v1.1.0`
+
+Additionally, the `production/us-west-2/region.yaml` file has the `version` key set to `v1.0.0`.
+
+In this scenario, even though all three environments will use both the `aws_eks` and `aws_vpc` modules:
+
+- **All** modules in `development` will use the latest `terraform/*` code on the `main` branch (useful for ensuring the latest
+code is always deployed).
+- **All** modules in `staging` will use the `terraform/*` code at the `v2.0.0` git tag.
+- The modules in `production` will default to using the `terraform/*` code at the `v1.1.0` tag except for the modules
+in `us-west-2` which will use `v1.0.0` (useful for incremental or blue/green deployments).
+
+## Local Development
+
+When developing modules, you may want to test changes before committing them and waiting on the CI/CD pipeline
+for deployment. Additionally, you may want to use your own settings for the terraform providers (for example, using
+a specific AWS profile for authentication).
+
+You can override all values in the committed version of `global.yaml`, `environment.yaml`, `region.yaml`, and `module.yaml`
+with `*.user.yaml` counterparts (e.g., `environment.user.yaml`). These files are never committed and are specific
+to **you**.
+
+In these files, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
+in a module directory.
+
+It is common that you might want to set `environments/development/environment.user.yaml` to the following if you
+are frequently testing changes to your terraform modules in your `development` environment:
+
+```yaml
+version: local
+```
+
+## Best Practices
+
+### Monorepo
+
+One of the reasons we *strongly* recommend a monorepo setup is so that you can version your infrastructure code in
+tandem with your application code. Often times application code and infrastructure depend on one another, and by using
+tandem versioning you can ensure that version `X` of your application code will run properly as long as version `X` of the
+infrastructure has been deployed.
+
+In our experience, mistakes in managing this dependency graph causes a significant number (>25%) of all major bugs and outages
+in most software organizations. It benefits you to keep this as simple as possible.
+
+### Using `version` for Application Code
+
+By default, `version` only refers to which version of the terraform module to source. However, you may also want
+to use this to control which version of your application code to deploy as well (for example which container image tag to
+use in your Kubernetes deployment). That way changing `version` from `X` to `Y` will update **both** the infrastructure
+and the application code to version `Y`.
+
+In your `terragrunt.hcl`, you can retrieve the `version` via `include.panfactum.locals.version`. For example:
+
+```hcl
+inputs = {
+  kube_image_version = include.panfactum.locals.version
+}
+```
+
+This works especially well in a monorepo setup.
+
+### Rolling Deployments in Integration Environments
+
+In your integration environment (often called the development environment), it is often helpful to have the latest
+code on the primary integration branch deployed immediately. Simply set the `version` to the branch name in order to
+accomplish this.
+
+This eliminates a manual process and will allow you to catch bugs early and often.
+
+### Pinned Versions in Higher Environments
+
+You should **always** pin your versions in higher environments like `production`. This allows your organization
+to release new changes only when you are ready for them.
+
+Additionally, having to change a file in the repo to trigger a deployment ensures that your organization will
+implicitly implement change control practices (e.g., pull request approvals, immutable audit log, etc.) that meets
+most compliance frameworks such as SOC 2.
+
+### Showing the Commit Hash
+
+Often you want to know *exactly* what code is deployed in an environment at any given time. Git refs like branch
+names or even tags are not helpful as they are mutable and can change what code they point to.
+
+The Panfactum terragrunt system will automatically provide all deployed terraform modules with an input variable
+called `version_hash` which represents the actual commit hash being deployed. You should use this to label
+and tag your infrastructure in your first-party modules; we do this automatically in the Panfactum modules.
+
+
+

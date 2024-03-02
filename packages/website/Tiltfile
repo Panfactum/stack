@@ -1,0 +1,74 @@
+load('../tilt/common.tiltfile', 'REGISTRY', 'NAMESPACE', 'TF_ROOT_DIR')
+load('../tilt/podman.tiltfile', 'podman_build')
+
+LABELS = ['app']
+TF_DIR = "{}/panfactum_public_app_deployment".format(TF_ROOT_DIR)
+IMAGE = "{}/public-app".format(REGISTRY)
+
+podman_build(
+  IMAGE,
+  "../..",
+  extra_flags=[
+    "-f", "./Containerfile",
+     "--target", "development"
+   ],
+  deps=[
+     "src",
+     "scripts",
+     "public",
+     "next.config.mjs",
+     "postcss.config.js",
+     "tailwind.config.js",
+     ".eslintrc.js",
+     "tsconfig.json",
+     "package.json",
+     "pnpm-lock.yaml",
+     "tsconfig.json",
+     "Containerfile",
+     "tilt.trigger",
+     "theme.js"
+   ],
+   live_update = [
+     sync('theme.js', '/code/packages/public-app/theme.js'),
+     sync('tailwind.config.js', '/code/packages/public-app/tailwind.config.js'),
+     sync('src', '/code/packages/public-app/src'),
+     sync('public', '/code/packages/public-app/public')
+   ]
+)
+
+k8s_custom_deploy(
+  "public-app",
+  ["bash", "-c", "terragrunt apply -auto-approve -no-color --terragrunt-non-interactive 1>&2 && kubectl get -n {}-public-app deployment/public-app -o yaml".format(NAMESPACE)],
+  "terragrunt destroy -auto-approve -no-color --terragrunt-non-interactive",
+  [
+    TF_DIR,
+    '../infrastructure/live/panfactum_public_app_deployment',
+    '../infrastructure/modules/kube_deployment',
+    '../infrastructure/modules/kube_ingress'
+  ],
+  apply_dir=TF_DIR,
+  delete_dir=TF_DIR,
+  image_deps = [IMAGE]
+)
+
+load('ext://uibutton', 'cmd_button')
+cmd_button('force-apply-public-app',
+          argv=["bash", "-c", "cd {}; terragrunt init".format(TF_DIR)],
+          resource='public-app',
+          icon_name='arrow_circle_up',
+          text='Force Apply',
+)
+
+cmd_button('force-build-public-app',
+          argv=["bash", "-c", "cd packages/public-app; echo $RANDOM > tilt.trigger"],
+          resource='public-app',
+          icon_name='deployed_code',
+          text='Force Rebuild',
+)
+
+k8s_resource(
+  workload='public-app',
+  new_name="public-app",
+  labels=LABELS,
+  links = ["{}.dev.panfactum.com".format(NAMESPACE)]
+)
