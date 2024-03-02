@@ -1,5 +1,8 @@
 # Panfactum Stack
 
+[![CLA assistant](https://cla-assistant.io/readme/badge/Panfactum/stack)](https://cla-assistant.io/Panfactum/stack)
+
+
 This repository contains the following components of the panfactum architecture which are all versioned
 together to ensure internal consistency:
 
