@@ -1,0 +1,44 @@
+name: Feature Request
+description: File a feature request
+title: "[feature]: "
+labels: ["feature", "triage"]
+assignees:
+  - fullykubed
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    id: request
+    attributes:
+      label: What new functionality would you like to see?
+      placeholder: Tell us what you want!
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: How would you use this new functionality?
+      description: This helps use better understand the best way to develop the functionality to meet your needs.
+      placeholder: Tell us your use case!
+    validations:
+      required: true
+  - type: dropdown
+    id: components
+    attributes:
+      label: What primary components of the stack would this impact?
+      multiple: true
+      options:
+        - terraform
+        - nix
+        - website
+        - reference
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Panfactum/stack/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
