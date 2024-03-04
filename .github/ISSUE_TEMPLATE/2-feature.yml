@@ -9,6 +9,13 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this feature request!
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Prior Search
+      options:
+        - label: I have already searched this [project's issues](https://github.com/Panfactum/stack/issues) to determine if a similar request has already been made.
+          required: true
   - type: textarea
     id: request
     attributes:

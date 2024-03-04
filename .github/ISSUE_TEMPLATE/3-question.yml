@@ -1,0 +1,42 @@
+name: Question
+description: Ask a question
+title: "[question]: "
+labels: ["question", "triage"]
+assignees:
+  - fullykubed
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to ask this question!
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Prior Search
+      options:
+        - label: I have already searched this [project's issues](https://github.com/Panfactum/stack/issues) to determine if a similar question has already been asked.
+          required: true
+  - type: textarea
+    id: request
+    attributes:
+      label: What is your question?
+    validations:
+      required: true
+  - type: dropdown
+    id: components
+    attributes:
+      label: What primary components of the stack does this relate to?
+      multiple: true
+      options:
+        - terraform
+        - nix
+        - website
+        - reference
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/Panfactum/stack/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
