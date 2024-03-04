@@ -143,6 +143,20 @@ const SIDENAV_SECTIONS = [
       }
     ]
   },
+  {
+    text: 'Contributing',
+    path: '/contributing',
+    sub: [
+      {
+        text: 'Getting Started',
+        path: '/getting-started'
+      },
+      {
+        text: 'Pull Requests',
+        path: '/pull-requests'
+      }
+    ]
+  },
 ]
 
 export default function Layout (

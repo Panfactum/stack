@@ -11,10 +11,6 @@ together to ensure internal consistency:
 - [Documentation Website](packages/website)
 - [Reference Architecture](packages/reference)
 
-## Contributing
-
-To begin contributing to this project, you must follow the Installation section of the [local setup guide](packages/website/src/app/\(web\)/docs/guides/getting-started/local-setup/page.mdx).
-
 ## Maintainers
 
 - [fullykubed](https://github.com/fullykubed)
