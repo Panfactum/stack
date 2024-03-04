@@ -1,38 +1,55 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Panfactum Website
+
+This contains the source code for the Panfactum website found at [panfactum.com](https://panfactum.com).
 
 ## Getting Started
 
-First, run the development server:
+1. First make sure you have read the 
+[contributing guide](https://panfactum.com/docs/guides/contributing) and following the instructions
+for setting up your developer environment.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+2. Install node modules via `npm install`:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Run the development server via `npx next dev`
 
-You can start editing the page by modifying `app/layoutClient.tsx`. The page auto-updates as you edit the file.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Project Architecture and Layout
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+The project is primarily written in Typescript.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+This is a standard [Next.js](https://nextjs.org/) project using the App Router.
 
-## Learn More
+The key directories are
 
-To learn more about Next.js, take a look at the following resources:
+- `public`: Static files such as images or file downloads
+- `src/app`: The routes for the Next.js app
+- `src/components`: Reusable React components
+- `src/lib`: Reusable non-UI TS/JS utilities including API clients
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Styling
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Styling is done as a mix between out-of-the-box 
+[Material UI](https://mui.com/material-ui/getting-started/) components and
+custom components built with [TailwindCSS](https://tailwindcss.com/).
 
-## Deploy on Vercel
+We do have some global styles set [here](src/app/globals.css). Most important
+are the code block styles for which we use [Prism.js](https://prismjs.com/).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Additionally, we have theme-level variables set in [theme.js](./theme.js) which controls
+coloring, breakpoints, etc.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Fonts are configured in [font.ts](./src/app/font.ts).
+
+Other than that, styles are done on a component-level basis
+and we do occasionally use the [Styled Components pattern](https://emotion.sh/docs/styled). 
+
+### Markdown Docs
+
+We do enable `mdx` files to be used in the site via 
+[@next/mdx](https://nextjs.org/docs/app/building-your-application/configuring/mdx).
+We provide custom elements via [mdx-components.tsx](src/mdx-components.tsx).
+
+When adding new Markdown documentation, you MUST ensure that you manually
+adjust the various layouts to include links to the new pages. This is NOT automatically
+generated as in some other frameworks like [docusaurus](https://docusaurus.io/).
