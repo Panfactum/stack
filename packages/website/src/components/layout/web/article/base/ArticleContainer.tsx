@@ -16,8 +16,7 @@ import {
 import { SecondaryTabsVisibleContext } from '@/lib/contexts/web/SecondaryTabsVisible'
 
 const StyledArticleContainer = styled.article<{withSidebar?: boolean, secondaryTabAdjust?: boolean}>`
-  
-
+  position: relative;
   
   margin: 0 auto;
   padding: 0 1rem 2rem;

@@ -70,12 +70,12 @@ const SIDENAV_SECTIONS = [
         path: '/overview'
       },
       {
-        text: 'Infrastructure as Code',
-        path: '/infrastructure-as-code'
-      },
-      {
         text: 'Preparing AWS',
         path: '/preparing-aws'
+      },
+      {
+        text: 'Bootstrapping Infrastructure-as-Code',
+        path: '/infrastructure-as-code'
       },
       {
         text: 'AWS Networking',
