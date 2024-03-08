@@ -6,6 +6,11 @@ import {currentPanfactumVersion} from "@/app/vars";
 
 const defaultTextSize = ['text-xs', 'sm:text-base']
 
+const replaceCodeVariables = (str: string) => {
+  return str
+    .replaceAll("__currentPanfactumVersion__", currentPanfactumVersion)
+}
+
 export function useMDXComponents (components: MDXComponents): MDXComponents {
   return {
     ...components,
@@ -63,14 +68,25 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
         {children}
       </a>
     ),
-    code: ({ children }) => (
-      <code className={`${roboto.className} rounded-sm text-xs sm:text-sm`}>
-        {children}
-      </code>
-    ),
-    table: ({ children }) => (
-      <div className="overflow-x-scroll">
-        <table className="py-2 bg-neutral rounded-md">
+    code: ({ children }) => {
+
+      let actualChildren = children;
+
+      // This allows string replacement in the code blocks we add to our documentation
+      // to ensure that we can easily maintain consistency across all docs
+      if(typeof children === "string" ){
+        actualChildren = replaceCodeVariables(children)
+      }
+
+      return (
+        <code className={`${roboto.className} rounded-sm text-xs sm:text-sm`}>
+          {actualChildren}
+        </code>
+      )
+    },
+    table: ({children}) => (
+    <div className="overflow-x-scroll">
+      <table className="py-2 bg-neutral rounded-md">
           {children}
         </table>
       </div>
@@ -92,8 +108,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       // This allows string replacement in the code blocks we add to our documentation
       // to ensure that we can easily maintain consistency across all docs
       if(className && className.includes('token') && typeof children === "string" ){
-        actualChildren = children
-          .replaceAll("__currentPanfactumVersion__", currentPanfactumVersion)
+        actualChildren = replaceCodeVariables(children)
       }
 
       return (

@@ -38,12 +38,12 @@ This can be done as follows:
 ```hcl
 ...
 terraform {
-   source = "github.com/Panfactum/stack.git?ref=1.0.0/packages/terraform//aws_eks"
+   source = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//aws_eks"
 }
 ...
 ```
 
-Note the `?ref=1.0.0` suffix.
+Note the `?ref=__currentPanfactumVersion__` suffix.
 
 ### Determining Which Providers to Enable
 
@@ -126,7 +126,7 @@ For example:
 
 ```hcl
 module "pod_template" {
-  source       = "github.com/Panfactum/stack.git?ref=1.0.0/packages/terraform//kube_pod"
+  source       = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//kube_pod"
 
   # Inputs below
   ...
