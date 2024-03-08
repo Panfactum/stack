@@ -1,10 +1,10 @@
-# We pin terraform since changes in versions could cause destructive impact to the
-# the infrastrcuture
-# See https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/networking/cluster/terraform/default.nix#L54
-# for the build config
-{ pkgs }:
-pkgs.mkTerraform {
-  version = "1.6.2";
-  hash = "sha256-24B8YlorL00OqmYYVM1xg5dM9hZ4enDWJ1XIGmeEAiM=";
-  vendorHash = "sha256-fIirGWt4Os2uZHo4ui7wmZEp+DRUHu/0p+cQCbUbzjc=";
-}
+let
+  system = builtins.currentSystem;
+  nixpkgsSrc = builtins.fetchTarball {
+    url =
+      "https://github.com/NixOS/nixpkgs/archive/58ae79ea707579c40102ddf62d84b902a987c58b.tar.gz";
+    sha256 =
+      "10ksg8w1wm6nkrihvqicyxfrdbj79q0j2wn5jyzdkvxr3jw36gj5"; # Update if using a different commit
+  };
+  pkgs = import nixpkgsSrc { inherit system; };
+in pkgs.terraform

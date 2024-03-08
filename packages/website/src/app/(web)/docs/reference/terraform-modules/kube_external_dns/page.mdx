@@ -1,0 +1,144 @@
+# Kubernetes External DNS
+
+**Type:** [Live](./overview)
+
+This module provides a deployment of the [external-dns](https://github.com/kubernetes-sigs/external-dns) project.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+-  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+-  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_aws_permissions"></a> [aws\_permissions](#module\_aws\_permissions)
+
+Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+
+
+### <a name="module_constants"></a> [constants](#module\_constants)
+
+Source: [constants](./constants)
+
+
+### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_namespace"></a> [namespace](#module\_namespace)
+
+Source: [kube_namespace](./kube_namespace)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+
+Description: A list of IPs that can use the service account token to authneticate with AWS API
+
+Type: `list(string)`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_dns_zones"></a> [dns\_zones](#input\_dns\_zones)
+
+Description: A mapping of public DNS domains to their configuration; external-dns uses this to set domain records
+
+Type:
+
+```hcl
+map(object({
+    record_manager_role_arn = string
+    zone_id                 = string
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_external_dns_helm_version"></a> [external\_dns\_helm\_version](#input\_external\_dns\_helm\_version)
+
+Description: The version of the external-dns helm chart to deploy
+
+Type: `string`
+
+Default: `"6.22.0"`
+
+### <a name="input_external_dns_version"></a> [external\_dns\_version](#input\_external\_dns\_version)
+
+Description: The version of external-dns to deploy
+
+Type: `string`
+
+Default: `"0.13.5"`
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes

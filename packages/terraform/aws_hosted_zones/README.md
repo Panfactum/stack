@@ -1,5 +1,3 @@
-# `aws_hosted_zone`
+# AWS Hosted Zone
 
-## Dependencies
-
-None
+**Type:** Live

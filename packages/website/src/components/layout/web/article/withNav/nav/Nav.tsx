@@ -1,7 +1,7 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { memo, useCallback, useState } from 'react'
+import {Fragment, memo, useCallback, useState } from 'react'
 
 import type {
   IArticleNavLinkProps,
@@ -15,6 +15,14 @@ const NavLink = memo((props: IArticleNavLinkProps & ITreeProps) => {
   const currentPath = usePathname()
   const linkPath = `${basePath}${path}`
   const active = currentPath.startsWith(linkPath)
+
+  // This allows long code identifiers (e.g., terraform module names) to be broken at their underscores
+  const breakableText = text
+    .split('_')
+    .map(((t,i, l) => {
+      return <Fragment key={t}>{t}{i === l.length - 1 ? '' : '_'}<wbr/></Fragment>
+    }))
+
   return (
     <div className="flex items-center py-1">
 
@@ -23,7 +31,9 @@ const NavLink = memo((props: IArticleNavLinkProps & ITreeProps) => {
         onClick={onNavigate}
         className={`${active ? 'text-black font-semibold' : 'text-secondary'} hover:cursor-pointer hover:text-black flex grow items-stretch justify-between leading-5 pr-1`}
       >
-        {text}
+        <div>
+          {breakableText}
+        </div>
         {active
           ? (
             <div className={'self-stretch w-[4px] bg-primary rounded-[2px] z-10'}/>

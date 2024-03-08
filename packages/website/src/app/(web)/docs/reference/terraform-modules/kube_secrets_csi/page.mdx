@@ -1,0 +1,103 @@
+# Kubernetes Secrets CSI
+
+**Type:** [Live](./overview)
+
+This module provides the CSI driver for provisioning external secrets (e.g., from vault) as volume mounts
+and kubernetes secrets. See the [docs](https://secrets-store-csi-driver.sigs.k8s.io/).
+
+See the [vars file](./vars.tf) for descriptions of the input parameters.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_constants"></a> [constants](#module\_constants)
+
+Source: [constants](./constants)
+
+
+### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_namespace"></a> [namespace](#module\_namespace)
+
+Source: [kube_namespace](./kube_namespace)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_secrets_store_csi_helm_version"></a> [secrets\_store\_csi\_helm\_version](#input\_secrets\_store\_csi\_helm\_version)
+
+Description: The version of the secrets-store-csi-driver helm chart to deploy
+
+Type: `string`
+
+Default: `"1.3.4"`
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes

@@ -1,0 +1,142 @@
+# Buildkit
+
+**Type:** [Live](./overview)
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_aws_permissions"></a> [aws\_permissions](#module\_aws\_permissions)
+
+Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+
+
+### <a name="module_cache_bucket"></a> [cache\_bucket](#module\_cache\_bucket)
+
+Source: [aws_s](./aws_s)3_private_bucket
+
+
+### <a name="module_constants"></a> [constants](#module\_constants)
+
+Source: [constants](./constants)
+
+
+### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_namespace"></a> [namespace](#module\_namespace)
+
+Source: [kube_namespace](./kube_namespace)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_cpu_millicores"></a> [cpu\_millicores](#input\_cpu\_millicores)
+
+Description: The number of cpus millicores to request for the buildkit pod
+
+Type: `number`
+
+### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+
+Description: A list of IPs that can use the service account token to authneticate with AWS API
+
+Type: `list(string)`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_local_storage_gb"></a> [local\_storage\_gb](#input\_local\_storage\_gb)
+
+Description: The number of GB to use for the local image temp storage
+
+Type: `number`
+
+### <a name="input_memory_mb"></a> [memory\_mb](#input\_memory\_mb)
+
+Description: The amount of memory in MB to request for the buildkit pod
+
+Type: `number`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_max_replicas"></a> [max\_replicas](#input\_max\_replicas)
+
+Description: The maximum number of replicas of buildkit to use
+
+Type: `number`
+
+Default: `10`
+
+### <a name="input_min_replicas"></a> [min\_replicas](#input\_min\_replicas)
+
+Description: The minimum number of replicas of buildkit to use
+
+Type: `number`
+
+Default: `1`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_cache_bucket"></a> [cache\_bucket](#output\_cache\_bucket)
+
+Description: n/a
+
+## Usage
+
+No notes

@@ -1,4 +1,6 @@
-# Kube RBAC
+# Kubernetes RBAC
+
+**Type:** Live
 
 This module configures the basic scaffolding for linking AWS IAM roles to Kubernetes RBAC roles by setting up
 the `aws-auth` ConfigMap used by the [aws-iam-authenticator](https://github.com/kubernetes-sigs/aws-iam-authenticator)

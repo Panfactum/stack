@@ -33,7 +33,7 @@ nix_direnv_watch_file node.nix
 ### From `nixpkgs`
 
 <Alert severity="info">
-    You should use [this search interface](https://search.nixos.org/packages) to find packages.
+    [This search interface](https://search.nixos.org/packages) is very helpful for finding packages.
 </Alert>
 
 Your `devenv.nix` should have an input variable called `pkgs`. This variable represents all packages
@@ -54,17 +54,17 @@ To add a package such as `nodejs_20`, update your `devenv.nix` with the followin
 <Alert severity="warning">
     All packages defined in the `nixpkgs` GitHub repo are updated together,
     and **many** updates are made to the repository each day.
-    `pkgs` refers to the set of packages defined **specific commit** in `nixpkgs`.
-    That commit hash is determined by the `inputs.pkgs.url` field in your `flake.nix`.
+    `pkgs` refers to the set of packages defined by a **specific commit** in `nixpkgs`.
+    That commit is determined by the `inputs.pkgs.url` field in your `flake.nix`.
 
-    Even if you specify a branch such as `nixos-23.11` (via `inputs.pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";`),
+    However, if you specify a branch such as `nixos-23.11` (via `inputs.pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";`),
     the commit hash is pinned in the `flake.lock` file and will not be automatically updated.
 
     To update the commit hash, you must run `nix flake update`, and the commit hash will update to the latest commit
     on that branch.
 
-    In general, we recommend pinning the commit directly in the `flake.nix` to avoid ambiguity such
-    as with `inputs.pkgs.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";`.
+    In general, we recommend pinning the commit directly in the `flake.nix` to avoid ambiguity. For example,
+    `inputs.pkgs.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";`.
 </Alert>
 
 ### Specific Version from `nixpkgs`
@@ -74,9 +74,9 @@ To add a package such as `nodejs_20`, update your `devenv.nix` with the followin
     helpful at finding the specific `nixpkgs` commit hash that contains specific versions of your desired tool.
 </Alert>
 
-Since all of the `nixpkgs` is versioned atomically, you may find yourself in the following scenario:
+Since all of `nixpkgs` is versioned atomically, you may find yourself in the following scenario:
 
-> You want a version of utility `A` that is found at `nixpkgs` commit `XXX` but also a version of utility
+> You want a version of utility `A` that is found at `nixpkgs` commit `XXX` and also a version of utility
 `B` that is found at commit `YYY`.
 
 Fortunately, you can create a nix expression that represents a package from a specific commit of `nixpkgs`
@@ -106,6 +106,11 @@ You would include this in your `devenv.nix` as follows:
   ];
 }
 ```
+
+<Alert severity="warning">
+    When you are updating the `nixpkgsSrc.url`, you MUST update the sha256 in order to trigger a rebuild. Simply
+    changing the URL will not invalidate the cache.
+</Alert>
 
 ### Custom Scripts
 

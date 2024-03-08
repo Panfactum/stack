@@ -1,22 +1,25 @@
 @tailwind base;
 /*! purgecss start ignore */
 
-/* Ensures that tanstack query is not impacted by code styles below */
-div.tsqd-parent-container code {
-    background: none !important;
-}
 
 .remark-highlight {
     overflow-x: scroll;
     @apply bg-neutral;
 }
 
+/* This provides styling for the inline code blocks in the various pages */
 code {
     padding-left: 5px;
     padding-right: 5px;
     user-select: all;
+    @media (max-width: 640px) {
+        font-size: 0.6rem !important;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
 }
 
+/* This resets some of the styles when using a multiline code block */
 pre > code {
     padding-left: 0;
     padding-right: 0;
@@ -53,8 +56,12 @@ pre[class*="language-"] {
 
 /* Code blocks */
 pre[class*="language-"] {
+    @media (max-width: 640px) {
+        padding: 0.5em;
+        line-height: 1;
+    }
     padding: 1em;
-    margin: 0.5em 0;
+    margin: 0;
     overflow: auto;
 }
 
@@ -329,11 +336,47 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
 
 @layer base {
 
+    /* Need to set this in order to allow setting scroll-margin-top */
+    html {
+        overflow:scroll;
+    }
+
+    /* Set some global styles to all elements for consistency */
     * {
         box-sizing: border-box;
         border-style: solid;
         border-width: 0;
         scroll-behavior: smooth !important;
+    }
+
+    /*
+    This fixes scrolling behavior when the primary and secondary web layout is used.
+    The original issue was that the sticky headers allowed content to scroll
+    behind them. This makes sure that the content remains in view when scrolling
+    to elements in the page.
+    */
+
+    #primary-web-layout * {
+        @apply scroll-m-[50px]
+    }
+    /* When using the secondary web layout, there is an additional subnav header for the tabs on larger pages */
+    #secondary-web-layout * {
+        @apply scroll-m-[50px] lg:scroll-m-[100px]
+    }
+
+
+    /* Ensures that tanstack query is not impacted by our custom code styling */
+    div.tsqd-parent-container code {
+        background: none !important;
+    }
+
+
+    /* Link styling should be different depending on whether we are writing docs or doing custom HTML */
+    a {
+        text-decoration: none;
+    }
+    a:visited {
+        color: initial;
     }
     a.markdown {
         text-decoration: underline;
@@ -343,21 +386,15 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
         @apply text-neutral;
     }
 
-    a {
-        text-decoration: none;
-    }
-    a:visited {
-        color: initial;
-    }
-
+    /* Default margins on these elements is annoying */
     body, h1, h2, h3, h4, h5, h6, p {
         margin: 0;
     }
 
+    /* Makes code blocks stick out more */
     code {
         @apply bg-neutral
     }
-
 
 }
 /*! purgecss end ignore */

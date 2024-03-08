@@ -1,0 +1,15 @@
+formatter: markdown doc
+sections:
+  show:
+    - header
+    - footer
+    - inputs
+    - modules
+    - requirements
+    - outputs
+header-from: README.md
+footer-from: USAGE.md
+settings:
+  anchor: true
+  html: true
+  read-comments: false

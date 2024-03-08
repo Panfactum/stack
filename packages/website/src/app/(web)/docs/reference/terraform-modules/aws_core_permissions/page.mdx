@@ -1,0 +1,112 @@
+# AWS Core Permissions
+
+**Type:** [Internal](./overview)
+
+Provides standard IAM policy definitions for the core roles used across AWS accounts. Exports them as terraform outputs
+for use in consuming modules. Does NOT actually create the policy infrastructure.
+
+Provides the following policies:
+
+1. `admin_policy_json` - Policy that allows read-write access to most resources and secrets in the environment. Does not
+allow destroying or mutating the "protected" resources or creating persistent security vulnerabilities.
+
+2. `reader_policy_json` - Policy that allows read-only access to only the resources we use at Bambee. Does not allow
+access to secrets. The "protected" resources are invisible.
+
+3. `ci_reader_policy_json` - Policy that allows bot readers to read secrets and protected s3 buckets so that
+infrastructure planning can work. Also allows the ability to add and remove items from the protected dynamodb tables.
+
+Note: The superuser role just uses the AWS managed policy `arn:aws:iam::aws:policy/AdministratorAccess` which allows
+unmitigated access.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Modules
+
+No modules.
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_protected_dynamodb_arns"></a> [protected\_dynamodb\_arns](#input\_protected\_dynamodb\_arns)
+
+Description: A list of protected dynamodb arns for the environment.
+
+Type: `list(string)`
+
+### <a name="input_protected_kms_arns"></a> [protected\_kms\_arns](#input\_protected\_kms\_arns)
+
+Description: A list of protected kms arns for the environment.
+
+Type: `list(string)`
+
+### <a name="input_protected_s3_arns"></a> [protected\_s3\_arns](#input\_protected\_s3\_arns)
+
+Description: A list of protected s3 buckets for the environment.
+
+Type: `list(string)`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_admin_policy_json"></a> [admin\_policy\_json](#output\_admin\_policy\_json)
+
+Description: n/a
+
+### <a name="output_ci_reader_policy_json"></a> [ci\_reader\_policy\_json](#output\_ci\_reader\_policy\_json)
+
+Description: n/a
+
+### <a name="output_reader_policy_json"></a> [reader\_policy\_json](#output\_reader\_policy\_json)
+
+Description: n/a
+
+## Usage
+
+No notes

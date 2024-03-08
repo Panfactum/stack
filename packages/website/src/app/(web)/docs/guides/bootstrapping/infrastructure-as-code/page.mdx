@@ -1,1 +1,226 @@
-# Infrastructure as Code
+import s3BucketInitImg from './s3-bucket-init.jpg'
+import firstTfStateImg from './first-tf-state.jpg'
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+
+# Bootstrapping Infrastructure-as-Code
+
+## Objective
+
+Complete the necessary setup to begin utilizing terraform and terragrunt.
+
+## Background
+
+If you're new to using infrastructure-as-code tooling professionally, you should review the
+concepts documentation before continuing (TODO).
+
+Because both terraform and terragrunt are **unopinionated tools**,
+every organization tends to implement infrastructure-as-code differently. There is no
+right or wrong approach, but it is tedious and error-prone to invent one from scratch.
+
+As a result, the Panfactum stack provides
+standardization with a **highly opinionated set of practices** for deploying infrastructure-as-code
+that incorporates dozens of lessons learned over the past decade. It aligns with the recommendations
+provided by both Hashicorp (terraform) and Gruntworks (terragrunt).
+
+We assume that you will build upon the framework we provide
+as you begin to deploy infrastructure. We provide CLI tooling that enables you to quickly scaffold out
+your project to align with our guides. As you become comfortable working in the stack,
+you may customize any part of our starting setup to fit your organization's evolving needs.
+
+**Regardless of whether you have used terraform and/or terragrunt before, you should
+review the [Panfactum terraforming guides](../terraforming/overview).**
+
+## Setup Environments Directory
+
+Please ensure you have completed the following sections of the [Deploying Modules guide](../terraforming/deploying-modules):
+    - _Setting up Your Repo_
+    - _Terragrunt Setup_
+
+After completing those sections, you should have a fully scaffolded environments
+directory. Please validate the following statements about this directory:
+
+- It contains a `panfactum.hcl`.
+- It contains a `global.yaml`.
+- It contains a `providers` directory with several providers such as `aws.tf`.
+- You have a top-level directory for **every** environment we created in the previous _Preparing AWS_ guide.
+- Each environment directory contains an `environment.yaml` file.
+- Each environment directory contains a region directory for **every** AWS region you want to deploy infrastructure
+into. Additionally, you have a region directory called `global` inside of every environment directory.
+- Each region directory contains a `region.yaml` file.
+
+Finally, ensure that you do **not** receive any warnings about needing to run `pf-terragrunt-update` when opening
+the repository in your terminal.
+
+Ultimately, your environments folder should closely resemble that of
+[our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
+
+## Configure Terragrunt Variables
+
+In order to begin deploying terraform modules, we must first configure terragrunt via our terragrunt variables
+which will be set in the `global.yaml`, `environemnt.yaml`, and `region.yaml` files
+(see [reference docs](http://localhost:3000/docs/reference/terragrunt-variables)).
+
+### Metadata
+
+The following metadata fields are used for tagging and labeling deployed infrastructure:
+
+- In **every** `environment.yaml` file, set the `environment` key to the name of the environment
+(typically the same as the directory name)
+- In **every** `region.yaml` file, set the `region` key to the name of the region (typically the same as the directory name)
+
+### State Backend
+
+Each environment will have its own, **independent** [terraform backend](https://developer.hashicorp.com/terraform/language/settings/backends/configuration)
+for storing information about the tracked terraform resources. We utilize the [S3 backend](https://developer.hashicorp.com/terraform/language/settings/backends/s3)
+and store the state for each environment inside of that environment's AWS account.
+
+In **every** environment.yaml, set the following keys:
+
+- `tf_state_account_id`: Set this to the account id for the environment's AWS account
+- `tf_state_profile`: Set this to the AWS profile name you created for accessing this account in the _Preparing AWS_ guide
+- `tf_state_region`: Set this your primary AWS region (buckets have to have an assigned region even though we use it for deploying resources to _all_ regions in the environment)
+- `tf_state_bucket`: Set the name of the S3 bucket you want to use. Should not exist yet and must be globally unique. Example: `my-company-terraform-state-development`.
+- `tf_state_lock_table`: Set the name of the DynamoDB table you want to use. Should not exist yet and must be globally unique. Example: `my-company-terraform-state-development`.
+
+### AWS Provider
+
+These variables will configure how the terraform AWS provider deploys resources into AWS and will vary its behavior
+based on the folder the terraform module is deployed from.
+
+In **every** `environment.yaml` file, set the following keys:
+
+- `aws_account_id`: Set this to the account id for the environment's AWS account.
+- `aws_profile`: Set this to the AWS profile name you created for accessing this account in the _Preparing AWS_ guide.
+- `aws_secondary_account_id`: Set this to the `aws_account_id` from above.
+- `aws_secondary_profile`: Set this to the `aws_profile` from above.
+
+In **every** `region.yaml` file, set the following keys:
+
+- `aws_region`: Set this to the AWS region code for the directory (e.g., `us-west-2`). For the `global` region,
+set the region to your primary AWS region which would normally be what you used for `tf_state_region` above.
+- `aws_secondary_region`: Set this to the `aws_region` from above.
+
+_The secondary values are used by some modules that configure resources in multiple AWS accounts or regions. What we
+have just done is default them to primary values, and we will override them on a per-module basis as needed._
+
+## Bootstrap State Backends
+
+To begin deploying infrastructure, you will first need a terraform state backend... which is itself infrastructure.
+In fact, we provide a terraform module for setting up the backend: [terraform_bootstrap_resources](../../reference/terraform-modules/terraform_bootstrap_resources).
+
+This creates a circular dependency that we will resolve as follows:
+
+1. Use terragrunt's built-in S3 backend generation to build the state backend for the `management` environment.
+2. Import those autogenerated resources into a deployment of `terraform_bootstrap_resources`.
+3. Deploy `terraform_bootstrap_resources` for all other environments _from the management environment_.
+
+
+### Create the State Backend for Management Environment
+
+Terragrunt will [automatically generate the resources](https://terragrunt.gruntwork.io/docs/features/keep-your-remote-state-configuration-dry/#create-remote-state-and-locking-resources-automatically)
+required to bootstrap an S3 terraform backend if they do not already exists. This greatly simplifies the bootstrapping process.
+
+To take advantage of this, we will create our first terragrunt deployment:
+
+1. Generate a deployment directory for [terraform_bootstrap_resources](../../reference/terraform-modules/terraform_bootstrap_resources):
+`environments/management/global/terraform_bootstrap_resources_management`
+2. Add a `terragrunt.hcl` to that directory:
+
+    ```hcl
+    include "panfactum" {
+        path = find_in_parent_folders("panfactum.hcl")
+        expose = true
+    }
+
+    terraform {
+      source = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//terraform_bootstrap_resources"
+    }
+
+    inputs = {
+        state_bucket = include.panfactum.locals.vars.tf_state_bucket
+        lock_table   = include.panfactum.locals.vars.tf_state_bucket
+    }
+    ```
+3. Add a `module.yaml` to that directory that enables the `aws` terraform provider:
+
+    ```yaml
+    providers:
+      - aws
+    ```
+
+4. Open your terminal to that directory and run `terragrunt init`. If your system is setup correctly, you should
+see a prompt like the following:
+
+    ```shell-session
+    Remote state S3 bucket panfactum-tf-state-management does not exist or you don't have permissions to access it. Would you like Terragrunt to create it? (y/n)
+    ```
+
+5. Type `y` and press enter. If everything completes successfully you should see a message such as
+
+    ```shell-session
+    Initializing the backend...
+
+    Successfully configured the backend "s3"! Terraform will automatically
+    use this backend unless the backend configuration changes.
+
+    Initializing provider plugins...
+    - Finding hashicorp/aws versions matching "~> 4.13"...
+    - Installing hashicorp/aws v4.67.0...
+    - Installed hashicorp/aws v4.67.0 (signed by HashiCorp)
+
+    Terraform has created a lock file .terraform.lock.hcl to record the provider
+    selections it made above. Include this file in your version control repository
+    so that Terraform can guarantee to make the same selections by default when
+    you run "terraform init" in the future.
+
+    Terraform has been successfully initialized!
+
+    You may now begin working with Terraform. Try running "terraform plan" to see
+    any changes that are required for your infrastructure. All Terraform commands
+    should now work.
+
+    If you ever set or change modules or backend configuration for Terraform,
+    rerun this command to reinitialize your working directory. If you forget, other
+    commands will detect it and remind you to do so if necessary.
+    ```
+
+6. If you navigate to the AWS console, you should see an **empty** S3 bucket that was just instantiated
+
+    <MarkdownImage src={s3BucketInitImg} alt={"Initialized S3 bucket"} />
+
+### Import the Autogenerated Resources
+
+While terragrunt autogenerated the necessary resources, they are **not** yet being managed by your
+`terraform_bootstrap_resources` module.[^1] We will need to [import them into terraform](https://developer.hashicorp.com/terraform/cli/import).
+
+[^1]: Technically, the module hasn't even been deployed yet. It has only been initialized locally on your machine.
+
+1. Run the following series of commands:
+
+    ```shell-session
+    terragrunt import aws_s3_bucket.state <tf_state_bucket>
+    terragrunt import aws_dynamodb_table.lock <tf_state_lock_table>
+    ```
+
+    Replace `<tf_state_bucket>` and `<tf_state_lock_table>` with your state bucket name and lock table name respectively.
+
+2. If your import is successful, you should have your first state file.
+
+    <MarkdownImage src={firstTfStateImg} alt={"First terraform state file"} />
+
+3. Run `terragrunt apply` to synchronize the resources with the `terraform_bootstrap_resources` module. This module
+adds several enhancements above and beyond the basic autogenerated resources created by terragrunt.
+
+    This will result in an error `Error: Error releasing the state lock`. This is because we actually replace the DynamoDB lock
+    table to enabled multi-region replication. This is a benign error, and no action is needed.
+
+4. Run `terragrunt plan`. You should see the following message: `No changes. Your infrastructure matches the configuration.`.
+Congratulations! You have successfully deployed your first terraform module in the Panfactum stack.
+
+### Bootstrap other Environments
+
+## Deploy AWS Account Module
+
+
+
+

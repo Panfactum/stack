@@ -4,7 +4,7 @@
 
   inputs = {
     nixpkgs.url =
-      "github:NixOS/nixpkgs/6608f1624a8dd9d001de8fc24baa9a2d929b0e82";
+      "github:NixOS/nixpkgs/4471857c0a4a8a0ffc7bdbeaf1b998746ce12a82";
     systems.url = "github:nix-systems/default";
     devenv.url = "github:cachix/devenv/python-rewrite";
   };

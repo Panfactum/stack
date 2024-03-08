@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import modules from './terraform-modules/modules.json'
 
 import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/ArticleWithNavLayout'
 
@@ -23,7 +24,10 @@ const SIDENAV_SECTIONS = [
         text: 'Overview',
         path: '/overview',
       },
-    ]
+    ].concat(modules.modules.map(module => ({
+      text: module,
+      path: `/${module}`
+    })))
   }
 ]
 

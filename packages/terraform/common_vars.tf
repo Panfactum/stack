@@ -1,8 +1,3 @@
-variable "app" {
-  description = "The name of the application/core repo."
-  type        = string
-}
-
 variable "environment" {
   description = "The name of the environment for the infrastructure."
   type        = string

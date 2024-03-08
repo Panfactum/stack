@@ -1,0 +1,188 @@
+# Elastic Kubernetes Service (EKS)
+
+**Type:** [Live](./overview)
+
+This module provides our standard set up for a configurable AWS EKS Cluster. It includes:
+- An [EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). This cluster defines the Kubernetes control plane (managed by AWS) and provisions it to the specified set of availability zones.
+- Node groups for the EKS cluster.
+- Security Groups for both the cluster control plane and for the node groups. The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic. The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
+
+Additionally, we use the following [EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html):
+  - [coredns](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html)
+  - [kube-proxy](https://docs.aws.amazon.com/eks/latest/userguide/managing-kube-proxy.html)
+  - [vpc-cni](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html)
+
+See the [vars file](./vars.tf) for descriptions of the input parameters.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+-  [tls](#requirement\_tls) (4.0.5)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_aws_cloudwatch_log_group"></a> [aws\_cloudwatch\_log\_group](#module\_aws\_cloudwatch\_log\_group)
+
+Source: [aws_cloudwatch_log_group](./aws_cloudwatch_log_group)
+
+
+### <a name="module_constants"></a> [constants](#module\_constants)
+
+Source: [constants](./constants)
+
+
+### <a name="module_node_settings"></a> [node\_settings](#module\_node\_settings)
+
+Source: [kube_node_settings](./kube_node_settings)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_all_nodes_allowed_security_groups"></a> [all\_nodes\_allowed\_security\_groups](#input\_all\_nodes\_allowed\_security\_groups)
+
+Description: Names of security groups allowed to communicate directly with the cluster nodes.
+
+Type: `set(string)`
+
+### <a name="input_cluster_description"></a> [cluster\_description](#input\_cluster\_description)
+
+Description: The purpose of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name)
+
+Description: The name of the EKS cluster resource.
+
+Type: `string`
+
+### <a name="input_controller_node_count"></a> [controller\_node\_count](#input\_controller\_node\_count)
+
+Description: The number of controller nodes to use
+
+Type: `number`
+
+### <a name="input_controller_node_instance_types"></a> [controller\_node\_instance\_types](#input\_controller\_node\_instance\_types)
+
+Description: The allowable instance types for the controller nodes
+
+Type: `list(string)`
+
+### <a name="input_controller_node_kube_version"></a> [controller\_node\_kube\_version](#input\_controller\_node\_kube\_version)
+
+Description: The version of kubernetes to use on the nodes
+
+Type: `string`
+
+### <a name="input_controller_node_subnets"></a> [controller\_node\_subnets](#input\_controller\_node\_subnets)
+
+Description: List of names for subnets that controller nodes should be deployed to
+
+Type: `list(string)`
+
+### <a name="input_coredns_version"></a> [coredns\_version](#input\_coredns\_version)
+
+Description: The version to use for the coredns EKS add-on.
+
+Type: `string`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_kube_control_plane_subnets"></a> [kube\_control\_plane\_subnets](#input\_kube\_control\_plane\_subnets)
+
+Description: List of subnet names for the control plane. Must be in at least two different availability zones.
+
+Type: `set(string)`
+
+### <a name="input_kube_control_plane_version"></a> [kube\_control\_plane\_version](#input\_kube\_control\_plane\_version)
+
+Description: Desired Kubernetes master version.
+
+Type: `string`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_kube_control_plane_logging"></a> [kube\_control\_plane\_logging](#input\_kube\_control\_plane\_logging)
+
+Description: Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)
+
+Type: `set(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_cluster_ca_data"></a> [cluster\_ca\_data](#output\_cluster\_ca\_data)
+
+Description: n/a
+
+### <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name)
+
+Description: n/a
+
+### <a name="output_cluster_url"></a> [cluster\_url](#output\_cluster\_url)
+
+Description: n/a
+
+### <a name="output_instance_profile"></a> [instance\_profile](#output\_instance\_profile)
+
+Description: n/a
+
+### <a name="output_node_role_arn"></a> [node\_role\_arn](#output\_node\_role\_arn)
+
+Description: n/a
+
+### <a name="output_user_data"></a> [user\_data](#output\_user\_data)
+
+Description: n/a
+
+## Usage
+
+- The cluster nodes won't be able to register with the cluster until the [kube\_rbac module](https://github.com/BambeeHR/access-control/tree/main/terraform/kube_rbac) in access-control is deployed. That module
+  allows the node IAM role to assume the correct Kubernetes permissions for
+  node registration.

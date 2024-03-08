@@ -1,0 +1,3 @@
+# Constants
+
+**Type:** Internal

@@ -1,5 +1,7 @@
 # Init
 
+**Type:** Live
+
 This module is used to initialize
 the `TF_PLUGIN_CACHE_DIR` with the specific
 versions of ALL providers that we use.

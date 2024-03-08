@@ -12,7 +12,7 @@ interface IWebContentLayoutProps {
 export default memo(function SecondaryWebLayout (props: IWebContentLayoutProps) {
   const { children, tabs } = props
   return (
-    <div className="bg-gray-light h-full">
+    <div className="bg-gray-light h-full" id={"secondary-web-layout"}>
       <WebTabNavigation tabs={tabs}/>
       {children}
     </div>

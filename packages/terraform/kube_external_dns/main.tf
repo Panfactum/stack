@@ -4,19 +4,19 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.22"
+      version = "2.27.0"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "2.10.1"
+      version = "2.12.1"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "5.10"
+      version = "5.39.1"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.5.1"
+      version = "3.6.0"
     }
   }
 }

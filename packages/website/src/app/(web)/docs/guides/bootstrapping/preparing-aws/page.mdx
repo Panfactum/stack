@@ -46,7 +46,7 @@ You do **not** need to create organizational units (OUs) or governance policies 
 
 ## Create Additional AWS Accounts
 
-You will want to create **on e account for each environment** your organization intends to use.
+You will want to create **one account for each environment** your organization intends to use.
 
 An _environment_ is a set of infrastructure components that is **isolated** from the infrastructure
 components of other environments. In other words, what happens to one environment should not impact what happens
@@ -93,6 +93,8 @@ that you should also see "management account" label in your account list.
 `<your_organization>-development`. Ensure that you have access to the email addresses you enter for each account's
 root user / owner. [^4] [^5]
 
+5. Save the AWS account ID for quick reference as we will need it in the later guides.
+
 [^4]: Tip: Use group inboxes for managing these accounts to reduce your [bus factor risk](https://en.wikipedia.org/wiki/Bus_factor).
 
 [^5]: Tip: While AWS forces you to use a unique email address for each account, you can sometimes use the `+` trick
@@ -119,7 +121,7 @@ authentication section and complete the setup for your desired second factor.
 
 4. Next you will create an Access key via "Create access key."
     1. You will receive a dialog warning that "Root user access
-    keys are not recommended." Don't worry. Once we have SSO established, we will remove these access keys permanently, and
+    keys are not recommended." Don't worry. Once we have SSO established, we will remove these access keys permanently and
     prevent anyone in your organization from needing static AWS credentials.
     2. Save **both** the access key id and secret access key in a safe place. We will need them in the next steps.
 

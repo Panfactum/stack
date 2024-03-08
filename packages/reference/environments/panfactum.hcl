@@ -3,18 +3,29 @@
 #################################################################
 
 locals {
-  # Read in the configuration yaml for this particular module
-  global_file = find_in_parent_fodlers("global.yaml", "DNE")
-  global_vars = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : {}
+  global_file = find_in_parent_folders("global.yaml", "DNE")
+  global_raw_vars = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : null
+  global_user_file = find_in_parent_folders("global.user.yaml", "DNE")
+  global_user_vars = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : null
+  global_vars = merge(local.global_raw_vars, local.global_user_vars)
 
-  environment_file = find_in_parent_fodlers("environment.yaml", "DNE")
-  environment_vars = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : {}
+  environment_file = find_in_parent_folders("environment.yaml", "DNE")
+  environment_raw_vars = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : null
+  environment_user_file = find_in_parent_folders("environment.user.yaml", "DNE")
+  environment_user_vars = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : null
+  environment_vars = merge(local.environment_raw_vars, local.environment_user_vars)
 
-  region_file = find_in_parent_fodlers("region.yaml", "DNE")
-  region_vars = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : {}
+  region_file = find_in_parent_folders("region.yaml", "DNE")
+  region_raw_vars = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : null
+  region_user_file = find_in_parent_folders("region.user.yaml", "DNE")
+  region_user_vars = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : null
+  region_vars = merge(local.region_raw_vars, local.region_user_vars)
 
   module_file      = "${get_terragrunt_dir()}/module.yaml"
-  module_vars    = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : {}
+  module_raw_vars    = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : null
+  module_user_file      = "${get_terragrunt_dir()}/module.user.yaml"
+  module_user_vars    = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : null
+  module_vars = merge(local.module_raw_vars, local.module_user_vars)
 
   # Merge all of the vars with order of precedence
   vars = merge(
@@ -25,10 +36,10 @@ locals {
   )
 
   # Activated providers
-  providers = toset(lookup(local.vars, "providers", []))
-  enable_aws = contains(local.vars.providers, "aws")
-  enable_kubernetes = contains(local.vars.providers, "kubernetes")
-  enable_vault = contains(local.vars.providers, "vault")
+  providers = lookup(local.vars, "providers", [])
+  enable_aws = contains(local.providers, "aws")
+  enable_kubernetes = contains(local.providers, "kubernetes")
+  enable_vault = contains(local.providers, "vault")
 
   # Repo metadata
   repo_url = get_env("PF_REPO_URL")
@@ -38,23 +49,21 @@ locals {
   # Determine the module "version" (git ref to checkout)
   # Use the following priority ordering:
   # 1. The `version` key in any of the `yaml` files
-  # 3. Fallback to the repo's primary branch
+  # 2. Fallback to the repo's primary branch
   version        = lookup(local.vars, "version", local.primary_branch)
 
   # The version_tag needs to be a commit sha
   version_hash = run_cmd("--terragrunt-quiet", "get-version-hash", local.version)
 
-  # Defining the module source
-  # NOTE: You can only use modules defined inside this repo (to use other repo's modules), define a
-  # `module` block in your terraform code
+
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
   use_local_terraform  = contains(["latest", "local", local.primary_branch], local.version)
-  terraform_dir = get_env("PF_TERRAFORM_DIR")
-  terraform_path       = "${startswith(local.terraform_dir, "/") ? local.terraform_dir : "/" + local.terraform_dir}//${basename(get_original_terragrunt_dir())}"
-  module_source_string = local.use_local_terraform ? "${get_repo_root()}${local.terraform_path}" : "${local.repo_url}${local.terraform_path}?ref=${local.version}"
+  terraform_dir        = get_env("PF_TERRAFORM_DIR")
+  terraform_path       = "${startswith(local.terraform_dir, "/") ? local.terraform_dir : "/${local.terraform_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
+  source               = local.use_local_terraform ? "${get_repo_root()}${local.terraform_path}" : "${local.repo_url}?ref=${local.version}${local.terraform_path}"
 
   # Folder of shared snippets to generate
-  shared_folder = "${get_repo_root()}/environments/providers"
+  provider_folder = "providers"
 
   # local dev namespace
   local_dev_namespace = get_env("LOCAL_DEV_NAMESPACE", "")
@@ -62,7 +71,7 @@ locals {
 
   # get vault_token (only if the vault provider is enabled)
   vault_address = local.enable_vault ? (local.is_ci ? get_env("VAULT_ADDR") : lookup(local.vars, "vault_address", get_env("VAULT_ADDR"))) : ""
-  vault_token   = local.enable_vault ? get_env("VAULT_TOKEN", run_cmd("--terragrunt-quiet", "get-vault-token", local.vault_address)) : ""
+  vault_token   = run_cmd("--terragrunt-quiet", "get-vault-token", local.vault_address) # This will always run even if in a ternary, so no need to add ternary
 
   # check if in ci system
   is_ci = get_env("CI", "false") == "true"
@@ -73,7 +82,7 @@ locals {
 ################################################################
 
 terraform {
-  source = local.module_source_string
+  source = local.source
 
   # Force Terraform to keep trying to acquire a lock for
   # up to 30 minutes if someone else already has the lock
@@ -92,50 +101,50 @@ terraform {
 generate "aws_provider" {
   path      = "aws.tf"
   if_exists = "overwrite_terragrunt"
-  contents  =  local.enable_aws ? file("${local.shared_folder}/aws.tf") : ""
+  contents  =  local.enable_aws ? file("${local.provider_folder}/aws.tf") : ""
 }
 
 generate "aws_secondary_provider" {
   path      = "aws_secondary.tf"
   if_exists = "overwrite_terragrunt"
   # Note: If the aws provider is enabled, always enable the secondary as it removes a footgun at no extra cost
-  contents  = local.enable_aws ? file("${local.shared_folder}/aws_secondary.tf") : ""
+  contents  = local.enable_aws ? file("${local.provider_folder}/aws_secondary.tf") : ""
 }
 
 generate "kubernetes_provider" {
   path      = "kubernetes.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = local.enable_kubernetes ? file("${local.shared_folder}/kubernetes.tf") : ""
+  contents  = local.enable_kubernetes ? file("${local.provider_folder}/kubernetes.tf") : ""
 }
 
 generate "time_provider" {
   path      = "time.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "time") ? file("${local.shared_folder}/time.tf") : ""
+  contents  = contains(local.vars.providers, "time") ? file("${local.provider_folder}/time.tf") : ""
 }
 
 generate "random_provider" {
   path      = "random.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "random") ? file("${local.shared_folder}/random.tf") : ""
+  contents  = contains(local.vars.providers, "random") ? file("${local.provider_folder}/random.tf") : ""
 }
 
 generate "local_provider" {
   path      = "local.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "local") ? file("${local.shared_folder}/local.tf") : ""
+  contents  = contains(local.vars.providers, "local") ? file("${local.provider_folder}/local.tf") : ""
 }
 
 generate "tls_provider" {
   path      = "tls.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "tls") ? file("${local.shared_folder}/tls.tf") : ""
+  contents  = contains(local.vars.providers, "tls") ? file("${local.provider_folder}/tls.tf") : ""
 }
 
 generate "vault_provider" {
   path      = "vault.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = local.enable_vault ? file("${local.shared_folder}/vault.tf") : ""
+  contents  = local.enable_vault ? file("${local.provider_folder}/vault.tf") : ""
 }
 
 

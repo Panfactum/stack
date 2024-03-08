@@ -1,5 +1,7 @@
 # AWS SSO
 
+**Type:** Live
+
 1. Connects Okta to [AWS SSO](https://aws.amazon.com/single-sign-on/) via the [AWS SSO pre-configured app](https://saml-doc.okta.com/SAML_Docs/How-to-Configure-SAML-2.0-for-AWS-Single-Sign-on.html)
    and [SCIM provisioning](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html).
 2. Creates the three core permission tiers for each AWS account:

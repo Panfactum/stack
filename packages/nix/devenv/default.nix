@@ -31,6 +31,8 @@ in {
     # IaC Tools
     #########################################
     terraform
+    terraform-docs
+    (customShellScript "generate-tf-docs")
 
     #########################################
     # Linters
@@ -39,6 +41,7 @@ in {
     shfmt
     nixfmt
     (customShellScript "precommit-terraform-fmt")
+    (customShellScript "precommit-terraform-docs")
     (customShellScript "lint")
   ];
 
@@ -53,6 +56,13 @@ in {
       entry = "precommit-terraform-fmt";
       description = "Terraform linting";
       files = "^packages/terraform/(.*).tf$";
+    };
+    terraform-docs = {
+      enable = true;
+      entry = "precommit-terraform-docs";
+      description = "Terraform documentation generate";
+      files = "^packages/terraform/(.*)$";
+      pass_filenames = false;
     };
     nixfmt = {
       enable = true;

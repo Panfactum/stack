@@ -1,0 +1,137 @@
+# AWS SSO
+
+**Type:** [Live](./overview)
+
+1. Connects Okta to [AWS SSO](https://aws.amazon.com/single-sign-on/) via the [AWS SSO pre-configured app](https://saml-doc.okta.com/SAML_Docs/How-to-Configure-SAML-2.0-for-AWS-Single-Sign-on.html)
+   and [SCIM provisioning](https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html).
+2. Creates the three core permission tiers for each AWS account:
+   1. `superusers` - Maps to the `arn:aws:iam::aws:policy/AdministratorAccess`
+   2. `admins` - Maps to a role that has admin access to most items but attempts to block permissions that could create obvious security problems or delete key infrastructure
+   3. `readers` - Read-only access to the specific subset of AWS resources used at Bambee
+3. Maps Okta groups to a permission tier (or none) for each AWS account
+
+## Maintainer Notes
+
+1. You have to enable AWS SSO in the root account via the web console before applying this module
+   for the first time.
+
+2. The SAML metadata document from the IdP needs to be uploaded to AWS MANUALLY.
+
+3. SCIM provisioning must be configured MANUALLY. Group assignments won't work until this step is completed.
+
+4. The user portal URL needs to be configured MANUALLY in the aws web console in the SSO settings.
+
+5. The group PUSH settings need to be configured MANUALLY in AAD.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+-  [time](https://registry.terraform.io/providers/hashicorp/time/~> 0.7/docs) (~> 0.7)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_aws_core_permissions"></a> [aws\_core\_permissions](#module\_aws\_core\_permissions)
+
+Source: [aws_core_permissions](./aws_core_permissions)
+
+
+### <a name="module_permission_bindings"></a> [permission\_bindings](#module\_permission\_bindings)
+
+Source: [aws_sso_permission_binding](./aws_sso_permission_binding)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_environment_access_map"></a> [environment\_access\_map](#input\_environment\_access\_map)
+
+Description: n/a
+
+Type:
+
+```hcl
+map(object({
+    account_id       = string
+    superuser_groups = list(string)
+    admin_groups     = list(string)
+    reader_groups    = list(string)
+  }))
+```
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_protected_dynamodb_arns"></a> [protected\_dynamodb\_arns](#input\_protected\_dynamodb\_arns)
+
+Description: A list of protected dynamodb arns for the environment.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_protected_kms_arns"></a> [protected\_kms\_arns](#input\_protected\_kms\_arns)
+
+Description: A list of protected kms arns for the environment.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_protected_s3_arns"></a> [protected\_s3\_arns](#input\_protected\_s3\_arns)
+
+Description: A list of protected s3 buckets for the environment.
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes

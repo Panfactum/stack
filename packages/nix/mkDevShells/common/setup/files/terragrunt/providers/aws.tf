@@ -4,7 +4,6 @@
 
 locals {
   aws_default_tags = {
-    app         = var.app
     environment = var.environment
     module      = var.module
     region      = var.region

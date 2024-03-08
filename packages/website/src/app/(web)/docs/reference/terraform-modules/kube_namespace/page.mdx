@@ -1,0 +1,129 @@
+# Kubernetess Namespace
+
+**Type:** [Submodule](./overview)
+
+Sets up a Kubernetes namespace and grants namespace-scoped permissions to specific Kubernetes user groups.
+
+For the complete list of Kubernetes user groups, see the [kube\_rbac module](../../live/kube\_rbac).
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_namespace_labels"></a> [namespace\_labels](#module\_namespace\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_namespace"></a> [namespace](#input\_namespace)
+
+Description: The name of the kubernetes namespace to instantiate.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_admin_groups"></a> [admin\_groups](#input\_admin\_groups)
+
+Description: The names of the kubernetes groups to give admin access to the namespace.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_bot_reader_groups"></a> [bot\_reader\_groups](#input\_bot\_reader\_groups)
+
+Description: The names of the kubernetes groups to give elevated read access to the namespace.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_linkerd_inject"></a> [linkerd\_inject](#input\_linkerd\_inject)
+
+Description: Whether to inject linkerd sidecars into pods in this namespace.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_loadbalancer_enabled"></a> [loadbalancer\_enabled](#input\_loadbalancer\_enabled)
+
+Description: Whether the namespace is going to create LoadBalancer services
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_reader_groups"></a> [reader\_groups](#input\_reader\_groups)
+
+Description: The names of the kubernetes groups to give read access to the namespace.
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_namespace"></a> [namespace](#output\_namespace)
+
+Description: n/a
+
+## Usage
+
+No notes

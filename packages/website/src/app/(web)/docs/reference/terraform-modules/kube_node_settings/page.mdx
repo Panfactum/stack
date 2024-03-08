@@ -1,0 +1,151 @@
+# Kubernetes Node Settings
+
+**Type:** [Internal](./overview)
+
+This module is intended to setup the `user-data.toml` that Bottlerocket OS uses to launch.
+
+The configuration settings are documented [here](https://github.com/bottlerocket-os/bottlerocket).
+
+This should be shared across the static EKS node groups
+as well as nodes provisioned via other autoscaling
+mechanisms such as Karpenter.
+
+## Providers
+
+No requirements.
+
+## Modules
+
+No modules.
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_cluster_ca_data"></a> [cluster\_ca\_data](#input\_cluster\_ca\_data)
+
+Description: B64 encoded CA data for the cluster API server
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_cluster_endpoint"></a> [cluster\_endpoint](#input\_cluster\_endpoint)
+
+Description: The address of the API server
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name)
+
+Description: The name of the EKS cluster
+
+Type: `string`
+
+Default: `""`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_eviction_hard_inodes_free"></a> [eviction\_hard\_inodes\_free](#output\_eviction\_hard\_inodes\_free)
+
+Description: n/a
+
+### <a name="output_eviction_hard_memory_available"></a> [eviction\_hard\_memory\_available](#output\_eviction\_hard\_memory\_available)
+
+Description: n/a
+
+### <a name="output_eviction_hard_nodefs_available"></a> [eviction\_hard\_nodefs\_available](#output\_eviction\_hard\_nodefs\_available)
+
+Description: n/a
+
+### <a name="output_eviction_soft_grace_period_inodes_free"></a> [eviction\_soft\_grace\_period\_inodes\_free](#output\_eviction\_soft\_grace\_period\_inodes\_free)
+
+Description: n/a
+
+### <a name="output_eviction_soft_grace_period_memory_available"></a> [eviction\_soft\_grace\_period\_memory\_available](#output\_eviction\_soft\_grace\_period\_memory\_available)
+
+Description: n/a
+
+### <a name="output_eviction_soft_grace_period_nodefs_available"></a> [eviction\_soft\_grace\_period\_nodefs\_available](#output\_eviction\_soft\_grace\_period\_nodefs\_available)
+
+Description: n/a
+
+### <a name="output_eviction_soft_inodes_free"></a> [eviction\_soft\_inodes\_free](#output\_eviction\_soft\_inodes\_free)
+
+Description: n/a
+
+### <a name="output_eviction_soft_memory_available"></a> [eviction\_soft\_memory\_available](#output\_eviction\_soft\_memory\_available)
+
+Description: n/a
+
+### <a name="output_eviction_soft_nodefs_available"></a> [eviction\_soft\_nodefs\_available](#output\_eviction\_soft\_nodefs\_available)
+
+Description: n/a
+
+### <a name="output_image_gc_high_threshold_percent"></a> [image\_gc\_high\_threshold\_percent](#output\_image\_gc\_high\_threshold\_percent)
+
+Description: n/a
+
+### <a name="output_image_gc_low_threshold_percent"></a> [image\_gc\_low\_threshold\_percent](#output\_image\_gc\_low\_threshold\_percent)
+
+Description: n/a
+
+### <a name="output_max_pods"></a> [max\_pods](#output\_max\_pods)
+
+Description: n/a
+
+### <a name="output_shutdown_grace_period"></a> [shutdown\_grace\_period](#output\_shutdown\_grace\_period)
+
+Description: n/a
+
+### <a name="output_user_data"></a> [user\_data](#output\_user\_data)
+
+Description: n/a
+
+## Usage
+
+No notes

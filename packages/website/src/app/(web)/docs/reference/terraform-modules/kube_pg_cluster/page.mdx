@@ -1,0 +1,217 @@
+# Postgres Cluster on Kubernetes
+
+**Type:** [Live](./overview)
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+-  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+-  [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+-  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_client_certs"></a> [client\_certs](#module\_client\_certs)
+
+Source: [kube_internal_cert](./kube_internal_cert)
+
+
+### <a name="module_constants"></a> [constants](#module\_constants)
+
+Source: [constants](./constants)
+
+
+### <a name="module_irsa"></a> [irsa](#module\_irsa)
+
+Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+
+
+### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_s3_bucket"></a> [s3\_bucket](#module\_s3\_bucket)
+
+Source: [aws_s](./aws_s)3_private_bucket
+
+
+### <a name="module_server_certs"></a> [server\_certs](#module\_server\_certs)
+
+Source: [kube_internal_cert](./kube_internal_cert)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+
+Description: A list of IPs that can use the service account token to authneticate with AWS API
+
+Type: `list(string)`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_pg_cluster_name"></a> [pg\_cluster\_name](#input\_pg\_cluster\_name)
+
+Description: The name of the postgres cluster
+
+Type: `string`
+
+### <a name="input_pg_cluster_namespace"></a> [pg\_cluster\_namespace](#input\_pg\_cluster\_namespace)
+
+Description: The namespace to deploy to the cluster into
+
+Type: `string`
+
+### <a name="input_pg_storage_gb"></a> [pg\_storage\_gb](#input\_pg\_storage\_gb)
+
+Description: The number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_backups_enabled"></a> [backups\_enabled](#input\_backups\_enabled)
+
+Description: Whether this database has backups enabled
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_backups_force_delete"></a> [backups\_force\_delete](#input\_backups\_force\_delete)
+
+Description: Whether to delete backups on destroy
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pg_instances"></a> [pg\_instances](#input\_pg\_instances)
+
+Description: The number of instances to deploy in the postgres cluster
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_pg_version"></a> [pg\_version](#input\_pg\_version)
+
+Description: The version of postgres to deploy
+
+Type: `string`
+
+Default: `"16.0-6"`
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_db_admin_role"></a> [db\_admin\_role](#output\_db\_admin\_role)
+
+Description: n/a
+
+### <a name="output_db_reader_role"></a> [db\_reader\_role](#output\_db\_reader\_role)
+
+Description: n/a
+
+### <a name="output_db_writer_role"></a> [db\_writer\_role](#output\_db\_writer\_role)
+
+Description: n/a
+
+### <a name="output_r_service_name"></a> [r\_service\_name](#output\_r\_service\_name)
+
+Description: n/a
+
+### <a name="output_r_service_port"></a> [r\_service\_port](#output\_r\_service\_port)
+
+Description: n/a
+
+### <a name="output_ro_service_name"></a> [ro\_service\_name](#output\_ro\_service\_name)
+
+Description: n/a
+
+### <a name="output_ro_service_port"></a> [ro\_service\_port](#output\_ro\_service\_port)
+
+Description: n/a
+
+### <a name="output_rw_service_name"></a> [rw\_service\_name](#output\_rw\_service\_name)
+
+Description: n/a
+
+### <a name="output_rw_service_port"></a> [rw\_service\_port](#output\_rw\_service\_port)
+
+Description: n/a
+
+### <a name="output_superuser_password"></a> [superuser\_password](#output\_superuser\_password)
+
+Description: n/a
+
+### <a name="output_superuser_username"></a> [superuser\_username](#output\_superuser\_username)
+
+Description: n/a
+
+## Usage
+
+No notes

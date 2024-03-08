@@ -35,6 +35,12 @@ function print_token() {
   fi
 }
 
+# Allow disabling this for use in our terragrunt config
+# when we don't have vault enabled
+if [[ $VAULT_ADDR == "@INVALID@" ]]; then
+  exit 0
+fi
+
 # Allow overriding via the VAULT_TOKEN env var
 if [[ -n $VAULT_TOKEN ]]; then
   print_token "$VAULT_TOKEN"

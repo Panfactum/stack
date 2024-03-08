@@ -1,0 +1,127 @@
+# AWS Authentication via Kubernetes Service Account
+
+**Type:** [Submodule](./overview)
+
+Gives a kubernetes service account in an EKS cluster access to an AWS IAM role through IRSA.
+
+This allows our Kubernetes pods to utilize the AWS API without static credentials. The IRSA functionality
+is included in the latest version of all AWS SDKs so code should be able to pick up the IRSA credentials
+using the implicit AWS provider-chain resolver (i.e., code changes to utilize these credentials is generally not required).
+
+See [the IRSA docs](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for more information.
+
+See the [vars file](./vars.tf) for descriptions of the input parameters.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Modules
+
+No modules.
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+
+Description: The name of the EKS cluster that contains the service account.
+
+Type: `string`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_iam_policy_json"></a> [iam\_policy\_json](#input\_iam\_policy\_json)
+
+Description: An IAM policy document in rendered JSON string form.
+
+Type: `string`
+
+### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+
+Description: A list of IPs that can use the service account token to authneticate with AWS API
+
+Type: `list(string)`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_service_account"></a> [service\_account](#input\_service\_account)
+
+Description: The name of the service account that should be able to assume the AWS permissions.
+
+Type: `string`
+
+### <a name="input_service_account_namespace"></a> [service\_account\_namespace](#input\_service\_account\_namespace)
+
+Description: The namespace of the service account.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_annotate_service_account"></a> [annotate\_service\_account](#input\_annotate\_service\_account)
+
+Description: Whether or not to annotate the service account
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_policy_arn"></a> [policy\_arn](#output\_policy\_arn)
+
+Description: The ARN of the policy assigned to the role.
+
+### <a name="output_role_arn"></a> [role\_arn](#output\_role\_arn)
+
+Description: The ARN of the role created for the service account.
+
+### <a name="output_role_name"></a> [role\_name](#output\_role\_name)
+
+Description: The name of the role created for the service account.
+
+## Usage
+
+No notes

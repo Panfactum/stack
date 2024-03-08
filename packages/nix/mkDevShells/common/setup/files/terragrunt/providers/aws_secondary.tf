@@ -4,7 +4,6 @@
 
 locals {
   aws_secondary_default_tags = merge({
-    app         = var.app
     environment = var.environment
     module      = var.module
     region      = var.region

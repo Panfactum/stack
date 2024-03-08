@@ -1,4 +1,6 @@
-# Kubernetes IAM Role for Service Accounts (IRSA)
+# AWS Authentication via Kubernetes Service Account
+
+**Type:** Submodule
 
 Gives a kubernetes service account in an EKS cluster access to an AWS IAM role through IRSA.
 

@@ -1,4 +1,6 @@
-# Virtual Private Cloud (VPC)
+# AWS Virtual Private Cloud (VPC)
+
+**Type:** Live
 
 This module configures the following infrastructure resources for a Virtual Private Cloud:
 

@@ -38,7 +38,7 @@ This can be done as follows:
 ```hcl
 ...
 terraform {
-   source = "github.com/Panfactum/stack.git/packages/terraform//aws_eks?ref=1.0.0"
+   source = "github.com/Panfactum/stack.git?ref=1.0.0/packages/terraform//aws_eks"
 }
 ...
 ```
@@ -126,7 +126,7 @@ For example:
 
 ```hcl
 module "pod_template" {
-  source       = "github.com/Panfactum/stack.git/packages/terraform//kube_pod?ref=1.0.0"
+  source       = "github.com/Panfactum/stack.git?ref=1.0.0/packages/terraform//kube_pod"
 
   # Inputs below
   ...
@@ -142,6 +142,6 @@ There are a handful of specific considerations to take into account when using P
 
 - The source code for every Panfactum module is provided [here](https://github.com/Panfactum/stack/tree/main/packages/terraform).
 - We provide reference instructions for using each module [here](../../reference/terraform-modules/overview) (including which providers to enable).
-- You should `source` Panfactum modules via `github.com/Panfactum/stack.git/packages/terraform//<module_name>?ref=<version>` (note the position of the `//`).
+- You should `source` Panfactum modules via `github.com/Panfactum/stack.git?ref=<version>/packages/terraform//<module_name>` (note the position of the `//`).
 - You should use the same git ref for the module version as you do for the local development `flake.nix` input (TODO: docs link). We deliberately version the local
 development utilities and the terraform modules in parallel to ensure compatibility with one another.

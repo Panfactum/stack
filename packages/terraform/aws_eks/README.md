@@ -1,5 +1,7 @@
 # Elastic Kubernetes Service (EKS)
 
+**Type:** Live
+
 This module provides our standard set up for a configurable AWS EKS Cluster. It includes:
 - An [EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). This cluster defines the Kubernetes control plane (managed by AWS) and provisions it to the specified set of availability zones.
 - Node groups for the EKS cluster.
@@ -11,8 +13,3 @@ Additionally, we use the following [EKS add-ons](https://docs.aws.amazon.com/eks
   - [vpc-cni](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html)
 
 See the [vars file](./vars.tf) for descriptions of the input parameters.
-
-## Maintainer Notes
-
-- The cluster nodes won't be able to register with the cluster until the [kube_rbac module](https://github.com/BambeeHR/access-control/tree/main/terraform/kube_rbac) in access-control is deployed. That module
-  allows the node IAM role to assume the correct Kubernetes permissions for node registration.

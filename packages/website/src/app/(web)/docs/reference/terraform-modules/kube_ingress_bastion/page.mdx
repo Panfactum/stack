@@ -1,0 +1,137 @@
+# Kubernetes Ingress Bastion
+
+**Type:** [Live](./overview)
+
+## Depends on
+
+TODO
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+-  [tls](#requirement\_tls) (4.0.5)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_bastion"></a> [bastion](#module\_bastion)
+
+Source: [kube_deployment](./kube_deployment)
+
+
+### <a name="module_constants"></a> [constants](#module\_constants)
+
+Source: [constants](./constants)
+
+
+### <a name="module_labels"></a> [labels](#module\_labels)
+
+Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_namespace"></a> [namespace](#module\_namespace)
+
+Source: [kube_namespace](./kube_namespace)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_bastion_ca_keys"></a> [bastion\_ca\_keys](#input\_bastion\_ca\_keys)
+
+Description: The bastion CA public key from Vault
+
+Type: `string`
+
+### <a name="input_bastion_domain"></a> [bastion\_domain](#input\_bastion\_domain)
+
+Description: The domain name of the bastion
+
+Type: `string`
+
+### <a name="input_bastion_image_version"></a> [bastion\_image\_version](#input\_bastion\_image\_version)
+
+Description: The version of the image to use for the deployment
+
+Type: `string`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_bastion_image"></a> [bastion\_image](#input\_bastion\_image)
+
+Description: The bastion image repo to use
+
+Type: `string`
+
+Default: `"487780594448.dkr.ecr.us-east-2.amazonaws.com/bastion"`
+
+### <a name="input_bastion_port"></a> [bastion\_port](#input\_bastion\_port)
+
+Description: The port the bastion should use for the ssh server
+
+Type: `number`
+
+Default: `45459`
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_bastion_host_public_key"></a> [bastion\_host\_public\_key](#output\_bastion\_host\_public\_key)
+
+Description: n/a
+
+## Usage
+
+No notes

@@ -40,8 +40,8 @@
     ####################################
     # Infrastructure-as-Code
     ####################################
-    (util.customNixModule "terraform") # declarative iac tool
-    (util.customNixModule "terragrunt") # terraform-runner
+    (import ./terraform.nix) # declarative iac tool
+    (import ./terragrunt.nix) # terraform-runner
     (util.customShellScript "get-version-hash") # helper for the IaC tagging
     (util.customShellScript
       "wait-on-image") # helper for waiting on image availability

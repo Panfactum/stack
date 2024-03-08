@@ -7,7 +7,7 @@ import Navbar from '@/components/layout/web/primary/navbar/Navbar'
 
 export default memo(function WebLayout ({ children }: {children: ReactNode}) {
   return (
-    <div className="h-full">
+    <div className="h-full" id={"primary-web-layout"}>
       <MobileHeader/>
       <Navbar/>
       {children}

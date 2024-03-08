@@ -2,6 +2,7 @@ import { clsx } from 'clsx'
 import type { MDXComponents } from 'mdx/types'
 
 import { roboto } from './app/font'
+import {currentPanfactumVersion} from "@/app/vars";
 
 const defaultTextSize = ['text-xs', 'sm:text-base']
 
@@ -39,13 +40,13 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 className={'pt-4 flex gap-x-2 items-baseline text-lg sm:text-xl'}>
+      <h2 className={'pt-4 flex gap-x-2 items-baseline text-xl sm:text-2xl'}>
         {children}
         <div className="h-[2px] grow bg-neutral"/>
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className={'pt-3 text-base sm:text-lg'}>
+      <h3 className={'pt-3 text-base font-semibold sm:text-lg'}>
         {children}
       </h3>
     ),
@@ -83,6 +84,23 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       <th className={clsx('p-1 border-solid border-b-2 border-gray-dark', defaultTextSize)}>
         {children}
       </th>
-    )
+    ),
+    span: ({children, className}) => {
+
+      let actualChildren = children;
+
+      // This allows string replacement in the code blocks we add to our documentation
+      // to ensure that we can easily maintain consistency across all docs
+      if(className && className.includes('token') && typeof children === "string" ){
+        actualChildren = children
+          .replaceAll("__currentPanfactumVersion__", currentPanfactumVersion)
+      }
+
+      return (
+        <span className={className}>
+          {actualChildren}
+        </span>
+      )
+    }
   }
 }

@@ -229,17 +229,17 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1696393200,
-        "narHash": "sha256-nFxSU4lrc2RyLd5MK33PwLdWbgi61foESVq4UC37rq4=",
+        "lastModified": 1705635624,
+        "narHash": "sha256-DU0schxQOtBNO1c9hUsgYl+QMOXQMfRT7Qw/mg+ayno=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "6608f1624a8dd9d001de8fc24baa9a2d929b0e82",
+        "rev": "4471857c0a4a8a0ffc7bdbeaf1b998746ce12a82",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "6608f1624a8dd9d001de8fc24baa9a2d929b0e82",
+        "rev": "4471857c0a4a8a0ffc7bdbeaf1b998746ce12a82",
         "type": "github"
       }
     },
@@ -250,10 +250,10 @@
         "systems": "systems_3"
       },
       "locked": {
-        "dirtyRev": "00895e65ba39e35ba5a35a42cc55074cfbdfb986-dirty",
-        "dirtyShortRev": "00895e6-dirty",
-        "lastModified": 1709222155,
-        "narHash": "sha256-ZeTKKIFxsZ3alp4wNUpY9fPoiw3PWR8IXGi6w1mWBps=",
+        "dirtyRev": "caada4206f2eb066256cd3d35e70b752380b9687-dirty",
+        "dirtyShortRev": "caada42-dirty",
+        "lastModified": 1709741966,
+        "narHash": "sha256-Y19G+a6dc2XHa8SBUe5EVMNGuccZBHNu2ViCkvdWC1M=",
         "type": "git",
         "url": "file:///home/jack/repos/panfactum/stack"
       },
@@ -264,11 +264,11 @@
     },
     "pkgs": {
       "locked": {
-        "lastModified": 1709128929,
-        "narHash": "sha256-GWrv9a+AgGhG4/eI/CyVVIIygia7cEy68Huv3P8oyaw=",
+        "lastModified": 1709677081,
+        "narHash": "sha256-tix36Y7u0rkn6mTm0lA45b45oab2cFLqAzDbJxeXS+c=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611",
+        "rev": "880992dcc006a5e00dd0591446fdf723e6a51a64",
         "type": "github"
       },
       "original": {
