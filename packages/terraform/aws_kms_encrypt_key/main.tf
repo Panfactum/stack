@@ -10,6 +10,11 @@ terraform {
   }
 }
 
+data "aws_region" "primary" {}
+data "aws_region" "secondary" {
+  provider = aws.secondary
+}
+
 ###########################################################################
 ## Access policy
 ###########################################################################
@@ -28,7 +33,7 @@ data "aws_iam_policy_document" "key" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = var.admin_iam_arns
+      identifiers = concat(["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"], var.admin_iam_arns)
       type        = "AWS"
     }
     actions = [
@@ -55,8 +60,12 @@ data "aws_iam_policy_document" "key" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = concat(var.admin_iam_arns, var.user_iam_arns)
-      type        = "AWS"
+      identifiers = concat(
+        ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
+        var.admin_iam_arns,
+        var.user_iam_arns
+      )
+      type = "AWS"
     }
     actions = [
       "kms:Encrypt",
@@ -71,8 +80,12 @@ data "aws_iam_policy_document" "key" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = concat(var.admin_iam_arns, var.user_iam_arns)
-      type        = "AWS"
+      identifiers = concat(
+        ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
+        var.admin_iam_arns,
+        var.user_iam_arns
+      )
+      type = "AWS"
     }
     actions = [
       "kms:CreateGrant",

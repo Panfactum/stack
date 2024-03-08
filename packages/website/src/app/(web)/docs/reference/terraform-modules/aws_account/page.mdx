@@ -26,6 +26,72 @@ Description: The human-readable string for the AWS account.
 
 Type: `string`
 
+### <a name="input_billing_email_address"></a> [billing\_email\_address](#input\_billing\_email\_address)
+
+Description: The email address where you want to receive invoices for your organization
+
+Type: `string`
+
+### <a name="input_billing_full_name"></a> [billing\_full\_name](#input\_billing\_full\_name)
+
+Description: The full name of the person who receives invoices for your organization
+
+Type: `string`
+
+### <a name="input_billing_phone_number"></a> [billing\_phone\_number](#input\_billing\_phone\_number)
+
+Description: The phone number of the person who receives invoices for your organization
+
+Type: `string`
+
+### <a name="input_billing_title"></a> [billing\_title](#input\_billing\_title)
+
+Description: The title of the person who receives invoices for your organization
+
+Type: `string`
+
+### <a name="input_contact_address_line_1"></a> [contact\_address\_line\_1](#input\_contact\_address\_line\_1)
+
+Description: The street address for your organization (line 1)
+
+Type: `string`
+
+### <a name="input_contact_city"></a> [contact\_city](#input\_contact\_city)
+
+Description: The city for your organization
+
+Type: `string`
+
+### <a name="input_contact_company_name"></a> [contact\_company\_name](#input\_contact\_company\_name)
+
+Description: The name of your organization
+
+Type: `string`
+
+### <a name="input_contact_country_code"></a> [contact\_country\_code](#input\_contact\_country\_code)
+
+Description: The ISO-3166 two-letter country code for your organization
+
+Type: `string`
+
+### <a name="input_contact_full_name"></a> [contact\_full\_name](#input\_contact\_full\_name)
+
+Description: The full name of the primary contact who manages your organization's AWS account
+
+Type: `string`
+
+### <a name="input_contact_phone_number"></a> [contact\_phone\_number](#input\_contact\_phone\_number)
+
+Description: The phone number of the primary contact who manages your organization's AWS account
+
+Type: `string`
+
+### <a name="input_contact_postal_code"></a> [contact\_postal\_code](#input\_contact\_postal\_code)
+
+Description: The postal code for your organization
+
+Type: `string`
+
 ### <a name="input_environment"></a> [environment](#input\_environment)
 
 Description: The name of the environment for the infrastructure.
@@ -44,9 +110,57 @@ Description: The name of the module.
 
 Type: `string`
 
+### <a name="input_operations_email_address"></a> [operations\_email\_address](#input\_operations\_email\_address)
+
+Description: The email address for the person who leads operations for your organization
+
+Type: `string`
+
+### <a name="input_operations_full_name"></a> [operations\_full\_name](#input\_operations\_full\_name)
+
+Description: The full name of the person who leads operations for your organization
+
+Type: `string`
+
+### <a name="input_operations_phone_number"></a> [operations\_phone\_number](#input\_operations\_phone\_number)
+
+Description: The phone number of the person who leads operations for your organization
+
+Type: `string`
+
+### <a name="input_operations_title"></a> [operations\_title](#input\_operations\_title)
+
+Description: The title of the person who leads operations for your organization
+
+Type: `string`
+
 ### <a name="input_region"></a> [region](#input\_region)
 
 Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_security_email_address"></a> [security\_email\_address](#input\_security\_email\_address)
+
+Description: The email address for the person who leads security for your organization
+
+Type: `string`
+
+### <a name="input_security_full_name"></a> [security\_full\_name](#input\_security\_full\_name)
+
+Description: The full name of the person who leads security for your organization
+
+Type: `string`
+
+### <a name="input_security_phone_number"></a> [security\_phone\_number](#input\_security\_phone\_number)
+
+Description: The phone number of the person who leads security for your organization
+
+Type: `string`
+
+### <a name="input_security_title"></a> [security\_title](#input\_security\_title)
+
+Description: The title of the person who leads security for your organization
 
 Type: `string`
 
@@ -64,7 +178,39 @@ Type: `string`
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_contact_address_line_2"></a> [contact\_address\_line\_2](#input\_contact\_address\_line\_2)
+
+Description: The street address for your organization (line 2)
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_contact_district_or_county"></a> [contact\_district\_or\_county](#input\_contact\_district\_or\_county)
+
+Description: The district or county of your organization
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_contact_state_or_region"></a> [contact\_state\_or\_region](#input\_contact\_state\_or\_region)
+
+Description: The state or region for your organization
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_contact_website_url"></a> [contact\_website\_url](#input\_contact\_website\_url)
+
+Description: The website your organization
+
+Type: `string`
+
+Default: `null`
 
 ## Outputs
 
