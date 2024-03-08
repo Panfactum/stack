@@ -2,6 +2,7 @@ import s3BucketInitImg from './s3-bucket-init.jpg'
 import firstTfStateImg from './first-tf-state.jpg'
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 import Alert from '@mui/material/Alert'
+import {currentPanfactumVersion} from "../../../../../vars";
 
 # Bootstrapping Infrastructure-as-Code
 
@@ -294,7 +295,7 @@ KMS keys to the secrets you create based on the secret's file name.
     Replace `<environment>` with the name of the environment. Replace `<arn>` and `<arn2>` with the ARN outputs from the deployment
     step.
 
-    Ultimately, you should construct a file that looks like this (TODO: Add link).
+    Ultimately, you should construct a file that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/.sops.yaml).
 
 3. Let's perform a quick test to ensure sops is working properly.
 

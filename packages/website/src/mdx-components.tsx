@@ -62,7 +62,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     a: ({ children, href }) => (
       <a
-        href={href}
+        href={replaceCodeVariables(href || "")}
         className="text-primary markdown"
       >
         {children}
