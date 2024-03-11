@@ -3,9 +3,9 @@
   let
     local = config.env.CI != "true";
     mkIf = pkgs.lib.mkIf;
-    mkDefault = pkgs.lib.mkDefault;
+    mkOverride = pkgs.lib.mkOverride;
   in {
-    env = { LOCAL_DEV_NAMESPACE = mkDefault "@INVALID@"; };
+    env = { LOCAL_DEV_NAMESPACE = mkOverride 1001 "@INVALID@"; };
 
     enterShell = mkIf local ''
       source enter-shell-local

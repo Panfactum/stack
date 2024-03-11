@@ -1,15 +1,15 @@
 { pkgs, util, }: {
   env = with pkgs.lib; {
-    CI = mkDefault "false"; # true iff running in a CI environment
-    VAULT_ADDR = mkDefault "@INVALID@"; # the vault address
-    PF_AWS_DIR = ".aws";
-    PF_SSH_DIR = ".ssh";
-    PF_KUBE_DIR = ".kube";
+    CI = mkOverride 1001 "false"; # true iff running in a CI environment
+    VAULT_ADDR = mkOverride 1001 "@INVALID@"; # the vault address
+    PF_AWS_DIR = mkOverride 1001 ".aws";
+    PF_SSH_DIR = mkOverride 1001 ".ssh";
+    PF_KUBE_DIR = mkOverride 1001 ".kube";
   };
 
-  dotenv = {
-    enable = true;
-    disableHint = true;
+  dotenv = with pkgs.lib; {
+    enable = mkOverride 1001 true;
+    disableHint = mkOverride 1001 true;
   };
 
   packages = with pkgs; [
