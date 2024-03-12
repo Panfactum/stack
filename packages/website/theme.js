@@ -8,7 +8,8 @@ module.exports = {
     "neutral": "#dfe0ea",
     "black": "#000000",
     "white": "#ffffff",
-    "red": "#c62f24"
+    "red": "#c62f24",
+    "warning": "#fbd495"
   },
   screens: {
     sm: 640,

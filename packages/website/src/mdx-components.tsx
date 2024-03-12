@@ -1,8 +1,10 @@
 import { clsx } from 'clsx'
 import type { MDXComponents } from 'mdx/types'
-
+import CopyHeader from "@/components/markdown/CopyHeader";
 import { roboto } from './app/font'
 import {currentPanfactumVersion} from "@/app/vars";
+import type {ReactElement, ReactNode} from "react";
+import DefaultTooltipLazy from "@/components/tooltip/DefaultTooltipLazy";
 
 const defaultTextSize = ['text-xs', 'sm:text-base']
 
@@ -11,64 +13,75 @@ const replaceCodeVariables = (str: string) => {
     .replaceAll("__currentPanfactumVersion__", currentPanfactumVersion)
 }
 
+const makeIdFromChildren = (children: ReactNode) => {
+  return typeof children === "string" ?
+    children.replaceAll(/[ _`"']/g, '-').toLowerCase() :
+    "unknown"
+}
+
 export function useMDXComponents (components: MDXComponents): MDXComponents {
   return {
     ...components,
-    strong: ({ children }) => (
-      <strong className="font-semibold">
+    strong: ({ children, className, ...props }) => (
+      <strong className={clsx("font-semibold", className)} {...props}>
         {children}
       </strong>
     ),
-    ul: ({ children }) => (
-      <ul className={'py-0.5 m-0 pl-4'}>
+    ul: ({ children, className, ...props }) => (
+      <ul className={clsx('py-0.5 m-0 pl-4', className)} {...props}>
         {children}
       </ul>
     ),
-    ol: ({ children }) => (
-      <ol className={'py-0.5 m-0 pl-4'}>
+    ol: ({ children, className, ...props }) => (
+      <ol className={clsx('py-0.5 m-0 pl-4', className)} {...props}>
         {children}
       </ol>
     ),
-    li: ({ children }) => (
-      <li className={clsx('py-0.5', defaultTextSize)}>
+    li: ({ children, className, ...props }) => (
+      <li className={clsx('py-0.5', defaultTextSize, className)} {...props}>
         {children}
       </li>
     ),
-    p: ({ children }) => (
-      <p className={clsx('py-1', defaultTextSize)}>
+    p: ({ children, className, ...props }) => (
+      <p className={clsx('py-1', defaultTextSize, className)} {...props}>
         {children}
       </p>
     ),
-    h1: ({ children }) => (
-      <h1 className={'pt-3 text-2xl sm:text-3xl'}>
+    h1: ({ children, className, ...props }) => (
+      <h1 className={clsx('pt-3 text-2xl sm:text-3xl', className)} {...props}>
         {children}
       </h1>
     ),
-    h2: ({ children }) => (
-      <h2 className={'pt-4 flex gap-x-2 items-baseline text-xl sm:text-2xl'}>
+    h2: ({ children, className, ...props }) => {
+      return (
+        <h2 className={clsx('pt-4 flex gap-x-2 items-baseline text-xl sm:text-2xl', className)} {...props}>
+          {children}
+          <CopyHeader id={makeIdFromChildren(children)}/>
+          <div className="h-[2px] grow bg-neutral"/>
+        </h2>
+      )
+    },
+    h3: ({children, className, ...props}) => (
+      <h3 className={clsx('pt-3 flex gap-x-2 items-baseline text-base font-semibold sm:text-lg', className)} {...props}>
         {children}
-        <div className="h-[2px] grow bg-neutral"/>
-      </h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className={'pt-3 text-base font-semibold sm:text-lg'}>
-        {children}
+        <CopyHeader id={makeIdFromChildren(children)} size={"small"}/>
       </h3>
     ),
-    h4: ({ children }) => (
-      <h4 className={'pt-1 text-sm sm:text-base'}>
+    h4: ({children, className, ...props }) => (
+      <h4 className={clsx('pt-1 text-sm sm:text-base', className)} {...props}>
         {children}
       </h4>
     ),
-    a: ({ children, href }) => (
+    a: ({ children, href, className, ...props }) => (
       <a
         href={replaceCodeVariables(href || "")}
-        className="text-primary markdown"
+        className={clsx(" markdown", className)}
+        {...props}
       >
         {children}
       </a>
     ),
-    code: ({ children }) => {
+    code: ({ children, ...props }) => {
 
       let actualChildren = children;
 
@@ -79,29 +92,29 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       }
 
       return (
-        <code className={`${roboto.className} rounded-sm text-xs sm:text-sm`}>
+        <code className={`${roboto.className} rounded-sm text-xs sm:text-sm`} {...props}>
           {actualChildren}
         </code>
       )
     },
-    table: ({children}) => (
+    table: ({children, className, ...props}) => (
     <div className="overflow-x-scroll">
-      <table className="py-2 bg-neutral rounded-md">
+      <table className={clsx("py-2 bg-neutral rounded-md", className)} {...props}>
           {children}
         </table>
       </div>
     ),
-    td: ({ children }) => (
-      <td className={clsx('p-1 pb-3 align-top', defaultTextSize)}>
+    td: ({ children, className, ...props }) => (
+      <td className={clsx('p-1 pb-3 align-top', defaultTextSize, className)} {...props}>
         {children}
       </td>
     ),
-    th: ({ children }) => (
-      <th className={clsx('p-1 border-solid border-b-2 border-gray-dark', defaultTextSize)}>
+    th: ({ children, className, ...props }) => (
+      <th className={clsx('p-1 border-solid border-b-2 border-gray-dark', defaultTextSize, className)} {...props}>
         {children}
       </th>
     ),
-    span: ({children, className}) => {
+    span: ({children, className, ...props}) => {
 
       let actualChildren = children;
 
@@ -112,9 +125,18 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       }
 
       return (
-        <span className={className}>
+        <span className={className} {...props}>
           {actualChildren}
         </span>
+      )
+    },
+    sup: ({children, ...props}) => {
+      return (
+        <sup {...props}>
+          <DefaultTooltipLazy title={"Click for footnote"}>
+            {children as ReactElement}
+          </DefaultTooltipLazy>
+        </sup>
       )
     }
   }

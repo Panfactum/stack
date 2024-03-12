@@ -25,7 +25,10 @@ module.exports = {
           "./src/mdx-components.tsx",
         ],
         defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || [],
-        safelist: ["html", "body", "tsqd-parent-container"]
+        safelist: {
+          standard: [/html/, /body/, /tsqd-parent-container/],
+          greedy: [/katex/, /Mui/]
+        },
       }
     ]
   ]

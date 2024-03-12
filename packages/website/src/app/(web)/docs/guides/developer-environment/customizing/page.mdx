@@ -1,4 +1,4 @@
-import Alert from '@mui/material/Alert'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 # Customizing
 
@@ -30,11 +30,9 @@ nix_direnv_watch_file node.nix
 
 ## Adding New Tools
 
-### From `nixpkgs`
+### From nixpkgs
 
-<Alert severity="info">
-    [This search interface](https://search.nixos.org/packages) is very helpful for finding packages.
-</Alert>
+
 
 Your `devenv.nix` should have an input variable called `pkgs`. This variable represents all packages
 available in the [nixpkgs GitHub repository](https://github.com/NixOS/nixpkgs).
@@ -51,7 +49,11 @@ To add a package such as `nodejs_20`, update your `devenv.nix` with the followin
 }
 ```
 
-<Alert severity="warning">
+<MarkdownAlert severity="info">
+    [This search interface](https://search.nixos.org/packages) is very helpful for finding packages.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
     All packages defined in the `nixpkgs` GitHub repo are updated together,
     and **many** updates are made to the repository each day.
     `pkgs` refers to the set of packages defined by a **specific commit** in `nixpkgs`.
@@ -65,14 +67,11 @@ To add a package such as `nodejs_20`, update your `devenv.nix` with the followin
 
     In general, we recommend pinning the commit directly in the `flake.nix` to avoid ambiguity. For example,
     `inputs.pkgs.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";`.
-</Alert>
+</MarkdownAlert>
 
-### Specific Version from `nixpkgs`
+### Specific Version from nixpkgs
 
-<Alert severity="info">
-    [This search interface](https://www.nixhub.io/) is incredibly
-    helpful at finding the specific `nixpkgs` commit hash that contains specific versions of your desired tool.
-</Alert>
+
 
 Since all of `nixpkgs` is versioned atomically, you may find yourself in the following scenario:
 
@@ -107,10 +106,15 @@ You would include this in your `devenv.nix` as follows:
 }
 ```
 
-<Alert severity="warning">
+<MarkdownAlert severity="info">
+    [This search interface](https://www.nixhub.io/) is incredibly
+    helpful at finding the specific `nixpkgs` commit hash that contains specific versions of your desired tool.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
     When you are updating the `nixpkgsSrc.url`, you MUST update the sha256 in order to trigger a rebuild. Simply
     changing the URL will not invalidate the cache.
-</Alert>
+</MarkdownAlert>
 
 ### Custom Scripts
 

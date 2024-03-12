@@ -1,7 +1,6 @@
 @tailwind base;
 /*! purgecss start ignore */
 
-
 .remark-highlight {
     overflow-x: scroll;
     @apply bg-neutral;
@@ -378,12 +377,20 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
     a:visited {
         color: initial;
     }
-    a.markdown {
+    :not(sup) > a.markdown {
         text-decoration: underline;
         @apply text-primary;
     }
-    a.markdown:visited {
-        @apply text-neutral;
+
+    .MuiAlert-message a.markdown {
+        color: inherit !important;
+    }
+
+    /* Footnote links */
+    sup > a.markdown {
+        @apply text-white bg-primary font-semibold cursor-pointer;
+        border-radius: 5px;
+        padding: 0 5px;
     }
 
     /* Default margins on these elements is annoying */
@@ -396,7 +403,14 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
         @apply bg-neutral
     }
 
+
+
 }
+
+.MuiAlert-message code {
+    color: black !important;
+}
+
 /*! purgecss end ignore */
 
 @tailwind components;

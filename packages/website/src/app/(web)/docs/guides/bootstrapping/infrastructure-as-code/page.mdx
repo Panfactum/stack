@@ -1,8 +1,7 @@
 import s3BucketInitImg from './s3-bucket-init.jpg'
 import firstTfStateImg from './first-tf-state.jpg'
 import MarkdownImage from "@/components/markdown/MarkdownImage";
-import Alert from '@mui/material/Alert'
-import {currentPanfactumVersion} from "../../../../../vars";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 # Bootstrapping Infrastructure-as-Code
 
@@ -419,11 +418,11 @@ Let's set it up.
 
 6. Run `terragrunt apply`.
 
-<Alert severity="warning">
+<MarkdownAlert severity="warning">
     Because the KMS key ARNs are embedded in every encrypted sops file, you **cannot** simply copy and paste the secrets files
     across environments as they will still be bound to the original environment. If you need to copy secrets to another
     environment, first decrypt the file (`sops -d`), then copy it to the proper directory, then encrypt it (`sops -e -i`).
-</Alert>
+</MarkdownAlert>
 
 ## Next Steps
 

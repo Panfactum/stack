@@ -1,4 +1,4 @@
-import Alert from '@mui/material/Alert'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 # Overview
 
@@ -9,10 +9,10 @@ written in [Hashicorp configuration langauge](https://developer.hashicorp.com/te
 - [terragrunt](https://terragrunt.gruntwork.io/docs/): A configuration-as-code tool used to inject input variables
 and configuration snippets into the terraform deployment process
 
-<Alert severity='info'>
+<MarkdownAlert severity='warning'>
     If you are not familiar with these tools, please review the concept docs (TODO) so you understand why these tools
     are used and how they factor into the wider ecosystem of infrastructure management utilities.
-</Alert>
+</MarkdownAlert>
 
 
 ## What We Provide
@@ -20,7 +20,7 @@ and configuration snippets into the terraform deployment process
 The Panfactum project provides two highly-opinioned sets of infrastructure utilities:
 
 - Terragrunt scaffolding that automatically aligns your project with industry best-practices ([docs](./deploying-modules))
-- 100+ terraform modules that defining the infrastructure comprising the Panfactum stack ([docs](./using-panfactum-modules))
+- 100+ terraform modules that define the infrastructure comprising the Panfactum stack ([docs](./using-panfactum-modules))
 
 This sets of guides will cover the basics of working with infrastructure using the Panfactum conventions. Once you
 have completed this guides, you will be ready to begin [bootstrapping the stack](../bootstrapping/overview).

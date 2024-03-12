@@ -1,11 +1,33 @@
 import type { ReactNode } from 'react'
 
-import ArticleLayout from '@/components/layout/web/article/base/ArticleLayout'
+import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/ArticleWithNavLayout'
 
-export default function Layout ({ children }: {children: ReactNode}) {
+const SIDENAV_SECTIONS = [
+  {
+    text: 'Networking',
+    path: '/networking',
+    sub: [
+      {
+        text: 'AWS Network Primitives',
+        path: '/aws-primitives'
+      },
+      {
+        text: 'NAT',
+        path: '/nat'
+      },
+    ]
+  }
+]
+
+export default function Layout (
+  { children } : {children: ReactNode}
+) {
   return (
-    <ArticleLayout>
+    <ArticleWithSideNavLayout
+      navSections={SIDENAV_SECTIONS}
+      basePath={'/docs/concepts'}
+    >
       {children}
-    </ArticleLayout>
+    </ArticleWithSideNavLayout>
   )
 }

@@ -71,10 +71,13 @@ export const theme = createTheme({
       main: tailwindTheme.colors.secondary
     },
     warning: {
-      main: tailwindTheme.colors.red
+      main: tailwindTheme.colors.warning
     },
     error: {
       main: tailwindTheme.colors.red
+    },
+    info: {
+      main: tailwindTheme.colors.primary
     }
   },
   extraColors: {

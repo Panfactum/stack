@@ -12,6 +12,12 @@
     disableHint = mkOverride 1001 true;
   };
 
+  enterShell = ''
+    # This resolves an issue where the in-progress 1.0 devenv pollutes the environment
+    # with a PYTHONPATH. It will be resolved once https://github.com/cachix/devenv/pull/1005 completes.
+    unset PYTHONPATH
+  '';
+
   packages = with pkgs; [
     ####################################
     # System Setup

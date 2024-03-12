@@ -1,8 +1,3 @@
-variable "igw_name" {
-  description = "The name of the internet gateway resource."
-  type        = string
-}
-
 variable "nat_associations" {
   description = "A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values represent destination subnets that will contain the NAT resources."
   type        = map(string)
@@ -12,10 +7,10 @@ variable "nat_associations" {
 variable "subnets" {
   description = "Subnet configuration"
   type = map(object({
-    az         = string      # Availability zone
-    cidr_block = string      # Subnet IP block
-    public     = bool        # If subnet is routable to and from the public internet
-    extra_tags = map(string) # Additional tags for the subnet
+    az         = string                    # Availability zone
+    cidr_block = string                    # Subnet IP block
+    public     = bool                      # If subnet is routable to and from the public internet
+    extra_tags = optional(map(string), {}) # Additional tags for the subnet
   }))
 }
 

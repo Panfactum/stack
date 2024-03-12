@@ -1,4 +1,4 @@
-import Alert from '@mui/material/Alert'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -6,9 +6,9 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 # Repository Setup
 
-<Alert severity="info">
+<MarkdownAlert severity="info">
     We provide a [reference repository setup](https://github.com/Panfactum/stack/tree/main/packages/reference) that you can benchmark against as you progress through the setup documentation.
-</Alert>
+</MarkdownAlert>
 
 ## Choosing a Repository
 
@@ -18,7 +18,7 @@ is defined in code.
 Before beginning, you must choose a repository where you want this code to live.
 
 We **strongly** recommend a [monorepo](https://en.wikipedia.org/wiki/Monorepo) setup where all application, tooling,
-and infrastructure code gets versioned together[^1]. However, if you already have many repositories, we recommend
+and infrastructure code gets versioned together. [^1] However, if you already have many repositories, we recommend
 setting up a dedicated "stack" repository where this code can live.
 
 [^1]: Yes, even if you are developing microservices.
@@ -31,11 +31,11 @@ This repository will contain the following pieces of functionality:
 - All of your local developer tooling
 - All of your immediate integration tooling for local development
 
-## Integrate the Panfactum `devenv`
+## Integrate the Panfactum devenv
 
-<Alert severity="warning">
+<MarkdownAlert severity="warning">
     Before continuing, make sure you have followed the installation steps from the [local setup guide](./local-setup).
-</Alert>
+</MarkdownAlert>
 
 Two fundamental tools codify your local developer environment:
 
@@ -55,7 +55,7 @@ as needed. You can read more about the available syntax and options [here](https
     {config, pkgs, ...}: { }
     ```
 
-1. Create a nix flake in the root of your repo by generating a `flake.nix` file
+2. Create a nix flake in the root of your repo by generating a `flake.nix` file
 with the following content:
     <Accordion>
     <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="flake-nix" id="flake-nix">
@@ -89,17 +89,13 @@ with the following content:
     </AccordionDetails>
     </Accordion>
 
-2. Run `git add flake.nix devenv.nix` to register the flake and devenv file.
+3. Run `git add flake.nix devenv.nix` to register the flake and devenv file.
 
-3. Run `nix flake update`. A `flake.lock` lockfile should be generated. This should be committed to version control
+4. Run `nix flake update`. A `flake.lock` lockfile should be generated. This should be committed to version control
 alongside the `flake.nix`.
 
-4. Test that you are able to instantiate the development environment via `nix develop --impure`. If everything is working,
-you should see multiple environment variables when you run `printenv | grep DEVENV`.
-
-<Alert severity="info">
-    You may see several warnings which we will resolve in subsequent setup steps.
-</Alert>
+5. Test that you are able to instantiate the development environment via `nix develop --impure`. If everything is working,
+you should see multiple environment variables when you run `printenv | grep DEVENV`. You may see several warnings which we will resolve in subsequent setup steps.
 
 ## Integrate `direnv`
 
@@ -166,10 +162,10 @@ For now, you will want to run the following commands to setup the basic scaffold
 
 ## Next Steps
 
-<Alert severity="warning">
+<MarkdownAlert severity="warning">
     Before proceeding much further, you should understanding how versioning and releases work in the Panfactum stack:
     [guide](../versioning/releases).
-</Alert>
+</MarkdownAlert>
 
 - [Complete the local setup guide](./local-setup)
 - [Learn how to deploy infrastructure](../terraforming/overview)

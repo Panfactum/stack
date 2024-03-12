@@ -1,4 +1,4 @@
-import Alert from '@mui/material/Alert'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import createAccountImg from './aws-create-account.jpg'
 import securityCredentialImg from './aws-security-credentials.jpg'
 import MarkdownImage from "@/components/markdown/MarkdownImage";
@@ -12,9 +12,9 @@ Establish your AWS account, organization, and admin access credentials
 
 ## Create your First AWS Account
 
-<Alert severity="info">
+<MarkdownAlert severity="info">
     If you already have an AWS account, you may skip this step.
-</Alert>
+</MarkdownAlert>
 
 An "AWS account" is the basic unit of encapsulation for AWS infrastructure. All AWS infrastructure exists in exactly
 one account.
@@ -27,14 +27,14 @@ The email and password you used to create this account are referred to as **root
 
 ## Create an AWS Organization
 
-<Alert severity="info">
+<MarkdownAlert severity="info">
     If you already have an AWS organization, you may skip this step. However, make sure that you have [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to your
     organization's management account.
-</Alert>
+</MarkdownAlert>
 
 An _AWS organization_ allows you to centrally manage a set of AWS accounts from a central _management account._ This
 provides an easier mechanism to manage billing, security, and compliance needs. For more information, review
-the [AWS documentation](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html) on organizations.[^1]
+the [AWS documentation](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html) on organizations. [^1]
 
 [^1]: One would think that you would _first_ create an AWS organization before individual accounts. However,
 the concept of an "Organization" was created many years after accounts, and this feature is very much "bolted-on." That said,
@@ -50,7 +50,7 @@ You will want to create **one account for each environment** your organization i
 
 An _environment_ is a set of infrastructure components that is **isolated** from the infrastructure
 components of other environments. In other words, what happens to one environment should not impact what happens
-to another.[^2]
+to another. [^2]
 
 [^2]: There are exceptions to this rule such as the _management environment_ which is used to set governance policies
 for other environments.
@@ -65,7 +65,7 @@ receive new changes immediately and make them live to all users.
 - As things grow in scale, you will likely want to adopt the practice of _promoting changes_ across a set of environments.
 We recommend the following setup:
     - `development`: The _integration_ environment. New changes are immediately deployed to this environment and made available
-    to internal stakeholders. If you follow [GitHub flow](https://githubflow.github.io/)[^3], code merged to your
+    to internal stakeholders. If you follow [GitHub flow](https://githubflow.github.io/) [^3], code merged to your
     `main` branch gets deployed here.
     - `staging`: (Optional) If you have end-to-end test suites, you should have this environment where code from `development` is periodically promoted
     and tested for production-readiness.
@@ -135,7 +135,7 @@ which by default is the `.aws` folder in your repo. We keep this configuration i
 settings already present on your computer.
     1. Run `pf-update-aws` to setup this directory.
     2. In this directory, create a file called `config`. For each account you created, add a block that matches the pattern below. Replace
-    `<profile_name>` with a semantic profile name (e.g., `development-superuser`).[^6] Replace `<aws_region>` with the main [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
+    `<profile_name>` with a semantic profile name (e.g., `development-superuser`). [^6] Replace `<aws_region>` with the main [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
     you will be interacting with (e.g., `us-east-2`).
 
         ```ini

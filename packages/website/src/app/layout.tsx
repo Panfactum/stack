@@ -1,5 +1,8 @@
+import 'katex/dist/katex.min.css'
 import './globals.css'
-import type { ReactNode } from 'react'
+
+
+import React, { type ReactNode } from 'react'
 
 import ThemeRegistry from '@/components/ThemeRegistry'
 
@@ -16,12 +19,12 @@ export default function RootLayout (
   return (
     <ThemeRegistry options={{ key: 'mui' }}>
       <html lang="en">
-        <body
-          id="root"
-          className={`${kanit.className} overflow-visible w-screen`}
-        >
-          {children}
-        </body>
+      <body
+        id="root"
+        className={`${kanit.className} overflow-visible w-screen`}
+      >
+      {children}
+      </body>
       </html>
     </ThemeRegistry>
   )
