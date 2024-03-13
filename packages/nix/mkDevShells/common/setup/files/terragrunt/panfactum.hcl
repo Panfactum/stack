@@ -111,6 +111,13 @@ generate "aws_secondary_provider" {
   contents  = local.enable_aws ? file("${local.provider_folder}/aws_secondary.tf") : ""
 }
 
+generate "aws_global_provider" {
+  path      = "aws_global.tf"
+  if_exists = "overwrite_terragrunt"
+  # Note: If the aws provider is enabled, always enable the global as it removes a footgun at no extra cost
+  contents  = local.enable_aws ? file("${local.provider_folder}/aws_global.tf") : ""
+}
+
 generate "kubernetes_provider" {
   path      = "kubernetes.tf"
   if_exists = "overwrite_terragrunt"

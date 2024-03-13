@@ -15,6 +15,10 @@ const SIDENAV_SECTIONS = [
         text: 'NAT',
         path: '/nat'
       },
+      {
+        text: 'Subdomain Delegation',
+        path: '/subdomain-delegation'
+      },
     ]
   }
 ]

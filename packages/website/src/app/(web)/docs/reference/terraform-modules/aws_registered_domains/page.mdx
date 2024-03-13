@@ -1,0 +1,344 @@
+# AWS Registered Domains
+
+**Type:** [Live](./overview)
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_dnssec"></a> [dnssec](#module\_dnssec)
+
+Source: [aws_dnssec](./aws_dnssec)
+
+
+### <a name="module_iam_role"></a> [iam\_role](#module\_iam\_role)
+
+Source: [aws_dns_iam_role](./aws_dns_iam_role)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_admin_address_line_1"></a> [admin\_address\_line\_1](#input\_admin\_address\_line\_1)
+
+Description: The street address (1) of the domain admin contact
+
+Type: `string`
+
+### <a name="input_admin_city"></a> [admin\_city](#input\_admin\_city)
+
+Description: The city of the domain admin contact
+
+Type: `string`
+
+### <a name="input_admin_country_code"></a> [admin\_country\_code](#input\_admin\_country\_code)
+
+Description: The country code of the domain admin contact
+
+Type: `string`
+
+### <a name="input_admin_email_address"></a> [admin\_email\_address](#input\_admin\_email\_address)
+
+Description: The email address of the domain contact
+
+Type: `string`
+
+### <a name="input_admin_first_name"></a> [admin\_first\_name](#input\_admin\_first\_name)
+
+Description: The first name of the domain admin contact
+
+Type: `string`
+
+### <a name="input_admin_last_name"></a> [admin\_last\_name](#input\_admin\_last\_name)
+
+Description: The last name of the domain admin contact
+
+Type: `string`
+
+### <a name="input_admin_organization_name"></a> [admin\_organization\_name](#input\_admin\_organization\_name)
+
+Description: The name of the organization that the admin contact works for
+
+Type: `string`
+
+### <a name="input_admin_phone_number"></a> [admin\_phone\_number](#input\_admin\_phone\_number)
+
+Description: The phone number of the domain contact
+
+Type: `string`
+
+### <a name="input_admin_state"></a> [admin\_state](#input\_admin\_state)
+
+Description: The state or province of the domain admin contact
+
+Type: `string`
+
+### <a name="input_admin_zip_code"></a> [admin\_zip\_code](#input\_admin\_zip\_code)
+
+Description: The ZIP code of the domain admin contact
+
+Type: `string`
+
+### <a name="input_domain_names"></a> [domain\_names](#input\_domain\_names)
+
+Description: Domain names that will be managed by this module
+
+Type: `set(string)`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_registrant_address_line_1"></a> [registrant\_address\_line\_1](#input\_registrant\_address\_line\_1)
+
+Description: The street address (1) of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_registrant_city"></a> [registrant\_city](#input\_registrant\_city)
+
+Description: The city of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_registrant_country_code"></a> [registrant\_country\_code](#input\_registrant\_country\_code)
+
+Description: The country code of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_registrant_email_address"></a> [registrant\_email\_address](#input\_registrant\_email\_address)
+
+Description: The email address of the domain contact
+
+Type: `string`
+
+### <a name="input_registrant_first_name"></a> [registrant\_first\_name](#input\_registrant\_first\_name)
+
+Description: The first name of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_registrant_last_name"></a> [registrant\_last\_name](#input\_registrant\_last\_name)
+
+Description: The last name of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_registrant_organization_name"></a> [registrant\_organization\_name](#input\_registrant\_organization\_name)
+
+Description: The name of the organization that the registrant contact works for
+
+Type: `string`
+
+### <a name="input_registrant_phone_number"></a> [registrant\_phone\_number](#input\_registrant\_phone\_number)
+
+Description: The phone number of the domain contact
+
+Type: `string`
+
+### <a name="input_registrant_state"></a> [registrant\_state](#input\_registrant\_state)
+
+Description: The state or province of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_registrant_zip_code"></a> [registrant\_zip\_code](#input\_registrant\_zip\_code)
+
+Description: The ZIP code of the domain registrant contact
+
+Type: `string`
+
+### <a name="input_tech_address_line_1"></a> [tech\_address\_line\_1](#input\_tech\_address\_line\_1)
+
+Description: The street address (1) of the domain tech contact
+
+Type: `string`
+
+### <a name="input_tech_city"></a> [tech\_city](#input\_tech\_city)
+
+Description: The city of the domain tech contact
+
+Type: `string`
+
+### <a name="input_tech_country_code"></a> [tech\_country\_code](#input\_tech\_country\_code)
+
+Description: The country code of the domain tech contact
+
+Type: `string`
+
+### <a name="input_tech_email_address"></a> [tech\_email\_address](#input\_tech\_email\_address)
+
+Description: The email address of the domain contact
+
+Type: `string`
+
+### <a name="input_tech_first_name"></a> [tech\_first\_name](#input\_tech\_first\_name)
+
+Description: The first name of the domain tech contact
+
+Type: `string`
+
+### <a name="input_tech_last_name"></a> [tech\_last\_name](#input\_tech\_last\_name)
+
+Description: The last name of the domain tech contact
+
+Type: `string`
+
+### <a name="input_tech_organization_name"></a> [tech\_organization\_name](#input\_tech\_organization\_name)
+
+Description: The name of the organization that the tech contact works for
+
+Type: `string`
+
+### <a name="input_tech_phone_number"></a> [tech\_phone\_number](#input\_tech\_phone\_number)
+
+Description: The phone number of the domain contact
+
+Type: `string`
+
+### <a name="input_tech_state"></a> [tech\_state](#input\_tech\_state)
+
+Description: The state or province of the domain tech contact
+
+Type: `string`
+
+### <a name="input_tech_zip_code"></a> [tech\_zip\_code](#input\_tech\_zip\_code)
+
+Description: The ZIP code of the domain tech contact
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_additional_account_ids_with_record_access"></a> [additional\_account\_ids\_with\_record\_access](#input\_additional\_account\_ids\_with\_record\_access)
+
+Description: Additional AWS account IDs for accounts that can assume with record manager role
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_admin_address_line_2"></a> [admin\_address\_line\_2](#input\_admin\_address\_line\_2)
+
+Description: The street address (2) of the domain admin contact
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_enable_auto_renew"></a> [enable\_auto\_renew](#input\_enable\_auto\_renew)
+
+Description: Whether to enable automatic domain renewal
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_enable_privacy_protection"></a> [enable\_privacy\_protection](#input\_enable\_privacy\_protection)
+
+Description: Whether to enable Whois privacy protection
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_enable_transfer_lock"></a> [enable\_transfer\_lock](#input\_enable\_transfer\_lock)
+
+Description: Whether to enable domain transfer lock
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_registrant_address_line_2"></a> [registrant\_address\_line\_2](#input\_registrant\_address\_line\_2)
+
+Description: The street address (2) of the domain registrant contact
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_tech_address_line_2"></a> [tech\_address\_line\_2](#input\_tech\_address\_line\_2)
+
+Description: The street address (2) of the domain tech contact
+
+Type: `string`
+
+Default: `null`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_domains"></a> [domains](#output\_domains)
+
+Description: n/a
+
+### <a name="output_record_manager_role_arn"></a> [record\_manager\_role\_arn](#output\_record\_manager\_role\_arn)
+
+Description: The ARN of the IAM role used to manage DNS records.
+
+## Usage
+
+### Create / Delete
+
+This module does **not** register domains but rather adopts domains
+that you have already registered and updates their information.
+Additionally, destroying this module does un-register the domains;
+it only removes them from the terraform state.
+
+### Contact Information
+
+There are three different domain contacts:
+
+- Registrant: The owner of the domain
+- Admin: The person responsible for administrative decisions about the domain
+- Tech: The person responsible for executing changes for the domain
+
+It is possible for the same person to serve multiple roles.
+
+These people will be contacted in the case of billing issues, abuse, or required
+changes. Their information is **not** publicly available, but will be made
+available to the registrar (AWS).

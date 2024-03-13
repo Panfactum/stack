@@ -1,0 +1,5 @@
+providers:
+  - aws
+aws_account_id: "471112902605"
+aws_profile: "development-superuser"
+aws_secondary_region: "us-east-2"

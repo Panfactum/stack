@@ -1,4 +1,4 @@
-// Live
+// Module
 
 terraform {
   required_providers {
@@ -15,7 +15,7 @@ terraform {
 data "aws_caller_identity" "main" {}
 
 data "aws_route53_zone" "zones" {
-  for_each = var.dns_zones
+  for_each = var.domain_names
   name     = each.key
 }
 
@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "record_manager" {
       "route53:ChangeResourceRecordSets",
       "route53:ListResourceRecordSets"
     ]
-    resources = [for domain in var.dns_zones : "arn:aws:route53:::hostedzone/${data.aws_route53_zone.zones[domain].zone_id}"]
+    resources = [for domain in var.domain_names : "arn:aws:route53:::hostedzone/${data.aws_route53_zone.zones[domain].zone_id}"]
   }
 }
 
@@ -59,8 +59,7 @@ resource "aws_iam_policy" "record_manager" {
   name_prefix = "route53-record-manager-"
   policy      = data.aws_iam_policy_document.record_manager.json
   tags = {
-    description      = "policy that grants permissions to update records in the DNS zones of this account"
-    VantaDescription = "policy that grants permissions to update records in the DNS zones of this account"
+    description = "Policy that grants permissions to update records in the DNS zones of this account"
   }
 }
 
@@ -68,8 +67,7 @@ resource "aws_iam_role" "record_manager" {
   name_prefix        = "route53-record-manager-"
   assume_role_policy = data.aws_iam_policy_document.record_manager_assume_role.json
   tags = {
-    description      = "role that grants permissions to update records in the DNS zones of this account"
-    VantaDescription = "role that grants permissions to update records in the DNS zones of this account"
+    description = "Role that grants permissions to update records in the DNS zones of this account"
   }
 }
 

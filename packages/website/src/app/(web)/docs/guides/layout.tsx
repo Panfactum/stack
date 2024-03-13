@@ -78,6 +78,10 @@ const SIDENAV_SECTIONS = [
         path: '/infrastructure-as-code'
       },
       {
+        text: 'DNS',
+        path: '/dns'
+      },
+      {
         text: 'AWS Networking',
         path: '/aws-networking'
       },

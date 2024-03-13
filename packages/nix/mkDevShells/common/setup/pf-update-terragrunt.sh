@@ -15,6 +15,6 @@ source_dir=$(dirname "$(dirname "$(realpath "$0")")")/files/terragrunt
 
 mkdir -p "$environments_dir"
 
-cp -r --no-preserve=mode,ownership "$source_dir"/. "$environments_dir"/
+rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source_dir"/ "$environments_dir"/
 
 echo "Terragrunt files in $PF_ENVIRONMENTS_DIR are updated." 1>&2

@@ -359,7 +359,7 @@ Let's set it up.
     }
 
     locals {
-        secrets = yamldecode(sops_decrypt_file("secrets.yaml"))
+        secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
     }
 
     inputs = {
@@ -426,8 +426,7 @@ Let's set it up.
 
 ## Next Steps
 
-Now that you are set up to deploy infrastructure-as-code, we are ready to begin setting up the Panfactum stack. Our
-next step is to [configure AWS networking by creating a Virtual Private Cloud (VPC)](./aws-networking).
+Now that you are set up to deploy infrastructure-as-code, we are ready to [setup DNS](./dns).
 
 
 

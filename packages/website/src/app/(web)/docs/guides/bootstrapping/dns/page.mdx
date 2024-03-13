@@ -1,0 +1,157 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+import dnssecImg from './dnssec.jpg';
+import testRecordImg from './test-record.jpg';
+
+# DNS
+
+[Domain Name Service (DNS)](https://www.cloudflare.com/learning/dns/what-is-dns/) is what allows you to connect
+to networked services by human-readable names (e.g., `panfactum.com`) instead of IP addresses (`1.1.1.1`). It also
+plays an important role in [X.509](https://en.wikipedia.org/wiki/X.509) certificate infrastructure which underpins
+security on the modern internet (e.g., [TLS/SSL](https://en.wikipedia.org/wiki/Transport_Layer_Security)).
+
+[AWS Route 53](https://aws.amazon.com/route53/) is AWS's suite of DNS utilities. It includes both a
+[registrar](https://en.wikipedia.org/wiki/Domain_name_registrar) (an organization that allows you to _lease_
+domain names) and a managed DNS server ([Hosted Zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html))
+for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
+
+## Objective
+
+Establish a domain name, setup subdomains, and delegate control of subdomains to AWS accounts.
+
+## Purchasing Domain Name(s)
+
+<MarkdownAlert severity="info">
+    If you already have a domain but from a different registrar, you can follow
+    [this guide](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-transfer-to-route-53.html)
+    to transfer the domain to AWS. This process can take a few days, so you may want to purchase another temporary domain to allow you to
+    immediately continue with this guide.
+</MarkdownAlert>
+
+1. Login to your `management` account in the AWS web console.
+2. Navigate to Route 53 > Registered domains.
+3. Select "Register domains."
+4. Search for the domain(s) you want to purchase and add them to your cart.
+5. Checkout and ensure you enable auto-renew.
+
+## Deploy the AWS Registered Domains Module
+
+<MarkdownAlert severity="warning">
+    If you had previously used this domain name and set up DNS records, applying this module will cause a temporary
+    service disruption. This is because the domain's nameservers will be updated to point to the hosted zone
+    created by this module.
+
+    To limit downtime as much as possible:
+
+    1. Reduce the SOA record TTL to the lowest possible value.
+    2. Wait for the initial TTL to expire.
+    3. Prepare in advance to deploy the [aws_dns_records](../../reference/terraform-modules/aws_dns_records) module from the following sections.
+    4. Apply the [aws_registered_domains](../../reference/terraform-modules/aws_registered_domains) module from this section,
+    and immediately apply the aws_dns_records modules afterwards.
+
+    Following these instructions should result in less than 5 minutes of downtime.
+</MarkdownAlert>
+
+To use your domain registrations in IaC and to align them with best practices, we will now deploy the
+[aws_registered_domains](../../reference/terraform-modules/aws_registered_domains) module. [^1]
+
+This module will **not** register / unregister domains, only update the registration settings. In addition,
+it will set up the root [hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) and enable [DNSSEC](https://www.cloudflare.com/dns/dnssec/how-dnssec-works/) to prevent domain hijacking.
+
+1. Add a new `aws_registered_domains` folder to your `management` environment in the `global` region.
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_registered_domains/terragrunt.hcl).
+3. Enable the `aws` provider in your `module.yaml`.
+4. Run `terragrunt apply`.
+
+[^1]: The domains will have the following defaults you can override if desired:
+[privacy protection](https://en.wikipedia.org/wiki/Domain_privacy), auto renewal,
+and [transfer lock](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-lock.html).
+For more information,
+refer to the [module documentation](../../reference/terraform-modules/aws_registered_domains).
+
+<MarkdownAlert severity="warning">
+    Once you deploy this module, you will receive an email from AWS to the email address(s) you indicated.
+    You MUST verify your emails within 15 days if you want to avoid service disruptions.
+</MarkdownAlert>
+
+
+### Verify DNS Resolution Works
+
+To verify that everything is working as expected:
+
+1. Navigate to the hosted zone via the AWS web console (Route 53 > Hosted Zone).
+2. View the DNSSEC signing section. It should appear as follows:
+    <MarkdownImage src={dnssecImg} alt="DNSSEC enabled"/>
+3. Add a new `A` record under `test` pointing to `1.1.1.1` to your hosted zone via the AWS management console.
+    <MarkdownImage src={testRecordImg} alt="Test A record"/>
+4. Run `dig test.panfactum.com +dnssec +short` (replace `panfactum.com` with your domain name). You should see a result
+that looks as follows:
+
+    ```shell-session
+    1.1.1.1
+    A 13 3 300 20240313171938 20240313151438 47555 panfactum.com. 9+bCqeEmKDiRc5sKz9vosmw86mkbaUMm9o8z1kFLZPbDiUV2Nbu9QXUV ni+rxqFyfK900c5Eil+y8bXARmh8CA==
+    ```
+
+    The presence of the last line verifies that DNSSEC is working as intended.
+
+5. Remove the test record.
+
+## Setting up Delegated Zones
+
+Each environment will have its own subdomain for each root domain (e.g., `dev.panfactum.com`). This
+subdomain will be managed by its own hosted zone (not the root hosted zone). This provides the following benefits:
+
+- Limits the blast radius if something is misconfigured. At most, a configuration problem will impact only a single
+environment without the possibility of impacting other environments (or worse, your entire DNS infrastructure).
+- Limits the permissions needed to be granted to users and services in each environment. To add records to the
+subdomain `dev.panfactum.com`, a user would not need _any_ access to records in other environments. This would not
+be possible if all records were stored in a single, global hosted zone.
+
+This is accomplished via a concept called [subdomain delegation](../../concepts/networking/subdomain-delegation). Panfactum's
+[aws_delegated_zones](../../reference/terraform-modules/aws_delegated_zones) will provide the relevant setup
+for this to work.
+
+Let's do this now for **every** environment:
+
+1. Choose a set of subdomain identifiers. For example, for `production` you might
+use the subdomains `prod` and `production`.
+2. Add a new directory in `management/global` called `aws_delegated_zones_<environment>` where `<environment>` is replaced
+with the environment name for this set of subdomains.
+3. Create a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_delegated_zones_production/terragrunt.hcl). [^2]
+Use the appropriate `subdomain_identifiers` for your environment.
+4. Create a `module.yaml`.
+    1. Enable the `aws` provider.
+    2. Set the `aws_account_id` and `aws_profile` to the appropriate values for the environment. Note that this module deploys
+    resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the environment account
+    and the secondary `aws` provider to deploy the appropriate DNS records in the `management` environment. These
+    settings are what enables this functionality.
+    3. Set `aws_secondary_region` to your primary region.
+5. Run `terragrunt apply`.
+
+[^2]: Note that this is the first time we will take advantage of terragrunt's [dependency blocks](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#dependency)
+to use the outputs of one module as inputs into another.
+
+
+### Verify DNS Resolution Works (Subdomains)
+
+To verify that everything is working as expected, follow the guide from the previous section but for the
+**subdomain zone.** This will require you to log in to the respective AWS account.
+
+You would test via `dig test.<your_subdomain_identifier>.<your_root_domain> +dnssec +short`. Ensure that this
+shows both the `1.1.1.1` IP address and the dnssec signature.
+
+## Deploying Records
+
+If you have static records to deploy, you can use our [aws_dns_records](../../reference/terraform-modules/aws_dns_records)
+module to deploy them to the appropriate hosted zone.
+
+Specifically, now would be a good time to migrate and/or set up your [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
+records for your primary email provider.
+
+In the future, we will set up a mechanism to ensure that DNS records for all of our Panfactum stack infrastructure
+is automatically deployed and updated without manual intervention.
+
+## Next Steps
+
+Now that you have prepared your DNS configuration, we are ready to begin setting up the Panfactum stack. Our
+next step is to [configure AWS networking by creating a Virtual Private Cloud (VPC)](./aws-networking).

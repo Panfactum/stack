@@ -6,3 +6,5 @@
 .direnv/
 .pnpm/
 node_modules/
+
+*.bkp

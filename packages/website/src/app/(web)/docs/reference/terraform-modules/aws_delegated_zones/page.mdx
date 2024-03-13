@@ -1,0 +1,110 @@
+# AWS Delegated Zones
+
+**Type:** [Live](./overview)
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_dnssec"></a> [dnssec](#module\_dnssec)
+
+Source: [aws_dnssec](./aws_dnssec)
+
+
+### <a name="module_iam_role"></a> [iam\_role](#module\_iam\_role)
+
+Source: [aws_dns_iam_role](./aws_dns_iam_role)
+
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_root_domain_names"></a> [root\_domain\_names](#input\_root\_domain\_names)
+
+Description: Root domain names that need to be delegated.
+
+Type: `set(string)`
+
+### <a name="input_subdomain_identifiers"></a> [subdomain\_identifiers](#input\_subdomain\_identifiers)
+
+Description: The subdomain path segments
+
+Type: `set(string)`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_record_manager_role_arn"></a> [record\_manager\_role\_arn](#output\_record\_manager\_role\_arn)
+
+Description: The ARN of the IAM role used to manage DNS records.
+
+## Usage
+
+### Create / Delete
+
+This module does **not** register domains but rather adopts domains
+that you have already registered and updates their information.
+Additionally, destroying this module does un-register the domains;
+it only removes them from the terraform state.
+
+### Contact Information
+
+There are three different domain contacts:
+
+- Registrant: The owner of the domain
+- Admin: The person responsible for administrative decisions about the domain
+- Tech: The person responsible for executing changes for the domain
+
+It is possible for the same person to serve multiple roles.
+
+These people will be contacted in the case of billing issues, abuse, or required
+changes. Their information is **not** publicly available, but will be made
+available to the registrar (AWS).

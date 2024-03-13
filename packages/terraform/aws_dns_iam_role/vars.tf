@@ -4,7 +4,7 @@ variable "additional_account_ids_with_record_access" {
   default     = []
 }
 
-variable "dns_zones" {
+variable "domain_names" {
   description = "A list of domain names in this account that the record manager role created by this module can manage"
   type        = set(string)
 }

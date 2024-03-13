@@ -234,6 +234,12 @@ You should explicitly declare these dependencies via terragrunt `dependency` blo
 This will ensure that modules are always updated in the desired order. Additionally, you can use this functionality
 to pass the outputs of one module into the inputs of another.
 
+<MarkdownAlert severity="warning">
+    Do not add dependencies that cross environment boundaries. Our CI paradigm scopes permissions to a single
+    environment at a time, so dependencies that cross environments will always lack the appropriate permissions
+    to apply successfully.
+</MarkdownAlert>
+
 ### CI / CD
 
 TODO

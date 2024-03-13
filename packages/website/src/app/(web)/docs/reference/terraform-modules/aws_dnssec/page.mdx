@@ -1,0 +1,85 @@
+# AWS DNSSEC
+
+**Type:** [Utility](./overview)
+
+This is a utility module used to setup [DNSSEC](https://developers.cloudflare.com/dns/dnssec/) for a set of AWS hosted zones.
+
+## Providers
+
+The following providers are needed by this module:
+
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Modules
+
+No modules.
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_domain_names"></a> [domain\_names](#input\_domain\_names)
+
+Description: Domain names that will be managed by this module
+
+Type: `set(string)`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment for the infrastructure.
+
+Type: `string`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+### <a name="input_module"></a> [module](#input\_module)
+
+Description: The name of the module.
+
+Type: `string`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+
+Description: The commit hash for the version. Used to reference build artifacts.
+
+Type: `string`
+
+### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+
+Description: Name of the application version or git commit ref.
+
+Type: `string`
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_keys"></a> [keys](#output\_keys)
+
+Description: The signing keys for each domain
+
+## Usage
+
+### Providers
+
+This module requires being passed in the `aws.global` provider
+as the KMS key needs to be in the `us-east-1` region.
+
+### Parent DS Record
+
+This module does **not** create the parent DS record. That is up
+to the caller.
