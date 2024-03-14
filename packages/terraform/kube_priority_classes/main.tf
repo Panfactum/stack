@@ -11,7 +11,6 @@ terraform {
 
 module "kube_labels" {
   source       = "../kube_labels"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -22,7 +21,6 @@ module "kube_labels" {
 
 module "constants" {
   source       = "../constants"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region

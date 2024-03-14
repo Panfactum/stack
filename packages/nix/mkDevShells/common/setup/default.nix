@@ -23,6 +23,9 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-update-kube.sh $out/bin/pf-update-kube
     chmod +x $out/bin/pf-update-kube
 
+    cp ${src}/pf-get-kube-state-hash.sh $out/bin/pf-get-kube-state-hash
+    chmod +x $out/bin/pf-get-kube-state-hash
+
     cp ${src}/pf-update-ssh.sh $out/bin/pf-update-ssh
     chmod +x $out/bin/pf-update-ssh
 

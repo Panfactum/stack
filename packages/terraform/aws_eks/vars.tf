@@ -11,22 +11,23 @@ variable "cluster_description" {
   type        = string
 }
 
-variable "kube_control_plane_version" {
+variable "control_plane_version" {
   description = "Desired Kubernetes master version."
   type        = string
+  default     = "1.29"
 }
 
-variable "kube_control_plane_subnets" {
+variable "control_plane_subnets" {
   description = "List of subnet names for the control plane. Must be in at least two different availability zones."
   type        = set(string)
 }
 
-variable "kube_control_plane_logging" {
+variable "control_plane_logging" {
   description = "Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)"
   type        = set(string)
   default     = []
   validation {
-    condition = length(setsubtract(var.kube_control_plane_logging, [
+    condition = length(setsubtract(var.control_plane_logging, [
       "api",
       "audit",
       "authenticator",
@@ -37,13 +38,32 @@ variable "kube_control_plane_logging" {
   }
 }
 
+variable "enable_public_access" {
+  description = "Whether the cluster control plane should be available from the public internet."
+  type        = bool
+  default     = true
+}
+
+variable "public_access_cidrs" {
+  description = "IP address ranges that can access the public control plane API endpoint."
+  type        = set(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "service_cidr" {
+  description = "CIDR block that kubernetes will use for assigning service and pod ID addresses."
+  type        = string
+}
+
 ######################################################################################
 # EKS add-ons versions
 # For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
 #######################################################################################
+
 variable "coredns_version" {
   description = "The version to use for the coredns EKS add-on."
   type        = string
+  default     = "v1.11.1-eksbuild.6"
 }
 
 ################################################################################
@@ -68,9 +88,11 @@ variable "controller_node_subnets" {
 variable "controller_node_kube_version" {
   description = "The version of kubernetes to use on the nodes"
   type        = string
+  default     = "1.29"
 }
 
 variable "all_nodes_allowed_security_groups" {
   description = "Names of security groups allowed to communicate directly with the cluster nodes."
   type        = set(string)
+  default     = []
 }

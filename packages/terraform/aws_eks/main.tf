@@ -3,8 +3,9 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "5.39.1"
+      source                = "hashicorp/aws"
+      version               = "5.39.1"
+      configuration_aliases = [aws.secondary]
     }
     tls = {
       source  = "hashicorp/tls"
@@ -16,7 +17,6 @@ terraform {
 locals {
   vpc_id = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
   common_tags = merge({
-    app         = var.app
     environment = var.environment
     module      = var.module
     region      = var.region
@@ -30,9 +30,9 @@ locals {
 }
 
 data "aws_region" "region" {}
+
 module "constants" {
   source       = "../constants"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -40,12 +40,12 @@ module "constants" {
   version_hash = var.version_hash
   is_local     = var.is_local
 }
+
 module "node_settings" {
   source           = "../kube_node_settings"
   cluster_name     = aws_eks_cluster.cluster.name
   cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_endpoint = aws_eks_cluster.cluster.endpoint
-  app              = var.app
   environment      = var.environment
   module           = var.module
   region           = var.region
@@ -57,20 +57,33 @@ module "node_settings" {
 ##########################################################################
 ## Main EKS Cluster
 ##########################################################################
+
 resource "aws_eks_cluster" "cluster" {
   depends_on                = [module.aws_cloudwatch_log_group]
-  enabled_cluster_log_types = var.kube_control_plane_logging
+  enabled_cluster_log_types = var.control_plane_logging
 
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
-  version  = var.kube_control_plane_version
+  version  = var.control_plane_version
 
   vpc_config {
     subnet_ids              = [for subnet in data.aws_subnet.control_plane_subnets : subnet.id]
     endpoint_private_access = true
-    endpoint_public_access  = true
-    public_access_cidrs     = ["0.0.0.0/0"]
+    endpoint_public_access  = var.enable_public_access
+    public_access_cidrs     = var.public_access_cidrs
     security_group_ids      = [aws_security_group.control_plane.id]
+  }
+
+  kubernetes_network_config {
+    service_ipv4_cidr = var.service_cidr
+    ip_family         = "ipv4"
+  }
+
+  encryption_config {
+    provider {
+      key_arn = module.encrypt_key.arn
+    }
+    resources = ["secrets"]
   }
 
   tags = {
@@ -83,7 +96,7 @@ resource "aws_eks_cluster" "cluster" {
 }
 
 data "aws_subnet" "control_plane_subnets" {
-  for_each = var.kube_control_plane_subnets
+  for_each = var.control_plane_subnets
   filter {
     name   = "tag:Name"
     values = [each.value]
@@ -91,7 +104,7 @@ data "aws_subnet" "control_plane_subnets" {
 }
 
 resource "aws_ec2_tag" "vpc_tag" {
-  for_each    = var.kube_control_plane_subnets
+  for_each    = var.control_plane_subnets
   resource_id = data.aws_subnet.control_plane_subnets[each.key].id
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
@@ -157,6 +170,22 @@ data "aws_iam_policy_document" "eks_assume_role" {
   }
 }
 
+module "encrypt_key" {
+  source = "../aws_kms_encrypt_key"
+  providers = {
+    aws.secondary = aws.secondary
+  }
+
+  name         = "kube-${var.cluster_name}"
+  description  = "Encryption key for kubernetes control plane data"
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
+  version_hash = var.version_hash
+  is_local     = var.is_local
+}
+
 resource "aws_eks_addon" "coredns" {
   cluster_name                = aws_eks_cluster.cluster.name
   addon_name                  = "coredns"
@@ -170,11 +199,11 @@ resource "aws_eks_addon" "coredns" {
 // Currently we use the default set provided by AWS to get access to control plane logs
 // TODO: https://github.com/aws/containers-roadmap/issues/1141
 ////////////////////////////////////////////////////////////
+
 module "aws_cloudwatch_log_group" {
   source       = "../aws_cloudwatch_log_group"
   name         = "/aws/eks/${var.cluster_name}/cluster"
   description  = "Collects logs for our AWS EKS Cluster"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region

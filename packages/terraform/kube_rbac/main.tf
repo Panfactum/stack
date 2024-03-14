@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
   }
 }
 
@@ -18,7 +22,6 @@ locals {
 
 module "kube_labels" {
   source       = "../kube_labels"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -230,6 +233,8 @@ resource "kubernetes_cluster_role_binding" "bot_readers" {
 /*******************  IAM Mappings ***********************/
 // See https://github.com/kubernetes-sigs/aws-iam-authenticator
 
+data "aws_caller_identity" "current" {}
+
 resource "kubernetes_config_map" "aws_auth" {
   metadata {
     name      = "aws-auth"
@@ -247,7 +252,10 @@ resource "kubernetes_config_map" "aws_auth" {
       }],
 
       // allows access to superusers
-      [for arn in var.kube_superuser_role_arns : {
+      [for arn in concat(
+        var.kube_superuser_role_arns,
+        ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+        ) : {
         rolearn  = arn
         username = "{{SessionName}}"
         groups   = [local.superusers_group]

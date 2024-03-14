@@ -4,7 +4,6 @@ terraform {
 
 locals {
   kube_labels = merge({
-    app         = var.app,
     module      = var.module,
     environment = var.environment,
     version_tag = var.version_tag,

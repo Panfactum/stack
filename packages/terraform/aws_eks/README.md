@@ -2,14 +2,23 @@
 
 **Type:** Live
 
-This module provides our standard set up for a configurable AWS EKS Cluster. It includes:
+This module provides our standard setup for a configurable AWS EKS Cluster.
+It includes:
 - An [EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). This cluster defines the Kubernetes control plane (managed by AWS) and provisions it to the specified set of availability zones.
-- Node groups for the EKS cluster.
-- Security Groups for both the cluster control plane and for the node groups. The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic. The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
+- A [KMS key](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for encrypting the control plane data at-rest.
+- A set of controller [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
+  with a static size for running cluster-critical
+  controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
+  Autoscaled nodes are deployed via our [kube_karpenter](../kube_karpenter) module.
+- [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
+  for both the cluster control plane and for the node groups. 
+    - The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic.
+    - The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
+- Subnet tags that controllers in our other modules depend upon.
+- The requisite infrastructure for using
+  [IAM roles for servica accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
+- Logging for the control plane components via
+  [AWS Cloudwatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html).
 
 Additionally, we use the following [EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html):
   - [coredns](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html)
-  - [kube-proxy](https://docs.aws.amazon.com/eks/latest/userguide/managing-kube-proxy.html)
-  - [vpc-cni](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html)
-
-See the [vars file](./vars.tf) for descriptions of the input parameters.

@@ -2,17 +2,26 @@
 
 **Type:** [Live](./overview)
 
-This module provides our standard set up for a configurable AWS EKS Cluster. It includes:
+This module provides our standard setup for a configurable AWS EKS Cluster.
+It includes:
 - An [EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). This cluster defines the Kubernetes control plane (managed by AWS) and provisions it to the specified set of availability zones.
-- Node groups for the EKS cluster.
-- Security Groups for both the cluster control plane and for the node groups. The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic. The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
+- A [KMS key](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for encrypting the control plane data at-rest.
+- A set of controller [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
+  with a static size for running cluster-critical
+  controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
+  Autoscaled nodes are deployed via our [kube\_karpenter](../kube\_karpenter) module.
+- [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
+  for both the cluster control plane and for the node groups.
+    - The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic.
+    - The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
+- Subnet tags that controllers in our other modules depend upon.
+- The requisite infrastructure for using
+  [IAM roles for servica accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
+- Logging for the control plane components via
+  [AWS Cloudwatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html).
 
 Additionally, we use the following [EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html):
   - [coredns](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html)
-  - [kube-proxy](https://docs.aws.amazon.com/eks/latest/userguide/managing-kube-proxy.html)
-  - [vpc-cni](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html)
-
-See the [vars file](./vars.tf) for descriptions of the input parameters.
 
 ## Providers
 
@@ -36,6 +45,11 @@ Source: [aws_cloudwatch_log_group](./aws_cloudwatch_log_group)
 Source: [constants](./constants)
 
 
+### <a name="module_encrypt_key"></a> [encrypt\_key](#module\_encrypt\_key)
+
+Source: [aws_kms_encrypt_key](./aws_kms_encrypt_key)
+
+
 ### <a name="module_node_settings"></a> [node\_settings](#module\_node\_settings)
 
 Source: [kube_node_settings](./kube_node_settings)
@@ -44,12 +58,6 @@ Source: [kube_node_settings](./kube_node_settings)
 ## Required Inputs
 
 The following input variables are required:
-
-### <a name="input_all_nodes_allowed_security_groups"></a> [all\_nodes\_allowed\_security\_groups](#input\_all\_nodes\_allowed\_security\_groups)
-
-Description: Names of security groups allowed to communicate directly with the cluster nodes.
-
-Type: `set(string)`
 
 ### <a name="input_cluster_description"></a> [cluster\_description](#input\_cluster\_description)
 
@@ -63,6 +71,12 @@ Description: The name of the EKS cluster resource.
 
 Type: `string`
 
+### <a name="input_control_plane_subnets"></a> [control\_plane\_subnets](#input\_control\_plane\_subnets)
+
+Description: List of subnet names for the control plane. Must be in at least two different availability zones.
+
+Type: `set(string)`
+
 ### <a name="input_controller_node_count"></a> [controller\_node\_count](#input\_controller\_node\_count)
 
 Description: The number of controller nodes to use
@@ -75,23 +89,11 @@ Description: The allowable instance types for the controller nodes
 
 Type: `list(string)`
 
-### <a name="input_controller_node_kube_version"></a> [controller\_node\_kube\_version](#input\_controller\_node\_kube\_version)
-
-Description: The version of kubernetes to use on the nodes
-
-Type: `string`
-
 ### <a name="input_controller_node_subnets"></a> [controller\_node\_subnets](#input\_controller\_node\_subnets)
 
 Description: List of names for subnets that controller nodes should be deployed to
 
 Type: `list(string)`
-
-### <a name="input_coredns_version"></a> [coredns\_version](#input\_coredns\_version)
-
-Description: The version to use for the coredns EKS add-on.
-
-Type: `string`
 
 ### <a name="input_environment"></a> [environment](#input\_environment)
 
@@ -105,18 +107,6 @@ Description: Whether this module is a part of a local development deployment
 
 Type: `bool`
 
-### <a name="input_kube_control_plane_subnets"></a> [kube\_control\_plane\_subnets](#input\_kube\_control\_plane\_subnets)
-
-Description: List of subnet names for the control plane. Must be in at least two different availability zones.
-
-Type: `set(string)`
-
-### <a name="input_kube_control_plane_version"></a> [kube\_control\_plane\_version](#input\_kube\_control\_plane\_version)
-
-Description: Desired Kubernetes master version.
-
-Type: `string`
-
 ### <a name="input_module"></a> [module](#input\_module)
 
 Description: The name of the module.
@@ -126,6 +116,12 @@ Type: `string`
 ### <a name="input_region"></a> [region](#input\_region)
 
 Description: The region to work in.
+
+Type: `string`
+
+### <a name="input_service_cidr"></a> [service\_cidr](#input\_service\_cidr)
+
+Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
 
 Type: `string`
 
@@ -145,13 +141,67 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_kube_control_plane_logging"></a> [kube\_control\_plane\_logging](#input\_kube\_control\_plane\_logging)
+### <a name="input_all_nodes_allowed_security_groups"></a> [all\_nodes\_allowed\_security\_groups](#input\_all\_nodes\_allowed\_security\_groups)
+
+Description: Names of security groups allowed to communicate directly with the cluster nodes.
+
+Type: `set(string)`
+
+Default: `[]`
+
+### <a name="input_control_plane_logging"></a> [control\_plane\_logging](#input\_control\_plane\_logging)
 
 Description: Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)
 
 Type: `set(string)`
 
 Default: `[]`
+
+### <a name="input_control_plane_version"></a> [control\_plane\_version](#input\_control\_plane\_version)
+
+Description: Desired Kubernetes master version.
+
+Type: `string`
+
+Default: `"1.29"`
+
+### <a name="input_controller_node_kube_version"></a> [controller\_node\_kube\_version](#input\_controller\_node\_kube\_version)
+
+Description: The version of kubernetes to use on the nodes
+
+Type: `string`
+
+Default: `"1.29"`
+
+### <a name="input_coredns_version"></a> [coredns\_version](#input\_coredns\_version)
+
+Description: The version to use for the coredns EKS add-on.
+
+Type: `string`
+
+Default: `"v1.11.1-eksbuild.6"`
+
+### <a name="input_enable_public_access"></a> [enable\_public\_access](#input\_enable\_public\_access)
+
+Description: Whether the cluster control plane should be available from the public internet.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_public_access_cidrs"></a> [public\_access\_cidrs](#input\_public\_access\_cidrs)
+
+Description: IP address ranges that can access the public control plane API endpoint.
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "0.0.0.0/0"
+]
+```
 
 ## Outputs
 
@@ -162,6 +212,10 @@ The following outputs are exported:
 Description: n/a
 
 ### <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name)
+
+Description: n/a
+
+### <a name="output_cluster_region"></a> [cluster\_region](#output\_cluster\_region)
 
 Description: n/a
 

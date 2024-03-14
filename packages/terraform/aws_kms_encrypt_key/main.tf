@@ -113,6 +113,10 @@ resource "aws_kms_key" "key" {
   is_enabled               = true
   multi_region             = true
   policy                   = data.aws_iam_policy_document.key.json
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_kms_alias" "alias" {
@@ -131,6 +135,10 @@ resource "aws_kms_replica_key" "replica" {
   deletion_window_in_days = 30
   enabled                 = true
   policy                  = data.aws_iam_policy_document.key.json
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_kms_alias" "replica_alias" {

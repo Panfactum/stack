@@ -14,6 +14,10 @@ output "cluster_ca_data" {
   value = aws_eks_cluster.cluster.certificate_authority[0].data
 }
 
+output "cluster_region" {
+  value = data.aws_region.region.name
+}
+
 output "instance_profile" {
   value = aws_iam_instance_profile.node_group.name
 }

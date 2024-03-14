@@ -123,8 +123,7 @@ Use the appropriate `subdomain_identifiers` for your environment.
     1. Enable the `aws` provider.
     2. Set the `aws_account_id` and `aws_profile` to the appropriate values for the environment. Note that this module deploys
     resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the environment account
-    and the secondary `aws` provider to deploy the appropriate DNS records in the `management` environment. These
-    settings are what enables this functionality.
+    and the secondary `aws` provider to deploy the appropriate DNS records in the `management` environment.
     3. Set `aws_secondary_region` to your primary region.
 5. Run `terragrunt apply`.
 
