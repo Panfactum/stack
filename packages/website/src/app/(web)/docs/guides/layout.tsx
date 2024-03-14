@@ -94,12 +94,24 @@ const SIDENAV_SECTIONS = [
         path: '/internal-cluster-networking'
       },
       {
+        text: 'Storage Interfaces',
+        path: '/storage-interfaces'
+      },
+      {
         text: 'Vault',
         path: '/vault'
       },
       {
         text: 'Certificate Management',
         path: '/certificate-management'
+      },
+      {
+        text: 'Service Mesh',
+        path: '/service-mesh'
+      },
+      {
+        text: 'Autoscaling',
+        path: '/autoscaling'
       },
       {
         text: 'External Cluster Networking',

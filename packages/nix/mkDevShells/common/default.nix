@@ -27,12 +27,13 @@
     ####################################
     # Kubernetes
     ####################################
-    kubectl # kubernetes CLI
-    kubectx # switching between namespaces and contexts
-    kustomize # tool for editing manifests programatically
-    kubernetes-helm # for working with Helm charts
-    kube-capacity # for visualizing resource utilization in the cluster
-    kubectl-cnpg # for managing the cnpg postgres databases
+    (import ./kubectl.nix) # kubernetes CLI
+    (import ./kubectx.nix) # switching between namespaces and contexts
+    (import ./kustomize.nix) # tool for editing manifests programatically
+    (import ./helm.nix) # for working with Helm charts
+    (import
+      ./kube-capacity.nix) # for visualizing resource utilization in the cluster
+    (import ./kubectl-cnpg.nix) # for managing the cnpg postgres databases
     (util.customNixModule
       "linkerd-await") # used to work with proxy sidecars in the kubernetes environment
 

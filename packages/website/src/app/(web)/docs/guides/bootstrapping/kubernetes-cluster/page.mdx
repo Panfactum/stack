@@ -160,18 +160,18 @@ user.
 
 ### Verify Connection
 
-Run `kubectx` to list all of the clusters that were set up in the previous section. Selecting one will set your
+1. Run `kubectx` to list all of the clusters that were set up in the previous section. Selecting one will set your
 Kubernetes [context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
-which defines which cluster your commandline tools like `kubectl` will target.
+which defines which cluster your commandline tools like `kubectl` will target. Select one now.
 
-Run `kubectl cluster-info`.
+2. Run `kubectl cluster-info`.
 
-You should receive a result that looks like this:
+    You should receive a result that looks like this:
 
-```shell-session
-Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com
-CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-```
+    ```shell-session
+    Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com
+    CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+    ```
 
 ### Using k9s
 

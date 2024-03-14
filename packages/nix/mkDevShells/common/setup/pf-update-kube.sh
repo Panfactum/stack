@@ -24,7 +24,7 @@ rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source"/ "$destination"/
 ## Step 2: Dynamically configure kubeconfig
 ############################################################
 
-USER_CONFIG_FILE="$PF_KUBE_DIR/config.user.yaml"
+USER_CONFIG_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/config.user.yaml"
 
 if [[ -f $USER_CONFIG_FILE ]]; then
 
