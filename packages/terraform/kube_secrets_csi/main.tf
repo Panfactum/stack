@@ -25,7 +25,6 @@ module "kube_labels" {
   additional_labels = {
     service = local.service
   }
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -36,7 +35,6 @@ module "kube_labels" {
 
 module "constants" {
   source       = "../constants"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -56,7 +54,6 @@ module "namespace" {
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
   linkerd_inject    = false
-  app               = var.app
   environment       = var.environment
   module            = var.module
   region            = var.region

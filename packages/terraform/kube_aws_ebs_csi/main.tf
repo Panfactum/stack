@@ -29,7 +29,6 @@ module "kube_labels" {
   additional_labels = {
     service = local.service
   }
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -40,7 +39,6 @@ module "kube_labels" {
 
 module "constants" {
   source       = "../constants"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -59,7 +57,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
   environment       = var.environment
   module            = var.module
   region            = var.region
@@ -100,7 +97,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.extra_permissions.json
   ip_allow_list             = var.ip_allow_list
-  app                       = var.app
   environment               = var.environment
   module                    = var.module
   region                    = var.region
@@ -163,11 +159,15 @@ resource "helm_release" "ebs_csi_driver" {
 resource "kubernetes_storage_class" "standard" {
   metadata {
     name = "ebs-standard"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
   }
   storage_provisioner    = "ebs.csi.aws.com"
   volume_binding_mode    = "WaitForFirstConsumer"
   allow_volume_expansion = true
   reclaim_policy         = "Delete"
+
   parameters = {
     type      = "gp3"
     encrypted = true

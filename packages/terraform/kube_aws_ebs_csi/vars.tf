@@ -2,7 +2,7 @@
 variable "aws_ebs_csi_driver_helm_version" {
   description = "The version of the aws-ebs-csi-driver helm chart to deploy"
   type        = string
-  default     = "2.24.0"
+  default     = "2.28.1"
 }
 
 variable "eks_cluster_name" {
@@ -13,6 +13,7 @@ variable "eks_cluster_name" {
 variable "ip_allow_list" {
   description = "A list of IPs that can use the service account token to authneticate with AWS API"
   type        = list(string)
+  default     = []
 }
 
 variable "vpa_enabled" {
