@@ -195,14 +195,14 @@ We will now deploy the [aws_vpc](../../reference/terraform-modules/aws_vpc) modu
 
 5. Ensure that your VPC looks similar to the following:
 
-    <MarkdownImage src={vpcImg}/>
+    <MarkdownImage src={vpcImg} alt="VPC viewed from the AWS web console"/>
 
 6. Ensure that your NAT nodes are running and healthy:
 
-    <MarkdownImage src={natImg}/>
+    <MarkdownImage src={natImg} alt="NAT nodes viewed from the AWS web console"/>
 
     Note that each node should have a Public IPv4 address which should match its [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html).
-    All traffic from your cluster will appear to be come from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
+    All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
 
 ### Test Connectivity
 
