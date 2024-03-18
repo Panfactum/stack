@@ -1,7 +1,7 @@
 variable "cilium_helm_version" {
   description = "The version of the metrics-server helm chart to deploy"
   type        = string
-  default     = "1.14.6"
+  default     = "1.15.2"
 }
 
 variable "eks_cluster_name" {
@@ -21,6 +21,7 @@ variable "vpa_enabled" {
 }
 
 variable "ip_allow_list" {
-  description = "A list of IPs that can use the service account token to authneticate with AWS API"
+  description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
+  default     = []
 }

@@ -13,11 +13,31 @@ terraform {
 
 locals {
   kube_oidc_provider = trimprefix(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://")
+  ip_allow_list_with_defaults = concat(
+    var.ip_allow_list,
+    [for subnet in data.aws_subnet.cluster_subnet_info : subnet.tags["panfactum.com/public-ip"] if contains(keys(subnet.tags), "panfactum.com/public-ip")],
+    [for subnet in data.aws_subnet.cluster_subnet_info : subnet.cidr_block]
+  )
 }
 
 data "aws_caller_identity" "main" {}
 data "aws_region" "main" {}
 
+# ################################################################################
+# IP Auto Discovery
+# ################################################################################
+
+data "aws_subnets" "cluster_subnets" {
+  filter {
+    name   = "tag-key"
+    values = ["kubernetes.io/cluster/${var.eks_cluster_name}"]
+  }
+}
+
+data "aws_subnet" "cluster_subnet_info" {
+  for_each = toset(data.aws_subnets.cluster_subnets.ids)
+  id       = each.key
+}
 
 # ################################################################################
 # IAM Permissions
@@ -79,7 +99,7 @@ data "aws_iam_policy_document" "ip_blocks" {
     // Only allow access from inside our cluster
     condition {
       test     = "NotIpAddress"
-      values   = var.ip_allow_list
+      values   = local.ip_allow_list_with_defaults
       variable = "aws:SourceIp"
     }
   }
@@ -92,7 +112,7 @@ data "aws_iam_policy_document" "ip_blocks" {
     // Only allow access from inside our cluster
     condition {
       test     = "NotIpAddress"
-      values   = var.ip_allow_list
+      values   = local.ip_allow_list_with_defaults
       variable = "aws:VpcSourceIp"
     }
   }

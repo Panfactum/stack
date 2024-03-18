@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_eks"
+  source = "../../../../../terraform//aws_eks"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_eks"
 }
 
 

@@ -103,9 +103,16 @@ data "aws_subnet" "control_plane_subnets" {
   }
 }
 
-resource "aws_ec2_tag" "vpc_tag" {
+resource "aws_ec2_tag" "subnet_tags" {
   for_each    = var.control_plane_subnets
   resource_id = data.aws_subnet.control_plane_subnets[each.key].id
+  key         = "kubernetes.io/cluster/${var.cluster_name}"
+  value       = "owned"
+}
+
+resource "aws_ec2_tag" "vpc_tags" {
+  for_each    = toset([for sub in data.aws_subnet.control_plane_subnets : sub.vpc_id])
+  resource_id = each.key
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
 }
@@ -221,6 +228,13 @@ data "aws_subnet" "node_groups" {
     name   = "tag:Name"
     values = [each.key]
   }
+}
+
+resource "aws_ec2_tag" "node_subnet_tags" {
+  for_each    = toset(var.controller_node_subnets)
+  resource_id = data.aws_subnet.node_groups[each.key].id
+  key         = "kubernetes.io/cluster/${var.cluster_name}"
+  value       = "owned"
 }
 
 // Latest bottlerocket image

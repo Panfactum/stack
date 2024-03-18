@@ -26,13 +26,13 @@ Those that do not host live infrastructure (e.g., `management`) do not need much
 
 If you are new to cloud networking, we recommend that your review the [concept documentation](../../concepts/networking/aws-primitives) before proceeding.
 
-## Creating your VPC
+## Create your VPC
 
 We will use the [aws_vpc](../../reference/terraform-modules/aws_vpc) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
 
-### Choosing your CIDR Blocks and Subnets
+### Choose your CIDR Blocks and Subnets
 
 One of the most important decision that you make throughout this entire guide
 is deciding your CIDR blocks for subnet setup. This is very difficult to change later
@@ -94,11 +94,11 @@ pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and
 See the [aws_vpc](../../reference/terraform-modules/aws_vpc) documentation for more details and to decide if it is right for you
 (it probably is).
 
-### Deploying the AWS VPC Module
+### Deploy the AWS VPC Module
 
 We will now deploy the [aws_vpc](../../reference/terraform-modules/aws_vpc) module via terragrunt:
 
-1. Setup a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
+1. Set up a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
 2. Add a `terragrunt.hcl` (example below)
 
@@ -204,7 +204,7 @@ We will now deploy the [aws_vpc](../../reference/terraform-modules/aws_vpc) modu
     Note that each node should have a Public IPv4 address which should match its [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html).
     All traffic from your cluster will appear to be come from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
 
-### Testing Connectivity
+### Test Connectivity
 
 We will now verify a few features of the network:
 

@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_vpc"
+  source = "../../../../../terraform/aws_vpc"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_vpc"
 }
 
 inputs = {

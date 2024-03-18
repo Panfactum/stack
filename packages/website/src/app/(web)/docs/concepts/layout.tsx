@@ -19,6 +19,10 @@ const SIDENAV_SECTIONS = [
         text: 'Subdomain Delegation',
         path: '/subdomain-delegation'
       },
+      {
+        text: 'Cluster Networking',
+        path: '/cluster-networking'
+      },
     ]
   }
 ]

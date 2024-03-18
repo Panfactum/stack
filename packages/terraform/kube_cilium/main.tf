@@ -23,11 +23,7 @@ locals {
 }
 
 module "base_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    customizationHash = md5(join("", [for filename in fileset(path.module, "cilium_kustomize/*") : filesha256(filename)]))
-  }
-  app          = var.app
+  source       = "../kube_labels"
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -39,7 +35,6 @@ module "base_labels" {
 module "operator_labels" {
   source            = "../kube_labels"
   additional_labels = merge(module.base_labels.kube_labels, { service = "operator" })
-  app               = var.app
   environment       = var.environment
   module            = var.module
   region            = var.region
@@ -51,7 +46,6 @@ module "operator_labels" {
 module "agent_labels" {
   source            = "../kube_labels"
   additional_labels = merge(module.base_labels.kube_labels, { service = "agent" })
-  app               = var.app
   environment       = var.environment
   module            = var.module
   region            = var.region
@@ -65,7 +59,6 @@ data "aws_region" "region" {}
 module "constants" {
   source          = "../constants"
   matching_labels = module.operator_labels.kube_labels
-  app             = var.app
   environment     = var.environment
   module          = var.module
   region          = var.region
@@ -84,7 +77,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
   environment       = var.environment
   module            = var.module
   region            = var.region
@@ -127,7 +119,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.cilium.json
   ip_allow_list             = var.ip_allow_list
-  app                       = var.app
   environment               = var.environment
   module                    = var.module
   region                    = var.region
@@ -216,13 +207,12 @@ resource "helm_release" "cilium" {
         podLabels = module.agent_labels.kube_labels
       }
 
-      // Add in 1.15.0 as currently hardcoded and requires postrender
-      # cni = {
-      #   resources = {
-      #     cpu = "10m"
-      #     memory = "10Mi"
-      #   }
-      # }
+      cni = {
+        resources = {
+          cpu    = "10m"
+          memory = "10Mi"
+        }
+      }
 
       operator = {
         replicas = 2
@@ -256,16 +246,6 @@ resource "helm_release" "cilium" {
       }
     })
   ]
-
-  // Be default, the init container
-  // has way too many resources and ends up
-  // utilizing all of the resource request allocations
-  // on each node.
-  // Unfortunately, they do node provide a way to modify this via the input
-  // variable so we have to do some string manipulation directly.
-  postrender {
-    binary_path = "${path.module}/cilium_kustomize/kustomize.sh"
-  }
 }
 
 resource "kubernetes_manifest" "vpa_operator" {

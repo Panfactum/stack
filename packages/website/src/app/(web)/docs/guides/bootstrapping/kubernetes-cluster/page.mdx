@@ -35,20 +35,20 @@ required to manage the control plane on your own, this is an incredible deal.
 4. Add a `module.yaml` that enables **both** the `aws` and `tls` providers.
 5. Do **NOT** apply the module yet.
 
-### Choosing a Cluster Name
+### Choose a Cluster Name
 
 Your cluster name should be globally unique within your organization and descriptive. We will use it
 as an identifier in many tools, and it should be immediately apparent which cluster is being referred to if
 referenced by name. A good name would look like `production-primary` indicating that this cluster is the
 primary cluster in the production environment.
 
-### Choosing Kubernetes Version
+### Choose Kubernetes Version
 
 We _strongly_ recommend leaving this as the module default. The version was specifically chosen for compatibility
 with the rest of the Panfactum stack. See the [module documentation](../../reference/terraform-variables/aws_eks) if
 you need to override either the control plane or node group versions.
 
-### Choosing Control Plane Subnets
+### Choose Control Plane Subnets
 
 For `control_plane_subnets`, you need to enter the names of **at least 3** subnets (each in a different AZ) that
 you created in the [aws networking guide](./aws-networking). [^3] This ensures the API server is resilient to an AZ outage.
@@ -61,14 +61,14 @@ We will do deeper into securing the API server in a subsequent section.
 
 [^2]: In fact, the rest of this guide depends on you doing this.
 
-### Choosing a Service CIDR
+### Choose a Service CIDR
 
 For `service_cidr`, you will want to a private CIDR range that does not conflict with your VPC or any of it's subnets. That
 is because Kubernetes performs its own routing and networking independently of AWS.
 
 If you've been following the recommendations in this guide, we _strongly_ recommend `172.20.0.0/16`.
 
-### Choosing Node Subnets
+### Choose Node Subnets
 
 For `controller_node_subnets`, you have an important decision to make: how many availability zones do you want your nodes
 to run in.
@@ -87,7 +87,7 @@ AZ outage (e.g., [Raft](https://raft.github.io/)).
 
 The subnets you choose should be **private** and should each be in a different AZ if you are using more than one.
 
-### Choosing Node Count and Size
+### Choose Node Count and Size
 
 The nodes created by this module are used to run cluster-critical controllers, without which your cluster will not
 function properly. [^5] You should use at least three to facilitate the high-availability algorithms used by some of the
@@ -95,7 +95,7 @@ controllers. The `t3a.large` is the minimum recommended instance size if using t
 
 [^5]: Additional "worker" nodes will be dynamically provisioned by [Karpenter](https://karpenter.sh/) in a future section of this guide.
 
-### Deploying the Cluster
+### Deploy the Cluster
 
 <MarkdownAlert severity="warning">
     When you deploy the cluster, ensure that you are using the credentials for the `root` user. You should already
@@ -116,9 +116,9 @@ issues.
 
 <MarkdownImage src={eksDashboardImg} alt="Kubernetes cluster dashboard in AWS web console"/>
 
-## Connecting to the Cluster
+## Connect to the Cluster
 
-### Setting up Kubeconfig
+### Set up Kubeconfig
 
 All utilities in the kubernetes ecosystem rely on
 [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) files to configure
@@ -173,7 +173,7 @@ which defines which cluster your commandline tools like `kubectl` will target. S
     CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
     ```
 
-### Using k9s
+### Use k9s
 
 Most of our cluster introspection and debugging will be done from a TUI called [k9s](https://k9scli.io/). This comes
 bundled with the Panfactum devenv.
@@ -191,14 +191,14 @@ and by default it is set to the `default` namespace. Press `0` to switch the fil
 k9s is an incredibly powerful tool, and it is our recommended way for operators to interact directly with their
 clusters. If you have never used this tool before, we recommend getting up to speed with [these tutorials](https://k9scli.io/topics/video/).
 
-## Deploying Kubernetes Modules
+## Deploy Kubernetes Modules
 
 In the Panfactum stack everything is deployed via terraform, including Kubernetes manifests. [^10] By constraining ourselves
 to a single IaC paradigm, we are able to greatly simplify operations for users of the stack.
 
 [^10]: Though we will often use [third-party helm charts](https://helm.sh/) under the hood.
 
-### Terragrunt Setup
+### Set up Terragrunt
 
 In order to start using our kubernetes terrraform modules, we must first configure the
 [kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting

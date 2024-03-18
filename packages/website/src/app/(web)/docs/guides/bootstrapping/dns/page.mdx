@@ -19,7 +19,7 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
 
 Establish a domain name, setup subdomains, and delegate control of subdomains to AWS accounts.
 
-## Purchasing Domain Name(s)
+## Purchase Domain Name(s)
 
 <MarkdownAlert severity="info">
     If you already have a domain but from a different registrar, you can follow
@@ -96,7 +96,7 @@ that looks as follows:
 
 5. Remove the test record.
 
-## Setting up Delegated Zones
+## Set Up Delegated Zones
 
 Each environment will have its own subdomain for each root domain (e.g., `dev.panfactum.com`). This
 subdomain will be managed by its own hosted zone (not the root hosted zone). This provides the following benefits:
@@ -139,7 +139,7 @@ To verify that everything is working as expected, follow the guide from the prev
 You would test via `dig test.<your_subdomain_identifier>.<your_root_domain> +dnssec +short`. Ensure that this
 shows both the `1.1.1.1` IP address and the dnssec signature.
 
-## Deploying Records
+## Deploy Records
 
 If you have static records to deploy, you can use our [aws_dns_records](../../reference/terraform-modules/aws_dns_records)
 module to deploy them to the appropriate hosted zone.

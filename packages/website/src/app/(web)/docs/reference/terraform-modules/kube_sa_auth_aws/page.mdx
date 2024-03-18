@@ -10,8 +10,6 @@ using the implicit AWS provider-chain resolver (i.e., code changes to utilize th
 
 See [the IRSA docs](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for more information.
 
-See the [vars file](./vars.tf) for descriptions of the input parameters.
-
 ## Providers
 
 The following providers are needed by this module:
@@ -45,12 +43,6 @@ Type: `string`
 Description: An IAM policy document in rendered JSON string form.
 
 Type: `string`
-
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
-
-Description: A list of IPs that can use the service account token to authneticate with AWS API
-
-Type: `list(string)`
 
 ### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
 
@@ -106,6 +98,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+
+Description: A list of IPs that can use the service account token to authneticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
 ## Outputs
 
 The following outputs are exported:
@@ -124,4 +124,13 @@ Description: The name of the role created for the service account.
 
 ## Usage
 
-No notes
+### IP Whitelisting
+
+By default, this module's IRSA authentication will only work when the service account token is presented from an IP address
+inside the cluster (this also includes the cluster's public NAT IPs).
+
+This limits the usefulness of tokens that are extracted from the cluster by an attacker.
+
+The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
+assigned in the [aws\_vpc](../aws\_vpc) and [aws\_eks](../aws\_eks) modules. If you need additional
+IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.

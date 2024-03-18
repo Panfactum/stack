@@ -13,7 +13,6 @@ locals {
 
 module "kube_labels" {
   source       = "../kube_labels"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -29,7 +28,6 @@ module "namespace_labels" {
     "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
     "loadbalancer/enabled"                    = var.loadbalancer_enabled ? "true" : "false"
   }
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region

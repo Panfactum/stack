@@ -10,8 +10,8 @@ terraform {
 }
 
 locals {
-  nat_subnets        = toset(values(var.nat_associations))
-  nat_subnet_list    = tolist(local.nat_subnets)
+  nat_subnets        = { for source, destination in var.nat_associations : destination => source }
+  nat_subnet_list    = tolist(toset(keys(local.nat_subnets)))
   peering_route_list = flatten([for subnet in keys(var.subnets) : [for label, config in var.vpc_peer_acceptances : merge({ subnet = subnet, vpc = label }, config)]])
   peering_routes     = { for peer_route in local.peering_route_list : "${peer_route.subnet}_${peer_route.vpc}" => peer_route }
   public_subnets     = { for name, subnet in var.subnets : name => subnet if subnet.public }
@@ -55,7 +55,10 @@ resource "aws_subnet" "subnets" {
   cidr_block              = each.value.cidr_block
   availability_zone       = each.value.az
   map_public_ip_on_launch = each.value.public
-  tags                    = merge(each.value.extra_tags, { Name = each.key })
+  tags = merge(each.value.extra_tags, {
+    Name                 = each.key
+    "panfactum.com/type" = each.value.public ? "public" : contains(keys(var.nat_associations), each.key) ? "private" : "isolated"
+  })
 }
 
 ##########################################################################
@@ -118,7 +121,18 @@ resource "aws_eip" "nat_ips" {
   for_each = local.nat_subnets
 
   depends_on = [aws_internet_gateway.main]
-  tags       = { Name = "NAT_${each.key}" }
+  tags = {
+    Name                   = "NAT_${each.key}"
+    "panfactum.com/for"    = each.value
+    "panfactum.com/vpc-id" = aws_vpc.main.id
+  }
+}
+
+resource "aws_ec2_tag" "eip_subnet_tags" {
+  for_each    = local.nat_subnets
+  resource_id = aws_subnet.subnets[each.value].id
+  key         = "panfactum.com/public-ip"
+  value       = aws_eip.nat_ips[each.key].public_ip
 }
 
 resource "aws_network_interface" "nats" {

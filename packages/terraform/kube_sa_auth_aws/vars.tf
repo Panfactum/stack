@@ -26,4 +26,5 @@ variable "annotate_service_account" {
 variable "ip_allow_list" {
   description = "A list of IPs that can use the service account token to authneticate with AWS API"
   type        = list(string)
+  default     = []
 }
