@@ -138,6 +138,13 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
           </DefaultTooltipLazy>
         </sup>
       )
+    },
+    section: ({children, ...props}) => {
+      return (
+        <section {...props}>
+            {children}
+        </section>
+      )
     }
   }
 }

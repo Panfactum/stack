@@ -35,7 +35,7 @@ locals {
     submodule = local.csi_submodule
   }
 
-  vault_domain = "vault.${var.environment_domain}"
+  vault_domains = [for domain in var.environment_domains : "vault.${domain}"]
 }
 
 module "server_labels" {
@@ -43,7 +43,6 @@ module "server_labels" {
   additional_labels = {
     submodule = local.server_submodule
   }
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -57,7 +56,6 @@ module "csi_labels" {
   additional_labels = {
     submodule = local.csi_submodule
   }
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -68,7 +66,6 @@ module "csi_labels" {
 
 module "constants" {
   source       = "../constants"
-  app          = var.app
   environment  = var.environment
   module       = var.module
   region       = var.region
@@ -90,7 +87,6 @@ module "namespace" {
   admin_groups      = ["system:admins"]
   reader_groups     = ["system:readers"]
   bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
   environment       = var.environment
   module            = var.module
   region            = var.region
@@ -100,54 +96,29 @@ module "namespace" {
 }
 
 /***************************************
-* AWS KMS Seal
+* AWS KMS Automatic Unseal
 ***************************************/
-data "aws_iam_policy_document" "kms" {
-  statement {
-    sid    = "VaultKMSUnseal"
-    effect = "Allow"
-    actions = [
-      "kms:*"
-    ]
-    principals {
-      identifiers = [
-        "arn:aws:iam::${data.aws_caller_identity.id.account_id}:root",
-        module.aws_permissions.role_arn
-      ]
-      type = "AWS"
-    }
-    resources = ["*"]
+
+module "unseal_key" {
+  source = "../aws_kms_encrypt_key"
+  providers = {
+    aws.secondary = aws.secondary
   }
-}
-resource "aws_kms_key" "vault" {
-  description              = "vault unseal key for ${var.eks_cluster_name}"
-  key_usage                = "ENCRYPT_DECRYPT"
-  customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  deletion_window_in_days  = 30
-  is_enabled               = true
-  multi_region             = true
-  policy                   = data.aws_iam_policy_document.kms.json
+
+
+  name          = "kube-${var.eks_cluster_name}-vault-unseal"
+  description   = "Vault unseal key for ${var.eks_cluster_name}"
+  user_iam_arns = [module.aws_permissions.role_arn]
+
+
+  environment  = var.environment
+  module       = var.module
+  region       = var.region
+  version_tag  = var.version_tag
+  version_hash = var.version_hash
+  is_local     = var.is_local
 }
 
-resource "aws_kms_alias" "alias" {
-  target_key_id = aws_kms_key.vault.key_id
-  name          = "alias/${var.eks_cluster_name}"
-}
-
-resource "aws_kms_replica_key" "replica" {
-  provider                = aws.secondary
-  primary_key_arn         = aws_kms_key.vault.arn
-  description             = "vault unseal key for ${var.eks_cluster_name}"
-  deletion_window_in_days = 30
-  enabled                 = true
-  policy                  = data.aws_iam_policy_document.kms.json
-}
-
-resource "aws_kms_alias" "replica_alias" {
-  provider      = aws.secondary
-  target_key_id = aws_kms_replica_key.replica.key_id
-  name          = "alias/${var.eks_cluster_name}"
-}
 
 data "aws_iam_policy_document" "sa" {
   statement {
@@ -158,7 +129,7 @@ data "aws_iam_policy_document" "sa" {
       "kms:Decrypt",
       "kms:DescribeKey",
     ]
-    resources = [aws_kms_key.vault.arn, aws_kms_replica_key.replica.arn]
+    resources = [module.unseal_key.arn, module.unseal_key.arn2]
   }
 }
 
@@ -177,7 +148,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.sa.json
   ip_allow_list             = var.ip_allow_list
-  app                       = var.app
   environment               = var.environment
   module                    = var.module
   region                    = var.region
@@ -285,7 +255,7 @@ resource "helm_release" "vault" {
             setNodeId = true
             config = templatefile("./ha.hcl", {
               aws_region   = data.aws_region.region.name
-              kms_key_id   = aws_kms_key.vault.id
+              kms_key_id   = module.unseal_key.id
               aws_role_arn = module.aws_permissions.role_arn
             })
           }
@@ -346,24 +316,24 @@ resource "kubernetes_manifest" "vpa_server" {
 * Vault Ingress
 ***************************************/
 
-module "ingress" {
-  count        = var.ingress_enabled ? 1 : 0
-  source       = "../kube_ingress"
-  namespace    = local.namespace
-  ingress_name = local.server_submodule
-  ingress_configs = [{
-    domains      = [local.vault_domain]
-    service      = "vault-active"
-    service_port = 8200
-  }]
-  depends_on   = [helm_release.vault]
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
-}
+#module "ingress" {
+#  count        = var.ingress_enabled ? 1 : 0
+#  source       = "../kube_ingress"
+#  namespace    = local.namespace
+#  ingress_name = local.server_submodule
+#  ingress_configs = [{
+#    domains      = [local.vault_domain]
+#    service      = "vault-active"
+#    service_port = 8200
+#  }]
+#  depends_on   = [helm_release.vault]
+#  app          = var.app
+#  environment  = var.environment
+#  module       = var.module
+#  region       = var.region
+#  version_tag  = var.version_tag
+#  version_hash = var.version_hash
+#  is_local     = var.is_local
+#}
 
 

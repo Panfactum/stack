@@ -24,13 +24,6 @@ terraform {
 data "aws_region" "region" {}
 data "aws_caller_identity" "id" {}
 
-locals {
-  redirect_uris = [
-    "http://localhost:8250/oidc/callback",              // CLI
-    "${var.vault_url}/ui/vault/auth/oidc/oidc/callback" // Web
-  ]
-}
-
 /***************************************
 * Setup Vault for User Auth
 ***************************************/
@@ -134,14 +127,10 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
 }
 
 /***************************************
-* Setup AWS Secrets Engine
-***************************************/
-
-# TODO: We will use this for generating CICD credentials
-
-/***************************************
 * Internal cluster PKI CA
 ***************************************/
+
+## TODO: Move this to the certificate infrastructure
 
 resource "vault_mount" "pki_internal" {
   path                      = "pki/internal"
@@ -199,6 +188,8 @@ resource "vault_mount" "transit" {
 /***************************************
 * SSH Signing (Bastion Authentication)
 ***************************************/
+
+## TODO: Move this to the bastion module
 
 resource "vault_mount" "ssh" {
   path                      = "ssh"

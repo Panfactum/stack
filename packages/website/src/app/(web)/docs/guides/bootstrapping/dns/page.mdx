@@ -29,9 +29,13 @@ Establish a domain name, setup subdomains, and delegate control of subdomains to
 </MarkdownAlert>
 
 1. Login to your `management` account in the AWS web console.
+
 2. Navigate to Route 53 > Registered domains.
+
 3. Select "Register domains."
+
 4. Search for the domain(s) you want to purchase and add them to your cart.
+
 5. Checkout and ensure you enable auto-renew.
 
 ## Deploy the AWS Registered Domains Module
@@ -59,8 +63,11 @@ This module will **not** register / unregister domains, only update the registra
 it will set up the root [hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) and enable [DNSSEC](https://www.cloudflare.com/dns/dnssec/how-dnssec-works/) to prevent domain hijacking.
 
 1. Add a new `aws_registered_domains` folder to your `management` environment in the `global` region.
+
 2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_registered_domains/terragrunt.hcl).
+
 3. Enable the `aws` provider in your `module.yaml`.
+
 4. Run `terragrunt apply`.
 
 [^1]: The domains will have the following defaults you can override if desired:
@@ -80,10 +87,13 @@ refer to the [module documentation](../../reference/terraform-modules/aws_regist
 To verify that everything is working as expected:
 
 1. Navigate to the hosted zone via the AWS web console (Route 53 > Hosted Zone).
+
 2. View the DNSSEC signing section. It should appear as follows:
     <MarkdownImage src={dnssecImg} alt="DNSSEC enabled"/>
+
 3. Add a new `A` record under `test` pointing to `1.1.1.1` to your hosted zone via the AWS management console.
     <MarkdownImage src={testRecordImg} alt="Test A record"/>
+
 4. Run `dig test.panfactum.com +dnssec +short` (replace `panfactum.com` with your domain name). You should see a result
 that looks as follows:
 
@@ -115,16 +125,23 @@ Let's do this now for **every** environment:
 
 1. Choose a set of subdomain identifiers. For example, for `production` you might
 use the subdomains `prod` and `production`.
+
 2. Add a new directory in `management/global` called `aws_delegated_zones_<environment>` where `<environment>` is replaced
 with the environment name for this set of subdomains.
+
 3. Create a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_delegated_zones_production/terragrunt.hcl). [^2]
 Use the appropriate `subdomain_identifiers` for your environment.
+
 4. Create a `module.yaml`.
+
     1. Enable the `aws` provider.
+
     2. Set the `aws_account_id` and `aws_profile` to the appropriate values for the environment. Note that this module deploys
     resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the environment account
     and the secondary `aws` provider to deploy the appropriate DNS records in the `management` environment.
+
     3. Set `aws_secondary_region` to your primary region.
+
 5. Run `terragrunt apply`.
 
 [^2]: Note that this is the first time we will take advantage of terragrunt's [dependency blocks](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#dependency)

@@ -403,8 +403,6 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
         @apply bg-neutral
     }
 
-
-
 }
 
 .MuiAlert-message code {

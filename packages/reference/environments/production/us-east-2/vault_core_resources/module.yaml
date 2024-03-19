@@ -1,0 +1,5 @@
+providers:
+  - aws
+  - kubernetes
+  - time
+  - vault

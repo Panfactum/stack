@@ -210,32 +210,59 @@ We will now verify a few features of the network:
 
 1. Attempt to `ping` one of the public IP addresses of your NAT nodes. The ping should **NOT** go through as our NAT
 nodes only allow _outbound_ connections.
+
 2. We will launch a test EC2 node in a private subnet to verify that it has outbound network connectivity.
-    1. Navigate to the AWS console
+
+    1. Navigate to the AWS console.
+
     2. Launch a new EC2 node under EC2 > Instances > Launch Instances (orange button, top-right).
+
     3. Configure the new instance.
+
         1. Use Amazon Linux.
+
         2. Select the smallest instance size.
+
         3. Proceed **without** a keypair.
+
         4. Select the VPC we just deployed (**not** the default).
+
         5. Select a private subnet.
+
         6. Disable public IP assignment.
+
         7. Select "Create a new security group."
+
         8. Leave the rest as-is.
+
         9. Launch the instance.
+
     4. Select the instance.
+
     5. Notice that there is no public IP address and it received a private IP address in the subnet CIDR block.
+
     6. Connect to the instance.
+
         1. Select "Connect" (top right).
+
         2. Select "Session Manager."
+
         3. Select "Open Systems Manager Quick Setup."
+
         4. Leave everything as the default **except** manually target **only** the new test instance you just launched.
+
         5. Wait for this to successfully deploy. It may take a few minutes.
+
         6. Reboot the instance to register the node with AWS Session Manager.
+
         7. Return to Connect > Session Manager. Click "Connect." This will open a terminal in your browser.
-    7. Run `curl ifconfig.me`
+
+    7. Run `curl ifconfig.me`.
+
         1. Notice that this works, verifying your private instance is able to connect to the public internet!
+
         2. Notice that the returned IP address is that of your NAT node in the same AZ as this instance. This verifies
         that NAT is working correctly.
+
     8. Close the connection, and terminate the instance.
 

@@ -35,11 +35,6 @@ Source: [constants](./constants)
 Source: [kube_labels](./kube_labels)
 
 
-### <a name="module_ingress"></a> [ingress](#module\_ingress)
-
-Source: [kube_ingress](./kube_ingress)
-
-
 ### <a name="module_namespace"></a> [namespace](#module\_namespace)
 
 Source: [kube_namespace](./kube_namespace)
@@ -48,6 +43,11 @@ Source: [kube_namespace](./kube_namespace)
 ### <a name="module_server_labels"></a> [server\_labels](#module\_server\_labels)
 
 Source: [kube_labels](./kube_labels)
+
+
+### <a name="module_unseal_key"></a> [unseal\_key](#module\_unseal\_key)
+
+Source: [aws_kms_encrypt_key](./aws_kms_encrypt_key)
 
 
 ## Required Inputs
@@ -66,21 +66,9 @@ Description: The name of the environment for the infrastructure.
 
 Type: `string`
 
-### <a name="input_environment_domain"></a> [environment\_domain](#input\_environment\_domain)
+### <a name="input_environment_domains"></a> [environment\_domains](#input\_environment\_domains)
 
-Description: The domain on which to bind service records.
-
-Type: `string`
-
-### <a name="input_ingress_enabled"></a> [ingress\_enabled](#input\_ingress\_enabled)
-
-Description: Whether or not to enable the ingress for routing traffic to vault
-
-Type: `bool`
-
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
-
-Description: A list of IPs that can use the service account token to authneticate with AWS API
+Description: The public domains on which the vault subdomain will be created for vault connectivity (e.g., the input `production.panfactum.com` will expose vault on `vault.production.panfactum.com`).
 
 Type: `list(string)`
 
@@ -102,12 +90,6 @@ Description: The region to work in.
 
 Type: `string`
 
-### <a name="input_vault_storage_size_gb"></a> [vault\_storage\_size\_gb](#input\_vault\_storage\_size\_gb)
-
-Description: The number of gb to allocate to vault storage.
-
-Type: `number`
-
 ### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
 
 Description: The commit hash for the version. Used to reference build artifacts.
@@ -124,13 +106,37 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_ingress_enabled"></a> [ingress\_enabled](#input\_ingress\_enabled)
+
+Description: Whether or not to enable the ingress for routing traffic to vault
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+
+Description: A list of IPs that can use the service account token to authneticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### <a name="input_vault_helm_version"></a> [vault\_helm\_version](#input\_vault\_helm\_version)
 
 Description: The version of the vault helm chart to deploy
 
 Type: `string`
 
-Default: `"0.25.0"`
+Default: `"0.27.0"`
+
+### <a name="input_vault_storage_size_gb"></a> [vault\_storage\_size\_gb](#input\_vault\_storage\_size\_gb)
+
+Description: The number of gb to allocate to vault storage.
+
+Type: `number`
+
+Default: `20`
 
 ### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
 
@@ -148,7 +154,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### <a name="output_vault_url"></a> [vault\_url](#output\_vault\_url)
+### <a name="output_vault_urls"></a> [vault\_urls](#output\_vault\_urls)
 
 Description: n/a
 
