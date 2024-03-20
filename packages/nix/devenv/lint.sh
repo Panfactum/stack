@@ -8,6 +8,14 @@ set -eo pipefail
 export NODE_OPTIONS="--max-old-space-size=8192"
 
 #######################################
+## Install node modules
+#######################################
+(
+  cd "$DEVENV_ROOT"
+  npm i
+)
+
+#######################################
 ## Terraform
 #######################################
 echo >&2 "Starting Terraform linting..."

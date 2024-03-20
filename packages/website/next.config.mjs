@@ -18,7 +18,8 @@ const withMDX = createMDX({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx']
+  pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
+  distDir: process.env.LINT === "true" ? '.lint' : 'build'
 }
 
 export default withBundleAnalyzer(withMDX(nextConfig))
