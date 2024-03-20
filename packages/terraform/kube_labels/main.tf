@@ -8,9 +8,9 @@ locals {
     "panfactum.com/module"      = var.pf_module,
     "panfactum.com/environment" = var.environment,
     "panfactum.com/region"      = var.region,
-    "panfactum.com/local" : "${var.is_local}"
-    environment = var.environment,
-    region      = var.region,
-    terraform   = "true"
+    "panfactum.com/local"       = var.is_local ? "true" : "false"
+    environment                 = var.environment,
+    region                      = var.region,
+    terraform                   = "true"
   })
 }
