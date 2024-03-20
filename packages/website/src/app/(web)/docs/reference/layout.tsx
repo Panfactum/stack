@@ -1,20 +1,21 @@
 import type { ReactNode } from 'react'
-import modules from './terraform-modules/modules.json'
 
 import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/ArticleWithNavLayout'
+
+import modules from './terraform-modules/modules.json'
 
 const SIDENAV_SECTIONS = [
   {
     text: 'Repo Environment Variables',
-    path: '/repo-variables',
+    path: '/repo-variables'
   },
   {
     text: '.env Environment Variables',
-    path: '/dotenv',
+    path: '/dotenv'
   },
   {
     text: 'Terragrunt Variables',
-    path: '/terragrunt-variables',
+    path: '/terragrunt-variables'
   },
   {
     text: 'Terraform Modules',
@@ -22,8 +23,8 @@ const SIDENAV_SECTIONS = [
     sub: [
       {
         text: 'Overview',
-        path: '/overview',
-      },
+        path: '/overview'
+      }
     ].concat(modules.modules.map(module => ({
       text: module,
       path: `/${module}`

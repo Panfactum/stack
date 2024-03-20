@@ -6,46 +6,45 @@ This guide aims to take you through the setup steps necessary to begin working i
 
 ## Supported Systems
 
-- Linux
-- MacOS (Intel or ARM)
-- Windows (via `WSLv2`)
-
+* Linux
+* MacOS (Intel or ARM)
+* Windows (via `WSLv2`)
 
 ## Installation
 
 Please install these tools:
 
-| Tool     | Purpose                                                                    | Installation Docs                                      |
-| -------- | -------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `nix`    | Package management tool used to install all other dependencies           | [Docs](https://nixos.org/download.html)                |
-| `direnv` | Automatically loads tooling when entering the project directory | [Docs](https://direnv.net/docs/installation.html) |
-| `nix-direnv` | Significantly improves the speed of loading developer environments declared via nix | [Docs](https://github.com/nix-community/nix-direnv)  |
+| Tool         | Purpose                                                                             | Installation Docs                                   |
+| ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `nix`        | Package management tool used to install all other dependencies                      | [Docs](https://nixos.org/download.html)             |
+| `direnv`     | Automatically loads tooling when entering the project directory                     | [Docs](https://direnv.net/docs/installation.html)   |
+| `nix-direnv` | Significantly improves the speed of loading developer environments declared via nix | [Docs](https://github.com/nix-community/nix-direnv) |
 
 ### Installation Notes
 
 #### `nix`
 
-- You must enable [nix flakes](https://zero-to-nix.com/concepts/flakes) by following [these instructions](https://nixos.wiki/wiki/Flakes).
-If you do not use `NixOS` or `home-manager`, we recommend adding the appropriate flags to your `~/.config/nix/nix.conf`.
+* You must enable [nix flakes](https://zero-to-nix.com/concepts/flakes) by following [these instructions](https://nixos.wiki/wiki/Flakes).
+  If you do not use `NixOS` or `home-manager`, we recommend adding the appropriate flags to your `~/.config/nix/nix.conf`.
 
-- Our stack depends on some "unfree" packages such as `terraform` which are not technically [open source software](https://thenewstack.io/hashicorp-abandons-open-source-for-business-source-license/).
-That said, using any of these tools in your stack is free as long as you are not developing competing products. You must whitelist
-the ability to download these tools by following these [instructions](https://nixos.wiki/wiki/Unfree_Software). We recommend
-adding the appropriate settings to your `~/.config/nixpkgs/config.nix` settings file.
+* Our stack depends on some "unfree" packages such as `terraform` which are not technically [open source software](https://thenewstack.io/hashicorp-abandons-open-source-for-business-source-license/).
+  That said, using any of these tools in your stack is free as long as you are not developing competing products. You must whitelist
+  the ability to download these tools by following these [instructions](https://nixos.wiki/wiki/Unfree_Software). We recommend
+  adding the appropriate settings to your `~/.config/nixpkgs/config.nix` settings file.
 
 #### `direnv`
 
-- Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
+* Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
 
 #### `nix-direnv`
 
-- If you do not use `NixOS` or `home-manager`, we recommend installing `nix-direnv` via the `nix-env` instructions provided in the above link.
+* If you do not use `NixOS` or `home-manager`, we recommend installing `nix-direnv` via the `nix-env` instructions provided in the above link.
 
 ## First Use
 
 <MarkdownAlert severity="warning">
-    If your organization does not already have a repository setup with the Panfactum stack, please complete
-    the [repository setup guide](./repo-setup) instead.
+  If your organization does not already have a repository setup with the Panfactum stack, please complete
+  the [repository setup guide](./repo-setup) instead.
 </MarkdownAlert>
 
 Once you have the tooling installed:
@@ -56,7 +55,7 @@ Once you have the tooling installed:
 
 3. You should now see an error message that looks like the following:
 
-   ```
+   ```shell-session
    direnv: error /home/user/repos/your-repo/.envrc is blocked. Run `direnv allow` to approve its content
    ```
 
@@ -66,7 +65,7 @@ Once you have the tooling installed:
 
 4. Once allowed, `direnv` will install [devenv](https://devenv.sh). The repo's `devenv` module defines all additional tooling that needs to be installed, and the installer should immediately run. It will look similar to the below:
 
-   ```text
+   ```shell-session
    direnv: loading ~/repos/your-repo/.envrc
    Building shell ...
    direnv: export +AWS_CONFIG_FILE +AWS_SHARED_CREDENTIALS_FILE +C_INCLUDE_PATH +DEVENV_DOTFILE +DEVENV_PROFILE ...
@@ -76,10 +75,10 @@ Once you have the tooling installed:
 
 5. If everything completes successfully, you should have the following environment variables set (check via `printenv | grep DEVENV`):
 
-   ```text
+   ```dotenv
    DEVENV_DOTFILE=/home/user/repos/your-repo/.devenv
    DEVENV_ROOT=/home/user/repos/your-repo
-   DEVENV_PROFILE=/nix/store/x9rx3384qckjrrp7668w89bds52xi6vs-devenv-profile
+   DEVENV_PROFILE=/nix/store/xxxxxxxxxxxxxxxxxxxxxxxxx-devenv-profile
    DEVENV_STATE=/home/user/user/repos/your-repo/.devenv/state
    ```
 

@@ -35,7 +35,7 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,

@@ -1,0 +1,104 @@
+version: "0.2"
+language: "en"
+dictionaries: [
+  "en_US",
+  "companies",
+  "softwareTerms",
+  "latex",
+  "bash",
+  "typescript",
+  "node",
+  "go",
+  "html",
+  "python",
+  "filetypes",
+  "aws",
+  "web-services"
+]
+words: [
+  "Panfactum",
+  "irsa",
+  "nodefs",
+  "bottlerocket",
+  "loadbalancer",
+  "linkerd",
+  "linkerd2",
+  "kubeconfig",
+  "healthcheck",
+  "cicd",
+  "descheduler",
+  "kubernetes",
+  "karpenter",
+  "millicores",
+  "tolerations",
+  "crds",
+  "azuread",
+  "stakater",
+  "autoscaler",
+  "keypair",
+  "Diffie",
+  "devenv",
+  "terragrunt",
+  "terraforming",
+  "healthchecks",
+  "cnpg",
+  "buildkit",
+  "gbit",
+  "coredns",
+  "autoscaled",
+  "dnssec",
+  "cilium",
+  "whois",
+  "scim",
+  "routable",
+  "cloudnative",
+  "moby",
+  "automations",
+  "pkgs",
+  "nixpkgs",
+  "direnv",
+  "Namecheap",
+  "envrc",
+  "boilerplate",
+  "IPAM",
+  "Isolavent",
+  "nftables",
+  "netfilter",
+  "datacenter",
+  "datacenters",
+  "sdlc",
+  "lockfile",
+  "lockfiles",
+  "timecode",
+  "gruntworks",
+  "isovalent",
+  "nameserver",
+  "langston",
+  "kops",
+  "shamir",
+  "autoscalers",
+  "parameterizing",
+  "entra",
+  "codegen",
+  "dotfile",
+  "pvcs",
+  "yamldecode",
+  "fullykubed",
+  "jetbrains"
+]
+languageSettings:
+  - languageId: markdown,mdx
+    ignoreRegExpList:
+      - markdown_code_block
+      - markdown_inline_code
+patterns:
+  - name: markdown_code_block
+    pattern: |
+      /
+          ^(\s*`{3,}).*     # match the ```
+          [\s\S]*?          # the block of code
+          ^\1               # end of the block
+      /gmx
+  - name: markdown_inline_code
+    pattern: |
+      /`.*`/gmx

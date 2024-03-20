@@ -1,3 +1,5 @@
+{/* lint disable no-duplicate-headings */}
+
 # AWS Authentication via Kubernetes Service Account
 
 **Type:** [Submodule](./overview)
@@ -100,7 +102,7 @@ Default: `true`
 
 ### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
 
-Description: A list of IPs that can use the service account token to authneticate with AWS API
+Description: A list of IPs that can use the service account token to authenticate with AWS API
 
 Type: `list(string)`
 
@@ -134,3 +136,5 @@ This limits the usefulness of tokens that are extracted from the cluster by an a
 The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
 assigned in the [aws\_vpc](../aws\_vpc) and [aws\_eks](../aws\_eks) modules. If you need additional
 IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
+
+{/* lint enable no-duplicate-headings */}

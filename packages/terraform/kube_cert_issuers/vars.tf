@@ -38,6 +38,6 @@ variable "vault_internal_url" {
 }
 
 variable "ip_allow_list" {
-  description = "A list of IPs that can use the service account token to authneticate with AWS API"
+  description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
 }

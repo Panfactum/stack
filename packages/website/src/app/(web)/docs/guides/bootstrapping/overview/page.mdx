@@ -4,15 +4,13 @@
 
 Deploy the necessary infrastructure to begin hosting your organization's software.
 
-
 ## Time Commitment
 
 | Experience Level | Description                                                                                 | Completion Time |
-|------------------|---------------------------------------------------------------------------------------------|-----------------|
-| Novice           | Has limited experience working with cloud infastructure                                     | 1-2 weeks       |
+| ---------------- | ------------------------------------------------------------------------------------------- | --------------- |
+| Novice           | Has limited experience working with cloud infrastructure                                    | 1-2 weeks       |
 | Competent        | Has worked with infrastructure-as-code tools, AWS, and kubernetes in professional settings  | 2-3 days        |
 | Expert           | Has extensive experience guiding teams that work terraform, terragrunt, AWS, and Kubernetes | 4-8 hours       |
-
 
 ## Summary
 
@@ -20,42 +18,41 @@ This series of guides will take you through setting up the core infrastructure f
 
 This includes the production-ready deployments of the following infrastructure components:
 
-- AWS organization
-- Kubernetes clusters
-- Identity provider
-- Database operators
+* AWS organization
+* Kubernetes clusters
+* Identity provider
+* Database operators
 
 TODO: Add link to more specific capabilities of the stack
 
 ## Prerequisites
 
-- You should already have completed the following guides:
-    - [Repository setup](../getting-started/repo-setup)
-    - [Terraforming](../terraforming/overview), in particular the [Deploying Modules guide](../terraforming/deploying-modules)
-- A credit card that you can use to pay for the AWS infrastructure. Expect to spend at minimum $150 / month / Kubernetes cluster.
-- If your organization already has an identity provider (a tool that you use for single-sign-on (SSO) such as
-Okta, Google, Azure Entra ID, etc), you will need to access to connect a new service provider. This typically
-requires admin privilegese to your Identity Provider.
-- This guide does **not** assume that you have any existing AWS infrastructure. However, in many
-circumstances you may already have an AWS organization. If you do, please take note:
-    - You do **not** need a new [AWS organization](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html).
-  In fact, it is usually easier to reuse your existing one.
-    - You will need [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to the [management account](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_getting-started_concepts.html) of your existing AWS organization. The
-  management account is used to provision new accounts in your organization and to set up organization-level settings such as AWS SSO.
-    - While it is possible to reuse existing AWS accounts, we recommend using net new accounts for this guide to avoid infrastructure
+* You should already have completed the following guides:
+  * [Repository setup](../getting-started/repo-setup)
+  * [Terraforming](../terraforming/overview), in particular the [Deploying Modules guide](../terraforming/deploying-modules)
+* A credit card that you can use to pay for the AWS infrastructure. Expect to spend at minimum $150 / month / Kubernetes cluster.
+* If your organization already has an identity provider (a tool that you use for single-sign-on (SSO) such as
+  Okta, Google, Azure Entra ID, etc), you will need to access to connect a new service provider. This typically
+  requires admin privileges to your Identity Provider.
+* This guide does **not** assume that you have any existing AWS infrastructure. However, in many
+  circumstances you may already have an AWS organization. If you do, please take note:
+  * You do **not** need a new [AWS organization](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html).
+    In fact, it is usually easier to reuse your existing one.
+  * You will need [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to the [management account](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_getting-started_concepts.html) of your existing AWS organization. The
+    management account is used to provision new accounts in your organization and to set up organization-level settings such as AWS SSO.
+  * While it is possible to reuse existing AWS accounts, we recommend using net new accounts for this guide to avoid infrastructure
     conflicts.[^1]
-    - If you do choose to reuse existing AWS accounts, you will need [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to
+  * If you do choose to reuse existing AWS accounts, you will need [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to
     those accounts.
-- A domain name selected that you want to use to access your infrastructure. It is preferable if you have **not**
-purchased it yet (but it is alright if you have).
-- This guide assumes that you will use AWS as your [domain name registrar](https://www.cloudflare.com/learning/dns/glossary/what-is-a-domain-name-registrar/). If you
-already have domain names with another registrar such as Cloudflare, GoDaddy, Namecheap, etc., you will need admin access to those accounts. This
-allows you to transfer those domain names into AWS which is required to complete this guide successfully.
-
+* A domain name selected that you want to use to access your infrastructure. It is preferable if you have **not**
+  purchased it yet (but it is alright if you have).
+* This guide assumes that you will use AWS as your [domain name registrar](https://www.cloudflare.com/learning/dns/glossary/what-is-a-domain-name-registrar/). If you
+  already have domain names with another registrar such as Cloudflare, GoDaddy, Namecheap, etc., you will need admin access to those accounts. This
+  allows you to transfer those domain names into AWS which is required to complete this guide successfully.
 
 [^1]: AWS accounts are **free** and are the recommended way to isolate infrastructure between environments (and even teams in larger organizations).
-Especially with the power of infrastructure-as-code, you should feel empowered to create as many as you need.
+    Especially with the power of infrastructure-as-code, you should feel empowered to create as many as you need.
 
 ## Next Steps
 
-- [Preparing AWS](./preparing-aws)
+* [Preparing AWS](./preparing-aws)

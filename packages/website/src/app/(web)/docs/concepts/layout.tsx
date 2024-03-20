@@ -22,7 +22,7 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Cluster Networking',
         path: '/cluster-networking'
-      },
+      }
     ]
   }
 ]

@@ -1,4 +1,4 @@
-# Kubernetess Namespace
+# Kubernetes Namespace
 
 **Type:** Submodule
 

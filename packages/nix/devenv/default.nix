@@ -40,8 +40,11 @@ in {
     shellcheck
     shfmt
     nixfmt
+    nodePackages.cspell
+    (customShellScript "precommit-spellcheck")
     (customShellScript "precommit-terraform-fmt")
     (customShellScript "precommit-terraform-docs")
+    (customShellScript "precommit-website")
     (customShellScript "lint")
   ];
 
@@ -75,6 +78,20 @@ in {
     shfmt = {
       enable = true;
       description = "Shell code formatting";
+    };
+    website = {
+      enable = true;
+      entry = "precommit-website";
+      description = "Checks for website";
+      files = "^packages/(website|eslint)/(.*)";
+      pass_filenames = false;
+    };
+    cspell-custom = {
+      enable = true;
+      entry = "precommit-spellcheck";
+      description = "Spellchecker";
+      files = "(.*).(md|mdx)$";
+      pass_filenames = false;
     };
   };
 }

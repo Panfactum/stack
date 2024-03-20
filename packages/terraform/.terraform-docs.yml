@@ -13,3 +13,19 @@ settings:
   anchor: true
   html: true
   read-comments: false
+content: |-
+  {/* lint disable no-duplicate-headings */}
+  
+  {{ .Header }}
+  
+  {{ .Requirements }}
+  
+  {{ .Modules }}
+  
+  {{ .Inputs }}
+  
+  {{ .Outputs }}
+  
+  {{ .Footer }}
+  
+  {/* lint enable no-duplicate-headings */}

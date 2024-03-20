@@ -118,19 +118,19 @@ terraform/
 
 Each `environment.yaml` as the following `version` keys:
 
-- `development`: `main`
-- `staging`: `v2.0.0`
-- `production`: `v1.1.0`
+* `development`: `main`
+* `staging`: `v2.0.0`
+* `production`: `v1.1.0`
 
 Additionally, the `production/us-west-2/region.yaml` file has the `version` key set to `v1.0.0`.
 
 In this scenario, even though all three environments will use both the `aws_eks` and `aws_vpc` modules:
 
-- **All** modules in `development` will use the latest `terraform/*` code on the `main` branch (useful for ensuring the latest
-code is always deployed).
-- **All** modules in `staging` will use the `terraform/*` code at the `v2.0.0` git tag.
-- The modules in `production` will default to using the `terraform/*` code at the `v1.1.0` tag except for the modules
-in `us-west-2` which will use `v1.0.0` (useful for incremental or blue/green deployments).
+* **All** modules in `development` will use the latest `terraform/*` code on the `main` branch (useful for ensuring the latest
+  code is always deployed).
+* **All** modules in `staging` will use the `terraform/*` code at the `v2.0.0` git tag.
+* The modules in `production` will default to using the `terraform/*` code at the `v1.1.0` tag except for the modules
+  in `us-west-2` which will use `v1.0.0` (useful for incremental or blue/green deployments).
 
 ## Local Development
 
@@ -206,6 +206,3 @@ names or even tags are not helpful as they are mutable and can change what code 
 The Panfactum terragrunt system will automatically provide all deployed terraform modules with an input variable
 called `version_hash` which represents the actual commit hash being deployed. You should use this to label
 and tag your infrastructure in your first-party modules; we do this automatically in the Panfactum modules.
-
-
-

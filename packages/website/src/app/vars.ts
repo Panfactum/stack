@@ -1,1 +1,1 @@
-export const currentPanfactumVersion = "main";
+export const currentPanfactumVersion = 'main'

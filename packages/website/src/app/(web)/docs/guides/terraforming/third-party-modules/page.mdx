@@ -21,9 +21,9 @@ terraform {
 
 A few important notes:
 
-- `github.com/Panfactum/stack.git` represents the git repository that you want to pull from
-- `/packages/terraform//aws_eks` represents the directory path to the terraform module folder
-- **Only** the code under the `//` will actually be downloaded (so the terraform modules won't be able to locally reference any files not under `//`)
+* `github.com/Panfactum/stack.git` represents the git repository that you want to pull from
+* `/packages/terraform//aws_eks` represents the directory path to the terraform module folder
+* **Only** the code under the `//` will actually be downloaded (so the terraform modules won't be able to locally reference any files not under `//`)
 
 For more information and options, you should refer to the [terragrunt documentation](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#terraform)
 on the `source` field.
@@ -54,7 +54,7 @@ There are two different methods to determine which providers to enable.
 
 #### Direct Method
 
-Every terraform module will have a [required_providers block](https://developer.hashicorp.com/terraform/language/providers/requirements) that looks like this:
+Every terraform module will have a [required\_providers block](https://developer.hashicorp.com/terraform/language/providers/requirements) that looks like this:
 
 ```hcl
 terraform {
@@ -114,7 +114,6 @@ provider "registry.terraform.io/hashicorp/aws" {
 
 In the above case, you would only need to enable the `aws` provider.
 
-
 ## Sourcing via Terraform
 
 You do not have to deploy third-party modules directly. You can instead include them via your own [first-party
@@ -135,13 +134,12 @@ module "pod_template" {
 
 All of the same terragrunt rules for sourcing and version pinning apply here as well.
 
-
 ## Using Panfactum Modules
 
 There are a handful of specific considerations to take into account when using Panfactum modules:
 
-- The source code for every Panfactum module is provided [here](https://github.com/Panfactum/stack/tree/main/packages/terraform).
-- We provide reference instructions for using each module [here](../../reference/terraform-modules/overview) (including which providers to enable).
-- You should `source` Panfactum modules via `github.com/Panfactum/stack.git?ref=<version>/packages/terraform//<module_name>` (note the position of the `//`).
-- You should use the same git ref for the module version as you do for the local development `flake.nix` input (TODO: docs link). We deliberately version the local
-development utilities and the terraform modules in parallel to ensure compatibility with one another.
+* The source code for every Panfactum module is provided [here](https://github.com/Panfactum/stack/tree/main/packages/terraform).
+* We provide reference instructions for using each module [here](../../reference/terraform-modules/overview) (including which providers to enable).
+* You should `source` Panfactum modules via `github.com/Panfactum/stack.git?ref=<version>/packages/terraform//<module_name>` (note the position of the `//`).
+* You should use the same git ref for the module version as you do for the local development `flake.nix` input (TODO: docs link). We deliberately version the local
+  development utilities and the terraform modules in parallel to ensure compatibility with one another.

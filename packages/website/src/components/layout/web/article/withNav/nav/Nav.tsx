@@ -1,7 +1,7 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {Fragment, memo, useCallback, useState } from 'react'
+import { Fragment, memo, useCallback, useState } from 'react'
 
 import type {
   IArticleNavLinkProps,
@@ -19,9 +19,15 @@ const NavLink = memo((props: IArticleNavLinkProps & ITreeProps) => {
   // This allows long code identifiers (e.g., terraform module names) to be broken at their underscores
   const breakableText = text
     .split('_')
-    .map(((t,i, l) => {
-      return <Fragment key={t}>{t}{i === l.length - 1 ? '' : '_'}<wbr/></Fragment>
-    }))
+    .map((t, i, l) => {
+      return (
+        <Fragment key={t}>
+          {t}
+          {i === l.length - 1 ? '' : '_'}
+          <wbr/>
+        </Fragment>
+      )
+    })
 
   return (
     <div className="flex items-center py-1">

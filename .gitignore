@@ -5,6 +5,7 @@
 .env
 .direnv/
 .pnpm/
+.cspell/
 node_modules/
 
 *.bkp

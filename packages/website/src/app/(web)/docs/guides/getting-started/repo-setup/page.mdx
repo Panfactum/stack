@@ -1,13 +1,14 @@
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 # Repository Setup
 
 <MarkdownAlert severity="info">
-    We provide a [reference repository setup](https://github.com/Panfactum/stack/tree/main/packages/reference) that you can benchmark against as you progress through the setup documentation.
+  We provide a [reference repository setup](https://github.com/Panfactum/stack/tree/main/packages/reference) that you can benchmark against as you progress through the setup documentation.
 </MarkdownAlert>
 
 ## Choosing a Repository
@@ -25,16 +26,16 @@ setting up a dedicated "stack" repository where this code can live.
 
 This repository will contain the following pieces of functionality:
 
-- Much (if not all) of your infrastructure-as-code (`terraform`)
-- All of your configuration-as-code (`terragrunt`) for every live environment
-- All of your deployment pipelines
-- All of your local developer tooling
-- All of your immediate integration tooling for local development
+* Much (if not all) of your infrastructure-as-code (`terraform`)
+* All of your configuration-as-code (`terragrunt`) for every live environment
+* All of your deployment pipelines
+* All of your local developer tooling
+* All of your immediate integration tooling for local development
 
 ## Integrate the Panfactum devenv
 
 <MarkdownAlert severity="warning">
-    Before continuing, make sure you have followed the installation steps from the [local setup guide](./local-setup).
+  Before continuing, make sure you have followed the installation steps from the [local setup guide](./local-setup).
 </MarkdownAlert>
 
 Two fundamental tools codify your local developer environment:
@@ -49,53 +50,55 @@ an isolated directory that won't interfere with tooling already installed on you
 The following steps will integrate the Panfactum tooling into your repo:
 
 1. Create a `devenv.nix` file in the root of your repo. We recommend starting with the below and expanding it
-as needed. You can read more about the available syntax and options [here](https://devenv.sh/basics/).
+   as needed. You can read more about the available syntax and options [here](https://devenv.sh/basics/).
 
-    ```nix
-    {config, pkgs, ...}: { }
-    ```
+   ```nix
+   {config, pkgs, ...}: { }
+   ```
 
 2. Create a nix flake in the root of your repo by generating a `flake.nix` file
-with the following content:
-    <Accordion>
-    <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="flake-nix" id="flake-nix">
-        `flake.nix`
-    </AccordionSummary>
-    <AccordionDetails>
-        ```nix
-        {
-            inputs = {
-                # Change 'nixos-23.11' to whichever cut of the nixpkgs repository
-                # you want to use in your project. This will NOT impact the Panfactum stack at all.
-                # For available versions, see https://github.com/NixOS/nixpkgs
-                # We recommend using the version that is supported here:
-                # https://search.nixos.org/packages (updated every 6 mo)
-                pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+   with the following content:
 
-                # Change 'main' to be the release version that you desire
-                # (or keep 'main' if you want to use the rolling release)
-                # Ensure that this matches the version you use for your terraform modules
-                panfactum.url = "github:Panfactum/stack/main";
-            };
+   <Accordion>
+     <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="flake-nix" id="flake-nix">
+       `flake.nix`
+     </AccordionSummary>
 
-            outputs = { self, panfactum, pkgs, ... } @ inputs: {
-                devShells = panfactum.lib.mkDevShells {
-                    inherit pkgs;
-                    modules = [ (import ./devenv.nix )];
-                };
-            };
-        }
-        ```
-    </AccordionDetails>
-    </Accordion>
+     <AccordionDetails>
+       ```nix
+       {
+           inputs = {
+               # Change 'nixos-23.11' to whichever cut of the nixpkgs repository
+               # you want to use in your project. This will NOT impact the Panfactum stack at all.
+               # For available versions, see https://github.com/NixOS/nixpkgs
+               # We recommend using the version that is supported here:
+               # https://search.nixos.org/packages (updated every 6 mo)
+               pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+
+               # Change 'main' to be the release version that you desire
+               # (or keep 'main' if you want to use the rolling release)
+               # Ensure that this matches the version you use for your terraform modules
+               panfactum.url = "github:Panfactum/stack/main";
+           };
+
+           outputs = { self, panfactum, pkgs, ... } @ inputs: {
+               devShells = panfactum.lib.mkDevShells {
+                   inherit pkgs;
+                   modules = [ (import ./devenv.nix )];
+               };
+           };
+       }
+       ```
+     </AccordionDetails>
+   </Accordion>
 
 3. Run `git add flake.nix devenv.nix` to register the flake and devenv file.
 
 4. Run `nix flake update`. A `flake.lock` lockfile should be generated. This should be committed to version control
-alongside the `flake.nix`.
+   alongside the `flake.nix`.
 
 5. Test that you are able to instantiate the development environment via `nix develop --impure`. If everything is working,
-you should see multiple environment variables when you run `printenv | grep DEVENV`. You may see several warnings which we will resolve in subsequent setup steps.
+   you should see multiple environment variables when you run `printenv | grep DEVENV`. You may see several warnings which we will resolve in subsequent setup steps.
 
 ## Integrate `direnv`
 
@@ -155,19 +158,19 @@ In later guides, we will cover how to configure these various utilities to deplo
 
 For now, you will want to run the following commands to setup the basic scaffolding and remove the warnings:
 
-- `pf-update-terragrunt`: Creates the environments folder with some starter `terragrunt` boilerplate
-- `pf-update-aws`: Creates the AWS config folder with some starter boilerplate. Your AWS settings will eventually live here.
-- `pf-update-kube`: Creates the Kubernetes config folder with some starter boilerplate. Your Kubernetes settings will eventually live here.
-- `pf-update-ssh`: Create the SSH config folder with some starter boilerplate. Your SSH settings will eventually live here.
+* `pf-update-terragrunt`: Creates the environments folder with some starter `terragrunt` boilerplate
+* `pf-update-aws`: Creates the AWS config folder with some starter boilerplate. Your AWS settings will eventually live here.
+* `pf-update-kube`: Creates the Kubernetes config folder with some starter boilerplate. Your Kubernetes settings will eventually live here.
+* `pf-update-ssh`: Create the SSH config folder with some starter boilerplate. Your SSH settings will eventually live here.
 
 ## Next Steps
 
 <MarkdownAlert severity="warning">
-    Before proceeding much further, you should understanding how versioning and releases work in the Panfactum stack:
-    [guide](../versioning/releases).
+  Before proceeding much further, you should understanding how versioning and releases work in the Panfactum stack:
+  [guide](../versioning/releases).
 </MarkdownAlert>
 
-- [Complete the local setup guide](./local-setup)
-- [Learn how to deploy infrastructure](../terraforming/overview)
-- [Bootstrap the Panfactum stack](../bootstrapping/overview)
-- [Customize your devenv to add additional settings and utilities](../developer-environment/customizing)
+* [Complete the local setup guide](./local-setup)
+* [Learn how to deploy infrastructure](../terraforming/overview)
+* [Bootstrap the Panfactum stack](../bootstrapping/overview)
+* [Customize your devenv to add additional settings and utilities](../developer-environment/customizing)

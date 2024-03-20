@@ -27,3 +27,33 @@ echo >&2 "Finished Nix linting!"
 echo >&2 "Starting shell linting..."
 shfmt -w "$DEVENV_ROOT"
 echo >&2 "Finished shell linting!"
+
+#######################################
+## Documentation
+#######################################
+echo >&2 "Starting documentation linting..."
+(
+  cd "$DEVENV_ROOT/packages/website"
+  ./node_modules/.bin/remark src -e .mdx -e .md -o -S
+)
+echo >&2 "Finished documentation linting!"
+
+#######################################
+## Spell Check
+#######################################
+echo >&2 "Starting spellcheck linting..."
+(
+  cd "$DEVENV_ROOT"
+  cspell lint --no-cache --no-progress '**/*.mdx' '**/*.md'
+)
+echo >&2 "Finished spellcheck linting!"
+
+#######################################
+## Website
+#######################################
+echo >&2 "Starting website linting..."
+(
+  cd "$DEVENV_ROOT/packages/website"
+  ./node_modules/.bin/eslint --fix src
+)
+echo >&2 "Finished website linting!"

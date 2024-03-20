@@ -13,8 +13,6 @@
     "aws_kms_encrypt_key",
     "aws_registered_domains",
     "aws_s3_private_bucket",
-    "aws_sso",
-    "aws_sso_permission_binding",
     "aws_vpc",
     "constants",
     "groups",

@@ -154,7 +154,7 @@ const SIDENAV_SECTIONS = [
           {
             text: 'General Guide',
             path: '/general'
-          },
+          }
         ]
       }
     ]
@@ -172,7 +172,7 @@ const SIDENAV_SECTIONS = [
         path: '/pull-requests'
       }
     ]
-  },
+  }
 ]
 
 export default function Layout (

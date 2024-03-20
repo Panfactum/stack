@@ -1,7 +1,8 @@
 import MarkdownImage from "@/components/markdown/MarkdownImage";
+
 import ebsCSILaunchImg from './ebs-csi-launch.jpg'
-import storageClassesImg from './storage-clases.jpg'
 import secretsCSILaunchImg from './secrets-csi-launch.jpg'
+import storageClassesImg from './storage-classes.jpg'
 
 # Container Storage Interface (CSI) Drivers
 
@@ -14,11 +15,11 @@ Deploy the various CSI drivers used by the Panfactum stack.
 Compared to networking, storage in kubernetes is relatively straightforward. Storage is exposed to pods
 via two mechanisms:
 
-- Directly from the available storage on the host operating system [^1]
-- Dynamically, using a [Container Storage Interface (CSI)](https://kubernetes.io/blog/2019/01/15/container-storage-interface-ga/) driver
+* Directly from the available storage on the host operating system [^1]
+* Dynamically, using a [Container Storage Interface (CSI)](https://kubernetes.io/blog/2019/01/15/container-storage-interface-ga/) driver
 
 [^1]: This type of storage should be considered ephemeral (temporary) as it inherently linked to the lifetime of the underlying
-nodes. In the Panfactum stack, nodes can be replaced at any time.
+    nodes. In the Panfactum stack, nodes can be replaced at any time.
 
 The primary use case for CSI is for attaching storage managed by cloud providers (e.g., [AWS EBS](https://aws.amazon.com/ebs/)). That said,
 this interface is extremely flexible and can also be used by other utilities to directly mount files inside your pods.
@@ -28,7 +29,7 @@ this interface is extremely flexible and can also be used by other utilities to 
 The [AWS EBS CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver) allows you to provision EBS volumes for
 use in your pods. This is the recommended way to store stateful data (i.e., Database storage) within the Panfactum stack.
 
-We provide the [kube_aws_ebs_csi](../../reference/terraform-modules/kube_aws_ebs_csi) module to deploy the driver.
+We provide the [kube\_aws\_ebs\_csi](../../reference/terraform-modules/kube_aws_ebs_csi) module to deploy the driver.
 
 Let's deploy it now:
 
@@ -43,21 +44,21 @@ Let's deploy it now:
 5. Run `terragrunt apply`.
 
 6. Verify the pods deployed successfully:
-    <MarkdownImage src={ebsCSILaunchImg} alt="AWS EBS CSI launched successfully"/>
+   <MarkdownImage src={ebsCSILaunchImg} alt="AWS EBS CSI launched successfully" />
 
 ### Storage Classes
 
 Note that there are now a few [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) resources
 in the cluster:
 
-<MarkdownImage src={storageClassesImg} alt="Storage classes in the cluster"/>
+<MarkdownImage src={storageClassesImg} alt="Storage classes in the cluster" />
 
 The following classes were installed by the `kube_aws_ebs_csi` module:
 
-- `ebs-standard`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes and deletes the volumes automatically
-when the utilizing resource is deleted (default)
-- `ebs-standard-retained`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes but never deletes the underlying
-volumes (recommended for production databases)
+* `ebs-standard`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes and deletes the volumes automatically
+  when the utilizing resource is deleted (default)
+* `ebs-standard-retained`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes but never deletes the underlying
+  volumes (recommended for production databases)
 
 Notice that there is also one named `gp2`. Unfortunately, EKS installs this automatically, but it uses legacy storage
 technology that is both more expensive and less performant. Even more unfortunately, this is set as the default storage
@@ -69,7 +70,7 @@ command: `kubectl delete storageclass gp2`.
 The [Kubernetes Secrets Store CSI driver](https://secrets-store-csi-driver.sigs.k8s.io/) allows you to mount secrets
 files from third part sources such as AWS or [Hashicorp Vault](https://www.vaultproject.io/) (which we will install in the next section).
 
-We provide the [kube_secrets_csi](../../reference/terraform-modules/kube_secrets_csi) module to deploy the driver.
+We provide the [kube\_secrets\_csi](../../reference/terraform-modules/kube_secrets_csi) module to deploy the driver.
 
 Let's deploy it now:
 
@@ -84,7 +85,7 @@ Let's deploy it now:
 5. Run `terragrunt apply`.
 
 6. Verify the pods deployed successfully:
-    <MarkdownImage src={secretsCSILaunchImg} alt="Secrets CSI launched successfully"/>
+   <MarkdownImage src={secretsCSILaunchImg} alt="Secrets CSI launched successfully" />
 
 ## Next Steps
 

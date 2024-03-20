@@ -1,8 +1,9 @@
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 # Deploying Modules
 
@@ -14,8 +15,8 @@ before proceeding.
 
 ## Setting up Your Repo
 
-<MarkdownAlert severity='info'>
-    We provide an example of a fully configured reference repository [here](https://github.com/Panfactum/stack/tree/main/packages/reference).
+<MarkdownAlert severity="info">
+  We provide an example of a fully configured reference repository [here](https://github.com/Panfactum/stack/tree/main/packages/reference).
 </MarkdownAlert>
 
 In order to provide a convenient and integrated experience for consumers of the Panfactum stack, we
@@ -28,13 +29,13 @@ and integrating new changes.
 
 The most important facets of Github flow are:
 
-- There is exactly **one** primary integration branch
-- That branch is **always** deployable
+* There is exactly **one** primary integration branch
+* That branch is **always** deployable
 
 We extend that pattern with one more rule:
 
-- That branch contains the configuration-as-code for **all** deployed infrastructure across **every**
-environment
+* That branch contains the configuration-as-code for **all** deployed infrastructure across **every**
+  environment
 
 This is a **critically important** concept. Again, **one** branch will define exactly what is deployed across
 **all** environments.
@@ -55,14 +56,14 @@ behaves via `hcl` and `yaml` files defined in the environments folder.
 
 ### Panfactum Codegen
 
-We provide some standard terragrunt boilderplate that we assume you will use. This
+We provide some standard terragrunt boilerplate that we assume you will use. This
 code can be installed by running `pf-update-terragrunt`.
 
 This will create the following files:
 
-- `panfactum.hcl`: Standard terragrunt that should be included in every module
-- `providers/*`: Terraform provider configuration for the providers using the Panfactum stack
-- `.gitignore`: Defines filetypes that should not be committed to version control if following our conventions
+* `panfactum.hcl`: Standard terragrunt that should be included in every module
+* `providers/*`: Terraform provider configuration for the providers using the Panfactum stack
+* `.gitignore`: Defines filetypes that should not be committed to version control if following our conventions
 
 **The rest of the setup must be completed by you.**
 
@@ -70,26 +71,26 @@ This will create the following files:
 
 Your environments folder MUST have three levels of scoping for the configuration-as-code:
 
-- environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
-- region: A separation of your deployments according to their physical location (e.g., `us-west-2`)
-- module: A separation of your deployments based on the specific terraform module being deployed
+* environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
+* region: A separation of your deployments according to their physical location (e.g., `us-west-2`)
+* module: A separation of your deployments based on the specific terraform module being deployed
 
 Accordingly, there are four levels of configuration for parameterizing the behavior of `panfactum.hcl`:
 
-- `global.yaml`: Found at the root of the directory
-- `environment.yaml`: Found at the root of each environment subdirectory
-- `region.yaml`: Found at the root of each region subdirectory
-- `module.yaml`: Found in each module subdirectory
+* `global.yaml`: Found at the root of the directory
+* `environment.yaml`: Found at the root of each environment subdirectory
+* `region.yaml`: Found at the root of each region subdirectory
+* `module.yaml`: Found in each module subdirectory
 
 A few rules about these files:
 
-- These files are optional, but you will use them to configure your providers and other behavior (described in detail later).
-- They can each contain *any and every key* found in this [reference doc](../../reference/terragrunt-variables).
-- You should commit these files to version control.
-- Conflicts are resolved via specificity (e.g., conflicting `module.yaml` values will override `region.yaml` values which in turn will override `environment.yaml` values).
-- Each file has a optional, user-specific counterpart named `*.user.yaml` (e.g., `region.user.yaml`).
-    - Values in these files override the values in their counterparts for local development purposes (e.g., `region.user.yaml` overrides values in `region.yaml`).
-    - These files are not committed to version-control; each user will have their own set of values.
+* These files are optional, but you will use them to configure your providers and other behavior (described in detail later).
+* They can each contain *any and every key* found in this [reference doc](../../reference/terragrunt-variables).
+* You should commit these files to version control.
+* Conflicts are resolved via specificity (e.g., conflicting `module.yaml` values will override `region.yaml` values which in turn will override `environment.yaml` values).
+* Each file has a optional, user-specific counterpart named `*.user.yaml` (e.g., `region.user.yaml`).
+  * Values in these files override the values in their counterparts for local development purposes (e.g., `region.user.yaml` overrides values in `region.yaml`).
+  * These files are not committed to version-control; each user will have their own set of values.
 
 **At this point, you should scaffold your environments folder until it looks something like this:**
 
@@ -159,10 +160,11 @@ inputs = {
 A full file example might look something like this:
 
 <Accordion>
-<AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="terragrunt-hcl" id="terragrunt-hcl">
+  <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="terragrunt-hcl" id="terragrunt-hcl">
     `[environment_1]/[region_1]/[module_1]/terragrunt.hcl`
-</AccordionSummary>
-<AccordionDetails>
+  </AccordionSummary>
+
+  <AccordionDetails>
     ```hcl
     include "panfactum" {
       path = find_in_parent_folders("panfactum.hcl")
@@ -177,7 +179,7 @@ A full file example might look something like this:
       foo = "bar"
     }
     ```
-</AccordionDetails>
+  </AccordionDetails>
 </Accordion>
 
 ### Setting up Providers
@@ -186,14 +188,14 @@ A full file example might look something like this:
 
 We provide ready-made configuration for the providers used in the Panfactum stack:
 
-- `aws`
-- `helm`
-- `kubernetes`
-- `local`
-- `random`
-- `time`
-- `tls`
-- `vault`
+* `aws`
+* `helm`
+* `kubernetes`
+* `local`
+* `random`
+* `time`
+* `tls`
+* `vault`
 
 To enable a provider, add the provider under `providers` key of the module's `module.yaml`.
 
@@ -215,8 +217,7 @@ in the `environment.yaml` or `region.yaml` files).
 
 TODO
 
-
-## Deploying Modules
+## Using Terragrunt to Deploy Modules
 
 Once you have configured your module, you can use `terragrunt` to deploy the module.
 
@@ -235,9 +236,9 @@ This will ensure that modules are always updated in the desired order. Additiona
 to pass the outputs of one module into the inputs of another.
 
 <MarkdownAlert severity="warning">
-    Do not add dependencies that cross environment boundaries. Our CI paradigm scopes permissions to a single
-    environment at a time, so dependencies that cross environments will always lack the appropriate permissions
-    to apply successfully.
+  Do not add dependencies that cross environment boundaries. Our CI paradigm scopes permissions to a single
+  environment at a time, so dependencies that cross environments will always lack the appropriate permissions
+  to apply successfully.
 </MarkdownAlert>
 
 ### CI / CD
@@ -263,9 +264,9 @@ This will merge your custom settings with the Panfactum default settings (see th
 [docs](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#include) for different merge strategies).
 
 ### Accessing the Scoped YAML Variables
+
 In your `shared.hcl`, you may find it helpful to reference values defined in the `global.yaml`, `environment.yaml`,
 `region.yaml`, and `module.yaml` files, **especially because you can add arbitrary values to these files**.
-
 
 Unfortunately, it is not currently possible to import the resolved values
 directly from the `panfactum.hcl` into your `shared.hcl` due to [this outstanding issue](https://github.com/gruntwork-io/terragrunt/issues/1566).
@@ -273,46 +274,47 @@ directly from the `panfactum.hcl` into your `shared.hcl` due to [this outstandin
 Until that issue is resolved, you should copy this block into your `shared.hcl`:
 
 <Accordion>
-    <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="locals-snippet" id="locals-snippet">
-        `locals` snippet
-    </AccordionSummary>
-    <AccordionDetails>
-        ```hcl
-        locals {
-            global_file = find_in_parent_folders("global.yaml", "DNE")
-            global_raw_vars = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : {}
-            global_user_file = find_in_parent_folders("global.user.yaml", "DNE")
-            global_user_vars = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : {}
-            global_vars = merge(local.global_raw_vars, local.global_user_vars)
+  <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="locals-snippet" id="locals-snippet">
+    `locals` snippet
+  </AccordionSummary>
 
-            environment_file = find_in_parent_folders("environment.yaml", "DNE")
-            environment_raw_vars = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : {}
-            environment_user_file = find_in_parent_folders("environment.user.yaml", "DNE")
-            environment_user_vars = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : {}
-            environment_vars = merge(local.environment_raw_vars, local.environment_user_vars)
+  <AccordionDetails>
+    ```hcl
+    locals {
+        global_file = find_in_parent_folders("global.yaml", "DNE")
+        global_raw_vars = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : {}
+        global_user_file = find_in_parent_folders("global.user.yaml", "DNE")
+        global_user_vars = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : {}
+        global_vars = merge(local.global_raw_vars, local.global_user_vars)
 
-            region_file = find_in_parent_folders("region.yaml", "DNE")
-            region_raw_vars = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : {}
-            region_user_file = find_in_parent_folders("region.user.yaml", "DNE")
-            region_user_vars = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : {}
-            region_vars = merge(local.region_raw_vars, local.region_user_vars)
+        environment_file = find_in_parent_folders("environment.yaml", "DNE")
+        environment_raw_vars = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : {}
+        environment_user_file = find_in_parent_folders("environment.user.yaml", "DNE")
+        environment_user_vars = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : {}
+        environment_vars = merge(local.environment_raw_vars, local.environment_user_vars)
 
-            module_file      = "${get_terragrunt_dir()}/module.yaml"
-            module_raw_vars    = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : {}
-            module_user_file      = "${get_terragrunt_dir()}/module.user.yaml"
-            module_user_vars    = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : {}
-            module_vars = merge(local.module_raw_vars, local.module_user_vars)
+        region_file = find_in_parent_folders("region.yaml", "DNE")
+        region_raw_vars = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : {}
+        region_user_file = find_in_parent_folders("region.user.yaml", "DNE")
+        region_user_vars = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : {}
+        region_vars = merge(local.region_raw_vars, local.region_user_vars)
 
-            # Merge all of the vars with order of precedence
-            vars = merge(
-                local.global_vars,
-                local.environment_vars,
-                local.region_vars,
-                local.module_vars
-            )
-        }
-        ```
-    </AccordionDetails>
+        module_file      = "${get_terragrunt_dir()}/module.yaml"
+        module_raw_vars    = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : {}
+        module_user_file      = "${get_terragrunt_dir()}/module.user.yaml"
+        module_user_vars    = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : {}
+        module_vars = merge(local.module_raw_vars, local.module_user_vars)
+
+        # Merge all of the vars with order of precedence
+        vars = merge(
+            local.global_vars,
+            local.environment_vars,
+            local.region_vars,
+            local.module_vars
+        )
+    }
+    ```
+  </AccordionDetails>
 </Accordion>
 
 You will then be able to access the properly scoped variable via `local.vars` at other places in your `shared.hcl` configuration.
@@ -329,35 +331,37 @@ Let's assume that you want to build modules that require the [Datadog terraform 
 to use the same provider settings.
 
 1. Ensure that each module has an `include` block for your custom `shared.hcl` (see above).
-2. Follow the "Accessing the Scoped YAML Variables" to gain access to the `local.vars.providers` array in your `shared.hcl` configuration.
-3. Create a new `datadog.tf` file with the following contents (example). Add it to the `environments/providers/` directory
-alongside the other provider snippets.
 
-    ```hcl
-    provider "datadog" {
-      api_url = "https://api.datadoghq.com/"
-    }
-    ```
+2. Follow the "Accessing the Scoped YAML Variables" to gain access to the `local.vars.providers` array in your `shared.hcl` configuration.
+
+3. Create a new `datadog.tf` file with the following contents (example). Add it to the `environments/providers/` directory
+   alongside the other provider snippets.
+
+   ```hcl
+   provider "datadog" {
+     api_url = "https://api.datadoghq.com/"
+   }
+   ```
 
 4. Add the following snippet to your `shared.hcl`:
 
-    ```hcl
-    generate "datadog_provider" {
-        path      = "datadog.tf"
-        if_exists = "overwrite_terragrunt"
-        contents  = contains(local.vars.providers, "datadog") ? file("${path_relative_from_include()}/providers/datadog.tf") : ""
-    }
-    ```
+   ```hcl
+   generate "datadog_provider" {
+       path      = "datadog.tf"
+       if_exists = "overwrite_terragrunt"
+       contents  = contains(local.vars.providers, "datadog") ? file("${path_relative_from_include()}/providers/datadog.tf") : ""
+   }
+   ```
+
 5. Add `datadog` to your `module.yaml` `providers` array:
 
-    ```yaml
-    providers:
-        - aws      # Will use the built-in Panfactum aws provider config
-        - datadog  # Will use your new Datadog provider config
-    ```
+   ```yaml
+   providers:
+       - aws      # Will use the built-in Panfactum aws provider config
+       - datadog  # Will use your new Datadog provider config
+   ```
 
 ## Next Steps
 
-- [Learn how to deploy Panfactum terraform modules (and other third-party modules)](./third-party-modules)
-- [Learn how to develop and deploy your own Terraform modules](./first-party-modules)
-
+* [Learn how to deploy Panfactum terraform modules (and other third-party modules)](./third-party-modules)
+* [Learn how to develop and deploy your own Terraform modules](./first-party-modules)

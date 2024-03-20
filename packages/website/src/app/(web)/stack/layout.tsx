@@ -6,8 +6,8 @@ export default function Layout (
   { children } : {children: ReactNode}
 ) {
   return (
-      <ArticleLayout>
-        {children}
-      </ArticleLayout>
+    <ArticleLayout>
+      {children}
+    </ArticleLayout>
   )
 }

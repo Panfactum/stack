@@ -3,30 +3,29 @@
 ## Background Information
 
 Networking is an extremely deep and broad topic.
-We have collated a comprehensive set of resources that we _strongly recommend_ to every
+We have collated a comprehensive set of resources that we *strongly recommend* to every
 engineer looking to understanding how data moves between subsystems in their cluster:
 
-- Basic Networking Concepts
-    - [Networking Fundamentals](https://www.youtube.com/playlist?list=PLIFyRwBY_4bRLmKfP1KnZA6rZbRHtxmXi) (Video Playlist):
+* Basic Networking Concepts
+  * [Networking Fundamentals](https://www.youtube.com/playlist?list=PLIFyRwBY_4bRLmKfP1KnZA6rZbRHtxmXi) (Video Playlist):
     Core networking concepts at each each layer of the [OSI model](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/)
-    - [TCP/IP Illustrated](https://www.amazon.com/TCP-Illustrated-Vol-Addison-Wesley-Professional/dp/0201633469) (Textbook): _The_ reference book for any core networking protocol
-- Applied Networking on Linux
-    - [Iptables Tutorial](https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html) (Online Textbook): An overview of how networking was originally
+  * [TCP/IP Illustrated](https://www.amazon.com/TCP-Illustrated-Vol-Addison-Wesley-Professional/dp/0201633469) (Textbook): *The* reference book for any core networking protocol
+* Applied Networking on Linux
+  * [Iptables Tutorial](https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html) (Online Textbook): An overview of how networking was originally
     designed to work on linux systems (while this technology is not usually used anymore, the concepts described here remain pervasive when discussing linux networking)
-    - [Nftables Tutorial](https://paulgorman.org/technical/linux-nftables.txt.html) (Article): A brief overview of how nftables replaces iptables on modern linux distributions
-    - [Netfilter docs](https://www.netfilter.org/documentation/index.html) (Website): A documentation hub that provides references to just about everything you might want to know
+  * [Nftables Tutorial](https://paulgorman.org/technical/linux-nftables.txt.html) (Article): A brief overview of how nftables replaces iptables on modern linux distributions
+  * [Netfilter docs](https://www.netfilter.org/documentation/index.html) (Website): A documentation hub that provides references to just about everything you might want to know
     about iptables / nftables
-    - [eBPF Intro](https://ebpf.io/what-is-ebpf/) (Article): An overview of the new linux technology that most low-level tooling is adopting as a replacement
+  * [eBPF Intro](https://ebpf.io/what-is-ebpf/) (Article): An overview of the new linux technology that most low-level tooling is adopting as a replacement
     to static configuration tools like iptables / nftables
-- Networking on Kubernetes
-    - [Life of a Packet](https://www.youtube.com/watch?v=0Omvgd7Hg1I) (Video): Great high-level overview of how data moves
+* Networking on Kubernetes
+  * [Life of a Packet](https://www.youtube.com/watch?v=0Omvgd7Hg1I) (Video): Great high-level overview of how data moves
     through the discrete components of the Kubernetes stack
-    - [A visual guide to Kubernetes networking fundamentals](https://opensource.com/article/22/6/kubernetes-networking-fundamentals) (Article):
+  * [A visual guide to Kubernetes networking fundamentals](https://opensource.com/article/22/6/kubernetes-networking-fundamentals) (Article):
     A condensed and visual reference guide covering the major concepts in the prior video
-    - [CNI Explained in 7 Minutes](https://www.youtube.com/watch?v=l2BS_kuQxBA) (Video): A brief overview of the motivations behind the container network interface (CNI) specification
-    - [Why replace iptables with eBPF](https://isovalent.com/blog/post/why-replace-iptables-with-ebpf/) (Article): Blog post
-    overviewing the motivations for using eBPF in current generation networking implementations
-
+  * [CNI Explained in 7 Minutes](https://www.youtube.com/watch?v=l2BS_kuQxBA) (Video): A brief overview of the motivations behind the container network interface (CNI) specification
+  * [Why replace iptables with eBPF](https://isovalent.com/blog/post/why-replace-iptables-with-ebpf/) (Article): Blog post providing an
+    overview for the motivations for using eBPF in current generation networking implementations
 
 ## Why We Use Cilium
 
@@ -36,12 +35,11 @@ networking rather than the Kubernetes default, iptables.
 
 This provides several benefits:
 
-- Allows for implementation of [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
-- Reduces operational complexity by consolidating several runtime components that would otherwise need to be individually managed and integrated
-- Significantly improves networking performance per dollar
-- Allows for more intelligent load balancing and system resiliency
-- Adds TCP/IP observability that would otherwise be impossible
-
+* Allows for implementation of [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+* Reduces operational complexity by consolidating several runtime components that would otherwise need to be individually managed and integrated
+* Significantly improves networking performance per dollar
+* Allows for more intelligent load balancing and system resiliency
+* Adds TCP/IP observability that would otherwise be impossible
 
 ### IP Address Management (IPAM)
 
@@ -54,8 +52,6 @@ has several downsides, and Cilium provides [an alternative implementation](https
 with the same functionality. As a result, we use that instead.
 
 Ultimately, pod and service IPs in the Panfactum stack will
-
-
 
 ### Replacing kube-proxy
 

@@ -16,7 +16,7 @@ It includes:
     - The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
 - Subnet tags that controllers in our other modules depend upon.
 - The requisite infrastructure for using
-  [IAM roles for servica accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
+  [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
 - Logging for the control plane components via
   [AWS Cloudwatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html).
 

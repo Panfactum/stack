@@ -1,9 +1,10 @@
-import MarkdownImage from "@/components/markdown/MarkdownImage";
-import eksDashboardImg from './eks-dashboard.jpg'
-import k9sImg from './k9s.jpg'
-import k9sReadyImg from './k9s-ready.jpg'
-import terminateNodeImg from './terminate-node.jpg'
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+
+import eksDashboardImg from './eks-dashboard.jpg'
+import k9sReadyImg from './k9s-ready.jpg'
+import k9sImg from './k9s.jpg'
+import terminateNodeImg from './terminate-node.jpg'
 
 # Kubernetes Cluster
 
@@ -11,21 +12,19 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws_eks](../../reference/terraform-variables/aws_eks) module.
+using our [aws\_eks](../../reference/terraform-variables/aws_eks) module.
 
 ## A Quick Note
 
-This is the first infrastructure component that will begin to incur nontrivial cost. EKS costs at minimum \$75 / month,
-and we recommend planning for at minimum \$150 / month / cluster. [^1]
+This is the first infrastructure component that will begin to incur nontrivial cost. EKS costs at minimum $75 / month,
+and we recommend planning for at minimum $150 / month / cluster. [^1]
 
 [^1]: This cost is well worth it. Even if you were to self-manage the control plane using a tool like
-[kops](https://github.com/kubernetes/kops), your raw infrastructure costs will likely cost at minimum /$50 / month.
-From personal experience running many bare metal clusters, when you factor in the additional time and headache
-required to manage the control plane on your own, this is an incredible deal.
-
+    [kops](https://github.com/kubernetes/kops), your raw infrastructure costs will likely cost at minimum /$50 / month.
+    From personal experience running many bare metal clusters, when you factor in the additional time and headache
+    required to manage the control plane on your own, this is an incredible deal.
 
 ## Deploying the Cluster
-
 
 ### Set up Terragrunt
 
@@ -48,7 +47,7 @@ primary cluster in the production environment.
 
 ### Choose Kubernetes Version
 
-We _strongly_ recommend leaving this as the module default. The version was specifically chosen for compatibility
+We *strongly* recommend leaving this as the module default. The version was specifically chosen for compatibility
 with the rest of the Panfactum stack. See the [module documentation](../../reference/terraform-variables/aws_eks) if
 you need to override either the control plane or node group versions.
 
@@ -58,7 +57,7 @@ For `control_plane_subnets`, you need to enter the names of **at least 3** subne
 you created in the [aws networking guide](./aws-networking). [^3] This ensures the API server is resilient to an AZ outage.
 
 [^3]: Ensure that you choose an odd number for proper resilience to AZ outages. A requirement of `etcd`, the database
-backend for Kubernetes.
+    backend for Kubernetes.
 
 We assume that you will use the three **public** subnets so that you can access the API server from your local machine. [^2]
 We will do deeper into securing the API server in a subsequent section.
@@ -70,7 +69,7 @@ We will do deeper into securing the API server in a subsequent section.
 For `service_cidr`, you will want to a private CIDR range that does not conflict with your VPC or any of it's subnets. That
 is because Kubernetes performs its own routing and networking independently of AWS.
 
-If you've been following the recommendations in this guide, we _strongly_ recommend `172.20.0.0/16`.
+If you've been following the recommendations in this guide, we *strongly* recommend `172.20.0.0/16`.
 
 ### Choose Node Subnets
 
@@ -81,13 +80,13 @@ More AZs will result in higher resiliency, but it will also result in increased 
 availability zones incurs additional charge. [^6]
 
 [^6]: In practice, this is fairly minimal unless you have very chatty applications. As a result, it is normally best to
-run whatever you'd run in production in all environments. This allows for better testing and issue emulation.
+    run whatever you'd run in production in all environments. This allows for better testing and issue emulation.
 
 We generally recommend using three AZs, but in development or test environments it is perfectly acceptable to
 choose one. [^4]
 
 [^4]: Note that this must be an odd number in order for many high availability algorithms to work in the case of an
-AZ outage (e.g., [Raft](https://raft.github.io/)).
+    AZ outage (e.g., [Raft](https://raft.github.io/)).
 
 The subnets you choose should be **private** and should each be in a different AZ if you are using more than one.
 
@@ -102,13 +101,13 @@ controllers. The `t3a.large` is the minimum recommended instance size if using t
 ### Deploy the Cluster
 
 <MarkdownAlert severity="warning">
-    When you deploy the cluster, ensure that you are using the credentials for the `root` user. You should already
-    be if you haven't deviated from this guide.
+  When you deploy the cluster, ensure that you are using the credentials for the `root` user. You should already
+  be if you haven't deviated from this guide.
 
-    In EKS, the user that creates the cluster implicitly has admin access to the Kubernetes API server. This is critical
-    in the case that you accidentally break cluster authentication and need to recover. The `root`
-    user is the only user that can never be accidentally deleted; using another user may result in you losing your
-    ability to recover the cluster in an emergency.
+  In EKS, the user that creates the cluster implicitly has admin access to the Kubernetes API server. This is critical
+  in the case that you accidentally break cluster authentication and need to recover. The `root`
+  user is the only user that can never be accidentally deleted; using another user may result in you losing your
+  ability to recover the cluster in an emergency.
 </MarkdownAlert>
 
 You are now ready to run `terragrunt apply`.
@@ -118,7 +117,7 @@ This may take up to 30 minutes to complete.
 When it is ready, you should see your EKS cluster in the AWS web console reporting as `Active` and without any health
 issues.
 
-<MarkdownImage src={eksDashboardImg} alt="Kubernetes cluster dashboard in AWS web console"/>
+<MarkdownImage src={eksDashboardImg} alt="Kubernetes cluster dashboard in AWS web console" />
 
 ## Connect to the Cluster
 
@@ -133,14 +132,14 @@ to `.kube`. This should have been created when you ran `pf-update-kube` to resol
 installed the Panfactum devenv.
 
 [^9]: We store the config file in your repo and not in the typical location (`~/.kube/config`) so that it does not
-interfere with other projects you are working on.
+    interfere with other projects you are working on.
 
 The Panfactum devenv comes with utilities that make connecting to your cluster a breeze.
 
 To your `$PF_KUBE_DIR`, add a `config.user.yaml` file that looks like this: [^7]
 
 [^7]: This file is specific to every user as different users will have different access levels to the various
-clusters. Every user will need to set up their own `$PF_KUBE_DIR/config.user.yaml`. This file is not committed to version control.
+    clusters. Every user will need to set up their own `$PF_KUBE_DIR/config.user.yaml`. This file is not committed to version control.
 
 ```yaml
 clusters:
@@ -158,24 +157,24 @@ are using for terragrunt in that environment.
 Run `pf-update-kube` to dynamically build your kubeconfig file. [^8]
 
 [^8]: This will create a kubeconfig file at `$PF_KUBE_DIR/config`. The `pf-update-kube` config
-only updates this file to include the clusters defined in your `config.user.yaml` file. If desired, you can manually
-add additional clusters to this file as well. This file will not be committed to version control as it is specific to every
-user.
+    only updates this file to include the clusters defined in your `config.user.yaml` file. If desired, you can manually
+    add additional clusters to this file as well. This file will not be committed to version control as it is specific to every
+    user.
 
 ### Verify Connection
 
 1. Run `kubectx` to list all of the clusters that were set up in the previous section. Selecting one will set your
-Kubernetes [context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
-which defines which cluster your commandline tools like `kubectl` will target. Select one now.
+   Kubernetes [context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
+   which defines which cluster your commandline tools like `kubectl` will target. Select one now.
 
 2. Run `kubectl cluster-info`.
 
-    You should receive a result that looks like this:
+   You should receive a result that looks like this:
 
-    ```shell-session
-    Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com
-    CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-    ```
+   ```shell-session
+   Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com
+   CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   ```
 
 ### Use k9s
 
@@ -187,10 +186,10 @@ Let's verify what pods are running in the cluster:
 1. Run `k9s`
 2. Type `:pods⏎` to list all pods in the cluster
 3. k9s will filter results by [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
-and by default it is set to the `default` namespace. Press `0` to switch the filter to all namespaces.
+   and by default it is set to the `default` namespace. Press `0` to switch the filter to all namespaces.
 4. You should see a minimal list of pods that looks like this:
 
-    <MarkdownImage src={k9sImg} alt="k9s listing all pods"/>
+   <MarkdownImage src={k9sImg} alt="k9s listing all pods" />
 
 k9s is an incredibly powerful tool, and it is our recommended way for operators to interact directly with their
 clusters. If you have never used this tool before, we recommend getting up to speed with [these tutorials](https://k9scli.io/topics/video/).
@@ -202,17 +201,17 @@ to a single IaC paradigm, we are able to greatly simplify operations for users o
 
 [^10]: Though we will often use [third-party helm charts](https://helm.sh/) under the hood.
 
-### Set up Terragrunt
+### Set up Kubernetes Provider
 
-In order to start using our kubernetes terrraform modules, we must first configure the
+In order to start using our kubernetes terraform modules, we must first configure the
 [kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
 some additional [terragrunt variables](../../reference/terragrunt-variables).
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 
-- `kube_config_context`: The context in your `kubeconfig` file to use for connecting to the cluster in this region.
-    If this was set up using `pf-update-kube`, this is just the name of the cluster.
-- `kube_api_server`: This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
+* `kube_config_context`: The context in your `kubeconfig` file to use for connecting to the cluster in this region.
+  If this was set up using `pf-update-kube`, this is just the name of the cluster.
+* `kube_api_server`: This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
 
 See [this file](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
 
@@ -221,7 +220,7 @@ Kubernetes modules deployed in this region will now appropriately deploy to this
 ### RBAC
 
 Up until now, we have been using implicit EKS authentication to communicate with the cluster (the IAM user that created
-the cluster automatically has cluster access). We will now deploy the [kube_rbac](../../reference/terraform-modules/kube_rbac)
+the cluster automatically has cluster access). We will now deploy the [kube\_rbac](../../reference/terraform-modules/kube_rbac)
 module which will allow other users to authenticate (and eventually use dynamic rather than static credentials). This relies
 on a paradigm called [role-based access control](https://en.wikipedia.org/wiki/Role-based_access_control)
 which we will cover in more detail as we set up user roles and SSO.
@@ -235,37 +234,37 @@ Authentication is controlled via a [ConfigMap](https://kubernetes.io/docs/concep
 `kube-system/aws-auth`. [^11]
 
 [^11]: The `<namespace>/<resource>` syntax is common in the Kubernetes ecosystem. `kube-system/aws-auth`
-should be interpreted as the `aws-auth` resource in the `kube-system` namespace. We use this syntax because most resources
-in Kubernetes are scoped to particular [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
+    should be interpreted as the `aws-auth` resource in the `kube-system` namespace. We use this syntax because most resources
+    in Kubernetes are scoped to particular [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
 
 Let's deploy this module now:
 
 1. Adjacent to your `aws_eks` module, add a `kube_rbac` directory.
 
 2. Set up a `terragunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_rbac/terragrunt.hcl).
-For now, you **only** need to set the `aws_node_role_arn` input. We
-will set up the other inputs when we configure SSO for your infrastructure.
+   For now, you **only** need to set the `aws_node_role_arn` input. We
+   will set up the other inputs when we configure SSO for your infrastructure.
 
 3. Enable **both** the `aws` and `kubernetes` providers in the `module.yaml`.
 
 4. A bootstrapped, default version of this ConfigMap gets created when you first create an EKS cluster. Delete it
-with `kubectl -n kube-system delete configmap aws-auth`.
+   with `kubectl -n kube-system delete configmap aws-auth`.
 
 5. Run `terragrunt apply`.
 
 6. To verify that cluster authentication is still functional, we will need to terminate a node and make sure the replacement node
-is able to rejoin the cluster. [^12] Select one of the nodes and terminate it as shown below:
-    <MarkdownImage src={terminateNodeImg} alt="Terminating a Kubernetes node to verify nodes' ability to join the cluster"/>
+   is able to rejoin the cluster. [^12] Select one of the nodes and terminate it as shown below:
+   <MarkdownImage src={terminateNodeImg} alt="Terminating a Kubernetes node to verify nodes' ability to join the cluster" />
 
 7. The autoscaling group should notice the missing node within a few minutes and launch a new node to replace the terminated node.
-If the node is able to reconnect, you should be able to see it as `Ready` within k9s (`:nodes`):
-    <MarkdownImage src={k9sReadyImg} alt="k9s showing node successfully joining the cluster"/>
+   If the node is able to reconnect, you should be able to see it as `Ready` within k9s (`:nodes`):
+   <MarkdownImage src={k9sReadyImg} alt="k9s showing node successfully joining the cluster" />
 
 8. If the node joins successfully, you have successfully setup your initial Kubernetes RBAC.
 
 [^12]: EC2 VMs are assigned IAM roles, and we only allow certain IAM roles to assume the necessary permissions to join
-the cluster as a Kubernetes node. This is defined in the `aws-auth` ConfigMap alongside the human user authentication
-directives.
+    the cluster as a Kubernetes node. This is defined in the `aws-auth` ConfigMap alongside the human user authentication
+    directives.
 
 ### Priority Classes
 
@@ -275,7 +274,7 @@ is depended on for proper cluster operation, we want to give them higher priorit
 
 The Panfactum stack defines
 several priority levels to ensure that your cluster remains as healthy as possible even in adverse circumstances such
-as an unexpected AZ outage. These are defined in the [kube_priority_classes](../../reference/terraform-modules/kube_priority_classes)
+as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](../../reference/terraform-modules/kube_priority_classes)
 module.
 
 Let's deploy this module:

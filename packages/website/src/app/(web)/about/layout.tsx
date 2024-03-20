@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
+import ArticleLayout from '@/components/layout/web/article/base/ArticleLayout'
 import SecondaryWebLayout from '@/components/layout/web/secondary/SecondaryWebLayout'
-import ArticleLayout from "@/components/layout/web/article/base/ArticleLayout";
 
 const TABS = [
   {
