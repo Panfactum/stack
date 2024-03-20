@@ -236,7 +236,7 @@ resource "helm_release" "runner" {
         metadata = {
           labels = {
             "azure.workload.identity/use" = "true"
-            module                        = local.name
+            pf_module                     = local.name
             submodule                     = each.key
           }
         }
@@ -389,7 +389,7 @@ resource "kubernetes_pod_disruption_budget_v1" "runners" {
     min_available = "100%"
     selector {
       match_labels = {
-        module    = local.name
+        pf_module = local.name
         submodule = each.key
       }
     }

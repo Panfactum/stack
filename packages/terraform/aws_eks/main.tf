@@ -190,13 +190,13 @@ module "encrypt_key" {
     aws.secondary = aws.secondary
   }
 
-  name        = "kube-${var.cluster_name}"
-  description = "Encryption key for kubernetes control plane data"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = var.extra_tags
+  name           = "kube-${var.cluster_name}"
+  description    = "Encryption key for kubernetes control plane data"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 resource "aws_eks_addon" "coredns" {
