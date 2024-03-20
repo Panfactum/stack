@@ -15,16 +15,7 @@ terraform {
 }
 
 locals {
-  vpc_id = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
-  common_tags = merge({
-    environment    = var.environment
-    pf_root_module = var.pf_root_module
-    region         = var.region
-    terraform      = "true"
-    },
-    {
-      "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-  })
+  vpc_id                       = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
   controller_nodes_description = "Nodes for cluster-critical components and bootstrapping processes. Not autoscaled."
 }
 
@@ -128,14 +119,21 @@ resource "aws_security_group" "control_plane" {
   description = "Security group for the ${var.cluster_name} EKS control plane."
   vpc_id      = local.vpc_id
   tags = merge(module.tags.tags, {
-    Name                                        = var.cluster_name
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    description                                 = "Security group for the ${var.cluster_name} EKS control plane."
+    Name        = var.cluster_name
+    description = "Security group for the ${var.cluster_name} EKS control plane."
   })
   lifecycle {
     prevent_destroy = true
   }
 }
+
+// This needs to be managed separately because they are included in the ignore_tags provider configuration
+resource "aws_ec2_tag" "control_plane_kubernetes" {
+  resource_id = aws_security_group.control_plane.id
+  key         = "kubernetes.io/cluster/${var.cluster_name}"
+  value       = "owned"
+}
+
 
 resource "aws_security_group_rule" "control_plane_nodes" {
   type                     = "ingress"
@@ -288,14 +286,14 @@ resource "aws_launch_template" "controller" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(module.tags.tags, local.common_tags, {
+    tags = merge(module.tags.tags, {
       Name        = "${var.cluster_name}-controller"
       description = local.controller_nodes_description
       eks-managed = "true"
     })
   }
 
-  tags = merge(module.tags.tags, local.common_tags, {
+  tags = merge(module.tags.tags, {
     description = local.controller_nodes_description
   })
 
@@ -327,7 +325,7 @@ resource "aws_eks_node_group" "controllers" {
   }
 
   capacity_type = "ON_DEMAND"
-  tags = merge(module.tags.tags, local.common_tags, {
+  tags = merge(module.tags.tags, {
     description = local.controller_nodes_description
   })
   labels = {
@@ -362,16 +360,28 @@ resource "aws_security_group" "all_nodes" {
   vpc_id      = local.vpc_id
 
   tags = merge(module.tags.tags, {
-    "Name"                                      = "${var.cluster_name}-nodes"
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-    description                                 = "Security group for all nodes in the ${var.cluster_name} EKS cluster"
-    "karpenter.sh/discovery"                    = var.cluster_name
+    Name        = "${var.cluster_name}-nodes"
+    description = "Security group for all nodes in the ${var.cluster_name} EKS cluster"
   })
 
   lifecycle {
     prevent_destroy = true
   }
 }
+
+// These need to be managed separately because they are included in the ignore_tags provider configuration
+resource "aws_ec2_tag" "all_nodes_kubernetes" {
+  resource_id = aws_security_group.all_nodes.id
+  key         = "kubernetes.io/cluster/${var.cluster_name}"
+  value       = "owned"
+}
+
+resource "aws_ec2_tag" "all_nodes_karpenter" {
+  resource_id = aws_security_group.all_nodes.id
+  key         = "karpenter.sh/discovery"
+  value       = var.cluster_name
+}
+
 
 resource "aws_security_group_rule" "ingress_self" {
   security_group_id = aws_security_group.all_nodes.id

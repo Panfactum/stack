@@ -69,6 +69,10 @@ resource "aws_subnet" "subnets" {
     Name                 = each.key
     "panfactum.com/type" = each.value.public ? "public" : contains(keys(var.nat_associations), each.key) ? "private" : "isolated"
   })
+
+  lifecycle {
+    ignore_changes = [tags["panfactum.com/public-ip"]]
+  }
 }
 
 ##########################################################################
