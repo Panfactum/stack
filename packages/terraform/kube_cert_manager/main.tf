@@ -24,6 +24,7 @@ module "base_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = var.extra_tags
@@ -33,6 +34,7 @@ module "controller_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = merge(var.extra_tags, { service = local.name })
@@ -42,6 +44,7 @@ module "webhook_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = merge(var.extra_tags, { service = "${local.name}-webhook" })
@@ -51,6 +54,7 @@ module "ca_injector_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = merge(var.extra_tags, { service = "${local.name}-ca-injector" })

@@ -28,7 +28,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_cluster_ca_data"></a> [cluster\_ca\_data](#input\_cluster\_ca\_data)
+### <a name="input_cluster_ca_data" /> [cluster\_ca\_data](#input_cluster_ca_data)
 
 Description: B64 encoded CA data for the cluster API server
 
@@ -36,7 +36,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_cluster_endpoint"></a> [cluster\_endpoint](#input\_cluster\_endpoint)
+### <a name="input_cluster_endpoint" /> [cluster\_endpoint](#input_cluster_endpoint)
 
 Description: The address of the API server
 
@@ -44,7 +44,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name)
+### <a name="input_cluster_name" /> [cluster\_name](#input_cluster_name)
 
 Description: The name of the EKS cluster
 
@@ -52,7 +52,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -60,7 +60,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -68,7 +68,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -76,7 +76,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -84,7 +84,7 @@ Type: `string`
 
 Default: `"kube_node_settings"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -92,7 +92,7 @@ Type: `string`
 
 Default: `"kube_node_settings"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -104,59 +104,59 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_eviction_hard_inodes_free"></a> [eviction\_hard\_inodes\_free](#output\_eviction\_hard\_inodes\_free)
+### <a name="output_eviction_hard_inodes_free" /> [eviction\_hard\_inodes\_free](#output_eviction_hard_inodes_free)
 
 Description: n/a
 
-### <a name="output_eviction_hard_memory_available"></a> [eviction\_hard\_memory\_available](#output\_eviction\_hard\_memory\_available)
+### <a name="output_eviction_hard_memory_available" /> [eviction\_hard\_memory\_available](#output_eviction_hard_memory_available)
 
 Description: n/a
 
-### <a name="output_eviction_hard_nodefs_available"></a> [eviction\_hard\_nodefs\_available](#output\_eviction\_hard\_nodefs\_available)
+### <a name="output_eviction_hard_nodefs_available" /> [eviction\_hard\_nodefs\_available](#output_eviction_hard_nodefs_available)
 
 Description: n/a
 
-### <a name="output_eviction_soft_grace_period_inodes_free"></a> [eviction\_soft\_grace\_period\_inodes\_free](#output\_eviction\_soft\_grace\_period\_inodes\_free)
+### <a name="output_eviction_soft_grace_period_inodes_free" /> [eviction\_soft\_grace\_period\_inodes\_free](#output_eviction_soft_grace_period_inodes_free)
 
 Description: n/a
 
-### <a name="output_eviction_soft_grace_period_memory_available"></a> [eviction\_soft\_grace\_period\_memory\_available](#output\_eviction\_soft\_grace\_period\_memory\_available)
+### <a name="output_eviction_soft_grace_period_memory_available" /> [eviction\_soft\_grace\_period\_memory\_available](#output_eviction_soft_grace_period_memory_available)
 
 Description: n/a
 
-### <a name="output_eviction_soft_grace_period_nodefs_available"></a> [eviction\_soft\_grace\_period\_nodefs\_available](#output\_eviction\_soft\_grace\_period\_nodefs\_available)
+### <a name="output_eviction_soft_grace_period_nodefs_available" /> [eviction\_soft\_grace\_period\_nodefs\_available](#output_eviction_soft_grace_period_nodefs_available)
 
 Description: n/a
 
-### <a name="output_eviction_soft_inodes_free"></a> [eviction\_soft\_inodes\_free](#output\_eviction\_soft\_inodes\_free)
+### <a name="output_eviction_soft_inodes_free" /> [eviction\_soft\_inodes\_free](#output_eviction_soft_inodes_free)
 
 Description: n/a
 
-### <a name="output_eviction_soft_memory_available"></a> [eviction\_soft\_memory\_available](#output\_eviction\_soft\_memory\_available)
+### <a name="output_eviction_soft_memory_available" /> [eviction\_soft\_memory\_available](#output_eviction_soft_memory_available)
 
 Description: n/a
 
-### <a name="output_eviction_soft_nodefs_available"></a> [eviction\_soft\_nodefs\_available](#output\_eviction\_soft\_nodefs\_available)
+### <a name="output_eviction_soft_nodefs_available" /> [eviction\_soft\_nodefs\_available](#output_eviction_soft_nodefs_available)
 
 Description: n/a
 
-### <a name="output_image_gc_high_threshold_percent"></a> [image\_gc\_high\_threshold\_percent](#output\_image\_gc\_high\_threshold\_percent)
+### <a name="output_image_gc_high_threshold_percent" /> [image\_gc\_high\_threshold\_percent](#output_image_gc_high_threshold_percent)
 
 Description: n/a
 
-### <a name="output_image_gc_low_threshold_percent"></a> [image\_gc\_low\_threshold\_percent](#output\_image\_gc\_low\_threshold\_percent)
+### <a name="output_image_gc_low_threshold_percent" /> [image\_gc\_low\_threshold\_percent](#output_image_gc_low_threshold_percent)
 
 Description: n/a
 
-### <a name="output_max_pods"></a> [max\_pods](#output\_max\_pods)
+### <a name="output_max_pods" /> [max\_pods](#output_max_pods)
 
 Description: n/a
 
-### <a name="output_shutdown_grace_period"></a> [shutdown\_grace\_period](#output\_shutdown\_grace\_period)
+### <a name="output_shutdown_grace_period" /> [shutdown\_grace\_period](#output_shutdown_grace_period)
 
 Description: n/a
 
-### <a name="output_user_data"></a> [user\_data](#output\_user\_data)
+### <a name="output_user_data" /> [user\_data](#output_user_data)
 
 Description: n/a
 

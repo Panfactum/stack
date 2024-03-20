@@ -5,39 +5,38 @@
 **Type:** [Submodule](./overview)
 
 This module provides our standard set up for a configurable Kubernetes Deployment. It includes:
-- A deployment
-- A secret object to hold configurable secrets for the deployment
-- Configurable environment variables
-- A service account with associated role and role binding
-- Horizontal pod autoscaling
-- A service for routing traffic
-- An ingress that provides some basic routing rules
+
+* A deployment
+* A secret object to hold configurable secrets for the deployment
+* Configurable environment variables
+* A service account with associated role and role binding
+* Horizontal pod autoscaling
+* A service for routing traffic
+* An ingress that provides some basic routing rules
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
-Source: [kube_labels](./kube_labels)
+Source: [kube\_labels](./kube_labels)
 
+### <a name="module_pod_template" /> [pod\_template](#module_pod_template)
 
-### <a name="module_pod_template"></a> [pod\_template](#module\_pod\_template)
-
-Source: [kube_pod](./kube_pod)
-
+Source: [kube\_pod](./kube_pod)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_containers"></a> [containers](#input\_containers)
+### <a name="input_containers" /> [containers](#input_containers)
 
 Description: A list of container configurations for the pod
 
@@ -63,13 +62,13 @@ list(object({
   }))
 ```
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The namespace the cluster is in
 
 Type: `string`
 
-### <a name="input_service_name"></a> [service\_name](#input\_service\_name)
+### <a name="input_service_name" /> [service\_name](#input_service_name)
 
 Description: The name of the service this deployment is for
 
@@ -79,7 +78,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_common_env"></a> [common\_env](#input\_common\_env)
+### <a name="input_common_env" /> [common\_env](#input_common_env)
 
 Description: Key pair values of the environment variables for each container
 
@@ -87,7 +86,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_deployment_update_type"></a> [deployment\_update\_type](#input\_deployment\_update\_type)
+### <a name="input_deployment_update_type" /> [deployment\_update\_type](#input_deployment_update_type)
 
 Description: The type of update that the deployment should use
 
@@ -95,7 +94,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### <a name="input_dynamic_secrets"></a> [dynamic\_secrets](#input\_dynamic\_secrets)
+### <a name="input_dynamic_secrets" /> [dynamic\_secrets](#input_dynamic_secrets)
 
 Description: Dynamic variable secrets
 
@@ -111,7 +110,7 @@ list(object({             // key is the secret provider class
 
 Default: `[]`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -119,7 +118,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -127,7 +126,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -135,7 +134,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_max_replicas"></a> [max\_replicas](#input\_max\_replicas)
+### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
 
 Description: The maximum number of instances of the service
 
@@ -143,7 +142,7 @@ Type: `number`
 
 Default: `10`
 
-### <a name="input_min_replicas"></a> [min\_replicas](#input\_min\_replicas)
+### <a name="input_min_replicas" /> [min\_replicas](#input_min_replicas)
 
 Description: The desired (minimum) number of instances of the service
 
@@ -151,7 +150,7 @@ Type: `number`
 
 Default: `2`
 
-### <a name="input_mount_owner"></a> [mount\_owner](#input\_mount\_owner)
+### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -159,7 +158,7 @@ Type: `number`
 
 Default: `1000`
 
-### <a name="input_node_preferences"></a> [node\_preferences](#input\_node\_preferences)
+### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
 
 Description: Node label preferences for the pods
 
@@ -167,7 +166,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### <a name="input_node_requirements"></a> [node\_requirements](#input\_node\_requirements)
+### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
 
 Description: Node label requirements for the pods
 
@@ -175,7 +174,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -183,7 +182,7 @@ Type: `string`
 
 Default: `"kube_deployment"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -191,7 +190,7 @@ Type: `string`
 
 Default: `"kube_deployment"`
 
-### <a name="input_pod_annotations"></a> [pod\_annotations](#input\_pod\_annotations)
+### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
 
 Description: Annotations to add to the pods in the deployment
 
@@ -199,7 +198,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_ports"></a> [ports](#input\_ports)
+### <a name="input_ports" /> [ports](#input_ports)
 
 Description: The port the application is listening on inside the container
 
@@ -214,7 +213,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_priority_class_name"></a> [priority\_class\_name](#input\_priority\_class\_name)
+### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
 Description: The priority class to use for pods in the deployment
 
@@ -222,7 +221,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -230,7 +229,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_restart_policy"></a> [restart\_policy](#input\_restart\_policy)
+### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
 
 Description: The pod restart policy
 
@@ -238,7 +237,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### <a name="input_secret_mounts"></a> [secret\_mounts](#input\_secret\_mounts)
+### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
 
 Description: A mapping of Kubernetes secret names to their absolute mount paths in the containers of the deployment
 
@@ -246,7 +245,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_secrets"></a> [secrets](#input\_secrets)
+### <a name="input_secrets" /> [secrets](#input_secrets)
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -254,7 +253,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_service_account"></a> [service\_account](#input\_service\_account)
+### <a name="input_service_account" /> [service\_account](#input_service_account)
 
 Description: The name of the service account to use for this deployment
 
@@ -262,7 +261,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_tmp_directories"></a> [tmp\_directories](#input\_tmp\_directories)
+### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
 
 Description: A list of paths that contain empty temporary directories
 
@@ -276,7 +275,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_tolerations"></a> [tolerations](#input\_tolerations)
+### <a name="input_tolerations" /> [tolerations](#input_tolerations)
 
 Description: A list of tolerations for the pods
 
@@ -293,7 +292,7 @@ list(object({
 
 Default: `[]`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -305,11 +304,11 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_match_labels"></a> [match\_labels](#output\_match\_labels)
+### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
 
 Description: The labels unique to this deployment that can be used to select the pods in this deployment
 
-### <a name="output_service"></a> [service](#output\_service)
+### <a name="output_service" /> [service](#output_service)
 
 Description: The name of the kubernetes service created for this deployment.
 

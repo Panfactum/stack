@@ -57,21 +57,22 @@ locals {
 }
 
 module "labels" {
-  source      = "../kube_labels"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = var.extra_tags
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "constants" {
-  source      = "../constants"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = var.extra_tags
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "namespace" {
@@ -80,7 +81,7 @@ module "namespace" {
   linkerd_inject       = false
   loadbalancer_enabled = true
   environment          = var.environment
-  module               = var.pf_root_module
+  pf_root_module       = var.pf_root_module
   region               = var.region
   is_local             = var.is_local
   extra_tags           = var.extra_tags

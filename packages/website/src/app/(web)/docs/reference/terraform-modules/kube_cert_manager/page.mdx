@@ -6,7 +6,7 @@
 
 This module provides our standard set up for [cert-manager](https://cert-manager.io/). It includes:
 
-- The cert-manager Helm chart
+* The cert-manager Helm chart
 
 See the [vars file](./vars.tf) for descriptions of the input parameters.
 
@@ -14,53 +14,45 @@ See the [vars file](./vars.tf) for descriptions of the input parameters.
 
 The following providers are needed by this module:
 
--  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_base_labels"></a> [base\_labels](#module\_base\_labels)
+### <a name="module_base_labels" /> [base\_labels](#module_base_labels)
 
-Source: [kube_labels](./kube_labels)
+Source: [kube\_labels](./kube_labels)
 
+### <a name="module_ca_injector_labels" /> [ca\_injector\_labels](#module_ca_injector_labels)
 
-### <a name="module_ca_injector_labels"></a> [ca\_injector\_labels](#module\_ca\_injector\_labels)
+Source: [kube\_labels](./kube_labels)
 
-Source: [kube_labels](./kube_labels)
-
-
-### <a name="module_constants_ca_injector"></a> [constants\_ca\_injector](#module\_constants\_ca\_injector)
+### <a name="module_constants_ca_injector" /> [constants\_ca\_injector](#module_constants_ca_injector)
 
 Source: [constants](./constants)
 
-
-### <a name="module_constants_controller"></a> [constants\_controller](#module\_constants\_controller)
-
-Source: [constants](./constants)
-
-
-### <a name="module_constants_webhook"></a> [constants\_webhook](#module\_constants\_webhook)
+### <a name="module_constants_controller" /> [constants\_controller](#module_constants_controller)
 
 Source: [constants](./constants)
 
+### <a name="module_constants_webhook" /> [constants\_webhook](#module_constants_webhook)
 
-### <a name="module_controller_labels"></a> [controller\_labels](#module\_controller\_labels)
+Source: [constants](./constants)
 
-Source: [kube_labels](./kube_labels)
+### <a name="module_controller_labels" /> [controller\_labels](#module_controller_labels)
 
+Source: [kube\_labels](./kube_labels)
 
-### <a name="module_namespace"></a> [namespace](#module\_namespace)
+### <a name="module_namespace" /> [namespace](#module_namespace)
 
-Source: [kube_namespace](./kube_namespace)
+Source: [kube\_namespace](./kube_namespace)
 
+### <a name="module_webhook_labels" /> [webhook\_labels](#module_webhook_labels)
 
-### <a name="module_webhook_labels"></a> [webhook\_labels](#module\_webhook\_labels)
-
-Source: [kube_labels](./kube_labels)
-
+Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
@@ -70,7 +62,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_cert_manager_version"></a> [cert\_manager\_version](#input\_cert\_manager\_version)
+### <a name="input_cert_manager_version" /> [cert\_manager\_version](#input_cert_manager_version)
 
 Description: The version of cert-manager to deploy
 
@@ -78,7 +70,7 @@ Type: `string`
 
 Default: `"1.12.0"`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -86,7 +78,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -94,7 +86,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -102,7 +94,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -110,7 +102,7 @@ Type: `string`
 
 Default: `"kube_cert_manager"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -118,7 +110,7 @@ Type: `string`
 
 Default: `"kube_cert_manager"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -126,7 +118,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -138,11 +130,11 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_namespace"></a> [namespace](#output\_namespace)
+### <a name="output_namespace" /> [namespace](#output_namespace)
 
 Description: n/a
 
-### <a name="output_service_account"></a> [service\_account](#output\_service\_account)
+### <a name="output_service_account" /> [service\_account](#output_service_account)
 
 Description: n/a
 

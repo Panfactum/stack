@@ -8,79 +8,73 @@
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
--  [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
--  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_client_certs"></a> [client\_certs](#module\_client\_certs)
+### <a name="module_client_certs" /> [client\_certs](#module_client_certs)
 
-Source: [kube_internal_cert](./kube_internal_cert)
+Source: [kube\_internal\_cert](./kube_internal_cert)
 
-
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_irsa" /> [irsa](#module_irsa)
 
-### <a name="module_irsa"></a> [irsa](#module\_irsa)
+Source: [kube\_sa\_auth\_aws](./kube_sa_auth_aws)
 
-Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
+Source: [kube\_labels](./kube_labels)
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+### <a name="module_s3_bucket" /> [s3\_bucket](#module_s3_bucket)
 
-Source: [kube_labels](./kube_labels)
+Source: [aws\_s](./aws_s)3\_private\_bucket
 
+### <a name="module_server_certs" /> [server\_certs](#module_server_certs)
 
-### <a name="module_s3_bucket"></a> [s3\_bucket](#module\_s3\_bucket)
-
-Source: [aws_s](./aws_s)3_private_bucket
-
-
-### <a name="module_server_certs"></a> [server\_certs](#module\_server\_certs)
-
-Source: [kube_internal_cert](./kube_internal_cert)
-
+Source: [kube\_internal\_cert](./kube_internal_cert)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
 Type: `list(string)`
 
-### <a name="input_pg_cluster_name"></a> [pg\_cluster\_name](#input\_pg\_cluster\_name)
+### <a name="input_pg_cluster_name" /> [pg\_cluster\_name](#input_pg_cluster_name)
 
 Description: The name of the postgres cluster
 
 Type: `string`
 
-### <a name="input_pg_cluster_namespace"></a> [pg\_cluster\_namespace](#input\_pg\_cluster\_namespace)
+### <a name="input_pg_cluster_namespace" /> [pg\_cluster\_namespace](#input_pg_cluster_namespace)
 
 Description: The namespace to deploy to the cluster into
 
 Type: `string`
 
-### <a name="input_pg_storage_gb"></a> [pg\_storage\_gb](#input\_pg\_storage\_gb)
+### <a name="input_pg_storage_gb" /> [pg\_storage\_gb](#input_pg_storage_gb)
 
 Description: The number of gigabytes of storage to provision for the postgres cluster
 
@@ -90,7 +84,7 @@ Type: `number`
 
 The following input variables are optional (have default values):
 
-### <a name="input_backups_enabled"></a> [backups\_enabled](#input\_backups\_enabled)
+### <a name="input_backups_enabled" /> [backups\_enabled](#input_backups_enabled)
 
 Description: Whether this database has backups enabled
 
@@ -98,7 +92,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_backups_force_delete"></a> [backups\_force\_delete](#input\_backups\_force\_delete)
+### <a name="input_backups_force_delete" /> [backups\_force\_delete](#input_backups_force_delete)
 
 Description: Whether to delete backups on destroy
 
@@ -106,7 +100,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -114,7 +108,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -122,7 +116,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -130,7 +124,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -138,7 +132,7 @@ Type: `string`
 
 Default: `"kube_pg_cluster"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -146,7 +140,7 @@ Type: `string`
 
 Default: `"kube_pg_cluster"`
 
-### <a name="input_pg_instances"></a> [pg\_instances](#input\_pg\_instances)
+### <a name="input_pg_instances" /> [pg\_instances](#input_pg_instances)
 
 Description: The number of instances to deploy in the postgres cluster
 
@@ -154,7 +148,7 @@ Type: `number`
 
 Default: `2`
 
-### <a name="input_pg_version"></a> [pg\_version](#input\_pg\_version)
+### <a name="input_pg_version" /> [pg\_version](#input_pg_version)
 
 Description: The version of postgres to deploy
 
@@ -162,7 +156,7 @@ Type: `string`
 
 Default: `"16.0-6"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -170,7 +164,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -182,47 +176,47 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_db_admin_role"></a> [db\_admin\_role](#output\_db\_admin\_role)
+### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
 
 Description: n/a
 
-### <a name="output_db_reader_role"></a> [db\_reader\_role](#output\_db\_reader\_role)
+### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
 
 Description: n/a
 
-### <a name="output_db_writer_role"></a> [db\_writer\_role](#output\_db\_writer\_role)
+### <a name="output_db_writer_role" /> [db\_writer\_role](#output_db_writer_role)
 
 Description: n/a
 
-### <a name="output_r_service_name"></a> [r\_service\_name](#output\_r\_service\_name)
+### <a name="output_r_service_name" /> [r\_service\_name](#output_r_service_name)
 
 Description: n/a
 
-### <a name="output_r_service_port"></a> [r\_service\_port](#output\_r\_service\_port)
+### <a name="output_r_service_port" /> [r\_service\_port](#output_r_service_port)
 
 Description: n/a
 
-### <a name="output_ro_service_name"></a> [ro\_service\_name](#output\_ro\_service\_name)
+### <a name="output_ro_service_name" /> [ro\_service\_name](#output_ro_service_name)
 
 Description: n/a
 
-### <a name="output_ro_service_port"></a> [ro\_service\_port](#output\_ro\_service\_port)
+### <a name="output_ro_service_port" /> [ro\_service\_port](#output_ro_service_port)
 
 Description: n/a
 
-### <a name="output_rw_service_name"></a> [rw\_service\_name](#output\_rw\_service\_name)
+### <a name="output_rw_service_name" /> [rw\_service\_name](#output_rw_service_name)
 
 Description: n/a
 
-### <a name="output_rw_service_port"></a> [rw\_service\_port](#output\_rw\_service\_port)
+### <a name="output_rw_service_port" /> [rw\_service\_port](#output_rw_service_port)
 
 Description: n/a
 
-### <a name="output_superuser_password"></a> [superuser\_password](#output\_superuser\_password)
+### <a name="output_superuser_password" /> [superuser\_password](#output_superuser_password)
 
 Description: n/a
 
-### <a name="output_superuser_username"></a> [superuser\_username](#output\_superuser\_username)
+### <a name="output_superuser_username" /> [superuser\_username](#output_superuser_username)
 
 Description: n/a
 

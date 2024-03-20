@@ -8,39 +8,38 @@ This module provides our standard configuration for private S3 buckets.
 
 Notably it includes:
 
-- versioning
-- access control
-- storage tiering and expiration
-- encryption
-- public access blocks
-- ownership controls
+* versioning
+* access control
+* storage tiering and expiration
+* encryption
+* public access blocks
+* ownership controls
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_tags"></a> [tags](#module\_tags)
+### <a name="module_tags" /> [tags](#module_tags)
 
-Source: [aws_tags](./aws_tags)
-
+Source: [aws\_tags](./aws_tags)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name)
+### <a name="input_bucket_name" /> [bucket\_name](#input_bucket_name)
 
 Description: The name of the s3 bucket.
 
 Type: `string`
 
-### <a name="input_description"></a> [description](#input\_description)
+### <a name="input_description" /> [description](#input_description)
 
 Description: A statement of purpose for the S3 bucket.
 
@@ -50,7 +49,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_access_policy"></a> [access\_policy](#input\_access\_policy)
+### <a name="input_access_policy" /> [access\_policy](#input_access_policy)
 
 Description: AWS access policy for the bucket.
 
@@ -58,7 +57,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_audit_log_enabled"></a> [audit\_log\_enabled](#input\_audit\_log\_enabled)
+### <a name="input_audit_log_enabled" /> [audit\_log\_enabled](#input_audit_log_enabled)
 
 Description: Whether the bucket's audit log should be stored.
 
@@ -66,7 +65,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -74,7 +73,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_expire_after_days"></a> [expire\_after\_days](#input\_expire\_after\_days)
+### <a name="input_expire_after_days" /> [expire\_after\_days](#input_expire_after_days)
 
 Description: Whether objects older than indicated days should be deleted. (0 to disable)
 
@@ -82,7 +81,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_expire_old_versions"></a> [expire\_old\_versions](#input\_expire\_old\_versions)
+### <a name="input_expire_old_versions" /> [expire\_old\_versions](#input_expire_old_versions)
 
 Description: Whether old object versions should be expired.
 
@@ -90,7 +89,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -98,7 +97,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy)
+### <a name="input_force_destroy" /> [force\_destroy](#input_force_destroy)
 
 Description: Whether the bucket can be deleted if objects still exist in it.
 
@@ -106,7 +105,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_intelligent_transitions_enabled"></a> [intelligent\_transitions\_enabled](#input\_intelligent\_transitions\_enabled)
+### <a name="input_intelligent_transitions_enabled" /> [intelligent\_transitions\_enabled](#input_intelligent_transitions_enabled)
 
 Description: Whether objects should be subject to intelligent access tiering.
 
@@ -114,7 +113,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -122,7 +121,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -130,7 +129,7 @@ Type: `string`
 
 Default: `"aws_s3_private_bucket"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -138,7 +137,7 @@ Type: `string`
 
 Default: `"aws_s3_private_bucket"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -146,7 +145,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_timed_transitions_enabled"></a> [timed\_transitions\_enabled](#input\_timed\_transitions\_enabled)
+### <a name="input_timed_transitions_enabled" /> [timed\_transitions\_enabled](#input_timed_transitions_enabled)
 
 Description: Whether objects should be transitioned to lower storage tiers after a certain amount of time.
 
@@ -154,7 +153,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_versioning_enabled"></a> [versioning\_enabled](#input\_versioning\_enabled)
+### <a name="input_versioning_enabled" /> [versioning\_enabled](#input_versioning_enabled)
 
 Description: Whether object versioning is enabled.
 
@@ -166,11 +165,11 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_bucket_arn"></a> [bucket\_arn](#output\_bucket\_arn)
+### <a name="output_bucket_arn" /> [bucket\_arn](#output_bucket_arn)
 
 Description: n/a
 
-### <a name="output_bucket_name"></a> [bucket\_name](#output\_bucket\_name)
+### <a name="output_bucket_name" /> [bucket\_name](#output_bucket_name)
 
 Description: n/a
 

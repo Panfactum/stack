@@ -11,41 +11,37 @@ This module provides the CSI driver for provisioning EBS resources to pods in th
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_aws_permissions"></a> [aws\_permissions](#module\_aws\_permissions)
+### <a name="module_aws_permissions" /> [aws\_permissions](#module_aws_permissions)
 
-Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+Source: [kube\_sa\_auth\_aws](./kube_sa_auth_aws)
 
-
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+Source: [kube\_labels](./kube_labels)
 
-Source: [kube_labels](./kube_labels)
+### <a name="module_namespace" /> [namespace](#module_namespace)
 
-
-### <a name="module_namespace"></a> [namespace](#module\_namespace)
-
-Source: [kube_namespace](./kube_namespace)
-
+Source: [kube\_namespace](./kube_namespace)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster.
 
@@ -55,7 +51,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_ebs_csi_driver_helm_version"></a> [aws\_ebs\_csi\_driver\_helm\_version](#input\_aws\_ebs\_csi\_driver\_helm\_version)
+### <a name="input_aws_ebs_csi_driver_helm_version" /> [aws\_ebs\_csi\_driver\_helm\_version](#input_aws_ebs_csi_driver_helm_version)
 
 Description: The version of the aws-ebs-csi-driver helm chart to deploy
 
@@ -63,7 +59,7 @@ Type: `string`
 
 Default: `"2.28.1"`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -71,7 +67,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -79,7 +75,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -87,7 +83,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -95,7 +91,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -103,7 +99,7 @@ Type: `string`
 
 Default: `"kube_aws_ebs_csi"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -111,7 +107,7 @@ Type: `string`
 
 Default: `"kube_aws_ebs_csi"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -119,7 +115,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 

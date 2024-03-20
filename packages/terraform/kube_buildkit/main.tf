@@ -28,12 +28,13 @@ locals {
 }
 
 module "kube_labels" {
-  source      = "../kube_labels"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = merge(var.extra_tags, { service = local.name })
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = local.name })
 }
 
 module "constants" {

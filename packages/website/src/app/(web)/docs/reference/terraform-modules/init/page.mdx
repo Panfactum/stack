@@ -30,23 +30,23 @@ here.
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [local](https://registry.terraform.io/providers/hashicorp/local/2.4.1/docs) (2.4.1)
+* [local](https://registry.terraform.io/providers/hashicorp/local/2.4.1/docs) (2.4.1)
 
--  [null](#requirement\_null) (3.2.2)
+* [null](#requirement_null) (3.2.2)
 
--  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
--  [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
--  [tls](#requirement\_tls) (4.0.5)
+* [tls](#requirement_tls) (4.0.5)
 
--  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Modules
 
@@ -56,43 +56,43 @@ No modules.
 
 The following input variables are required:
 
-### <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id)
+### <a name="input_aws_account_id" /> [aws\_account\_id](#input_aws_account_id)
 
 Description: The AWS account id for the provider.
 
 Type: `string`
 
-### <a name="input_aws_profile"></a> [aws\_profile](#input\_aws\_profile)
+### <a name="input_aws_profile" /> [aws\_profile](#input_aws_profile)
 
 Description: The AWS profile to use for the provider.
 
 Type: `string`
 
-### <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region)
+### <a name="input_aws_region" /> [aws\_region](#input_aws_region)
 
 Description: The AWS region code for the provider.
 
 Type: `string`
 
-### <a name="input_kube_api_server"></a> [kube\_api\_server](#input\_kube\_api\_server)
+### <a name="input_kube_api_server" /> [kube\_api\_server](#input_kube_api_server)
 
 Description: The URL of the API server for this provider.
 
 Type: `string`
 
-### <a name="input_kube_config_context"></a> [kube\_config\_context](#input\_kube\_config\_context)
+### <a name="input_kube_config_context" /> [kube\_config\_context](#input_kube_config_context)
 
 Description: The context to use in the kubeconfig file.
 
 Type: `string`
 
-### <a name="input_vault_address"></a> [vault\_address](#input\_vault\_address)
+### <a name="input_vault_address" /> [vault\_address](#input_vault_address)
 
 Description: The address of the vault server.
 
 Type: `string`
 
-### <a name="input_vault_token"></a> [vault\_token](#input\_vault\_token)
+### <a name="input_vault_token" /> [vault\_token](#input_vault_token)
 
 Description: The token for auth to the vault server.
 
@@ -102,7 +102,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -110,7 +110,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -118,7 +118,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -126,7 +126,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -134,7 +134,7 @@ Type: `string`
 
 Default: `"init"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -142,7 +142,7 @@ Type: `string`
 
 Default: `"init"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 

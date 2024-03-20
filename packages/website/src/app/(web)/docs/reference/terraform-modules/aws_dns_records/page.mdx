@@ -7,14 +7,14 @@
 This module is used to deploy the following DNS record types
 to the indicated hosted zones:
 
-- [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
-- [TXT](https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/)
+* [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
+* [TXT](https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/)
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Modules
 
@@ -24,7 +24,7 @@ No modules.
 
 The following input variables are required:
 
-### <a name="input_zones"></a> [zones](#input\_zones)
+### <a name="input_zones" /> [zones](#input_zones)
 
 Description: Zone configurations. Keys are the domain names.
 
@@ -49,7 +49,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -57,7 +57,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -65,7 +65,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -73,7 +73,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -81,7 +81,7 @@ Type: `string`
 
 Default: `"aws_dns_records"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -89,7 +89,7 @@ Type: `string`
 
 Default: `"aws_dns_records"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 

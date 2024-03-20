@@ -41,12 +41,12 @@ module "tags" {
 }
 
 module "constants" {
-  source      = "../constants"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = var.extra_tags
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "node_settings" {
@@ -55,7 +55,7 @@ module "node_settings" {
   cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_endpoint = aws_eks_cluster.cluster.endpoint
   environment      = var.environment
-  module           = var.pf_root_module
+  pf_root_module   = var.pf_root_module
   region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags

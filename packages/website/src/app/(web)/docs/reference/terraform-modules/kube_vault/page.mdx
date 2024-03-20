@@ -12,57 +12,51 @@ See the [vars file](./vars.tf) for descriptions of the input parameters.
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_aws_permissions"></a> [aws\_permissions](#module\_aws\_permissions)
+### <a name="module_aws_permissions" /> [aws\_permissions](#module_aws_permissions)
 
-Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+Source: [kube\_sa\_auth\_aws](./kube_sa_auth_aws)
 
-
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_csi_labels" /> [csi\_labels](#module_csi_labels)
 
-### <a name="module_csi_labels"></a> [csi\_labels](#module\_csi\_labels)
+Source: [kube\_labels](./kube_labels)
 
-Source: [kube_labels](./kube_labels)
+### <a name="module_namespace" /> [namespace](#module_namespace)
 
+Source: [kube\_namespace](./kube_namespace)
 
-### <a name="module_namespace"></a> [namespace](#module\_namespace)
+### <a name="module_server_labels" /> [server\_labels](#module_server_labels)
 
-Source: [kube_namespace](./kube_namespace)
+Source: [kube\_labels](./kube_labels)
 
+### <a name="module_unseal_key" /> [unseal\_key](#module_unseal_key)
 
-### <a name="module_server_labels"></a> [server\_labels](#module\_server\_labels)
-
-Source: [kube_labels](./kube_labels)
-
-
-### <a name="module_unseal_key"></a> [unseal\_key](#module\_unseal\_key)
-
-Source: [aws_kms_encrypt_key](./aws_kms_encrypt_key)
-
+Source: [aws\_kms\_encrypt\_key](./aws_kms_encrypt_key)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_environment_domains"></a> [environment\_domains](#input\_environment\_domains)
+### <a name="input_environment_domains" /> [environment\_domains](#input_environment_domains)
 
 Description: The public domains on which the vault subdomain will be created for vault connectivity (e.g., the input `production.panfactum.com` will expose vault on `vault.production.panfactum.com`).
 
@@ -72,7 +66,7 @@ Type: `list(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -80,7 +74,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -88,7 +82,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_ingress_enabled"></a> [ingress\_enabled](#input\_ingress\_enabled)
+### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
 
 Description: Whether or not to enable the ingress for routing traffic to vault
 
@@ -96,7 +90,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -104,7 +98,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -112,7 +106,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -120,7 +114,7 @@ Type: `string`
 
 Default: `"kube_vault"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -128,7 +122,7 @@ Type: `string`
 
 Default: `"kube_vault"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -136,7 +130,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_vault_helm_version"></a> [vault\_helm\_version](#input\_vault\_helm\_version)
+### <a name="input_vault_helm_version" /> [vault\_helm\_version](#input_vault_helm_version)
 
 Description: The version of the vault helm chart to deploy
 
@@ -144,7 +138,7 @@ Type: `string`
 
 Default: `"0.27.0"`
 
-### <a name="input_vault_storage_size_gb"></a> [vault\_storage\_size\_gb](#input\_vault\_storage\_size\_gb)
+### <a name="input_vault_storage_size_gb" /> [vault\_storage\_size\_gb](#input_vault_storage_size_gb)
 
 Description: The number of gb to allocate to vault storage.
 
@@ -152,7 +146,7 @@ Type: `number`
 
 Default: `20`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -164,11 +158,11 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_vault_internal_url"></a> [vault\_internal\_url](#output\_vault\_internal\_url)
+### <a name="output_vault_internal_url" /> [vault\_internal\_url](#output_vault_internal_url)
 
 Description: n/a
 
-### <a name="output_vault_urls"></a> [vault\_urls](#output\_vault\_urls)
+### <a name="output_vault_urls" /> [vault\_urls](#output_vault_urls)
 
 Description: n/a
 

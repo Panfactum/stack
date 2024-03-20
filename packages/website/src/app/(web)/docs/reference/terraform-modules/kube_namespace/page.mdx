@@ -6,33 +6,31 @@
 
 Sets up a Kubernetes namespace and grants namespace-scoped permissions to specific Kubernetes user groups.
 
-For the complete list of Kubernetes user groups, see the [kube\_rbac module](../../live/kube\_rbac).
+For the complete list of Kubernetes user groups, see the [kube\_rbac module](../../live/kube_rbac).
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
-Source: [kube_labels](./kube_labels)
+Source: [kube\_labels](./kube_labels)
 
+### <a name="module_namespace_labels" /> [namespace\_labels](#module_namespace_labels)
 
-### <a name="module_namespace_labels"></a> [namespace\_labels](#module\_namespace\_labels)
-
-Source: [kube_labels](./kube_labels)
-
+Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The name of the kubernetes namespace to instantiate.
 
@@ -42,7 +40,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_admin_groups"></a> [admin\_groups](#input\_admin\_groups)
+### <a name="input_admin_groups" /> [admin\_groups](#input_admin_groups)
 
 Description: The names of the kubernetes groups to give admin access to the namespace.
 
@@ -56,7 +54,7 @@ Default:
 ]
 ```
 
-### <a name="input_bot_reader_groups"></a> [bot\_reader\_groups](#input\_bot\_reader\_groups)
+### <a name="input_bot_reader_groups" /> [bot\_reader\_groups](#input_bot_reader_groups)
 
 Description: The names of the kubernetes groups to give elevated read access to the namespace.
 
@@ -70,7 +68,7 @@ Default:
 ]
 ```
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -78,7 +76,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -86,7 +84,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -94,7 +92,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_linkerd_inject"></a> [linkerd\_inject](#input\_linkerd\_inject)
+### <a name="input_linkerd_inject" /> [linkerd\_inject](#input_linkerd_inject)
 
 Description: Whether to inject linkerd sidecars into pods in this namespace.
 
@@ -102,7 +100,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_loadbalancer_enabled"></a> [loadbalancer\_enabled](#input\_loadbalancer\_enabled)
+### <a name="input_loadbalancer_enabled" /> [loadbalancer\_enabled](#input_loadbalancer_enabled)
 
 Description: Whether the namespace is going to create LoadBalancer services
 
@@ -110,7 +108,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -118,7 +116,7 @@ Type: `string`
 
 Default: `"kube_namespace"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -126,7 +124,7 @@ Type: `string`
 
 Default: `"kube_namespace"`
 
-### <a name="input_reader_groups"></a> [reader\_groups](#input\_reader\_groups)
+### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
 
 Description: The names of the kubernetes groups to give read access to the namespace.
 
@@ -140,7 +138,7 @@ Default:
 ]
 ```
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -152,7 +150,7 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_namespace"></a> [namespace](#output\_namespace)
+### <a name="output_namespace" /> [namespace](#output_namespace)
 
 Description: n/a
 

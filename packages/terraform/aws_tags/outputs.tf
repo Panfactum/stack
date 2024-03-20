@@ -1,5 +1,5 @@
 output "tags" {
-  value = merge({
+  value = merge(var.extra_tags, {
     environment                 = var.environment
     region                      = var.region
     "panfactum.com/environment" = var.environment
@@ -8,5 +8,5 @@ output "tags" {
     "panfactum.com/module"      = var.pf_module
     "panfactum.com/local"       = var.is_local,
     terraform                   = "true"
-  }, var.extra_tags)
+  })
 }

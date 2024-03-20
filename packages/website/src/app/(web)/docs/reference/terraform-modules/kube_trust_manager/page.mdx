@@ -6,7 +6,7 @@
 
 This module provides our standard set up for [cert-manager](https://cert-manager.io/). It includes:
 
-- The cert-manager Helm chart
+* The cert-manager Helm chart
 
 See the [vars file](./vars.tf) for descriptions of the input parameters.
 
@@ -14,29 +14,27 @@ See the [vars file](./vars.tf) for descriptions of the input parameters.
 
 The following providers are needed by this module:
 
--  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_trust_manager_constants"></a> [trust\_manager\_constants](#module\_trust\_manager\_constants)
+### <a name="module_trust_manager_constants" /> [trust\_manager\_constants](#module_trust_manager_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_trust_manager_labels" /> [trust\_manager\_labels](#module_trust_manager_labels)
 
-### <a name="module_trust_manager_labels"></a> [trust\_manager\_labels](#module\_trust\_manager\_labels)
-
-Source: [kube_labels](./kube_labels)
-
+Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The name of the cert-manager namespace.
 
@@ -46,7 +44,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -54,7 +52,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -62,7 +60,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -70,7 +68,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -78,7 +76,7 @@ Type: `string`
 
 Default: `"kube_trust_manager"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -86,7 +84,7 @@ Type: `string`
 
 Default: `"kube_trust_manager"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -94,7 +92,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_trust_manager_version"></a> [trust\_manager\_version](#input\_trust\_manager\_version)
+### <a name="input_trust_manager_version" /> [trust\_manager\_version](#input_trust_manager_version)
 
 Description: The version of trust-manager to deploy
 
@@ -102,7 +100,7 @@ Type: `string`
 
 Default: `"0.5.0"`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 

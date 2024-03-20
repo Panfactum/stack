@@ -10,22 +10,21 @@ Defines an AWS IAM role that can be used by management utilities to propagate DN
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_tags"></a> [tags](#module\_tags)
+### <a name="module_tags" /> [tags](#module_tags)
 
-Source: [aws_tags](./aws_tags)
-
+Source: [aws\_tags](./aws_tags)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_domain_names"></a> [domain\_names](#input\_domain\_names)
+### <a name="input_domain_names" /> [domain\_names](#input_domain_names)
 
 Description: A list of domain names in this account that the record manager role created by this module can manage
 
@@ -35,7 +34,7 @@ Type: `set(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_additional_account_ids_with_record_access"></a> [additional\_account\_ids\_with\_record\_access](#input\_additional\_account\_ids\_with\_record\_access)
+### <a name="input_additional_account_ids_with_record_access" /> [additional\_account\_ids\_with\_record\_access](#input_additional_account_ids_with_record_access)
 
 Description: Additional AWS account IDs for accounts that can assume with record manager role
 
@@ -43,7 +42,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -51,7 +50,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -59,7 +58,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -67,7 +66,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -75,7 +74,7 @@ Type: `string`
 
 Default: `"aws_dns_iam_role"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -83,7 +82,7 @@ Type: `string`
 
 Default: `"aws_dns_iam_role"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -95,7 +94,7 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_role_arn"></a> [role\_arn](#output\_role\_arn)
+### <a name="output_role_arn" /> [role\_arn](#output_role_arn)
 
 Description: The ARN of the IAM role used to manage DNS records.
 

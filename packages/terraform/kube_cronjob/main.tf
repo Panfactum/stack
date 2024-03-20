@@ -10,12 +10,13 @@ terraform {
 }
 
 module "kube_labels" {
-  source      = "../kube_labels"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = merge(var.extra_tags, { service = var.name })
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = var.name })
 }
 
 module "pod_template" {

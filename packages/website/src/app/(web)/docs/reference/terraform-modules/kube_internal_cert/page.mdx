@@ -10,34 +10,33 @@ Provisions a TLS key-pair with the internal cluster issuer. For use with interna
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_labels"></a> [labels](#module\_labels)
+### <a name="module_labels" /> [labels](#module_labels)
 
-Source: [kube_labels](./kube_labels)
-
+Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_labels"></a> [labels](#input\_labels)
+### <a name="input_labels" /> [labels](#input_labels)
 
 Description: Labels to apply to the certificate
 
 Type: `map(string)`
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The namespace the cluster is in
 
 Type: `string`
 
-### <a name="input_secret_name"></a> [secret\_name](#input\_secret\_name)
+### <a name="input_secret_name" /> [secret\_name](#input_secret_name)
 
 Description: The name of the secret to save the keypair to
 
@@ -47,7 +46,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_common_name"></a> [common\_name](#input\_common\_name)
+### <a name="input_common_name" /> [common\_name](#input_common_name)
 
 Description: Common name to add to add to the cert
 
@@ -55,7 +54,7 @@ Type: `string`
 
 Default: `"default"`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -63,7 +62,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -71,7 +70,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -79,7 +78,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -87,7 +86,7 @@ Type: `string`
 
 Default: `"kube_internal_cert"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -95,7 +94,7 @@ Type: `string`
 
 Default: `"kube_internal_cert"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -103,7 +102,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_service_names"></a> [service\_names](#input\_service\_names)
+### <a name="input_service_names" /> [service\_names](#input_service_names)
 
 Description: The names of the kubernetes service(s) to use for the domain names
 
@@ -111,7 +110,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_usages"></a> [usages](#input\_usages)
+### <a name="input_usages" /> [usages](#input_usages)
 
 Description: Usages to add to the certificate
 

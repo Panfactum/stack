@@ -28,6 +28,7 @@ module "base_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = var.extra_tags
@@ -37,6 +38,7 @@ module "operator_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = merge(module.base_labels.kube_labels, { service = "operator" })
@@ -46,6 +48,7 @@ module "agent_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = merge(module.base_labels.kube_labels, { service = "agent" })

@@ -8,44 +8,41 @@
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+Source: [kube\_labels](./kube_labels)
 
-Source: [kube_labels](./kube_labels)
+### <a name="module_node_settings" /> [node\_settings](#module_node_settings)
 
-
-### <a name="module_node_settings"></a> [node\_settings](#module\_node\_settings)
-
-Source: [kube_node_settings](./kube_node_settings)
-
+Source: [kube\_node\_settings](./kube_node_settings)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_ca_data"></a> [eks\_cluster\_ca\_data](#input\_eks\_cluster\_ca\_data)
+### <a name="input_eks_cluster_ca_data" /> [eks\_cluster\_ca\_data](#input_eks_cluster_ca_data)
 
 Description: The B64 encoded CA data of the API server of the eks cluster
 
 Type: `string`
 
-### <a name="input_eks_cluster_endpoint"></a> [eks\_cluster\_endpoint](#input\_eks\_cluster\_endpoint)
+### <a name="input_eks_cluster_endpoint" /> [eks\_cluster\_endpoint](#input_eks_cluster_endpoint)
 
 Description: The URL of the API server of the eks cluster
 
 Type: `string`
 
-### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the eks cluster
 
@@ -55,7 +52,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -63,7 +60,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -71,7 +68,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -79,7 +76,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -87,7 +84,7 @@ Type: `string`
 
 Default: `"kube_karpenter_provisioners"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -95,7 +92,7 @@ Type: `string`
 
 Default: `"kube_karpenter_provisioners"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 

@@ -15,43 +15,39 @@ PDB configuration is added to the cnpg cluster resources.
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_cronjob" /> [cronjob](#module_cronjob)
 
-### <a name="module_cronjob"></a> [cronjob](#module\_cronjob)
+Source: [kube\_cronjob](./kube_cronjob)
 
-Source: [kube_cronjob](./kube_cronjob)
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
+Source: [kube\_labels](./kube_labels)
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+### <a name="module_namespace" /> [namespace](#module_namespace)
 
-Source: [kube_labels](./kube_labels)
-
-
-### <a name="module_namespace"></a> [namespace](#module\_namespace)
-
-Source: [kube_namespace](./kube_namespace)
-
+Source: [kube\_namespace](./kube_namespace)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_image_version"></a> [image\_version](#input\_image\_version)
+### <a name="input_image_version" /> [image\_version](#input_image_version)
 
 Description: The version of the image to use for the cronjob
 
 Type: `string`
 
-### <a name="input_schedule"></a> [schedule](#input\_schedule)
+### <a name="input_schedule" /> [schedule](#input_schedule)
 
 Description: The schedule to run this on
 
@@ -61,7 +57,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -69,7 +65,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -77,7 +73,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_image_repo"></a> [image\_repo](#input\_image\_repo)
+### <a name="input_image_repo" /> [image\_repo](#input_image_repo)
 
 Description: The image to use for the cronjob
 
@@ -85,7 +81,7 @@ Type: `string`
 
 Default: `"487780594448.dkr.ecr.us-east-2.amazonaws.com/ci"`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -93,7 +89,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The namespace to deploy kubernetes resources into
 
@@ -101,7 +97,7 @@ Type: `string`
 
 Default: `"cnpg-pdb-patcher"`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -109,7 +105,7 @@ Type: `string`
 
 Default: `"kube_cnpg_pdb_patcher"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -117,7 +113,7 @@ Type: `string`
 
 Default: `"kube_cnpg_pdb_patcher"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 

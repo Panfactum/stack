@@ -8,11 +8,11 @@
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
--  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Modules
 
@@ -22,19 +22,19 @@ No modules.
 
 The following input variables are required:
 
-### <a name="input_kubernetes_url"></a> [kubernetes\_url](#input\_kubernetes\_url)
+### <a name="input_kubernetes_url" /> [kubernetes\_url](#input_kubernetes_url)
 
 Description: The url to the kubernetes API server
 
 Type: `string`
 
-### <a name="input_ssh_cert_lifetime_seconds"></a> [ssh\_cert\_lifetime\_seconds](#input\_ssh\_cert\_lifetime\_seconds)
+### <a name="input_ssh_cert_lifetime_seconds" /> [ssh\_cert\_lifetime\_seconds](#input_ssh_cert_lifetime_seconds)
 
 Description: The lifetime of SSH certs provisioned by Vault
 
 Type: `number`
 
-### <a name="input_vault_internal_url"></a> [vault\_internal\_url](#input\_vault\_internal\_url)
+### <a name="input_vault_internal_url" /> [vault\_internal\_url](#input_vault_internal_url)
 
 Description: The internal url of the vault instance
 
@@ -44,7 +44,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -52,7 +52,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -60,7 +60,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -68,7 +68,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -76,7 +76,7 @@ Type: `string`
 
 Default: `"vault_core_resources"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -84,7 +84,7 @@ Type: `string`
 
 Default: `"vault_core_resources"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -96,11 +96,11 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_vault_internal_pki_path"></a> [vault\_internal\_pki\_path](#output\_vault\_internal\_pki\_path)
+### <a name="output_vault_internal_pki_path" /> [vault\_internal\_pki\_path](#output_vault_internal_pki_path)
 
 Description: n/a
 
-### <a name="output_vault_ssh_ca_public_key"></a> [vault\_ssh\_ca\_public\_key](#output\_vault\_ssh\_ca\_public\_key)
+### <a name="output_vault_ssh_ca_public_key" /> [vault\_ssh\_ca\_public\_key](#output_vault_ssh_ca_public_key)
 
 Description: n/a
 

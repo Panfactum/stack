@@ -12,51 +12,47 @@ TODO
 
 The following providers are needed by this module:
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [tls](#requirement\_tls) (4.0.5)
+* [tls](#requirement_tls) (4.0.5)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_bastion"></a> [bastion](#module\_bastion)
+### <a name="module_bastion" /> [bastion](#module_bastion)
 
-Source: [kube_deployment](./kube_deployment)
+Source: [kube\_deployment](./kube_deployment)
 
-
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_labels" /> [labels](#module_labels)
 
-### <a name="module_labels"></a> [labels](#module\_labels)
+Source: [kube\_labels](./kube_labels)
 
-Source: [kube_labels](./kube_labels)
+### <a name="module_namespace" /> [namespace](#module_namespace)
 
-
-### <a name="module_namespace"></a> [namespace](#module\_namespace)
-
-Source: [kube_namespace](./kube_namespace)
-
+Source: [kube\_namespace](./kube_namespace)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_bastion_ca_keys"></a> [bastion\_ca\_keys](#input\_bastion\_ca\_keys)
+### <a name="input_bastion_ca_keys" /> [bastion\_ca\_keys](#input_bastion_ca_keys)
 
 Description: The bastion CA public key from Vault
 
 Type: `string`
 
-### <a name="input_bastion_domain"></a> [bastion\_domain](#input\_bastion\_domain)
+### <a name="input_bastion_domain" /> [bastion\_domain](#input_bastion_domain)
 
 Description: The domain name of the bastion
 
 Type: `string`
 
-### <a name="input_bastion_image_version"></a> [bastion\_image\_version](#input\_bastion\_image\_version)
+### <a name="input_bastion_image_version" /> [bastion\_image\_version](#input_bastion_image_version)
 
 Description: The version of the image to use for the deployment
 
@@ -66,7 +62,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_bastion_image"></a> [bastion\_image](#input\_bastion\_image)
+### <a name="input_bastion_image" /> [bastion\_image](#input_bastion_image)
 
 Description: The bastion image repo to use
 
@@ -74,7 +70,7 @@ Type: `string`
 
 Default: `"487780594448.dkr.ecr.us-east-2.amazonaws.com/bastion"`
 
-### <a name="input_bastion_port"></a> [bastion\_port](#input\_bastion\_port)
+### <a name="input_bastion_port" /> [bastion\_port](#input_bastion_port)
 
 Description: The port the bastion should use for the ssh server
 
@@ -82,7 +78,7 @@ Type: `number`
 
 Default: `45459`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -90,7 +86,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -98,7 +94,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -106,7 +102,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -114,7 +110,7 @@ Type: `string`
 
 Default: `"kube_ingress_bastion"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -122,7 +118,7 @@ Type: `string`
 
 Default: `"kube_ingress_bastion"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -130,7 +126,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -142,7 +138,7 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_bastion_host_public_key"></a> [bastion\_host\_public\_key](#output\_bastion\_host\_public\_key)
+### <a name="output_bastion_host_public_key" /> [bastion\_host\_public\_key](#output_bastion_host_public_key)
 
 Description: n/a
 

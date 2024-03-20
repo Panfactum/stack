@@ -42,6 +42,7 @@ module "server_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags = merge(var.extra_tags, {
@@ -53,6 +54,7 @@ module "csi_labels" {
   source         = "../kube_labels"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags = merge(var.extra_tags, {
@@ -64,6 +66,7 @@ module "constants" {
   source         = "../constants"
   environment    = var.environment
   pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = var.extra_tags

@@ -6,52 +6,48 @@
 
 This module provides our standard set up network ingress control plane components in each Kubernetes clusters. It includes:
 
-- [NGINX Ingress](https://github.com/kubernetes/ingress-nginx)
-- [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v1.1/)
+* [NGINX Ingress](https://github.com/kubernetes/ingress-nginx)
+* [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v1.1/)
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.22.0/docs) (2.22.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.22.0/docs) (2.22.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_constants"></a> [constants](#module\_constants)
+### <a name="module_constants" /> [constants](#module_constants)
 
 Source: [constants](./constants)
 
+### <a name="module_labels" /> [labels](#module_labels)
 
-### <a name="module_labels"></a> [labels](#module\_labels)
+Source: [kube\_labels](./kube_labels)
 
-Source: [kube_labels](./kube_labels)
+### <a name="module_namespace" /> [namespace](#module_namespace)
 
+Source: [kube\_namespace](./kube_namespace)
 
-### <a name="module_namespace"></a> [namespace](#module\_namespace)
+### <a name="module_webhook_cert" /> [webhook\_cert](#module_webhook_cert)
 
-Source: [kube_namespace](./kube_namespace)
-
-
-### <a name="module_webhook_cert"></a> [webhook\_cert](#module\_webhook\_cert)
-
-Source: [kube_internal_cert](./kube_internal_cert)
-
+Source: [kube\_internal\_cert](./kube_internal_cert)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_dhparam"></a> [dhparam](#input\_dhparam)
+### <a name="input_dhparam" /> [dhparam](#input_dhparam)
 
 Description: The Diffie-Hellman parameter to use for establishing perfect forward secrecy with TLS
 
 Type: `string`
 
-### <a name="input_ingress_domains"></a> [ingress\_domains](#input\_ingress\_domains)
+### <a name="input_ingress_domains" /> [ingress\_domains](#input_ingress_domains)
 
 Description: The domains that can be used for network ingress to the cluster
 
@@ -61,7 +57,7 @@ Type: `set(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_enable_tls_1_2"></a> [enable\_tls\_1\_2](#input\_enable\_tls\_1\_2)
+### <a name="input_enable_tls_1_2" /> [enable\_tls\_1\_2](#input_enable_tls_1_2)
 
 Description: Whether to enable TLS 1.2 protocols
 
@@ -69,7 +65,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -77,7 +73,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -85,7 +81,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_ingress_timeout"></a> [ingress\_timeout](#input\_ingress\_timeout)
+### <a name="input_ingress_timeout" /> [ingress\_timeout](#input_ingress_timeout)
 
 Description: The timeout for connections flowing through the ingress
 
@@ -93,7 +89,7 @@ Type: `number`
 
 Default: `60`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -101,7 +97,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_max_replicas"></a> [max\_replicas](#input\_max\_replicas)
+### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
 
 Description: The maximum number of nginx-ingress replicas to deploy
 
@@ -109,7 +105,7 @@ Type: `number`
 
 Default: `10`
 
-### <a name="input_min_replicas"></a> [min\_replicas](#input\_min\_replicas)
+### <a name="input_min_replicas" /> [min\_replicas](#input_min_replicas)
 
 Description: The minimum number of nginx-ingress replicas to deploy
 
@@ -117,7 +113,7 @@ Type: `number`
 
 Default: `2`
 
-### <a name="input_nginx_ingress_helm_version"></a> [nginx\_ingress\_helm\_version](#input\_nginx\_ingress\_helm\_version)
+### <a name="input_nginx_ingress_helm_version" /> [nginx\_ingress\_helm\_version](#input_nginx_ingress_helm_version)
 
 Description: The version of the nginx-ingress helm chart to deploy
 
@@ -125,7 +121,7 @@ Type: `string`
 
 Default: `"4.7.1"`
 
-### <a name="input_nginx_ingress_version"></a> [nginx\_ingress\_version](#input\_nginx\_ingress\_version)
+### <a name="input_nginx_ingress_version" /> [nginx\_ingress\_version](#input_nginx_ingress_version)
 
 Description: The version of nginx-ingress to deploy
 
@@ -133,7 +129,7 @@ Type: `string`
 
 Default: `"v1.8.1"`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -141,7 +137,7 @@ Type: `string`
 
 Default: `"kube_ingress_nginx"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -149,7 +145,7 @@ Type: `string`
 
 Default: `"kube_ingress_nginx"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -157,7 +153,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 

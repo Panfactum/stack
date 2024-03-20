@@ -6,74 +6,72 @@
 
 This module provides our standard cluster issuers for [cert-manager](https://cert-manager.io/). It includes:
 
-- Cluster issuer for public domain names
-- Cluster issuer for self-signed certs
+* Cluster issuer for public domain names
+* Cluster issuer for self-signed certs
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_aws_permissions"></a> [aws\_permissions](#module\_aws\_permissions)
+### <a name="module_aws_permissions" /> [aws\_permissions](#module_aws_permissions)
 
-Source: [kube_sa_auth_aws](./kube_sa_auth_aws)
+Source: [kube\_sa\_auth\_aws](./kube_sa_auth_aws)
 
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
-
-Source: [kube_labels](./kube_labels)
-
+Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_alert_email"></a> [alert\_email](#input\_alert\_email)
+### <a name="input_alert_email" /> [alert\_email](#input_alert_email)
 
 Description: An email that will receive certificate alerts.
 
 Type: `string`
 
-### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
 Type: `list(string)`
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The name of the cert-manager namespace.
 
 Type: `string`
 
-### <a name="input_service_account"></a> [service\_account](#input\_service\_account)
+### <a name="input_service_account" /> [service\_account](#input_service_account)
 
 Description: The name of the cert-manager service account.
 
 Type: `string`
 
-### <a name="input_vault_internal_pki_path"></a> [vault\_internal\_pki\_path](#input\_vault\_internal\_pki\_path)
+### <a name="input_vault_internal_pki_path" /> [vault\_internal\_pki\_path](#input_vault_internal_pki_path)
 
 Description: The path to the internal cert issuer in the vault instance
 
 Type: `string`
 
-### <a name="input_vault_internal_url"></a> [vault\_internal\_url](#input\_vault\_internal\_url)
+### <a name="input_vault_internal_url" /> [vault\_internal\_url](#input_vault_internal_url)
 
 Description: The url to the vault instance for internal cert issuance
 
@@ -83,7 +81,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_dns_zones"></a> [dns\_zones](#input\_dns\_zones)
+### <a name="input_dns_zones" /> [dns\_zones](#input_dns_zones)
 
 Description: A mapping of public DNS domains to their configuration; cert-manager uses this to issue public-facing certificates.
 
@@ -98,7 +96,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -106,7 +104,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -114,7 +112,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -122,7 +120,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -130,7 +128,7 @@ Type: `string`
 
 Default: `"kube_cert_issuers"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -138,7 +136,7 @@ Type: `string`
 
 Default: `"kube_cert_issuers"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 

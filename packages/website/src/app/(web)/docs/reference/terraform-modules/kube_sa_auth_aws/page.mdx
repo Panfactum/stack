@@ -16,42 +16,41 @@ See [the IRSA docs](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-f
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_tags"></a> [tags](#module\_tags)
+### <a name="module_tags" /> [tags](#module_tags)
 
-Source: [aws_tags](./aws_tags)
-
+Source: [aws\_tags](./aws_tags)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster that contains the service account.
 
 Type: `string`
 
-### <a name="input_iam_policy_json"></a> [iam\_policy\_json](#input\_iam\_policy\_json)
+### <a name="input_iam_policy_json" /> [iam\_policy\_json](#input_iam_policy_json)
 
 Description: An IAM policy document in rendered JSON string form.
 
 Type: `string`
 
-### <a name="input_service_account"></a> [service\_account](#input\_service\_account)
+### <a name="input_service_account" /> [service\_account](#input_service_account)
 
 Description: The name of the service account that should be able to assume the AWS permissions.
 
 Type: `string`
 
-### <a name="input_service_account_namespace"></a> [service\_account\_namespace](#input\_service\_account\_namespace)
+### <a name="input_service_account_namespace" /> [service\_account\_namespace](#input_service_account_namespace)
 
 Description: The namespace of the service account.
 
@@ -61,7 +60,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_annotate_service_account"></a> [annotate\_service\_account](#input\_annotate\_service\_account)
+### <a name="input_annotate_service_account" /> [annotate\_service\_account](#input_annotate_service_account)
 
 Description: Whether or not to annotate the service account
 
@@ -69,7 +68,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -77,7 +76,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -85,7 +84,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -93,7 +92,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -101,7 +100,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -109,7 +108,7 @@ Type: `string`
 
 Default: `"kube_sa_auth_aws"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -117,7 +116,7 @@ Type: `string`
 
 Default: `"kube_sa_auth_aws"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -129,15 +128,15 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_policy_arn"></a> [policy\_arn](#output\_policy\_arn)
+### <a name="output_policy_arn" /> [policy\_arn](#output_policy_arn)
 
 Description: The ARN of the policy assigned to the role.
 
-### <a name="output_role_arn"></a> [role\_arn](#output\_role\_arn)
+### <a name="output_role_arn" /> [role\_arn](#output_role_arn)
 
 Description: The ARN of the role created for the service account.
 
-### <a name="output_role_name"></a> [role\_name](#output\_role\_name)
+### <a name="output_role_name" /> [role\_name](#output_role_name)
 
 Description: The name of the role created for the service account.
 
@@ -151,7 +150,7 @@ inside the cluster (this also includes the cluster's public NAT IPs).
 This limits the usefulness of tokens that are extracted from the cluster by an attacker.
 
 The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
-assigned in the [aws\_vpc](../aws\_vpc) and [aws\_eks](../aws\_eks) modules. If you need additional
+assigned in the [aws\_vpc](../aws_vpc) and [aws\_eks](../aws_eks) modules. If you need additional
 IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
 
 {/* lint enable no-duplicate-headings */}

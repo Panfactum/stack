@@ -3,7 +3,7 @@ terraform {
 }
 
 locals {
-  kube_labels = merge({
+  kube_labels = merge(var.extra_tags, {
     "panfactum.com/root-module" = var.pf_root_module,
     "panfactum.com/module"      = var.pf_module,
     "panfactum.com/environment" = var.environment,
@@ -12,5 +12,5 @@ locals {
     environment = var.environment,
     region      = var.region,
     terraform   = "true"
-  }, var.extra_tags)
+  })
 }

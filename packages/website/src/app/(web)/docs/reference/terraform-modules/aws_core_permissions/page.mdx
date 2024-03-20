@@ -10,13 +10,13 @@ for use in consuming modules. Does NOT actually create the policy infrastructure
 Provides the following policies:
 
 1. `admin_policy_json` - Policy that allows read-write access to most resources and secrets in the environment. Does not
-allow destroying or mutating the "protected" resources or creating persistent security vulnerabilities.
+   allow destroying or mutating the "protected" resources or creating persistent security vulnerabilities.
 
 2. `reader_policy_json` - Policy that allows read-only access to only the resources used in the Panfactum stack. Does not allow
-access to secrets. The "protected" resources are invisible.
+   access to secrets. The "protected" resources are invisible.
 
 3. `ci_reader_policy_json` - Policy that allows bot readers to read secrets and protected s3 buckets so that
-infrastructure planning can work. Also allows the ability to add and remove items from the protected dynamodb tables.
+   infrastructure planning can work. Also allows the ability to add and remove items from the protected dynamodb tables.
 
 Note: The superuser role just uses the AWS managed policy `arn:aws:iam::aws:policy/AdministratorAccess` which allows
 unmitigated access.
@@ -25,7 +25,7 @@ unmitigated access.
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Modules
 
@@ -35,19 +35,19 @@ No modules.
 
 The following input variables are required:
 
-### <a name="input_protected_dynamodb_arns"></a> [protected\_dynamodb\_arns](#input\_protected\_dynamodb\_arns)
+### <a name="input_protected_dynamodb_arns" /> [protected\_dynamodb\_arns](#input_protected_dynamodb_arns)
 
 Description: A list of protected dynamodb arns for the environment.
 
 Type: `list(string)`
 
-### <a name="input_protected_kms_arns"></a> [protected\_kms\_arns](#input\_protected\_kms\_arns)
+### <a name="input_protected_kms_arns" /> [protected\_kms\_arns](#input_protected_kms_arns)
 
 Description: A list of protected kms arns for the environment.
 
 Type: `list(string)`
 
-### <a name="input_protected_s3_arns"></a> [protected\_s3\_arns](#input\_protected\_s3\_arns)
+### <a name="input_protected_s3_arns" /> [protected\_s3\_arns](#input_protected_s3_arns)
 
 Description: A list of protected s3 buckets for the environment.
 
@@ -57,7 +57,7 @@ Type: `list(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -65,7 +65,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -73,7 +73,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -81,7 +81,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -89,7 +89,7 @@ Type: `string`
 
 Default: `"aws_core_permissions"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -97,7 +97,7 @@ Type: `string`
 
 Default: `"aws_core_permissions"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
@@ -109,15 +109,15 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_admin_policy_json"></a> [admin\_policy\_json](#output\_admin\_policy\_json)
+### <a name="output_admin_policy_json" /> [admin\_policy\_json](#output_admin_policy_json)
 
 Description: n/a
 
-### <a name="output_ci_reader_policy_json"></a> [ci\_reader\_policy\_json](#output\_ci\_reader\_policy\_json)
+### <a name="output_ci_reader_policy_json" /> [ci\_reader\_policy\_json](#output_ci_reader_policy_json)
 
 Description: n/a
 
-### <a name="output_reader_policy_json"></a> [reader\_policy\_json](#output\_reader\_policy\_json)
+### <a name="output_reader_policy_json" /> [reader\_policy\_json](#output_reader_policy_json)
 
 Description: n/a
 

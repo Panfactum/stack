@@ -15,7 +15,7 @@ See the below table for our standard Kubernetes groups, the AWS roles linked to 
 input variables), and the description of the intended permission level.
 
 | Kubernetes Group     | AWS Roles Linked                | Permission Level                                           |
-|----------------------|---------------------------------|------------------------------------------------------------|
+| -------------------- | ------------------------------- | ---------------------------------------------------------- |
 | `system:superusers`  | `var.kube_superuser_role_arns`  | `cluster-admin`                                            |
 | `system:admins`      | `var.kube_admin_role_arns`      | Write access to everything besides core cluster utilities. |
 | `system:readers`     | `var.kube_reader_role_arns`     | Read access to all non-admin resources except secrets.     |
@@ -23,32 +23,31 @@ input variables), and the description of the intended permission level.
 
 ## Maintainer Notes
 
-- This requires the cluster first be deployed via the [aws\_eks module](../aws\_eks).
-- You will need to import the `kubernetes_config_map.aws_auth` resource and apply those changes in order for the nodes
+* This requires the cluster first be deployed via the [aws\_eks module](../aws_eks).
+* You will need to import the `kubernetes_config_map.aws_auth` resource and apply those changes in order for the nodes
   to successfully register. You will need to use the credentials of the cluster owner (the IAM entity that originally created the cluster).
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_kube_labels"></a> [kube\_labels](#module\_kube\_labels)
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
 
-Source: [kube_labels](./kube_labels)
-
+Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_aws_node_role_arn"></a> [aws\_node\_role\_arn](#input\_aws\_node\_role\_arn)
+### <a name="input_aws_node_role_arn" /> [aws\_node\_role\_arn](#input_aws_node_role_arn)
 
 Description: AWS IAM role that the EKS nodes use (required for node bootstrapping)..
 
@@ -58,7 +57,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment the infrastructure is being deployed into.
 
@@ -66,7 +65,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
 
 Description: Extra tags or labels to add to the created resources.
 
@@ -74,7 +73,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
@@ -82,7 +81,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_kube_admin_role_arns"></a> [kube\_admin\_role\_arns](#input\_kube\_admin\_role\_arns)
+### <a name="input_kube_admin_role_arns" /> [kube\_admin\_role\_arns](#input_kube_admin_role_arns)
 
 Description: AWS IAM role ARNs that have read and write access to most cluster resources.
 
@@ -90,7 +89,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_kube_bot_reader_role_arns"></a> [kube\_bot\_reader\_role\_arns](#input\_kube\_bot\_reader\_role\_arns)
+### <a name="input_kube_bot_reader_role_arns" /> [kube\_bot\_reader\_role\_arns](#input_kube_bot_reader_role_arns)
 
 Description: AWS IAM role ARNs that have elevated read access to cluster resources.
 
@@ -98,7 +97,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_kube_reader_role_arns"></a> [kube\_reader\_role\_arns](#input\_kube\_reader\_role\_arns)
+### <a name="input_kube_reader_role_arns" /> [kube\_reader\_role\_arns](#input_kube_reader_role_arns)
 
 Description: AWS IAM role ARNs that have read-only access to cluster resources.
 
@@ -106,7 +105,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_kube_superuser_role_arns"></a> [kube\_superuser\_role\_arns](#input\_kube\_superuser\_role\_arns)
+### <a name="input_kube_superuser_role_arns" /> [kube\_superuser\_role\_arns](#input_kube_superuser_role_arns)
 
 Description: AWS IAM role ARNs that have 'cluster-admin' access to the cluster.
 
@@ -114,7 +113,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
 
@@ -122,7 +121,7 @@ Type: `string`
 
 Default: `"kube_rbac"`
 
-### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
 
 Description: The name of the root Panfactum module in the module tree.
 
@@ -130,7 +129,7 @@ Type: `string`
 
 Default: `"kube_rbac"`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
 
