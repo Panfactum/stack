@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -12,8 +12,8 @@ dependency "cluster" {
 }
 
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  vpa_enabled = false
-  ingress_enabled = false
+  eks_cluster_name    = dependency.cluster.outputs.cluster_name
+  vpa_enabled         = false
+  ingress_enabled     = false
   environment_domains = ["production.panfactum.com", "prod.panfactum.com"]
 }

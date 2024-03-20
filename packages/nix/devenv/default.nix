@@ -30,9 +30,12 @@ in {
     #########################################
     # IaC Tools
     #########################################
-    terraform
+    (import ../mkDevShells/common/terraform.nix)
+    (import ../mkDevShells/common/terragrunt.nix)
+    (import ../mkDevShells/common/kubectl.nix)
     terraform-docs
     (customShellScript "generate-tf-docs")
+    (customShellScript "generate-common-tf")
 
     #########################################
     # Linters
@@ -43,6 +46,7 @@ in {
     nodePackages.cspell
     (customShellScript "precommit-spellcheck")
     (customShellScript "precommit-terraform-fmt")
+    (customShellScript "precommit-terragrunt-fmt")
     (customShellScript "precommit-terraform-docs")
     (customShellScript "precommit-website")
     (customShellScript "lint")

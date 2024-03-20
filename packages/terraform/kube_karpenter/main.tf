@@ -17,55 +17,53 @@ terraform {
   }
 }
 
-locals {
+data "aws_region" "main" {}
+data "aws_caller_identity" "main" {}
 
+locals {
   name      = "karpenter"
   namespace = module.namespace.namespace
-
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags = merge(var.extra_tags, {
     service = local.name
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  })
 }
-
-data "aws_region" "main" {}
-data "aws_caller_identity" "main" {}
 
 module "constants" {
   source          = "../constants"
   matching_labels = module.kube_labels.kube_labels
-  app             = var.app
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
+}
+
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
 }
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.name
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 // Tagging to enable Karpenter autodiscovery
@@ -93,6 +91,9 @@ resource "aws_sqs_queue" "karpenter" {
   name_prefix               = "${var.eks_cluster_name}-"
   message_retention_seconds = 300
   sqs_managed_sse_enabled   = true
+  tags = merge(module.tags.tags, {
+    description = "Used by Karpenter to detect node termination events in advance"
+  })
 }
 
 data "aws_iam_policy_document" "karpenter_sqs" {
@@ -119,6 +120,7 @@ resource "aws_cloudwatch_event_rule" "scheduled_change" {
     source      = ["aws.health"]
     detail-type = ["AWS Health Event"]
   })
+  tags = module.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "scheduled_change" {
@@ -133,6 +135,7 @@ resource "aws_cloudwatch_event_rule" "spot_interruption" {
     source      = ["aws.ec2"]
     detail-type = ["EC2 Spot Instance Interruption Warning"]
   })
+  tags = module.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "spot_interruption" {
@@ -147,6 +150,7 @@ resource "aws_cloudwatch_event_rule" "rebalance" {
     source      = ["aws.ec2"]
     detail-type = ["EC2 Instance Rebalance Recommendation"]
   })
+  tags = module.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "rebalance" {
@@ -161,6 +165,7 @@ resource "aws_cloudwatch_event_rule" "instance_state_change" {
     source      = ["aws.ec2"]
     detail-type = ["EC2 Instance State-change Notification"]
   })
+  tags = module.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_state_change" {
@@ -368,13 +373,11 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.karpenter.json
   ip_allow_list             = var.ip_allow_list
-  app                       = var.app
   environment               = var.environment
-  module                    = var.module
+  pf_root_module            = var.pf_root_module
   region                    = var.region
-  version_tag               = var.version_tag
-  version_hash              = var.version_hash
   is_local                  = var.is_local
+  extra_tags                = var.extra_tags
 }
 
 resource "helm_release" "karpenter" {

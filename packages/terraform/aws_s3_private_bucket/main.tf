@@ -11,13 +11,23 @@ terraform {
 
 data "aws_caller_identity" "main" {}
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 
 resource "aws_s3_bucket" "bucket" {
   bucket              = var.bucket_name
   object_lock_enabled = false
-  tags = {
+  tags = merge(module.tags.tags, {
     description = var.description
-  }
+  })
   force_destroy = var.force_destroy
 }
 
@@ -145,9 +155,9 @@ resource "aws_s3_bucket" "audit" {
   bucket              = "${var.bucket_name}-audit-log"
   object_lock_enabled = true
 
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Audit logs for the ${var.bucket_name} bucket"
-  }
+  })
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "audit" {

@@ -12,28 +12,25 @@ locals {
 }
 
 module "kube_labels" {
-  source       = "../kube_labels"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "namespace_labels" {
-  source = "../kube_labels"
-  additional_labels = {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags = merge(var.extra_tags, {
     // https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/deploy/pod_readiness_gate/
     "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
     "loadbalancer/enabled"                    = var.loadbalancer_enabled ? "true" : "false"
-  }
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  })
 }
 
 ######################### Namespace #######################################

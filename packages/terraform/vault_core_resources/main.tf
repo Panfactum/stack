@@ -10,19 +10,12 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.39.1"
-    }
     time = {
       source  = "hashicorp/time"
       version = "0.10.0"
     }
   }
 }
-
-data "aws_region" "region" {}
-data "aws_caller_identity" "id" {}
 
 /***************************************
 * Setup Vault for User Auth

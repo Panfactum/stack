@@ -54,45 +54,9 @@ Source: [aad_oauth_application](./aad_oauth_application)
 
 The following input variables are required:
 
-### <a name="input_environment"></a> [environment](#input\_environment)
-
-Description: The name of the environment for the infrastructure.
-
-Type: `string`
-
 ### <a name="input_environment_domain"></a> [environment\_domain](#input\_environment\_domain)
 
 Description: The domain on which to bind service records.
-
-Type: `string`
-
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-### <a name="input_module"></a> [module](#input\_module)
-
-Description: The name of the module.
-
-Type: `string`
-
-### <a name="input_region"></a> [region](#input\_region)
-
-Description: The region to work in.
-
-Type: `string`
-
-### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
-
-Description: The commit hash for the version. Used to reference build artifacts.
-
-Type: `string`
-
-### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
-
-Description: Name of the application version or git commit ref.
 
 Type: `string`
 
@@ -116,6 +80,30 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_kube_prometheus_stack_version"></a> [kube\_prometheus\_stack\_version](#input\_kube\_prometheus\_stack\_version)
 
 Description: The version of cert-manager to deploy
@@ -124,6 +112,22 @@ Type: `string`
 
 Default: `"48.3.1"`
 
+### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"kube_prometheus_stack"`
+
+### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"kube_prometheus_stack"`
+
 ### <a name="input_reader_groups"></a> [reader\_groups](#input\_reader\_groups)
 
 Description: AAD groups that should have read-only access to grafana
@@ -131,6 +135,14 @@ Description: AAD groups that should have read-only access to grafana
 Type: `list(string)`
 
 Default: `[]`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
 

@@ -12,19 +12,19 @@ variable "linkerd_inject" {
 variable "admin_groups" {
   description = "The names of the kubernetes groups to give admin access to the namespace."
   type        = list(string)
-  default     = []
+  default     = ["system:admins"]
 }
 
 variable "reader_groups" {
   description = "The names of the kubernetes groups to give read access to the namespace."
   type        = list(string)
-  default     = []
+  default     = ["system:readers"]
 }
 
 variable "bot_reader_groups" {
   description = "The names of the kubernetes groups to give elevated read access to the namespace."
   type        = list(string)
-  default     = []
+  default     = ["system:bot-readers"]
 }
 
 variable "loadbalancer_enabled" {

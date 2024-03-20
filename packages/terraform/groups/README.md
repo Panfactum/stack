@@ -1,3 +1,0 @@
-# RBAC Groups
-
-**Type:** Live

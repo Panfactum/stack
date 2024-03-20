@@ -63,51 +63,15 @@ list(object({
   }))
 ```
 
-### <a name="input_environment"></a> [environment](#input\_environment)
-
-Description: The name of the environment for the infrastructure.
-
-Type: `string`
-
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-### <a name="input_module"></a> [module](#input\_module)
-
-Description: The name of the module.
-
-Type: `string`
-
 ### <a name="input_namespace"></a> [namespace](#input\_namespace)
 
 Description: The namespace the cluster is in
 
 Type: `string`
 
-### <a name="input_region"></a> [region](#input\_region)
-
-Description: The region to work in.
-
-Type: `string`
-
 ### <a name="input_service_name"></a> [service\_name](#input\_service\_name)
 
 Description: The name of the service this deployment is for
-
-Type: `string`
-
-### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
-
-Description: The commit hash for the version. Used to reference build artifacts.
-
-Type: `string`
-
-### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
-
-Description: Name of the application version or git commit ref.
 
 Type: `string`
 
@@ -146,6 +110,30 @@ list(object({             // key is the secret provider class
 ```
 
 Default: `[]`
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_max_replicas"></a> [max\_replicas](#input\_max\_replicas)
 
@@ -187,6 +175,22 @@ Type: `map(list(string))`
 
 Default: `{}`
 
+### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"kube_deployment"`
+
+### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"kube_deployment"`
+
 ### <a name="input_pod_annotations"></a> [pod\_annotations](#input\_pod\_annotations)
 
 Description: Annotations to add to the pods in the deployment
@@ -213,6 +217,14 @@ Default: `{}`
 ### <a name="input_priority_class_name"></a> [priority\_class\_name](#input\_priority\_class\_name)
 
 Description: The priority class to use for pods in the deployment
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region the infrastructure is being deployed into.
 
 Type: `string`
 

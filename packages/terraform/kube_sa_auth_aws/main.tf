@@ -23,6 +23,16 @@ locals {
 data "aws_caller_identity" "main" {}
 data "aws_region" "main" {}
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 # ################################################################################
 # IP Auto Discovery
 # ################################################################################
@@ -47,9 +57,9 @@ resource "aws_iam_policy" "service_account" {
   name_prefix = "${var.service_account}-"
   description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   policy      = var.iam_policy_json
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
-  }
+  })
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -76,9 +86,9 @@ resource "aws_iam_role" "service_account" {
   name_prefix        = "${var.service_account}-"
   description        = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   assume_role_policy = data.aws_iam_policy_document.service_account_assume.json
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
-  }
+  })
   max_session_duration = 43200
 }
 
@@ -122,9 +132,9 @@ resource "aws_iam_policy" "ip_blocks" {
   name_prefix = "${var.service_account}-ip-blocks-"
   description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
   policy      = data.aws_iam_policy_document.ip_blocks.json
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
-  }
+  })
 }
 
 resource "aws_iam_policy_attachment" "ip_blocks" {

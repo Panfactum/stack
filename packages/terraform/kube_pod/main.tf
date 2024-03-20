@@ -362,33 +362,28 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = merge({
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags = merge(var.extra_tags, var.extra_pod_labels, {
     pod-template-id = random_id.pod_template_id.hex
-  }, var.extra_pod_labels)
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  })
 }
 
 module "constants" {
   source          = "../constants"
   matching_labels = local.match_labels
-  app             = var.app
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 resource "random_id" "pod_template_id" {
-  prefix      = "${var.module}-"
+  prefix      = "${var.pf_root_module}-"
   byte_length = 8
 }
 

@@ -9,6 +9,15 @@ terraform {
   }
 }
 
+module "labels" {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
 resource "kubernetes_manifest" "webhook_cert" {
   manifest = {
     apiVersion = "cert-manager.io/v1"
@@ -16,6 +25,7 @@ resource "kubernetes_manifest" "webhook_cert" {
     metadata = {
       name      = var.secret_name
       namespace = var.namespace
+      labels    = module.labels.kube_labels
     }
     spec = {
       secretName = var.secret_name

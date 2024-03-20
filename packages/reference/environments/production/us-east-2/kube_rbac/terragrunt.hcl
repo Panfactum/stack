@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -12,5 +12,5 @@ dependency "cluster" {
 }
 
 inputs = {
-  aws_node_role_arn         = dependency.cluster.outputs.node_role_arn
+  aws_node_role_arn = dependency.cluster.outputs.node_role_arn
 }

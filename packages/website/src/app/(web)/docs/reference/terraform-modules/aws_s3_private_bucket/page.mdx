@@ -23,7 +23,12 @@ The following providers are needed by this module:
 
 ## Modules
 
-No modules.
+The following Modules are called:
+
+### <a name="module_tags"></a> [tags](#module\_tags)
+
+Source: [aws_tags](./aws_tags)
+
 
 ## Required Inputs
 
@@ -38,42 +43,6 @@ Type: `string`
 ### <a name="input_description"></a> [description](#input\_description)
 
 Description: A statement of purpose for the S3 bucket.
-
-Type: `string`
-
-### <a name="input_environment"></a> [environment](#input\_environment)
-
-Description: The name of the environment for the infrastructure.
-
-Type: `string`
-
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-### <a name="input_module"></a> [module](#input\_module)
-
-Description: The name of the module.
-
-Type: `string`
-
-### <a name="input_region"></a> [region](#input\_region)
-
-Description: The region to work in.
-
-Type: `string`
-
-### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
-
-Description: The commit hash for the version. Used to reference build artifacts.
-
-Type: `string`
-
-### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
-
-Description: Name of the application version or git commit ref.
 
 Type: `string`
 
@@ -97,6 +66,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_expire_after_days"></a> [expire\_after\_days](#input\_expire\_after\_days)
 
 Description: Whether objects older than indicated days should be deleted. (0 to disable)
@@ -113,6 +90,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy)
 
 Description: Whether the bucket can be deleted if objects still exist in it.
@@ -128,6 +113,38 @@ Description: Whether objects should be subject to intelligent access tiering.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"aws_s3_private_bucket"`
+
+### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"aws_s3_private_bucket"`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_timed_transitions_enabled"></a> [timed\_transitions\_enabled](#input\_timed\_transitions\_enabled)
 

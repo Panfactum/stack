@@ -14,29 +14,24 @@ terraform {
 }
 
 module "trust_manager_labels" {
-  source = "../kube_labels"
-  additional_labels = {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags = merge(var.extra_tags, {
     service = "${var.namespace}-trust-manager"
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  })
 }
 
 module "trust_manager_constants" {
   source          = "../constants"
   matching_labels = module.trust_manager_labels.kube_labels
-  app             = var.app
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 /***************************************

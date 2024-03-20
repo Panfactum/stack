@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 

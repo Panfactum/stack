@@ -10,7 +10,8 @@ const remarkConfig = {
             skipUrlPatterns: [
                 /^.*__currentPanfactumVersion__.*$/, // ignore custom interpolation
                 /^.*cloudflare\.com.*$/ // cloudflare returns a 403 when using cli tools to access their sites
-            ]
+            ],
+            skipLocalhost: true
         }]],
         ["remark-lint-no-duplicate-headings", ['error']],
         ['remark-lint-no-empty-url', ['error']],

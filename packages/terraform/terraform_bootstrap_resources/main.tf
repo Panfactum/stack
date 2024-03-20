@@ -3,10 +3,35 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.13"
+      source                = "hashicorp/aws"
+      version               = "5.39.1"
+      configuration_aliases = [aws.secondary]
     }
   }
+}
+
+data "aws_region" "secondary" {
+  provider = aws.secondary
+}
+
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
+module "secondary_tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = data.aws_region.secondary.name
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
 }
 
 ####################################################
@@ -16,6 +41,9 @@ terraform {
 resource "aws_s3_bucket" "state" {
   bucket              = var.state_bucket
   object_lock_enabled = false
+  tags = merge(module.tags.tags, {
+    description = "The terraform state bucket for ${var.environment}"
+  })
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
@@ -143,8 +171,12 @@ resource "aws_dynamodb_table" "lock" {
   }
 
   replica {
-    region_name = var.aws_secondary_region
+    region_name = data.aws_region.secondary.name
   }
+
+  tags = merge(module.tags.tags, {
+    description = "The state lock table for ${var.environment}"
+  })
 
   // Table class immediately drifted on 3/4 tables and would be reapplied every time
   // Ignoring lifecycle changes since we won't be changing table class for these

@@ -40,14 +40,12 @@ locals {
 }
 
 module "constants" {
-  source       = "../constants"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -55,18 +53,13 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.name
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -226,12 +219,9 @@ module "oauth_app" {
   editor_group_object_ids = [for group in var.editor_groups : data.azuread_group.groups[group].object_id]
   reader_group_object_ids = [for group in var.reader_groups : data.azuread_group.groups[group].object_id]
   aad_sp_object_owners    = var.aad_sp_object_owners
-  app                     = var.app
   environment             = var.environment
-  module                  = var.module
+  pf_root_module          = var.pf_root_module
   region                  = var.region
-  version_tag             = var.version_tag
-  version_hash            = var.version_hash
   is_local                = var.is_local
 }
 
@@ -248,12 +238,9 @@ module "ingress" {
     service      = "prometheus-grafana"
     service_port = 80
   }]
-  depends_on   = [helm_release.prometheus_stack]
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  depends_on     = [helm_release.prometheus_stack]
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
 }

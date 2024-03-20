@@ -38,6 +38,11 @@ Source: [kube_labels](./kube_labels)
 Source: [kube_namespace](./kube_namespace)
 
 
+### <a name="module_tags"></a> [tags](#module\_tags)
+
+Source: [aws_tags](./aws_tags)
+
+
 ## Required Inputs
 
 The following input variables are required:
@@ -60,29 +65,11 @@ Description: The arn of the role the EKS cluster roles are assigned
 
 Type: `string`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
-
-Description: The name of the environment for the infrastructure.
-
-Type: `string`
-
 ### <a name="input_ip_allow_list"></a> [ip\_allow\_list](#input\_ip\_allow\_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
 Type: `list(string)`
-
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-### <a name="input_module"></a> [module](#input\_module)
-
-Description: The name of the module.
-
-Type: `string`
 
 ### <a name="input_node_subnets"></a> [node\_subnets](#input\_node\_subnets)
 
@@ -90,27 +77,33 @@ Description: List of subnet names to deploy karpenter Nodes into.
 
 Type: `set(string)`
 
-### <a name="input_region"></a> [region](#input\_region)
-
-Description: The region to work in.
-
-Type: `string`
-
-### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
-
-Description: The commit hash for the version. Used to reference build artifacts.
-
-Type: `string`
-
-### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
-
-Description: Name of the application version or git commit ref.
-
-Type: `string`
-
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_karpenter_helm_version"></a> [karpenter\_helm\_version](#input\_karpenter\_helm\_version)
 
@@ -119,6 +112,30 @@ Description: The version of the karpenter helm chart to deploy
 Type: `string`
 
 Default: `"v0.31.1"`
+
+### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"kube_karpenter"`
+
+### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"kube_karpenter"`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
 

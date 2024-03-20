@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -8,7 +8,7 @@ terraform {
 }
 
 dependency "cluster" {
-  config_path = "../aws_eks"
+  config_path  = "../aws_eks"
   skip_outputs = true
 }
 

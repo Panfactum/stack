@@ -3,29 +3,29 @@
 #################################################################
 
 locals {
-  global_file = find_in_parent_folders("global.yaml", "DNE")
-  global_raw_vars = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : null
+  global_file      = find_in_parent_folders("global.yaml", "DNE")
+  global_raw_vars  = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : null
   global_user_file = find_in_parent_folders("global.user.yaml", "DNE")
   global_user_vars = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : null
-  global_vars = merge(local.global_raw_vars, local.global_user_vars)
+  global_vars      = merge(local.global_raw_vars, local.global_user_vars)
 
-  environment_file = find_in_parent_folders("environment.yaml", "DNE")
-  environment_raw_vars = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : null
+  environment_file      = find_in_parent_folders("environment.yaml", "DNE")
+  environment_raw_vars  = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : null
   environment_user_file = find_in_parent_folders("environment.user.yaml", "DNE")
   environment_user_vars = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : null
-  environment_vars = merge(local.environment_raw_vars, local.environment_user_vars)
+  environment_vars      = merge(local.environment_raw_vars, local.environment_user_vars)
 
-  region_file = find_in_parent_folders("region.yaml", "DNE")
-  region_raw_vars = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : null
+  region_file      = find_in_parent_folders("region.yaml", "DNE")
+  region_raw_vars  = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : null
   region_user_file = find_in_parent_folders("region.user.yaml", "DNE")
   region_user_vars = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : null
-  region_vars = merge(local.region_raw_vars, local.region_user_vars)
+  region_vars      = merge(local.region_raw_vars, local.region_user_vars)
 
   module_file      = "${get_terragrunt_dir()}/module.yaml"
-  module_raw_vars    = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : null
-  module_user_file      = "${get_terragrunt_dir()}/module.user.yaml"
-  module_user_vars    = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : null
-  module_vars = merge(local.module_raw_vars, local.module_user_vars)
+  module_raw_vars  = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : null
+  module_user_file = "${get_terragrunt_dir()}/module.user.yaml"
+  module_user_vars = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : null
+  module_vars      = merge(local.module_raw_vars, local.module_user_vars)
 
   # Merge all of the vars with order of precedence
   vars = merge(
@@ -36,31 +36,31 @@ locals {
   )
 
   # Activated providers
-  providers = lookup(local.vars, "providers", [])
-  enable_aws = contains(local.providers, "aws")
+  providers         = lookup(local.vars, "providers", [])
+  enable_aws        = contains(local.providers, "aws")
   enable_kubernetes = contains(local.providers, "kubernetes")
-  enable_vault = contains(local.providers, "vault")
+  enable_vault      = contains(local.providers, "vault")
 
   # Repo metadata
-  repo_url = get_env("PF_REPO_URL")
-  repo_name = get_env("PF_REPO_NAME")
+  repo_url       = get_env("PF_REPO_URL")
+  repo_name      = get_env("PF_REPO_NAME")
   primary_branch = get_env("PF_REPO_PRIMARY_BRANCH")
 
   # Determine the module "version" (git ref to checkout)
   # Use the following priority ordering:
   # 1. The `version` key in any of the `yaml` files
   # 2. Fallback to the repo's primary branch
-  version        = lookup(local.vars, "version", local.primary_branch)
+  version = lookup(local.vars, "version", local.primary_branch)
 
   # The version_tag needs to be a commit sha
   version_hash = run_cmd("--terragrunt-quiet", "get-version-hash", local.version)
 
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
-  use_local_terraform  = contains(["latest", "local", local.primary_branch], local.version)
-  terraform_dir        = get_env("PF_TERRAFORM_DIR")
-  terraform_path       = "${startswith(local.terraform_dir, "/") ? local.terraform_dir : "/${local.terraform_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
-  source               = local.use_local_terraform ? "${get_repo_root()}${local.terraform_path}" : "${local.repo_url}?ref=${local.version}${local.terraform_path}"
+  use_local_terraform = contains(["latest", "local", local.primary_branch], local.version)
+  terraform_dir       = get_env("PF_TERRAFORM_DIR")
+  terraform_path      = "${startswith(local.terraform_dir, "/") ? local.terraform_dir : "/${local.terraform_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
+  source              = local.use_local_terraform ? "${get_repo_root()}${local.terraform_path}" : "${local.repo_url}?ref=${local.version}${local.terraform_path}"
 
   # Folder of shared snippets to generate
   provider_folder = "providers"
@@ -101,27 +101,41 @@ terraform {
 generate "aws_provider" {
   path      = "aws.tf"
   if_exists = "overwrite_terragrunt"
-  contents  =  local.enable_aws ? file("${local.provider_folder}/aws.tf") : ""
+  contents = local.enable_aws ? templatefile("${local.provider_folder}/aws.tftpl", {
+    aws_region     = local.enable_aws ? local.vars.aws_region : ""
+    aws_account_id = local.enable_aws ? local.vars.aws_account_id : ""
+    aws_profile    = local.enable_aws ? local.vars.aws_profile : ""
+  }) : ""
 }
 
 generate "aws_secondary_provider" {
   path      = "aws_secondary.tf"
   if_exists = "overwrite_terragrunt"
   # Note: If the aws provider is enabled, always enable the secondary as it removes a footgun at no extra cost
-  contents  = local.enable_aws ? file("${local.provider_folder}/aws_secondary.tf") : ""
+  contents = local.enable_aws ? templatefile("${local.provider_folder}/aws_secondary.tftpl", {
+    aws_region     = local.enable_aws ? local.vars.aws_secondary_region : ""
+    aws_account_id = local.enable_aws ? local.vars.aws_secondary_account_id : ""
+    aws_profile    = local.enable_aws ? local.vars.aws_secondary_profile : ""
+  }) : ""
 }
 
 generate "aws_global_provider" {
   path      = "aws_global.tf"
   if_exists = "overwrite_terragrunt"
   # Note: If the aws provider is enabled, always enable the global as it removes a footgun at no extra cost
-  contents  = local.enable_aws ? file("${local.provider_folder}/aws_global.tf") : ""
+  contents = local.enable_aws ? templatefile("${local.provider_folder}/aws_global.tftpl", {
+    aws_account_id = local.enable_aws ? local.vars.aws_account_id : ""
+    aws_profile    = local.enable_aws ? local.vars.aws_profile : ""
+  }) : ""
 }
 
 generate "kubernetes_provider" {
   path      = "kubernetes.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = local.enable_kubernetes ? file("${local.provider_folder}/kubernetes.tf") : ""
+  contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubernetes.tftpl", {
+    kube_api_server     = local.enable_kubernetes ? local.vars.kube_api_server : ""
+    kube_config_context = local.enable_kubernetes ? local.vars.kube_config_context : ""
+  }) : ""
 }
 
 generate "time_provider" {
@@ -151,7 +165,10 @@ generate "tls_provider" {
 generate "vault_provider" {
   path      = "vault.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = local.enable_vault ? file("${local.provider_folder}/vault.tf") : ""
+  contents = local.enable_vault ? templatefile("${local.provider_folder}/vault.tftpl", {
+    vault_address = local.vault_address
+    vault_token   = local.vault_token
+  }) : ""
 }
 
 
@@ -194,31 +211,8 @@ retry_sleep_interval_sec = 30
 ################################################################
 
 inputs = {
-
-  // used for sourcing build artifacts
-  version_hash = local.version_hash
-
   // common vars
   is_local    = local.is_local
-  module      = basename(get_original_terragrunt_dir()) # TODO: This isn't always correct
   environment = local.vars.environment
-  version_tag = local.version
   region      = local.vars.region
-
-  // aws provider
-  aws_region               = local.enable_aws ? local.vars.aws_region : ""
-  aws_account_id           = local.enable_aws ? local.vars.aws_account_id : ""
-  aws_profile              = local.enable_aws ? local.vars.aws_profile : ""
-  aws_secondary_region     = local.enable_aws ? local.vars.aws_secondary_region : ""
-  aws_secondary_account_id = local.enable_aws ? local.vars.aws_secondary_account_id : ""
-  aws_secondary_profile    = local.enable_aws ? local.vars.aws_secondary_profile : ""
-
-  // kubernetes provider
-  kube_api_server     = local.enable_kubernetes ? local.vars.kube_api_server : ""
-  kube_config_context = local.enable_kubernetes ? local.vars.kube_config_context : ""
-
-
-  // vault provider
-  vault_address = local.vault_address
-  vault_token   = local.vault_token
 }

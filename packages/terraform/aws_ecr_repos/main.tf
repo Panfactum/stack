@@ -9,6 +9,16 @@ terraform {
   }
 }
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 ##########################################################################
 ## Repo setup
 ##########################################################################
@@ -49,6 +59,7 @@ resource "aws_ecr_repository" "repo" {
   for_each             = toset(var.ecr_repository_names)
   name                 = each.key
   image_tag_mutability = var.is_immutable ? "IMMUTABLE" : "MUTABLE"
+  tags                 = module.tags.tags
 }
 
 resource "aws_ecr_repository_policy" "delegated_access" {

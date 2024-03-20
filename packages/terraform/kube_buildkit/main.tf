@@ -19,8 +19,8 @@ locals {
   namespace = module.namespace.namespace
 
   match_labels = {
-    service = local.name
-    module  = var.module
+    service        = local.name
+    pf_root_module = var.pf_root_module
   }
 
   port = 1234
@@ -28,28 +28,21 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = local.name
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source      = "../kube_labels"
+  environment = var.environment
+  module      = var.pf_root_module
+  region      = var.region
+  is_local    = var.is_local
+  extra_tags  = merge(var.extra_tags, { service = local.name })
 }
 
 module "constants" {
-  source       = "../constants"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -57,18 +50,13 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.name
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -86,13 +74,11 @@ module "cache_bucket" {
   description        = "Used for buildkit layer caches"
   expire_after_days  = 7
   versioning_enabled = false
-  app                = var.app
   environment        = var.environment
-  module             = var.module
+  pf_root_module     = var.pf_root_module
   region             = var.region
-  version_tag        = var.version_tag
-  version_hash       = var.version_hash
   is_local           = var.is_local
+  extra_tags         = var.extra_tags
 }
 
 /***************************************
@@ -118,13 +104,11 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.buildkit.json
   ip_allow_list             = var.ip_allow_list
-  app                       = var.app
   environment               = var.environment
-  module                    = var.module
+  pf_root_module            = var.pf_root_module
   region                    = var.region
-  version_tag               = var.version_tag
-  version_hash              = var.version_hash
   is_local                  = var.is_local
+  extra_tags                = var.extra_tags
 }
 
 /***************************************

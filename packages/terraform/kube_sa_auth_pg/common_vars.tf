@@ -1,29 +1,35 @@
 variable "environment" {
-  description = "The name of the environment for the infrastructure."
+  description = "The name of the environment the infrastructure is being deployed into."
   type        = string
+  default     = null
 }
 
-variable "module" {
-  description = "The name of the module."
+variable "pf_root_module" {
+  description = "The name of the root Panfactum module in the module tree."
   type        = string
+  default     = "kube_sa_auth_pg"
+}
+
+variable "pf_module" {
+  description = "The name of the Panfactum module where the containing resources are directly defined."
+  type        = string
+  default     = "kube_sa_auth_pg"
 }
 
 variable "region" {
-  description = "The region to work in."
+  description = "The region the infrastructure is being deployed into."
   type        = string
+  default     = null
 }
 
-variable "version_tag" {
-  description = "Name of the application version or git commit ref."
-  type        = string
-}
-
-variable "version_hash" {
-  description = "The commit hash for the version. Used to reference build artifacts."
-  type        = string
+variable "extra_tags" {
+  description = "Extra tags or labels to add to the created resources."
+  type        = map(string)
+  default     = {}
 }
 
 variable "is_local" {
   description = "Whether this module is a part of a local development deployment"
   type        = bool
+  default     = false
 }

@@ -17,11 +17,10 @@ terraform {
 locals {
   vpc_id = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
   common_tags = merge({
-    environment = var.environment
-    module      = var.module
-    region      = var.region
-    terraform   = "true"
-    version     = var.version_tag
+    environment    = var.environment
+    pf_root_module = var.pf_root_module
+    region         = var.region
+    terraform      = "true"
     },
     {
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
@@ -31,14 +30,23 @@ locals {
 
 data "aws_region" "region" {}
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 module "constants" {
-  source       = "../constants"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source      = "../constants"
+  environment = var.environment
+  module      = var.pf_root_module
+  region      = var.region
+  is_local    = var.is_local
+  extra_tags  = var.extra_tags
 }
 
 module "node_settings" {
@@ -47,11 +55,10 @@ module "node_settings" {
   cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_endpoint = aws_eks_cluster.cluster.endpoint
   environment      = var.environment
-  module           = var.module
+  module           = var.pf_root_module
   region           = var.region
-  version_tag      = var.version_tag
-  version_hash     = var.version_hash
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 ##########################################################################
@@ -86,9 +93,9 @@ resource "aws_eks_cluster" "cluster" {
     resources = ["secrets"]
   }
 
-  tags = {
+  tags = merge(module.tags.tags, {
     description = var.cluster_description
-  }
+  })
 
   lifecycle {
     prevent_destroy = true
@@ -120,11 +127,11 @@ resource "aws_ec2_tag" "vpc_tags" {
 resource "aws_security_group" "control_plane" {
   description = "Security group for the ${var.cluster_name} EKS control plane."
   vpc_id      = local.vpc_id
-  tags = {
+  tags = merge(module.tags.tags, {
     Name                                        = var.cluster_name
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
     description                                 = "Security group for the ${var.cluster_name} EKS control plane."
-  }
+  })
   lifecycle {
     prevent_destroy = true
   }
@@ -157,10 +164,10 @@ resource "aws_iam_role" "eks_cluster_role" {
     "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
     "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   ]
-  tags = {
+  tags = merge(module.tags.tags, {
     Name        = var.cluster_name
     description = "IAM role for the ${var.cluster_name} EKS control plane."
-  }
+  })
   lifecycle {
     prevent_destroy = true
   }
@@ -183,14 +190,13 @@ module "encrypt_key" {
     aws.secondary = aws.secondary
   }
 
-  name         = "kube-${var.cluster_name}"
-  description  = "Encryption key for kubernetes control plane data"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  name        = "kube-${var.cluster_name}"
+  description = "Encryption key for kubernetes control plane data"
+  environment = var.environment
+  module      = var.pf_root_module
+  region      = var.region
+  is_local    = var.is_local
+  extra_tags  = var.extra_tags
 }
 
 resource "aws_eks_addon" "coredns" {
@@ -208,15 +214,14 @@ resource "aws_eks_addon" "coredns" {
 ////////////////////////////////////////////////////////////
 
 module "aws_cloudwatch_log_group" {
-  source       = "../aws_cloudwatch_log_group"
-  name         = "/aws/eks/${var.cluster_name}/cluster"
-  description  = "Collects logs for our AWS EKS Cluster"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source      = "../aws_cloudwatch_log_group"
+  name        = "/aws/eks/${var.cluster_name}/cluster"
+  description = "Collects logs for our AWS EKS Cluster"
+  environment = var.environment
+  module      = var.pf_root_module
+  region      = var.region
+  is_local    = var.is_local
+  extra_tags  = var.extra_tags
 }
 
 ##########################################################################
@@ -283,14 +288,14 @@ resource "aws_launch_template" "controller" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(local.common_tags, {
+    tags = merge(module.tags.tags, local.common_tags, {
       Name        = "${var.cluster_name}-controller"
       description = local.controller_nodes_description
       eks-managed = "true"
     })
   }
 
-  tags = merge(local.common_tags, {
+  tags = merge(module.tags.tags, local.common_tags, {
     description = local.controller_nodes_description
   })
 
@@ -322,7 +327,7 @@ resource "aws_eks_node_group" "controllers" {
   }
 
   capacity_type = "ON_DEMAND"
-  tags = merge(local.common_tags, {
+  tags = merge(module.tags.tags, local.common_tags, {
     description = local.controller_nodes_description
   })
   labels = {
@@ -356,12 +361,12 @@ resource "aws_security_group" "all_nodes" {
   name_prefix = "${var.cluster_name}-nodes-"
   vpc_id      = local.vpc_id
 
-  tags = {
+  tags = merge(module.tags.tags, {
     "Name"                                      = "${var.cluster_name}-nodes"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
     description                                 = "Security group for all nodes in the ${var.cluster_name} EKS cluster"
     "karpenter.sh/discovery"                    = var.cluster_name
-  }
+  })
 
   lifecycle {
     prevent_destroy = true
@@ -425,9 +430,9 @@ resource "aws_security_group_rule" "egress_all" {
 resource "aws_iam_instance_profile" "node_group" {
   name_prefix = "${var.cluster_name}-node-"
   role        = aws_iam_role.node_group.name
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Instance profile for all nodes in the ${var.cluster_name} EKS cluster"
-  }
+  })
   lifecycle {
     create_before_destroy = true
   }
@@ -467,9 +472,9 @@ resource "aws_iam_role" "node_group" {
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
   ]
 
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "IAM role for all nodes in the ${var.cluster_name} EKS cluster"
-  }
+  })
 
   lifecycle {
     create_before_destroy = true
@@ -489,7 +494,7 @@ resource "aws_iam_openid_connect_provider" "provider" {
   thumbprint_list = [for cert in data.tls_certificate.cluster.certificates : cert.sha1_fingerprint]
   url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Gives the ${var.cluster_name} EKS cluster access to AWS roles via IRSA"
-  }
+  })
 }

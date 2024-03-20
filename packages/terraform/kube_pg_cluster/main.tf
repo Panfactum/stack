@@ -31,25 +31,21 @@ locals {
 }
 
 module "kube_labels" {
-  source       = "../kube_labels"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "constants" {
-  source       = "../constants"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -71,13 +67,11 @@ module "s3_bucket" {
   audit_log_enabled               = true
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
-  app                             = var.app
   environment                     = var.environment
-  module                          = var.module
+  pf_root_module                  = var.pf_root_module
   region                          = var.region
-  version_tag                     = var.version_tag
-  version_hash                    = var.version_hash
   is_local                        = var.is_local
+  extra_tags                      = var.extra_tags
 }
 
 data "aws_iam_policy_document" "s3_access" {
@@ -104,13 +98,11 @@ module "irsa" {
   // Due to a limitation in the cluster resource api, the cluster resource is the one that creates
   // the service account for us, so we let it to the annotations
   annotate_service_account = false
-  app                      = var.app
   environment              = var.environment
-  module                   = var.module
+  pf_root_module           = var.pf_root_module
   region                   = var.region
-  version_tag              = var.version_tag
-  version_hash             = var.version_hash
   is_local                 = var.is_local
+  extra_tags               = var.extra_tags
 }
 
 /***************************************
@@ -133,13 +125,11 @@ module "server_certs" {
     "${var.pg_cluster_name}-r",
     "${var.pg_cluster_name}-ro"
   ]
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 resource "kubernetes_labels" "server_certs" {
@@ -161,19 +151,16 @@ resource "random_id" "client_certs_secret" {
 }
 
 module "client_certs" {
-  source       = "../kube_internal_cert"
-  secret_name  = random_id.client_certs_secret.hex
-  namespace    = var.pg_cluster_namespace
-  labels       = module.kube_labels.kube_labels
-  usages       = ["client auth"]
-  common_name  = "streaming_replica"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_internal_cert"
+  secret_name    = random_id.client_certs_secret.hex
+  namespace      = var.pg_cluster_namespace
+  labels         = module.kube_labels.kube_labels
+  usages         = ["client auth"]
+  common_name    = "streaming_replica"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
 }
 
 resource "kubernetes_labels" "client_certs" {

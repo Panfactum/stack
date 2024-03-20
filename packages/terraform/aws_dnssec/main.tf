@@ -10,6 +10,16 @@ terraform {
   }
 }
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = "us-east-1"
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 ##########################################################################
 ## DNSSEC Setup
 ##########################################################################
@@ -78,6 +88,9 @@ resource "aws_kms_key" "key" {
   deletion_window_in_days  = 7
   key_usage                = "SIGN_VERIFY"
   policy                   = data.aws_iam_policy_document.key.json
+  tags = merge(module.tags.tags, {
+    description = "Key used to sign records for DNSSEC"
+  })
 }
 
 data "aws_route53_zone" "zones" {

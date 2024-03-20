@@ -15,6 +15,26 @@ data "aws_region" "secondary" {
   provider = aws.secondary
 }
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
+module "secondary_tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = data.aws_region.secondary.name
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 ###########################################################################
 ## Access policy
 ###########################################################################
@@ -114,6 +134,8 @@ resource "aws_kms_key" "key" {
   multi_region             = true
   policy                   = data.aws_iam_policy_document.key.json
 
+  tags = module.tags.tags
+
   lifecycle {
     prevent_destroy = true
   }
@@ -135,6 +157,8 @@ resource "aws_kms_replica_key" "replica" {
   deletion_window_in_days = 30
   enabled                 = true
   policy                  = data.aws_iam_policy_document.key.json
+
+  tags = module.secondary_tags.tags
 
   lifecycle {
     prevent_destroy = true

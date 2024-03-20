@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -16,8 +16,8 @@ dependency "vault" {
 }
 
 inputs = {
-  vault_internal_url               = dependency.vault.outputs.vault_internal_url
-  kubernetes_url                   = dependency.cluster.outputs.cluster_url
-  ssh_cert_lifetime_seconds        = 60 * 60 * 8
+  vault_internal_url        = dependency.vault.outputs.vault_internal_url
+  kubernetes_url            = dependency.cluster.outputs.cluster_url
+  ssh_cert_lifetime_seconds = 60 * 60 * 8
 }
 

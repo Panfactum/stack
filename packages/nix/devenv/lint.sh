@@ -4,6 +4,9 @@ set -eo pipefail
 
 # Performs all of the linting for the monorepo
 
+# Needed to avoid running out of memory
+export NODE_OPTIONS="--max-old-space-size=8192"
+
 #######################################
 ## Terraform
 #######################################
@@ -13,6 +16,20 @@ echo >&2 "Starting Terraform linting..."
   terraform fmt -write=true -recursive
 )
 echo >&2 "Finished Terraform linting!"
+
+#######################################
+## Terragrunt
+#######################################
+echo >&2 "Starting Terragrunt linting..."
+(
+  cd "$DEVENV_ROOT/packages/nix/mkDevShells/common/setup/files/terragrunt"
+  terragrunt hclfmt
+)
+(
+  cd "$DEVENV_ROOT/packages/reference/environments"
+  terragrunt hclfmt
+)
+echo >&2 "Finished Terragrunt linting!"
 
 #######################################
 ## Nix
@@ -34,7 +51,7 @@ echo >&2 "Finished shell linting!"
 echo >&2 "Starting documentation linting..."
 (
   cd "$DEVENV_ROOT/packages/website"
-  ./node_modules/.bin/remark src -e .mdx -e .md -o -S
+  ./node_modules/.bin/remark src -e .mdx -e .md -o -S -r .remarkrc.lint.mjs
 )
 echo >&2 "Finished documentation linting!"
 

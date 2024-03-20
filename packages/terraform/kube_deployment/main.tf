@@ -10,17 +10,14 @@ terraform {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags = merge(var.extra_tags, {
     service = var.service_name
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  })
 }
 
 module "pod_template" {
@@ -47,13 +44,11 @@ module "pod_template" {
   tolerations       = var.tolerations
   restart_policy    = var.restart_policy
 
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 resource "kubernetes_manifest" "deployment" {

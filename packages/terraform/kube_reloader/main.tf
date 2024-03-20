@@ -14,43 +14,33 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags = merge(var.extra_tags, {
     service = local.service
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  })
 }
 
 module "constants" {
-  source       = "../constants"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.service
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.service
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 resource "kubernetes_cluster_role" "reloader" {
@@ -179,11 +169,9 @@ module "deployment" {
 
   vpa_enabled = var.vpa_enabled
 
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }

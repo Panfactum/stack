@@ -21,92 +21,69 @@ locals {
 }
 
 module "base_labels" {
-  source       = "../kube_labels"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "controller_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = local.name
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = local.name })
 }
 
 module "webhook_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = "${local.name}-webhook"
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = "${local.name}-webhook" })
 }
 
 module "ca_injector_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = "${local.name}-ca-injector"
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = "${local.name}-ca-injector" })
 }
 
 module "constants_controller" {
   source          = "../constants"
   matching_labels = module.controller_labels.kube_labels
-  app             = var.app
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 module "constants_webhook" {
   source          = "../constants"
   matching_labels = module.webhook_labels.kube_labels
-  app             = var.app
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 module "constants_ca_injector" {
   source          = "../constants"
   matching_labels = module.ca_injector_labels.kube_labels
-  app             = var.app
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 /***************************************
@@ -114,18 +91,13 @@ module "constants_ca_injector" {
 ***************************************/
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  app               = var.app
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.name
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************

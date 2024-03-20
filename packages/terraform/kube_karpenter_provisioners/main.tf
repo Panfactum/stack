@@ -36,15 +36,22 @@ locals {
   ]
 }
 
+module "kube_labels" {
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
 module "constants" {
-  source       = "../constants"
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "node_settings" {
@@ -52,13 +59,11 @@ module "node_settings" {
   cluster_name     = var.eks_cluster_name
   cluster_endpoint = var.eks_cluster_endpoint
   cluster_ca_data  = var.eks_cluster_ca_data
-  app              = var.app
   environment      = var.environment
-  module           = var.module
+  pf_root_module   = var.pf_root_module
   region           = var.region
-  version_tag      = var.version_tag
-  version_hash     = var.version_hash
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /********************************************************************************************************************
@@ -70,7 +75,8 @@ resource "kubernetes_manifest" "default_node_template" {
     apiVersion = "karpenter.k8s.aws/v1alpha1"
     kind       = "AWSNodeTemplate"
     metadata = {
-      name = "default"
+      name   = "default"
+      labels = module.kube_labels.kube_labels
     }
     spec = {
       amiFamily = "AL2"
@@ -121,7 +127,8 @@ resource "kubernetes_manifest" "spot_provisioner" {
     apiVersion = "karpenter.sh/v1alpha5"
     kind       = "Provisioner"
     metadata = {
-      name = "spot"
+      name   = "spot"
+      labels = module.kube_labels.kube_labels
     }
     spec = {
       providerRef = {
@@ -162,7 +169,8 @@ resource "kubernetes_manifest" "on_demand_provisioner" {
     apiVersion = "karpenter.sh/v1alpha5"
     kind       = "Provisioner"
     metadata = {
-      name = "on-demand"
+      name   = "on-demand"
+      labels = module.kube_labels.kube_labels
     }
     spec = {
       providerRef = {

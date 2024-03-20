@@ -10,6 +10,16 @@ terraform {
   }
 }
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 
 ##########################################################################
 ## Zone Setup
@@ -24,6 +34,7 @@ resource "aws_route53_zone" "zones" {
   for_each          = var.domain_names
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
+  tags              = module.tags.tags
 }
 
 
@@ -90,6 +101,8 @@ resource "aws_route53domains_registered_domain" "domain" {
     zip_code          = var.registrant_zip_code
     country_code      = var.registrant_country_code
   }
+
+  tags = module.tags.tags
 }
 
 
@@ -103,13 +116,12 @@ module "dnssec" {
     aws.global = aws.global
   }
 
-  domain_names = var.domain_names
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  domain_names   = var.domain_names
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 resource "aws_route53domains_delegation_signer_record" "dnssec" {
@@ -132,9 +144,8 @@ module "iam_role" {
   domain_names                              = var.domain_names
   additional_account_ids_with_record_access = var.additional_account_ids_with_record_access
   environment                               = var.environment
-  module                                    = var.module
+  pf_root_module                            = var.pf_root_module
   region                                    = var.region
-  version_tag                               = var.version_tag
-  version_hash                              = var.version_hash
   is_local                                  = var.is_local
+  extra_tags                                = var.extra_tags
 }

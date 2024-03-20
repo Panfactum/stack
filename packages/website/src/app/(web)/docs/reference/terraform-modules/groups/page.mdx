@@ -8,7 +8,7 @@
 
 The following providers are needed by this module:
 
--  [azuread](#requirement\_azuread) (~> 2.15)
+* [azuread](#requirement_azuread) (\~> 2.15)
 
 ## Modules
 
@@ -18,7 +18,7 @@ No modules.
 
 The following input variables are required:
 
-### <a name="input_ci_group_config"></a> [ci\_group\_config](#input\_ci\_group\_config)
+### <a name="input_ci_group_config" /> [ci\_group\_config](#input_ci_group_config)
 
 Description: CI agents are assigned to these groups depending on their environment context
 
@@ -30,7 +30,7 @@ map(object({
   }))
 ```
 
-### <a name="input_dynamic_group_config"></a> [dynamic\_group\_config](#input\_dynamic\_group\_config)
+### <a name="input_dynamic_group_config" /> [dynamic\_group\_config](#input_dynamic_group_config)
 
 Description: Users are assigned to these groups based on their role in the organization.
 
@@ -44,31 +44,31 @@ map(object({
   }))
 ```
 
-### <a name="input_environment"></a> [environment](#input\_environment)
+### <a name="input_environment" /> [environment](#input_environment)
 
 Description: The name of the environment for the infrastructure.
 
 Type: `string`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
 
 Type: `bool`
 
-### <a name="input_module"></a> [module](#input\_module)
+### <a name="input_module" /> [module](#input_module)
 
 Description: The name of the module.
 
 Type: `string`
 
-### <a name="input_region"></a> [region](#input\_region)
+### <a name="input_region" /> [region](#input_region)
 
 Description: The region to work in.
 
 Type: `string`
 
-### <a name="input_role_group_config"></a> [role\_group\_config](#input\_role\_group\_config)
+### <a name="input_role_group_config" /> [role\_group\_config](#input_role_group_config)
 
 Description: Role groups are groups that define a user's role and access controls in the organization.
 
@@ -81,13 +81,13 @@ map(object({
   }))
 ```
 
-### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
+### <a name="input_version_hash" /> [version\_hash](#input_version_hash)
 
 Description: The commit hash for the version. Used to reference build artifacts.
 
 Type: `string`
 
-### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
+### <a name="input_version_tag" /> [version\_tag](#input_version_tag)
 
 Description: Name of the application version or git commit ref.
 

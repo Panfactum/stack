@@ -273,7 +273,7 @@ Let's now deploy [vault\_core\_resources](../../reference/terraform-modules/vaul
    Those certificates are valid for `ssh_cert_lifetime_seconds`. We recommend setting this to a fairly low value
    ($\leq$ 8 hours) as long-lived certificates would allow de-provisioned users to continue to access the private network. [^8]
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, `time`, and `vault` providers.
+4. Add a `module.yaml` that enables the `kubernetes`, `time`, and `vault` providers.
 
 5. Run `terragrunt apply`.
 

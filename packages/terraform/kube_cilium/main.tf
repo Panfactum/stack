@@ -22,49 +22,43 @@ locals {
   namespace = module.namespace.namespace
 }
 
+data "aws_region" "region" {}
+
 module "base_labels" {
-  source       = "../kube_labels"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "operator_labels" {
-  source            = "../kube_labels"
-  additional_labels = merge(module.base_labels.kube_labels, { service = "operator" })
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(module.base_labels.kube_labels, { service = "operator" })
 }
 
 module "agent_labels" {
-  source            = "../kube_labels"
-  additional_labels = merge(module.base_labels.kube_labels, { service = "agent" })
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(module.base_labels.kube_labels, { service = "agent" })
 }
-
-data "aws_region" "region" {}
 
 module "constants" {
   source          = "../constants"
   matching_labels = module.operator_labels.kube_labels
   environment     = var.environment
-  module          = var.module
+  pf_root_module  = var.pf_root_module
   region          = var.region
-  version_tag     = var.version_tag
-  version_hash    = var.version_hash
   is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 /***************************************
@@ -72,17 +66,13 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.name
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.name
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -120,11 +110,10 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.cilium.json
   ip_allow_list             = var.ip_allow_list
   environment               = var.environment
-  module                    = var.module
+  pf_root_module            = var.pf_root_module
   region                    = var.region
-  version_tag               = var.version_tag
-  version_hash              = var.version_hash
   is_local                  = var.is_local
+  extra_tags                = var.extra_tags
 
   // The helm chart creates the service account
   annotate_service_account = false

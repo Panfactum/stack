@@ -9,6 +9,16 @@ terraform {
   }
 }
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 /********************************************************************************************************************
 * Permissions
 *********************************************************************************************************************/
@@ -58,17 +68,17 @@ data "aws_iam_policy_document" "record_manager_assume_role" {
 resource "aws_iam_policy" "record_manager" {
   name_prefix = "route53-record-manager-"
   policy      = data.aws_iam_policy_document.record_manager.json
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Policy that grants permissions to update records in the DNS zones of this account"
-  }
+  })
 }
 
 resource "aws_iam_role" "record_manager" {
   name_prefix        = "route53-record-manager-"
   assume_role_policy = data.aws_iam_policy_document.record_manager_assume_role.json
-  tags = {
+  tags = merge(module.tags.tags, {
     description = "Role that grants permissions to update records in the DNS zones of this account"
-  }
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "record_manager" {

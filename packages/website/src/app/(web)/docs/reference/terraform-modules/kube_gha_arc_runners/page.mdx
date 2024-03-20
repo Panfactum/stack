@@ -120,12 +120,6 @@ Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_environment"></a> [environment](#input\_environment)
-
-Description: The name of the environment for the infrastructure.
-
-Type: `string`
-
 ### <a name="input_gha_runner_env_prefix"></a> [gha\_runner\_env\_prefix](#input\_gha\_runner\_env\_prefix)
 
 Description: The prefix to append to each runner's name
@@ -168,12 +162,6 @@ Description: A list of IPs that can use the service account token to authenticat
 
 Type: `list(string)`
 
-### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
 ### <a name="input_large_runner_config"></a> [large\_runner\_config](#input\_large\_runner\_config)
 
 Description: Configuration for the large runner
@@ -204,18 +192,6 @@ object({
   })
 ```
 
-### <a name="input_module"></a> [module](#input\_module)
-
-Description: The name of the module.
-
-Type: `string`
-
-### <a name="input_region"></a> [region](#input\_region)
-
-Description: The region to work in.
-
-Type: `string`
-
 ### <a name="input_runner_image"></a> [runner\_image](#input\_runner\_image)
 
 Description: The runner image to use
@@ -243,25 +219,29 @@ Description: The tf lock table to clear when runners are terminated
 
 Type: `string`
 
-### <a name="input_version_hash"></a> [version\_hash](#input\_version\_hash)
-
-Description: The commit hash for the version. Used to reference build artifacts.
-
-Type: `string`
-
-### <a name="input_version_tag"></a> [version\_tag](#input\_version\_tag)
-
-Description: Name of the application version or git commit ref.
-
-Type: `string`
-
 ## Optional Inputs
 
 The following input variables are optional (have default values):
 
+### <a name="input_environment"></a> [environment](#input\_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_extra_env_secrets"></a> [extra\_env\_secrets](#input\_extra\_env\_secrets)
 
 Description: A key-value mapping of extra secret environment variables for the runner pods
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags)
+
+Description: Extra tags or labels to add to the created resources.
 
 Type: `map(string)`
 
@@ -274,6 +254,38 @@ Description: The version of the arc scale set to deploy
 Type: `string`
 
 Default: `"0.6.1"`
+
+### <a name="input_is_local"></a> [is\_local](#input\_is\_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pf_module"></a> [pf\_module](#input\_pf\_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"kube_gha_arc_runners"`
+
+### <a name="input_pf_root_module"></a> [pf\_root\_module](#input\_pf\_root\_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"kube_gha_arc_runners"`
+
+### <a name="input_region"></a> [region](#input\_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_scale_set_name"></a> [scale\_set\_name](#input\_scale\_set\_name)
 

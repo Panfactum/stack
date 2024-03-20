@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -12,6 +12,6 @@ dependency "root_domains" {
 }
 
 inputs = {
-  root_domain_names = keys(dependency.root_domains.outputs.domains)
+  root_domain_names     = keys(dependency.root_domains.outputs.domains)
   subdomain_identifiers = ["prod", "production"]
 }

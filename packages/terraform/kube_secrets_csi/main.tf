@@ -21,26 +21,21 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = local.service
-  }
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = local.service })
 }
 
 module "constants" {
-  source       = "../constants"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source      = "../constants"
+  environment = var.environment
+  module      = var.pf_root_module
+  region      = var.region
+  is_local    = var.is_local
+  extra_tags  = var.extra_tags
 }
 
 /***************************************
@@ -48,18 +43,14 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.service
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  linkerd_inject    = false
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.service
+  linkerd_inject = false
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************

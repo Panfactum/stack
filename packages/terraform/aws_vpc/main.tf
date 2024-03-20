@@ -19,6 +19,16 @@ locals {
 
 data "aws_region" "region" {}
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 ##########################################################################
 ## Main VPC
 ##########################################################################
@@ -26,12 +36,12 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-  tags                 = merge(var.vpc_extra_tags, { Name = var.vpc_name })
+  tags                 = merge(module.tags.tags, var.vpc_extra_tags, { Name = var.vpc_name })
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
-  tags   = { Name = var.vpc_name }
+  tags   = merge(module.tags.tags, { Name = var.vpc_name })
 }
 
 ##########################################################################
@@ -42,7 +52,7 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id          = aws_vpc.main.id
   service_name    = "com.amazonaws.${data.aws_region.region.name}.s3"
   route_table_ids = [for table in aws_route_table.tables : table.id]
-  tags            = { Name = "S3-endpoint-${aws_vpc.main.id}}" }
+  tags            = merge(module.tags.tags, { Name = "S3-endpoint-${aws_vpc.main.id}}" })
 }
 
 ##########################################################################
@@ -55,7 +65,7 @@ resource "aws_subnet" "subnets" {
   cidr_block              = each.value.cidr_block
   availability_zone       = each.value.az
   map_public_ip_on_launch = each.value.public
-  tags = merge(each.value.extra_tags, {
+  tags = merge(module.tags.tags, each.value.extra_tags, {
     Name                 = each.key
     "panfactum.com/type" = each.value.public ? "public" : contains(keys(var.nat_associations), each.key) ? "private" : "isolated"
   })
@@ -100,6 +110,7 @@ resource "aws_iam_role" "nat" {
   name_prefix        = "fck-nat-"
   assume_role_policy = data.aws_iam_policy_document.nat_assume_role_policy.json
   description        = "Role for fck-nat (self-hosted NAT) instances"
+  tags               = module.tags.tags
 }
 
 resource "aws_iam_policy" "nat" {
@@ -115,17 +126,18 @@ resource "aws_iam_role_policy_attachment" "nat" {
 
 resource "aws_iam_instance_profile" "nat" {
   role = aws_iam_role.nat.name
+  tags = module.tags.tags
 }
 
 resource "aws_eip" "nat_ips" {
   for_each = local.nat_subnets
 
   depends_on = [aws_internet_gateway.main]
-  tags = {
+  tags = merge(module.tags.tags, {
     Name                   = "NAT_${each.key}"
     "panfactum.com/for"    = each.value
     "panfactum.com/vpc-id" = aws_vpc.main.id
-  }
+  })
 }
 
 resource "aws_ec2_tag" "eip_subnet_tags" {
@@ -141,6 +153,10 @@ resource "aws_network_interface" "nats" {
   subnet_id         = aws_subnet.subnets[each.key].id
   source_dest_check = false
   security_groups   = [aws_security_group.nats[each.key].id]
+
+  tags = merge(module.tags.tags, {
+    Name = each.key
+  })
 }
 
 resource "aws_security_group" "nats" {
@@ -162,6 +178,10 @@ resource "aws_security_group" "nats" {
     to_port     = 0
     protocol    = "-1"
   }
+
+  tags = merge(module.tags.tags, {
+    description = "Security group for NAT nodes in ${each.key}"
+  })
 }
 
 data "aws_ami" "fck_nat" {
@@ -192,10 +212,16 @@ resource "aws_launch_template" "nats" {
   }))
   tag_specifications {
     resource_type = "instance"
-    tags = {
-      Name = "nat-${each.key}"
-    }
+    tags = merge(module.tags.tags, {
+      Name        = "nat-${each.key}"
+      description = "NAT node in ${each.key}"
+    })
   }
+
+  tags = merge(module.tags.tags, {
+    description = "Launch template for NAT nodes in ${each.key}"
+  })
+
   depends_on = [
     aws_iam_role.nat
   ]
@@ -218,6 +244,9 @@ resource "aws_autoscaling_group" "nats" {
     }
   }
   vpc_zone_identifier = [aws_subnet.subnets[each.key].id]
+  tags = merge(module.tags.tags, {
+    description = "Autoscaling group for NAT nodes in ${each.key}"
+  })
 }
 
 ##########################################################################
@@ -228,7 +257,7 @@ resource "aws_route_table" "tables" {
   for_each = var.subnets
 
   vpc_id = aws_vpc.main.id
-  tags   = { Name = "RT_${each.key}" }
+  tags   = merge(module.tags.tags, { Name = "RT_${each.key}" })
 }
 
 resource "aws_route" "igw" {
@@ -271,7 +300,7 @@ resource "aws_vpc_peering_connection_accepter" "accepters" {
 
   vpc_peering_connection_id = each.value.vpc_peering_connection_id
   auto_accept               = true
-  tags                      = { Name = each.key }
+  tags                      = merge(module.tags.tags, { Name = each.key })
 }
 
 resource "aws_vpc_peering_connection_options" "accepters" {

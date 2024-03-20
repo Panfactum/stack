@@ -15,6 +15,16 @@ locals {
 }
 
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 ##########################################################################
 ## Zone Setup
 ##########################################################################
@@ -28,6 +38,7 @@ resource "aws_route53_zone" "zones" {
   for_each          = local.subdomains
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
+  tags              = module.tags.tags
 }
 
 ##########################################################################
@@ -37,13 +48,12 @@ resource "aws_route53_zone" "zones" {
 module "iam_role" {
   source = "../aws_dns_iam_role"
 
-  domain_names = local.subdomains
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  domain_names   = local.subdomains
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 ##########################################################################
@@ -56,13 +66,12 @@ module "dnssec" {
     aws.global = aws.global
   }
 
-  domain_names = local.subdomains
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  domain_names   = local.subdomains
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 
   depends_on = [aws_route53_zone.zones]
 }

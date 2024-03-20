@@ -25,26 +25,21 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = local.service
-  }
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = local.service })
 }
 
 module "constants" {
-  source       = "../constants"
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../constants"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -52,17 +47,13 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source            = "../kube_namespace"
-  namespace         = local.service
-  admin_groups      = ["system:admins"]
-  reader_groups     = ["system:readers"]
-  bot_reader_groups = ["system:bot-readers"]
-  environment       = var.environment
-  module            = var.module
-  region            = var.region
-  version_tag       = var.version_tag
-  version_hash      = var.version_hash
-  is_local          = var.is_local
+  source         = "../kube_namespace"
+  namespace      = local.service
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /***************************************
@@ -98,11 +89,10 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.extra_permissions.json
   ip_allow_list             = var.ip_allow_list
   environment               = var.environment
-  module                    = var.module
+  pf_root_module            = var.pf_root_module
   region                    = var.region
-  version_tag               = var.version_tag
-  version_hash              = var.version_hash
   is_local                  = var.is_local
+  extra_tags                = var.extra_tags
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {

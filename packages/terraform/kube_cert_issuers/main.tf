@@ -27,17 +27,12 @@ locals {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
-  additional_labels = {
-    service = local.service
-  }
-  app          = var.app
-  environment  = var.environment
-  module       = var.module
-  region       = var.region
-  version_tag  = var.version_tag
-  version_hash = var.version_hash
-  is_local     = var.is_local
+  source         = "../kube_labels"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = merge(var.extra_tags, { service = local.service })
 }
 
 /***************************************
@@ -61,13 +56,11 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.ip_allow_list
-  app                       = var.app
   environment               = var.environment
-  module                    = var.module
+  pf_root_module            = var.pf_root_module
   region                    = var.region
-  version_tag               = var.version_tag
-  version_hash              = var.version_hash
   is_local                  = var.is_local
+  extra_tags                = var.extra_tags
 }
 
 // the default issuer for PUBLIC tls certs in the default DNS zone for the env
@@ -111,6 +104,7 @@ resource "kubernetes_service_account" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
+    // TODO: Labels
   }
 }
 
@@ -118,6 +112,7 @@ resource "kubernetes_role" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
+    // TODO: Labels
   }
   rule {
     verbs          = ["create"]

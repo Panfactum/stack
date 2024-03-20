@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -8,6 +8,6 @@ terraform {
 }
 
 inputs = {
-  name = "sops-${include.panfactum.locals.vars.environment}"
-  description   = "Encryption key for sops"
+  name        = "sops-${include.panfactum.locals.vars.environment}"
+  description = "Encryption key for sops"
 }

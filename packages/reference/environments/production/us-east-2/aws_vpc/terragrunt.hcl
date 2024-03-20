@@ -1,5 +1,5 @@
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
@@ -13,9 +13,9 @@ inputs = {
   vpc_description = "VPC for the primary production environment."
 
   nat_associations = {
-    "PRIVATE_A"      = "PUBLIC_A"
-    "PRIVATE_B"      = "PUBLIC_B"
-    "PRIVATE_C"      = "PUBLIC_C"
+    "PRIVATE_A" = "PUBLIC_A"
+    "PRIVATE_B" = "PUBLIC_B"
+    "PRIVATE_C" = "PUBLIC_C"
   }
 
   subnets = {

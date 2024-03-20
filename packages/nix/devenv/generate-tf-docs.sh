@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
+# Purpose: Uses terraform-docs to create the markdown documentation
+# for each terraform module for the public website
+
 OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/(web)/docs/reference/terraform-modules"
 TF_DIR="$DEVENV_ROOT/packages/terraform"
 
 # Initialize an empty JSON object with a `modules` array
 JSON=$(jq -n '{modules: []}')
+
+# Remove the old docs
+find "$OUTPUT_DIR" -type d | grep '_' | xargs rm -rf
 
 # Loop through each directory in the script's directory
 for d in "$TF_DIR"/*; do
