@@ -244,9 +244,6 @@ resource "aws_autoscaling_group" "nats" {
     }
   }
   vpc_zone_identifier = [aws_subnet.subnets[each.key].id]
-  tags = merge(module.tags.tags, {
-    description = "Autoscaling group for NAT nodes in ${each.key}"
-  })
 }
 
 ##########################################################################

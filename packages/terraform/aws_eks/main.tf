@@ -214,14 +214,14 @@ resource "aws_eks_addon" "coredns" {
 ////////////////////////////////////////////////////////////
 
 module "aws_cloudwatch_log_group" {
-  source      = "../aws_cloudwatch_log_group"
-  name        = "/aws/eks/${var.cluster_name}/cluster"
-  description = "Collects logs for our AWS EKS Cluster"
-  environment = var.environment
-  module      = var.pf_root_module
-  region      = var.region
-  is_local    = var.is_local
-  extra_tags  = var.extra_tags
+  source         = "../aws_cloudwatch_log_group"
+  name           = "/aws/eks/${var.cluster_name}/cluster"
+  description    = "Collects logs for our AWS EKS Cluster"
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 ##########################################################################
