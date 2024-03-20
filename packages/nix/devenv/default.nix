@@ -64,6 +64,12 @@ in {
       description = "Terraform linting";
       files = "^packages/terraform/(.*).tf$";
     };
+    terragrunt-custom = {
+      enable = true;
+      entry = "precommit-terragrunt-fmt";
+      description = "Terragrunt linting";
+      files = "^packages/(nix|reference)/(.*).hcl$";
+    };
     terraform-docs = {
       enable = true;
       entry = "precommit-terraform-docs";
