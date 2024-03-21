@@ -84,7 +84,9 @@ words: [
   "pvcs",
   "yamldecode",
   "fullykubed",
-  "jetbrains"
+  "jetbrains",
+  "mitm",
+  "keyholder"
 ]
 languageSettings:
   - languageId: markdown,mdx

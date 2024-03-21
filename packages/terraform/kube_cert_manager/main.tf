@@ -134,8 +134,6 @@ resource "helm_release" "cert_manager" {
         commonLabels      = module.base_labels.kube_labels
         priorityClassName = module.constants_controller.cluster_important_priority_class_name
       }
-
-      // Does not need to be highly available
       replicaCount = 2
       podLabels    = module.controller_labels.kube_labels
       affinity = merge(

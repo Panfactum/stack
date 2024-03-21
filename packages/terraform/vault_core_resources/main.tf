@@ -120,44 +120,6 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
 }
 
 /***************************************
-* Internal cluster PKI CA
-***************************************/
-
-## TODO: Move this to the certificate infrastructure
-
-resource "vault_mount" "pki_internal" {
-  path                      = "pki/internal"
-  type                      = "pki"
-  description               = "Internal root CA for the cluster"
-  default_lease_ttl_seconds = 60 * 60 * 24
-  max_lease_ttl_seconds     = 60 * 60 * 24 * 365 * 10
-}
-
-resource "vault_pki_secret_backend_root_cert" "pki_internal" {
-  backend              = vault_mount.pki_internal.path
-  type                 = "internal"
-  common_name          = "http://vault.vault.svc.cluster.local:8200"
-  ttl                  = 60 * 60 * 24 * 365 * 10
-  format               = "pem"
-  private_key_format   = "der"
-  key_type             = "ec"
-  key_bits             = 256
-  exclude_cn_from_sans = true
-  ou                   = "engineering"
-  organization         = "panfactum"
-}
-
-resource "vault_pki_secret_backend_config_urls" "pki_internal" {
-  backend = vault_mount.pki_internal.path
-  issuing_certificates = [
-    "${var.vault_internal_url}/v1/pki/ca"
-  ]
-  crl_distribution_points = [
-    "${var.vault_internal_url}/v1/pki/crl"
-  ]
-}
-
-/***************************************
 * Database Secrets Backend
 ***************************************/
 

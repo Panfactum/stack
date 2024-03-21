@@ -12,7 +12,7 @@ const SIDENAV_SECTIONS = [
         path: '/aws-primitives'
       },
       {
-        text: 'NAT',
+        text: 'Network Address Translation (NAT)',
         path: '/nat'
       },
       {
@@ -20,8 +20,12 @@ const SIDENAV_SECTIONS = [
         path: '/subdomain-delegation'
       },
       {
-        text: 'Cluster Networking',
+        text: 'Kubernetes Networking',
         path: '/cluster-networking'
+      },
+      {
+        text: 'Cryptography',
+        path: '/cryptography'
       }
     ]
   }
