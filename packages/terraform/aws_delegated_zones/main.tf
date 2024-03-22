@@ -38,12 +38,7 @@ resource "aws_route53_zone" "zones" {
   for_each          = local.subdomains
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
-  tags = merge(
-    module.tags.tags,
-    {
-      # "panfactum.com/record-manager-arn" = module.iam_role.role_arn
-    }
-  )
+  tags              = module.tags.tags
 }
 
 ##########################################################################
@@ -113,4 +108,6 @@ resource "aws_route53_record" "ds" {
   zone_id  = data.aws_route53_zone.roots[join(".", slice(split(".", each.value), 1, length(split(".", each.value))))].id
   ttl      = 60 * 60 * 24 * 2
   records  = [module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].ds_record]
+
+  depends_on = [module.dnssec]
 }

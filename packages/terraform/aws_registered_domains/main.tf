@@ -33,12 +33,7 @@ resource "aws_route53_zone" "zones" {
   for_each          = var.domain_names
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
-  tags = merge(
-    module.tags.tags,
-    {
-      # "panfactum.com/record-manager-arn" = module.iam_role.role_arn
-    }
-  )
+  tags              = module.tags.tags
 }
 
 
@@ -138,6 +133,8 @@ resource "aws_route53domains_delegation_signer_record" "dnssec" {
     flags      = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].flags
     public_key = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].public_key
   }
+
+  depends_on = [module.dnssec]
 }
 
 ##########################################################################
