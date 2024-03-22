@@ -20,10 +20,6 @@ module "tags" {
   is_local       = var.is_local
 }
 
-locals {
-  hosted_zone_ids = { for zone in aws_route53_zone.zones : zone.zone_id => zone.name }
-}
-
 ##########################################################################
 ## Zone Setup
 ##########################################################################
@@ -40,7 +36,7 @@ resource "aws_route53_zone" "zones" {
   tags = merge(
     module.tags.tags,
     {
-      "panfactum.com/record-manager-arn" = module.iam_role.role_arn
+      # "panfactum.com/record-manager-arn" = module.iam_role.role_arn
     }
   )
 }
@@ -124,21 +120,23 @@ module "dnssec" {
     aws.global = aws.global
   }
 
-  hosted_zone_ids = keys(local.hosted_zone_ids)
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+  hosted_zone_names = var.domain_names
+  environment       = var.environment
+  pf_root_module    = var.pf_root_module
+  region            = var.region
+  is_local          = var.is_local
+  extra_tags        = var.extra_tags
+
+  depends_on = [aws_route53_zone.zones]
 }
 
 resource "aws_route53domains_delegation_signer_record" "dnssec" {
-  for_each    = local.hosted_zone_ids
-  domain_name = [for zone in aws_route53_zone.zones : zone.name if zone.zone_id == each.key][0]
+  for_each    = var.domain_names
+  domain_name = each.key
   signing_attributes {
-    algorithm  = module.dnssec.keys[each.key].algorithm
-    flags      = module.dnssec.keys[each.key].flags
-    public_key = module.dnssec.keys[each.key].public_key
+    algorithm  = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].algorithm
+    flags      = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].flags
+    public_key = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].public_key
   }
 }
 
@@ -156,4 +154,6 @@ module "iam_role" {
   region                                    = var.region
   is_local                                  = var.is_local
   extra_tags                                = var.extra_tags
+
+  depends_on = [aws_route53_zone.zones]
 }
