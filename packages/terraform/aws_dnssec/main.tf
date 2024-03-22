@@ -94,18 +94,18 @@ resource "aws_kms_key" "key" {
 }
 
 data "aws_route53_zone" "zones" {
-  for_each = var.domain_names
-  name     = each.key
+  for_each = var.hosted_zone_ids
+  zone_id  = each.key
 }
 
 resource "aws_route53_key_signing_key" "keys" {
-  for_each                   = var.domain_names
-  hosted_zone_id             = data.aws_route53_zone.zones[each.key].id
+  for_each                   = var.hosted_zone_ids
+  hosted_zone_id             = each.key
   key_management_service_arn = aws_kms_key.key.arn
-  name                       = "${each.key}-dnssec"
+  name                       = "${data.aws_route53_zone.zones[each.key].name}-dnssec"
 }
 
 resource "aws_route53_hosted_zone_dnssec" "dnssec" {
-  for_each       = var.domain_names
-  hosted_zone_id = aws_route53_key_signing_key.keys[each.key].hosted_zone_id
+  for_each       = var.hosted_zone_ids
+  hosted_zone_id = each.key
 }

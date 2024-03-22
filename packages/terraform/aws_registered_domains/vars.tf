@@ -195,4 +195,3 @@ variable "tech_country_code" {
   type        = string
 }
 
-

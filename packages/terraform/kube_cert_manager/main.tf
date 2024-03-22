@@ -10,14 +10,19 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
 locals {
 
-  name      = "cert-manager"
-  namespace = module.namespace.namespace
-
+  name           = "cert-manager"
+  webhook_name   = "cert-manger-webhook"
+  namespace      = module.namespace.namespace
+  webhook_secret = "cert-manager-webhook-certs"
 }
 
 module "base_labels" {
@@ -30,6 +35,11 @@ module "base_labels" {
   extra_tags     = var.extra_tags
 }
 
+resource "random_id" "controller_id" {
+  prefix      = "${local.name}-"
+  byte_length = 8
+}
+
 module "controller_labels" {
   source         = "../kube_labels"
   environment    = var.environment
@@ -37,7 +47,12 @@ module "controller_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = local.name })
+  extra_tags     = merge(var.extra_tags, { id = random_id.controller_id.hex })
+}
+
+resource "random_id" "webhook" {
+  prefix      = "${local.name}-webhook-"
+  byte_length = 8
 }
 
 module "webhook_labels" {
@@ -47,7 +62,12 @@ module "webhook_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = "${local.name}-webhook" })
+  extra_tags     = merge(var.extra_tags, { id = random_id.webhook.hex })
+}
+
+resource "random_id" "ca_injector" {
+  prefix      = "${local.name}-ca-injector-"
+  byte_length = 8
 }
 
 module "ca_injector_labels" {
@@ -57,12 +77,12 @@ module "ca_injector_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = "${local.name}-ca-injector" })
+  extra_tags     = merge(var.extra_tags, { id = random_id.ca_injector.hex })
 }
 
 module "constants_controller" {
   source          = "../constants"
-  matching_labels = module.controller_labels.kube_labels
+  matching_labels = { id = random_id.controller_id.hex }
   environment     = var.environment
   pf_root_module  = var.pf_root_module
   region          = var.region
@@ -72,7 +92,7 @@ module "constants_controller" {
 
 module "constants_webhook" {
   source          = "../constants"
-  matching_labels = module.webhook_labels.kube_labels
+  matching_labels = { id = random_id.webhook.hex }
   environment     = var.environment
   pf_root_module  = var.pf_root_module
   region          = var.region
@@ -82,7 +102,7 @@ module "constants_webhook" {
 
 module "constants_ca_injector" {
   source          = "../constants"
-  matching_labels = module.ca_injector_labels.kube_labels
+  matching_labels = { id = random_id.ca_injector.hex }
   environment     = var.environment
   pf_root_module  = var.pf_root_module
   region          = var.region
@@ -116,6 +136,70 @@ resource "kubernetes_service_account" "cert_manager" {
   }
 }
 
+resource "kubernetes_service_account" "webhook" {
+  metadata {
+    name      = local.webhook_name
+    namespace = local.namespace
+    labels    = module.webhook_labels.kube_labels
+  }
+}
+
+module "webhook_cert" {
+  count          = var.self_generated_certs_enabled ? 0 : 1
+  source         = "../kube_internal_cert"
+  service_names  = ["jetstack-cert-manager-webhook"]
+  common_name    = "jetstack-cert-manager-webhook.cert-manager.svc"
+  secret_name    = local.webhook_secret
+  namespace      = local.namespace
+  labels         = module.webhook_labels.kube_labels
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
+
+resource "kubernetes_role" "webhook" {
+  metadata {
+    name      = local.webhook_name
+    labels    = module.webhook_labels.kube_labels
+    namespace = local.namespace
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["list", "get", "watch", "update", "delete", "create"]
+    resource_names = [
+      local.webhook_secret,
+      "jetstack-cert-manager-webhook-ca"
+    ]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["list"]
+  }
+}
+
+resource "kubernetes_role_binding" "extra_permissions" {
+  metadata {
+    labels    = module.webhook_labels.kube_labels
+    name      = local.webhook_name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.webhook.metadata[0].name
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.webhook.metadata[0].name
+    namespace = local.namespace
+  }
+}
+
 resource "helm_release" "cert_manager" {
   namespace       = local.namespace
   name            = "jetstack"
@@ -144,7 +228,7 @@ resource "helm_release" "cert_manager" {
       livenessProbe = {
         enabled = true
       }
-      extraArgs = ["--v=0"]
+      extraArgs = ["--v=${var.log_verbosity}"]
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.cert_manager.metadata[0].name
@@ -154,17 +238,53 @@ resource "helm_release" "cert_manager" {
       }
       webhook = {
         replicaCount = 2
-        extraArgs    = ["--v=0"]
-        podLabels    = module.webhook_labels.kube_labels
+        extraArgs    = ["--v=${var.log_verbosity}"]
+        serviceAccount = {
+          create = false
+          name   = kubernetes_service_account.webhook.metadata[0].name
+        }
+        podLabels = module.webhook_labels.kube_labels
         affinity = merge(
           module.constants_webhook.controller_node_affinity_helm,
           module.constants_webhook.pod_anti_affinity_helm
         )
+        //////////////////////////////////////////////////////////
+        // This section replaces the self-generated certs with our certificate chain
+        //////////////////////////////////////////////////////////
+        config = var.self_generated_certs_enabled ? null : {
+          apiVersion = "webhook.config.cert-manager.io/v1alpha1"
+          kind       = "WebhookConfiguration"
+          tlsConfig = {
+            filesystem = {
+              certFile = "/etc/certs/tls.crt"
+              keyFile  = "/etc/certs/tls.key"
+            }
+          }
+        }
+        volumeMounts = var.self_generated_certs_enabled ? [] : [{
+          name      = "certs"
+          mountPath = "/etc/certs"
+        }]
+        volumes = var.self_generated_certs_enabled ? [] : [{
+          name = "certs"
+          secret = {
+            secretName = local.webhook_secret
+            optional   = false
+          }
+        }]
+        // this must be inject-ca-from-secret to override the chart default
+        mutatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? null : {
+          "cert-manager.io/inject-ca-from-secret" = "${local.namespace}/${local.webhook_secret}"
+        }
+        validatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? null : {
+          "cert-manager.io/inject-ca-from-secret" = "${local.namespace}/${local.webhook_secret}"
+        }
+
       }
       cainjector = {
         enabled      = true
         replicaCount = 2
-        extraArgs    = ["--v=0"]
+        extraArgs    = ["--v=${var.log_verbosity}"]
         podLabels    = module.ca_injector_labels.kube_labels
         affinity = merge(
           module.constants_ca_injector.controller_node_affinity_helm,
@@ -173,6 +293,8 @@ resource "helm_release" "cert_manager" {
       }
     })
   ]
+
+  depends_on = [module.webhook_cert]
 }
 
 resource "kubernetes_manifest" "vpa_controller" {

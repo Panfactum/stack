@@ -6,4 +6,4 @@ let
     shallow = true;
   };
   pkgs = import nixpkgsSrc { inherit system; };
-in pkgs.helm
+in pkgs.kubernetes-helm

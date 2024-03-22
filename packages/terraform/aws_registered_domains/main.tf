@@ -20,6 +20,9 @@ module "tags" {
   is_local       = var.is_local
 }
 
+locals {
+  hosted_zone_ids = { for zone in aws_route53_zone.zones : zone.zone_id => zone.name }
+}
 
 ##########################################################################
 ## Zone Setup
@@ -34,7 +37,12 @@ resource "aws_route53_zone" "zones" {
   for_each          = var.domain_names
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
-  tags              = module.tags.tags
+  tags = merge(
+    module.tags.tags,
+    {
+      "panfactum.com/record-manager-arn" = module.iam_role.role_arn
+    }
+  )
 }
 
 
@@ -116,17 +124,17 @@ module "dnssec" {
     aws.global = aws.global
   }
 
-  domain_names   = var.domain_names
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  hosted_zone_ids = keys(local.hosted_zone_ids)
+  environment     = var.environment
+  pf_root_module  = var.pf_root_module
+  region          = var.region
+  is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 resource "aws_route53domains_delegation_signer_record" "dnssec" {
-  for_each    = var.domain_names
-  domain_name = each.key
+  for_each    = local.hosted_zone_ids
+  domain_name = [for zone in aws_route53_zone.zones : zone.name if zone.zone_id == each.key][0]
   signing_attributes {
     algorithm  = module.dnssec.keys[each.key].algorithm
     flags      = module.dnssec.keys[each.key].flags

@@ -8,7 +8,7 @@ terraform {
 }
 
 locals {
-  secrets = yamldecode(sops_decrypt_file("secrets.yaml"))
+  secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
 }
 
 inputs = {

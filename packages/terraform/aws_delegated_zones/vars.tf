@@ -10,4 +10,3 @@ variable "subdomain_identifiers" {
 
 
 
-

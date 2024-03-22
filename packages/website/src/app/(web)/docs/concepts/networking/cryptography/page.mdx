@@ -110,9 +110,9 @@ IP addresses and / or domain names which clients use to verify the identity of t
 is not being intercepted by a MITM attack).
 
 However, how does one know they can trust the metadata in any given certificate? We resolve that problem
-through a certificate authority (CA) which digitally signs the certificate (including the metadata).
+by using a certificate authority (CA) which digitally signs the certificate (including the metadata).
 
-But then how does one know which certificate authorities to trust?
+But how do we know which certificate authorities to trust?
 
 For public sites, there are a handful of CAs that come pre-trusted by all major operating systems. This allows
 users to immediately open a browser and visit a website without having to make a trust decision.
@@ -135,6 +135,10 @@ CA by adding the CA's public key to the computer's trust list. [^8]
     but not in the semantic sense (i.e., guaranteed that no one is intercepting the traffic). Consider infrastructure
     hosted by a cloud provider. Not only does the organization and its employees have access to your traffic, but so do all the devices
     facilitating the provider's network, each device having its own manufacturer and exploitable software stack.
+
+Finally, there is the concept of a [self-signed certificate](https://en.wikipedia.org/wiki/Self-signed_certificate)
+which serves as its *own* CA. Obviously, this provides no additional trust value and is used
+either for testing purposes or as the [root certificate](https://en.wikipedia.org/wiki/Root_certificate) used by a trusted CA.
 
 ### Mutual TLS (mTLS)
 

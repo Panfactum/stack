@@ -11,7 +11,8 @@ terraform {
 }
 
 locals {
-  subdomains = toset(flatten([for root in var.root_domain_names : [for sub in var.subdomain_identifiers : "${sub}.${root}"]]))
+  subdomains      = toset(flatten([for root in var.root_domain_names : [for sub in var.subdomain_identifiers : "${sub}.${root}"]]))
+  hosted_zone_ids = { for zone in aws_route53_zone.zones : zone.zone_id => zone.name }
 }
 
 
@@ -38,7 +39,12 @@ resource "aws_route53_zone" "zones" {
   for_each          = local.subdomains
   name              = each.key
   delegation_set_id = aws_route53_delegation_set.zones[each.key].id
-  tags              = module.tags.tags
+  tags = merge(
+    module.tags.tags,
+    {
+      "panfactum.com/record-manager-arn" = module.iam_role.role_arn
+    }
+  )
 }
 
 ##########################################################################
@@ -66,14 +72,12 @@ module "dnssec" {
     aws.global = aws.global
   }
 
-  domain_names   = local.subdomains
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
-
-  depends_on = [aws_route53_zone.zones]
+  hosted_zone_ids = keys(local.hosted_zone_ids)
+  environment     = var.environment
+  pf_root_module  = var.pf_root_module
+  region          = var.region
+  is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 ##########################################################################
@@ -100,10 +104,10 @@ resource "aws_route53_record" "ns" {
 // DNSSEC delegation
 resource "aws_route53_record" "ds" {
   provider = aws.secondary
-  for_each = local.subdomains
-  name     = split(".", each.key)[0]
+  for_each = local.hosted_zone_ids
+  name     = split(".", each.value)[0]
   type     = "DS"
-  zone_id  = data.aws_route53_zone.roots[join(".", slice(split(".", each.key), 1, length(split(".", each.key))))].id
+  zone_id  = data.aws_route53_zone.roots[join(".", slice(split(".", each.value), 1, length(split(".", each.value))))].id
   ttl      = 60 * 60 * 24 * 2
   records  = [module.dnssec.keys[each.key].ds_record]
 }

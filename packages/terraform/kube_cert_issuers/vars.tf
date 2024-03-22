@@ -1,11 +1,13 @@
 variable "service_account" {
   description = "The name of the cert-manager service account."
   type        = string
+  default     = "cert-manager"
 }
 
 variable "namespace" {
   description = "The name of the cert-manager namespace."
   type        = string
+  default     = "cert-manager"
 }
 
 variable "eks_cluster_name" {
@@ -13,8 +15,8 @@ variable "eks_cluster_name" {
   type        = string
 }
 
-variable "dns_zones" {
-  description = "A mapping of public DNS domains to their configuration; cert-manager uses this to issue public-facing certificates."
+variable "route53_zones" {
+  description = "A mapping of public DNS domains managed by AWS to their configuration; cert-manager uses this to issue public-facing certificates."
   type = map(object({
     record_manager_role_arn = string
     zone_id                 = string
@@ -27,11 +29,6 @@ variable "alert_email" {
   type        = string
 }
 
-variable "vault_internal_pki_path" {
-  description = "The path to the internal cert issuer in the vault instance"
-  type        = string
-}
-
 variable "vault_internal_url" {
   description = "The url to the vault instance for internal cert issuance"
   type        = string
@@ -40,4 +37,5 @@ variable "vault_internal_url" {
 variable "ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
+  default     = []
 }

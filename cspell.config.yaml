@@ -86,7 +86,8 @@ words: [
   "fullykubed",
   "jetbrains",
   "mitm",
-  "keyholder"
+  "keyholder",
+  "cainjector"
 ]
 languageSettings:
   - languageId: markdown,mdx

@@ -1,0 +1,4 @@
+providers:
+  - random
+  - helm
+  - kubernetes

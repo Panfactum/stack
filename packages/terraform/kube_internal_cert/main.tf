@@ -30,6 +30,12 @@ resource "kubernetes_manifest" "webhook_cert" {
     }
     spec = {
       secretName = var.secret_name
+      secretTemplate = {
+        annotations = {
+          // This allows for the secret to have its ca data directly injected into webhooks
+          "cert-manager.io/allow-direct-injection" = "true"
+        }
+      }
       commonName = var.common_name
       dnsNames = length(var.service_names) == 0 ? ["default"] : flatten([for service in var.service_names : [
         service,

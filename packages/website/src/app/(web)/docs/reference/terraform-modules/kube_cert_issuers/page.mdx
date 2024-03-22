@@ -47,30 +47,6 @@ Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
-
-Description: A list of IPs that can use the service account token to authenticate with AWS API
-
-Type: `list(string)`
-
-### <a name="input_namespace" /> [namespace](#input_namespace)
-
-Description: The name of the cert-manager namespace.
-
-Type: `string`
-
-### <a name="input_service_account" /> [service\_account](#input_service_account)
-
-Description: The name of the cert-manager service account.
-
-Type: `string`
-
-### <a name="input_vault_internal_pki_path" /> [vault\_internal\_pki\_path](#input_vault_internal_pki_path)
-
-Description: The path to the internal cert issuer in the vault instance
-
-Type: `string`
-
 ### <a name="input_vault_internal_url" /> [vault\_internal\_url](#input_vault_internal_url)
 
 Description: The url to the vault instance for internal cert issuance
@@ -80,21 +56,6 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
-
-### <a name="input_dns_zones" /> [dns\_zones](#input_dns_zones)
-
-Description: A mapping of public DNS domains to their configuration; cert-manager uses this to issue public-facing certificates.
-
-Type:
-
-```hcl
-map(object({
-    record_manager_role_arn = string
-    zone_id                 = string
-  }))
-```
-
-Default: `{}`
 
 ### <a name="input_environment" /> [environment](#input_environment)
 
@@ -112,6 +73,14 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
@@ -119,6 +88,14 @@ Description: Whether this module is a part of a local development deployment
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The name of the cert-manager namespace.
+
+Type: `string`
+
+Default: `"cert-manager"`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
@@ -143,6 +120,29 @@ Description: The region the infrastructure is being deployed into.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_route53_zones" /> [route53\_zones](#input_route53_zones)
+
+Description: A mapping of public DNS domains managed by AWS to their configuration; cert-manager uses this to issue public-facing certificates.
+
+Type:
+
+```hcl
+map(object({
+    record_manager_role_arn = string
+    zone_id                 = string
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_service_account" /> [service\_account](#input_service_account)
+
+Description: The name of the cert-manager service account.
+
+Type: `string`
+
+Default: `"cert-manager"`
 
 ## Outputs
 

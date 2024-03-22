@@ -18,6 +18,8 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
 ## Modules
 
 The following Modules are called:
@@ -50,6 +52,10 @@ Source: [kube\_labels](./kube_labels)
 
 Source: [kube\_namespace](./kube_namespace)
 
+### <a name="module_webhook_cert" /> [webhook\_cert](#module_webhook_cert)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
+
 ### <a name="module_webhook_labels" /> [webhook\_labels](#module_webhook_labels)
 
 Source: [kube\_labels](./kube_labels)
@@ -68,7 +74,7 @@ Description: The version of cert-manager to deploy
 
 Type: `string`
 
-Default: `"1.12.0"`
+Default: `"1.14.4"`
 
 ### <a name="input_environment" /> [environment](#input_environment)
 
@@ -94,6 +100,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+
+Description: The log verbosity (0-9) for the cert-manager pods
+
+Type: `number`
+
+Default: `0`
+
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
@@ -117,6 +131,14 @@ Description: The region the infrastructure is being deployed into.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_self_generated_certs_enabled" /> [self\_generated\_certs\_enabled](#input_self_generated_certs_enabled)
+
+Description: Whether to enable self-generated webhook certs (only use on initial installation)
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_delegated_zones"
+  source = "../../../../../terraform//aws_delegated_zones"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_delegated_zones"
 }
 
 dependency "root_domains" {

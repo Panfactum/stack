@@ -18,12 +18,8 @@ terraform {
 }
 
 locals {
-
-  service = "cert-manager"
-
   ci_public_name   = "public"
   ci_internal_name = "internal"
-
 }
 
 module "kube_labels" {
@@ -33,7 +29,7 @@ module "kube_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = local.service })
+  extra_tags     = merge(var.extra_tags)
 }
 
 /***************************************
@@ -46,7 +42,7 @@ data "aws_iam_policy_document" "permissions" {
   statement {
     effect    = "Allow"
     actions   = ["sts:AssumeRole"]
-    resources = [for domain, config in var.dns_zones : config.record_manager_role_arn]
+    resources = [for domain, config in var.route53_zones : config.record_manager_role_arn]
   }
 }
 
@@ -80,7 +76,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
         privateKeySecretRef = {
           name = "letsencrypt-cert-key"
         }
-        solvers = [for domain, config in var.dns_zones : {
+        solvers = [for domain, config in var.route53_zones : {
           dns01 = {
             route53 = {
               hostedZoneID = config.zone_id
@@ -104,7 +100,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
 resource "vault_mount" "pki_internal" {
   path                      = "pki/internal"
   type                      = "pki"
-  description               = "Internal root CA for the cluster"
+  description               = "Internal root CA for the ${var.eks_cluster_name} cluster"
   default_lease_ttl_seconds = 60 * 60 * 24
   max_lease_ttl_seconds     = 60 * 60 * 24 * 365 * 10
 }
@@ -112,7 +108,7 @@ resource "vault_mount" "pki_internal" {
 resource "vault_pki_secret_backend_root_cert" "pki_internal" {
   backend              = vault_mount.pki_internal.path
   type                 = "internal"
-  common_name          = "http://vault.vault.svc.cluster.local:8200"
+  common_name          = var.vault_internal_url
   ttl                  = 60 * 60 * 24 * 365 * 10
   format               = "pem"
   private_key_format   = "der"
@@ -138,7 +134,7 @@ resource "kubernetes_service_account" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
-    // TODO: Labels
+    labels    = module.kube_labels.kube_labels
   }
 }
 
@@ -146,7 +142,7 @@ resource "kubernetes_role" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
-    // TODO: Labels
+    labels    = module.kube_labels.kube_labels
   }
   rule {
     verbs          = ["create"]
@@ -160,6 +156,7 @@ resource "kubernetes_role_binding" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
+    labels    = module.kube_labels.kube_labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -176,7 +173,7 @@ resource "kubernetes_role_binding" "vault_issuer" {
 data "vault_policy_document" "vault_issuer" {
   rule {
     capabilities = ["create", "read", "update"]
-    path         = "${var.vault_internal_pki_path}/sign/${vault_pki_secret_backend_role.vault_issuer.name}"
+    path         = "${vault_mount.pki_internal.path}/sign/${vault_pki_secret_backend_role.vault_issuer.name}"
   }
 }
 
@@ -195,7 +192,7 @@ resource "vault_kubernetes_auth_backend_role" "vault_issuer" {
 }
 
 resource "vault_pki_secret_backend_role" "vault_issuer" {
-  backend = var.vault_internal_pki_path
+  backend = vault_mount.pki_internal.path
   name    = "vault-issuer"
 
   // This is super permissive b/c these certificates are only used for
@@ -222,7 +219,7 @@ resource "kubernetes_manifest" "internal_ca" {
     }
     spec = {
       vault = {
-        path   = "${var.vault_internal_pki_path}/sign/${vault_pki_secret_backend_role.vault_issuer.name}"
+        path   = "${vault_mount.pki_internal.path}/sign/${vault_pki_secret_backend_role.vault_issuer.name}"
         server = var.vault_internal_url
         auth = {
           kubernetes = {

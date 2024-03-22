@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_registered_domains"
+  source = "../../../../../terraform//aws_registered_domains"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_registered_domains"
 }
 
 locals {
@@ -13,6 +14,10 @@ locals {
 
 inputs = {
   domain_names = ["panfactum.com"]
+
+  additional_account_ids_with_record_access = [
+    "891377197483" // production
+  ]
 
   admin_organization_name = "Panfactum"
   admin_first_name        = "Jack"
