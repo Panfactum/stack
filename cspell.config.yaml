@@ -87,7 +87,9 @@ words: [
   "jetbrains",
   "mitm",
   "keyholder",
-  "cainjector"
+  "cainjector",
+  "linkerd",
+  "cmctl"
 ]
 languageSettings:
   - languageId: markdown,mdx

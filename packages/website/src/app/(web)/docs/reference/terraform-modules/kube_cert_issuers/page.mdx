@@ -8,6 +8,7 @@ This module provides our standard cluster issuers for [cert-manager](https://cer
 
 * Cluster issuer for public domain names
 * Cluster issuer for self-signed certs
+* Cluster issuer for intermediate CAs
 
 ## Providers
 
@@ -146,7 +147,11 @@ Default: `"cert-manager"`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_vault_ca_crt" /> [vault\_ca\_crt](#output_vault_ca_crt)
+
+Description: The public certificate of the root vault certificate authority
 
 ## Usage
 

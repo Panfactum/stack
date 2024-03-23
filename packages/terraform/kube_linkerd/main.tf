@@ -18,7 +18,6 @@ locals {
   name      = "linkerd"
   namespace = module.namespace.namespace
 
-  linkerd_vault_issuer                     = "linkerd-vault-issuer"
   linkerd_root_ca_secret                   = "linkerd-identity-trust-roots" # MUST be named this
   linkerd_root_issuer                      = "linkerd-root-issuer"
   linkerd_identity_issuer                  = "linkerd-identity-issuer"
@@ -26,16 +25,6 @@ locals {
   linkerd_policy_validator_webhook_secret  = "linkerd-policy-validator-k8s-tls" # MUST be named this
   linkerd_proxy_injector_webhook_secret    = "linkerd-proxy-injector-k8s-tls"   # MUST be named this
   linkerd_profile_validator_webhook_secret = "linkerd-sp-validator-k8s-tls"     # MUST be named this
-
-  linkerd_submodule = "linkerd"
-  linkerd_labels = merge(module.kube_labels.kube_labels, {
-    submodule = local.linkerd_submodule
-  })
-
-  linkerd_cni_submodule = "linkerd-cni"
-  linkerd_cni_labels = merge(module.kube_labels.kube_labels, {
-    submodule = local.linkerd_cni_submodule
-  })
 }
 
 module "kube_labels" {
@@ -45,7 +34,7 @@ module "kube_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = local.name })
+  extra_tags     = var.extra_tags
 }
 
 module "constants" {
@@ -71,225 +60,43 @@ module "namespace" {
   extra_tags     = var.extra_tags
 }
 
+
 /***************************************
-* Setup Certs
-* See docs here: https://github.com/BuoyantIO/cert-manager-workshop/tree/main
+* Linkerd Certs
 ***************************************/
 
-
 ///////////////////////////////////////////
-// Step 1: Set up linkerd root CA by getting it issued
-// from Vault
-//
-// Notes:
-//   - This MUST be in the cert-manager namespace
-//     for trust-manager to work and for security
-///////////////////////////////////////////
-
-resource "kubernetes_service_account" "linkerd_vault_issuer" {
-  metadata {
-    name      = local.linkerd_vault_issuer
-    namespace = var.cert_manager_namespace
-  }
-}
-
-resource "kubernetes_role" "linkerd_vault_issuer" {
-  metadata {
-    name      = local.linkerd_vault_issuer
-    namespace = var.cert_manager_namespace
-  }
-  rule {
-    verbs          = ["create"]
-    resources      = ["serviceaccounts/token"]
-    resource_names = [kubernetes_service_account.linkerd_vault_issuer.metadata[0].name]
-    api_groups     = [""]
-  }
-}
-
-resource "kubernetes_role_binding" "linkerd_vault_issuer" {
-  metadata {
-    name      = local.linkerd_vault_issuer
-    namespace = var.cert_manager_namespace
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = "cert-manager"
-    namespace = var.cert_manager_namespace
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "Role"
-    name      = kubernetes_role.linkerd_vault_issuer.metadata[0].name
-  }
-}
-
-data "vault_policy_document" "linkerd_vault_issuer" {
-  rule {
-    capabilities = ["create", "read", "update"]
-    path         = "${var.vault_internal_pki_path}/root/sign-intermediate"
-  }
-}
-
-resource "vault_policy" "linkerd_vault_issuer" {
-  name   = local.linkerd_vault_issuer
-  policy = data.vault_policy_document.linkerd_vault_issuer.hcl
-}
-
-resource "vault_kubernetes_auth_backend_role" "linkerd_vault_issuer" {
-  bound_service_account_names      = [kubernetes_service_account.linkerd_vault_issuer.metadata[0].name]
-  bound_service_account_namespaces = [kubernetes_service_account.linkerd_vault_issuer.metadata[0].namespace]
-  audience                         = "vault://${var.cert_manager_namespace}/${local.linkerd_vault_issuer}"
-  role_name                        = local.linkerd_vault_issuer
-  token_ttl                        = 60
-  token_policies                   = [vault_policy.linkerd_vault_issuer.name]
-}
-
-resource "kubernetes_manifest" "linkerd_vault_issuer" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Issuer"
-    metadata = {
-      name      = local.linkerd_vault_issuer
-      labels    = module.kube_labels.kube_labels
-      namespace = var.cert_manager_namespace
-    }
-    spec = {
-      vault = {
-        path   = "${var.vault_internal_pki_path}/root/sign-intermediate"
-        server = var.vault_internal_url
-        auth = {
-          kubernetes = {
-            role      = vault_kubernetes_auth_backend_role.linkerd_vault_issuer.role_name
-            mountPath = "/v1/auth/kubernetes"
-            serviceAccountRef = {
-              name = kubernetes_service_account.linkerd_vault_issuer.metadata[0].name
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_manifest" "linkerd_root_issuer_cert" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.linkerd_root_issuer
-      namespace = var.cert_manager_namespace
-    }
-    spec = {
-      secretName = local.linkerd_root_ca_secret
-      issuerRef = {
-        name = local.linkerd_vault_issuer
-        kind = "Issuer"
-      }
-      commonName = "root.linkerd.cluster.local"
-      isCA       = true
-
-      // This MUST be configured this way
-      // or linkerd will silently error!
-      privateKey = {
-        algorithm = "ECDSA"
-        size      = 256
-
-        // Don't rotate the private key automatically
-        // as this needs to be done manually
-        rotationPolicy = "Never"
-      }
-
-      usages = [
-        "cert sign",
-        "crl sign",
-        "server auth",
-        "client auth"
-      ]
-    }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
-    }
-  }
-  depends_on = [kubernetes_manifest.linkerd_vault_issuer]
-}
-
-resource "kubernetes_manifest" "linkerd_root_issuer" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "ClusterIssuer"
-    metadata = {
-      name   = local.linkerd_root_issuer
-      labels = module.kube_labels.kube_labels
-    }
-    spec = {
-      ca = {
-        secretName = local.linkerd_root_ca_secret
-      }
-    }
-  }
-  depends_on = [kubernetes_manifest.linkerd_root_issuer_cert]
-}
-
-
-///////////////////////////////////////////
-// Step 2: Create another CA inside of the linkerd
+// Step 1: Create a CA inside of the linkerd
 // namespace that will be used to issue identity certificates
 // (we just generate the cert and give it to linkerd so it
 // can do the generation)
 ///////////////////////////////////////////
 
-resource "kubernetes_manifest" "linkerd_identity_issuer" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.linkerd_identity_issuer
-      namespace = local.namespace
-    }
-    spec = {
-      secretName = local.linkerd_identity_ca_secret
-      issuerRef = {
-        name = local.linkerd_root_issuer
-        kind = "ClusterIssuer"
-      }
-      commonName = "identity.linkerd.cluster.local"
-      isCA       = true
+module "linkerd_identity_issuer" {
+  source = "../kube_internal_cert"
 
-      // This MUST be configured this way
-      // or linkerd will silently error!
-      privateKey = {
-        algorithm      = "ECDSA"
-        size           = 256
-        rotationPolicy = "Always"
-      }
+  secret_name = local.linkerd_identity_issuer
+  common_name = "identity.linkerd.cluster.local"
+  namespace   = local.namespace
+  is_ca       = true
+  usages = [
+    "cert sign",
+    "crl sign",
+    "server auth",
+    "client auth"
+  ]
+  duration     = "2160h0m0s"
+  renew_before = "1680h0m0s"
 
-      duration    = "48h0m0s"
-      renewBefore = "25h0m0s"
-
-      usages = [
-        "cert sign",
-        "crl sign",
-        "server auth",
-        "client auth"
-      ]
-    }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
-    }
-  }
-  depends_on = [kubernetes_manifest.linkerd_root_issuer]
+  environment = var.environment
+  region      = var.region
+  extra_tags  = var.extra_tags
 }
 
 ///////////////////////////////////////////
-// Step 3: Setup a mechanism to copy
-// the CA cert data of the root CAs into the linkerd
-// namespace so that linkerd can use them to validate the
+// Step 2: Setup a mechanism to copy
+// the CA cert data of the root Vault CA into all namespaces
+// so that linkerd can use them to validate the
 // certificates
 ///////////////////////////////////////////
 
@@ -302,10 +109,7 @@ resource "kubernetes_manifest" "linkerd_bundle" {
     }
     spec = {
       sources = [{
-        secret = {
-          name = local.linkerd_root_ca_secret
-          key  = "tls.crt"
-        }
+        inLine = var.vault_ca_crt
       }]
       target = {
         configMap = {
@@ -314,137 +118,58 @@ resource "kubernetes_manifest" "linkerd_bundle" {
       }
     }
   }
-  depends_on = [
-    kubernetes_manifest.linkerd_root_issuer
-  ]
 }
 
 ///////////////////////////////////////////
-// Step 4: Setup the webhook certs
+// Step 3: Setup the webhook certs
 // based on these docs for automatic rotation:
 // https://linkerd.io/2.13/tasks/automatically-rotating-webhook-tls-credentials/
 ///////////////////////////////////////////
 
-resource "kubernetes_manifest" "linkerd_policy_validator" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.linkerd_policy_validator_webhook_secret
-      namespace = local.namespace
-    }
-    spec = {
-      secretName = local.linkerd_policy_validator_webhook_secret
-      issuerRef = {
-        name = local.linkerd_root_issuer
-        kind = "ClusterIssuer"
-      }
-      commonName = "linkerd-policy-validator.linkerd.svc"
-      dnsNames   = ["linkerd-policy-validator.linkerd.svc"]
+module "linkerd_policy_validator" {
+  source = "../kube_internal_cert"
 
-      privateKey = {
-        algorithm      = "ECDSA"
-        size           = 256
-        encoding       = "PKCS8"
-        rotationPolicy = "Always"
-      }
+  secret_name          = local.linkerd_policy_validator_webhook_secret
+  service_names        = ["linkerd-policy-validator"]
+  namespace            = local.namespace
+  private_key_encoding = "PKCS8" // It must be this encoding
+  duration             = "2160h0m0s"
+  renew_before         = "1680h0m0s"
 
-      duration    = "24h0m0s"
-      renewBefore = "16h0m0s"
-
-      usages = [
-        "server auth",
-      ]
-    }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
-    }
-  }
-  depends_on = [kubernetes_manifest.linkerd_root_issuer]
+  environment = var.environment
+  region      = var.region
+  extra_tags  = var.extra_tags
 }
 
-resource "kubernetes_manifest" "linkerd_proxy_injector" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.linkerd_proxy_injector_webhook_secret
-      namespace = local.namespace
-    }
-    spec = {
-      secretName = local.linkerd_proxy_injector_webhook_secret
-      issuerRef = {
-        name = local.linkerd_root_issuer
-        kind = "ClusterIssuer"
-      }
-      commonName = "linkerd-proxy-injector.linkerd.svc"
-      dnsNames   = ["linkerd-proxy-injector.linkerd.svc"]
 
-      privateKey = {
-        algorithm      = "ECDSA"
-        size           = 256
-        rotationPolicy = "Always"
-      }
 
-      duration    = "24h0m0s"
-      renewBefore = "16h0m0s"
+module "linkerd_proxy_injector" {
+  source = "../kube_internal_cert"
 
-      usages = [
-        "server auth",
-      ]
-    }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
-    }
-  }
+  secret_name   = local.linkerd_proxy_injector_webhook_secret
+  service_names = ["linkerd-proxy-injector"]
+  namespace     = local.namespace
+  duration      = "2160h0m0s"
+  renew_before  = "1680h0m0s"
 
-  depends_on = [kubernetes_manifest.linkerd_root_issuer]
+  environment = var.environment
+  region      = var.region
+  extra_tags  = var.extra_tags
 }
 
-resource "kubernetes_manifest" "linkerd_profile_validator" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.linkerd_profile_validator_webhook_secret
-      namespace = local.namespace
-    }
-    spec = {
-      secretName = local.linkerd_profile_validator_webhook_secret
-      issuerRef = {
-        name = local.linkerd_root_issuer
-        kind = "ClusterIssuer"
-      }
-      commonName = "linkerd-sp-validator.linkerd.svc"
-      dnsNames   = ["linkerd-sp-validator.linkerd.svc"]
 
-      privateKey = {
-        algorithm      = "ECDSA"
-        size           = 256
-        rotationPolicy = "Always"
-      }
+module "linkerd_profile_validator" {
+  source = "../kube_internal_cert"
 
-      duration    = "24h0m0s"
-      renewBefore = "16h0m0s"
+  secret_name   = local.linkerd_profile_validator_webhook_secret
+  service_names = ["linkerd-sp-validator"]
+  namespace     = local.namespace
+  duration      = "2160h0m0s"
+  renew_before  = "1680h0m0s"
 
-      usages = [
-        "server auth",
-      ]
-    }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
-    }
-  }
-  depends_on = [kubernetes_manifest.linkerd_root_issuer]
+  environment = var.environment
+  region      = var.region
+  extra_tags  = var.extra_tags
 }
 
 
@@ -456,9 +181,9 @@ resource "kubernetes_manifest" "linkerd_profile_validator" {
 resource "helm_release" "linkerd_crds" {
   namespace       = local.namespace
   name            = "linkerd-crds"
-  repository      = "https://helm.linkerd.io/stable"
+  repository      = "https://helm.linkerd.io/edge"
   chart           = "linkerd-crds"
-  version         = var.linkerd_crd_helm_version
+  version         = var.linkerd_helm_version
   recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
@@ -468,9 +193,9 @@ resource "helm_release" "linkerd_crds" {
 resource "helm_release" "linkerd" {
   namespace       = local.namespace
   name            = "linkerd-control-plane"
-  repository      = "https://helm.linkerd.io/stable"
+  repository      = "https://helm.linkerd.io/edge"
   chart           = "linkerd-control-plane"
-  version         = var.linkerd_control_plane_helm_version
+  version         = var.linkerd_helm_version
   recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
@@ -496,7 +221,7 @@ resource "helm_release" "linkerd" {
         }
       }
 
-      podLabels = local.linkerd_labels
+      podLabels = module.kube_labels.kube_labels
 
       priorityClassName = "system-cluster-critical"
       nodeAffinity      = module.constants.controller_node_affinity_helm.nodeAffinity
@@ -554,10 +279,10 @@ resource "helm_release" "linkerd" {
   depends_on = [
     helm_release.linkerd_crds,
     kubernetes_manifest.linkerd_bundle,
-    kubernetes_manifest.linkerd_identity_issuer,
-    kubernetes_manifest.linkerd_policy_validator,
-    kubernetes_manifest.linkerd_proxy_injector,
-    kubernetes_manifest.linkerd_profile_validator
+    module.linkerd_policy_validator,
+    module.linkerd_proxy_injector,
+    module.linkerd_identity_issuer,
+    module.linkerd_profile_validator
   ]
 }
 

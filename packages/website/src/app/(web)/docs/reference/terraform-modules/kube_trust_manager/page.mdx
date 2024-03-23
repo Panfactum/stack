@@ -4,6 +4,13 @@
 
 **Type:** [Live](./overview)
 
+This module create a deployment of cert-manager's
+[trust-manager](https://cert-manager.io/docs/trust/trust-manager/).
+
+trust-manager is a single-purpose utility with copies X.509 CA trust bundles
+to every namespace in the cluster so that they can be consumed by various workloads.
+This is particularly useful for distributing CA certificates for a service mesh.
+
 ## Providers
 
 The following providers are needed by this module:
@@ -26,13 +33,7 @@ Source: [kube\_labels](./kube_labels)
 
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_namespace" /> [namespace](#input_namespace)
-
-Description: The name of the cert-manager namespace.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
@@ -61,6 +62,14 @@ Description: Whether this module is a part of a local development deployment
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The name of the cert-manager namespace.
+
+Type: `string`
+
+Default: `"cert-manager"`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
@@ -92,7 +101,7 @@ Description: The version of trust-manager to deploy
 
 Type: `string`
 
-Default: `"0.5.0"`
+Default: `"0.9.1"`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

@@ -18,8 +18,9 @@ terraform {
 }
 
 locals {
-  ci_public_name   = "public"
-  ci_internal_name = "internal"
+  ci_public_name      = "public"
+  ci_internal_name    = "internal"
+  ci_internal_ca_name = "internal-ca"
 }
 
 module "kube_labels" {
@@ -129,6 +130,9 @@ resource "vault_pki_secret_backend_config_urls" "pki_internal" {
   ]
 }
 
+//////////////////////////////////
+/// Regular certs
+//////////////////////////////////
 
 resource "kubernetes_service_account" "vault_issuer" {
   metadata {
@@ -140,7 +144,7 @@ resource "kubernetes_service_account" "vault_issuer" {
 
 resource "kubernetes_role" "vault_issuer" {
   metadata {
-    name      = "vault-issuer"
+    name      = kubernetes_service_account.vault_issuer.metadata[0].name
     namespace = var.namespace
     labels    = module.kube_labels.kube_labels
   }
@@ -154,7 +158,7 @@ resource "kubernetes_role" "vault_issuer" {
 
 resource "kubernetes_role_binding" "vault_issuer" {
   metadata {
-    name      = "vault-issuer"
+    name      = kubernetes_service_account.vault_issuer.metadata[0].name
     namespace = var.namespace
     labels    = module.kube_labels.kube_labels
   }
@@ -178,7 +182,7 @@ data "vault_policy_document" "vault_issuer" {
 }
 
 resource "vault_policy" "vault_issuer" {
-  name   = "vault-issuer"
+  name   = kubernetes_service_account.vault_issuer.metadata[0].name
   policy = data.vault_policy_document.vault_issuer.hcl
 }
 
@@ -186,14 +190,14 @@ resource "vault_kubernetes_auth_backend_role" "vault_issuer" {
   bound_service_account_names      = [kubernetes_service_account.vault_issuer.metadata[0].name]
   bound_service_account_namespaces = [kubernetes_service_account.vault_issuer.metadata[0].namespace]
   audience                         = "vault://${local.ci_internal_name}"
-  role_name                        = "vault-issuer"
+  role_name                        = vault_pki_secret_backend_role.vault_issuer.name
   token_ttl                        = 60
   token_policies                   = [vault_policy.vault_issuer.name]
 }
 
 resource "vault_pki_secret_backend_role" "vault_issuer" {
   backend = vault_mount.pki_internal.path
-  name    = "vault-issuer"
+  name    = kubernetes_service_account.vault_issuer.metadata[0].name
 
   // This is super permissive b/c these certificates are only used for
   // internal traffic encryption
@@ -206,10 +210,10 @@ resource "vault_pki_secret_backend_role" "vault_issuer" {
   key_type = "ec"
   key_bits = 256
 
-  max_ttl = 60 * 60 * 48 // Internal certs need to be rotated regularly
+  max_ttl = 60 * 60 * 24 * 90 // Internal certs need to be rotated at least quarterly
 }
 
-resource "kubernetes_manifest" "internal_ca" {
+resource "kubernetes_manifest" "internal_ci" {
   manifest = {
     apiVersion = "cert-manager.io/v1"
     kind       = "ClusterIssuer"
@@ -227,6 +231,115 @@ resource "kubernetes_manifest" "internal_ca" {
             mountPath = "/v1/auth/kubernetes"
             serviceAccountRef = {
               name = kubernetes_service_account.vault_issuer.metadata[0].name
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//////////////////////////////////
+/// CA certs
+//////////////////////////////////
+
+resource "kubernetes_service_account" "vault_ca_issuer" {
+  metadata {
+    name      = "vault-ca-issuer"
+    namespace = var.namespace
+    labels    = module.kube_labels.kube_labels
+  }
+}
+
+resource "kubernetes_role" "vault_ca_issuer" {
+  metadata {
+    name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
+    namespace = var.namespace
+    labels    = module.kube_labels.kube_labels
+  }
+  rule {
+    verbs          = ["create"]
+    resources      = ["serviceaccounts/token"]
+    resource_names = [kubernetes_service_account.vault_ca_issuer.metadata[0].name]
+    api_groups     = [""]
+  }
+}
+
+resource "kubernetes_role_binding" "vault_ca_issuer" {
+  metadata {
+    name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
+    namespace = var.namespace
+    labels    = module.kube_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "cert-manager"
+    namespace = var.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.vault_ca_issuer.metadata[0].name
+  }
+}
+
+data "vault_policy_document" "vault_ca_issuer" {
+  rule {
+    capabilities = ["create", "read", "update"]
+    path         = "${vault_mount.pki_internal.path}/root/sign-intermediate"
+  }
+}
+
+resource "vault_policy" "vault_ca_issuer" {
+  name   = kubernetes_service_account.vault_ca_issuer.metadata[0].name
+  policy = data.vault_policy_document.vault_ca_issuer.hcl
+}
+
+resource "vault_kubernetes_auth_backend_role" "vault_ca_issuer" {
+  bound_service_account_names      = [kubernetes_service_account.vault_ca_issuer.metadata[0].name]
+  bound_service_account_namespaces = [kubernetes_service_account.vault_ca_issuer.metadata[0].namespace]
+  audience                         = "vault://${local.ci_internal_ca_name}"
+  role_name                        = vault_pki_secret_backend_role.vault_ca_issuer.name
+  token_ttl                        = 60
+  token_policies                   = [vault_policy.vault_ca_issuer.name]
+}
+
+resource "vault_pki_secret_backend_role" "vault_ca_issuer" {
+  backend = vault_mount.pki_internal.path
+  name    = kubernetes_service_account.vault_ca_issuer.metadata[0].name
+
+  // This is super permissive b/c these certificates are only used for
+  // internal traffic encryption
+  allow_any_name              = true
+  allow_wildcard_certificates = true
+  enforce_hostnames           = false
+  allow_ip_sans               = true
+  require_cn                  = false
+
+  key_type = "ec"
+  key_bits = 256
+
+  max_ttl = 60 * 60 * 24 * 90 // Internal certs need to be rotated at least quarterly
+}
+
+resource "kubernetes_manifest" "internal_ca_ci" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name   = local.ci_internal_ca_name
+      labels = module.kube_labels.kube_labels
+    }
+    spec = {
+      vault = {
+        path   = "${vault_mount.pki_internal.path}/root/sign-intermediate"
+        server = var.vault_internal_url
+        auth = {
+          kubernetes = {
+            role      = vault_kubernetes_auth_backend_role.vault_ca_issuer.role_name
+            mountPath = "/v1/auth/kubernetes"
+            serviceAccountRef = {
+              name = kubernetes_service_account.vault_ca_issuer.metadata[0].name
             }
           }
         }

@@ -151,12 +151,11 @@ module "webhook_cert" {
   common_name    = "jetstack-cert-manager-webhook.cert-manager.svc"
   secret_name    = local.webhook_secret
   namespace      = local.namespace
-  labels         = module.webhook_labels.kube_labels
   environment    = var.environment
   pf_root_module = var.pf_root_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  extra_tags     = module.webhook_labels.kube_labels
 }
 
 

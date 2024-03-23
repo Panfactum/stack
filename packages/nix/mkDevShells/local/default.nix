@@ -35,11 +35,7 @@
         ####################################
         # Kubernetes
         ####################################
-        (util.customNixModule "cilium") # for managing the cilium CNI
-        hubble # for network observability
-        cmctl # for working with cert-manager
-        linkerd # for working with the service mesh
-        k9s # kubernetes tui
+        (import ./k9s.nix) # kubernetes tui
 
         ####################################
         # Network Utilities

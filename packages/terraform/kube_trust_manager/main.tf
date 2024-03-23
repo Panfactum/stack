@@ -63,9 +63,10 @@ resource "helm_release" "trust_manager" {
       }
 
       // Does not need to be highly available
-      replicaCount = 1
-      tolerations  = module.trust_manager_constants.spot_node_toleration_helm
-      affinity     = module.trust_manager_constants.controller_node_with_spot_affinity_helm
+      replicaCount      = 1
+      tolerations       = module.trust_manager_constants.spot_node_toleration_helm
+      affinity          = module.trust_manager_constants.controller_node_with_spot_affinity_helm
+      priorityClassName = module.trust_manager_constants.cluster_important_priority_class_name
     })
   ]
 
