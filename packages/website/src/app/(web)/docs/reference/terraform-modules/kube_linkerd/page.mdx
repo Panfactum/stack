@@ -28,6 +28,22 @@ Source: [constants](./constants)
 
 Source: [kube\_labels](./kube_labels)
 
+### <a name="module_linkerd_identity_issuer" /> [linkerd\_identity\_issuer](#module_linkerd_identity_issuer)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
+
+### <a name="module_linkerd_policy_validator" /> [linkerd\_policy\_validator](#module_linkerd_policy_validator)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
+
+### <a name="module_linkerd_profile_validator" /> [linkerd\_profile\_validator](#module_linkerd_profile_validator)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
+
+### <a name="module_linkerd_proxy_injector" /> [linkerd\_proxy\_injector](#module_linkerd_proxy_injector)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
+
 ### <a name="module_namespace" /> [namespace](#module_namespace)
 
 Source: [kube\_namespace](./kube_namespace)
@@ -36,27 +52,9 @@ Source: [kube\_namespace](./kube_namespace)
 
 The following input variables are required:
 
-### <a name="input_cert_manager_namespace" /> [cert\_manager\_namespace](#input_cert_manager_namespace)
+### <a name="input_vault_ca_crt" /> [vault\_ca\_crt](#input_vault_ca_crt)
 
-Description: The namespace where cert-manager is deployed
-
-Type: `string`
-
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
-
-Description: The name of the EKS cluster.
-
-Type: `string`
-
-### <a name="input_vault_internal_pki_path" /> [vault\_internal\_pki\_path](#input_vault_internal_pki_path)
-
-Description: The path to the internal cert issuer in the vault instance
-
-Type: `string`
-
-### <a name="input_vault_internal_url" /> [vault\_internal\_url](#input_vault_internal_url)
-
-Description: The url to the vault instance for internal cert issuance
+Description: The vault certificate authority public certificate.
 
 Type: `string`
 
@@ -88,29 +86,13 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_linkerd_cni_helm_version" /> [linkerd\_cni\_helm\_version](#input_linkerd_cni_helm_version)
+### <a name="input_linkerd_helm_version" /> [linkerd\_helm\_version](#input_linkerd_helm_version)
 
-Description: The version of the linkerd-cni helm chart to deploy
-
-Type: `string`
-
-Default: `"30.8.3"`
-
-### <a name="input_linkerd_control_plane_helm_version" /> [linkerd\_control\_plane\_helm\_version](#input_linkerd_control_plane_helm_version)
-
-Description: The version of the linkerd-control-plane helm chart to deploy
+Description: The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)
 
 Type: `string`
 
-Default: `"1.12.5"`
-
-### <a name="input_linkerd_crd_helm_version" /> [linkerd\_crd\_helm\_version](#input_linkerd_crd_helm_version)
-
-Description: The version of the linkerd-crd helm chart to deploy
-
-Type: `string`
-
-Default: `"1.6.1"`
+Default: `"2024.3.3"`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 

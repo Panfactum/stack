@@ -203,7 +203,8 @@ resource "helm_release" "vault" {
             "reloader.stakater.com/auto" = "true"
           }
         }
-        extraLabels = module.server_labels.kube_labels
+        updateStrategyType = "RollingUpdate"
+        extraLabels        = module.server_labels.kube_labels
         serviceAccount = {
           create = false,
           name   = kubernetes_service_account.vault.metadata[0].name

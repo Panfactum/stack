@@ -40,6 +40,7 @@ locals {
   enable_aws        = contains(local.providers, "aws")
   enable_kubernetes = contains(local.providers, "kubernetes")
   enable_vault      = contains(local.providers, "vault")
+  enable_helm       = contains(local.providers, "helm")
 
   # Repo metadata
   repo_url       = get_env("PF_REPO_URL")
@@ -135,6 +136,15 @@ generate "kubernetes_provider" {
   contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubernetes.tftpl", {
     kube_api_server     = local.enable_kubernetes ? local.vars.kube_api_server : ""
     kube_config_context = local.enable_kubernetes ? local.vars.kube_config_context : ""
+  }) : ""
+}
+
+generate "helm_provider" {
+  path      = "helm.tf"
+  if_exists = "overwrite_terragrunt"
+  contents = local.enable_helm ? templatefile("${local.provider_folder}/helm.tftpl", {
+    kube_api_server     = local.enable_helm ? local.vars.kube_api_server : ""
+    kube_config_context = local.enable_helm ? local.vars.kube_config_context : ""
   }) : ""
 }
 

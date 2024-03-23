@@ -94,17 +94,23 @@ To verify that everything is working as expected:
 3. Add a new `A` record under `test` pointing to `1.1.1.1` to your hosted zone via the AWS management console.
    <MarkdownImage src={testRecordImg} alt="Test A record" />
 
-4. Run `dig test.panfactum.com +dnssec +short` (replace `panfactum.com` with your domain name). You should see a result
+4. Run `delv @1.1.1.1 test.panfactum.com` (replace `panfactum.com` with your domain name). [^3] You should see a result
    that looks as follows:
 
    ```shell-session
-   1.1.1.1
-   A 13 3 300 20240313171938 20240313151438 47555 panfactum.com. 9+bCqeEmKDiRc5sKz9vosmw86mkbaUMm9o8z1kFLZPbDiUV2Nbu9QXUV ni+rxqFyfK900c5Eil+y8bXARmh8CA==
+   ; fully validated
+   test.panfactum.com.	300	IN	A	1.1.1.1
+   test.panfactum.com.	300	IN	RRSIG	A 13 3 300 20240322220955 20240322200455 11333 panfactum.com. NX8hwISu5w6ZhHKPsawBMeb3XarIMZiDzv1Rxlb584vQgziAx67aX8KK xPS6vQlMtW6jwfWOrhNYLHTrEpIKww==
    ```
 
-   The presence of the last line verifies that DNSSEC is working as intended.
+   The presence of `; fully validated` verifies that DNSSEC is working as intended. The `RRSIG` record is the digital
+   signature for the record set.
 
 5. Remove the test record.
+
+[^3]: Note that `@1.1.1.1` instructs `delv` to use Cloudflare's DNS servers instead of your network's default.
+    Some intermediate DNS servers do not support DNSSEC and will actually strip the relevant information from the returned responses.
+    This is particularly prevalent for consumer hardware and ISPs.
 
 ## Set Up Delegated Zones
 
@@ -152,8 +158,8 @@ Let's do this now for **every** environment:
 To verify that everything is working as expected, follow the guide from the previous section but for the
 **subdomain zone.** This will require you to log in to the respective AWS account.
 
-You would test via `dig test.<your_subdomain_identifier>.<your_root_domain> +dnssec +short`. Ensure that this
-shows both the `1.1.1.1` IP address and the dnssec signature.
+You would test via `delv @1.1.1.1 test.<your_subdomain_identifier>.<your_root_domain>`. Ensure that this
+shows both the return `A` record and the dnssec signature.
 
 ## Deploy Records
 

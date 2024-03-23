@@ -6,3 +6,4 @@ This module provides our standard cluster issuers for [cert-manager](https://cer
 
 - Cluster issuer for public domain names
 - Cluster issuer for self-signed certs
+- Cluster issuer for intermediate CAs

@@ -1,7 +1,7 @@
 variable "trust_manager_version" {
   description = "The version of trust-manager to deploy"
   type        = string
-  default     = "0.5.0"
+  default     = "0.9.1"
 }
 
 variable "vpa_enabled" {
@@ -13,4 +13,5 @@ variable "vpa_enabled" {
 variable "namespace" {
   description = "The name of the cert-manager namespace."
   type        = string
+  default     = "cert-manager"
 }

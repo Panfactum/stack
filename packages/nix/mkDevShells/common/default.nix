@@ -34,13 +34,14 @@
     (import
       ./kube-capacity.nix) # for visualizing resource utilization in the cluster
     (import ./kubectl-cnpg.nix) # for managing the cnpg postgres databases
-    (util.customNixModule
-      "linkerd-await") # used to work with proxy sidecars in the kubernetes environment
+    (import ./linkerd.nix) # utility for working with the service mesh
+    (util.customNixModule "cilium") # for managing the cilium CNI
+    (import ./cmctl.nix) # for working with cert-manager
 
     ####################################
     # Hashicorp Vault
     ####################################
-    vault # provides the vault cli for interacting with vault
+    (import ./vault.nix) # provides the vault cli for interacting with vault
     (util.customShellScript
       "get-vault-token") # our helper tool for getting vault tokens during tf runs
 
@@ -120,7 +121,7 @@
     ####################################
     # Network Utilities
     ####################################
-    bind # dns utilies
+    dig # dns lookup
     mtr # better traceroute alternative
 
     ####################################

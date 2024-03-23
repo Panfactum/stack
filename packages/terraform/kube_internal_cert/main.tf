@@ -19,7 +19,7 @@ module "labels" {
   extra_tags     = var.extra_tags
 }
 
-resource "kubernetes_manifest" "webhook_cert" {
+resource "kubernetes_manifest" "cert" {
   manifest = {
     apiVersion = "cert-manager.io/v1"
     kind       = "Certificate"
@@ -36,7 +36,7 @@ resource "kubernetes_manifest" "webhook_cert" {
           "cert-manager.io/allow-direct-injection" = "true"
         }
       }
-      commonName = var.common_name
+      commonName = var.common_name == null ? (length(var.service_names) == 0 ? "default" : "${var.service_names[0]}.${var.namespace}.svc") : var.common_name
       dnsNames = length(var.service_names) == 0 ? ["default"] : flatten([for service in var.service_names : [
         service,
         "${service}.${var.namespace}",
@@ -49,22 +49,25 @@ resource "kubernetes_manifest" "webhook_cert" {
       usages = tolist(toset(concat([
         "key encipherment",
         "digital signature",
-        "server auth"
-      ], var.usages)))
+        "server auth",
+        "client auth"
+      ], var.is_ca ? ["cert sign", "crl sign"] : [], var.usages)))
 
-      // rotate every 8 hours with a 16 hour buffer period in case something goes
-      // wrong
-      duration    = "24h0m0s"
-      renewBefore = "16h0m0s"
+
+      duration    = var.duration
+      renewBefore = var.renew_before
+
+      isCA = var.is_ca
 
       privateKey = {
         algorithm      = "ECDSA"
         size           = 256
-        rotationPolicy = "Always"
+        rotationPolicy = var.private_key_rotation_enabled ? "Always" : "Never"
+        encoding       = var.private_key_encoding
       }
 
       issuerRef = {
-        name  = "internal"
+        name  = var.cluster_issuer_name == null ? (var.is_ca ? "internal-ca" : "internal") : var.cluster_issuer_name
         kind  = "ClusterIssuer"
         group = "cert-manager.io"
       }

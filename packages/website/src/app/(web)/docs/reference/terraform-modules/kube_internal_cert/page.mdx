@@ -24,12 +24,6 @@ Source: [kube\_labels](./kube_labels)
 
 The following input variables are required:
 
-### <a name="input_labels" /> [labels](#input_labels)
-
-Description: Labels to apply to the certificate
-
-Type: `map(string)`
-
 ### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The namespace the cluster is in
@@ -46,13 +40,29 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_cluster_issuer_name" /> [cluster\_issuer\_name](#input_cluster_issuer_name)
+
+Description: Name of the ClusterIssuer to use for provisioning the cert
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_common_name" /> [common\_name](#input_common_name)
 
 Description: Common name to add to add to the cert
 
 Type: `string`
 
-Default: `"default"`
+Default: `null`
+
+### <a name="input_duration" /> [duration](#input_duration)
+
+Description: How long the certificate will be valid for.
+
+Type: `string`
+
+Default: `"24h0m0s"`
 
 ### <a name="input_environment" /> [environment](#input_environment)
 
@@ -69,6 +79,14 @@ Description: Extra tags or labels to add to the created resources.
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_is_ca" /> [is\_ca](#input_is_ca)
+
+Description: Whether the certificate is a certificate authority certificate or not.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_is_local" /> [is\_local](#input_is_local)
 
@@ -94,6 +112,22 @@ Type: `string`
 
 Default: `"kube_internal_cert"`
 
+### <a name="input_private_key_encoding" /> [private\_key\_encoding](#input_private_key_encoding)
+
+Description: The encoding of the private key. Must by `PKCS1` or `PKCS8`
+
+Type: `string`
+
+Default: `"PKCS1"`
+
+### <a name="input_private_key_rotation_enabled" /> [private\_key\_rotation\_enabled](#input_private_key_rotation_enabled)
+
+Description: Whether to enable private key rotation.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_region" /> [region](#input_region)
 
 Description: The region the infrastructure is being deployed into.
@@ -101,6 +135,14 @@ Description: The region the infrastructure is being deployed into.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_renew_before" /> [renew\_before](#input_renew_before)
+
+Description: How long prior to the expiration that certificate renewal will be triggered.
+
+Type: `string`
+
+Default: `"16h0m0s"`
 
 ### <a name="input_service_names" /> [service\_names](#input_service_names)
 
