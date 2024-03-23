@@ -7,6 +7,10 @@ terraform {
       version               = "5.39.1"
       configuration_aliases = [aws.global]
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.10.0"
+    }
   }
 }
 
@@ -24,18 +28,11 @@ module "tags" {
 ## Zone Setup
 ##########################################################################
 
-resource "aws_route53_delegation_set" "zones" {
-  for_each       = var.domain_names
-  reference_name = each.key
-}
-
 resource "aws_route53_zone" "zones" {
-  for_each          = var.domain_names
-  name              = each.key
-  delegation_set_id = aws_route53_delegation_set.zones[each.key].id
-  tags              = module.tags.tags
+  for_each = var.domain_names
+  name     = each.key
+  tags     = module.tags.tags
 }
-
 
 ##########################################################################
 ## Registered Domain Setup
@@ -53,7 +50,7 @@ resource "aws_route53domains_registered_domain" "domain" {
   auto_renew         = var.enable_auto_renew
 
   dynamic "name_server" {
-    for_each = toset(aws_route53_delegation_set.zones[each.key].name_servers)
+    for_each = toset(aws_route53_zone.zones[each.key].name_servers)
     content {
       name = name_server.key
     }
@@ -109,32 +106,51 @@ resource "aws_route53domains_registered_domain" "domain" {
 ## DNSSEC Setup
 ##########################################################################
 
+// Because we are changing the ns records in the domain registration
+// we need to wait a few seconds for that update to take effect
+// to establish the parent-child zone relationship prior to trying
+// to enable dnnsec
+resource "time_sleep" "wait_for_ns_update" {
+  depends_on      = [aws_route53domains_registered_domain.domain]
+  create_duration = "30s"
+  triggers        = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
+}
+
 module "dnssec" {
   source = "../aws_dnssec"
   providers = {
     aws.global = aws.global
   }
 
-  hosted_zone_names = var.domain_names
-  environment       = var.environment
-  pf_root_module    = var.pf_root_module
-  region            = var.region
-  is_local          = var.is_local
-  extra_tags        = var.extra_tags
+  hosted_zones   = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 
-  depends_on = [aws_route53_zone.zones]
+  depends_on = [time_sleep.wait_for_ns_update]
+}
+
+
+// It can take a few seconds for the new dnssec keys to be fully
+// registered by the aws backend
+resource "time_sleep" "wait_for_dnssec_update" {
+  depends_on      = [module.dnssec]
+  create_duration = "30s"
+  triggers        = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 }
 
 resource "aws_route53domains_delegation_signer_record" "dnssec" {
   for_each    = var.domain_names
   domain_name = each.key
   signing_attributes {
-    algorithm  = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].algorithm
-    flags      = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].flags
-    public_key = module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].public_key
+    algorithm  = module.dnssec.keys[each.key].algorithm
+    flags      = module.dnssec.keys[each.key].flags
+    public_key = module.dnssec.keys[each.key].public_key
   }
 
-  depends_on = [module.dnssec]
+  depends_on = [time_sleep.wait_for_dnssec_update]
 }
 
 ##########################################################################
@@ -144,13 +160,12 @@ resource "aws_route53domains_delegation_signer_record" "dnssec" {
 module "iam_role" {
   source = "../aws_dns_iam_role"
 
-  domain_names                              = var.domain_names
+  hosted_zone_ids                           = [for zone, config in aws_route53_zone.zones : config.zone_id]
   additional_account_ids_with_record_access = var.additional_account_ids_with_record_access
-  environment                               = var.environment
-  pf_root_module                            = var.pf_root_module
-  region                                    = var.region
-  is_local                                  = var.is_local
-  extra_tags                                = var.extra_tags
 
-  depends_on = [aws_route53_zone.zones]
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }

@@ -141,31 +141,6 @@ Status check results are √
   included in the Panfactum stack unless you have a specific reason to deviate.
 </MarkdownAlert>
 
-### Install Viz
-
-Linkerd also comes with a handy debugging suite called `viz` that can be easily installed (temporarily) using
-the cli. Run this now: `linkerd viz install | kubectl apply -f -`.
-
-### Inject Sidecars
-
-Linkerd works by injecting sidecar containers into your pods to connect them to the mesh. This happens on
-pod *creation* so already existing pods will not have any sidecars injected. Let's restart them to connect
-them to the mesh:
-
-1. Using k9s, restart all your deployments not in the `linkerd` namespace:
-
-   1. Navigate to `:deployments`. Don't forget to change the namespace filter to "all" by pressing `0`.
-
-   2. Select each deployment by pressing `<space>`.
-
-   3. Press `r` to restart.
-
-2. Perform a similar restart to `:statefulsets`.
-
-3. Notice that the new pods have linkerd sidecar containers:
-
-   <MarkdownImage src={linkerdSidecarImg} alt="Pod with linkerd sidecar containers" />
-
 ### Verify Certificate Rotation
 
 While linkerd may be working after the initial deploy, we also want to ensure it *continues* to work
@@ -181,7 +156,31 @@ cmctl renew -n linkerd \
     linkerd-sp-validator-k8s-tls
 ```
 
-Run `linkerd check` again to ensure the control plane is working.
+### Install Viz
+
+Linkerd also comes with a handy debugging suite called `viz` that can be easily installed (temporarily) using
+the cli. Run this now: `linkerd viz install | kubectl apply -f -`.
+
+### Inject Sidecars
+
+Linkerd works by injecting sidecar containers into your pods to connect them to the mesh. This happens on
+pod *creation* so already existing pods will not have any sidecars injected. Let's restart them to connect
+them to the mesh:
+
+1. Using k9s, restart all your deployments not in the `linkerd` namespace:
+
+2. Navigate to `:deployments`. Don't forget to change the namespace filter to "all" by pressing `0`.
+
+3. Select each deployment by pressing `<space>`.
+
+4. Press `r` to restart.
+
+5. Perform a similar restart to `:statefulsets`.
+
+6. Notice that the new pods have linkerd sidecar containers:
+
+<MarkdownImage src={linkerdSidecarImg} alt="Pod with linkerd sidecar containers" />
+
 
 ### Verify Data Plane
 

@@ -1,5 +1,6 @@
 providers:
   - aws
+  - time
 aws_account_id: "891377197483"
 aws_profile: "production-superuser"
 aws_secondary_region: "us-east-2"

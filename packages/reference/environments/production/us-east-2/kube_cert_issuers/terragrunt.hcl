@@ -48,7 +48,7 @@ inputs = {
     // Make sure you provide the production account id to the `additional_account_ids_with_record_access` input
     // to that module to allow the production account to access this role
     "panfactum.com" = {
-      zone_id                 = "Z03750923SGTQA43MERM6"
+      zone_id                 = "Z0647021SA79T1775S78"
       record_manager_role_arn = "arn:aws:iam::143003111016:role/route53-record-manager-20240313213835573400000002"
     }
   }

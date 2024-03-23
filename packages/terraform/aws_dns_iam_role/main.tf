@@ -24,11 +24,6 @@ module "tags" {
 *********************************************************************************************************************/
 data "aws_caller_identity" "main" {}
 
-data "aws_route53_zone" "zones" {
-  for_each = var.domain_names
-  name     = each.key
-}
-
 data "aws_iam_policy_document" "record_manager" {
   statement {
     effect    = "Allow"
@@ -50,7 +45,7 @@ data "aws_iam_policy_document" "record_manager" {
       "route53:ChangeResourceRecordSets",
       "route53:ListResourceRecordSets"
     ]
-    resources = [for domain in var.domain_names : "arn:aws:route53:::hostedzone/${data.aws_route53_zone.zones[domain].zone_id}"]
+    resources = [for zone_id in var.hosted_zone_ids : "arn:aws:route53:::hostedzone/${zone_id}"]
   }
 }
 

@@ -7,6 +7,10 @@ terraform {
       version               = "5.39.1"
       configuration_aliases = [aws.secondary]
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.10.0"
+    }
   }
 }
 
@@ -48,12 +52,12 @@ resource "aws_route53_zone" "zones" {
 module "iam_role" {
   source = "../aws_dns_iam_role"
 
-  domain_names   = local.subdomains
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  hosted_zone_ids = [for zone, config in aws_route53_zone.zones : config.zone_id]
+  environment     = var.environment
+  pf_root_module  = var.pf_root_module
+  region          = var.region
+  is_local        = var.is_local
+  extra_tags      = var.extra_tags
 
   depends_on = [aws_route53_zone.zones]
 }
@@ -62,20 +66,30 @@ module "iam_role" {
 ## DNSSEC Setup
 ##########################################################################
 
+// Because we are changing the ns records in the domain registration
+// we need to wait a few seconds for that update to take effect
+// to establish the parent-child zone relationship prior to trying
+// to enable dnnsec
+resource "time_sleep" "wait_for_ns_update" {
+  depends_on      = [aws_route53_record.ns]
+  create_duration = "30s"
+  triggers        = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
+}
+
 module "dnssec" {
   source = "../aws_dnssec"
   providers = {
     aws.global = aws.global
   }
 
-  hosted_zone_names = local.subdomains
-  environment       = var.environment
-  pf_root_module    = var.pf_root_module
-  region            = var.region
-  is_local          = var.is_local
-  extra_tags        = var.extra_tags
+  hosted_zones   = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 
-  depends_on = [aws_route53_zone.zones, aws_route53_record.ns]
+  depends_on = [time_sleep.wait_for_ns_update]
 }
 
 ##########################################################################
@@ -107,7 +121,7 @@ resource "aws_route53_record" "ds" {
   type     = "DS"
   zone_id  = data.aws_route53_zone.roots[join(".", slice(split(".", each.value), 1, length(split(".", each.value))))].id
   ttl      = 60 * 60 * 24 * 2
-  records  = [module.dnssec.keys[aws_route53_zone.zones[each.key].zone_id].ds_record]
+  records  = [module.dnssec.keys[each.key].ds_record]
 
   depends_on = [module.dnssec]
 }

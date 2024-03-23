@@ -1,9 +1,9 @@
 output "keys" {
   description = "The signing keys for each domain"
-  value = { for key in aws_route53_key_signing_key.keys : key.hosted_zone_id => {
-    algorithm  = key.signing_algorithm_type
-    flags      = key.flag
-    public_key = key.public_key
-    ds_record  = key.ds_record
+  value = { for name, config in aws_route53_key_signing_key.keys : name => {
+    algorithm  = config.signing_algorithm_type
+    flags      = config.flag
+    public_key = config.public_key
+    ds_record  = config.ds_record
   } }
 }

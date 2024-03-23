@@ -1,5 +1,5 @@
-variable "hosted_zone_names" {
-  description = "Domain names that will be managed by this module"
-  type        = set(string)
+variable "hosted_zones" {
+  description = "Zones that will be managed by this module"
+  type        = map(string) // domain name => zone_id
 }
 
