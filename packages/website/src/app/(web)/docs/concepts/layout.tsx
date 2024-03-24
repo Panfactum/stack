@@ -8,6 +8,10 @@ const SIDENAV_SECTIONS = [
     path: '/networking',
     sub: [
       {
+        text: 'Cryptography',
+        path: '/cryptography'
+      },
+      {
         text: 'AWS Network Primitives',
         path: '/aws-primitives'
       },
@@ -22,10 +26,6 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Kubernetes Networking',
         path: '/cluster-networking'
-      },
-      {
-        text: 'Cryptography',
-        path: '/cryptography'
       }
     ]
   }

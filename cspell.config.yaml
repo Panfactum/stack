@@ -89,7 +89,9 @@ words: [
   "keyholder",
   "cainjector",
   "linkerd",
-  "cmctl"
+  "cmctl",
+  "istio",
+  "cncf"
 ]
 languageSettings:
   - languageId: markdown,mdx

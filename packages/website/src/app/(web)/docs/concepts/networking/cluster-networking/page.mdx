@@ -1,3 +1,7 @@
+import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
+
+import serviceMeshSVG from './service-mesh.svg'
+
 # Cluster Networking
 
 ## Background Information
@@ -27,7 +31,11 @@ engineer looking to understanding how data moves between subsystems in their clu
   * [Why replace iptables with eBPF](https://isovalent.com/blog/post/why-replace-iptables-with-ebpf/) (Article): Blog post providing an
     overview for the motivations for using eBPF in current generation networking implementations
 
-## Why We Use Cilium
+## Layer 3 / 4
+
+Layer 3 and 4 (L3/4) of the [OSI model](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/)
+is where most [software-defined networking (SDN)](https://en.wikipedia.org/wiki/Software-defined_networking) begins. In Kubernetes,
+this refers specifically to the TCP and IP protocols.
 
 The Panfactum stack replaces the default networking stack provided by EKS with [Cilium](https://cilium.io/) by
 [Isovalent](https://isovalent.com/). The main motivating factor for this decision is to take advantage of eBPF-based
@@ -51,13 +59,98 @@ However, EKS clusters run the AWS VPC CNI which assigns pods IP address from the
 has several downsides, and Cilium provides [an alternative implementation](https://docs.cilium.io/en/v1.15/network/concepts/ipam/eni/#ipam-eni)
 with the same functionality. As a result, we use that instead.
 
-Ultimately, pod and service IPs in the Panfactum stack will
-
 ### Replacing kube-proxy
 
 [Kube-proxy](https://medium.com/@amroessameldin/kube-proxy-what-is-it-and-how-it-works-6def85d9bc8f) is not a proxy
-but rather a daemon running on each node that allows for IP address assignment to Kubernetes services and endpoints. Unfortunately, it is
-iptables-based and not natively integrated with cilium.
+but rather a daemon running on each node that allows for IP address assignment to Kubernetes
+[Services](https://kubernetes.io/docs/concepts/services-networking/service/) and [Endpoints](https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/).
+Unfortunately, it is iptables-based and not natively integrated with cilium.
 While cilium is typically thought of as a CNI (focused on pod / container networking), it also offers [a replacement](https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/)
 to this part of the default Kubernetes networking setup. We use this in the Panfactum stack to bring the benefits
 of eBPF to all parts of the networking infrastructure.
+
+## Service Mesh
+
+At higher layers of the OSI model there exists an additional category of technologies that sit atop the L3/L4 stack: service meshes.
+
+Put abstractly, a service mesh is a system component that mediates network communication between workloads in your cluster.
+Unfortunately, the Kubernetes ecosystem lacks concrete standards for what a service mesh
+specifically ought to do, but some progress is being made with [the Gateway API](https://gateway-api.sigs.k8s.io/). [^1]
+
+[^1]: Prior attempts such as the [Service Mesh Interface](https://smi-spec.io/) have been discontinued.
+
+That said, the core motivation for a service mesh is to centrally implement best practices for layer 7 communications (e.g., http, grpc, etc.) in your cluster.
+
+This not only ensures consistency but also removes the burden from each application developer to implement best-practices like mTLS, metrics reporting, etc.
+
+### How a Service Mesh works
+
+In Kubernetes, a service mesh is typically implemented as a central controller that injects [sidecar containers](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
+into each pod. Traffic from each pod is routed through the sidecar containers
+before leaving and entering the pod. The sidecar containers
+then become the *only* containers that communicate directly with one another and thus create a mesh that captures
+and orchestrates all network traffic.
+
+<MarkdownSVGImage src={serviceMeshSVG} alt="Service mesh diagram" />
+
+There are many implementations of this paradigm. The most popular ones are:
+
+* [Linkerd](https://linkerd.io/): Simple and powerful, but not as many features
+* [Istio](https://istio.io/): Extremely complicated, but allows deep customization
+* [Consul](https://www.consul.io/): Originally developed by Hashicorp for their Kubernetes alternative, [Nomad](https://www.nomadproject.io/)
+
+### Do You Need A Service Mesh?
+
+This can be a divisive topic as many Kubernetes veterans have suffered from poorly implemented service mesh deployments.
+Moreover, a service mesh is **not** absolutely essential to the functioning of most clusters.
+
+However, we believe the complexities are overstated, and the benefits are numerous. For an additional
+15 minutes of setup time (if using the Panfactum stack), you *automatically* get the following without *any* additional
+work:
+
+* [Automatic mTLS](https://buoyant.io/mtls-guide): Never worry about manually implementing https or managing certificates while also ensuring the highest level of
+  for all network communications.
+
+* Locality-aware traffic routing: Improve performance by ensuring traffic is always
+  routed to the closest applicable server. Eliminate [cross-AZ network charges](https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/)
+  whenever possible.
+
+* Circuit breaking: Reroute traffic from unhealthy or resource-constrained pods to improve overall cluster resiliency.
+
+* Observability: Collect granular data about network throughput and latency that can be used to power observability tooling.
+
+* Tapping: Gain the ability to introspect network traffic in realtime to improve overall debugging ability.
+
+Additionally, most service meshes come with many more advanced capabilities that are entirely optional
+but nice to have if you ever need to use them: per-route traffic splitting, multi-cluster networking, etc.
+
+Ultimately, you do not *need* a service mesh, but you *should* choose to use one if you are working with Kubernetes in a professional setting.
+As a result, we include one in the Panfactum stack.
+
+### Linkerd2
+
+In the Panfactum stack, we use [Linkerd](https://linkerd.io/) as our service mesh technology. Linkerd has several benefits over the alternatives:
+
+* [Graduated CNCF project](https://www.cncf.io/projects/)
+* [Small resource footprint and highly performant](https://buoyant.io/linkerd-vs-istio)
+* Extremely simple to setup and maintain relative to other options (looking at you, Istio)
+* Most of its functionality can be provided without needing to learn or implement new Kubernetes resource types
+
+You can see our implementation in the [kube\_linkerd](../../reference/terraform-modules/kube_linkerd) terraform module.
+
+#### New Release Model
+
+In February 2024, the maintainers of Linkerd [announced a change](https://linkerd.io/2024/02/21/announcing-linkerd-2.15/)
+(Buoyant) to how they would be supporting Linkerd that caused some consternation as it removed the availability of
+stable releases from non-paying customers.
+
+While we are monitoring the situation, there are a few key takeaways:
+
+* The Linkerd project’s license has not changed and is still OSS.
+* The “edge” releases continue to be shipped and will continue to contain the all of the code in the stable releases.
+  Edge releases simply do not provide any semantic versioning, come much more frequently (weekly), and do not receive back-ported
+  bugfixes.
+* We have updated the Panfactum stack to use the edge release channels and perform our own stability testing. With the exception of security issues, we will only update the release versions when we release new major versions of the Panfactum stack.
+* While mildly inconvenient, we hope that this provides the Linkerd maintainers a pathway to fund continued development and maintenance of an excellent project.
+
+Buoyant has posted a more detailed update [here](https://buoyant.io/blog/clarifications-on-linkerd-2-15-stable-announcement).
