@@ -11,6 +11,8 @@ and kubernetes secrets. See the [docs](https://secrets-store-csi-driver.sigs.k8s
 
 The following providers are needed by this module:
 
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
@@ -30,6 +32,10 @@ Source: [kube\_labels](./kube_labels)
 ### <a name="module_namespace" /> [namespace](#module_namespace)
 
 Source: [kube\_namespace](./kube_namespace)
+
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
 
 ## Required Inputs
 
@@ -78,6 +84,14 @@ Description: The name of the root Panfactum module in the module tree.
 Type: `string`
 
 Default: `"kube_secrets_csi"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_region" /> [region](#input_region)
 

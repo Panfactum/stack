@@ -32,7 +32,7 @@ Let's deploy the module now:
 
 3. Set `vpa_enabled` to `false`. We will enable it when we deploy the autoscalers.
 
-4. Add a `module.yaml` that enables the `kubernetes` and `helm` providers.
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
 5. Run `terragrunt apply`.
 
@@ -180,7 +180,6 @@ them to the mesh:
 6. Notice that the new pods have linkerd sidecar containers:
 
 <MarkdownImage src={linkerdSidecarImg} alt="Pod with linkerd sidecar containers" />
-
 
 ### Verify Data Plane
 

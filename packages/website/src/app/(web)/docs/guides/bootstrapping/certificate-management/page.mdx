@@ -41,7 +41,7 @@ Let's deploy it now:
 4. Set `enable_self_generated_webhook_certs` to `true`. We will disable insecure self-signed certificates
    after we set up certificate issuers in the next section.
 
-5. Add a `module.yaml` that enables the `kubernetes`, `helm`, and `random` providers.
+5. Add a `module.yaml` that enables the `aws`, `kubernetes`, `helm`, and `random` providers.
 
 6. Run `terragrunt apply`.
 
@@ -216,7 +216,7 @@ Let's deploy it now:
 
 3. Set `vpa_enabled` to `false`. We will enable it when we deploy the autoscalers.
 
-4. Add a `module.yaml` that enables the `kubernetes` and `helm` providers.
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
 5. Run `terragrunt apply`.
 

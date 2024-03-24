@@ -44,6 +44,10 @@ Source: [kube\_namespace](./kube_namespace)
 
 Source: [kube\_labels](./kube_labels)
 
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
+
 ## Required Inputs
 
 The following input variables are required:
@@ -119,6 +123,14 @@ Description: The name of the root Panfactum module in the module tree.
 Type: `string`
 
 Default: `"kube_cilium"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_region" /> [region](#input_region)
 

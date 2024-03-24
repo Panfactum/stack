@@ -72,7 +72,7 @@ module "iam_role" {
 // to enable dnnsec
 resource "time_sleep" "wait_for_ns_update" {
   depends_on      = [aws_route53_record.ns]
-  create_duration = "30s"
+  create_duration = "120s"
   triggers        = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 }
 

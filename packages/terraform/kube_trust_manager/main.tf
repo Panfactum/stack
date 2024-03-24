@@ -10,7 +10,16 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
   }
+}
+
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "trust_manager_labels" {
@@ -55,6 +64,11 @@ resource "helm_release" "trust_manager" {
       crds = {
         enabled = true
       }
+
+      image = {
+        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/trust-manager"
+      }
+
       app = {
         trust = {
           namespace = var.namespace

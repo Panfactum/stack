@@ -1,9 +1,11 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
+import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
 
 import eksDashboardImg from './eks-dashboard.jpg'
 import k9sReadyImg from './k9s-ready.jpg'
 import k9sImg from './k9s.jpg'
+import pullThroughSVG from './pull-through-cache.svg'
 import terminateNodeImg from './terminate-node.jpg'
 
 # Kubernetes Cluster
@@ -23,6 +25,72 @@ and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
     [kops](https://github.com/kubernetes/kops), your raw infrastructure costs will likely cost at minimum /$50 / month.
     From personal experience running many bare metal clusters, when you factor in the additional time and headache
     required to manage the control plane on your own, this is an incredible deal.
+
+## Configure Pull Through Cache
+
+Many of the utilities we will run on the cluster are distributed as images from public registries such as
+[quay.io](https://quay.io/), [ghcr.io](https://github.com/features/packages), [docker.io](https://www.docker.com/),
+or [registry.k8s.io](https://github.com/kubernetes/registry.k8s.io). The cluster's ability to download
+these images is critical to its operational resiliency. Unfortunately, public registries have several downsides:
+
+* They can and frequently do experience service disruptions
+* Many impose rate limits to the amount of images any IP is allowed to download in a given time window
+* Image downloads tend to be large and are subject to the bandwidth limitations of the upstream registry as well
+  the intermediate network infrastructure
+
+To address these problems, we will configure a [pull through cache using AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html).
+Conceptually this works as follows:
+
+<MarkdownSVGImage src={pullThroughSVG} alt="Model for how pull through image caches operate in AWS" />
+
+Instead of cluster nodes pulling images directly from a public registry, they will pull them from ECR which is then
+configured to download the image from the public registry *only if it does not already contain the image
+in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
+the initial deployment.
+
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](../../reference/terraform-modules/aws_ecr_pull_through_cache).
+
+However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
+
+[^13]: Yes, even though we are only using their public images. This appears to be an AWS limitation.
+
+### GitHub Credentials
+
+You will need a GitHub user and an associated [GitHub personal access token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+
+Use the following PAT settings:
+
+* Use a **classic** token.
+* Set the token to **never** expire.
+* Grant **only** the `read:packages` scope.
+
+### Docker Hub Credentials
+
+You will need a Docker Hub user an [associated access token](https://docs.docker.com/security/for-developers/access-tokens/).
+
+This token should have the `Public Repo Read-only` access permissions.
+
+### Deploy the Pull Through Cache Module
+
+The following instructions apply for **every** environment-region combination where you will deploy Kubernetes cluster:
+
+1. Choose the region where you want to deploy clusters.
+
+2. Add an `aws_ecr_pull_through_cache` directory to that region.
+
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
+
+4. Add a `module.yaml` that enables the `aws` provider.
+
+5. Run `terragrunt apply`.
+
+In the following sections, modules will have `pull_through_cache_enabled` as an input. Setting this to `true`
+will use the pull through cache that you just deployed. This is the default in the examples that we provide.
+
+<MarkdownAlert severity="warning">
+  This should only be deployed *once* per environment-region combination. If you have multiple clusters
+  in the same region, you do **not** need to deploy the pull through cache multiple times.
+</MarkdownAlert>
 
 ## Deploying the Cluster
 

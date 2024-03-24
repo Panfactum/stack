@@ -1,0 +1,103 @@
+{/* lint disable no-duplicate-headings */}
+
+# AWS ECR Pull Through Cache Address
+
+**Type:** [Utility](./overview)
+
+Used to find the pull through cache address for the AWS account
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Modules
+
+No modules.
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_environment" /> [environment](#input_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_is_local" /> [is\_local](#input_is_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"aws_ecr_repos"`
+
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"aws_ecr_repos"`
+
+### <a name="input_region" /> [region](#input_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_docker_hub_registry" /> [docker\_hub\_registry](#output_docker_hub_registry)
+
+Description: n/a
+
+### <a name="output_ecr_public_registry" /> [ecr\_public\_registry](#output_ecr_public_registry)
+
+Description: n/a
+
+### <a name="output_github_registry" /> [github\_registry](#output_github_registry)
+
+Description: n/a
+
+### <a name="output_kubernetes_registry" /> [kubernetes\_registry](#output_kubernetes_registry)
+
+Description: n/a
+
+### <a name="output_quay_registry" /> [quay\_registry](#output_quay_registry)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

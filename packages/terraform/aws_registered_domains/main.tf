@@ -112,7 +112,7 @@ resource "aws_route53domains_registered_domain" "domain" {
 // to enable dnnsec
 resource "time_sleep" "wait_for_ns_update" {
   depends_on      = [aws_route53domains_registered_domain.domain]
-  create_duration = "30s"
+  create_duration = "120s"
   triggers        = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 }
 
@@ -137,7 +137,7 @@ module "dnssec" {
 // registered by the aws backend
 resource "time_sleep" "wait_for_dnssec_update" {
   depends_on      = [module.dnssec]
-  create_duration = "30s"
+  create_duration = "60s"
   triggers        = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 }
 

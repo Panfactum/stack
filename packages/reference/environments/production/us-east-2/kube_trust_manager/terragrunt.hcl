@@ -13,5 +13,6 @@ dependency "cert_manager" {
 }
 
 inputs = {
-  vpa_enabled = false
+  pull_through_cache_enabled = true
+  vpa_enabled                = false
 }

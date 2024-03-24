@@ -12,6 +12,7 @@ dependency "cluster" {
 }
 
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  vpa_enabled      = false
+  pull_through_cache_enabled = true
+  eks_cluster_name           = dependency.cluster.outputs.cluster_name
+  vpa_enabled                = false
 }

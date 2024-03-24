@@ -460,27 +460,9 @@ data "aws_iam_policy_document" "node_group_assume_role" {
 }
 
 resource "aws_iam_role" "node_group" {
-
   name_prefix           = "${var.cluster_name}-node-"
   assume_role_policy    = data.aws_iam_policy_document.node_group_assume_role.json
   force_detach_policies = true
-  managed_policy_arns = [
-    // AWS-provided policies
-    // access to the container registries
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-
-    // required for the EKS kubelet to make calls to the AWS API
-    // server on the cluster's behalf
-    // https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-
-    // TODO: This needs to be limited to the service account
-    // https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-
-    // Gives the SSM-agent the necessary permissions to the AWS API
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-  ]
 
   tags = merge(module.tags.tags, {
     description = "IAM role for all nodes in the ${var.cluster_name} EKS cluster"
@@ -489,6 +471,62 @@ resource "aws_iam_role" "node_group" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+// See https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html#pull-through-cache-iam
+// Also see https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-creation-templates.html#repository-creation-templates-iam
+data "aws_iam_policy_document" "node_group_pull_through_cache_permissions" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:CreateRepository",
+      "ecr:BatchImportUpstreamImage",
+      "ecr:TagResource",
+      "ecr:PutLifecyclePolicy",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:SetRepositoryPolicy",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "node_group_pull_through_cache_permissions" {
+  name_prefix = "nodes-ecr-pull-through-cache-"
+  policy      = data.aws_iam_policy_document.node_group_pull_through_cache_permissions.json
+}
+
+resource "aws_iam_role_policy_attachment" "node_group_pull_through_cache_permissions" {
+  policy_arn = aws_iam_policy.node_group_pull_through_cache_permissions.arn
+  role       = aws_iam_role.node_group.name
+}
+
+
+// access to the container registries
+resource "aws_iam_role_policy_attachment" "node_group_ecr" {
+  role       = aws_iam_role.node_group.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+// required for the EKS kubelet to make calls to the AWS API
+// server on the cluster's behalf
+// https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
+resource "aws_iam_role_policy_attachment" "node_group_worker_policy" {
+  role       = aws_iam_role.node_group.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+// TODO: This needs to be limited to the service account
+// https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html
+resource "aws_iam_role_policy_attachment" "node_group_ci" {
+  role       = aws_iam_role.node_group.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+// Gives access to ssm systems manager
+resource "aws_iam_role_policy_attachment" "node_group_ssm" {
+  role       = aws_iam_role.node_group.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 ##########################################################################

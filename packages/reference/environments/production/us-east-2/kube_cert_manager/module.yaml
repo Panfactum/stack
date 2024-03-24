@@ -2,3 +2,4 @@ providers:
   - random
   - helm
   - kubernetes
+  - aws

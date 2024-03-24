@@ -6,17 +6,20 @@ variable "alias" {
 variable "contact_address_line_1" {
   type        = string
   description = "The street address for your organization (line 1)"
+  sensitive   = true
 }
 
 variable "contact_address_line_2" {
   type        = string
   description = "The street address for your organization (line 2)"
   default     = null
+  sensitive   = true
 }
 
 variable "contact_city" {
   type        = string
   description = "The city for your organization"
+  sensitive   = true
 }
 
 variable "contact_company_name" {
@@ -33,6 +36,7 @@ variable "contact_district_or_county" {
   type        = string
   description = "The district or county of your organization"
   default     = null
+  sensitive   = true
 }
 
 variable "contact_full_name" {
@@ -43,11 +47,13 @@ variable "contact_full_name" {
 variable "contact_phone_number" {
   type        = string
   description = "The phone number of the primary contact who manages your organization's AWS account"
+  sensitive   = true
 }
 
 variable "contact_postal_code" {
   type        = string
   description = "The postal code for your organization"
+  sensitive   = true
 }
 
 variable "contact_state_or_region" {
@@ -65,6 +71,7 @@ variable "contact_website_url" {
 variable "security_email_address" {
   type        = string
   description = "The email address for the person who leads security for your organization"
+  sensitive   = true
 }
 
 variable "security_full_name" {
@@ -75,6 +82,7 @@ variable "security_full_name" {
 variable "security_phone_number" {
   type        = string
   description = "The phone number of the person who leads security for your organization"
+  sensitive   = true
 }
 
 variable "security_title" {
@@ -85,6 +93,7 @@ variable "security_title" {
 variable "operations_email_address" {
   type        = string
   description = "The email address for the person who leads operations for your organization"
+  sensitive   = true
 }
 
 variable "operations_full_name" {
@@ -95,6 +104,7 @@ variable "operations_full_name" {
 variable "operations_phone_number" {
   type        = string
   description = "The phone number of the person who leads operations for your organization"
+  sensitive   = true
 }
 
 variable "operations_title" {
@@ -105,6 +115,7 @@ variable "operations_title" {
 variable "billing_email_address" {
   type        = string
   description = "The email address where you want to receive invoices for your organization"
+  sensitive   = true
 }
 
 variable "billing_full_name" {
@@ -115,6 +126,7 @@ variable "billing_full_name" {
 variable "billing_phone_number" {
   type        = string
   description = "The phone number of the person who receives invoices for your organization"
+  sensitive   = true
 }
 
 variable "billing_title" {

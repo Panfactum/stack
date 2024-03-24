@@ -18,10 +18,13 @@ terraform {
 }
 
 locals {
-
   service   = "aws-ebs-csi-driver"
   namespace = module.namespace.namespace
+}
 
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "kube_labels" {
@@ -119,6 +122,10 @@ resource "helm_release" "ebs_csi_driver" {
   values = [
     yamlencode({
 
+      image = {
+        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/aws-ebs-csi-driver"
+      }
+
       controller = {
         // Does not need to be highly available
         replicaCount = 1
@@ -128,6 +135,49 @@ resource "helm_release" "ebs_csi_driver" {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
+        }
+      }
+
+      sidecars = {
+        provisioner = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-provisioner"
+          }
+        }
+        attacher = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-attacher"
+          }
+        }
+        resizer = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-resizer"
+          }
+        }
+        livenessProbe = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/livenessprobe"
+          }
+        }
+        livenessProbe = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/livenessprobe"
+          }
+        }
+        nodeDriverRegistrar = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/node-driver-registrar"
+          }
+        }
+        volumemodifier = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/volume-modifier-for-k8s"
+          }
+        }
+        snapshotter = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-snapshotter/csi-snapshotter"
+          }
         }
       }
 

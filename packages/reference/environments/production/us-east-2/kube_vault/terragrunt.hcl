@@ -12,8 +12,9 @@ dependency "cluster" {
 }
 
 inputs = {
-  eks_cluster_name    = dependency.cluster.outputs.cluster_name
-  vpa_enabled         = false
-  ingress_enabled     = false
-  environment_domains = ["production.panfactum.com", "prod.panfactum.com"]
+  eks_cluster_name           = dependency.cluster.outputs.cluster_name
+  pull_through_cache_enabled = true
+  vpa_enabled                = false
+  ingress_enabled            = false
+  environment_domains        = ["production.panfactum.com", "prod.panfactum.com"]
 }

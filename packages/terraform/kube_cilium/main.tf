@@ -24,6 +24,11 @@ locals {
 
 data "aws_region" "region" {}
 
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
+}
+
 module "base_labels" {
   source         = "../kube_labels"
   environment    = var.environment
@@ -153,6 +158,10 @@ resource "helm_release" "cilium" {
 
   values = [
     yamlencode({
+      image = {
+        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/cilium/cilium"
+      }
+
       eni = {
         enabled = true
 
@@ -195,10 +204,6 @@ resource "helm_release" "cilium" {
         hostNamespaceOnly = true
       }
 
-      nodeinit = {
-        podLabels = module.agent_labels.kube_labels
-      }
-
       cni = {
         resources = {
           cpu    = "10m"
@@ -207,6 +212,9 @@ resource "helm_release" "cilium" {
       }
 
       operator = {
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/cilium/operator"
+        }
         replicas = 2
         tolerations = [
 

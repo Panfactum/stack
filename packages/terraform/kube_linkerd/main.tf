@@ -10,11 +10,14 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
   }
 }
 
 locals {
-
   name      = "linkerd"
   namespace = module.namespace.namespace
 
@@ -25,6 +28,11 @@ locals {
   linkerd_policy_validator_webhook_secret  = "linkerd-policy-validator-k8s-tls" # MUST be named this
   linkerd_proxy_injector_webhook_secret    = "linkerd-proxy-injector-k8s-tls"   # MUST be named this
   linkerd_profile_validator_webhook_secret = "linkerd-sp-validator-k8s-tls"     # MUST be named this
+}
+
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "kube_labels" {
@@ -205,6 +213,7 @@ resource "helm_release" "linkerd" {
     yamlencode({
       controllerLogLevel = "info"
 
+      controllerImage           = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/controller"
       controllerReplicas        = 2
       enablePodAntiAffinity     = true
       enablePodDisruptionBudget = true
@@ -218,6 +227,18 @@ resource "helm_release" "linkerd" {
         externalCA = true
         issuer = {
           scheme = "kubernetes.io/tls"
+        }
+      }
+
+      proxy = {
+        image = {
+          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy"
+        }
+      }
+
+      policyController = {
+        image = {
+          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/policy-controller"
         }
       }
 
@@ -253,15 +274,26 @@ resource "helm_release" "linkerd" {
         }
       }
 
-      // Be default, the init container
-      // has way too many resources and ends up
-      // utilizing all of the resource request allocations
-      // on each node, so we lower them significantly
-      // The values selected are the lowest allowable
-      // values for VPA measurements; no container
-      // on the cluster will EVER get lower values,
-      // so no point in going any lower
+
+      debugContainer = {
+        image = {
+          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/debug"
+        }
+      }
+
       proxyInit = {
+        image = {
+          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy-init"
+        }
+
+        // Be default, the init container
+        // has way too many resources and ends up
+        // utilizing all of the resource request allocations
+        // on each node, so we lower them significantly
+        // The values selected are the lowest allowable
+        // values for VPA measurements; no container
+        // on the cluster will EVER get lower values,
+        // so no point in going any lower
         resources = {
           cpu = {
             request = "10m"

@@ -45,27 +45,32 @@ variable "admin_last_name" {
 variable "admin_email_address" {
   description = "The email address of the domain contact"
   type        = string
+  sensitive   = true
 }
 
 variable "admin_phone_number" {
   description = "The phone number of the domain contact"
   type        = string
+  sensitive   = true
 }
 
 variable "admin_address_line_1" {
   description = "The street address (1) of the domain admin contact"
   type        = string
+  sensitive   = true
 }
 
 variable "admin_address_line_2" {
   description = "The street address (2) of the domain admin contact"
   type        = string
   default     = null
+  sensitive   = true
 }
 
 variable "admin_city" {
   description = "The city of the domain admin contact"
   type        = string
+  sensitive   = true
 }
 
 variable "admin_state" {
@@ -76,6 +81,7 @@ variable "admin_state" {
 variable "admin_zip_code" {
   description = "The ZIP code of the domain admin contact"
   type        = string
+  sensitive   = true
 }
 
 variable "admin_country_code" {
@@ -101,27 +107,32 @@ variable "registrant_last_name" {
 variable "registrant_email_address" {
   description = "The email address of the domain contact"
   type        = string
+  sensitive   = true
 }
 
 variable "registrant_phone_number" {
   description = "The phone number of the domain contact"
   type        = string
+  sensitive   = true
 }
 
 variable "registrant_address_line_1" {
   description = "The street address (1) of the domain registrant contact"
   type        = string
+  sensitive   = true
 }
 
 variable "registrant_address_line_2" {
   description = "The street address (2) of the domain registrant contact"
   type        = string
   default     = null
+  sensitive   = true
 }
 
 variable "registrant_city" {
   description = "The city of the domain registrant contact"
   type        = string
+  sensitive   = true
 }
 
 variable "registrant_state" {
@@ -132,6 +143,7 @@ variable "registrant_state" {
 variable "registrant_zip_code" {
   description = "The ZIP code of the domain registrant contact"
   type        = string
+  sensitive   = true
 }
 
 variable "registrant_country_code" {
@@ -157,27 +169,32 @@ variable "tech_last_name" {
 variable "tech_email_address" {
   description = "The email address of the domain contact"
   type        = string
+  sensitive   = true
 }
 
 variable "tech_phone_number" {
   description = "The phone number of the domain contact"
   type        = string
+  sensitive   = true
 }
 
 variable "tech_address_line_1" {
   description = "The street address (1) of the domain tech contact"
   type        = string
+  sensitive   = true
 }
 
 variable "tech_address_line_2" {
   description = "The street address (2) of the domain tech contact"
   type        = string
   default     = null
+  sensitive   = true
 }
 
 variable "tech_city" {
   description = "The city of the domain tech contact"
   type        = string
+  sensitive   = true
 }
 
 variable "tech_state" {
@@ -188,6 +205,7 @@ variable "tech_state" {
 variable "tech_zip_code" {
   description = "The ZIP code of the domain tech contact"
   type        = string
+  sensitive   = true
 }
 
 variable "tech_country_code" {

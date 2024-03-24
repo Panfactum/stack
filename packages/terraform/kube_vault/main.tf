@@ -38,6 +38,11 @@ locals {
   vault_domains = [for domain in var.environment_domains : "vault.${domain}"]
 }
 
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
+}
+
 module "server_labels" {
   source         = "../kube_labels"
   environment    = var.environment
@@ -180,6 +185,14 @@ resource "helm_release" "vault" {
 
       csi = {
         enabled = true
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault-csi-provider"
+        }
+        agent = {
+          image = {
+            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
+          }
+        }
         daemonSet = {
           annotations = {
             "reloader.stakater.com/auto" = "true"
@@ -198,6 +211,9 @@ resource "helm_release" "vault" {
       }
 
       server = {
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
+        }
         statefulSet = {
           annotations = {
             "reloader.stakater.com/auto" = "true"

@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
   }
 }
 
@@ -23,6 +27,11 @@ locals {
   webhook_name   = "cert-manger-webhook"
   namespace      = module.namespace.namespace
   webhook_secret = "cert-manager-webhook-certs"
+}
+
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "base_labels" {
@@ -217,6 +226,9 @@ resource "helm_release" "cert_manager" {
         commonLabels      = module.base_labels.kube_labels
         priorityClassName = module.constants_controller.cluster_important_priority_class_name
       }
+      image = {
+        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-controller"
+      }
       replicaCount = 2
       podLabels    = module.controller_labels.kube_labels
       affinity = merge(
@@ -236,6 +248,9 @@ resource "helm_release" "cert_manager" {
         fsGroup = 1001
       }
       webhook = {
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-webhook"
+        }
         replicaCount = 2
         extraArgs    = ["--v=${var.log_verbosity}"]
         serviceAccount = {
@@ -281,6 +296,9 @@ resource "helm_release" "cert_manager" {
 
       }
       cainjector = {
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-cainjector"
+        }
         enabled      = true
         replicaCount = 2
         extraArgs    = ["--v=${var.log_verbosity}"]

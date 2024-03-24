@@ -1,3 +1,4 @@
 providers:
   - helm
   - kubernetes
+  - aws

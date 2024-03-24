@@ -7,7 +7,15 @@ terraform {
   source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_eks"
 }
 
+dependency "aws_vpc" {
+  config_path  = "../aws_vpc"
+  skip_outputs = true
+}
 
+dependency "pull_through_cache" {
+  config_path  = "../aws_ecr_pull_through_cache"
+  skip_outputs = true
+}
 
 inputs = {
   cluster_name        = "production-primary"

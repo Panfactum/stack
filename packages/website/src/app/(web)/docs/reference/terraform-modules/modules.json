@@ -7,6 +7,8 @@
     "aws_dns_iam_role",
     "aws_dns_records",
     "aws_dnssec",
+    "aws_ecr_pull_through_cache",
+    "aws_ecr_pull_through_cache_addresses",
     "aws_ecr_repos",
     "aws_eks",
     "aws_kms_encrypt_key",
