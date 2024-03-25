@@ -57,7 +57,7 @@ output "pod_anti_affinity_helm" {
 
 output "spot_node_preferences" {
   value = {
-    "node.kubernetes.io/class" = {
+    "panfactum.com/role" = {
       weight   = 1
       operator = "In"
       values   = ["spot"]
@@ -78,12 +78,25 @@ output "cluster_important_priority_class_name" {
   value = "cluster-important"
 }
 
-output "topology_spread_zone" {
+output "topology_spread_zone_strict" {
   value = [
     {
       maxSkew           = 1
       topologyKey       = "topology.kubernetes.io/zone"
       whenUnsatisfiable = "DoNotSchedule"
+      labelSelector = {
+        matchLabels = var.matching_labels
+      }
+    }
+  ]
+}
+
+output "topology_spread_zone_preferred" {
+  value = [
+    {
+      maxSkew           = 1
+      topologyKey       = "topology.kubernetes.io/zone"
+      whenUnsatisfiable = "ScheduleAnyway"
       labelSelector = {
         matchLabels = var.matching_labels
       }

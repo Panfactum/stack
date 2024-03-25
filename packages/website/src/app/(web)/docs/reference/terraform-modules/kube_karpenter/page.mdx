@@ -34,6 +34,10 @@ Source: [kube\_labels](./kube_labels)
 
 Source: [kube\_namespace](./kube_namespace)
 
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
+
 ### <a name="module_tags" /> [tags](#module_tags)
 
 Source: [aws\_tags](./aws_tags)
@@ -42,35 +46,35 @@ Source: [aws\_tags](./aws_tags)
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### <a name="input_cluster_name" /> [cluster\_name](#input_cluster_name)
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_eks_node_instance_profile" /> [eks\_node\_instance\_profile](#input_eks_node_instance_profile)
-
-Description: The name of the instance profile to use for the nodes
-
-Type: `string`
-
-### <a name="input_eks_node_role_arn" /> [eks\_node\_role\_arn](#input_eks_node_role_arn)
+### <a name="input_node_role_arn" /> [node\_role\_arn](#input_node_role_arn)
 
 Description: The arn of the role the EKS cluster roles are assigned
 
 Type: `string`
 
-### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+### <a name="input_node_security_group_id" /> [node\_security\_group\_id](#input_node_security_group_id)
 
-Description: A list of IPs that can use the service account token to authenticate with AWS API
+Description: The id of the security group for nodes running in the EKS cluster
 
-Type: `list(string)`
+Type: `string`
 
 ### <a name="input_node_subnets" /> [node\_subnets](#input_node_subnets)
 
-Description: List of subnet names to deploy karpenter Nodes into.
+Description: List of subnet names to deploy karpenter nodes into.
 
 Type: `set(string)`
+
+### <a name="input_node_vpc_id" /> [node\_vpc\_id](#input_node_vpc_id)
+
+Description: The ID of the VPC to deploy karpenter nodes into.
+
+Type: `string`
 
 ## Optional Inputs
 
@@ -92,6 +96,14 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### <a name="input_is_local" /> [is\_local](#input_is_local)
 
 Description: Whether this module is a part of a local development deployment
@@ -106,7 +118,15 @@ Description: The version of the karpenter helm chart to deploy
 
 Type: `string`
 
-Default: `"v0.31.1"`
+Default: `"0.35.2"`
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level for the karpenter pods
+
+Type: `string`
+
+Default: `"info"`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
@@ -123,6 +143,14 @@ Description: The name of the root Panfactum module in the module tree.
 Type: `string`
 
 Default: `"kube_karpenter"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_region" /> [region](#input_region)
 

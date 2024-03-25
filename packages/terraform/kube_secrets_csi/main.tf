@@ -89,12 +89,45 @@ resource "helm_release" "secrets_csi_driver" {
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/csi-secrets-store/driver"
         }
+        driver = {
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "200Mi"
+            }
+          }
+        }
+
         registrarImage = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/sig-storage/csi-node-driver-registrar"
         }
+        registrar = {
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "200Mi"
+            }
+          }
+        }
+
         livenessProbeImage = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/sig-storage/livenessprobe"
         }
+        livenessProbe = {
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "200Mi"
+            }
+          }
+        }
+
         daemonsetAnnotations = {
           "reloader.stakater.com/auto" = "true"
         }

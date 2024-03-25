@@ -136,6 +136,14 @@ resource "helm_release" "ebs_csi_driver" {
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
         }
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
       }
 
       sidecars = {
@@ -143,40 +151,91 @@ resource "helm_release" "ebs_csi_driver" {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-provisioner"
           }
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
+          }
         }
         attacher = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-attacher"
+          }
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
           }
         }
         resizer = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-resizer"
           }
-        }
-        livenessProbe = {
-          image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/livenessprobe"
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
           }
         }
         livenessProbe = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/livenessprobe"
+          }
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
           }
         }
         nodeDriverRegistrar = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/node-driver-registrar"
           }
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
+          }
         }
         volumemodifier = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/volume-modifier-for-k8s"
           }
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
+          }
         }
         snapshotter = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-snapshotter/csi-snapshotter"
+          }
+          resources = {
+            requests = {
+              memory = "100Mi"
+            }
+            limits = {
+              memory = "130Mi"
+            }
           }
         }
       }
@@ -186,6 +245,14 @@ resource "helm_release" "ebs_csi_driver" {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
+        }
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
+          }
         }
       }
     })

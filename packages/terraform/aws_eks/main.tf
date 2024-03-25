@@ -329,7 +329,7 @@ resource "aws_eks_node_group" "controllers" {
     description = local.controller_nodes_description
   })
   labels = {
-    class = "controller"
+    "panfactum.com/class" = "controller"
   }
   taint {
     effect = "NO_SCHEDULE"
@@ -375,13 +375,6 @@ resource "aws_ec2_tag" "all_nodes_kubernetes" {
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
 }
-
-resource "aws_ec2_tag" "all_nodes_karpenter" {
-  resource_id = aws_security_group.all_nodes.id
-  key         = "karpenter.sh/discovery"
-  value       = var.cluster_name
-}
-
 
 resource "aws_security_group_rule" "ingress_self" {
   security_group_id = aws_security_group.all_nodes.id

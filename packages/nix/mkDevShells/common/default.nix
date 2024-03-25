@@ -37,6 +37,7 @@
     (import ./linkerd.nix) # utility for working with the service mesh
     (util.customNixModule "cilium") # for managing the cilium CNI
     (import ./cmctl.nix) # for working with cert-manager
+    (import ./stern.nix)
 
     ####################################
     # Hashicorp Vault

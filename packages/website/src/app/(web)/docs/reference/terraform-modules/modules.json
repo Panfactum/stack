@@ -36,7 +36,7 @@
     "kube_ingress_nginx",
     "kube_internal_cert",
     "kube_karpenter",
-    "kube_karpenter_provisioners",
+    "kube_karpenter_node_pools",
     "kube_labels",
     "kube_linkerd",
     "kube_metrics_server",

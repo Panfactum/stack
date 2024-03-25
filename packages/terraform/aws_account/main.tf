@@ -10,6 +10,16 @@ terraform {
 }
 
 
+module "tags" {
+  source         = "../aws_tags"
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
 ###########################################################################
 ## Alias
 ###########################################################################
@@ -17,7 +27,6 @@ terraform {
 resource "aws_iam_account_alias" "alias" {
   account_alias = var.alias
 }
-
 
 ###########################################################################
 ## Contact Information
@@ -59,4 +68,15 @@ resource "aws_account_alternate_contact" "billing" {
   name                   = var.billing_full_name
   phone_number           = var.billing_phone_number
   title                  = var.billing_title
+}
+
+
+###########################################################################
+## Create the service linked role for working with spot instances
+###########################################################################
+
+resource "aws_iam_service_linked_role" "spot" {
+  aws_service_name = "spot.amazonaws.com"
+  description      = "Used by various controllers to launch spot instances"
+  tags             = module.tags.tags
 }

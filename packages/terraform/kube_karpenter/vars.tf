@@ -1,26 +1,31 @@
 variable "karpenter_helm_version" {
   description = "The version of the karpenter helm chart to deploy"
   type        = string
-  default     = "v0.31.1"
+  default     = "0.35.2"
 }
 
-variable "eks_cluster_name" {
+variable "cluster_name" {
   description = "The name of the EKS cluster."
   type        = string
 }
 
-variable "eks_node_role_arn" {
+variable "node_role_arn" {
   description = "The arn of the role the EKS cluster roles are assigned"
   type        = string
 }
 
-variable "eks_node_instance_profile" {
-  description = "The name of the instance profile to use for the nodes"
+variable "node_security_group_id" {
+  description = "The id of the security group for nodes running in the EKS cluster"
+  type        = string
+}
+
+variable "node_vpc_id" {
+  description = "The ID of the VPC to deploy karpenter nodes into."
   type        = string
 }
 
 variable "node_subnets" {
-  description = "List of subnet names to deploy karpenter Nodes into."
+  description = "List of subnet names to deploy karpenter nodes into."
   type        = set(string)
 }
 
@@ -33,4 +38,21 @@ variable "vpa_enabled" {
 variable "ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
+  default     = []
+}
+
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the deployed images"
+  type        = bool
+  default     = false
+}
+
+variable "log_level" {
+  description = "The log level for the karpenter pods"
+  type        = string
+  default     = "info"
+  validation {
+    condition     = contains(["info", "error", "warn", "debug"], var.log_level)
+    error_message = "Invalid log_level provided."
+  }
 }

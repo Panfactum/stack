@@ -204,10 +204,12 @@ resource "helm_release" "cilium" {
         hostNamespaceOnly = true
       }
 
-      cni = {
-        resources = {
-          cpu    = "10m"
-          memory = "10Mi"
+      resources = {
+        requests = {
+          memory = "100Mi"
+        }
+        limits = {
+          memory = "200Mi"
         }
       }
 
@@ -235,7 +237,19 @@ resource "helm_release" "cilium" {
           module.constants.pod_anti_affinity_helm
         )
 
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "150Mi"
+          }
+        }
+
+        // The operator is what assigns and updates node ENIs so this is
+        // absolutely cluster critical
         priorityClassName = "system-cluster-critical"
+
         extraArgs = [
           "--cluster-name=${var.eks_cluster_name}"
         ]

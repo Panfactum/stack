@@ -4,7 +4,7 @@ locals {
     preference = {
       matchExpressions = [
         {
-          key      = "node.kubernetes.io/class"
+          key      = "panfactum.com/class"
           operator = "In"
           values   = ["controller"]
         }
@@ -14,11 +14,13 @@ locals {
   prefer_spot = {
     weight = 50
     preference = {
-      matchExpressions = [{
-        key      = "node.kubernetes.io/class"
-        operator = "In"
-        values   = ["spot"]
-      }]
+      matchExpressions = [
+        {
+          key      = "panfactum.com/class"
+          operator = "In"
+          values   = ["spot"]
+        }
+      ]
     }
   }
 }

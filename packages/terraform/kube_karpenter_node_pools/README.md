@@ -1,0 +1,3 @@
+# Karpenter NodePools
+
+**Type:** Live

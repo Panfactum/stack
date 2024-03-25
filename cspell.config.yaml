@@ -91,7 +91,8 @@ words: [
   "linkerd",
   "cmctl",
   "istio",
-  "cncf"
+  "cncf",
+  "keda"
 ]
 languageSettings:
   - languageId: markdown,mdx

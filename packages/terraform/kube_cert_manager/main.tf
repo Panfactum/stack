@@ -223,7 +223,10 @@ resource "helm_release" "cert_manager" {
     yamlencode({
       installCRDs = true
       global = {
-        commonLabels      = module.base_labels.kube_labels
+        commonLabels = module.base_labels.kube_labels
+
+        // While the certificates are "critical" to the cluster, the provisioning infrastructure
+        // can go down temporarily without taking down the cluster so this does not need to be "system-cluster-critical"
         priorityClassName = module.constants_controller.cluster_important_priority_class_name
       }
       image = {
@@ -235,7 +238,14 @@ resource "helm_release" "cert_manager" {
         module.constants_controller.controller_node_affinity_helm,
         module.constants_controller.pod_anti_affinity_helm
       )
-
+      // This _can_ be run on a spot node if necessary as a short temporary disruption
+      // will not cause cascading failures
+      tolerations = module.constants_controller.spot_node_toleration_helm
+      resources = {
+        limits = {
+          memory = "100Mi"
+        }
+      }
       livenessProbe = {
         enabled = true
       }
@@ -262,6 +272,12 @@ resource "helm_release" "cert_manager" {
           module.constants_webhook.controller_node_affinity_helm,
           module.constants_webhook.pod_anti_affinity_helm
         )
+        resources = {
+          limits = {
+            memory = "100Mi"
+          }
+        }
+
         //////////////////////////////////////////////////////////
         // This section replaces the self-generated certs with our certificate chain
         //////////////////////////////////////////////////////////
@@ -307,6 +323,11 @@ resource "helm_release" "cert_manager" {
           module.constants_ca_injector.controller_node_affinity_helm,
           module.constants_ca_injector.pod_anti_affinity_helm
         )
+        resources = {
+          limits = {
+            memory = "100Mi"
+          }
+        }
       }
     })
   ]

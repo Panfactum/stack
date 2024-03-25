@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_linkerd"
+  source = "../../../../../terraform//kube_linkerd"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_linkerd"
 }
 
 dependency "cert_manager" {
@@ -24,5 +25,5 @@ dependency "cert_issuers" {
 inputs = {
   vault_ca_crt               = dependency.cert_issuers.outputs.vault_ca_crt
   pull_through_cache_enabled = true
-  vpa_enabled                = false
+  vpa_enabled                = true
 }

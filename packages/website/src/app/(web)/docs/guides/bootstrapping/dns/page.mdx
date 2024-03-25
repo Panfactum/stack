@@ -7,6 +7,12 @@ import testRecordImg from './test-record.jpg';
 
 # DNS
 
+## Objective
+
+Establish a domain name, setup subdomains, and delegate control of subdomains to AWS accounts.
+
+## Background
+
 [Domain Name Service (DNS)](https://www.cloudflare.com/learning/dns/what-is-dns) is what allows you to connect
 to networked services by human-readable names (e.g., `panfactum.com`) instead of IP addresses (`1.2.3.4`). It also
 plays an important role in [X.509](https://en.wikipedia.org/wiki/X.509) certificate infrastructure which underpins
@@ -16,10 +22,6 @@ security on the modern internet (e.g., [TLS/SSL](https://en.wikipedia.org/wiki/T
 [registrar](https://en.wikipedia.org/wiki/Domain_name_registrar) (an organization that allows you to *lease*
 domain names) and a managed DNS server ([Hosted Zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html))
 for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_record_types).
-
-## Objective
-
-Establish a domain name, setup subdomains, and delegate control of subdomains to AWS accounts.
 
 ## Purchase Domain Name(s)
 

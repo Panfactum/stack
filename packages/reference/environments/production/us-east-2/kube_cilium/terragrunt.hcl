@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_cilium"
+  source = "../../../../../terraform//kube_cilium"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_cilium"
 }
 
 dependency "cluster" {
@@ -15,5 +16,5 @@ inputs = {
   eks_cluster_name           = dependency.cluster.outputs.cluster_name
   eks_cluster_url            = dependency.cluster.outputs.cluster_url
   pull_through_cache_enabled = true
-  vpa_enabled                = false
+  vpa_enabled                = true
 }

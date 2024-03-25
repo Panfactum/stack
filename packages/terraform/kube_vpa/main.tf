@@ -10,16 +10,21 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
   }
 }
 
 locals {
-
   name      = "vertical-pod-autoscaler"
   namespace = module.namespace.namespace
+}
 
-  webhook_secret = "va-webhook-certs"
-
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "kube_labels" {
@@ -29,9 +34,7 @@ module "kube_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags = merge(var.extra_tags, {
-    service = local.name
-  })
+  extra_tags     = var.extra_tags
 }
 
 module "constants" {
@@ -64,9 +67,8 @@ module "namespace" {
 module "webhook_cert" {
   source         = "../kube_internal_cert"
   service_names  = ["vertical-pod-autoscaler-vpa-webhook"]
-  secret_name    = local.webhook_secret
+  secret_name    = "vpa-webhook-certs"
   namespace      = local.namespace
-  labels         = module.kube_labels.kube_labels
   environment    = var.environment
   pf_root_module = var.pf_root_module
   region         = var.region
@@ -95,25 +97,18 @@ resource "helm_release" "vpa" {
       priorityClassName = "system-cluster-critical"
 
       recommender = {
+
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-recommender"
+        }
+
         // ONLY 1 of these should be running at a time
         // b/c there is no leader-election: https://github.com/kubernetes/autoscaler/issues/5481
         // However, that creates a potential issue with memory consumption as if this pod
         // OOMs, then it won't be recorded and then bumped up. As a result, we have to tune this
         // pods memory floor carefully and give it plenty of headroom.
         replicaCount = 1
-        affinity = merge({
-          podAntiAffinity = {
-            requiredDuringSchedulingIgnoredDuringExecution = [{
-              labelSelector = {
-                matchLabels = {
-                  "app.kubernetes.io/name"      = "vpa"
-                  "app.kubernetes.io/component" = "recommender"
-                }
-              }
-              topologyKey : "kubernetes.io/hostname"
-            }]
-          }
-        }, module.constants.controller_node_affinity_helm)
+        affinity     = module.constants.controller_node_affinity_helm
 
         extraArgs = {
           // Better packing
@@ -124,36 +119,59 @@ resource "helm_release" "vpa" {
           "cpu-histogram-decay-half-life"    = "2h0m0s"
           "memory-histogram-decay-half-life" = "2h0m0s"
 
-          v = 2
+          // Provide 30% headroom (instead of the 15% default)
+          "recommendation-margin-fraction" = 0.3
+
+          v = var.log_verbosity
+        }
+
+        resources = {
+          requests = {
+            memory = "300Mi"
+          }
+          limits = {
+            memory = "500Mi"
+          }
         }
       }
 
 
       updater = {
+
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-updater"
+        }
+
         // ONLY 1 of these should be running at a time
         // b/c there is no leader-election: https://github.com/kubernetes/autoscaler/issues/5481
         replicaCount = 1
-        affinity = merge({
-          podAntiAffinity = {
-            requiredDuringSchedulingIgnoredDuringExecution = [{
-              labelSelector = {
-                matchLabels = {
-                  "app.kubernetes.io/name"      = "vpa"
-                  "app.kubernetes.io/component" = "updater"
-                }
-              }
-              topologyKey : "kubernetes.io/hostname"
-            }]
-          }
-        }, module.constants.controller_node_affinity_helm)
+        affinity     = module.constants.controller_node_affinity_helm
 
         extraArgs = {
           "min-replicas" = 0 // We don't care b/c we use pdbs
-          v              = 2
+          v              = var.log_verbosity
+        }
+
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
+          }
         }
       }
 
       admissionController = {
+
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-admission-controller"
+        }
+
+        annotations = {
+          "reloader.stakater.com/auto" = "true"
+        }
+
         // We do need at least 2 otherwise we may get stuck in a loop
         // b/c if this pod goes down, it cannot apply the appropriate
         // resource requirements when it comes back up and then the
@@ -177,31 +195,32 @@ resource "helm_release" "vpa" {
           minAvailable = 1
         }
 
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+
         // We will use our own secret
         generateCertificate = false
-        secretName          = local.webhook_secret
+        secretName          = module.webhook_cert.secret_name
         extraArgs = {
           client-ca-file  = "/etc/tls-certs/ca.crt"
           tls-cert-file   = "/etc/tls-certs/tls.crt"
           tls-private-key = "/etc/tls-certs/tls.key"
-          v               = "2"
+          v               = var.log_verbosity
         }
         mutatingWebhookConfiguration = {
           annotations = {
-            "cert-manager.io/inject-ca-from" = "${local.namespace}/${local.webhook_secret}"
+            "cert-manager.io/inject-ca-from" = "${local.namespace}/${module.webhook_cert.certificate_name}"
           }
         }
       }
     })
   ]
-
-  // We need to add the reloader annotation to the admission controller deployment
-  // so that it restarts when the webhook cert is rotated
-  postrender {
-    binary_path = "${path.module}/vpa_kustomize/kustomize.sh"
-  }
-
-  depends_on = [module.webhook_cert]
 }
 
 /***************************************

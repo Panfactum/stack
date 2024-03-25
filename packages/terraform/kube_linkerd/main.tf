@@ -211,8 +211,8 @@ resource "helm_release" "linkerd" {
 
   values = [
     yamlencode({
-      controllerLogLevel = "info"
-
+      controllerLogLevel        = "info"
+      controllerLogFormat       = "json"
       controllerImage           = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/controller"
       controllerReplicas        = 2
       enablePodAntiAffinity     = true
@@ -229,10 +229,29 @@ resource "helm_release" "linkerd" {
           scheme = "kubernetes.io/tls"
         }
       }
+      identityResources = {
+        memory = {
+          limit = "500Mi"
+        }
+      }
 
       proxy = {
         image = {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy"
+        }
+        logFormat = "json"
+        resources = {
+
+          // We provide both a request and a limit
+          // to ensure that the VPA gives slightly more headroom
+          // to the proxy (2.5x vs 1x) as its typically a low memory
+          // component but can experience some spikes on high network traffic
+          // Since this applies to ALL pods in the cluster, this ends up
+          // being fairly important
+          memory = {
+            request = "40Mi"
+            limit   = "100Mi"
+          }
         }
       }
 
@@ -240,21 +259,47 @@ resource "helm_release" "linkerd" {
         image = {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/policy-controller"
         }
+        resources = {
+          memory = {
+            // If this does down, networking in the cluster will break causing a cascading failure
+            // so we should give a 2.5x memory headroom to deal with memory spikes
+            request = "200Mi"
+            limit   = "500Mi"
+          }
+        }
       }
 
       podLabels = module.kube_labels.kube_labels
 
+      // These pods must be running in order to prevent cascading cluster failures
       priorityClassName = "system-cluster-critical"
-      nodeAffinity      = module.constants.controller_node_affinity_helm.nodeAffinity
+
+      nodeAffinity = module.constants.controller_node_affinity_helm.nodeAffinity
 
       policyValidator = {
         externalSecret = true
         injectCaFrom   = "${local.namespace}/${local.linkerd_policy_validator_webhook_secret}"
       }
+      spValidatorResources = {
+        memory = {
+          // If this does down, networking in the cluster will break causing a cascading failure
+          // so we should give a 2.5x memory headroom to deal with memory spikes
+          request = "200Mi"
+          limit   = "500Mi"
+        }
+      }
 
       profileValidator = {
         externalSecret = true
         injectCaFrom   = "${local.namespace}/${local.linkerd_profile_validator_webhook_secret}"
+      }
+      destinationResources = {
+        memory = {
+          // If this does down, networking in the cluster will break causing a cascading failure
+          // so we should give a 2.5x memory headroom to deal with memory spikes
+          request = "200Mi"
+          limit   = "500Mi"
+        }
       }
 
       proxyInjector = {
@@ -273,6 +318,14 @@ resource "helm_release" "linkerd" {
           }]
         }
       }
+      proxyInjectorResources = {
+        memory = {
+          // If this does down, networking in the cluster will break causing a cascading failure
+          // so we should give a 2.5x memory headroom to deal with memory spikes
+          request = "200Mi"
+          limit   = "500Mi"
+        }
+      }
 
 
       debugContainer = {
@@ -285,6 +338,7 @@ resource "helm_release" "linkerd" {
         image = {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy-init"
         }
+        logFormat = "json"
 
         // Be default, the init container
         // has way too many resources and ends up

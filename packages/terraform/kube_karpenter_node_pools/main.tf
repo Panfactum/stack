@@ -57,9 +57,9 @@ module "constants" {
 
 module "node_settings" {
   source           = "../kube_node_settings"
-  cluster_name     = var.eks_cluster_name
-  cluster_endpoint = var.eks_cluster_endpoint
-  cluster_ca_data  = var.eks_cluster_ca_data
+  cluster_name     = var.cluster_name
+  cluster_endpoint = var.cluster_endpoint
+  cluster_ca_data  = var.cluster_ca_data
   environment      = var.environment
   pf_root_module   = var.pf_root_module
   region           = var.region
@@ -68,25 +68,35 @@ module "node_settings" {
 }
 
 /********************************************************************************************************************
-* Node Template
+* Node Class
 *********************************************************************************************************************/
 
-resource "kubernetes_manifest" "default_node_template" {
+resource "kubernetes_manifest" "default_node_class" {
   manifest = {
-    apiVersion = "karpenter.k8s.aws/v1alpha1"
-    kind       = "AWSNodeTemplate"
+    apiVersion = "karpenter.k8s.aws/v1beta1"
+    kind       = "EC2NodeClass"
     metadata = {
       name   = "default"
       labels = module.kube_labels.kube_labels
     }
     spec = {
-      amiFamily = "AL2"
-      subnetSelector = {
-        "karpenter.sh/discovery" = var.eks_cluster_name
-      }
-      securityGroupSelector = {
-        "karpenter.sh/discovery" = var.eks_cluster_name
-      }
+      amiFamily = "Bottlerocket"
+      subnetSelectorTerms = [
+        {
+          tags = {
+            "karpenter.sh/discovery" = var.cluster_name
+          }
+        }
+      ]
+      securityGroupSelectorTerms = [
+        {
+          tags = {
+            "karpenter.sh/discovery" = var.cluster_name
+          }
+        }
+      ]
+      instanceProfile = var.node_instance_profile
+
       metadataOptions = {
         httpEndpoint            = "enabled"
         httpProtocolIPv6        = "disabled"
@@ -120,82 +130,104 @@ resource "kubernetes_manifest" "default_node_template" {
 
 
 /********************************************************************************************************************
-* Provisioners
+* Node Pools
 *********************************************************************************************************************/
 
-resource "kubernetes_manifest" "spot_provisioner" {
+resource "kubernetes_manifest" "spot_node_pool" {
   manifest = {
-    apiVersion = "karpenter.sh/v1alpha5"
-    kind       = "Provisioner"
+    apiVersion = "karpenter.sh/v1beta1"
+    kind       = "NodePool"
     metadata = {
       name   = "spot"
       labels = module.kube_labels.kube_labels
     }
     spec = {
-      providerRef = {
-        name = kubernetes_manifest.default_node_template.manifest.metadata.name
-      }
-      weight = 10
-      consolidation = {
-        enabled = true
-      }
-      ttlSecondsUntilExpired = 60 * 60 * 24 * 7
-      startupTaints = [
-        module.constants.cilium_taint
-      ]
-      taints = [
-        {
-          key    = "spot"
-          value  = "true"
-          effect = "NoSchedule"
+      template = {
+        metadata = {
+          labels = merge(module.kube_labels.kube_labels, {
+            "panfactum.com/class" = "spot"
+          })
         }
-      ]
-      requirements = concat(
-        local.shared_requirements,
-        [{
-          key = "karpenter.sh/capacity-type"
-          operator : "In"
-          values : ["spot"]
-        }]
-      )
-      labels = {
-        "node.kubernetes.io/class" = "spot"
+        spec = {
+          nodeClassRef = {
+            apiVersion = "karpenter.k8s.aws/v1beta1"
+            kind       = "EC2NodeClass"
+            name       = "default"
+          }
+          taints = [
+            {
+              key    = "spot"
+              value  = "true"
+              effect = "NoSchedule"
+            }
+          ]
+          startupTaints = [
+            module.constants.cilium_taint
+          ]
+          requirements = concat(
+            local.shared_requirements,
+            [{
+              key = "karpenter.sh/capacity-type"
+              operator : "In"
+              values : ["spot"]
+            }]
+          )
+        }
       }
+      disruption = {
+        consolidationPolicy = "WhenUnderutilized"
+        expireAfter         = "${24 * 7}h"
+      }
+
+      // This should be the preference over on demand nodes
+      weight = 10
     }
   }
 }
 
-resource "kubernetes_manifest" "on_demand_provisioner" {
+
+resource "kubernetes_manifest" "on_demand_node_pool" {
   manifest = {
-    apiVersion = "karpenter.sh/v1alpha5"
-    kind       = "Provisioner"
+    apiVersion = "karpenter.sh/v1beta1"
+    kind       = "NodePool"
     metadata = {
       name   = "on-demand"
       labels = module.kube_labels.kube_labels
     }
     spec = {
-      providerRef = {
-        name = kubernetes_manifest.default_node_template.manifest.metadata.name
+      template = {
+        metadata = {
+          labels = merge(module.kube_labels.kube_labels, {
+            "panfactum.com/class" = "worker"
+          })
+        }
+        spec = {
+          nodeClassRef = {
+            apiVersion = "karpenter.k8s.aws/v1beta1"
+            kind       = "EC2NodeClass"
+            name       = "default"
+          }
+          startupTaints = [
+            module.constants.cilium_taint
+          ]
+          requirements = concat(
+            local.shared_requirements,
+            [{
+              key = "karpenter.sh/capacity-type"
+              operator : "In"
+              values : ["on-demand"]
+            }]
+          )
+        }
       }
+      disruption = {
+        consolidationPolicy = "WhenUnderutilized"
+        expireAfter         = "${24 * 7}h"
+      }
+
+      // This should have the lowest preference
       weight = 1
-      consolidation = {
-        enabled = true
-      }
-      ttlSecondsUntilExpired = 60 * 60 * 8 // we want to recycle these more frequently to move to spot nodes
-      startupTaints = [
-        module.constants.cilium_taint
-      ]
-      requirements = concat(
-        local.shared_requirements,
-        [{
-          key = "karpenter.sh/capacity-type"
-          operator : "In"
-          values : ["on-demand"]
-        }]
-      )
-      labels = {
-        "node.kubernetes.io/class" = "worker"
-      }
     }
   }
 }
+

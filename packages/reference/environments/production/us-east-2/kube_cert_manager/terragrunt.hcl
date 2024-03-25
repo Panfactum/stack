@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_cert_manager"
+  source = "../../../../../terraform//kube_cert_manager"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_cert_manager"
 }
 
 dependency "cilium" {
@@ -15,5 +16,5 @@ dependency "cilium" {
 inputs = {
   pull_through_cache_enabled   = true
   self_generated_certs_enabled = false
-  vpa_enabled                  = false
+  vpa_enabled                  = true
 }

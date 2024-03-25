@@ -8,9 +8,9 @@ locals {
   eviction_soft_grace_period_memory_available = "2m0s"
   eviction_soft_grace_period_nodefs_available = "2m0s"
   eviction_soft_grace_period_inodes_free      = "2m0s"
-  image_gc_high_threshold_percent             = 85
-  image_gc_low_threshold_percent              = 80
-  max_pods                                    = 100
+  image_gc_high_threshold_percent             = "85"
+  image_gc_low_threshold_percent              = "80"
+  max_pods                                    = "100"
   shutdown_grace_period                       = "60m0s"
   user_data = templatefile("${path.module}/user-data.toml", {
     API_SERVER_ADDR                             = var.cluster_endpoint

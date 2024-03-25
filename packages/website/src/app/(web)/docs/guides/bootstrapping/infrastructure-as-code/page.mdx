@@ -427,6 +427,16 @@ Let's set it up.
   environment, first decrypt the file (`sops -d`), then copy it to the proper directory, then encrypt it (`sops -e -i`).
 </MarkdownAlert>
 
+<MarkdownAlert severity="warning">
+  If you are using an existing AWS account, you may see the following error:
+  `Service role name AWSServiceRoleForEC2Spot has been taken in this account, please try a different suffix`.
+
+  Resolve this error by importing the service-linked role into your terraform state:
+  `terragrunt import aws_iam_service_linked_role.spot arn:aws:iam::<your_account_id>:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
+
+  Replace `<your_account_id>` with the account id for this account.
+</MarkdownAlert>
+
 ## Next Steps
 
 Now that you are set up to deploy infrastructure-as-code, we are ready to [setup DNS](./dns).

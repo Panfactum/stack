@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_trust_manager"
+  source = "../../../../../terraform//kube_trust_manager"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_trust_manager"
 }
 
 dependency "cert_manager" {
@@ -14,5 +15,5 @@ dependency "cert_manager" {
 
 inputs = {
   pull_through_cache_enabled = true
-  vpa_enabled                = false
+  vpa_enabled                = true
 }

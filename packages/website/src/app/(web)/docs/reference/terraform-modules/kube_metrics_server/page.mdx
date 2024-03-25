@@ -6,11 +6,11 @@
 
 This module provides a deployment of the [metrics-server](https://github.com/kubernetes-sigs/external-dns) project.
 
-See the [vars file](./vars.tf) for descriptions of the input parameters.
-
 ## Providers
 
 The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
@@ -19,6 +19,10 @@ The following providers are needed by this module:
 ## Modules
 
 The following Modules are called:
+
+### <a name="module_cert" /> [cert](#module_cert)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
 
 ### <a name="module_constants" /> [constants](#module_constants)
 
@@ -32,15 +36,13 @@ Source: [kube\_labels](./kube_labels)
 
 Source: [kube\_namespace](./kube_namespace)
 
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
+
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
-
-Description: The name of the EKS cluster.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
@@ -70,21 +72,21 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+
+Description: The log verbosity (0-9) for the metrics-server pods
+
+Type: `number`
+
+Default: `0`
+
 ### <a name="input_metrics_server_helm_version" /> [metrics\_server\_helm\_version](#input_metrics_server_helm_version)
 
 Description: The version of the metrics-server helm chart to deploy
 
 Type: `string`
 
-Default: `"3.10.0"`
-
-### <a name="input_metrics_server_version" /> [metrics\_server\_version](#input_metrics_server_version)
-
-Description: The version of the metrics-server to deploy
-
-Type: `string`
-
-Default: `"v0.6.3"`
+Default: `"3.12.0"`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
@@ -101,6 +103,14 @@ Description: The name of the root Panfactum module in the module tree.
 Type: `string`
 
 Default: `"kube_metrics_server"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_region" /> [region](#input_region)
 

@@ -1,3 +1,0 @@
-# Karpenter Provisioners
-
-**Type:** Live
