@@ -162,7 +162,7 @@ The subnets you choose should be **private** and should each be in a different A
 
 The nodes created by this module are used to run cluster-critical controllers, without which your cluster will not
 function properly. [^5] You should use at least three to facilitate the high-availability algorithms used by some of the
-controllers. The `t3a.large` is the minimum recommended instance size if using three nodes.
+controllers. The `t3a.medium` is the minimum recommended instance size if using three nodes.
 
 [^5]: Additional "worker" nodes will be dynamically provisioned by [Karpenter](https://karpenter.sh/) in a future section of this guide.
 

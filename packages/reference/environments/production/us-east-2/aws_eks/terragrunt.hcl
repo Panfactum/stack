@@ -30,7 +30,7 @@ inputs = {
   service_cidr          = "172.20.0.0/16"
 
   controller_node_count          = 3
-  controller_node_instance_types = ["t3a.large"]
+  controller_node_instance_types = ["t3a.medium"]
   controller_node_subnets = [
     "PRIVATE_A",
     "PRIVATE_B",
