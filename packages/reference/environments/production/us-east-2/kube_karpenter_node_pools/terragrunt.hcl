@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_karpenter_node_pools"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_karpenter_node_pools"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_karpenter_node_pools"
 }
 
 dependency "karpenter" {

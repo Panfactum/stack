@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_vault"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_vault"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_vault"
 }
 
 dependency "cluster" {

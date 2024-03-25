@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_karpenter"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_karpenter"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_karpenter"
 }
 
 dependency "vpc" {

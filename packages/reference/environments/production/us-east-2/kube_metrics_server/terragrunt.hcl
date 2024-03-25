@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_metrics_server"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_metrics_server"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_metrics_server"
 }
 
 dependency "cert_issuers" {

@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_linkerd"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_linkerd"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_linkerd"
 }
 
 dependency "cert_manager" {
