@@ -84,14 +84,12 @@ resource "helm_release" "descheduler" {
       podLabels            = module.kube_labels.kube_labels
       deschedulingInterval = "30m"
 
-      replicas = 2
+      replicas = 1
       affinity = merge(
-        module.constants.controller_node_affinity_helm,
+        module.constants.controller_node_with_burstable_affinity_helm,
         module.constants.pod_anti_affinity_helm
       )
-      leaderElection = {
-        enabled = true
-      }
+      tolerations = module.constants.burstable_node_toleration_helm
 
       deschedulerPolicy = {
         maxNoOfPodsToEvictPerNode      = 10

@@ -29,6 +29,9 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-update-ssh.sh $out/bin/pf-update-ssh
     chmod +x $out/bin/pf-update-ssh
 
+    cp ${src}/pf-get-ssh-state-hash.sh $out/bin/pf-get-ssh-state-hash
+    chmod +x $out/bin/pf-get-ssh-state-hash
+
     cp ${src}/pf-check-repo-setup.sh $out/bin/pf-check-repo-setup
     chmod +x $out/bin/pf-check-repo-setup
 

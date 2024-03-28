@@ -92,7 +92,9 @@ words: [
   "cmctl",
   "istio",
   "cncf",
-  "keda"
+  "keda",
+  "burstable",
+  "nosniff"
 ]
 languageSettings:
   - languageId: markdown,mdx

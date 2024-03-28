@@ -244,13 +244,13 @@ resource "helm_release" "linkerd" {
 
           // We provide both a request and a limit
           // to ensure that the VPA gives slightly more headroom
-          // to the proxy (2.5x vs 1x) as its typically a low memory
+          // to the proxy (2x vs 1x) as its typically a low memory
           // component but can experience some spikes on high network traffic
           // Since this applies to ALL pods in the cluster, this ends up
           // being fairly important
           memory = {
             request = "40Mi"
-            limit   = "100Mi"
+            limit   = "80Mi"
           }
         }
       }
@@ -285,7 +285,7 @@ resource "helm_release" "linkerd" {
           // If this does down, networking in the cluster will break causing a cascading failure
           // so we should give a 2.5x memory headroom to deal with memory spikes
           request = "200Mi"
-          limit   = "500Mi"
+          limit   = "400Mi"
         }
       }
 
@@ -296,9 +296,9 @@ resource "helm_release" "linkerd" {
       destinationResources = {
         memory = {
           // If this does down, networking in the cluster will break causing a cascading failure
-          // so we should give a 2.5x memory headroom to deal with memory spikes
+          // so we should give a 2x memory headroom to deal with memory spikes
           request = "200Mi"
-          limit   = "500Mi"
+          limit   = "400Mi"
         }
       }
 
@@ -323,7 +323,7 @@ resource "helm_release" "linkerd" {
           // If this does down, networking in the cluster will break causing a cascading failure
           // so we should give a 2.5x memory headroom to deal with memory spikes
           request = "200Mi"
-          limit   = "500Mi"
+          limit   = "400Mi"
         }
       }
 

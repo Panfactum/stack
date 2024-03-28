@@ -377,7 +377,7 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
     a:visited {
         color: initial;
     }
-    :not(sup) > a.markdown {
+    :not(span.footnote) > a.markdown {
         text-decoration: underline;
         @apply text-primary;
     }
@@ -387,8 +387,8 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
     }
 
     /* Footnote links */
-    sup > a.markdown {
-        @apply text-white bg-primary font-semibold cursor-pointer;
+    span.footnote > a.markdown {
+        @apply text-sm text-white bg-primary font-semibold cursor-pointer;
         border-radius: 5px;
         padding: 0 5px;
     }

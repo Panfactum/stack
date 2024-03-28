@@ -234,13 +234,16 @@ resource "helm_release" "cert_manager" {
       }
       replicaCount = 2
       podLabels    = module.controller_labels.kube_labels
+      podAnnotations = {
+        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+      }
       affinity = merge(
-        module.constants_controller.controller_node_affinity_helm,
+        module.constants_controller.controller_node_with_burstable_affinity_helm,
         module.constants_controller.pod_anti_affinity_helm
       )
       // This _can_ be run on a spot node if necessary as a short temporary disruption
       // will not cause cascading failures
-      tolerations = module.constants_controller.spot_node_toleration_helm
+      tolerations = module.constants_controller.burstable_node_toleration_helm
       resources = {
         limits = {
           memory = "100Mi"
@@ -268,6 +271,9 @@ resource "helm_release" "cert_manager" {
           name   = kubernetes_service_account.webhook.metadata[0].name
         }
         podLabels = module.webhook_labels.kube_labels
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
         affinity = merge(
           module.constants_webhook.controller_node_affinity_helm,
           module.constants_webhook.pod_anti_affinity_helm
@@ -319,10 +325,16 @@ resource "helm_release" "cert_manager" {
         replicaCount = 2
         extraArgs    = ["--v=${var.log_verbosity}"]
         podLabels    = module.ca_injector_labels.kube_labels
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
         affinity = merge(
-          module.constants_ca_injector.controller_node_affinity_helm,
+          module.constants_ca_injector.controller_node_with_burstable_affinity_helm,
           module.constants_ca_injector.pod_anti_affinity_helm
         )
+        // This _can_ be run on a spot node if necessary as a short temporary disruption
+        // will not cause cascading failures
+        tolerations = module.constants_controller.burstable_node_toleration_helm
         resources = {
           limits = {
             memory = "100Mi"

@@ -34,6 +34,34 @@ locals {
       values   = ["linux"]
     }
   ]
+
+  burstable_requirements = [
+    {
+      key      = "karpenter.k8s.aws/instance-category"
+      operator = "In"
+      values   = ["t"]
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-generation"
+      operator = "Gt"
+      values   = ["2"]
+    },
+    {
+      key      = "kubernetes.io/arch"
+      operator = "In"
+      values   = ["amd64"]
+    },
+    {
+      key      = "kubernetes.io/os"
+      operator = "In"
+      values   = ["linux"]
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-memory"
+      operator = "Gt"
+      values   = ["2047"]
+    }
+  ]
 }
 
 module "kube_labels" {
@@ -132,6 +160,64 @@ resource "kubernetes_manifest" "default_node_class" {
 /********************************************************************************************************************
 * Node Pools
 *********************************************************************************************************************/
+
+resource "kubernetes_manifest" "burstable_node_pool" {
+  manifest = {
+    apiVersion = "karpenter.sh/v1beta1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "burstable"
+      labels = module.kube_labels.kube_labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(module.kube_labels.kube_labels, {
+            "panfactum.com/class" = "burstable"
+          })
+        }
+        spec = {
+          nodeClassRef = {
+            apiVersion = "karpenter.k8s.aws/v1beta1"
+            kind       = "EC2NodeClass"
+            name       = "default"
+          }
+          taints = [
+            {
+              key    = "burstable"
+              value  = "true"
+              effect = "NoSchedule"
+            },
+            {
+              key    = "spot"
+              value  = "true"
+              effect = "NoSchedule"
+            }
+          ]
+          startupTaints = [
+            module.constants.cilium_taint
+          ]
+          requirements = concat(
+            local.burstable_requirements,
+            [{
+              key = "karpenter.sh/capacity-type"
+              operator : "In"
+              values : ["spot"]
+            }]
+          )
+        }
+      }
+      disruption = {
+        consolidationPolicy = "WhenUnderutilized"
+        expireAfter         = "${24 * 7}h"
+      }
+
+      // This should be higher than the preference of normal spot nodes
+      weight = 20
+    }
+  }
+}
+
 
 resource "kubernetes_manifest" "spot_node_pool" {
   manifest = {

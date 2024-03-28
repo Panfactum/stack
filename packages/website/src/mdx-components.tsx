@@ -58,7 +58,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     p: ({ children, className, ...props }) => (
       <p
-        className={clsx('py-1', defaultTextSize, className)}
+        className={clsx('py-[0.3rem]', defaultTextSize, className)}
         {...props}
       >
         {children}
@@ -177,11 +177,14 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     },
     sup: ({ children, ...props }) => {
       return (
-        <sup {...props}>
+        <span
+          className="footnote inline-flex align-top"
+          {...props}
+        >
           <DefaultTooltipLazy title={'Click for footnote'}>
             {children as ReactElement}
           </DefaultTooltipLazy>
-        </sup>
+        </span>
       )
     },
     section: ({ children, ...props }) => {

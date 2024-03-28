@@ -215,7 +215,7 @@ locals {
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     }
     limits = {
-      memory            = container.minimum_memory * 1024 * 1024
+      memory            = container.minimum_memory * 1024 * 1024 * 1.3
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     }
   } }
@@ -246,8 +246,10 @@ locals {
 
   pod = {
     metadata = { for k, v in {
-      labels      = module.kube_labels.kube_labels
-      annotations = length(keys(var.pod_annotations)) == 0 ? null : var.pod_annotations
+      labels = module.kube_labels.kube_labels
+      annotations = merge({
+        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+      }, var.pod_annotations)
     } : k => v if v != null }
     spec = { for k, v in {
       priorityClassName  = var.priority_class_name
@@ -267,7 +269,7 @@ locals {
           requiredDuringSchedulingIgnoredDuringExecution  = length(keys(var.node_requirements)) == 0 ? null : local.node_requirements
         } : k => v if v != null }
       }, module.constants.pod_anti_affinity_helm)
-      topologySpreadConstraints = module.constants.topology_spread_zone
+      topologySpreadConstraints = module.constants.topology_spread_zone_preferred
       restartPolicy             = var.restart_policy
 
       ///////////////////////////

@@ -42,7 +42,7 @@ variable "audit_log_enabled" {
 variable "access_policy" {
   description = "AWS access policy for the bucket."
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "description" {
@@ -55,3 +55,10 @@ variable "force_destroy" {
   type        = bool
   default     = false
 }
+
+variable "kms_master_key_id" {
+  description = "If provided, will use this CMK for bucket encryption (SSS-KMS) rather than the SSE-S3 key"
+  type        = string
+  default     = null
+}
+

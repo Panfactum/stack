@@ -1,0 +1,6 @@
+providers:
+  - aws
+  - kubernetes
+  - random
+  - tls
+  - vault

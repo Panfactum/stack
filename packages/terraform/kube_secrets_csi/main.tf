@@ -95,7 +95,7 @@ resource "helm_release" "secrets_csi_driver" {
               memory = "100Mi"
             }
             limits = {
-              memory = "200Mi"
+              memory = "130Mi"
             }
           }
         }
@@ -109,7 +109,7 @@ resource "helm_release" "secrets_csi_driver" {
               memory = "100Mi"
             }
             limits = {
-              memory = "200Mi"
+              memory = "130Mi"
             }
           }
         }
@@ -123,7 +123,7 @@ resource "helm_release" "secrets_csi_driver" {
               memory = "100Mi"
             }
             limits = {
-              memory = "200Mi"
+              memory = "130Mi"
             }
           }
         }
@@ -132,7 +132,8 @@ resource "helm_release" "secrets_csi_driver" {
           "reloader.stakater.com/auto" = "true"
         }
         podAnnotations = {
-          "linkerd.io/inject" = "enabled"
+          "linkerd.io/inject"                                   = "enabled"
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
         priorityClassName = "system-node-critical"
       }

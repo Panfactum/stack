@@ -1,13 +1,7 @@
-variable "nginx_ingress_version" {
-  description = "The version of nginx-ingress to deploy"
-  type        = string
-  default     = "v1.8.1"
-}
-
 variable "nginx_ingress_helm_version" {
   description = "The version of the nginx-ingress helm chart to deploy"
   type        = string
-  default     = "4.7.1"
+  default     = "4.10.0"
 }
 
 variable "max_replicas" {
@@ -19,12 +13,13 @@ variable "max_replicas" {
 variable "min_replicas" {
   description = "The minimum number of nginx-ingress replicas to deploy"
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "dhparam" {
   description = "The Diffie-Hellman parameter to use for establishing perfect forward secrecy with TLS"
   type        = string
+  sensitive   = true
 }
 
 variable "ingress_domains" {
@@ -32,8 +27,8 @@ variable "ingress_domains" {
   type        = set(string)
 }
 
-variable "ingress_timeout" {
-  description = "The timeout for connections flowing through the ingress"
+variable "ingress_timeout_seconds" {
+  description = "The maximum number of seconds that request may take."
   type        = number
   default     = 60
 }
@@ -44,8 +39,14 @@ variable "vpa_enabled" {
   default     = false
 }
 
-variable "enable_tls_1_2" {
+variable "tls_1_2_enabled" {
   description = "Whether to enable TLS 1.2 protocols"
+  type        = bool
+  default     = false
+}
+
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
   default     = false
 }

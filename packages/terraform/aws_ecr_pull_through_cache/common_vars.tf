@@ -7,13 +7,13 @@ variable "environment" {
 variable "pf_root_module" {
   description = "The name of the root Panfactum module in the module tree."
   type        = string
-  default     = "aws_ecr_repos"
+  default     = "aws_ecr_pull_through_cache"
 }
 
 variable "pf_module" {
   description = "The name of the Panfactum module where the containing resources are directly defined."
   type        = string
-  default     = "aws_ecr_repos"
+  default     = "aws_ecr_pull_through_cache"
 }
 
 variable "region" {

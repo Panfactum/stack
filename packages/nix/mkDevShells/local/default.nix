@@ -43,7 +43,6 @@
         openssh # ssh client and server
         autossh # automatically restart tunnels
         step-cli # working with certificates
-        (util.customShellScript
-          "tunnel") # for connecting to private network resources through ssh bastion
+
       ];
   })

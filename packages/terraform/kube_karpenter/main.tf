@@ -555,7 +555,9 @@ resource "helm_release" "karpenter" {
       nameOverride     = local.name
       fullnameOverride = local.name
       podLabels        = module.kube_labels.kube_labels
-
+      podAnnotations = {
+        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+      }
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.karpenter.metadata[0].name
@@ -580,10 +582,10 @@ resource "helm_release" "karpenter" {
       priorityClassName = "system-cluster-critical"
 
       replicas                  = 2
-      tolerations               = module.constants.spot_node_toleration_helm
+      tolerations               = module.constants.burstable_node_toleration_helm
       topologySpreadConstraints = module.constants.topology_spread_zone_preferred
       affinity = merge(
-        module.constants.controller_node_affinity_helm,
+        module.constants.controller_node_with_burstable_affinity_helm,
         module.constants.pod_anti_affinity_helm
       )
 

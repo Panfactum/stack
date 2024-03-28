@@ -55,7 +55,7 @@ Description: AWS access policy for the bucket.
 
 Type: `string`
 
-Default: `""`
+Default: `null`
 
 ### <a name="input_audit_log_enabled" /> [audit\_log\_enabled](#input_audit_log_enabled)
 
@@ -120,6 +120,14 @@ Description: Whether this module is a part of a local development deployment
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_kms_master_key_id" /> [kms\_master\_key\_id](#input_kms_master_key_id)
+
+Description: If provided, will use this CMK for bucket encryption (SSS-KMS) rather than the SSE-S3 key
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 

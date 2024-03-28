@@ -91,6 +91,9 @@ resource "helm_release" "metrics_server" {
     yamlencode({
       commonLabels = module.kube_labels.kube_labels
       podLabels    = module.kube_labels.kube_labels
+      podAnnotations = {
+        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+      }
       deploymentAnnotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -122,10 +125,11 @@ resource "helm_release" "metrics_server" {
       ////////////////////////////////////////
       replicas = 2
       affinity = merge(
-        module.constants.controller_node_affinity_helm,
+        module.constants.controller_node_with_burstable_affinity_helm,
         module.constants.pod_anti_affinity_helm
       )
       topologySpreadConstraints = module.constants.topology_spread_zone_strict
+      tolerations               = module.constants.burstable_node_toleration_helm
       podDisruptionBudget = {
         enabled      = true
         minAvailable = 1

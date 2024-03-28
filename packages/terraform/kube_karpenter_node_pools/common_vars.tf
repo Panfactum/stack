@@ -7,13 +7,13 @@ variable "environment" {
 variable "pf_root_module" {
   description = "The name of the root Panfactum module in the module tree."
   type        = string
-  default     = "kube_karpenter_provisioners"
+  default     = "kube_karpenter_node_pools"
 }
 
 variable "pf_module" {
   description = "The name of the Panfactum module where the containing resources are directly defined."
   type        = string
-  default     = "kube_karpenter_provisioners"
+  default     = "kube_karpenter_node_pools"
 }
 
 variable "region" {

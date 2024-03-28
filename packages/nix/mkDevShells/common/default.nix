@@ -38,6 +38,8 @@
     (util.customNixModule "cilium") # for managing the cilium CNI
     (import ./cmctl.nix) # for working with cert-manager
     (import ./stern.nix)
+    (util.customShellScript
+      "pf-tunnel") # for connecting to private network resources through ssh bastion
 
     ####################################
     # Hashicorp Vault

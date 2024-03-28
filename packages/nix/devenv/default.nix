@@ -52,9 +52,15 @@ in {
     (customShellScript "lint")
   ];
 
+  dotenv.enable = true;
+
   scripts = {
     # We use pnpm instead of npm
     npm.exec = "pnpm $@";
+
+    # Login to GHCR for publishing imagess
+    ghcr-login.exec =
+      "echo $GITHUB_TOKEN | podman login ghcr.io -u fullykubed --password-stdin";
   };
 
   pre-commit.hooks = {

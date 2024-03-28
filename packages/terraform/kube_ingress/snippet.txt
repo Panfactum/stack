@@ -1,0 +1,26 @@
+more_set_headers "Cross-Origin-Resource-Policy: ${cross_origin_resource_policy}";
+
+%{ if x_content_type_options_enabled }
+more_set_headers "X-Content-Type-Options: nosniff";
+%{ endif }
+
+%{ for header, value in extra_response_headers }
+more_set_headers "${header}: ${value}";
+%{ endfor }
+
+set $pf_csp_enabled ${csp_enabled};
+set $pf_csp_override ${csp_override};
+set $pf_csp_non_html "${csp_non_html}";
+set $pf_csp "${csp}";
+
+set $pf_cross_origin_isolation_enabled ${cross_origin_isolation_enabled};
+set $pf_cross_origin_embedder_policy "${cross_origin_embedder_policy}";
+set $pf_cross_origin_opener_policy "${cross_origin_opener_policy}";
+
+set $pf_permissions_policy_enabled ${permissions_policy_enabled};
+set $pf_permissions_policy_override ${permissions_policy_override};
+set $pf_permissions_policy "${permissions_policy}";
+
+set $pf_x_xss_protection "${x_xss_protection}";
+set $pf_x_frame_options "${x_frame_options}";
+set $pf_referrer_policy "${referrer_policy}";

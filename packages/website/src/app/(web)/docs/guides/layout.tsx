@@ -114,8 +114,12 @@ const SIDENAV_SECTIONS = [
         path: '/autoscaling'
       },
       {
-        text: 'External Cluster Networking',
-        path: '/external-cluster-networking'
+        text: 'Inbound Networking',
+        path: '/inbound-networking'
+      },
+      {
+        text: 'Maintenance Controllers',
+        path: '/maintenance-controllers'
       },
       {
         text: 'Database Operators',

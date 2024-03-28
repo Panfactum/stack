@@ -5,7 +5,7 @@ output "arn" {
 
 output "arn2" {
   description = "The ARN of the backup key"
-  value       = replace(aws_kms_key.key.arn, data.aws_region.primary.name, data.aws_region.secondary.name)
+  value       = var.replication_enabled ? replace(aws_kms_key.key.arn, data.aws_region.primary.name, data.aws_region.secondary.name) : null
 }
 
 output "alias_arn" {

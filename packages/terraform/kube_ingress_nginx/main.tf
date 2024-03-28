@@ -4,11 +4,19 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.22.0"
+      version = "2.27.0"
     }
     helm = {
       source  = "hashicorp/helm"
       version = "2.12.1"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
     }
   }
 }
@@ -17,6 +25,8 @@ locals {
 
   name      = "ingress-nginx"
   namespace = module.namespace.namespace
+
+  plugin_name = "panfactum-plugin-lua"
 
   nginx_selector = {
     "app.kubernetes.io/component" = "controller"
@@ -32,64 +42,32 @@ locals {
 
   // Number of seconds to wait for data before terminating connections;
   // Used for both upstream and downstream logic
-  nginx_base_timeout = var.ingress_timeout
+  nginx_base_timeout = var.ingress_timeout_seconds
 
-  //
-  // If the deregistered target stays healthy and an existing connection is not idle, the load balancer can continue to send traffic to the target.
-  // Number of seconds it takes to stop receiving connections from the NLB
-  // (even though you can set this to < 5 minutes, there appears to be a consistent floor of about 5 minutes)
+  // Number of seconds it takes to stop receiving connections from the NLB; there is an inherent delay
+  // before the NLB will stop sending new connections even though it is marked as de-registering
   // https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2366#issuecomment-1118312709
-  deregistration_buffer = 300
+  deregistration_buffer = 60
 
-  csp_config = {
-    default-src = [
-      "'self'"
-    ]
-    connect-src     = ["'self'", "ws:"]
-    base-uri        = ["'self'"]
-    font-src        = ["'self'", "https:", "data:"]
-    form-action     = ["'self'"]
-    frame-ancestors = ["'self'"]
-    img-src = [
-      "'self'",
-      "data:"
-    ]
-    object-src = ["'none'"]
-    script-src = [
-      "'self'",
-      "'unsafe-inline'", # Added for grafana
-      "'unsafe-eval'"    # Added for grafana
-    ]
-    style-src = ["'self'", "https:", "'unsafe-inline'"]
-  }
+  // The base timeout is simply for time between individual packets.
+  // This multiplies that base timeout to get the max timeout for an entire request
+  timeout_multiplier = 1.5
 
-  // TODO: Modularize since used in Bastion
-  nlb_common_annotations = {
-    "service.beta.kubernetes.io/aws-load-balancer-type"                            = "external"
-    "service.beta.kubernetes.io/aws-load-balancer-backend-protocol"                = "tcp"
-    "service.beta.kubernetes.io/aws-load-balancer-scheme"                          = "internet-facing"
-    "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type"                 = "ip"
-    "service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold" = "2"
-    "service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold"   = "2"
-    "service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout"             = "2"
-    "service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval"            = "5"
-    "service.beta.kubernetes.io/aws-load-balancer-target-group-attributes" = join(",", [
+  request_timeout = ceil(local.nginx_base_timeout * local.timeout_multiplier)
 
-      // Ensures a client always connects to the same backing server; important
-      // for both performance and rate-limiting
-      "stickiness.enabled=true",
-      "stickiness.type=source_ip",
+  // Needs to account for BOTH the de-registration buffer AND the finishing
+  // time for any requests that were received during that buffer window before actually
+  // terminating any active connections
+  deregistration_delay = local.request_timeout + local.deregistration_buffer
 
-      // Preserve the client IP even when routing through the LB
-      "preserve_client_ip.enabled=true",
+  // The actual time for the NGINX pods to shutdown which accounts for the de-registration
+  // delay AND the extra ten second delay for the controller to exit
+  termination_grace_period = local.deregistration_delay + 10
+}
 
-      // This needs to be SHORTER than it takes for the NGINX pod to terminate as incoming connections
-      // will only be stopped when this delay is met
-      "deregistration_delay.timeout_seconds=${local.deregistration_delay}",
-      "deregistration_delay.connection_termination.enabled=true"
-    ])
-    //TODO: "service.beta.kubernetes.io/aws-load-balancer-attributes" = "access_logs.s3.enabled=true,access_logs.s3.bucket=my-access-log-bucket,access_logs.s3.prefix=my-app"
-  }
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "labels" {
@@ -103,12 +81,13 @@ module "labels" {
 }
 
 module "constants" {
-  source         = "../constants"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source          = "../constants"
+  matching_labels = local.nginx_selector
+  environment     = var.environment
+  pf_root_module  = var.pf_root_module
+  region          = var.region
+  is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 module "namespace" {
@@ -124,7 +103,7 @@ module "namespace" {
 }
 
 /***********************************************
-* NGINX
+* Certs
 ************************************************/
 
 module "webhook_cert" {
@@ -132,51 +111,11 @@ module "webhook_cert" {
   service_names  = ["ingress-nginx-controller-admission"]
   secret_name    = local.webhook_secret
   namespace      = local.namespace
-  labels         = module.labels.kube_labels
   environment    = var.environment
   pf_root_module = var.pf_root_module
   region         = var.region
   is_local       = var.is_local
   extra_tags     = var.extra_tags
-}
-
-resource "kubernetes_manifest" "ingress_cert" {
-  manifest = {
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.ingress_secret
-      namespace = local.namespace
-    }
-    spec = {
-      secretName = local.ingress_secret
-      dnsNames = flatten([for domain in var.ingress_domains : [
-        domain
-      ]])
-
-      // We don't rotate this as frequently to both respect
-      // the rate limits: https://letsencrypt.org/docs/rate-limits/
-      // and to avoid getting the 30 day renewal reminders
-      duration    = "2160h0m0s"
-      renewBefore = "720h0m0s"
-
-      privateKey = {
-        rotationPolicy = "Always"
-      }
-
-      issuerRef = {
-        name  = "public"
-        kind  = "ClusterIssuer"
-        group = "cert-manager.io"
-      }
-    }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
-    }
-  }
 }
 
 resource "kubernetes_secret" "dhparam" {
@@ -196,9 +135,33 @@ resource "kubernetes_secret" "dhparam" {
   }
 }
 
-resource "random_id" "ingress_name" {
-  byte_length = 8
-  prefix      = "nginx-ingress-"
+/***********************************************
+* Ingress Controller
+************************************************/
+
+module "nlb_common" {
+  source = "../kube_nlb_common_resources"
+
+  name_prefix = "nginx-"
+
+  // Should be the same as the termination grace period seconds (minus the controller exit time)
+  deregistration_delay_seconds = local.deregistration_buffer + ceil(local.nginx_base_timeout * 1.5)
+
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
+resource "kubernetes_config_map" "plugin" {
+  metadata {
+    name      = local.name
+    namespace = local.namespace
+  }
+  data = {
+    plugin = file("${path.module}/plugin.lua")
+  }
 }
 
 resource "helm_release" "nginx_ingress" {
@@ -210,20 +173,17 @@ resource "helm_release" "nginx_ingress" {
   recreate_pods   = false
   force_update    = true
   cleanup_on_fail = true
-  wait            = true
+  wait            = false
   wait_for_jobs   = true
-  max_history     = 3
+  max_history     = 5
 
   values = [
     yamlencode({
-      commonLabels = merge(module.labels.kube_labels,
-        {
-          customizationHash = md5(join("", [for filename in sort(fileset(path.module, "nginx_kustomize/*")) : filesha256(filename)]))
-        }
-      )
+      commonLabels = module.labels.kube_labels,
+
       controller = {
         image = {
-          tag = var.nginx_ingress_version
+          registry = var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"
         }
 
         replicaCount = var.min_replicas
@@ -236,30 +196,22 @@ resource "helm_release" "nginx_ingress" {
         podAnnotations = {
           // Attach the service mesh sidecar
           "linkerd.io/inject" = "enabled"
-        }
 
-        // standard security headers
-        addHeaders = {
-          "X-Frame-Options"        = "SAMEORIGIN"
-          "X-Content-Type-Options" = "nosniff"
-          "X-XSS-Protection"       = "1"
-          "Referrer-Policy"        = "no-referrer"
+          // Ensure the proxy
+          // remains active as long as the controller is active
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
 
-          // TODO: These items should be configured per-ingress rather than globally
-          // This is possible by using the configuration snippet annotation
-          // This MUST be done before we serve HTML sites through the ingress architecture
-          // It is temporarily disabled as it was blocking development
-          #          "Content-Security-Policy" = join("; ", concat(
-          #            [for directive, config in local.csp_config: "${directive} ${join(" ", config)}"],
-          #            ["upgrade-insecure-requests"]
-          #          ))
-          #          "Cross-Origin-Opener-Policy" =  "same-origin-allow-popups"
-          #          "Cross-Origin-Resource-Policy" = "cross-origin"
+          // Ensure the pods are restarted when the plugin code changes
+          "panfactum.com/plugin-hash" = filemd5("${path.module}/plugin.lua")
+
+          // Forces a reload if the kustomization fails
+          customizationHash = md5(join("", [for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)]))
         }
 
         extraArgs = {
-          // Used so that we don't have to specify a secret on each ingress resource
-          default-ssl-certificate = "${local.namespace}/${local.ingress_secret}"
+          // Allows the container to keep receiving traffic due to
+          // the NLB taking a few seconds to completely disconnect
+          shutdown-grace-period = local.deregistration_buffer
         }
 
         // See https://kubernetes.github.io/ingress-nginx/deploy/hardening-guide/
@@ -282,7 +234,8 @@ resource "helm_release" "nginx_ingress" {
           // Enable compression
           enable-brotli = "true"
 
-          // Disable buffering
+          // Disable buffering so that packets get sent as soon as possible
+          // and aren't held in nginx memory for longer than necessary
           proxy-buffering         = "off"
           proxy-request-buffering = "off"
 
@@ -300,7 +253,7 @@ resource "helm_release" "nginx_ingress" {
           disable-ipv6-dns = "true"
 
           // WAF
-          enable-modsecurity  = "false" # TODO: enable
+          enable-modsecurity  = "false" # TODO: consider enabling when the modsecurity situations stabalizes
           modsecurity-snippet = file("${path.module}/modsecurity.txt")
 
           // Rate limiting
@@ -308,19 +261,27 @@ resource "helm_release" "nginx_ingress" {
           limit-conn-status-code = "429"
 
           // Timeouts and performance
-          keep-alive                 = "${local.nginx_base_timeout}"
-          client-header-timeout      = "${local.nginx_base_timeout}"
-          client-body-timeout        = "${local.nginx_base_timeout}"
-          proxy-body-size            = "10m"
-          proxy-connect-timeout      = "${local.nginx_base_timeout}"
-          proxy-read-timeout         = "${local.nginx_base_timeout}"
-          proxy-send-timeout         = "${local.nginx_base_timeout}"
-          proxy-next-upstream-timout = "${ceil(local.nginx_base_timeout * 2)}"
-          load-balance               = "ewma"
+          keep-alive              = "60"
+          proxy-connect-timeout   = "60"                          // time to wait on a successful connection to an upstream server
+          client-header-timeout   = "${local.nginx_base_timeout}" // time for client to send the entire header request header
+          client-body-timeout     = "${local.nginx_base_timeout}" // time between successive reads of request from client (not the entire request)
+          proxy-read-timeout      = "${local.nginx_base_timeout}" // time between successive reads of response from the upstream server (not the entire response)
+          proxy-send-timeout      = "${local.nginx_base_timeout}" // time between successive sends of requests to the upstream server (not the entire request)
+          worker-shutdown-timeout = "${local.request_timeout}"    // time that nginx gets to shutdown a worker once receiving SIGQUIT; should be slightly higher than the request timeout
+
+          // Use the service-based upstreams
+          // https://linkerd.io/2.15/tasks/using-ingress/
+          // https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#service-upstream
+          service-upstream           = "true"
+          proxy-stream-next-upstream = "false"
+
+          // Size limits
+          proxy-body-size = "10m" // maximum size of client request body
+          load-balance    = "ewma"
 
           // SSL setup
           ssl-ciphers            = "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384"
-          ssl-protocols          = var.enable_tls_1_2 ? "TLSv1.2 TLSv1.3" : "TLSv1.3"
+          ssl-protocols          = var.tls_1_2_enabled ? "TLSv1.2 TLSv1.3" : "TLSv1.3"
           ssl-session-cache      = "true"
           ssl-session-cache-size = "100m"
           ssl-session-tickets    = "true"
@@ -335,16 +296,15 @@ resource "helm_release" "nginx_ingress" {
           hsts-preload            = "true"
 
           // Hide identifying headers for security
-          hide-headers = "server,x-powered-by"
+          hide-headers = "server,x-powered-by,x-aspnet-version,x-aspnetmvc-version"
 
-          //
+          // Provides a status endpoint
           http-snippet = file("${path.module}/nginx_status_snippet.txt")
         }
         service = {
           name              = local.name
           loadBalancerClass = "service.k8s.aws/nlb"
-          annotations = merge(local.nlb_common_annotations, {
-            "service.beta.kubernetes.io/aws-load-balancer-name"           = random_id.ingress_name.hex,
+          annotations = merge(module.nlb_common.annotations, {
             "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol" = "*"
           })
         }
@@ -354,28 +314,6 @@ resource "helm_release" "nginx_ingress" {
           portName = "metrics"
         }
 
-        tolerations = module.constants.spot_node_toleration_helm
-        affinity = {
-          podAntiAffinity = {
-            requiredDuringSchedulingIgnoredDuringExecution = [{
-              labelSelector = {
-                matchExpressions = [
-                  {
-                    key      = "app.kubernetes.io/component"
-                    operator = "In"
-                    values   = ["controller"]
-                  },
-                  {
-                    key      = "app.kubernetes.io/instance"
-                    operator = "In"
-                    values   = ["ingress-nginx"]
-                  }
-                ]
-              }
-              topologyKey = "kubernetes.io/hostname"
-            }]
-          }
-        }
 
         updateStrategy = {
           type = "RollingUpdate"
@@ -384,26 +322,12 @@ resource "helm_release" "nginx_ingress" {
             maxUnavailable = 0
           }
         }
-        minReadySeconds = 30
-        minAvailable    = "50%"
-        topologySpreadConstraints = [
-          {
-            maxSkew           = 1
-            topologyKey       = "topology.kubernetes.io/zone"
-            whenUnsatisfiable = "DoNotSchedule"
-            labelSelector = {
-              matchLabels = local.nginx_selector
-            }
-          },
-          {
-            maxSkew           = 1
-            topologyKey       = "kubernetes.io/hostname"
-            whenUnsatisfiable = "DoNotSchedule"
-            labelSelector = {
-              matchLabels = local.nginx_selector
-            }
-          }
-        ]
+        minReadySeconds = 10
+        minAvailable    = "67%"
+
+        tolerations               = module.constants.burstable_node_toleration_helm
+        affinity                  = module.constants.pod_anti_affinity_helm
+        topologySpreadConstraints = module.constants.topology_spread_zone_strict
 
         // We need to change these from the defaults
         // so that they are more responsive;
@@ -418,17 +342,7 @@ resource "helm_release" "nginx_ingress" {
           periodSeconds    = 1
         }
 
-        // See https://medium.com/codecademy-engineering/kubernetes-nginx-and-zero-downtime-in-production-2c910c6a5ed8
-        lifecycle = {
-          preStop = {
-            exec = {
-              // The pod MUST not be killed prior to the deregistration delay elapsing or connections will be forwarded
-              // to a non-existent / killed pod
-              command = ["/bin/sh", "-c", "sleep ${local.deregistration_delay}; /usr/local/openresty/nginx/sbin/nginx -c /etc/nginx/nginx.conf -s quit; while pgrep -x nginx; do sleep 1; done"]
-            }
-          }
-        }
-        terminationGracePeriodSeconds = local.deregistration_delay + local.nginx_base_timeout * 3
+        terminationGracePeriodSeconds = local.termination_grace_period
 
         allowSnippetAnnotations = true
         priorityClassName       = module.constants.cluster_important_priority_class_name
@@ -449,8 +363,10 @@ resource "helm_release" "nginx_ingress" {
         }
         resources = {
           requests = {
-            cpu    = "200m"
-            memory = "500M"
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
           }
         }
         extraVolumeMounts = [
@@ -465,24 +381,32 @@ resource "helm_release" "nginx_ingress" {
             subPath   = "tls.key"
             name      = "webhook-cert"
             readOnly  = true
+          },
+          {
+            mountPath = "/etc/nginx/lua/plugins/panfactum/main.lua"
+            subPath   = "plugin"
+            name      = local.name
+            readOnly  = true
+          }
+        ]
+        extraVolumes = [
+          {
+            name = local.name
+            configMap = {
+              name = local.name
+            }
           }
         ]
       }
     })
   ]
 
-  # TODO: re-enable this patch if we enable horizontal autoscaling in the future
-  #  postrender {
-  #    binary_path = "${path.module}/nginx_kustomize/kustomize.sh"
-  #    args = [
-  #      local.namespace,
-  #      "ingress-nginx-controller",
-  #      var.min_replicas,
-  #      var.kube_config_context
-  #    ]
-  #  }
+  // The helm chart doesn't allow enabling plugins for some reason
+  // so we manually inject the "plugins" field into the configmap
+  postrender {
+    binary_path = "${path.module}/kustomize/kustomize.sh"
+  }
 
-  timeout    = 30 * 60
   depends_on = [module.webhook_cert]
 }
 

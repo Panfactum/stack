@@ -36,7 +36,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
   rule {
     bucket_key_enabled = true
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = var.kms_master_key_id == null ? "AES256" : "aws:kms"
+      kms_master_key_id = var.kms_master_key_id
     }
   }
 }
@@ -135,16 +136,10 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
   }
 }
 
-data "aws_iam_policy_document" "policy" {
-
-  // Concatenates the inline access policy provided to the module
-  override_policy_documents = var.access_policy == "" ? [] : [var.access_policy]
-}
 
 resource "aws_s3_bucket_policy" "bucket" {
-  count  = var.access_policy == "" ? 0 : 1
   bucket = aws_s3_bucket.bucket.bucket
-  policy = data.aws_iam_policy_document.policy.json
+  policy = var.access_policy == null ? "" : var.access_policy
 }
 
 /***************************************************************

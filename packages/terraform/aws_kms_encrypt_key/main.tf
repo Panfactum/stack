@@ -97,6 +97,25 @@ data "aws_iam_policy_document" "key" {
     resources = ["*"]
   }
 
+  dynamic "statement" {
+    for_each = var.log_delivery_enabled ? ["enabled"] : []
+    content {
+      effect = "Allow"
+      principals {
+        identifiers = ["delivery.logs.amazonaws.com"]
+        type        = "Service"
+      }
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ]
+      resources = ["*"]
+    }
+  }
+
   statement {
     effect = "Allow"
     principals {
@@ -150,7 +169,13 @@ resource "aws_kms_alias" "alias" {
 ## Replica Key
 ###########################################################################
 
+moved {
+  from = aws_kms_replica_key.replica
+  to   = aws_kms_replica_key.replica[0]
+}
+
 resource "aws_kms_replica_key" "replica" {
+  count                   = var.replication_enabled ? 1 : 0
   provider                = aws.secondary
   primary_key_arn         = aws_kms_key.key.arn
   description             = var.description
@@ -165,8 +190,14 @@ resource "aws_kms_replica_key" "replica" {
   }
 }
 
+moved {
+  from = aws_kms_alias.replica_alias
+  to   = aws_kms_alias.replica_alias[0]
+}
+
 resource "aws_kms_alias" "replica_alias" {
+  count         = var.replication_enabled ? 1 : 0
   provider      = aws.secondary
-  target_key_id = aws_kms_replica_key.replica.key_id
+  target_key_id = aws_kms_replica_key.replica[0].key_id
   name          = "alias/${var.name}"
 }

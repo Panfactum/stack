@@ -7,11 +7,36 @@ output "spot_node_toleration_helm" {
   }]
 }
 
+output "burstable_node_toleration_helm" {
+  value = [
+    {
+      key      = "spot"
+      operator = "Equal"
+      value    = "true"
+      effect   = "NoSchedule"
+    },
+    {
+      key      = "burstable"
+      operator = "Equal"
+      value    = "true"
+      effect   = "NoSchedule"
+    }
+  ]
+}
+
 output "cilium_taint" {
   value = {
     key    = "node.cilium.io/agent-not-ready"
     value  = "true"
     effect = "NoSchedule"
+  }
+}
+
+output "burstable_node_affinity_helm" {
+  value = {
+    nodeAffinity = {
+      preferredDuringSchedulingIgnoredDuringExecution = [local.prefer_burstable]
+    }
   }
 }
 
@@ -42,6 +67,18 @@ output "controller_node_with_spot_affinity_helm" {
   }
 }
 
+output "controller_node_with_burstable_affinity_helm" {
+  value = {
+    nodeAffinity = {
+      preferredDuringSchedulingIgnoredDuringExecution = [
+        local.prefer_controller,
+        local.prefer_burstable,
+        local.prefer_spot
+      ]
+    }
+  }
+}
+
 output "pod_anti_affinity_helm" {
   value = {
     podAntiAffinity = {
@@ -57,10 +94,20 @@ output "pod_anti_affinity_helm" {
 
 output "spot_node_preferences" {
   value = {
-    "panfactum.com/role" = {
+    "panfactum.com/class" = {
       weight   = 1
       operator = "In"
       values   = ["spot"]
+    }
+  }
+}
+
+output "burstable_node_preferences" {
+  value = {
+    "panfactum.com/class" = {
+      weight   = 1
+      operator = "In"
+      values   = ["burstable"]
     }
   }
 }

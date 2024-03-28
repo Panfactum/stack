@@ -112,10 +112,9 @@ work:
   for all network communications.
 
 * Locality-aware traffic routing: Improve performance by ensuring traffic is always
-  routed to the closest applicable server. Eliminate [cross-AZ network charges](https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/)
-  whenever possible.
+  routed to the fastest-responding server. Significantly reduce [cross-AZ network charges](https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/).
 
-* Circuit breaking: Reroute traffic from unhealthy or resource-constrained pods to improve overall cluster resiliency.
+* Circuit breaking: Reroute traffic away from unhealthy or resource-constrained pods to improve overall cluster resiliency.
 
 * Observability: Collect granular data about network throughput and latency that can be used to power observability tooling.
 

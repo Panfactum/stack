@@ -15,6 +15,10 @@ terraform {
       version               = "5.39.1"
       configuration_aliases = [aws.secondary]
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
@@ -216,8 +220,11 @@ resource "helm_release" "vault" {
         }
         pod = {
           affinity    = module.constants.controller_node_affinity_helm
-          tolerations = module.constants.spot_node_toleration_helm
+          tolerations = module.constants.burstable_node_toleration_helm
           extraLabels = module.csi_labels.kube_labels
+          annotations = {
+            "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+          }
         }
         priorityClassName = "system-node-critical"
       }
@@ -245,6 +252,9 @@ resource "helm_release" "vault" {
         }
         updateStrategyType = "RollingUpdate"
         extraLabels        = module.server_labels.kube_labels
+        annotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
         serviceAccount = {
           create = false,
           name   = kubernetes_service_account.vault.metadata[0].name
@@ -349,24 +359,28 @@ resource "kubernetes_manifest" "vpa_server" {
 * Vault Ingress
 ***************************************/
 
-#module "ingress" {
-#  count        = var.ingress_enabled ? 1 : 0
-#  source       = "../kube_ingress"
-#  namespace    = local.namespace
-#  ingress_name = local.server_submodule
-#  ingress_configs = [{
-#    domains      = [local.vault_domain]
-#    service      = "vault-active"
-#    service_port = 8200
-#  }]
-#  depends_on   = [helm_release.vault]
-#  app          = var.app
-#  environment  = var.environment
-#  module       = var.module
-#  region       = var.region
-#  version_tag  = var.version_tag
-#  version_hash = var.version_hash
-#  is_local     = var.is_local
-#}
+module "ingress" {
+  count     = var.ingress_enabled ? 1 : 0
+  source    = "../kube_ingress"
+  namespace = local.namespace
+  name      = "vault"
+  ingress_configs = [{
+    domains      = local.vault_domains
+    service      = "vault-active"
+    service_port = 8200
+  }]
+  rate_limiting_enabled          = true
+  cross_origin_isolation_enabled = true
+  permissions_policy_enabled     = true
+  csp_enabled                    = false
+
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  region         = var.region
+  is_local       = var.is_local
+
+  depends_on = [helm_release.vault]
+}
 
 

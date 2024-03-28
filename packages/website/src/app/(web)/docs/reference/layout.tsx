@@ -14,6 +14,16 @@ const SIDENAV_SECTIONS = [
     path: '/dotenv'
   },
   {
+    text: '.ssh Configuration',
+    path: '/ssh',
+    sub: [
+      {
+        text: 'config.yaml',
+        path: '/config-yaml'
+      }
+    ]
+  },
+  {
     text: 'Terragrunt Variables',
     path: '/terragrunt-variables'
   },

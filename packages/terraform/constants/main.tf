@@ -23,4 +23,16 @@ locals {
       ]
     }
   }
+  prefer_burstable = {
+    weight = 25
+    preference = {
+      matchExpressions = [
+        {
+          key      = "panfactum.com/class"
+          operator = "In"
+          values   = ["burstable"]
+        }
+      ]
+    }
+  }
 }

@@ -10,6 +10,7 @@ together to ensure internal consistency:
 - [Standard Terraform Modules](packages/terraform)
 - [Documentation Website](packages/website)
 - [Reference Architecture](packages/reference)
+- [Bastion Host](packages/bastion)
 
 ## Maintainers
 

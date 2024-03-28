@@ -37,8 +37,38 @@ module "kube_labels" {
   extra_tags     = var.extra_tags
 }
 
-module "constants" {
-  source         = "../constants"
+module "constants_admission_controller" {
+  source = "../constants"
+  matching_labels = {
+    "app.kubernetes.io/name"      = "vpa"
+    "app.kubernetes.io/component" = "admission-controller"
+  }
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
+module "constants_updater" {
+  source = "../constants"
+  matching_labels = {
+    "app.kubernetes.io/name"      = "vpa"
+    "app.kubernetes.io/component" = "updater"
+  }
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
+module "constants_recommender" {
+  source = "../constants"
+  matching_labels = {
+    "app.kubernetes.io/name"      = "vpa"
+    "app.kubernetes.io/component" = "recommender"
+  }
   environment    = var.environment
   pf_root_module = var.pf_root_module
   region         = var.region
@@ -102,13 +132,18 @@ resource "helm_release" "vpa" {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-recommender"
         }
 
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
+
         // ONLY 1 of these should be running at a time
         // b/c there is no leader-election: https://github.com/kubernetes/autoscaler/issues/5481
         // However, that creates a potential issue with memory consumption as if this pod
         // OOMs, then it won't be recorded and then bumped up. As a result, we have to tune this
         // pods memory floor carefully and give it plenty of headroom.
         replicaCount = 1
-        affinity     = module.constants.controller_node_affinity_helm
+        affinity     = module.constants_recommender.controller_node_with_burstable_affinity_helm
+        tolerations  = module.constants_recommender.burstable_node_toleration_helm
 
         extraArgs = {
           // Better packing
@@ -142,10 +177,15 @@ resource "helm_release" "vpa" {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-updater"
         }
 
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
+
         // ONLY 1 of these should be running at a time
         // b/c there is no leader-election: https://github.com/kubernetes/autoscaler/issues/5481
         replicaCount = 1
-        affinity     = module.constants.controller_node_affinity_helm
+        affinity     = module.constants_updater.controller_node_with_burstable_affinity_helm
+        tolerations  = module.constants_updater.burstable_node_toleration_helm
 
         extraArgs = {
           "min-replicas" = 0 // We don't care b/c we use pdbs
@@ -171,25 +211,20 @@ resource "helm_release" "vpa" {
         annotations = {
           "reloader.stakater.com/auto" = "true"
         }
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
 
         // We do need at least 2 otherwise we may get stuck in a loop
         // b/c if this pod goes down, it cannot apply the appropriate
         // resource requirements when it comes back up and then the
         // updater will take it down again
         replicaCount = 2
-        affinity = merge({
-          podAntiAffinity = {
-            requiredDuringSchedulingIgnoredDuringExecution = [{
-              labelSelector = {
-                matchLabels = {
-                  "app.kubernetes.io/name"      = "vpa"
-                  "app.kubernetes.io/component" = "admission-controller"
-                }
-              }
-              topologyKey : "kubernetes.io/hostname"
-            }]
-          }
-        }, module.constants.controller_node_affinity_helm)
+        affinity = merge(
+          module.constants_admission_controller.controller_node_with_burstable_affinity_helm,
+          module.constants_admission_controller.pod_anti_affinity_helm
+        )
+        tolerations = module.constants_admission_controller.burstable_node_toleration_helm
 
         podDisruptionBudget = {
           minAvailable = 1

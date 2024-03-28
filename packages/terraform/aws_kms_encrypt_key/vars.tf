@@ -19,3 +19,15 @@ variable "user_iam_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "replication_enabled" {
+  description = "Whether to replicate the key to another region"
+  type        = bool
+  default     = true
+}
+
+variable "log_delivery_enabled" {
+  description = "Whether to allow the delivery.logs.amazonaws.com service to use the key"
+  type        = bool
+  default     = false
+}

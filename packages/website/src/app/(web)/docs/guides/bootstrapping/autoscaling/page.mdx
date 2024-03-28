@@ -1,10 +1,10 @@
-import MarkdownImage from "@/components/markdown/MarkdownImage";
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import k9sClusterCapacityImg from './k9s-cluster-capacity.jpg';
+import k9sPodMetricsProvided from './k9s-pod-metrics-provided.jpg';
 import k9sPodMetricsImg from './k9s-pod-metrics.jpg';
 import k9sVPAImg from './k9s-vpa.jpg';
-import k9sPodMetricsProvided from './k9s-pod-metrics-provided.jpg';
 import spotNodeLabelImg from './spot-node-label.jpg';
 
 # Autoscaling
@@ -71,9 +71,7 @@ Let's test to ensure it is working as intended:
    ```shell-session
    NODE                                         NAMESPACE            POD                                                 CONTAINER                 CPU REQUESTS   CPU LIMITS    CPU UTIL    MEMORY REQUESTS   MEMORY LIMITS   MEMORY UTIL
    *                                            *                    *                                                   *                         1240m (21%)    3700m (63%)   514m (8%)   1740Mi (9%)       5334Mi (29%)    4596Mi (25%)
-
    ....
-
    ip-10-0-213-182.us-east-2.compute.internal   *                    *                                                   *                         360m (18%)     1200m (62%)   161m (8%)   530Mi (8%)        1238Mi (20%)    1420Mi (23%)
    ip-10-0-213-182.us-east-2.compute.internal   cilium               cilium-4d4gf                                        *                         100m (5%)      0m (0%)       25m (1%)    10Mi (0%)         0Mi (0%)        126Mi (2%)
    ip-10-0-213-182.us-east-2.compute.internal   cilium               cilium-4d4gf                                        cilium-agent              0m (0%)        0m (0%)       25m (1%)    0Mi (0%)          0Mi (0%)        126Mi (2%)
@@ -158,17 +156,17 @@ Let's deploy it now:
 
    <MarkdownImage src={k9sPodMetricsProvided} alt="Resource requests and limits are set" />
 
-   We set requests for both CPU and memory so that the Kubernetes scheduler  can
-   accurately decide which enough resources available for pods during the pod-to-node assignment phase.
+   * We set **requests** for both CPU and memory so that the Kubernetes scheduler  can
+     accurately decide which enough resources available for pods during the pod-to-node assignment phase.
 
-   We set memory limits so that memory leaks in any application will not consume unbounded memory on the node
-   and thus cause all other pods on the node to crash with OOM errors.
+   * We set **memory limits** so that memory leaks in any application will not consume unbounded memory on the node
+     and thus cause all other pods on the node to crash with OOM errors.
 
-   We do **not** set cpu limits because if a node's CPU is constrained, CPU will automatically be shared
-   across all pods *proportional to each pod's CPU request.*
+   * We do **not set cpu limits** because if a node's CPU is constrained, CPU will automatically be shared
+     across all pods *proportional to each pod's CPU request.* [^3]
 
-   In general, it is best to avoid setting CPU limits in order to allow CPU to occasionally spike as needed. If the
-   CPU utilization remains high, *cluster autoscaling* will kick in to provision net new nodes.
+   [^3]: In general, it is best to avoid setting CPU limits in order to allow CPU to occasionally spike as needed. If the
+       CPU utilization remains high, *cluster autoscaling* will kick in to provision net new nodes.
 
 <MarkdownAlert severity="info">
   When you first install the VPA, you will see many pods evicted over the first few hours. As the VPA collects
@@ -283,4 +281,4 @@ recognizes that additional nodes need to be schedule.
 
 ## Next Steps
 
-Now that autoscaling is active, we can [proceed to set up inbound networking for our cluster.](./external-cluster-networking).
+Now that autoscaling is active, we can [proceed to set up inbound networking for our cluster.](./inbound-networking).

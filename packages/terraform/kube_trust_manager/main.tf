@@ -74,6 +74,9 @@ resource "helm_release" "trust_manager" {
           namespace = var.namespace
         }
         podLabels = module.trust_manager_labels.kube_labels
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
       }
 
       // Does not need to be highly available
