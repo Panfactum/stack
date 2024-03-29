@@ -283,7 +283,8 @@ Now that the bastion is running, let's configure connectivity:
 4. Update the values to the correct values for your setup. See the [reference docs](../../reference/ssh/config-yaml) for
    more information.
 
-5. Run `pf-update-ssh --build` to generate the `known_hosts` and `connection_info` files for your project. These
+5. Run `pf-update-ssh --build` to generate the `known_hosts` and `connection_info` files for your project. Additionally, a
+    `state.lock` file is used to help determine when you need to rebuild. These
    files should be committed to version control as they do not contain any sensitive information and can be shared
    with everyone in your organization.
 
