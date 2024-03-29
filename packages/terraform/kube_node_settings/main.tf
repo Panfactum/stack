@@ -10,13 +10,13 @@ locals {
   eviction_soft_grace_period_inodes_free      = "2m0s"
   image_gc_high_threshold_percent             = "85"
   image_gc_low_threshold_percent              = "80"
-  max_pods                                    = "100"
   shutdown_grace_period                       = "60m0s"
   user_data = templatefile("${path.module}/user-data.toml", {
     API_SERVER_ADDR                             = var.cluster_endpoint
     CLUSTER_CA_DATA                             = var.cluster_ca_data
     CLUSTER_NAME                                = var.cluster_name
-    MAX_PODS                                    = local.max_pods
+    MAX_PODS                                    = var.max_pods
+    KUBE_RESERVED_MEMORY                        = 150 + (6 * var.max_pods)
     SHUTDOWN_GRACE_PERIOD                       = local.shutdown_grace_period
     IMAGE_GC_HIGH_THRESHOLD_PERCENT             = local.image_gc_high_threshold_percent
     IMAGE_GC_LOW_THRESHOLD_PERCENT              = local.image_gc_low_threshold_percent

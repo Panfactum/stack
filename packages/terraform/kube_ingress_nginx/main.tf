@@ -323,7 +323,7 @@ resource "helm_release" "nginx_ingress" {
           }
         }
         minReadySeconds = 10
-        minAvailable    = "67%"
+        maxUnavailable  = 1
 
         tolerations               = module.constants.burstable_node_toleration_helm
         affinity                  = module.constants.pod_anti_affinity_helm

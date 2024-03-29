@@ -19,3 +19,6 @@ image-gc-low-threshold-percent = "${IMAGE_GC_LOW_THRESHOLD_PERCENT}"
 "memory.available" = "${EVICTION_SOFT_GRACE_PERIOD_MEMORY_AVAILABLE}"
 "nodefs.available" = "${EVICTION_SOFT_GRACE_PERIOD_NODEFS_AVAILABLE}"
 "nodefs.inodesFree" = "${EVICTION_SOFT_GRACE_PERIOD_INODES_FREE}"
+
+[settings.kubernetes.kube-reserved]
+memory = "${KUBE_RESERVED_MEMORY}Mi"

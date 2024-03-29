@@ -209,7 +209,7 @@ resource "helm_release" "cilium" {
           memory = "100Mi"
         }
         limits = {
-          memory = "200Mi"
+          memory = "130Mi"
         }
       }
 
@@ -242,7 +242,7 @@ resource "helm_release" "cilium" {
             memory = "100Mi"
           }
           limits = {
-            memory = "150Mi"
+            memory = "130Mi"
           }
         }
 

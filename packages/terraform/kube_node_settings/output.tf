@@ -32,7 +32,7 @@ output "image_gc_low_threshold_percent" {
   value = local.image_gc_low_threshold_percent
 }
 output "max_pods" {
-  value = local.max_pods
+  value = var.max_pods
 }
 output "shutdown_grace_period" {
   value = local.shutdown_grace_period

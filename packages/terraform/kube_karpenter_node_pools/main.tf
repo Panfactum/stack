@@ -83,11 +83,25 @@ module "constants" {
   extra_tags     = var.extra_tags
 }
 
+module "node_settings_burstable" {
+  source           = "../kube_node_settings"
+  cluster_name     = var.cluster_name
+  cluster_endpoint = var.cluster_endpoint
+  cluster_ca_data  = var.cluster_ca_data
+  max_pods         = 20
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+}
+
 module "node_settings" {
   source           = "../kube_node_settings"
   cluster_name     = var.cluster_name
   cluster_endpoint = var.cluster_endpoint
   cluster_ca_data  = var.cluster_ca_data
+  max_pods         = 40
   environment      = var.environment
   pf_root_module   = var.pf_root_module
   region           = var.region
@@ -131,7 +145,7 @@ resource "kubernetes_manifest" "default_node_class" {
         httpPutResponseHopLimit = 1 // don't allow pods to access the node roles
         httpTokens              = "required"
       }
-      userData = module.node_settings.user_data
+      userData = module.node_settings_burstable.user_data
       blockDeviceMappings = [
         {
           deviceName = "/dev/xvda"

@@ -45,6 +45,7 @@ module "node_settings" {
   cluster_name     = aws_eks_cluster.cluster.name
   cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_endpoint = aws_eks_cluster.cluster.endpoint
+  max_pods         = 25
   environment      = var.environment
   pf_root_module   = var.pf_root_module
   region           = var.region

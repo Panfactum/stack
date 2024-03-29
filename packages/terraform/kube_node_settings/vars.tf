@@ -15,3 +15,9 @@ variable "cluster_name" {
   type        = string
   default     = ""
 }
+
+variable "max_pods" {
+  description = "The maximum number of pods to run on this node type"
+  type        = number
+  default     = 50
+}
