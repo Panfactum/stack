@@ -39,3 +39,14 @@ variable "vpc_peer_acceptances" {
   }))
   default = {}
 }
+
+variable "vpc_flow_logs_expire_after_days" {
+  description = "How many days until VPC flow logs expire."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.vpc_flow_logs_expire_after_days >= 7
+    error_message = "Flow logs must be kept for at least 7 days"
+  }
+}

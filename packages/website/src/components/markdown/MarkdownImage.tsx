@@ -10,7 +10,7 @@ export default function MarkdownImage (props: ImageProps & {size?: 'small' | 'la
       placeholder="blur"
       {...imageProps}
       alt={props.alt}
-      className={clsx(size === 'large' ? 'max-w-full' : 'max-w-[50%]', 'block object-contain border-[2px] border-neutral h-fit')}
+      className={clsx(size === 'large' ? 'max-w-full' : 'max-w-[50%]', 'block object-contain border-[2px] border-neutral h-fit my-2')}
     />
   )
 }

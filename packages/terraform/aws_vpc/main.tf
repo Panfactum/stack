@@ -18,6 +18,7 @@ locals {
 }
 
 data "aws_region" "region" {}
+data "aws_caller_identity" "current" {}
 
 module "tags" {
   source         = "../aws_tags"
@@ -317,148 +318,90 @@ resource "aws_vpc_peering_connection_options" "accepters" {
 ## Flow Logs
 ##########################################################################
 
-#resource "aws_s3_bucket" "flow_logs" {
-#  for_each = var.subnets
-#
-#  bucket_prefix       = lower(replace(each.key, "_", "-"))
-#  object_lock_enabled = true
-#}
-#
-#resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
-#  for_each = var.subnets
-#
-#  bucket = aws_s3_bucket.flow_logs[each.key].bucket
-#
-#  rule {
-#    bucket_key_enabled = true
-#
-#    apply_server_side_encryption_by_default {
-#      sse_algorithm = "aws:kms"
-#    }
-#  }
-#}
-#
-#resource "aws_s3_bucket_metric" "flow_logs" {
-#  for_each = var.subnets
-#
-#  bucket = aws_s3_bucket.flow_logs[each.key].bucket
-#  name   = "EntireBucket"
-#}
-#
-#resource "aws_s3_bucket_policy" "log_delivery" {
-#  for_each = var.subnets
-#
-#  bucket = aws_s3_bucket.flow_logs[each.key].bucket
-#  policy = data.aws_iam_policy_document.log_delivery[each.key].json
-#}
-#
-#resource "aws_s3_bucket_public_access_block" "flow_logs" {
-#  for_each = var.subnets
-#
-#  bucket                  = aws_s3_bucket.flow_logs[each.key].bucket
-#  block_public_acls       = true
-#  block_public_policy     = true
-#  ignore_public_acls      = true
-#  restrict_public_buckets = true
-#}
-#
-#data "aws_iam_policy_document" "log_delivery" {
-#  for_each = var.subnets
-#
-#  # https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-s3.html#flow-logs-s3-permissions
-#  statement {
-#    actions = ["s3:PutObject"]
-#    condition {
-#      test     = "ArnLike"
-#      values   = ["arn:aws:logs:${var.aws_region}:${var.aws_account_id}:*"]
-#      variable = "aws:SourceArn"
-#    }
-#    condition {
-#      test     = "StringEquals"
-#      values   = [var.aws_account_id]
-#      variable = "aws:SourceAccount"
-#    }
-#    condition {
-#      test     = "StringEquals"
-#      values   = ["bucket-owner-full-control"]
-#      variable = "s3:x-amz-acl"
-#    }
-#    effect = "Allow"
-#    principals {
-#      identifiers = ["delivery.logs.amazonaws.com"]
-#      type        = "Service"
-#    }
-#    resources = ["${aws_s3_bucket.flow_logs[each.key].arn}/AWSLogs/${var.aws_account_id}/*"]
-#    sid       = "AWSLogDeliveryWrite"
-#  }
-#
-#  statement {
-#    actions = ["s3:GetBucketAcl"]
-#    condition {
-#      test     = "ArnLike"
-#      values   = ["arn:aws:logs:${var.aws_region}:${var.aws_account_id}:*"]
-#      variable = "aws:SourceArn"
-#    }
-#    condition {
-#      test     = "StringEquals"
-#      values   = [var.aws_account_id]
-#      variable = "aws:SourceAccount"
-#    }
-#    effect = "Allow"
-#    principals {
-#      identifiers = ["delivery.logs.amazonaws.com"]
-#      type        = "Service"
-#    }
-#    resources = [aws_s3_bucket.flow_logs[each.key].arn]
-#    sid       = "AWSLogDeliveryAclCheck"
-#  }
-#
-#  version = "2012-10-17"
-#}
-#
-#resource "aws_s3_bucket_intelligent_tiering_configuration" "flow_log_archive" {
-#  for_each = var.subnets
-#
-#  bucket = aws_s3_bucket.flow_logs[each.key].bucket
-#  name   = "archive"
-#  status = "Enabled"
-#
-#  tiering {
-#    access_tier = "ARCHIVE_ACCESS"
-#    days        = 90
-#  }
-#  tiering {
-#    access_tier = "DEEP_ARCHIVE_ACCESS"
-#    days        = 180
-#  }
-#}
-#
-#resource "aws_flow_log" "flow_logs" {
-#  for_each = var.subnets
-#
-#  destination_options {
-#    file_format        = "plain-text"
-#    per_hour_partition = true
-#  }
-#
-#  log_destination          = aws_s3_bucket.flow_logs[each.key].arn
-#  log_destination_type     = "s3"
-#  max_aggregation_interval = 600
-#  subnet_id                = aws_subnet.subnets[each.key].id
-#  traffic_type             = "ALL"
-#  tags                     = { Name = "FL_${each.key}" }
-#}
-#
-#resource "aws_s3_bucket_object_lock_configuration" "locks" {
-#  for_each = var.subnets
-#
-#  bucket              = aws_s3_bucket.flow_logs[each.key].bucket
-#  object_lock_enabled = "Enabled"
-#
-#  rule {
-#    default_retention {
-#      mode  = "GOVERNANCE"
-#      years = 10
-#    }
-#  }
-#}
+data "aws_iam_policy_document" "log_delivery" {
+
+  # https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-s3.html
+  statement {
+    sid    = "AWSLogDeliveryWrite"
+    effect = "Allow"
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type        = "Service"
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["${module.log_bucket.bucket_arn}/*"]
+    condition {
+      test     = "StringEquals"
+      values   = [data.aws_caller_identity.current.account_id]
+      variable = "aws:SourceAccount"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = ["bucket-owner-full-control"]
+      variable = "s3:x-amz-acl"
+    }
+    condition {
+      test     = "ArnLike"
+      values   = ["arn:aws:logs:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:*"]
+      variable = "aws:SourceArn"
+    }
+  }
+
+  statement {
+    sid    = "AWSLogDeliveryAclCheck"
+    effect = "Allow"
+    principals {
+      identifiers = ["delivery.logs.amazonaws.com"]
+      type        = "Service"
+    }
+    actions = [
+      "s3:GetBucketAcl",
+      "s3:ListBucket"
+    ]
+    resources = [module.log_bucket.bucket_arn]
+    condition {
+      test     = "StringEquals"
+      values   = [data.aws_caller_identity.current.account_id]
+      variable = "aws:SourceAccount"
+    }
+    condition {
+      test     = "ArnLike"
+      values   = ["arn:aws:logs:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:*"]
+      variable = "aws:SourceArn"
+    }
+  }
+}
+
+module "log_bucket" {
+  source      = "../aws_s3_private_bucket"
+  bucket_name = "flow-logs-${aws_vpc.main.id}"
+  description = "Flow logs for the ${var.vpc_name} VPC"
+
+  expire_after_days               = var.vpc_flow_logs_expire_after_days
+  timed_transitions_enabled       = true
+  intelligent_transitions_enabled = false
+
+  access_policy = data.aws_iam_policy_document.log_delivery.json
+
+  environment    = var.environment
+  region         = var.region
+  pf_root_module = var.pf_root_module
+  pf_module      = var.pf_module
+  extra_tags     = var.extra_tags
+  is_local       = var.is_local
+}
+
+resource "aws_flow_log" "flow_logs" {
+
+  destination_options {
+    file_format        = "plain-text"
+    per_hour_partition = true
+  }
+
+  log_destination          = module.log_bucket.bucket_arn
+  log_destination_type     = "s3"
+  max_aggregation_interval = 600
+  vpc_id                   = aws_vpc.main.id
+  traffic_type             = "ALL"
+  tags                     = module.tags.tags
+}

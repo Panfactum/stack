@@ -4,13 +4,15 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_vpc"
+  source = "../../../../../terraform//aws_vpc"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_vpc"
 }
 
 inputs = {
-  vpc_name        = "PRODUCTION_PRIMARY"
-  vpc_cidr        = "10.0.0.0/16"
-  vpc_description = "VPC for the primary production environment."
+  vpc_name                        = "PRODUCTION_PRIMARY"
+  vpc_cidr                        = "10.0.0.0/16"
+  vpc_description                 = "VPC for the primary production environment."
+  vpc_flow_logs_expire_after_days = 7
 
   nat_associations = {
     "PRIVATE_A" = "PUBLIC_A"

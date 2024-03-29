@@ -26,6 +26,10 @@ The following providers are needed by this module:
 
 The following Modules are called:
 
+### <a name="module_log_bucket" /> [log\_bucket](#module_log_bucket)
+
+Source: [aws\_s](./aws_s)3\_private\_bucket
+
 ### <a name="module_tags" /> [tags](#module_tags)
 
 Source: [aws\_tags](./aws_tags)
@@ -128,6 +132,14 @@ Description: Extra tags to add to the VPC resource.
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_vpc_flow_logs_expire_after_days" /> [vpc\_flow\_logs\_expire\_after\_days](#input_vpc_flow_logs_expire_after_days)
+
+Description: How many days until VPC flow logs expire.
+
+Type: `number`
+
+Default: `30`
 
 ### <a name="input_vpc_peer_acceptances" /> [vpc\_peer\_acceptances](#input_vpc_peer_acceptances)
 

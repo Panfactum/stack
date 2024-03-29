@@ -106,13 +106,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
     }
   }
 
+  // This is the most aggressive cost-savings transitions allowed
+  // by AWS
   rule {
     id     = "timed-transitions"
     status = var.timed_transitions_enabled ? "Enabled" : "Disabled"
     filter {}
     transition {
       days          = 30
-      storage_class = "STANDARD_IA"
+      storage_class = "ONEZONE_IA"
     }
     transition {
       days          = 60
@@ -133,6 +135,13 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
   tiering {
     access_tier = "DEEP_ARCHIVE_ACCESS"
     days        = 180
+  }
+
+  lifecycle {
+    precondition {
+      condition     = (var.timed_transitions_enabled && !var.intelligent_transitions_enabled) || (!var.timed_transitions_enabled && var.intelligent_transitions_enabled)
+      error_message = "Intelligent transitions cannot be enabled simultaneously with timed transitions"
+    }
   }
 }
 
