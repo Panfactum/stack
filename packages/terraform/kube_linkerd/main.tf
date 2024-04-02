@@ -211,7 +211,7 @@ resource "helm_release" "linkerd" {
 
   values = [
     yamlencode({
-      controllerLogLevel        = "info"
+      controllerLogLevel        = var.log_level
       controllerLogFormat       = "json"
       controllerImage           = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/controller"
       controllerReplicas        = 2
@@ -240,6 +240,7 @@ resource "helm_release" "linkerd" {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy"
         }
         logFormat = "json"
+        logLevel  = var.log_level
         resources = {
 
           // We provide both a request and a limit
@@ -259,6 +260,7 @@ resource "helm_release" "linkerd" {
         image = {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/policy-controller"
         }
+        logLevel = var.log_level
         resources = {
           memory = {
             // If this does down, networking in the cluster will break causing a cascading failure
@@ -339,6 +341,7 @@ resource "helm_release" "linkerd" {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy-init"
         }
         logFormat = "json"
+        logLevel  = var.log_level
 
         // Be default, the init container
         // has way too many resources and ends up

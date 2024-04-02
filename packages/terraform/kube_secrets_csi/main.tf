@@ -78,6 +78,7 @@ resource "helm_release" "secrets_csi_driver" {
 
   values = [
     yamlencode({
+      fullnameOverride = "secrets-csi"
       linux = {
         enabled = true
         crds = {
@@ -154,7 +155,7 @@ resource "kubernetes_manifest" "vpa" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "secrets-csi-secrets-store-csi-driver"
+      name      = "secrets-csi"
       namespace = local.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -162,10 +163,11 @@ resource "kubernetes_manifest" "vpa" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "DaemonSet"
-        name       = "secrets-csi-secrets-store-csi-driver"
+        name       = "secrets-csi"
       }
     }
   }
+  depends_on = [helm_release.secrets_csi_driver]
 }
 
 

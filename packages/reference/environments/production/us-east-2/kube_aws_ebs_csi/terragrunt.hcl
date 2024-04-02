@@ -11,6 +11,11 @@ dependency "cluster" {
   config_path = "../aws_eks"
 }
 
+dependency "external_snapshotter" {
+  config_path  = "../kube_external_snapshotter"
+  skip_outputs = true
+}
+
 inputs = {
   eks_cluster_name           = dependency.cluster.outputs.cluster_name
   pull_through_cache_enabled = true

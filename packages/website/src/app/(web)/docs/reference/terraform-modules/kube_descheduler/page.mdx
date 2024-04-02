@@ -6,11 +6,11 @@
 
 This module provides a deployment of the [descheduler](https://github.com/kubernetes-sigs/descheduler) project.
 
-See the [vars file](./vars.tf) for descriptions of the input parameters.
-
 ## Providers
 
 The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
@@ -32,6 +32,10 @@ Source: [kube\_labels](./kube_labels)
 
 Source: [kube\_namespace](./kube_namespace)
 
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
+
 ## Required Inputs
 
 No required inputs.
@@ -46,15 +50,7 @@ Description: The version of the descheduler helm chart to deploy
 
 Type: `string`
 
-Default: `"0.27.1"`
-
-### <a name="input_descheduler_version" /> [descheduler\_version](#input_descheduler_version)
-
-Description: The version of the descheduler to deploy
-
-Type: `string`
-
-Default: `"v0.27.1"`
+Default: `"0.29.0"`
 
 ### <a name="input_environment" /> [environment](#input_environment)
 
@@ -80,6 +76,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+
+Description: The log verbosity (1-9) for the descheduler pods
+
+Type: `number`
+
+Default: `1`
+
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
 Description: The name of the Panfactum module where the containing resources are directly defined.
@@ -95,6 +99,14 @@ Description: The name of the root Panfactum module in the module tree.
 Type: `string`
 
 Default: `"kube_descheduler"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_region" /> [region](#input_region)
 

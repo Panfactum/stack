@@ -1,7 +1,13 @@
-variable "reloader_version" {
-  description = "The image version of the stakater/reloader image"
+variable "reloader_helm_version" {
+  description = "The image version of the stakater/reloader helm chart"
   type        = string
-  default     = "v1.0.1"
+  default     = "1.0.72"
+}
+
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the deployed images"
+  type        = bool
+  default     = false
 }
 
 variable "vpa_enabled" {

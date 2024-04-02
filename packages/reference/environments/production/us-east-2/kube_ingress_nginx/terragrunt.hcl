@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_ingress_nginx"
+  source = "../../../../../terraform//kube_ingress_nginx"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_ingress_nginx"
 }
 
 locals {

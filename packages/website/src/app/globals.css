@@ -400,7 +400,7 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
 
     /* Makes code blocks stick out more */
     code {
-        @apply bg-neutral
+        @apply bg-neutral text-sm
     }
 
 }

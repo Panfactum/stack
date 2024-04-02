@@ -156,8 +156,8 @@ resource "kubernetes_service_account" "webhook" {
 module "webhook_cert" {
   count          = var.self_generated_certs_enabled ? 0 : 1
   source         = "../kube_internal_cert"
-  service_names  = ["jetstack-cert-manager-webhook"]
-  common_name    = "jetstack-cert-manager-webhook.cert-manager.svc"
+  service_names  = ["cert-manager-webhook"]
+  common_name    = "cert-manager-webhook.cert-manager.svc"
   secret_name    = local.webhook_secret
   namespace      = local.namespace
   environment    = var.environment
@@ -221,6 +221,8 @@ resource "helm_release" "cert_manager" {
 
   values = [
     yamlencode({
+      fullnameOverride = "cert-manager"
+
       installCRDs = true
       global = {
         commonLabels = module.base_labels.kube_labels
@@ -245,8 +247,11 @@ resource "helm_release" "cert_manager" {
       // will not cause cascading failures
       tolerations = module.constants_controller.burstable_node_toleration_helm
       resources = {
-        limits = {
+        requests = {
           memory = "100Mi"
+        }
+        limits = {
+          memory = "130Mi"
         }
       }
       livenessProbe = {
@@ -279,8 +284,11 @@ resource "helm_release" "cert_manager" {
           module.constants_webhook.pod_anti_affinity_helm
         )
         resources = {
-          limits = {
+          requests = {
             memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
           }
         }
 
@@ -336,8 +344,11 @@ resource "helm_release" "cert_manager" {
         // will not cause cascading failures
         tolerations = module.constants_controller.burstable_node_toleration_helm
         resources = {
-          limits = {
+          requests = {
             memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
           }
         }
       }
@@ -353,7 +364,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "jetstack-cert-manager"
+      name      = "cert-manager"
       namespace = local.namespace
       labels    = module.controller_labels.kube_labels
     }
@@ -361,10 +372,11 @@ resource "kubernetes_manifest" "vpa_controller" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "jetstack-cert-manager"
+        name       = "cert-manager"
       }
     }
   }
+  depends_on = [helm_release.cert_manager]
 }
 
 resource "kubernetes_manifest" "vpa_cainjector" {
@@ -373,7 +385,7 @@ resource "kubernetes_manifest" "vpa_cainjector" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "jetstack-cert-manager-cainjector"
+      name      = "cert-manager-cainjector"
       namespace = local.namespace
       labels    = module.ca_injector_labels.kube_labels
     }
@@ -381,10 +393,11 @@ resource "kubernetes_manifest" "vpa_cainjector" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "jetstack-cert-manager-cainjector"
+        name       = "cert-manager-cainjector"
       }
     }
   }
+  depends_on = [helm_release.cert_manager]
 }
 
 resource "kubernetes_manifest" "vpa_webhook" {
@@ -393,7 +406,7 @@ resource "kubernetes_manifest" "vpa_webhook" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "jetstack-cert-manager-webhook"
+      name      = "cert-manager-webhook"
       namespace = local.namespace
       labels    = module.webhook_labels.kube_labels
     }
@@ -401,10 +414,11 @@ resource "kubernetes_manifest" "vpa_webhook" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "jetstack-cert-manager-webhook"
+        name       = "cert-manager-webhook"
       }
     }
   }
+  depends_on = [helm_release.cert_manager]
 }
 
 resource "kubernetes_manifest" "pdb_controller" {
@@ -412,7 +426,7 @@ resource "kubernetes_manifest" "pdb_controller" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = "${local.name}-pdb"
+      name      = "cert-manager"
       namespace = local.namespace
       labels    = module.controller_labels.kube_labels
     }
@@ -431,7 +445,7 @@ resource "kubernetes_manifest" "pdb_webhook" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = "${local.name}-pdb-webhook"
+      name      = "cert-manager-webhook"
       namespace = local.namespace
       labels    = module.webhook_labels.kube_labels
     }
@@ -450,7 +464,7 @@ resource "kubernetes_manifest" "pdb_ca_injector" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = "${local.name}-pdb-ca-injector"
+      name      = "cert-manager-ca-injector"
       namespace = local.namespace
       labels    = module.ca_injector_labels.kube_labels
     }

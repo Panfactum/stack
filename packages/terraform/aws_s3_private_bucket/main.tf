@@ -139,7 +139,7 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
 
   lifecycle {
     precondition {
-      condition     = (var.timed_transitions_enabled && !var.intelligent_transitions_enabled) || (!var.timed_transitions_enabled && var.intelligent_transitions_enabled)
+      condition     = (var.timed_transitions_enabled && !var.intelligent_transitions_enabled) || (!var.timed_transitions_enabled && var.intelligent_transitions_enabled) || (!var.timed_transitions_enabled && !var.intelligent_transitions_enabled)
       error_message = "Intelligent transitions cannot be enabled simultaneously with timed transitions"
     }
   }
@@ -147,6 +147,7 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
 
 
 resource "aws_s3_bucket_policy" "bucket" {
+  count  = var.access_policy == null ? 0 : 1
   bucket = aws_s3_bucket.bucket.bucket
   policy = var.access_policy == null ? "" : var.access_policy
 }

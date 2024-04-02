@@ -94,7 +94,10 @@ words: [
   "cncf",
   "keda",
   "burstable",
-  "nosniff"
+  "nosniff",
+  "snapshotter",
+  "velero",
+  "runtimes"
 ]
 languageSettings:
   - languageId: markdown,mdx

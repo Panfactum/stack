@@ -1,0 +1,183 @@
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes Reloader
+
+**Type:** [Live](./overview)
+
+This module equips our cluster with the [reloader](https://github.com/stakater/Reloader), a utility that refreshes Pods when configmaps or secrets they rely on change.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_aws_permissions" /> [aws\_permissions](#module_aws_permissions)
+
+Source: [kube\_sa\_auth\_aws](./kube_sa_auth_aws)
+
+### <a name="module_backup_bucket" /> [backup\_bucket](#module_backup_bucket)
+
+Source: [aws\_s](./aws_s)3\_private\_bucket
+
+### <a name="module_constants" /> [constants](#module_constants)
+
+Source: [constants](./constants)
+
+### <a name="module_kube_labels" /> [kube\_labels](#module_kube_labels)
+
+Source: [kube\_labels](./kube_labels)
+
+### <a name="module_namespace" /> [namespace](#module_namespace)
+
+Source: [kube\_namespace](./kube_namespace)
+
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_aws_plugin_version" /> [aws\_plugin\_version](#input_aws_plugin_version)
+
+Description: The image version of the velero/velero-plugin-for-aws image
+
+Type: `string`
+
+Default: `"v1.9.0"`
+
+### <a name="input_csi_plugin_version" /> [csi\_plugin\_version](#input_csi_plugin_version)
+
+Description: The image version of the velero/velero-plugin-for-csi image
+
+Type: `string`
+
+Default: `"v0.7.0"`
+
+### <a name="input_environment" /> [environment](#input_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_is_local" /> [is\_local](#input_is_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level for the Velero pods
+
+Type: `string`
+
+Default: `"warning"`
+
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"kube_velero"`
+
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"kube_velero"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_region" /> [region](#input_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_velero_helm_version" /> [velero\_helm\_version](#input_velero_helm_version)
+
+Description: The version of the velero helm chart
+
+Type: `string`
+
+Default: `"6.0.0"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_backup_bucket" /> [backup\_bucket](#output_backup_bucket)
+
+Description: The name of the S3 bucket used to store cluster backups
+
+### <a name="output_backup_bucket_arn" /> [backup\_bucket\_arn](#output_backup_bucket_arn)
+
+Description: The ARN of the S3 bucket used to store cluster backups
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

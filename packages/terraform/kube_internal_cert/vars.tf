@@ -55,15 +55,15 @@ variable "private_key_rotation_enabled" {
 }
 
 // The default:
-// rotate every 8 hours with a 16 hour buffer period in case something goes wrong
+// rotate every week with a one week buffer period in case something goes wrong
 variable "duration" {
   description = "How long the certificate will be valid for."
   type        = string
-  default     = "24h0m0s"
+  default     = "336h0m0s"
 }
 
 variable "renew_before" {
   description = "How long prior to the expiration that certificate renewal will be triggered."
   type        = string
-  default     = "16h0m0s"
+  default     = "168h0m0s"
 }

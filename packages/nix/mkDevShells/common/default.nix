@@ -37,7 +37,8 @@
     (import ./linkerd.nix) # utility for working with the service mesh
     (util.customNixModule "cilium") # for managing the cilium CNI
     (import ./cmctl.nix) # for working with cert-manager
-    (import ./stern.nix)
+    (import ./stern.nix) # log aggregator for quick cli log inspection
+    (import ./velero.nix) # backups of cluster state
     (util.customShellScript
       "pf-tunnel") # for connecting to private network resources through ssh bastion
 

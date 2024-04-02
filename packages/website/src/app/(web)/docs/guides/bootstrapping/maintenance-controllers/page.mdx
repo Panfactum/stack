@@ -1,0 +1,240 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+
+import ebsDeleteImg from './ebs-delete.jpg'
+import ebsSnapshotsImg from './ebs-snapshots.jpg'
+import k9sBackupImg from './k9s-backup.jpg'
+import s3BackupImg from './s3-backup.jpg';
+
+# Maintenance Controllers
+
+## Objective
+
+Deploy ancillary controllers that help automatically maintain the cluster.
+
+## Reloader
+
+Referencing ConfigMaps or Secrets in the manifest for a Deployment or StatefulSet is an extremely common Kubernetes
+pattern. Unfortunately, by default changes to referenced ConfigMaps or Secrets do not trigger a new rollout of pods
+for the Deployment or StatefulSet. As a result, pods might continue to run with stale data.
+
+The [Reloader](https://github.com/stakater/Reloader) controller was developed by [Stakater](https://www.stakater.com/)
+to address this gap. With this controller deployed in the cluster, changes to ConfigMaps or Secrets will trigger
+rolling upgrades on the resources that reference them.
+
+We provide a module to deploy this controller: [kube\_reloader](../../reference/terraform-modules/kube_reloader).
+
+Let's deploy the Reloader now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_reloader`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_reloader/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+To test that the Reloader is working, let's renew the VPA webhook certificate:
+`cmctl renew -n vertical-pod-autoscaler vpa-webhook-certs`. [^1] Notice that the `vpa-admission-contoller` deployment
+began a rolling upgrade.
+
+[^1]: Certificate data is stored as a Secret which the pods reference.
+
+## Descheduler
+
+By default, Kubernetes scheduling only concerns itself with *initially* placing pods on nodes. However, there
+are many cases where we may want to add some additional logic to control when a pod is evicted from a node:
+
+* The pod is violating one of its *soft* [affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
+  or [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/). [^2]
+* The pod is stuck in a pending state or a crash loop.
+* The pod exceeds our maximum lifetime limits. [^3]
+
+[^2]: Soft rules allow the pod to be scheduled even if that would violate the rule. This can occur if there is no
+    possible way to satisfy the rule without creating new nodes.
+
+[^3]: In the Panfactum stack, pods are only allowed to run for a few hours. This serves several benefits: (a) many credentials
+    are dynamically provisioned on pod launch and short-lived, so restarting ensures that pods never use stale credentials; (b)
+    regularly evicting pods continually verifies that failover paths are working as expected; (c) restarting prevents
+    resource leaks from accumulating; (d) restarting regularly ensures that we continually collect metrics from
+    every part of the pod lifecycle, especially the initialization phase which can often be resource-heavy.
+
+The standard solution for implementing this behavior is via the [Descheduler](https://github.com/kubernetes-sigs/descheduler).
+This allows us to implement policies for regularly evicting pods based on the above criteria. To ensure the evictions are non-disruptive,
+the Descheduler respects
+[PodDisruptionBudgets](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) which we provide for
+all Panfactum modules.
+
+We provide a module for the Descheduler: [kube\_descheduler](../../reference/terraform-modules/kube_descheduler).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_reloader` module called `kube_descheduler`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_descheduler/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+Once deployed, you should see all pods that have runtimes over four hours begin to be evicted.
+
+## Backups
+
+While having all infrastructure codified in infrastructure-as-code can be extremely helpful during disaster recovery,
+we are still missing two important capabilities:
+
+* The ability to rollback the *data* of the systems running in the cluster
+* The ability to accomplish a rollback with a *single* emergency command
+
+In this section, we will add these capabilities.
+
+### Deploy the external-snapshotter
+
+All of the cluster's persistent data is stored on [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+backed by [AWS EBS volumes](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes.html). This is managed
+via the [kube\_aws\_ebs\_csi](../../reference/terraform-modules/kube_aws_ebs_csi) module we installed in
+[a prior section](./storage-interfaces).
+
+EBS volumes support point-in-time snapshots that can be used to rollback data to a particular moment. We
+can enable the ability to create those snapshots
+via the [external-snapshotter](https://github.com/kubernetes-csi/external-snapshotter) controller. This will allow
+us to create [VolumeSnapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/)
+in Kubernetes that will in turn create EBS snapshots in AWS.
+
+We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](../../reference/terraform-modules/kube_external_snapshotter).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_descheduler` module called `kube_external_snapshotter`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_external_snapshotter/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+### Deploy Velero
+
+[Velero](https://velero.io/) is a cluster component that adds the [Backup](https://velero.io/docs/v1.13/api-types/backup/)
+custom resource to the cluster. A Backup enables the following functionality:
+
+* The ability to export the current state of *all* Kubernetes resources to an AWS S3 backup bucket
+* The ability to create point-in-time snapshots of *all* the PersistentVolumes
+* The ability to restore the cluster and its data from the Backup by creating a [Restore](https://velero.io/docs/v1.13/api-types/restore/)
+* The ability to regularly schedule (and garbage collect) Backups via a [Schedule](https://velero.io/docs/v1.13/api-types/schedule/)
+
+We provide a module to deploy this functionality: [kube\_velero](../../reference/terraform-modules/kube_velero).
+
+By default, this will create hourly backups of the cluster and its data that will allow you to rollback your entire
+cluster in the case of an emergency. [^4]
+
+[^4]: Backups that include all stored data are expensive in AWS. Each copy is charged at roughly 66%
+    of the price of live data. For this reason, we only retain hourly backups for 90 minutes. These backups are intended for
+    major disaster recovery scenarios where the impact is immediate and obvious (e.g., someone accidentally deletes an entire namespace). If you
+    want to create additional, longer-lived backups, you can create your own [Schedules](https://velero.io/docs/v1.13/api-types/schedule/).
+
+Let's deploy the Velero controller now:
+
+1. Create a new directory adjacent to your `kube_external_snapshotter` module called `kube_velero`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_velero/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+### Test Cluster Backups
+
+<MarkdownAlert severity="warning">
+  This test will involve destructive actions. Be sure to verify the results from each step before proceeding to the
+  next to ensure your cluster is not damaged.
+</MarkdownAlert>
+
+Let's verify that backup functionality is working as expected by simulating an emergency.
+
+1. Velero has a companion CLI for managing backups called `velero`. This comes bundled with the Panfactum devenv. Use
+   it to create a backup now: `velero create backup test --wait`
+
+2. In k9s, notice that this created a new Backup resource (`:backup`):
+
+   <MarkdownImage src={k9sBackupImg} alt="Backup resource created in K9s" />
+
+   `Status.Phase` should be `Completed` to indicate that the backup operation was successful.
+
+3. Open the backup S3 bucket in the AWS web console (the name was provided in the `kube_velero` module output). Notice
+   that the bucket is populated with the backup data:
+
+   <MarkdownImage src={s3BackupImg} alt="Backup resources created in S3" />
+
+   This contains all the data stored in the Kubernetes API server when you initiated the backup.
+
+4. In the AWS console, view the EBS snapshots (EC2 > Elastic Block Store > Snapshots). Notice that all the Vault
+   PVs have had snapshots created:
+
+   <MarkdownImage src={ebsSnapshotsImg} alt="EBS snapshots for the backup" />
+
+   While these are referenced in the S3 bucket data, they are stored here rather than directly in the bucket.
+
+5. **We will now simulate a disaster.**
+
+   1. Delete the `vault` namespace: `kubectl delete ns vault`.
+
+   2. Delete *all* PVs in the cluster: `kubectl delete pv --all`.
+
+   3. By default, we retain the data backing deleted PVs inside of AWS for disaster recovery purposes. Delete these
+      retained copies as well (EC2 > Elastic Block Store > Volumes). For this, **only delete the `vault/data-vault-x` volumes**, not the other volumes which
+      are not Kubernetes PVs.
+
+      <MarkdownImage src={ebsDeleteImg} alt="Delete the Vault EBS volumes" />
+
+   4. Let's verify that Vault is truly unavailable. Run `vault token lookup`. You should receive an error like the following:
+
+      ```shell-session
+      Error looking up token: Get "https://vault.prod.panfactum.com/v1/auth/token/lookup-self": tls: failed to verify certificate: x509: certificate is valid for ingress.local, not vault.prod.panfactum.com
+      ```
+
+   5. At this point, your cluster would normally be irrevocably damaged. You would not be able to recover
+      without redeploying the entire cluster as the Vault EBS volumes contained root secret material used to power the X.509 infrastructure.
+
+      If not addressed, your cluster will stop functioning within a few hours.
+
+6. Fortunately, we can easily restore from the backup: `velero create restore test --from-backup=test --wait`. [^5]
+
+7. Once this completes, notice that the `vault` namespace and its associated resources have been restored.
+
+8. Let's verify that the data has been restored as well. Run `vault token lookup`. If this returns valid information
+   about your token, that means that the Vault data was successfully restored from the backup:
+
+   ```shell-session
+   Key                 Value
+   ---                 -----
+   accessor            d2aFlPZGeFv9lfuri5ltRlKl
+   creation_time       1710860509
+   creation_ttl        0s
+   display_name        root
+   entity_id           n/a
+   expire_time         <nil>
+   explicit_max_ttl    0s
+   id                  hvs.xxxxxxxxxxxxxxxxxxxxxxxx
+   meta                <nil>
+   num_uses            0
+   orphan              true
+   path                auth/token/root
+   policies            [root]
+   ttl                 0s
+   type                service
+   ```
+
+9. Once you have verified that functionality is successfully restored, delete the backup:
+   `velero delete backup test`.
+
+[^5]: You may see a status of `PartiallyFailed`. In the current iteration of the Panfactum stack we use
+    functionality that Velero does not yet have full support for handling. The warnings
+    that Velero generates when this occurs are inconsequential and can be safely ignored assuming that the desired
+    functionality was restored as expected.
+
+## Next Steps
+
+Now that we have improved the overall stability and resiliency of the cluster, [we can begin deploying
+additional databases](./database-operators) to the cluster for more serious workloads.

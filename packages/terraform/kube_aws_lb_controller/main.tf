@@ -339,6 +339,7 @@ resource "helm_release" "alb_controller" {
 
   values = [
     yamlencode({
+      fullnameOverride = "alb-controller"
 
       ingressClass = "alb"
       image = {
@@ -450,7 +451,7 @@ resource "kubernetes_manifest" "vpa" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "eks-aws-load-balancer-controller"
+      name      = "alb-controller"
       namespace = local.namespace
       labels    = module.labels.kube_labels
     }
@@ -458,7 +459,7 @@ resource "kubernetes_manifest" "vpa" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "eks-aws-load-balancer-controller"
+        name       = "alb-controller"
       }
     }
   }

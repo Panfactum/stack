@@ -10,14 +10,31 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
   }
 }
 
 locals {
-
   name      = "descheduler"
   namespace = module.namespace.namespace
 
+  default_evictor_config = {
+    name = "DefaultEvictor"
+    args = {
+      evictSystemCriticalPods = true
+      evictFailedBarePods     = true
+      evictLocalStoragePods   = true
+      nodeFit                 = false
+    }
+  }
+}
+
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "kube_labels" {
@@ -27,9 +44,7 @@ module "kube_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags = merge(var.extra_tags, {
-    service = local.name
-  })
+  extra_tags     = var.extra_tags
 }
 
 module "constants" {
@@ -41,10 +56,6 @@ module "constants" {
   is_local        = var.is_local
   extra_tags      = var.extra_tags
 }
-
-/***************************************
-* Namespace
-***************************************/
 
 module "namespace" {
   source         = "../kube_namespace"
@@ -74,75 +85,157 @@ resource "helm_release" "descheduler" {
   values = [
     yamlencode({
       cmdOptions = {
-        v = 1
+        v              = "${var.log_verbosity}"
+        logging-format = "json"
       }
       kind = "Deployment"
       image = {
-        tag = var.descheduler_version
+        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/descheduler/descheduler"
       }
-      commonLabels         = module.kube_labels.kube_labels
-      podLabels            = module.kube_labels.kube_labels
-      deschedulingInterval = "30m"
+      commonLabels = module.kube_labels.kube_labels
+      podLabels    = module.kube_labels.kube_labels
+      podAnnotations = {
+        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+      }
+      deschedulingInterval = "5m"
 
-      replicas = 1
+      replicas = 2
+      leaderElection = {
+        enabled = true
+      }
       affinity = merge(
         module.constants.controller_node_with_burstable_affinity_helm,
         module.constants.pod_anti_affinity_helm
       )
       tolerations = module.constants.burstable_node_toleration_helm
 
+      resources = {
+        requests = {
+          memory = "100Mi"
+        }
+        limits = {
+          memory = "130Mi"
+        }
+      }
+
+      deschedulerPolicyAPIVersion = "descheduler/v1alpha2"
       deschedulerPolicy = {
         maxNoOfPodsToEvictPerNode      = 10
         maxNoOfPodsToEvictPerNamespace = 10
-        ignorePvcPods                  = true
-        evictLocalStoragePods          = true
-        strategies = {
-          RemovePodsViolatingInterPodAntiAffinity = {
-            enabled = true
-          }
-          RemovePodsViolatingNodeAffinity = {
-            enabled = true
-            params = {
-              nodeAffinityType = [
-                "requiredDuringSchedulingIgnoredDuringExecution"
-              ]
+
+        profiles = [
+
+          // Evict pods violating schedule constraints
+          {
+            name = "scheduling-violation"
+            pluginConfig = [
+              local.default_evictor_config,
+              {
+                name = "RemovePodsViolatingNodeAffinity"
+                args = {
+                  nodeAffinityType = [
+                    "requiredDuringSchedulingIgnoredDuringExecution"
+                  ]
+                }
+              },
+              {
+                name = "RemovePodsViolatingTopologySpreadConstraint"
+                args = {
+                  constraints = [
+                    "DoNotSchedule",
+                    "ScheduleAnyway"
+                  ]
+                }
+              },
+            ]
+            plugins = {
+              balance = {
+                enabled = [
+                  "RemoveDuplicates",
+                  "RemovePodsViolatingTopologySpreadConstraint"
+                ]
+              }
+              deschedule = {
+                enabled = [
+                  "RemovePodsViolatingInterPodAntiAffinity",
+                  "RemovePodsViolatingNodeAffinity",
+                  "RemovePodsViolatingNodeTaints",
+                ]
+              }
             }
-          }
-          RemovePodsViolatingNodeTaints = {
-            enabled = true
-          }
-          RemovePodsViolatingTopologySpreadConstraint = {
-            enabled = true
-            params = {
-              includeSoftConstraints = true
+          },
+
+          // Evicts pods that cannot run properly
+          {
+            name = "pod-runtime-problems"
+            pluginConfig = [
+              local.default_evictor_config,
+              {
+                name = "PodLifeTime"
+                args = {
+                  maxPodLifeTimeSeconds = 60 * 5
+                  states = [
+                    "Pending",
+                    "PodInitializing",
+                    "ContainerCreating",
+                    "ImagePullBackOff"
+                  ]
+                }
+              },
+              {
+                name = "RemoveFailedPods"
+                args = {
+                  minPodLifetimeSeconds   = 60
+                  includingInitContainers = true
+                  excludeOwnerKinds = [
+                    "Job" // Jobs will be handled by the job controller
+                  ]
+                }
+              },
+              {
+                name = "RemovePodsHavingTooManyRestarts"
+                args = {
+                  podRestartThreshold     = 5
+                  includingInitContainers = true
+                }
+              }
+            ]
+            plugins = {
+              deschedule = {
+                enabled = [
+                  "PodLifeTime",
+                  "RemoveFailedPods",
+                  "RemovePodsHavingTooManyRestarts"
+                ]
+              }
             }
-          }
-          RemovePodsHavingTooManyRestarts = {
-            enabled = true
-            params = {
-              podsHavingTooManyRestarts = {
-                podRestartThreshold     = 5
-                includingInitContainers = true
+          },
+
+          // Evicts pods over a certain age
+          {
+            name = "pod-lifetime"
+            pluginConfig = [
+              local.default_evictor_config,
+              {
+                name = "PodLifeTime"
+                args = {
+                  maxPodLifeTimeSeconds = 60 * 60 * 4
+                }
+              },
+            ]
+            plugins = {
+              deschedule = {
+                enabled = [
+                  "PodLifeTime"
+                ]
               }
             }
           }
-          PodLifeTime = {
-            enabled = true
-            params = {
-              podLifeTime = {
-                maxPodLifeTimeSeconds = 60 * 60 * 8
-              }
-            }
-          }
-        }
+        ]
       }
+
       priorityClassName = module.constants.cluster_important_priority_class_name
 
-      // TODO: This is incorrect; it needs to be on the deployment,
-      // but we will have to use kustomize as a variable is not exposed
-      podAnnotations = {
-        "reloader.stakater.com/auto" = "true"
-      }
       livenessProbe = {
         initialDelaySeconds = 20
         periodSeconds       = 10
@@ -158,7 +251,7 @@ resource "kubernetes_manifest" "vpa_descheduler" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = local.name
+      name      = "descheduler"
       namespace = local.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -166,7 +259,7 @@ resource "kubernetes_manifest" "vpa_descheduler" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = local.name
+        name       = "descheduler"
       }
     }
   }
@@ -178,7 +271,7 @@ resource "kubernetes_manifest" "pdb" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = "${local.name}-pdb"
+      name      = "descheduler"
       namespace = local.namespace
       labels    = module.kube_labels.kube_labels
     }

@@ -96,7 +96,7 @@ module "namespace" {
 
 module "webhook_cert" {
   source         = "../kube_internal_cert"
-  service_names  = ["vertical-pod-autoscaler-vpa-webhook"]
+  service_names  = ["vpa-webhook"]
   secret_name    = "vpa-webhook-certs"
   namespace      = local.namespace
   environment    = var.environment
@@ -119,6 +119,7 @@ resource "helm_release" "vpa" {
 
   values = [
     yamlencode({
+      fullnameOverride = "vpa"
 
       podLabels = merge(module.kube_labels.kube_labels, {
         customizationHash = md5(join("", [for filename in fileset(path.module, "vpa_kustomize/*") : filesha256(filename)]))
@@ -268,7 +269,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "vertical-pod-autoscaler-vpa-admission-controller"
+      name      = "vpa-admission-controller"
       namespace = local.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -276,7 +277,7 @@ resource "kubernetes_manifest" "vpa_controller" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "vertical-pod-autoscaler-vpa-admission-controller"
+        name       = "vpa-admission-controller"
       }
     }
   }
@@ -288,7 +289,7 @@ resource "kubernetes_manifest" "vpa_recommender" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "vertical-pod-autoscaler-vpa-recommender"
+      name      = "vpa-recommender"
       namespace = local.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -304,7 +305,7 @@ resource "kubernetes_manifest" "vpa_recommender" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "vertical-pod-autoscaler-vpa-recommender"
+        name       = "vpa-recommender"
       }
     }
   }
@@ -316,7 +317,7 @@ resource "kubernetes_manifest" "vpa_updater" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "vertical-pod-autoscaler-vpa-updater"
+      name      = "vpa-updater"
       namespace = local.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -324,7 +325,7 @@ resource "kubernetes_manifest" "vpa_updater" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "vertical-pod-autoscaler-vpa-updater"
+        name       = "vpa-updater"
       }
     }
   }

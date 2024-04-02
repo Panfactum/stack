@@ -31,6 +31,7 @@
     "kube_deployment",
     "kube_descheduler",
     "kube_external_dns",
+    "kube_external_snapshotter",
     "kube_gha_arc_runners",
     "kube_gha_arc_systems",
     "kube_ingress",
@@ -55,6 +56,7 @@
     "kube_secrets_csi",
     "kube_trust_manager",
     "kube_vault",
+    "kube_velero",
     "kube_vpa",
     "terraform_bootstrap_resources",
     "vault_core_resources"

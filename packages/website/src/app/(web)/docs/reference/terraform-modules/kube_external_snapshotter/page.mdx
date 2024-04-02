@@ -1,0 +1,149 @@
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes External Snapshotter
+
+**Type:** [Live](./overview)
+
+This module provides support for PVC snapshots via the [external-snapshotter](https://github.com/kubernetes-csi/external-snapshotter) project.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Modules
+
+The following Modules are called:
+
+### <a name="module_constants_controller" /> [constants\_controller](#module_constants_controller)
+
+Source: [constants](./constants)
+
+### <a name="module_constants_webhook" /> [constants\_webhook](#module_constants_webhook)
+
+Source: [constants](./constants)
+
+### <a name="module_kube_labels_controller" /> [kube\_labels\_controller](#module_kube_labels_controller)
+
+Source: [kube\_labels](./kube_labels)
+
+### <a name="module_kube_labels_webhook" /> [kube\_labels\_webhook](#module_kube_labels_webhook)
+
+Source: [kube\_labels](./kube_labels)
+
+### <a name="module_namespace" /> [namespace](#module_namespace)
+
+Source: [kube\_namespace](./kube_namespace)
+
+### <a name="module_pull_through" /> [pull\_through](#module_pull_through)
+
+Source: [aws\_ecr\_pull\_through\_cache\_addresses](./aws_ecr_pull_through_cache_addresses)
+
+### <a name="module_webhook_cert" /> [webhook\_cert](#module_webhook_cert)
+
+Source: [kube\_internal\_cert](./kube_internal_cert)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_environment" /> [environment](#input_environment)
+
+Description: The name of the environment the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_external_snapshotter_helm_version" /> [external\_snapshotter\_helm\_version](#input_external_snapshotter_helm_version)
+
+Description: The version of the external-snapshotter helm chart to deploy
+
+Type: `string`
+
+Default: `"2.2.0"`
+
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_is_local" /> [is\_local](#input_is_local)
+
+Description: Whether this module is a part of a local development deployment
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+
+Description: The log verbosity (0-9) for the VPA pods
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+Default: `"kube_external_snapshotter"`
+
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+Default: `"kube_external_snapshotter"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_region" /> [region](#input_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

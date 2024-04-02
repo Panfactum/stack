@@ -20,3 +20,14 @@ variable "pull_through_cache_enabled" {
   type        = bool
   default     = false
 }
+
+variable "log_level" {
+  description = "The log level for the Linkerd pods"
+  type        = string
+  default     = "warn"
+  validation {
+    condition     = contains(["info", "error", "trace", "warn", "debug"], var.log_level)
+    error_message = "Invalid log_level provided."
+  }
+}
+

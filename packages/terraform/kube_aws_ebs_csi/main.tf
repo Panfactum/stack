@@ -14,18 +14,32 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
 locals {
   service   = "aws-ebs-csi-driver"
   namespace = module.namespace.namespace
+
+  controller_match_labels = {
+    id = random_id.controller_id.hex
+  }
 }
 
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
 }
+
+resource "random_id" "controller_id" {
+  prefix      = "ebs-controller-"
+  byte_length = 8
+}
+
 
 module "kube_labels" {
   source         = "../kube_labels"
@@ -38,12 +52,13 @@ module "kube_labels" {
 }
 
 module "constants" {
-  source         = "../constants"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source          = "../constants"
+  matching_labels = local.controller_match_labels
+  environment     = var.environment
+  pf_root_module  = var.pf_root_module
+  region          = var.region
+  is_local        = var.is_local
+  extra_tags      = var.extra_tags
 }
 
 /***************************************
@@ -125,12 +140,16 @@ resource "helm_release" "ebs_csi_driver" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/aws-ebs-csi-driver"
       }
+      labels = module.kube_labels.kube_labels
 
       controller = {
-        // Does not need to be highly available
-        replicaCount = 1
+        replicaCount = 2
         tolerations  = module.constants.burstable_node_toleration_helm
-        affinity     = module.constants.controller_node_with_burstable_affinity_helm
+        affinity = merge(
+          module.constants.controller_node_with_burstable_affinity_helm,
+          module.constants.pod_anti_affinity_helm
+        )
+        topologySpreadConstraints = module.constants.topology_spread_zone_preferred
         serviceAccount = {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
@@ -139,6 +158,7 @@ resource "helm_release" "ebs_csi_driver" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
+        podLabels = merge(module.kube_labels.kube_labels, local.controller_match_labels)
         resources = {
           requests = {
             memory = "100Mi"
@@ -229,6 +249,7 @@ resource "helm_release" "ebs_csi_driver" {
           }
         }
         snapshotter = {
+          forceEnable = true
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-snapshotter/csi-snapshotter"
           }

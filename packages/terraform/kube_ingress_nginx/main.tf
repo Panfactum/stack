@@ -36,9 +36,7 @@ locals {
 
   // This has to be THIS name in order for it to
   // replace the self-generated cert secret from the helm chart
-  webhook_secret = "ingress-nginx-admission"
-
-  ingress_secret = "ingress-nginx-tls"
+  webhook_secret = "nginx-admission"
 
   // Number of seconds to wait for data before terminating connections;
   // Used for both upstream and downstream logic
@@ -108,7 +106,7 @@ module "namespace" {
 
 module "webhook_cert" {
   source         = "../kube_internal_cert"
-  service_names  = ["ingress-nginx-controller-admission"]
+  service_names  = ["nginx-controller-admission"]
   secret_name    = local.webhook_secret
   namespace      = local.namespace
   environment    = var.environment
@@ -179,7 +177,8 @@ resource "helm_release" "nginx_ingress" {
 
   values = [
     yamlencode({
-      commonLabels = module.labels.kube_labels,
+      fullnameOverride = "nginx"
+      commonLabels     = module.labels.kube_labels,
 
       controller = {
         image = {
@@ -452,7 +451,7 @@ resource "kubernetes_manifest" "vpa_nginx" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "ingress-nginx-controller"
+      name      = "nginx-controller"
       namespace = local.namespace
       labels    = module.labels.kube_labels
     }
@@ -460,7 +459,7 @@ resource "kubernetes_manifest" "vpa_nginx" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "ingress-nginx-controller"
+        name       = "nginx-controller"
       }
     }
   }

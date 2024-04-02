@@ -7,13 +7,13 @@ variable "environment" {
 variable "pf_root_module" {
   description = "The name of the root Panfactum module in the module tree."
   type        = string
-  default     = "kube_ingress_bastion"
+  default     = "kube_bastion"
 }
 
 variable "pf_module" {
   description = "The name of the Panfactum module where the containing resources are directly defined."
   type        = string
-  default     = "kube_ingress_bastion"
+  default     = "kube_bastion"
 }
 
 variable "region" {
