@@ -215,6 +215,7 @@ resource "helm_release" "cert_manager" {
   chart           = "cert-manager"
   version         = var.cert_manager_version
   recreate_pods   = false
+  reset_values    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
