@@ -235,6 +235,13 @@ resource "kubernetes_cluster_role_binding" "bot_readers" {
 
 data "aws_caller_identity" "current" {}
 
+// This is automatically created by EKS so we can declaratively
+// import it
+import {
+  id = "kube-system/aws-auth"
+  to = kubernetes_config_map.aws_auth
+}
+
 resource "kubernetes_config_map" "aws_auth" {
   metadata {
     name      = "aws-auth"

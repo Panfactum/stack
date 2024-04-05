@@ -10,4 +10,4 @@ creation_rules:
 
   - path_regex: .*/production/.*
     aws_profile: production-superuser
-    kms: 'arn:aws:kms:us-east-2:891377197483:key/mrk-d0c15db4572947ef80e06b23b5dbcddf,arn:aws:kms:us-west-2:891377197483:key/mrk-d0c15db4572947ef80e06b23b5dbcddf'
+    kms: 'arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c,arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c'

@@ -24,6 +24,8 @@ module "tags" {
   is_local       = var.is_local
 }
 
+data "aws_region" "current" {}
+
 ##########################################################################
 ## Zone Setup
 ##########################################################################
@@ -169,3 +171,4 @@ module "iam_role" {
   is_local       = var.is_local
   extra_tags     = var.extra_tags
 }
+

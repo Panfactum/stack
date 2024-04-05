@@ -315,20 +315,17 @@ Let's deploy this module now:
 
 3. Enable **both** the `aws` and `kubernetes` providers in the `module.yaml`.
 
-4. A bootstrapped, default version of this ConfigMap gets created when you first create an EKS cluster. Delete it
-   with `kubectl -n kube-system delete configmap aws-auth`.
+4. Run `terragrunt apply`.
 
-5. Run `terragrunt apply`.
-
-6. To verify that cluster authentication is still functional, we will need to terminate a node and make sure the replacement node
+5. To verify that cluster authentication is still functional, we will need to terminate a node and make sure the replacement node
    is able to rejoin the cluster. [^12] Select one of the nodes and terminate it as shown below:
    <MarkdownImage src={terminateNodeImg} alt="Terminating a Kubernetes node to verify nodes' ability to join the cluster" />
 
-7. The autoscaling group should notice the missing node within a few minutes and launch a new node to replace the terminated node.
+6. The autoscaling group should notice the missing node within a few minutes and launch a new node to replace the terminated node.
    If the node is able to reconnect, you should be able to see it as `Ready` within k9s (`:nodes`):
    <MarkdownImage src={k9sReadyImg} alt="k9s showing node successfully joining the cluster" />
 
-8. If the node joins successfully, you have successfully setup your initial Kubernetes RBAC.
+7. If the node joins successfully, you have successfully set up your initial Kubernetes RBAC.
 
 [^12]: EC2 VMs are assigned IAM roles, and we only allow certain IAM roles to assume the necessary permissions to join
     the cluster as a Kubernetes node. This is defined in the `aws-auth` ConfigMap alongside the human user authentication

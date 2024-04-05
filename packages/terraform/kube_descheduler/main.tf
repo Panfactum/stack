@@ -173,7 +173,7 @@ resource "helm_release" "descheduler" {
               {
                 name = "PodLifeTime"
                 args = {
-                  maxPodLifeTimeSeconds = 60 * 5
+                  maxPodLifeTimeSeconds = 60 * 3
                   states = [
                     "Pending",
                     "PodInitializing",

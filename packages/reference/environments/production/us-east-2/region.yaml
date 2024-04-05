@@ -7,7 +7,7 @@ aws_secondary_region: "us-west-2" # The secondary/backup region to use for the a
 
 # Kubernetes
 kube_config_context: "production-primary"
-kube_api_server: "https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com"
+kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com"
 
 # Vault
 vault_addr: "https://vault.prod.panfactum.com"

@@ -46,11 +46,13 @@ module "node_settings" {
   cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_endpoint = aws_eks_cluster.cluster.endpoint
   max_pods         = 25
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  is_spot          = false
+
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 ##########################################################################
@@ -96,6 +98,7 @@ resource "aws_eks_cluster" "cluster" {
 
 data "aws_subnet" "control_plane_subnets" {
   for_each = var.control_plane_subnets
+  vpc_id   = var.vpc_id
   filter {
     name   = "tag:Name"
     values = [each.value]
@@ -228,6 +231,7 @@ module "aws_cloudwatch_log_group" {
 ##########################################################################
 data "aws_subnet" "node_groups" {
   for_each = toset(var.controller_node_subnets)
+  vpc_id   = var.vpc_id
   filter {
     name   = "tag:Name"
     values = [each.key]
@@ -312,6 +316,11 @@ resource "aws_eks_node_group" "controllers" {
 
   instance_types = var.controller_node_instance_types
 
+  // Todo: We need to enable this as we cannot
+  // control the PDBs for the postgres clusters.
+  // Remove when 1.23 of cnpg is released
+  force_update_version = true
+
   launch_template {
     id      = aws_launch_template.controller.id
     version = aws_launch_template.controller.latest_version
@@ -352,6 +361,7 @@ resource "aws_eks_node_group" "controllers" {
 ////////////////////////////////////////////////////////////
 data "aws_security_group" "all_nodes_source" {
   for_each = var.all_nodes_allowed_security_groups
+  vpc_id   = var.vpc_id
   name     = each.key
 }
 

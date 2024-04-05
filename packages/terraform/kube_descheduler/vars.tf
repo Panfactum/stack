@@ -31,3 +31,4 @@ variable "log_verbosity" {
     error_message = "Log verbosity must be less than or equal to 9"
   }
 }
+

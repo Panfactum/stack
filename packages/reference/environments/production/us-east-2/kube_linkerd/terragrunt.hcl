@@ -23,6 +23,7 @@ dependency "cert_issuers" {
 
 inputs = {
   vault_ca_crt               = dependency.cert_issuers.outputs.vault_ca_crt
+  log_level                  = "info"
   pull_through_cache_enabled = true
   vpa_enabled                = true
 }

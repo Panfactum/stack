@@ -1,0 +1,4 @@
+providers:
+  - aws
+  - random
+  - time

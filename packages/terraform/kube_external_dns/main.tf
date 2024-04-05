@@ -214,6 +214,14 @@ resource "kubernetes_manifest" "vpa" {
       labels    = each.value.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "external-dns"
+          minAllowed = {
+            memory = "25Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

@@ -90,6 +90,7 @@ resource "aws_subnet" "subnets" {
 data "aws_iam_policy_document" "nat_policy" {
   statement {
     actions = [
+      "ec2:DescribeNetworkInterface*",
       "ec2:AttachNetworkInterface",
       "ec2:ModifyNetworkInterfaceAttribute",
       "ec2:AssociateAddress",
@@ -221,6 +222,15 @@ resource "aws_launch_template" "nats" {
       Name        = "nat-${each.key}"
       description = "NAT node in ${each.key}"
     })
+  }
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      delete_on_termination = true
+      encrypted             = true
+      volume_size           = 2
+      volume_type           = "gp3"
+    }
   }
 
   tags = merge(module.tags.tags, {

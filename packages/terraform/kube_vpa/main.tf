@@ -112,7 +112,7 @@ resource "helm_release" "vpa" {
   repository      = "https://charts.fairwinds.com/stable"
   chart           = "vpa"
   version         = var.vertical_autoscaler_helm_version
-  recreate_pods   = true
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

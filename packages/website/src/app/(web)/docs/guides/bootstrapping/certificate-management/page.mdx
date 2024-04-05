@@ -102,8 +102,8 @@ Let's deploy it now:
 
    2. In the prior [DNS guide](./dns), we configured DNS in the [aws\_registered\_domains](../../reference/terraform-modules/aws_registered_domains)
       and [aws\_delegated\_zones](../../reference/terraform-modules/aws_delegated_zones) modules
-      under `management/global`. Because
-      these modules use a separate environment's state bucket, we cannot use them in terragrunt `dependency` blocks.
+      under `production/global`. If you are setting up an environment **other than** production,
+      we cannot reference them in terragrunt `dependency` blocks.
       Instead, we must copy the necessary values manually from the module outputs. [^2]
 
    3. To retrieve the outputs, change your directory to the desired modules and run `terragrunt output`.
@@ -114,13 +114,6 @@ Let's deploy it now:
    4. The `record_manager_role_arn` defines the IAM role that can create records in the every
       zone created by the module. The `zone_id` is the unique internal AWS identifier for
       the Route53 zone hosting records for the domain.
-
-   5. Note that you might want to issue certificates and records in the root zones created by the
-      `aws_registered_domains` module, especially in your production environment. These zones
-      are in the `management` AWS account, so we must ensure that we provide cross-account
-      access [^3] via the `additional_account_ids_with_record_access` input. In
-      [this Panfactum example](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_registered_domains/terragrunt.hcl),
-      we provide access to our `production` account to manage records under `panfactum.com`.
 
 5. Add a `module.yaml` that enables the `aws`, `vault`, and `kubernetes` providers.
 

@@ -15,5 +15,5 @@ dependency "cert_issuers" {
 inputs = {
   pull_through_cache_enabled = true
   vpa_enabled                = true
-  log_verbosity              = 5
+  log_verbosity              = 1
 }

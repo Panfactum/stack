@@ -9,6 +9,10 @@ terraform {
   }
 }
 
+locals {
+  localhost_sans = var.include_localhost ? ["localhost"] : []
+}
+
 module "labels" {
   source         = "../kube_labels"
   environment    = var.environment
@@ -35,14 +39,25 @@ resource "kubernetes_manifest" "cert" {
           // This allows for the secret to have its ca data directly injected into webhooks
           "cert-manager.io/allow-direct-injection" = "true"
         }
+        labels = module.labels.kube_labels
       }
       commonName = var.common_name == null ? (length(var.service_names) == 0 ? "default" : "${var.service_names[0]}.${var.namespace}.svc") : var.common_name
-      dnsNames = length(var.service_names) == 0 ? ["default"] : flatten([for service in var.service_names : [
-        service,
-        "${service}.${var.namespace}",
-        "${service}.${var.namespace}.svc",
-        "${service}.${var.namespace}.svc.cluster.local"
-      ]])
+      dnsNames = length(var.service_names) == 0 ? concat(["default"], local.localhost_sans) : concat(
+        flatten([for service in var.service_names : [
+          service,
+          "${service}.${var.namespace}",
+          "${service}.${var.namespace}.svc",
+          "${service}.${var.namespace}.svc.cluster.local"
+        ]]),
+        !var.include_subdomains ? [] : flatten([for service in var.service_names : [
+          "*.${service}",
+          "*.${service}.${var.namespace}",
+          "*.${service}.${var.namespace}.svc",
+          "*.${service}.${var.namespace}.svc.cluster.local"
+        ]]),
+        local.localhost_sans
+      )
+      ipAddresses = var.include_localhost ? ["127.0.0.1"] : []
       subject = {
         organizations = length(var.service_names) == 0 ? ["default"] : var.service_names
       }
@@ -67,8 +82,8 @@ resource "kubernetes_manifest" "cert" {
       }
 
       issuerRef = {
-        name  = var.cluster_issuer_name == null ? (var.is_ca ? "internal-ca" : "internal") : var.cluster_issuer_name
-        kind  = "ClusterIssuer"
+        name  = var.issuer_name == null ? (var.is_ca ? "internal-ca" : "internal") : var.issuer_name
+        kind  = var.use_cluster_issuer ? "ClusterIssuer" : "Issuer"
         group = "cert-manager.io"
       }
     }

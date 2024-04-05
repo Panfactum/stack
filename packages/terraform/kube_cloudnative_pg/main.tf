@@ -10,14 +10,33 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
 locals {
-
   name      = "cloudnative-pg"
   namespace = module.namespace.namespace
+  matching_labels = {
+    id = random_id.controller_id.hex
+  }
+}
 
+resource "random_id" "controller_id" {
+  prefix      = "cnpg-"
+  byte_length = 8
+}
+
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "kube_labels" {
@@ -27,12 +46,12 @@ module "kube_labels" {
   pf_module      = var.pf_module
   region         = var.region
   is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = local.name })
+  extra_tags     = merge(var.extra_tags, local.matching_labels)
 }
 
 module "constants" {
   source          = "../constants"
-  matching_labels = module.kube_labels.kube_labels
+  matching_labels = local.matching_labels
   environment     = var.environment
   pf_root_module  = var.pf_root_module
   region          = var.region
@@ -40,13 +59,31 @@ module "constants" {
   extra_tags      = var.extra_tags
 }
 
-/***************************************
-* Kubernetes Resources
-***************************************/
+
 
 module "namespace" {
   source         = "../kube_namespace"
   namespace      = local.name
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
+/***************************************
+* Operator
+***************************************/
+
+module "webhook_cert" {
+  source = "../kube_internal_cert"
+
+  // These MUST be set with these exact values
+  // as we will overwrite the hardcoded cert secret
+  service_names = ["cnpg-webhook-service"]
+  secret_name   = "cnpg-webhook-cert"
+
+  namespace      = local.namespace
   environment    = var.environment
   pf_root_module = var.pf_root_module
   region         = var.region
@@ -60,7 +97,7 @@ resource "helm_release" "cnpg" {
   repository      = "https://cloudnative-pg.github.io/charts"
   chart           = "cloudnative-pg"
   version         = var.cloudnative_pg_helm_version
-  recreate_pods   = true
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
@@ -73,18 +110,31 @@ resource "helm_release" "cnpg" {
         create = true
       }
 
-      priorityClassName = module.constants.cluster_important_priority_class_name
+      image = {
+        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/cloudnative-pg/cloudnative-pg"
+      }
 
-      // Does not need to be highly available
-      replicaCount = 2
+      additionalArgs = [
+        "--log-level=${var.log_level}"
+      ]
+
+      priorityClassName = module.constants.cluster_important_priority_class_name
+      replicaCount      = 2
       affinity = merge(
         module.constants.controller_node_affinity_helm,
         module.constants.pod_anti_affinity_helm
       )
+      tolerations               = module.constants.burstable_node_toleration_helm
+      topologySpreadConstraints = module.constants.topology_spread_zone_preferred
 
-      podLabels = module.kube_labels.kube_labels
+      podLabels = merge(
+        module.kube_labels.kube_labels,
+        {
+          customizationHash = md5(join("", [for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)]))
+        }
+      )
       podAnnotations = {
-        "reloader.stakater.com/auto" = "true"
+        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
       }
 
       config = {
@@ -93,9 +143,22 @@ resource "helm_release" "cnpg" {
           INHERITED_LABELS      = "region, service, version_tag, module, app"
         }
       }
-      podLabels = module.kube_labels.kube_labels
+
+      resources = {
+        requests = {
+          memory = "100Mi"
+        }
+        limits = {
+          memory = "130Mi"
+        }
+      }
     })
   ]
+
+  // Injects the CA data into the webhook manifest
+  postrender {
+    binary_path = "${path.module}/kustomize/kustomize.sh"
+  }
 }
 
 resource "kubernetes_manifest" "vpa" {
@@ -116,6 +179,7 @@ resource "kubernetes_manifest" "vpa" {
       }
     }
   }
+  depends_on = [helm_release.cnpg]
 }
 
 resource "kubernetes_manifest" "pdb" {
@@ -129,7 +193,7 @@ resource "kubernetes_manifest" "pdb" {
     }
     spec = {
       selector = {
-        matchLabels = module.kube_labels.kube_labels
+        matchLabels = local.matching_labels
       }
       maxUnavailable = 1
     }

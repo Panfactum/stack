@@ -34,7 +34,7 @@ Here are the important notes:
 * The DNS zone is represented by a [Route53 hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html)
   which is identified by its apex / root domain name.
 
-* When you register a domain with AWS, that "registers" the nameservers of your management account's DNS servers as
+* When you register a domain with AWS, that "registers" the nameservers of your production account's DNS servers as
   the [authoritative name servers](https://en.wikipedia.org/wiki/Name_server) for that root domain. This means
   that this name server is the source of truth for all records under this root domain.
 
@@ -45,7 +45,7 @@ Here are the important notes:
 * When you query a delegated domain name (i.e., `dig test.dev.panfactum.com`), the resolution process works as follows: [^1]
 
   * Check the `.com` [TLD](https://en.wikipedia.org/wiki/Top-level_domain) for the nameservers of `panfactum.com`.
-  * Check the nameservers for `panfactum.com` (in the management account) for the [A record](https://www.cloudflare.com/learning/dns/dns-records/dns-a-record/) `test.dev.panfactum.com`. Notice that there are
+  * Check the nameservers for `panfactum.com` (in the production account) for the [A record](https://www.cloudflare.com/learning/dns/dns-records/dns-a-record/) `test.dev.panfactum.com`. Notice that there are
     `NS` records delegating `dev.panfactum.com` to another nameserver (in the development account).
   * Check the nameservers for `dev.panfactum.com` for the A record `test.dev.panfactum.com`. Notice that this record exists. Return the associated IP address.
 

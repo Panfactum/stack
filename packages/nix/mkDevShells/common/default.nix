@@ -129,9 +129,11 @@
     mtr # better traceroute alternative
 
     ####################################
-    # Postgres Management
+    # Database Tools
     ####################################
     (util.customShellScript
       "cnpg-pdb-patch") # patches all pdbs created by the cnpg operator
+    (import ./redis.nix) # redis-cli
+    (import ./postgresql.nix) # psql, cli for working with postgres
   ];
 }

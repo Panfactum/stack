@@ -1,0 +1,4 @@
+providers:
+  - aws
+  - time
+aws_secondary_region: "us-east-2"

@@ -97,7 +97,13 @@ words: [
   "nosniff",
   "snapshotter",
   "velero",
-  "runtimes"
+  "runtimes",
+  "dmarc",
+  "authentik",
+  "bitnami",
+  "sigv",
+  "pgbouncer",
+  "pooler"
 ]
 languageSettings:
   - languageId: markdown,mdx

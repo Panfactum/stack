@@ -13,7 +13,7 @@ function _M.header_filter()
   local content_type = ngx.header["Content-Type"]
   if content_type and content_type:find("html") then
 
-    if ngx.var.pf_csp_enabled and (ngx.var.pf_csp_override or ngx.header["Content-Security-Policy"] == nil) then
+    if ngx.var.pf_csp_enabled and (ngx.var.pf_csp_override or not ngx.header["Content-Security-Policy"]) then
       ngx.header["Content-Security-Policy"] = ngx.var.pf_csp
     end
 
@@ -22,7 +22,7 @@ function _M.header_filter()
       ngx.header["Cross-Origin-Opener-Policy"] = ngx.var.pf_cross_origin_opener_policy
     end
 
-    if ngx.var.pf_permissions_policy_enabled (ngx.var.pf_permissions_policy_override or ngx.header["Permissions-Policy"] == nil) then
+    if ngx.var.pf_permissions_policy_enabled and (ngx.var.pf_permissions_policy_override or not ngx.header["Permissions-Policy"]) then
       ngx.header["Permissions-Policy"] = ngx.var.pf_permissions_policy
     end
 
@@ -31,7 +31,7 @@ function _M.header_filter()
     ngx.header["Referrer-Policy"] = ngx.var.pf_referrer_policy
 
   else
-    if ngx.var.pf_csp_enabled and (ngx.var.pf_csp_override or ngx.header["Content-Security-Policy"] == nil) then
+    if ngx.var.pf_csp_enabled and (ngx.var.pf_csp_override or not ngx.header["Content-Security-Policy"]) then
       ngx.header["Content-Security-Policy"] = ngx.var.pf_csp_non_html
     end
   end

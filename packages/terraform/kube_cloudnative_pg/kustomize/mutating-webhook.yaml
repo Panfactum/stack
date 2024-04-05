@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: cnpg-mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: cloudnative-pg/cnpg-webhook-cert

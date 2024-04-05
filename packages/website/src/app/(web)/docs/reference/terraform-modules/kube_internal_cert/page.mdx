@@ -32,14 +32,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_cluster_issuer_name" /> [cluster\_issuer\_name](#input_cluster_issuer_name)
-
-Description: Name of the ClusterIssuer to use for provisioning the cert
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_common_name" /> [common\_name](#input_common_name)
 
 Description: Common name to add to add to the cert
@@ -72,6 +64,22 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_include_localhost" /> [include\_localhost](#input_include_localhost)
+
+Description: Whether to include localhost in the SANs
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_include_subdomains" /> [include\_subdomains](#input_include_subdomains)
+
+Description: Whether to include subdomains of the services via wildcard
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_is_ca" /> [is\_ca](#input_is_ca)
 
 Description: Whether the certificate is a certificate authority certificate or not.
@@ -87,6 +95,14 @@ Description: Whether this module is a part of a local development deployment
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_issuer_name" /> [issuer\_name](#input_issuer_name)
+
+Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
 
@@ -151,6 +167,14 @@ Description: Usages to add to the certificate
 Type: `list(string)`
 
 Default: `[]`
+
+### <a name="input_use_cluster_issuer" /> [use\_cluster\_issuer](#input_use_cluster_issuer)
+
+Description: Whether to use a ClusterIssuer. If false, will use an Issuer.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 

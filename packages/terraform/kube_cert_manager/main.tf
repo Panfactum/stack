@@ -214,7 +214,7 @@ resource "helm_release" "cert_manager" {
   repository      = "https://charts.jetstack.io"
   chart           = "cert-manager"
   version         = var.cert_manager_version
-  recreate_pods   = true
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

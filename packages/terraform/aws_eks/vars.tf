@@ -17,6 +17,11 @@ variable "control_plane_version" {
   default     = "1.29"
 }
 
+variable "vpc_id" {
+  description = "The id for the VPC that the cluster should be deployed into"
+  type        = string
+}
+
 variable "control_plane_subnets" {
   description = "List of subnet names for the control plane. Must be in at least two different availability zones."
   type        = set(string)

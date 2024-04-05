@@ -146,15 +146,31 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
 }
 
 
+
+data "aws_iam_policy_document" "default_policy" {
+  statement {
+    effect  = "Allow"
+    actions = ["s3:*"]
+    principals {
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.main.account_id}:root"]
+      type        = "AWS"
+    }
+    resources = [aws_s3_bucket.bucket.arn, "${aws_s3_bucket.bucket.arn}/*"]
+  }
+}
+
 resource "aws_s3_bucket_policy" "bucket" {
-  count  = var.access_policy == null ? 0 : 1
   bucket = aws_s3_bucket.bucket.bucket
-  policy = var.access_policy == null ? "" : var.access_policy
+  policy = var.access_policy == null ? data.aws_iam_policy_document.default_policy.json : var.access_policy
 }
 
 /***************************************************************
 * Bucket Audit Logging
 ***************************************************************/
+
+// TODO: This appears to be broken
+// Need to investigate and fix
+
 resource "aws_s3_bucket" "audit" {
   count               = var.audit_log_enabled ? 1 : 0
   bucket              = "${var.bucket_name}-audit-log"

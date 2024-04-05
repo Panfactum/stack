@@ -31,6 +31,7 @@ module "namespace_labels" {
     // https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/deploy/pod_readiness_gate/
     "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
     "loadbalancer/enabled"                    = var.loadbalancer_enabled ? "true" : "false"
+    name                                      = var.namespace
   })
 }
 

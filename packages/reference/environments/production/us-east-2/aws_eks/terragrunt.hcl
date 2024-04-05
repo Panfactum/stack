@@ -4,12 +4,12 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_eks"
+  source = "../../../../../terraform//aws_eks"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_eks"
 }
 
 dependency "aws_vpc" {
-  config_path  = "../aws_vpc"
-  skip_outputs = true
+  config_path = "../aws_vpc"
 }
 
 dependency "pull_through_cache" {
@@ -18,6 +18,8 @@ dependency "pull_through_cache" {
 }
 
 inputs = {
+  vpc_id = dependency.aws_vpc.outputs.vpc_id
+
   cluster_name        = "production-primary"
   cluster_description = "The primary production kubernetes cluster"
 

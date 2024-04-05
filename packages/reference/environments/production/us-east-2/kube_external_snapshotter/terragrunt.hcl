@@ -4,12 +4,15 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_external_snapshotter"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_external_snapshotter"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_external_snapshotter"
 }
 
 dependency "cluster" {
   config_path  = "../aws_eks"
+  skip_outputs = true
+}
+dependency "aws_ebs_csi" {
+  config_path  = "../kube_aws_ebs_csi"
   skip_outputs = true
 }
 

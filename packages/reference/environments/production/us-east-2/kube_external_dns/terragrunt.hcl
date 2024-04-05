@@ -4,7 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_external_dnss"
+  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_external_dns"
 }
 
 dependency "aws_eks" {

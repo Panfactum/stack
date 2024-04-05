@@ -32,7 +32,7 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
   immediately continue with this guide.
 </MarkdownAlert>
 
-1. Login to your `management` account in the AWS web console.
+1. Login to your `production` account in the AWS web console (or whichever account will host your client-facing infrastructure).
 
 2. Navigate to Route 53 > Registered domains.
 
@@ -73,9 +73,9 @@ Let's deploy the module now:
 1. When you purchased your domain name, AWS *may* have automatically set up a hosted zone for you.
    You should delete the automatically generated zone as this module will create one for you. [^2]
 
-2. Add a new `aws_registered_domains` folder to your `management` environment in the `global` region.
+2. Add a new `aws_registered_domains` folder to your `production` environment in the `global` region.
 
-3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_registered_domains/terragrunt.hcl).
+3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/global/aws_registered_domains/terragrunt.hcl).
 
 4. Enable the `aws` and `time` providers in your `module.yaml`.
 
@@ -149,10 +149,10 @@ Let's do this now for **every** environment:
 1. Choose a set of subdomain identifiers. For example, for `production` you might
    use the subdomains `prod` and `production`.
 
-2. Add a new directory in `management/global` called `aws_delegated_zones_<environment>` where `<environment>` is replaced
+2. Add a new directory in `production/global` called `aws_delegated_zones_<environment>` where `<environment>` is replaced
    with the environment name for this set of subdomains.
 
-3. Create a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_delegated_zones_production/terragrunt.hcl). [^4]
+3. Create a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/global/aws_delegated_zones_production/terragrunt.hcl). [^4]
    Use the appropriate `subdomain_identifiers` for your environment.
 
 4. Create a `module.yaml`.
@@ -161,7 +161,7 @@ Let's do this now for **every** environment:
 
    2. Set the `aws_account_id` and `aws_profile` to the appropriate values for the environment. Note that this module deploys
       resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the environment account
-      and the secondary `aws` provider to deploy the appropriate DNS records in the `management` environment.
+      and the secondary `aws` provider to deploy the appropriate DNS records in the `production` environment.
 
    3. Set `aws_secondary_region` to your primary region.
 

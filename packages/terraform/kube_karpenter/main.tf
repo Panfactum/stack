@@ -595,6 +595,17 @@ resource "helm_release" "karpenter" {
         featureGates = {
           spotToSpotConsolidation = true
         }
+
+        // Due to the way the VPA sets resource requests and limits (mutating webhook)
+        // Karpenter does not know in advance how many resources the daemonsets
+        // will need. As a result, it may schedule nodes that can only run
+        // the daemonsets (and not other pending pods). This will create an infinite
+        // scale-up loop.
+        // To mitigate this, we provide a generous amount of spare overhead capacity
+        // during its sizing calculations by bumping vmMemoryOverheadPercent significantly.
+        // This ensures that new nodes can run the dynamically sized daemonsets
+        // as well as the other pods.
+        vmMemoryOverheadPercent = "0.3"
       }
 
       logConfig = {

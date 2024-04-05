@@ -21,3 +21,9 @@ variable "max_pods" {
   type        = number
   default     = 50
 }
+
+variable "is_spot" {
+  description = "Whether these settings are for a spot node"
+  type        = bool
+  default     = false
+}

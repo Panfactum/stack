@@ -62,6 +62,53 @@ locals {
       values   = ["2047"]
     }
   ]
+
+  node_class_template = {
+    amiFamily = "Bottlerocket"
+    subnetSelectorTerms = [
+      {
+        tags = {
+          "karpenter.sh/discovery" = var.cluster_name
+        }
+      }
+    ]
+    securityGroupSelectorTerms = [
+      {
+        tags = {
+          "karpenter.sh/discovery" = var.cluster_name
+        }
+      }
+    ]
+    instanceProfile = var.node_instance_profile
+
+    metadataOptions = {
+      httpEndpoint            = "enabled"
+      httpProtocolIPv6        = "disabled"
+      httpPutResponseHopLimit = 1 // don't allow pods to access the node roles
+      httpTokens              = "required"
+    }
+    userData = module.node_settings.user_data
+    blockDeviceMappings = [
+      {
+        deviceName = "/dev/xvda"
+        ebs = {
+          volumeSize          = "25Gi" // includes temp storage
+          encrypted           = true
+          deleteOnTermination = true
+          volumeType          = "gp3"
+        }
+      },
+      {
+        deviceName = "/dev/xvdb"
+        ebs = {
+          volumeSize          = "40Gi"
+          encrypted           = true
+          deleteOnTermination = true
+          volumeType          = "gp3"
+        }
+      }
+    ]
+  }
 }
 
 module "kube_labels" {
@@ -89,11 +136,28 @@ module "node_settings_burstable" {
   cluster_endpoint = var.cluster_endpoint
   cluster_ca_data  = var.cluster_ca_data
   max_pods         = 20
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  is_spot          = true
+
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
+}
+
+module "node_settings_spot" {
+  source           = "../kube_node_settings"
+  cluster_name     = var.cluster_name
+  cluster_endpoint = var.cluster_endpoint
+  cluster_ca_data  = var.cluster_ca_data
+  max_pods         = 40
+  is_spot          = true
+
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 module "node_settings" {
@@ -102,16 +166,19 @@ module "node_settings" {
   cluster_endpoint = var.cluster_endpoint
   cluster_ca_data  = var.cluster_ca_data
   max_pods         = 40
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  is_spot          = false
+
+  environment    = var.environment
+  pf_root_module = var.pf_root_module
+  region         = var.region
+  is_local       = var.is_local
+  extra_tags     = var.extra_tags
 }
 
 /********************************************************************************************************************
 * Node Class
 *********************************************************************************************************************/
+
 
 resource "kubernetes_manifest" "default_node_class" {
   manifest = {
@@ -121,52 +188,42 @@ resource "kubernetes_manifest" "default_node_class" {
       name   = "default"
       labels = module.kube_labels.kube_labels
     }
-    spec = {
-      amiFamily = "Bottlerocket"
-      subnetSelectorTerms = [
-        {
-          tags = {
-            "karpenter.sh/discovery" = var.cluster_name
-          }
-        }
-      ]
-      securityGroupSelectorTerms = [
-        {
-          tags = {
-            "karpenter.sh/discovery" = var.cluster_name
-          }
-        }
-      ]
-      instanceProfile = var.node_instance_profile
+    spec = local.node_class_template
+  }
+}
 
-      metadataOptions = {
-        httpEndpoint            = "enabled"
-        httpProtocolIPv6        = "disabled"
-        httpPutResponseHopLimit = 1 // don't allow pods to access the node roles
-        httpTokens              = "required"
-      }
-      userData = module.node_settings_burstable.user_data
-      blockDeviceMappings = [
-        {
-          deviceName = "/dev/xvda"
-          ebs = {
-            volumeSize          = "25Gi" // includes temp storage
-            encrypted           = true
-            deleteOnTermination = true
-            volumeType          = "gp3"
-          }
-        },
-        {
-          deviceName = "/dev/xvdb"
-          ebs = {
-            volumeSize          = "40Gi"
-            encrypted           = true
-            deleteOnTermination = true
-            volumeType          = "gp3"
-          }
-        }
-      ]
+resource "kubernetes_manifest" "spot_node_class" {
+  manifest = {
+    apiVersion = "karpenter.k8s.aws/v1beta1"
+    kind       = "EC2NodeClass"
+    metadata = {
+      name   = "spot"
+      labels = module.kube_labels.kube_labels
     }
+    spec = merge(
+      local.node_class_template,
+      {
+        userData = module.node_settings_spot.user_data
+      }
+    )
+  }
+}
+
+
+resource "kubernetes_manifest" "burstable_node_class" {
+  manifest = {
+    apiVersion = "karpenter.k8s.aws/v1beta1"
+    kind       = "EC2NodeClass"
+    metadata = {
+      name   = "burstable"
+      labels = module.kube_labels.kube_labels
+    }
+    spec = merge(
+      local.node_class_template,
+      {
+        userData = module.node_settings_burstable.user_data
+      }
+    )
   }
 }
 
@@ -194,7 +251,7 @@ resource "kubernetes_manifest" "burstable_node_pool" {
           nodeClassRef = {
             apiVersion = "karpenter.k8s.aws/v1beta1"
             kind       = "EC2NodeClass"
-            name       = "default"
+            name       = "burstable"
           }
           taints = [
             {
@@ -230,6 +287,7 @@ resource "kubernetes_manifest" "burstable_node_pool" {
       weight = 20
     }
   }
+  depends_on = [kubernetes_manifest.burstable_node_class]
 }
 
 
@@ -252,7 +310,7 @@ resource "kubernetes_manifest" "spot_node_pool" {
           nodeClassRef = {
             apiVersion = "karpenter.k8s.aws/v1beta1"
             kind       = "EC2NodeClass"
-            name       = "default"
+            name       = "spot"
           }
           taints = [
             {
@@ -283,6 +341,7 @@ resource "kubernetes_manifest" "spot_node_pool" {
       weight = 10
     }
   }
+  depends_on = [kubernetes_manifest.spot_node_class]
 }
 
 
@@ -329,5 +388,6 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
       weight = 1
     }
   }
+  depends_on = [kubernetes_manifest.default_node_class]
 }
 

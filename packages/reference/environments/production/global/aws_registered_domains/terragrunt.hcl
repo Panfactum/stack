@@ -14,10 +14,6 @@ locals {
 inputs = {
   domain_names = ["panfactum.com"]
 
-  additional_account_ids_with_record_access = [
-    "891377197483" // production
-  ]
-
   admin_organization_name = "Panfactum"
   admin_first_name        = "Jack"
   admin_last_name         = "Langston"

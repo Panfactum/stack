@@ -153,7 +153,7 @@ resource "helm_release" "cilium" {
   version         = var.cilium_helm_version
   recreate_pods   = false
   cleanup_on_fail = true
-  wait            = true
+  wait            = false // Don't wait b/c this won't work on initial setup in EKS due to the existing CNIs on the nodes
   wait_for_jobs   = true
 
   values = [
@@ -206,10 +206,10 @@ resource "helm_release" "cilium" {
 
       resources = {
         requests = {
-          memory = "100Mi"
+          memory = "300Mi" // Needs to be a bit higher before the VPA is enabled
         }
         limits = {
-          memory = "130Mi"
+          memory = "390Mi"
         }
       }
 

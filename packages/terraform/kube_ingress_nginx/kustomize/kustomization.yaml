@@ -9,4 +9,4 @@ patches:
   - path: configmap.yaml
     target:
       kind: ConfigMap
-      name: ingress-nginx-controller
+      name: nginx-controller

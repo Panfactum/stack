@@ -4,8 +4,10 @@ cluster-certificate = "${CLUSTER_CA_DATA}"
 cluster-name = "${CLUSTER_NAME}"
 max-pods = ${MAX_PODS}
 shutdown-grace-period = "${SHUTDOWN_GRACE_PERIOD}"
+shutdown-grace-period-for-critical-pods = "${SHUTDOWN_GRACE_PERIOD_FOR_CRITICAL_PODS}"
 image-gc-high-threshold-percent = "${IMAGE_GC_HIGH_THRESHOLD_PERCENT}"
 image-gc-low-threshold-percent = "${IMAGE_GC_LOW_THRESHOLD_PERCENT}"
+allowed-unsafe-sysctls = ["net.core.somaxconn"]
 
 [settings.kubernetes.eviction-hard]
 "memory.available" = "${EVICTION_HARD_MEMORY_AVAILABLE}"
@@ -22,3 +24,9 @@ image-gc-low-threshold-percent = "${IMAGE_GC_LOW_THRESHOLD_PERCENT}"
 
 [settings.kubernetes.kube-reserved]
 memory = "${KUBE_RESERVED_MEMORY}Mi"
+
+[settings.kernel.sysctl]
+"user.max_user_namespaces" = "16384"
+"vm.max_map_count" = "262144"
+
+

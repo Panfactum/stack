@@ -26,10 +26,28 @@ variable "common_name" {
   default     = null
 }
 
-variable "cluster_issuer_name" {
-  description = "Name of the ClusterIssuer to use for provisioning the cert"
+variable "issuer_name" {
+  description = "Name of the ClusterIssuer/Issuer to use for provisioning the cert"
   type        = string
   default     = null
+}
+
+variable "use_cluster_issuer" {
+  description = "Whether to use a ClusterIssuer. If false, will use an Issuer."
+  type        = bool
+  default     = true
+}
+
+variable "include_localhost" {
+  description = "Whether to include localhost in the SANs"
+  type        = bool
+  default     = false
+}
+
+variable "include_subdomains" {
+  description = "Whether to include subdomains of the services via wildcard"
+  type        = bool
+  default     = false
 }
 
 variable "private_key_encoding" {
