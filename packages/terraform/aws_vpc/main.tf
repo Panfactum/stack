@@ -80,7 +80,8 @@ resource "aws_subnet" "subnets" {
 ## NATs
 ##
 ## We use the https://github.com/AndrewGuenther/fck-nat project to lower
-## our egress costs.
+## our egress costs. However, we heavily modify the userscript to provide
+## enhanced functionality.
 ##
 ## Note this does sacrifice some high availability as outbound traffic will
 ## be temporarily halted when these instances restart. Additionally, our egress
@@ -94,7 +95,8 @@ data "aws_iam_policy_document" "nat_policy" {
       "ec2:AttachNetworkInterface",
       "ec2:ModifyNetworkInterfaceAttribute",
       "ec2:AssociateAddress",
-      "ec2:DisassociateAddress"
+      "ec2:DisassociateAddress",
+      "ec2:TerminateInstances"
     ]
     effect    = "Allow"
     resources = ["*"]
@@ -193,7 +195,7 @@ resource "aws_security_group" "nats" {
 data "aws_ami" "fck_nat" {
   filter {
     name   = "name"
-    values = ["fck-nat-amzn2-*"]
+    values = ["fck-nat-al2023-*"]
   }
   filter {
     name   = "architecture"
@@ -218,19 +220,28 @@ resource "aws_launch_template" "nats" {
   }))
   tag_specifications {
     resource_type = "instance"
-    tags = merge(module.tags.tags, {
-      Name        = "nat-${each.key}"
-      description = "NAT node in ${each.key}"
-    })
+    tags = merge(
+      { for k, v in module.tags.tags : replace(k, "/", ":") => v }, // For some reason, "/" is now disallowed here?
+      {
+        Name        = "nat-${each.key}"
+        description = "NAT node in ${each.key}"
+      }
+    )
   }
   block_device_mappings {
     device_name = "/dev/xvda"
     ebs {
       delete_on_termination = true
       encrypted             = true
-      volume_size           = 2
+      volume_size           = 8
       volume_type           = "gp3"
     }
+  }
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "enabled"
   }
 
   tags = merge(module.tags.tags, {
