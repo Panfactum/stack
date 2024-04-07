@@ -17,6 +17,9 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-update-envrc.sh $out/bin/pf-update-envrc
     chmod +x $out/bin/pf-update-envrc
 
+    cp ${src}/pf-update-gitignore.sh $out/bin/pf-update-gitignore
+    chmod +x $out/bin/pf-update-gitignore
+
     cp ${src}/pf-update-aws.sh $out/bin/pf-update-aws
     chmod +x $out/bin/pf-update-aws
 

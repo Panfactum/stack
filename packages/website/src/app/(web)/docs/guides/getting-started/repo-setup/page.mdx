@@ -156,12 +156,14 @@ Notice that you still like have a few shell warnings that look like the followin
 
 In later guides, we will cover how to configure these various utilities to deploy and connect to your infrastructure.
 
-For now, you will want to run the following commands to setup the basic scaffolding and remove the warnings:
+For now, you will want to run the following commands to set up the basic scaffolding and remove the warnings:
 
+* `pf-update-envrc`: Updates the `.envrc` file with the latest Panfactum values
 * `pf-update-terragrunt`: Creates the environments folder with some starter `terragrunt` boilerplate
 * `pf-update-aws`: Creates the AWS config folder with some starter boilerplate. Your AWS settings will eventually live here.
 * `pf-update-kube`: Creates the Kubernetes config folder with some starter boilerplate. Your Kubernetes settings will eventually live here.
 * `pf-update-ssh`: Create the SSH config folder with some starter boilerplate. Your SSH settings will eventually live here.
+* `pf-update-gitignore`: Augments the top-level `.gitignore` file to prevent certain Panfactum files / directories are not accidentally committed
 
 ## Next Steps
 

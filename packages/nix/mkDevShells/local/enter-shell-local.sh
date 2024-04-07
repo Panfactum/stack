@@ -33,6 +33,11 @@ export TERRAGRUNT_DOWNLOAD="$DEVENV_ROOT/.terragrunt-cache"
 # See https://terragrunt.gruntwork.io/docs/reference/cli-options/#terragrunt-fetch-dependency-output-from-state
 export TERRAGRUNT_FETCH_DEPENDENCY_OUTPUT_FROM_STATE="true"
 
+# Enables the local provider cache so that the provider binaries to significantly
+# reduce the amount of times that we need to download provider binaries
+export TF_PLUGIN_CACHE_DIR="$DEVENV_ROOT/.terraform"
+mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
 #############################################
 ## Podman / Docker
 #############################################

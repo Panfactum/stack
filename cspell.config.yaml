@@ -103,7 +103,8 @@ words: [
   "bitnami",
   "sigv",
   "pgbouncer",
-  "pooler"
+  "pooler",
+  "akadmin"
 ]
 languageSettings:
   - languageId: markdown,mdx

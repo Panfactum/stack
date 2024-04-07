@@ -1,9 +1,12 @@
 .devenv.flake.nix
 .devenv/
+.direnv/
 .idea
 .pre-commit-config.yaml
 .env
-.direnv/
+!packages/reference/.env
+!packages/reference/.direnv
+!packages/reference/.devenv
 .pnpm/
 .cspell/
 node_modules/

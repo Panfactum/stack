@@ -1,3 +1,5 @@
 .devenv
-.direnv
+.terraform
+.env
 .terragrunt-cache
+.direnv
