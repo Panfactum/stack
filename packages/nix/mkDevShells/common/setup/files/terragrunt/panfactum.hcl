@@ -93,6 +93,15 @@ terraform {
       local.is_local ? "-lock=false" : "-lock-timeout=30m"
     ]
   }
+
+  # Fail fast if inputs are missing rather than prompting for
+  # interactive input
+  extra_arguments "input_validation" {
+    commands = get_terraform_commands_that_need_input()
+    arguments = [
+      "-input=false",
+    ]
+  }
 }
 
 ################################################################
@@ -145,6 +154,14 @@ generate "helm_provider" {
   contents = local.enable_helm ? templatefile("${local.provider_folder}/helm.tftpl", {
     kube_api_server     = local.enable_helm ? local.vars.kube_api_server : ""
     kube_config_context = local.enable_helm ? local.vars.kube_config_context : ""
+  }) : ""
+}
+
+generate "authentik_provider" {
+  path      = "authentik.tf"
+  if_exists = "overwrite_terragrunt"
+  contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik.tftpl", {
+    authentik_url = local.enable_authentik ? local.vars.authentik_url : ""
   }) : ""
 }
 

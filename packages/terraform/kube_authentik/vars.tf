@@ -77,3 +77,8 @@ variable "email_from_address" {
   type        = string
 }
 
+variable "akadmin_email" {
+  description = "The email address to use for the root authentik administrator. Warning: must be changed manually once applied."
+  type        = string
+}
+

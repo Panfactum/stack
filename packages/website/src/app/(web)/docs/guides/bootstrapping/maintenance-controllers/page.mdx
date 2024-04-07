@@ -188,11 +188,7 @@ Let's verify that backup functionality is working as expected by simulating an e
 
       <MarkdownImage src={ebsDeleteImg} alt="Delete the Vault EBS volumes" />
 
-   4. Let's verify that Vault is truly unavailable. Run `vault token lookup`. You should receive an error like the following:
-
-      ```shell-session
-      Error looking up token: Get "https://vault.prod.panfactum.com/v1/auth/token/lookup-self": tls: failed to verify certificate: x509: certificate is valid for ingress.local, not vault.prod.panfactum.com
-      ```
+   4. Let's verify that Vault is truly unavailable. Run `vault token lookup`. You should receive a connection error.
 
    5. At this point, your cluster would normally be irrevocably damaged. You would not be able to recover
       without redeploying the entire cluster as the Vault EBS volumes contained root secret material used to power the X.509 infrastructure.

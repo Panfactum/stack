@@ -4,7 +4,8 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_authentik"
+  source = "../../../../../terraform//kube_authentik"
+  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_authentik"
 }
 
 dependency "cnpg" {
@@ -32,4 +33,6 @@ inputs = {
   smtp_user          = dependency.ses_domain.outputs.smtp_user
   smtp_password      = dependency.ses_domain.outputs.smtp_password
   email_from_address = "no-reply@panfactum.com"
+
+  akadmin_email = "it@panfactum.com"
 }

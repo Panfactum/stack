@@ -327,7 +327,9 @@ data "aws_iam_policy_document" "backup" {
       "dynamodb:DeleteItem",
       "dynamodb:BatchWriteItem",
       "dynamodb:DescribeTable",
-      "dynamodb:RestoreTableFromAwsBackup"
+      "dynamodb:RestoreTableFromAwsBackup",
+      "dynamodb:ListTagsOfResource",
+      "dynamodb:StartAwsBackupJob"
     ]
     resources = [aws_dynamodb_table.lock.arn]
   }

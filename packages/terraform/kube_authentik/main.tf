@@ -164,6 +164,32 @@ resource "random_password" "secret_id" {
   special = false
 }
 
+// Initial password for the root akadmin user
+// Will only be used on the first apply
+resource "random_password" "bootstrap_password" {
+  length  = 64
+  special = false
+}
+
+// Initial API token for the root akadmin user
+// Will only be used on the first apply
+resource "random_password" "bootstrap_token" {
+  length  = 64
+  special = false
+}
+
+resource "kubernetes_secret" "bootstrap_creds" {
+  metadata {
+    name      = "bootstrap-creds"
+    namespace = local.namespace
+    labels    = module.labels_server.kube_labels
+  }
+  data = {
+    password = random_password.bootstrap_password.result
+    token    = random_password.bootstrap_token.result
+  }
+}
+
 resource "helm_release" "authentik" {
   namespace       = local.namespace
   name            = "authentik"
@@ -187,6 +213,7 @@ resource "helm_release" "authentik" {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
         env = [
+          // Authentik Settings
           {
             name  = "AUTHENTIK_COOKIE_DOMAIN"
             value = var.domain
@@ -195,10 +222,14 @@ resource "helm_release" "authentik" {
             name  = "AUTHENTIK_DISABLE_UPDATE_CHECK"
             value = "true"
           },
+
+          // Redis Settings
           {
             name  = "AUTHENTIK_REDIS__TLS"
             value = "false"
           },
+
+          // Postgres Settings
           {
             name  = "AUTHENTIK_POSTGRESQL__USE_PGBOUNCER"
             value = "true"
@@ -210,6 +241,31 @@ resource "helm_release" "authentik" {
           {
             name  = "AUTHENTIK_POSTGRESQL__SSLMODE"
             value = "verify-full"
+          },
+
+          // Bootstrap Settings
+          // https://docs.goauthentik.io/docs/installation/automated-install
+          {
+            name  = "AUTHENTIK_BOOTSTRAP_EMAIL"
+            value = var.akadmin_email
+          },
+          {
+            name = "AUTHENTIK_BOOTSTRAP_TOKEN"
+            valueFrom = {
+              secretKeyRef = {
+                name = kubernetes_secret.bootstrap_creds.metadata[0].name
+                key  = "token"
+              }
+            }
+          },
+          {
+            name = "AUTHENTIK_BOOTSTRAP_PASSWORD"
+            valueFrom = {
+              secretKeyRef = {
+                name = kubernetes_secret.bootstrap_creds.metadata[0].name
+                key  = "password"
+              }
+            }
           }
         ]
       }

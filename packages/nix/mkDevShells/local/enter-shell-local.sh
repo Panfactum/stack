@@ -13,23 +13,6 @@ set -eo pipefail
 export KUBECONFIG="$DEVENV_ROOT/$PF_KUBE_DIR/config"
 export KUBE_CONFIG_PATH="$DEVENV_ROOT/$PF_KUBE_DIR/config"
 
-## TODO: Make this a command that parses the output of the terraform module
-## Setup access to the development-primary kubernetes cluster
-#kubectl config set-credentials development-primary \
-#  --exec-api-version "client.authentication.k8s.io/v1beta1" \
-#  --exec-command aws \
-#  --exec-arg --region,us-west-2,eks,get-token,--cluster-name,development-primary \
-#  --exec-env AWS_PROFILE=development-superuser
-#
-#kubectl config set-cluster development-primary \
-#  --server https://816EF3BEAC08244FA2032C5C09A5D503.gr7.us-east-2.eks.amazonaws.com \
-#  --certificate-authority "$DEVENV_ROOT/.kube/development-primary.crt" \
-#  --embed-certs
-#
-#kubectl config set-context development-primary \
-#  --user development-primary \
-#  --cluster development-primary
-
 #############################################
 ## AWS
 #############################################
@@ -45,6 +28,10 @@ export AWS_PROFILE=development-superuser #TODO: Move to the .env file
 
 # Use repo-local terragrunt downloads
 export TERRAGRUNT_DOWNLOAD="$DEVENV_ROOT/.terragrunt-cache"
+
+# This speeds up terragrunt commands that have dependencies significantly
+# See https://terragrunt.gruntwork.io/docs/reference/cli-options/#terragrunt-fetch-dependency-output-from-state
+export TERRAGRUNT_FETCH_DEPENDENCY_OUTPUT_FROM_STATE="true"
 
 #############################################
 ## Podman / Docker

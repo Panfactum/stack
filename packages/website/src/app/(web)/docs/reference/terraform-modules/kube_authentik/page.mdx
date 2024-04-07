@@ -25,6 +25,12 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
+### <a name="input_akadmin_email" /> [akadmin\_email](#input_akadmin_email)
+
+Description: The email address to use for the root authentik administrator. Warning: must be changed manually once applied.
+
+Type: `string`
+
 ### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster.
@@ -174,6 +180,18 @@ Default: `false`
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_akadmin_bootstrap_password" /> [akadmin\_bootstrap\_password](#output_akadmin_bootstrap_password)
+
+Description: The initial password for the root akadmin user. Only used on initial bootstrapping.
+
+### <a name="output_akadmin_bootstrap_token" /> [akadmin\_bootstrap\_token](#output_akadmin_bootstrap_token)
+
+Description: The initial API token for the root akadmin user. Only used on initial bootstrapping.
+
+### <a name="output_akadmin_email" /> [akadmin\_email](#output_akadmin_email)
+
+Description: The email for the root akadmin user.
 
 ### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
 
