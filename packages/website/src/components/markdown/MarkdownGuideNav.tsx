@@ -73,6 +73,7 @@ export default memo(function MarkdownGuideNav (props: MarkdownGuideNavProps) {
               <div>
                 {' '}
                 Step
+                {' '}
                 {stepNumber}
                 {' '}
                 /
@@ -103,6 +104,7 @@ export default memo(function MarkdownGuideNav (props: MarkdownGuideNavProps) {
               <div>
                 {' '}
                 Step
+                {' '}
                 {stepNumber}
                 {' '}
                 /
