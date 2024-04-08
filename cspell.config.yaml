@@ -104,7 +104,8 @@ words: [
   "sigv",
   "pgbouncer",
   "pooler",
-  "akadmin"
+  "akadmin",
+  "nixos"
 ]
 languageSettings:
   - languageId: markdown,mdx
