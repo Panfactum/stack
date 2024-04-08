@@ -1,0 +1,51 @@
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
+
+# Install Tooling
+
+## Objective
+
+Install the necessary tooling to begin working with the Panfactum stack.
+
+## Supported Systems
+
+* Linux
+* MacOS (Intel or ARM)
+* Windows (via `WSLv2`)
+
+## Installation
+
+Please install these tools:
+
+| Tool         | Purpose                                                                             | Installation Docs                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `git`        | Primary version control tool                                                        | [Docs](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)                                                     |
+| `git-lfs`    | Git extension for working with large binary blobs                                   | [Docs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) |
+| `nix`        | Package management tool used to install all other dependencies                      | [Docs](https://nixos.org/download.html)                                                                                   |
+| `direnv`     | Automatically loads tooling when entering the project directory                     | [Docs](https://direnv.net/docs/installation.html)                                                                         |
+| `nix-direnv` | Significantly improves the speed of loading developer environments declared via nix | [Docs](https://github.com/nix-community/nix-direnv)                                                                       |
+
+### Installation Notes
+
+#### `nix`
+
+* You must enable [nix flakes](https://zero-to-nix.com/concepts/flakes) by following [these instructions](https://nixos.wiki/wiki/Flakes).
+  If you do not use `NixOS` or `home-manager`, we recommend adding the appropriate flags to your `~/.config/nix/nix.conf`.
+
+* Our stack depends on some "unfree" packages such as `terraform` which are not technically [open source software](https://thenewstack.io/hashicorp-abandons-open-source-for-business-source-license/).
+  That said, using any of these tools in your stack is free as long as you are not developing competing products. You must whitelist
+  the ability to download these tools by following these [instructions](https://nixos.wiki/wiki/Unfree_Software). We recommend
+  adding the appropriate settings to your `~/.config/nixpkgs/config.nix` settings file.
+
+#### `direnv`
+
+* Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
+
+#### `nix-direnv`
+
+* If you do not use `NixOS` or `home-manager`, we recommend installing `nix-direnv` via the `nix-env` instructions provided in the above link.
+
+## Next Steps
+
+We are now ready to launch your organization's developer environment.
+
+<MarkdownGuideNav backHref={"./overview"} forwardHref={"./boot-developer-environment"} stepNumber={2} totalSteps={4} progressLabel={"Getting Started Guide:"} />

@@ -2,6 +2,8 @@
 
 # Kubernetes Deployment
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/kube_deployment)
+
 **Type:** [Submodule](./overview)
 
 This module provides our standard set up for a configurable Kubernetes Deployment. It includes:
@@ -98,30 +100,6 @@ list(object({             // key is the secret provider class
 
 Default: `[]`
 
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
 
 Description: The maximum number of instances of the service
@@ -162,22 +140,6 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"kube_deployment"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"kube_deployment"`
-
 ### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
 
 Description: Annotations to add to the pods in the deployment
@@ -204,14 +166,6 @@ Default: `{}`
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
 Description: The priority class to use for pods in the deployment
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
 
 Type: `string`
 

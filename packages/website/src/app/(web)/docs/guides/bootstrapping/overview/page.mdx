@@ -1,35 +1,20 @@
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
+
 # Overview
 
-## Objective
-
-Deploy the necessary infrastructure to begin hosting your organization's software.
+This series of guides will take you through the necessary steps to deploy and begin working
+with the Panfactum stack in your organization.
 
 ## Time Commitment
 
 | Experience Level | Description                                                                                 | Completion Time |
 | ---------------- | ------------------------------------------------------------------------------------------- | --------------- |
 | Novice           | Has limited experience working with cloud infrastructure                                    | 1-2 weeks       |
-| Competent        | Has worked with infrastructure-as-code tools, AWS, and kubernetes in professional settings  | 2-3 days        |
+| Experienced      | Has worked with infrastructure-as-code tools, AWS, and kubernetes in professional settings  | 2-3 days        |
 | Expert           | Has extensive experience guiding teams that work terraform, terragrunt, AWS, and Kubernetes | 4-8 hours       |
-
-## Summary
-
-This series of guides will take you through setting up the core infrastructure for the Panfactum stack.
-
-This includes the production-ready deployments of the following infrastructure components:
-
-* AWS organization
-* Kubernetes clusters
-* Identity provider
-* Database operators
-
-TODO: Add link to more specific capabilities of the stack
 
 ## Prerequisites
 
-* You should already have completed the following guides:
-  * [Repository setup](../getting-started/repo-setup)
-  * [Terraforming](../terraforming/overview), in particular the [Deploying Modules guide](../terraforming/deploying-modules)
 * A credit card that you can use to pay for the AWS infrastructure. Expect to spend at minimum $150 / month / Kubernetes cluster.
 * If your organization already has an identity provider (a tool that you use for single-sign-on (SSO) such as
   Okta, Google, Azure Entra ID, etc), you will need to access to connect a new service provider. This typically
@@ -55,4 +40,6 @@ TODO: Add link to more specific capabilities of the stack
 
 ## Next Steps
 
-* [Preparing AWS](./preparing-aws)
+To get started, let's install the Panfactum local developer environment.
+
+<MarkdownGuideNav forwardHref={"./installing-devenv"} stepNumber={1} totalSteps={20} progressLabel={"Panfactum Bootstrapping Guide:"} />

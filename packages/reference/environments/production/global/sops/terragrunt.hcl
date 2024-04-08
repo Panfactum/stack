@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//aws_kms_encrypt_key"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//aws_kms_encrypt_key"
+  source = include.panfactum.locals.pf_stack_source
 }
 
 inputs = {

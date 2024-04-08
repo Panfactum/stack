@@ -48,37 +48,49 @@ module "pull_through" {
 }
 
 module "server_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
   extra_tags = merge(var.extra_tags, {
     submodule = local.server_submodule
   })
 }
 
 module "csi_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
   extra_tags = merge(var.extra_tags, {
     submodule = local.csi_submodule
   })
 }
 
 module "constants" {
-  source         = "../constants"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../constants"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 data "aws_region" "region" {}
@@ -89,13 +101,18 @@ data "aws_caller_identity" "id" {}
 ***************************************/
 
 module "namespace" {
-  source         = "../kube_namespace"
-  namespace      = local.name
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_namespace"
+
+  namespace = local.name
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -114,11 +131,14 @@ module "unseal_key" {
   user_iam_arns = [module.aws_permissions.role_arn]
 
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 
@@ -144,17 +164,22 @@ resource "kubernetes_service_account" "vault" {
 }
 
 module "aws_permissions" {
-  source                    = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
+
   service_account           = kubernetes_service_account.vault.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.sa.json
   ip_allow_list             = var.ip_allow_list
-  environment               = var.environment
-  pf_root_module            = var.pf_root_module
-  region                    = var.region
-  is_local                  = var.is_local
-  extra_tags                = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -360,8 +385,9 @@ resource "kubernetes_manifest" "vpa_server" {
 ***************************************/
 
 module "ingress" {
-  count     = var.ingress_enabled ? 1 : 0
-  source    = "../kube_ingress"
+  count  = var.ingress_enabled ? 1 : 0
+  source = "../kube_ingress"
+
   namespace = local.namespace
   name      = "vault"
   ingress_configs = [{
@@ -374,11 +400,14 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = false
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
 
   depends_on = [helm_release.vault]
 }

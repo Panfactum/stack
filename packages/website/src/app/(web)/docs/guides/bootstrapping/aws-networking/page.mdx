@@ -3,6 +3,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import natImg from './nat.jpg'
@@ -268,3 +269,9 @@ We will now verify a few features of the network:
          that NAT is working correctly.
 
    8. Close the connection, and terminate the instance.
+
+## Next Steps
+
+Now that networking is setup in AWS, we can deploy your Kubernetes cluster.
+
+<MarkdownGuideNav backHref={"./dns"} forwardHref={"./kubernetes-cluster"} stepNumber={7} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />

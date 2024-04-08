@@ -10,22 +10,30 @@ terraform {
 }
 
 module "kube_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants" {
-  source         = "../constants"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../constants"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "kubernetes_priority_class" "database" {

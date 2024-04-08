@@ -28,52 +28,71 @@ module "pull_through" {
 }
 
 module "kube_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_admission_controller" {
   source = "../constants"
+
   matching_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "admission-controller"
   }
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_updater" {
   source = "../constants"
+
   matching_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "updater"
   }
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_recommender" {
   source = "../constants"
+
   matching_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "recommender"
   }
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 # ################################################################################
@@ -81,13 +100,18 @@ module "constants_recommender" {
 # ################################################################################
 
 module "namespace" {
-  source         = "../kube_namespace"
-  namespace      = local.name
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_namespace"
+
+  namespace = local.name
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 # ################################################################################
@@ -95,15 +119,20 @@ module "namespace" {
 # ################################################################################
 
 module "webhook_cert" {
-  source         = "../kube_internal_cert"
-  service_names  = ["vpa-webhook"]
-  secret_name    = "vpa-webhook-certs"
-  namespace      = local.namespace
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_internal_cert"
+
+  service_names = ["vpa-webhook"]
+  secret_name   = "vpa-webhook-certs"
+  namespace     = local.namespace
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "helm_release" "vpa" {

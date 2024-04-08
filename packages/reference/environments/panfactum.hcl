@@ -3,29 +3,33 @@
 #################################################################
 
 locals {
-  global_file      = find_in_parent_folders("global.yaml", "DNE")
-  global_raw_vars  = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : null
-  global_user_file = find_in_parent_folders("global.user.yaml", "DNE")
-  global_user_vars = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : null
-  global_vars      = merge(local.global_raw_vars, local.global_user_vars)
+  global_file       = find_in_parent_folders("global.yaml", "DNE")
+  global_raw_vars   = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : null
+  global_user_file  = find_in_parent_folders("global.user.yaml", "DNE")
+  global_user_vars  = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : null
+  global_vars       = merge({}, local.global_raw_vars, local.global_user_vars)
+  global_extra_tags = lookup(local.global_vars, "extra_tags", {})
 
-  environment_file      = find_in_parent_folders("environment.yaml", "DNE")
-  environment_raw_vars  = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : null
-  environment_user_file = find_in_parent_folders("environment.user.yaml", "DNE")
-  environment_user_vars = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : null
-  environment_vars      = merge(local.environment_raw_vars, local.environment_user_vars)
+  environment_file       = find_in_parent_folders("environment.yaml", "DNE")
+  environment_raw_vars   = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : null
+  environment_user_file  = find_in_parent_folders("environment.user.yaml", "DNE")
+  environment_user_vars  = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : null
+  environment_vars       = merge({}, local.environment_raw_vars, local.environment_user_vars)
+  environment_extra_tags = lookup(local.environment_vars, "extra_tags", {})
 
-  region_file      = find_in_parent_folders("region.yaml", "DNE")
-  region_raw_vars  = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : null
-  region_user_file = find_in_parent_folders("region.user.yaml", "DNE")
-  region_user_vars = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : null
-  region_vars      = merge(local.region_raw_vars, local.region_user_vars)
+  region_file       = find_in_parent_folders("region.yaml", "DNE")
+  region_raw_vars   = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : null
+  region_user_file  = find_in_parent_folders("region.user.yaml", "DNE")
+  region_user_vars  = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : null
+  region_vars       = merge({}, local.region_raw_vars, local.region_user_vars)
+  region_extra_tags = lookup(local.region_vars, "extra_tags", {})
 
-  module_file      = "${get_terragrunt_dir()}/module.yaml"
-  module_raw_vars  = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : null
-  module_user_file = "${get_terragrunt_dir()}/module.user.yaml"
-  module_user_vars = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : null
-  module_vars      = merge(local.module_raw_vars, local.module_user_vars)
+  module_file       = "${get_terragrunt_dir()}/module.yaml"
+  module_raw_vars   = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : null
+  module_user_file  = "${get_terragrunt_dir()}/module.user.yaml"
+  module_user_vars  = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : null
+  module_vars       = merge({}, local.module_raw_vars, local.module_user_vars)
+  module_extra_tags = lookup(local.module_vars, "extra_tags", {})
 
   # Merge all of the vars with order of precedence
   vars = merge(
@@ -41,6 +45,15 @@ locals {
   enable_kubernetes = contains(local.providers, "kubernetes")
   enable_vault      = contains(local.providers, "vault")
   enable_helm       = contains(local.providers, "helm")
+  enable_authentik  = contains(local.providers, "authentik")
+
+  # The version of the panfactum stack to deploy
+  pf_stack_type                = lookup(local.vars, "pf_stack_type", "community")
+  pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
+  pf_stack_repo                = local.pf_stack_version == "local" ? "local" : local.pf_stack_type == "community" ? "git@github.com:Panfactum/stack.git" : "git@github.com:Panfactum/stack.git"
+  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "get-version-hash", local.pf_stack_version, local.pf_stack_repo)
+  pf_stack_module              = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
+  pf_stack_source              = local.pf_stack_version == "local" ? ("../../../../../terraform//${local.pf_stack_module}") : "${local.pf_stack_repo}//packages/terraform/${local.pf_stack_module}?ref=${local.pf_stack_version_commit_hash}"
 
   # Repo metadata
   repo_url       = get_env("PF_REPO_URL")
@@ -54,11 +67,10 @@ locals {
   version = lookup(local.vars, "version", local.primary_branch)
 
   # The version_tag needs to be a commit sha
-  version_hash = run_cmd("--terragrunt-quiet", "get-version-hash", local.version)
-
+  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "get-version-hash", local.version)
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
-  use_local_terraform = contains(["latest", "local", local.primary_branch], local.version)
+  use_local_terraform = contains(["local", local.primary_branch], local.version)
   terraform_dir       = get_env("PF_TERRAFORM_DIR")
   terraform_path      = "${startswith(local.terraform_dir, "/") ? local.terraform_dir : "/${local.terraform_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
   source              = local.use_local_terraform ? "${get_repo_root()}${local.terraform_path}" : "${local.repo_url}?ref=${local.version}${local.terraform_path}"
@@ -90,7 +102,16 @@ terraform {
   extra_arguments "retry_lock" {
     commands = get_terraform_commands_that_need_locking()
     arguments = [
-      local.is_local ? "-lock=false" : "-lock-timeout=30m",
+      local.is_local ? "-lock=false" : "-lock-timeout=30m"
+    ]
+  }
+
+  # Fail fast if inputs are missing rather than prompting for
+  # interactive input
+  extra_arguments "input_validation" {
+    commands = get_terraform_commands_that_need_input()
+    arguments = [
+      "-input=false",
     ]
   }
 }
@@ -145,6 +166,14 @@ generate "helm_provider" {
   contents = local.enable_helm ? templatefile("${local.provider_folder}/helm.tftpl", {
     kube_api_server     = local.enable_helm ? local.vars.kube_api_server : ""
     kube_config_context = local.enable_helm ? local.vars.kube_config_context : ""
+  }) : ""
+}
+
+generate "authentik_provider" {
+  path      = "authentik.tf"
+  if_exists = "overwrite_terragrunt"
+  contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik.tftpl", {
+    authentik_url = local.enable_authentik ? local.vars.authentik_url : ""
   }) : ""
 }
 
@@ -219,10 +248,12 @@ retry_sleep_interval_sec = 30
 ################################################################
 ### Default Module Inputs
 ################################################################
-
 inputs = {
-  // common vars
-  is_local    = local.is_local
-  environment = local.vars.environment
-  region      = local.vars.region
+  is_local         = local.is_local
+  environment      = local.vars.environment
+  region           = local.vars.region
+  pf_stack_type    = local.pf_stack_type
+  pf_stack_version = local.pf_stack_version
+  pf_stack_commit  = local.pf_stack_version_commit_hash
+  extra_tags       = merge(local.module_extra_tags, local.region_extra_tags, local.environment_extra_tags, local.global_extra_tags)
 }

@@ -13,20 +13,11 @@ Set `inputs.panfactum.url` to `"github:Panfactum/stack/24-01.4"`.
 
 ## Terragrunt Deployments
 
-If you are deploying Panfactum terraform modules directly, set the `source` in your module's `terragrunt.hcl`
-to the correct `ref` to match the desired version. For example:
-
-```hcl
-terraform {
-   source = "github.com/Panfactum/stack.git/packages/terraform//aws_eks?ref=24-01.4"
-}
-```
-
-Ensure you do this for **every** module.
+If you are deploying Panfactum terraform modules directly, update the `pf_stack_version` [terragrunt variable](../../reference/terragrunt-variables).
 
 ## Terraform Modules
 
-If you are using Panfacutm terraform modules in your own terraform modules, set the `source` in `module` blocks
+If you are using Panfactum terraform modules in your own terraform modules, set the `source` in `module` blocks
 to the correct `ref` to match the desired version. For example:
 
 ```hcl

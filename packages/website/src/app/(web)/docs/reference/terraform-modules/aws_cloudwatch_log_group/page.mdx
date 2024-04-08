@@ -2,6 +2,8 @@
 
 # AWS CloudWatch Log Group
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/aws_cloudwatch_log_group)
+
 **Type:** [Submodule](./overview)
 
 This module sets a cloud watch log group for a given service
@@ -31,54 +33,6 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
-
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"aws_cloudwatch_log_group"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"aws_cloudwatch_log_group"`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
 
 ## Outputs
 

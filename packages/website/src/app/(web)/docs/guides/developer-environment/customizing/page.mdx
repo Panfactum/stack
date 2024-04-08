@@ -83,13 +83,13 @@ commit, you can create the following nix expression in a file called `node.nix` 
 ```nix
 let
   system = builtins.currentSystem;
-  nixpkgsSrc = builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611.tar.gz";
-    sha256 = "1b6953zxrbvvy2x4qw5v4s1350jljlngr27pwd36i040mzsyyshr"; # Update if using a different commit
+  nixpkgsSrc = builtins.fetchGit {
+    url = "https://github.com/NixOS/nixpkgs";
+    rev = "c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
+    shallow = true;
   };
   pkgs = import nixpkgsSrc { inherit system; };
-in
-  pkgs.nodejs_20
+in pkgs.nodejs_20
 ```
 
 You would include this in your `devenv.nix` as follows:

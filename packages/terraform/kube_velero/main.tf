@@ -41,33 +41,45 @@ resource "random_id" "controller_id" {
 }
 
 module "kube_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, local.matching_labels)
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, local.matching_labels)
 }
 
 module "constants" {
-  source          = "../constants"
-  environment     = var.environment
-  matching_labels = local.matching_labels
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+  source = "../constants"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  matching_labels  = local.matching_labels
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "namespace" {
-  source         = "../kube_namespace"
-  namespace      = "velero"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_namespace"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  namespace        = "velero"
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -88,11 +100,15 @@ module "backup_bucket" {
   intelligent_transitions_enabled = false
   timed_transitions_enabled       = false
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -143,16 +159,21 @@ resource "kubernetes_service_account" "velero" {
 }
 
 module "aws_permissions" {
-  source                    = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
+
   service_account           = kubernetes_service_account.velero.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.velero.json
   ip_allow_list             = var.ip_allow_list
-  environment               = var.environment
-  pf_root_module            = var.pf_root_module
-  region                    = var.region
-  is_local                  = var.is_local
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
 }
 
 

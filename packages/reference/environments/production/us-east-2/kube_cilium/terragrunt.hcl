@@ -4,7 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_cilium"
+  source = include.panfactum.locals.pf_stack_source
 }
 
 dependency "cluster" {

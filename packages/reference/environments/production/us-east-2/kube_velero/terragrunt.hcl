@@ -4,11 +4,16 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_velero"
+  source = include.panfactum.locals.pf_stack_source
 }
 
 dependency "cluster" {
   config_path = "../aws_eks"
+}
+
+dependency "snapshotter" {
+  config_path  = "../kube_external_snapshotter"
+  skip_outputs = true
 }
 
 inputs = {

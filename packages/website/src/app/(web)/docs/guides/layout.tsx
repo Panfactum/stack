@@ -8,56 +8,20 @@ const SIDENAV_SECTIONS = [
     path: '/getting-started',
     sub: [
       {
-        text: 'Overview',
+        text: 'Start Here',
         path: '/overview'
       },
       {
-        text: 'Local Setup',
-        path: '/local-setup'
+        text: 'Install Tooling',
+        path: '/install-tooling'
       },
       {
-        text: 'Repository Setup',
-        path: '/repo-setup'
-      }
-    ]
-  },
-  {
-    text: 'Developer Environment',
-    path: '/developer-environment',
-    sub: [
-      {
-        text: 'Customizing',
-        path: '/customizing'
+        text: 'Boot Developer Environment',
+        path: '/boot-developer-environment'
       },
       {
-        text: 'Debugging',
-        path: '/debugging'
-      }
-    ]
-  },
-  {
-    text: 'Terraforming',
-    path: '/terraforming',
-    sub: [
-      {
-        text: 'Overview',
-        path: '/overview'
-      },
-      {
-        text: 'Deploying Modules',
-        path: '/deploying-modules'
-      },
-      {
-        text: 'Using Third-Party Modules',
-        path: '/third-party-modules'
-      },
-      {
-        text: 'Developing First-Party Modules',
-        path: '/first-party-modules'
-      },
-      {
-        text: 'Debugging',
-        path: '/debugging'
+        text: 'Connect to Infrastructure',
+        path: '/connect-to-infrastructure'
       }
     ]
   },
@@ -70,8 +34,16 @@ const SIDENAV_SECTIONS = [
         path: '/overview'
       },
       {
+        text: 'Installing the Developer Environment',
+        path: '/installing-devenv'
+      },
+      {
         text: 'Preparing AWS',
         path: '/preparing-aws'
+      },
+      {
+        text: 'Configuring Infrastructure-as-Code',
+        path: '/configuring-infrastructure-as-code'
       },
       {
         text: 'Bootstrapping Infrastructure-as-Code',
@@ -136,6 +108,58 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Testing',
         path: '/testing'
+      }
+    ]
+  },
+  {
+    text: 'Developer Environment',
+    path: '/developer-environment',
+    sub: [
+      {
+        text: 'Customizing',
+        path: '/customizing'
+      },
+      {
+        text: 'Debugging',
+        path: '/debugging'
+      },
+      {
+        text: 'Editor Setup',
+        path: '/editor-setup'
+      }
+    ]
+  },
+  {
+    text: 'Terraforming',
+    path: '/terraforming',
+    sub: [
+      {
+        text: 'Overview',
+        path: '/overview'
+      },
+      {
+        text: 'Repository Setup',
+        path: '/repo-setup'
+      },
+      {
+        text: 'Deploying Modules',
+        path: '/deploying-modules'
+      },
+      {
+        text: 'Using Panfactum Modules',
+        path: '/panfactum-modules'
+      },
+      {
+        text: 'Developing First-Party Modules',
+        path: '/first-party-modules'
+      },
+      {
+        text: 'Extending Panfactum Configuration',
+        path: '/extending-panfactum'
+      },
+      {
+        text: 'Debugging',
+        path: '/debugging'
       }
     ]
   },

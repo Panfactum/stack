@@ -6,6 +6,10 @@ import modules from './terraform-modules/modules.json'
 
 const SIDENAV_SECTIONS = [
   {
+    text: 'Releases',
+    path: '/releases'
+  },
+  {
     text: 'Repo Environment Variables',
     path: '/repo-variables'
   },
@@ -39,6 +43,10 @@ const SIDENAV_SECTIONS = [
       text: module,
       path: `/${module}`
     })))
+  },
+  {
+    text: 'Resource Tags',
+    path: '/resource-tags'
   }
 ]
 

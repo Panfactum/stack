@@ -64,63 +64,90 @@ resource "random_id" "pooler_r_id" {
 }
 
 module "kube_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, local.cluster_match_labels)
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, local.cluster_match_labels)
 }
 
 module "kube_labels_pooler_rw" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, local.pooler_rw_match_labels)
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, local.pooler_rw_match_labels)
 }
 
 module "kube_labels_pooler_r" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, local.pooler_r_match_labels)
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, local.pooler_r_match_labels)
 }
 
 module "constants" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = local.cluster_match_labels
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_pooler_rw" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = local.pooler_rw_match_labels
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_pooler_r" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = local.pooler_r_match_labels
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -134,19 +161,24 @@ resource "random_id" "bucket_name" {
 }
 
 module "s3_bucket" {
-  count                           = var.backups_enabled ? 1 : 0
-  source                          = "../aws_s3_private_bucket"
+  count  = var.backups_enabled ? 1 : 0
+  source = "../aws_s3_private_bucket"
+
   bucket_name                     = random_id.bucket_name[0].hex
   description                     = "Backups for the ${local.cluster_name} cluster."
   versioning_enabled              = false
   audit_log_enabled               = false
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
-  environment                     = var.environment
-  pf_root_module                  = var.pf_root_module
-  region                          = var.region
-  is_local                        = var.is_local
-  extra_tags                      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 data "aws_iam_policy_document" "s3_access" {
@@ -162,8 +194,9 @@ data "aws_iam_policy_document" "s3_access" {
 }
 
 module "irsa" {
-  count                     = var.backups_enabled ? 1 : 0
-  source                    = "../kube_sa_auth_aws"
+  count  = var.backups_enabled ? 1 : 0
+  source = "../kube_sa_auth_aws"
+
   eks_cluster_name          = var.eks_cluster_name
   service_account           = local.cluster_name
   service_account_namespace = var.pg_cluster_namespace
@@ -173,11 +206,15 @@ module "irsa" {
   // Due to a limitation in the cluster resource api, the cluster resource is the one that creates
   // the service account for us, so we let it to the annotations
   annotate_service_account = false
-  environment              = var.environment
-  pf_root_module           = var.pf_root_module
-  region                   = var.region
-  is_local                 = var.is_local
-  extra_tags               = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -202,10 +239,13 @@ module "server_certs" {
     "${local.cluster_name}-pooler-rw"
   ]
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
   extra_tags = merge(var.extra_tags, {
     "cnpg.io/reload" = ""
   })
@@ -223,10 +263,13 @@ module "client_certs" {
   usages      = ["client auth"]
   common_name = "streaming_replica"
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
   extra_tags = merge(var.extra_tags, {
     "cnpg.io/reload" = ""
   })

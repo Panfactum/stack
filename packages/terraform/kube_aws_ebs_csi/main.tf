@@ -42,23 +42,32 @@ resource "random_id" "controller_id" {
 
 
 module "kube_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = local.service })
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, { service = local.service })
 }
 
 module "constants" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = local.controller_match_labels
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -66,13 +75,18 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source         = "../kube_namespace"
-  namespace      = local.service
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_namespace"
+
+  namespace = local.service
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -101,17 +115,22 @@ data "aws_iam_policy_document" "extra_permissions" {
 }
 
 module "aws_permissions" {
-  source                    = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
+
   service_account           = kubernetes_service_account.ebs_csi.metadata[0].name
   service_account_namespace = kubernetes_service_account.ebs_csi.metadata[0].namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.extra_permissions.json
   ip_allow_list             = var.ip_allow_list
-  environment               = var.environment
-  pf_root_module            = var.pf_root_module
-  region                    = var.region
-  is_local                  = var.is_local
-  extra_tags                = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "aws_iam_role_policy_attachment" "default_permissions" {

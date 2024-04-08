@@ -35,13 +35,17 @@ module "pull_through" {
 }
 
 module "base_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "random_id" "controller_id" {
@@ -50,13 +54,17 @@ resource "random_id" "controller_id" {
 }
 
 module "controller_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { id = random_id.controller_id.hex })
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, { id = random_id.controller_id.hex })
 }
 
 resource "random_id" "webhook" {
@@ -65,13 +73,17 @@ resource "random_id" "webhook" {
 }
 
 module "webhook_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { id = random_id.webhook.hex })
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, { id = random_id.webhook.hex })
 }
 
 resource "random_id" "ca_injector" {
@@ -80,43 +92,62 @@ resource "random_id" "ca_injector" {
 }
 
 module "ca_injector_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { id = random_id.ca_injector.hex })
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, { id = random_id.ca_injector.hex })
 }
 
 module "constants_controller" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = { id = random_id.controller_id.hex }
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_webhook" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = { id = random_id.webhook.hex }
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants_ca_injector" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = { id = random_id.ca_injector.hex }
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -124,13 +155,18 @@ module "constants_ca_injector" {
 ***************************************/
 
 module "namespace" {
-  source         = "../kube_namespace"
-  namespace      = local.name
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_namespace"
+
+  namespace = local.name
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -154,17 +190,22 @@ resource "kubernetes_service_account" "webhook" {
 }
 
 module "webhook_cert" {
-  count          = var.self_generated_certs_enabled ? 0 : 1
-  source         = "../kube_internal_cert"
-  service_names  = ["cert-manager-webhook"]
-  common_name    = "cert-manager-webhook.cert-manager.svc"
-  secret_name    = local.webhook_secret
-  namespace      = local.namespace
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = module.webhook_labels.kube_labels
+  count  = var.self_generated_certs_enabled ? 0 : 1
+  source = "../kube_internal_cert"
+
+  service_names = ["cert-manager-webhook"]
+  common_name   = "cert-manager-webhook.cert-manager.svc"
+  secret_name   = local.webhook_secret
+  namespace     = local.namespace
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = module.webhook_labels.kube_labels
 }
 
 

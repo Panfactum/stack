@@ -2,6 +2,8 @@
 
 # Kubernetes Ingress
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/kube_ingress)
+
 **Type**: Module
 
 Our standard module for configuring ingress traffic in the cluster
@@ -357,14 +359,6 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_extra_response_headers" /> [extra\_response\_headers](#input_extra_response_headers)
 
 Description: A key-value mapping of extra headers to add to every response
@@ -372,22 +366,6 @@ Description: A key-value mapping of extra headers to add to every response
 Type: `map(string)`
 
 Default: `{}`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_permissions_policy_accelerometer" /> [permissions\_policy\_accelerometer](#input_permissions_policy_accelerometer)
 
@@ -685,22 +663,6 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"kube_ingress"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"kube_ingress"`
-
 ### <a name="input_rate_limiting_enabled" /> [rate\_limiting\_enabled](#input_rate_limiting_enabled)
 
 Description: Whether to enable rate limiting
@@ -716,14 +678,6 @@ Description: The value for Referrer-Policy header.
 Type: `string`
 
 Default: `"no-referrer"`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
 
 ### <a name="input_x_content_type_options_enabled" /> [x\_content\_type\_options\_enabled](#input_x_content_type_options_enabled)
 

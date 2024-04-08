@@ -4,8 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "../../../../../terraform//kube_authentik"
-  #source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_authentik"
+  source = include.panfactum.locals.pf_stack_source
 }
 
 dependency "cnpg" {

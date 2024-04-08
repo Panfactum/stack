@@ -2,6 +2,8 @@
 
 # Kubernetes Internal TLS Certificate
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/kube_internal_cert)
+
 **Type:** [Internal](./overview)
 
 Provisions a TLS key-pair with the internal cluster issuer. For use with internal cluster traffic.
@@ -48,22 +50,6 @@ Type: `string`
 
 Default: `"336h0m0s"`
 
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_include_localhost" /> [include\_localhost](#input_include_localhost)
 
 Description: Whether to include localhost in the SANs
@@ -88,14 +74,6 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_issuer_name" /> [issuer\_name](#input_issuer_name)
 
 Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
@@ -103,22 +81,6 @@ Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
 Type: `string`
 
 Default: `null`
-
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"kube_internal_cert"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"kube_internal_cert"`
 
 ### <a name="input_private_key_encoding" /> [private\_key\_encoding](#input_private_key_encoding)
 
@@ -135,14 +97,6 @@ Description: Whether to enable private key rotation.
 Type: `bool`
 
 Default: `true`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
 
 ### <a name="input_renew_before" /> [renew\_before](#input_renew_before)
 

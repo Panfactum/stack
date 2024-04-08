@@ -4,7 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = "github.com/Panfactum/stack.git?ref=main/packages/terraform//kube_aws_lb_controller"
+  source = include.panfactum.locals.pf_stack_source
 }
 
 dependency "aws_eks" {

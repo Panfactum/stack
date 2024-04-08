@@ -1,6 +1,10 @@
 # Meta
 environment: "production" # Name of the environment
 
+# Panfactum Stack
+pf_stack_type: "community"
+pf_stack_version: "main"
+
 # AWS
 aws_account_id: "891377197483" # ID of the aws account to use for the aws provider
 aws_profile: "production-superuser" # Name of the AWS CLI profile to use for the aws provider

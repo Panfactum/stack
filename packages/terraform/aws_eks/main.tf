@@ -22,22 +22,30 @@ locals {
 data "aws_region" "region" {}
 
 module "tags" {
-  source         = "../aws_tags"
-  environment    = var.environment
-  region         = var.region
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  extra_tags     = var.extra_tags
-  is_local       = var.is_local
+  source = "../aws_tags"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  extra_tags       = var.extra_tags
+  is_local         = var.is_local
 }
 
 module "constants" {
-  source         = "../constants"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../constants"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "node_settings" {
@@ -48,11 +56,14 @@ module "node_settings" {
   max_pods         = 25
   is_spot          = false
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 ##########################################################################
@@ -192,13 +203,17 @@ module "encrypt_key" {
     aws.secondary = aws.secondary
   }
 
-  name           = "kube-${var.cluster_name}"
-  description    = "Encryption key for kubernetes control plane data"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  name        = "kube-${var.cluster_name}"
+  description = "Encryption key for kubernetes control plane data"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "aws_eks_addon" "coredns" {
@@ -216,14 +231,18 @@ resource "aws_eks_addon" "coredns" {
 ////////////////////////////////////////////////////////////
 
 module "aws_cloudwatch_log_group" {
-  source         = "../aws_cloudwatch_log_group"
-  name           = "/aws/eks/${var.cluster_name}/cluster"
-  description    = "Collects logs for our AWS EKS Cluster"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source      = "../aws_cloudwatch_log_group"
+  name        = "/aws/eks/${var.cluster_name}/cluster"
+  description = "Collects logs for our AWS EKS Cluster"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 ##########################################################################

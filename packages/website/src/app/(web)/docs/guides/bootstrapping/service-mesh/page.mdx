@@ -1,4 +1,5 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import linkerdPods from './linkerd-pods.jpg'
@@ -214,6 +215,8 @@ We will revisit observability tooling in a later section, so for now, let's remo
 
 ## Next Steps
 
-At this point, all of the necessary components for powering *internal* cluster networking are configured. However, before
-we configure *external* networking, [we should address autoscaling](./autoscaling)
+At this point, all the necessary components for powering *internal* cluster networking are configured. However, before
+we configure *external* networking, we will address autoscaling
 as the cluster is likely already running 75+ containers and will soon become resource constrained.
+
+<MarkdownGuideNav backHref={"./certificate-management"} forwardHref={"./autoscaling"} stepNumber={13} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />

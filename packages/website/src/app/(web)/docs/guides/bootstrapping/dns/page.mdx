@@ -1,4 +1,5 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import dnssecImg from './dnssec.jpg';
@@ -192,4 +193,6 @@ is automatically deployed and updated without manual intervention.
 ## Next Steps
 
 Now that you have prepared your DNS configuration, we are ready to begin setting up the Panfactum stack. Our
-next step is to [configure AWS networking by creating a Virtual Private Cloud (VPC)](./aws-networking).
+next step is to configure AWS networking by creating a Virtual Private Cloud (VPC).
+
+<MarkdownGuideNav backHref={"./infrastructure-as-code"} forwardHref={"./aws-networking"} stepNumber={6} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />

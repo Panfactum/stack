@@ -7,10 +7,22 @@ files (or their `*.user.yaml` counterparts) inside the environments directory.
 
 Used for consistency across labels and tags.
 
-| Variable      | Type   | Description                 | Recommended File   |
-| :------------ | :----- | :-------------------------- | :----------------- |
-| `environment` | string | The name of the environment | `environment.yaml` |
-| `region`      | string | The name of the region      | `region.yaml`      |
+| Variable      | Type        | Description                                                                  | Recommended File   |
+| :------------ | :---------- | :--------------------------------------------------------------------------- | :----------------- |
+| `environment` | string      | The name of the environment                                                  | `environment.yaml` |
+| `region`      | string      | The name of the region                                                       | `region.yaml`      |
+| `extra_tags`  | map(string) | An object containing extra tags to add to all resources in the current scope | Any                |
+
+## Module Source
+
+Used to configure the `terraform.source` option when deploying a module.
+
+| Variable           | Type   | Description                                                                                                                                                                                                                                                 | Recommended File   |
+| :----------------- | :----- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_TERRAFORM_DIR` you are using.  Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                         | `environment.yaml` |
+| `pf_stack_type`    | string | Configures `include.panfactum.locals.pf_stack_source`. The edition of the Panfactum stack you are using. One of: `community`, `enterprise`, `local`.                                                                                                        | `global.yaml`      |
+| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                                       | `environment.yaml` |
+| `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_TERRAFORM_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/terraform` to use. Defaults to the name of the module directory. | `module.yaml`      |
 
 ## State Backend Setup
 
@@ -40,6 +52,7 @@ The following provider strings are available:
 * `time`
 * `tls`
 * `vault`
+* `authentik`
 
 In addition, some providers have additional configuration values that must be set.
 

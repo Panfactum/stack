@@ -1,6 +1,35 @@
 # Releases
 
-## Format
+## Community Edition Releases
+
+You can find all the releases [here](https://github.com/Panfactum/stack/releases).
+
+### Community Edition Format
+
+Community edition release will be of the format:
+
+`community-<YY>-<MM>-<DD>`
+
+These releases do not contain any SLA or semantic versioning guarantees, but we will announce breaking changes in the
+CHANGELOG.
+
+This project maintains a strictly
+linear history. Bug fixes and
+new features will be added in new releases only (i.e., they will never be back-ported).
+
+### Community Edition Cadence
+
+We have no set cadence for the community stack, but generally we will release changes 2-5 times per month.
+
+### Community Edition Support
+
+We offer extended support and enhanced resolution SLAs in our enterprise edition only (see below).
+
+## Enterprise Edition Releases
+
+You can find all the supported releases [here](../../reference/releases).
+
+### Enterprise Edition Format
 
 Each release will be of the format:
 
@@ -36,7 +65,7 @@ we do this for good reasons:
     that will notify you if code changes, but only if you cut a new discrete release number. For critical items like
     security patches, we want our users to be able to receive notifications if they should update immediately.
 
-## Cadence
+### Enterprise Edition Cadence
 
 We aim to create a new major release of the Panfactum stack **twice per year.**
 
@@ -48,7 +77,7 @@ if there are significant fixes for bugs or security vulnerabilities.
 We endeavor to never introduce breaking changes in patches. If a fix requires breaking functionality, we will
 cut a new major release.
 
-## Support
+### Enterprise Edition Support
 
 Major releases will receive patches for significant bugs or security vulnerabilities for twelve (12) months
 following its initial release.
@@ -64,5 +93,3 @@ If the answer to both of these questions is "yes," then it is likely:
 
 * We will attempt to resolve the issue within 30 days
 * We will patch supported releases
-
-**We offer extended support and enhanced resolution SLAs to [our customers](../../../pricing).**

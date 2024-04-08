@@ -1,3 +1,4 @@
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import zonesOutputImg from './aws-delegated-zones-output.jpg'
@@ -220,5 +221,7 @@ namespace. [^7]
 
 ## Next Steps
 
-Now that internal certificate management is working, [we will build upon that foundation to deploy a service mesh
-which will ensure that *all* network traffic in the cluster is secured with mTLS.](./service-mesh)
+Now that internal certificate management is working, we will build upon that foundation to deploy a service mesh
+which will ensure that *all* network traffic in the cluster is secured with mTLS.
+
+<MarkdownGuideNav backHref={"./vault"} forwardHref={"./service-mesh"} stepNumber={12} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />

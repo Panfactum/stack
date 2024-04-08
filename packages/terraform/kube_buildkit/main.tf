@@ -28,22 +28,30 @@ locals {
 }
 
 module "kube_labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = merge(var.extra_tags, { service = local.name })
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = merge(var.extra_tags, { service = local.name })
 }
 
 module "constants" {
-  source         = "../constants"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../constants"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -51,13 +59,18 @@ module "constants" {
 ***************************************/
 
 module "namespace" {
-  source         = "../kube_namespace"
-  namespace      = local.name
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_namespace"
+
+  namespace = local.name
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -70,16 +83,21 @@ resource "random_id" "cache_bucket" {
 }
 
 module "cache_bucket" {
-  source             = "../aws_s3_private_bucket"
+  source = "../aws_s3_private_bucket"
+
   bucket_name        = random_id.cache_bucket.hex
   description        = "Used for buildkit layer caches"
   expire_after_days  = 7
   versioning_enabled = false
-  environment        = var.environment
-  pf_root_module     = var.pf_root_module
-  region             = var.region
-  is_local           = var.is_local
-  extra_tags         = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -99,17 +117,22 @@ data "aws_iam_policy_document" "buildkit" {
 }
 
 module "aws_permissions" {
-  source                    = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
+
   service_account           = kubernetes_service_account.buildkit.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.buildkit.json
   ip_allow_list             = var.ip_allow_list
-  environment               = var.environment
-  pf_root_module            = var.pf_root_module
-  region                    = var.region
-  is_local                  = var.is_local
-  extra_tags                = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***************************************

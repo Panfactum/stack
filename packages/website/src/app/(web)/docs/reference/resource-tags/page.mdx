@@ -1,0 +1,25 @@
+# Standard Resource Tags
+
+Every resource deployed by a Panfactum module contains the following tags [^1].
+
+[^1]: For Kubernetes resources, these are [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
+
+| Variable                      | Description                                                                                                 |
+| :---------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `panfactum.com/environment`   | The environment this resource is deployed in                                                                |
+| `panfactum.com/region`        | The region this resource is deployed in                                                                     |
+| `panfactum.com/module`        | The Panfactum module directly defining this resource                                                        |
+| `panfactum.com/root-module`   | The root Panfactum module responsible for creating this resource                                            |
+| `panfactum.com/stack-type`    | Which type of Panfactum stack the module deploying this resource is a part of (`community` or `enterprise`) |
+| `panfactum.com/stack-version` | Which version of the Panfactum stack the module deploying this resource is a part of (git ref)              |
+| `panfactum.com/stack-commit`  | The specific commit hash of the module deploying this resource                                              |
+| `panfactum.com/local`         | `true` iff the resource is part of a local development environment                                          |
+
+## Internal Tags
+
+The Panfactum modules do occasionally add other tags to resources, but these are for internal use only
+and do not have a stable API. They are always prefixed with `panfactum.com`.
+
+## Extra Tags
+
+You can add arbitrary extra tags to the resources you deploy. See [this guide](../guides/terraforming/deploying-modules#resource-tagging) for instructions.

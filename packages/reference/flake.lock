@@ -250,10 +250,10 @@
         "systems": "systems_3"
       },
       "locked": {
-        "dirtyRev": "0da21fc7e87d7a81ec71755bebe1ba8e58eabaaa-dirty",
-        "dirtyShortRev": "0da21fc-dirty",
-        "lastModified": 1712500996,
-        "narHash": "sha256-QxiRoQEx61FZHp1nzc92w4IEYjAhanzzrvdG8I1lgaw=",
+        "dirtyRev": "c3b1cd7024739bc4ab17e2a63f9794b3b740392d-dirty",
+        "dirtyShortRev": "c3b1cd7-dirty",
+        "lastModified": 1712506833,
+        "narHash": "sha256-Td1A5mUY4sJWG4p43TBvH9OcTLmOn9wIzrMrBOFcvro=",
         "type": "git",
         "url": "file:///home/jack/repos/panfactum/stack"
       },

@@ -2,6 +2,8 @@
 
 # Kubernetes cert-manager
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/kube_cert_manager)
+
 **Type:** [Live](./overview)
 
 This module provides our standard set up for [cert-manager](https://cert-manager.io/). It includes:
@@ -38,30 +40,6 @@ Type: `string`
 
 Default: `"1.14.4"`
 
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
 
 Description: The log verbosity (0-9) for the cert-manager pods
@@ -70,22 +48,6 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"kube_cert_manager"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"kube_cert_manager"`
-
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
@@ -93,14 +55,6 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
 
 ### <a name="input_self_generated_certs_enabled" /> [self\_generated\_certs\_enabled](#input_self_generated_certs_enabled)
 

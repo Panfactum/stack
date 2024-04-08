@@ -2,6 +2,8 @@
 
 # Kubernetes Node Settings
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/kube_node_settings)
+
 **Type:** [Internal](./overview)
 
 This module is intended to setup the `user-data.toml` that Bottlerocket OS uses to launch.
@@ -48,30 +50,6 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_is_spot" /> [is\_spot](#input_is_spot)
 
 Description: Whether these settings are for a spot node
@@ -87,30 +65,6 @@ Description: The maximum number of pods to run on this node type
 Type: `number`
 
 Default: `50`
-
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"kube_node_settings"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"kube_node_settings"`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
 
 ## Outputs
 

@@ -1,17 +1,25 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 
 # Getting Started
 
-<MarkdownAlert severity="info">
-  If you are
-  looking for guides on how to setup your cloud computing environment, please see our [bootstrapping guides](../bootstrapping/overview).
+<MarkdownAlert severity="warning">
+  This guide is for users working in organizations which have **already installed** the Panfactum stack.
+  If you are looking to set up the Panfactum stack for the first time, please see our
+  [bootstrapping guides](../bootstrapping/overview) instead.
 </MarkdownAlert>
 
-The Panfactum stack is a combination of two sets of tools: (a) tools that run locally on your machine and (b) tools that run
-in your organization's cloud computing environment.
+## Background
 
-Our *Getting Started* guide focuses installing the former so that you can begin working with the latter.
+The Panfactum stack is a unified architecture combining two sets of tools:
 
-*All* users will need to following the [local setup guide](./local-setup).
+* Tools that run locally on your machine
+* Tools that run in your organization's cloud computing environment
 
-You should only need to follow the [repository setup guide](./repo-setup) once per git repository.
+This *Getting Started* guide focuses installing the former so that you can begin working with the latter.
+
+## Next Steps
+
+Let's get started by installing the necessary tooling.
+
+<MarkdownGuideNav forwardHref={"./install-tooling"} stepNumber={1} totalSteps={4} progressLabel={"Getting Started Guide:"} />

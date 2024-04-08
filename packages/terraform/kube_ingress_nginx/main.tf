@@ -69,35 +69,49 @@ module "pull_through" {
 }
 
 module "labels" {
-  source         = "../kube_labels"
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_labels"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "constants" {
-  source          = "../constants"
+  source = "../constants"
+
   matching_labels = local.nginx_selector
-  environment     = var.environment
-  pf_root_module  = var.pf_root_module
-  region          = var.region
-  is_local        = var.is_local
-  extra_tags      = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 module "namespace" {
-  source               = "../kube_namespace"
+  source = "../kube_namespace"
+
   namespace            = local.name
-  linkerd_inject       = false
+  linkerd_inject       = false // TODO: ?
   loadbalancer_enabled = true
-  environment          = var.environment
-  pf_root_module       = var.pf_root_module
-  region               = var.region
-  is_local             = var.is_local
-  extra_tags           = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 /***********************************************
@@ -105,15 +119,20 @@ module "namespace" {
 ************************************************/
 
 module "webhook_cert" {
-  source         = "../kube_internal_cert"
-  service_names  = ["nginx-controller-admission"]
-  secret_name    = local.webhook_secret
-  namespace      = local.namespace
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+  source = "../kube_internal_cert"
+
+  service_names = ["nginx-controller-admission"]
+  secret_name   = local.webhook_secret
+  namespace     = local.namespace
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "kubernetes_secret" "dhparam" {
@@ -145,11 +164,15 @@ module "nlb_common" {
   // Should be the same as the termination grace period seconds (minus the controller exit time)
   deregistration_delay_seconds = local.deregistration_buffer + ceil(local.nginx_base_timeout * 1.5)
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
-  extra_tags     = var.extra_tags
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
 }
 
 resource "kubernetes_config_map" "plugin" {

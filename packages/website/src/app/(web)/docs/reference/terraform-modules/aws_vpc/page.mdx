@@ -2,6 +2,8 @@
 
 # AWS Virtual Private Cloud (VPC)
 
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/aws_vpc)
+
 **Type:** [Live](./overview)
 
 This module configures the following infrastructure resources for a Virtual Private Cloud:
@@ -57,30 +59,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_environment" /> [environment](#input_environment)
-
-Description: The name of the environment the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
-
-### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
-
-Description: Extra tags or labels to add to the created resources.
-
-Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development deployment
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_nat_associations" /> [nat\_associations](#input_nat_associations)
 
 Description: A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values represent destination subnets that will contain the NAT resources.
@@ -88,30 +66,6 @@ Description: A mapping of NATed egress network traffic between subnets. Keys rep
 Type: `map(string)`
 
 Default: `{}`
-
-### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
-
-Description: The name of the Panfactum module where the containing resources are directly defined.
-
-Type: `string`
-
-Default: `"aws_vpc"`
-
-### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
-
-Description: The name of the root Panfactum module in the module tree.
-
-Type: `string`
-
-Default: `"aws_vpc"`
-
-### <a name="input_region" /> [region](#input_region)
-
-Description: The region the infrastructure is being deployed into.
-
-Type: `string`
-
-Default: `null`
 
 ### <a name="input_vpc_extra_tags" /> [vpc\_extra\_tags](#input_vpc_extra_tags)
 

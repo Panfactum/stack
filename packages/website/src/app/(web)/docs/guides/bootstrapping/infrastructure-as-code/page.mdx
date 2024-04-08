@@ -1,4 +1,5 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import firstTfStateImg from './first-tf-state.jpg'
@@ -8,105 +9,9 @@ import s3BucketInitImg from './s3-bucket-init.jpg'
 
 ## Objective
 
-Complete the necessary setup to begin utilizing terraform and terragrunt.
+Deploy your first modules using terragrunt and terraform.
 
-## Background
-
-If you're new to using infrastructure-as-code tooling professionally, you should review the
-concepts documentation before continuing (TODO).
-
-Because both terraform and terragrunt are **unopinionated tools**,
-every organization tends to implement infrastructure-as-code differently. There is no
-right or wrong approach, but it is tedious and error-prone to invent one from scratch.
-
-As a result, the Panfactum stack provides
-standardization with a **highly opinionated set of practices** for deploying infrastructure-as-code
-that incorporates dozens of lessons learned over the past decade. It aligns with the recommendations
-provided by both Hashicorp (terraform) and Gruntworks (terragrunt).
-
-We assume that you will build upon the framework we provide
-as you begin to deploy infrastructure. We provide CLI tooling that enables you to quickly scaffold out
-your project to align with our guides. As you become comfortable working in the stack,
-you may customize any part of our starting setup to fit your organization's evolving needs.
-
-**Regardless of whether you have used terraform and/or terragrunt before, you should
-review the [Panfactum terraforming guides](../terraforming/overview).**
-
-## Set Up Environments Directory
-
-Please ensure you have completed the following sections of the [Deploying Modules guide](../terraforming/deploying-modules):
-
-* *Setting up Your Repo*
-* *Terragrunt Setup*
-
-After completing those sections, you should have a fully scaffolded environments
-directory. Please validate the following statements about this directory:
-
-* It contains a `panfactum.hcl`.
-* It contains a `global.yaml`.
-* It contains a `providers` directory with several providers such as `aws.tf`.
-* You have a top-level directory for **every** environment we created in the previous *Preparing AWS* guide.
-* Each environment directory contains an `environment.yaml` file.
-* Each environment directory contains a region directory for **every** AWS region you want to deploy infrastructure
-  into. Additionally, you have a region directory called `global` inside of every environment directory.
-* Each region directory contains a `region.yaml` file.
-
-Finally, ensure that you do **not** receive any warnings about needing to run `pf-terragrunt-update` when opening
-the repository in your terminal.
-
-Ultimately, your environments folder should closely resemble that of
-[our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
-
-## Configure Terragrunt Variables
-
-In order to begin deploying terraform modules, we must first configure terragrunt via our terragrunt variables
-which will be set in the `global.yaml`, `environment.yaml`, and `region.yaml` files
-(see [reference docs](http://localhost:3000/docs/reference/terragrunt-variables)).
-
-### Metadata
-
-The following metadata fields are used for tagging and labeling deployed infrastructure:
-
-* In **every** `environment.yaml` file, set the `environment` key to the name of the environment
-  (typically the same as the directory name)
-* In **every** `region.yaml` file, set the `region` key to the name of the region (typically the same as the directory name)
-
-### State Backend
-
-Each environment will have its own, **independent** [terraform backend](https://developer.hashicorp.com/terraform/language/settings/backends/configuration)
-for storing information about the tracked terraform resources. We utilize the [S3 backend](https://developer.hashicorp.com/terraform/language/settings/backends/s3)
-and store the state for each environment inside of that environment's AWS account.
-
-In **every** environment.yaml, set the following keys:
-
-* `tf_state_account_id`: Set this to the account id for the environment's AWS account
-* `tf_state_profile`: Set this to the AWS profile name you created for accessing this account in the *Preparing AWS* guide
-* `tf_state_region`: Set this your primary AWS region (buckets have to have an assigned region even though we use it for deploying resources to *all* regions in the environment)
-* `tf_state_bucket`: Set the name of the S3 bucket you want to use. Should not exist yet and must be globally unique. Example: `my-company-terraform-state-development`.
-* `tf_state_lock_table`: Set the name of the DynamoDB table you want to use. Should not exist yet and must be globally unique. Example: `my-company-terraform-state-development`.
-
-### AWS Provider
-
-These variables will configure how the terraform AWS provider deploys resources into AWS and will vary its behavior
-based on the folder the terraform module is deployed from.
-
-In **every** `environment.yaml` file, set the following keys:
-
-* `aws_account_id`: Set this to the account id for the environment's AWS account.
-* `aws_profile`: Set this to the AWS profile name you created for accessing this account in the *Preparing AWS* guide.
-* `aws_secondary_account_id`: Set this to the `aws_account_id` from above.
-* `aws_secondary_profile`: Set this to the `aws_profile` from above.
-
-In **every** `region.yaml` file, set the following keys:
-
-* `aws_region`: Set this to the AWS region code for the directory (e.g., `us-west-2`). For the `global` region,
-  set the region to your primary AWS region which would normally be what you used for `tf_state_region` above.
-* `aws_secondary_region`: Set this to the `aws_region` from above.
-
-*The secondary values are used by some modules that configure resources in multiple AWS accounts or regions. What we
-have just done is default them to primary values, and we will override them on a per-module basis as needed.*
-
-## Bootstrap State Backends
+## Setup State Backends
 
 To begin deploying infrastructure, you will first need a terraform state backend... which is itself infrastructure.
 In fact, we provide a terraform module for setting up the backend: [terraform\_bootstrap\_resources](../../reference/terraform-modules/terraform_bootstrap_resources).
@@ -127,23 +32,7 @@ To take advantage of this, we will create our first terragrunt deployment:
 1. Generate a deployment directory for [terraform\_bootstrap\_resources](../../reference/terraform-modules/terraform_bootstrap_resources):
    `environments/management/global/terraform_bootstrap_resources`
 
-2. Add a `terragrunt.hcl` to that directory:
-
-   ```hcl
-   include "panfactum" {
-       path = find_in_parent_folders("panfactum.hcl")
-       expose = true
-   }
-
-   terraform {
-     source = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//terraform_bootstrap_resources"
-   }
-
-   inputs = {
-       state_bucket = include.panfactum.locals.vars.tf_state_bucket
-       lock_table   = include.panfactum.locals.vars.tf_state_lock_table
-   }
-   ```
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/terraform_bootstrap_resources/terragrunt.hcl).
 
 3. Add a `module.yaml` to that directory that enables the `aws` terraform provider:
 
@@ -256,24 +145,7 @@ Let's set this up.
 
    1. Add a new directory called `sops` to the `global` region.
 
-   2. Add a `terragrunt.hcl`:
-
-      ```hcl
-
-      include "panfactum" {
-          path = find_in_parent_folders("panfactum.hcl")
-          expose = true
-      }
-
-      terraform {
-          source = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//aws_kms_encrypt_key"
-      }
-
-      inputs = {
-          name = "sops-${include.panfactum.locals.vars.environment}"
-          description   = "Encryption key for sops"
-      }
-      ```
+   2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/sops/terragrunt.hcl).
 
    3. Enable the `aws` provider in a `module.yaml`:
 
@@ -349,52 +221,7 @@ Let's set it up.
 
 1. In **every** environment's `global` region, create an `aws_account` directory.
 
-2. Add a `terragrunt.hcl` to the directory:
-
-   ```hcl
-   include "panfactum" {
-       path = find_in_parent_folders("panfactum.hcl")
-       expose = true
-   }
-
-   terraform {
-       source = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//aws_kms_encrypt_key"
-   }
-
-   locals {
-       secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
-   }
-
-   inputs = {
-       alias = "panfactum-${include.panfactum.locals.vars.environment}"
-
-       contact_company_name = "Panfactum, LLC"
-       contact_website = "https://panfactum.com"
-       contact_full_name = "Jack Langston"
-       contact_address_line_1 = local.secrets.address_line_1
-       contact_city = local.secrets.city
-       contact_district_or_county = local.secrets.district_or_county
-       contact_state_or_region = local.secrets.state_or_region
-       contact_postal_code = local.secrets.postal_code
-       contact_country_code = "US"
-       contact_phone_number = local.secrets.phone_number
-
-       security_full_name = "Jack Langston"
-       security_title     = "Captain"
-       security_phone_number = local.secrets.phone_number
-       security_email_address = local.secrets.email_address
-
-       billing_full_name = "Jack Langston"
-       billing_title     = "Captain"
-       billing_phone_number = local.secrets.phone_number
-       billing_email_address = local.secrets.email_address
-
-       operations_full_name = "Jack Langston"
-       operations_title     = "Captain"
-       operations_phone_number = local.secrets.phone_number
-       operations_email_address = local.secrets.email_address
-   }
-   ```
+2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
 
    Note the addition of this line `secrets = yamldecode(sops_decrypt_file("secrets.yaml"))` which demonstrates how
    terragrunt and sops integrate with one another.
@@ -439,4 +266,6 @@ Let's set it up.
 
 ## Next Steps
 
-Now that you are set up to deploy infrastructure-as-code, we are ready to [setup DNS](./dns).
+Now that you are set up to deploy infrastructure-as-code, we are ready to setup DNS.
+
+<MarkdownGuideNav backHref={"./configuring-infrastructure-as-code"} forwardHref={"./dns"} stepNumber={5} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />

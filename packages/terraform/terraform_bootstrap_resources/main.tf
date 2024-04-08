@@ -15,23 +15,31 @@ data "aws_region" "secondary" {
 }
 
 module "tags" {
-  source         = "../aws_tags"
-  environment    = var.environment
-  region         = var.region
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  extra_tags     = var.extra_tags
-  is_local       = var.is_local
+  source = "../aws_tags"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  extra_tags       = var.extra_tags
+  is_local         = var.is_local
 }
 
 module "secondary_tags" {
-  source         = "../aws_tags"
-  environment    = var.environment
-  region         = data.aws_region.secondary.name
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  extra_tags     = var.extra_tags
-  is_local       = var.is_local
+  source = "../aws_tags"
+
+  pf_stack_type    = var.pf_stack_type
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = data.aws_region.secondary.name
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  extra_tags       = var.extra_tags
+  is_local         = var.is_local
 }
 
 ####################################################

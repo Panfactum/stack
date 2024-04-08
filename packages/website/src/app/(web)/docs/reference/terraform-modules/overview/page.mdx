@@ -1,1 +1,75 @@
 # Overview
+
+This directory contains reference documentation for all the Panfactum terraform modules which can be found
+in the following locations:
+
+* [Community Edition](https://github.com/Panfactum/stack/tree/main/packages/terraform)
+
+## Module Types
+
+We categorize each module into one of the following types:
+
+* **Live:** Intended to be deployed directly into your system via terragrunt.
+* **Submodule:** Intended to be used as [child module](https://developer.hashicorp.com/terraform/language/modules) in your own terraform modules.
+* **Utility:** Intended for internal use by other Panfactum modules. Unstable API and not intended for external use.
+
+## Injected Variables
+
+All Panfactum modules comes with the following common variables. These are automatically injected
+if you are using our terragrunt scaffolding.
+
+These are not documented on each module's individual reference pages as they are simply used for tagging.
+
+### <a name="input_environment" /> [environment](#input_environment)
+
+Description: The name of the environment the infrastructure is being deployed into
+
+Type: `string`
+
+### <a name="input_region" /> [region](#input_region)
+
+Description: The region the infrastructure is being deployed into.
+
+Type: `string`
+
+### <a name="input_extra_tags" /> [extra\_tags](#input_extra_tags)
+
+Description: Extra tags or labels to add to the created resources.
+
+Type: `map(string)`
+
+### <a name="input_pf_root_module" /> [pf\_root\_module](#input_pf_root_module)
+
+Description: The name of the root Panfactum module in the module tree.
+
+Type: `string`
+
+### <a name="input_pf_module" /> [pf\_module](#input_pf_module)
+
+Description: The name of the Panfactum module where the containing resources are directly defined.
+
+Type: `string`
+
+### <a name="input_pf_stack_type" /> [pf\_stack\_type](#input_pf_stack_type)
+
+Description: Which type of the Panfactum stack is being used.
+
+Type: `string`
+
+### <a name="input_pf_stack_version" /> [pf\_stack\_version](#input_pf_stack_version)
+
+Description: Which version of the Panfactum stack is being used (git ref).
+
+Type: `string`
+
+### <a name="input_pf_stack_commit" /> [pf\_stack\_commit](#input_pf_stack_commit)
+
+Description: The commit hash for the version of the Panfactum stack being used.
+
+Type: `string`
+
+### <a name="input_is_local" /> [is\_local](#input_is_local)
+
+Description: Whether this module is a part of a local development deployment.
+
+Type: `bool`
