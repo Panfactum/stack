@@ -48,9 +48,9 @@ locals {
   enable_authentik  = contains(local.providers, "authentik")
 
   # The version of the panfactum stack to deploy
-  pf_stack_type                = lookup(local.vars, "pf_stack_type", "community")
+  pf_stack_edition             = lookup(local.vars, "pf_stack_edition", "community")
   pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
-  pf_stack_repo                = local.pf_stack_version == "local" ? "local" : local.pf_stack_type == "community" ? "git@github.com:Panfactum/stack.git" : "git@github.com:Panfactum/stack.git"
+  pf_stack_repo                = local.pf_stack_version == "local" ? "local" : local.pf_stack_edition == "community" ? "git@github.com:Panfactum/stack.git" : "git@github.com:Panfactum/stack.git"
   pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "get-version-hash", local.pf_stack_version, local.pf_stack_repo)
   pf_stack_module              = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
   pf_stack_source              = local.pf_stack_version == "local" ? ("../../../../../terraform//${local.pf_stack_module}") : "${local.pf_stack_repo}//packages/terraform/${local.pf_stack_module}?ref=${local.pf_stack_version_commit_hash}"
@@ -252,7 +252,7 @@ inputs = {
   is_local         = local.is_local
   environment      = local.vars.environment
   region           = local.vars.region
-  pf_stack_type    = local.pf_stack_type
+  pf_stack_edition = local.pf_stack_edition
   pf_stack_version = local.pf_stack_version
   pf_stack_commit  = local.pf_stack_version_commit_hash
   extra_tags       = merge(local.module_extra_tags, local.region_extra_tags, local.environment_extra_tags, local.global_extra_tags)

@@ -43,7 +43,7 @@ resource "random_id" "controller_id" {
 module "kube_labels" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -57,7 +57,7 @@ module "kube_labels" {
 module "constants" {
   source = "../constants"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -71,7 +71,7 @@ module "constants" {
 module "namespace" {
   source = "../kube_namespace"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   namespace        = "velero"
@@ -101,7 +101,7 @@ module "backup_bucket" {
   timed_transitions_enabled       = false
 
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -167,7 +167,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.velero.json
   ip_allow_list             = var.ip_allow_list
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

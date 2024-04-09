@@ -71,7 +71,7 @@ module "pull_through" {
 module "labels" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -87,7 +87,7 @@ module "constants" {
 
   matching_labels = local.nginx_selector
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -104,7 +104,7 @@ module "namespace" {
   linkerd_inject       = false // TODO: ?
   loadbalancer_enabled = true
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -125,7 +125,7 @@ module "webhook_cert" {
   secret_name   = local.webhook_secret
   namespace     = local.namespace
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -165,7 +165,7 @@ module "nlb_common" {
   deregistration_delay_seconds = local.deregistration_buffer + ceil(local.nginx_base_timeout * 1.5)
 
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

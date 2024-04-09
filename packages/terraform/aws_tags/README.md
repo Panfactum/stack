@@ -1,3 +1,3 @@
 # AWS Tags
 
-Type: Utility
+Type: Internal

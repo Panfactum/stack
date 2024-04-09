@@ -56,7 +56,7 @@ module "pull_through" {
 module "labels_server" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -72,7 +72,7 @@ module "constants_server" {
 
   matching_labels = local.server_matching_labels
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -85,7 +85,7 @@ module "constants_server" {
 module "labels_worker" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -101,7 +101,7 @@ module "constants_worker" {
 
   matching_labels = local.worker_matching_labels
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -116,7 +116,7 @@ module "namespace" {
 
   namespace = local.name
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -143,7 +143,7 @@ module "database" {
   pull_through_cache_enabled = var.pull_through_cache_enabled
   pgbouncer_pool_mode        = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -172,7 +172,7 @@ module "redis" {
   // https://github.com/Panfactum/stack/issues/17
   unsafe_tls_disabled = true
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -551,7 +551,7 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = true
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

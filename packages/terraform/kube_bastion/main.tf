@@ -44,7 +44,7 @@ module "pull_through" {
 module "labels" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -58,7 +58,7 @@ module "labels" {
 module "constants" {
   source = "../constants"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -75,7 +75,7 @@ module "namespace" {
   linkerd_inject       = false
   loadbalancer_enabled = true
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -142,7 +142,7 @@ module "nlb_common" {
 
   name_prefix = "bastion-"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -263,7 +263,7 @@ module "bastion" {
 
   vpa_enabled = var.vpa_enabled
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

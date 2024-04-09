@@ -50,7 +50,7 @@ module "pull_through" {
 module "server_labels" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -66,7 +66,7 @@ module "server_labels" {
 module "csi_labels" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -82,7 +82,7 @@ module "csi_labels" {
 module "constants" {
   source = "../constants"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -105,7 +105,7 @@ module "namespace" {
 
   namespace = local.name
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -131,7 +131,7 @@ module "unseal_key" {
   user_iam_arns = [module.aws_permissions.role_arn]
 
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -172,7 +172,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.sa.json
   ip_allow_list             = var.ip_allow_list
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -400,7 +400,7 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = false
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

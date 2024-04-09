@@ -1,1 +1,5 @@
+# Panfactum Stack
+pf_stack_edition: "community"
+
+# Authentik
 authentik_url: https://authentik.panfactum.com

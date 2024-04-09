@@ -38,7 +38,7 @@ module "pull_through" {
 module "kube_labels" {
   source = "../kube_labels"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -52,7 +52,7 @@ module "kube_labels" {
 module "constants" {
   source = "../constants"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -71,7 +71,7 @@ module "namespace" {
 
   namespace = local.name
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -109,7 +109,7 @@ module "linkerd_identity_issuer" {
   duration     = "2160h0m0s"
   renew_before = "1680h0m0s"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   pf_root_module   = var.pf_root_module
@@ -161,7 +161,7 @@ module "linkerd_policy_validator" {
   duration             = "2160h0m0s"
   renew_before         = "1680h0m0s"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   pf_root_module   = var.pf_root_module
@@ -181,7 +181,7 @@ module "linkerd_proxy_injector" {
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   pf_root_module   = var.pf_root_module
@@ -200,7 +200,7 @@ module "linkerd_profile_validator" {
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   pf_root_module   = var.pf_root_module

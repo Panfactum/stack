@@ -12,7 +12,7 @@ You can directly deploy these modules via your terragrunt configuration code.
 
 We use the following [terragrunt variables](../../reference/terragrunt-variables), to automatically configure your `terraform.source`.
 
-* `pf_stack_type`: Either `community` or `enterprise` (paid). Should be set in your `global.yaml`.
+* `pf_stack_edition`: Either `community` or `enterprise` (paid). Should be set in your `global.yaml`.
 * `pf_stack_version`: Check [here](../../reference/releases) for the full list of available releases. This should
   be the same version as used for the Panfactum devenv. Set this in each `environment.yaml` so that you can test
   version updates in one environment at a time.

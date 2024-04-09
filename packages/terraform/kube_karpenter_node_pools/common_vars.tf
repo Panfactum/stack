@@ -34,7 +34,7 @@ variable "is_local" {
   default     = false
 }
 
-variable "pf_stack_type" {
+variable "pf_stack_edition" {
   description = "Which type of the Panfactum stack is being used #injected"
   type        = string
   default     = "community"

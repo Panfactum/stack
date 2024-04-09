@@ -22,7 +22,7 @@ locals {
 module "tags" {
   source = "../aws_tags"
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -58,7 +58,7 @@ module "iam_role" {
 
   hosted_zone_ids = [for zone, config in aws_route53_zone.zones : config.zone_id]
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -92,7 +92,7 @@ module "dnssec" {
 
   hosted_zones = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 
-  pf_stack_type    = var.pf_stack_type
+  pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

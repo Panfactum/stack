@@ -7,7 +7,7 @@ output "tags" {
     "panfactum.com/root-module"   = var.pf_root_module
     "panfactum.com/module"        = var.pf_module
     "panfactum.com/local"         = var.is_local ? "true" : "false",
-    "panfactum.com/stack-type"    = var.pf_stack_type
+    "panfactum.com/stack-edition" = var.pf_stack_edition
     "panfactum.com/stack-version" = var.pf_stack_version
     "panfactum.com/stack-commit"  = var.pf_stack_commit
     terraform                     = "true"

@@ -2,7 +2,6 @@
 environment: "production" # Name of the environment
 
 # Panfactum Stack
-pf_stack_type: "community"
 pf_stack_version: "main"
 
 # AWS
