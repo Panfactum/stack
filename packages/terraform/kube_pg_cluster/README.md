@@ -1,3 +1,3 @@
 # Postgres Cluster on Kubernetes
 
-**Type:** Live
+**Type:** Submodule

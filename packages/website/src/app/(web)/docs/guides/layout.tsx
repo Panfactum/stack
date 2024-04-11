@@ -94,8 +94,8 @@ const SIDENAV_SECTIONS = [
         path: '/maintenance-controllers'
       },
       {
-        text: 'Database Operators',
-        path: '/database-operators'
+        text: 'Databases',
+        path: '/databases'
       },
       {
         text: 'Identity Provider',

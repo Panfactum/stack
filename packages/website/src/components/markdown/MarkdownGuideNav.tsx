@@ -30,15 +30,15 @@ function MarkdownGuideNavButton (props: {href: string | undefined, tooltip: stri
 }
 
 interface MarkdownGuideNavProps {
-  backHref: string | undefined
-  backText: string
-  backTooltip: string | undefined
-  forwardHref: string | undefined
-  forwardText: string
-  forwardTooltip: string | undefined
-  stepNumber: number | undefined
-  totalSteps: number | undefined
-  progressLabel: string | undefined
+  backHref?: string | undefined
+  backText?: string | undefined
+  backTooltip?: string | undefined
+  forwardHref?: string | undefined
+  forwardText?: string | undefined
+  forwardTooltip?: string | undefined
+  stepNumber?: number | undefined
+  totalSteps?: number | undefined
+  progressLabel?: string | undefined
 }
 
 export default memo(function MarkdownGuideNav (props: MarkdownGuideNavProps) {

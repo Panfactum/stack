@@ -1,5 +1,4 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
 
@@ -8,6 +7,7 @@ import k9sReadyImg from './k9s-ready.jpg'
 import k9sImg from './k9s.jpg'
 import pullThroughSVG from './pull-through-cache.svg'
 import terminateNodeImg from './terminate-node.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Kubernetes Cluster
 
@@ -358,4 +358,4 @@ Let's deploy this module:
 Congratulations! You have officially deployed Kubernetes using infrastructure-as-code.
 Now that the cluster is running, we will begin working on the internal networking stack.
 
-<MarkdownGuideNav backHref={"./aws-networking"} forwardHref={"./internal-cluster-networking"} stepNumber={8} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />
+<BootstrappingGuideNav backHref={"./aws-networking"} forwardHref={"./internal-cluster-networking"} stepNumber={8} />

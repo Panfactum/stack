@@ -13,7 +13,6 @@ dependency "linkerd" {
 }
 
 inputs = {
-  log_level                  = "info"
   pull_through_cache_enabled = true
   vpa_enabled                = true
 }

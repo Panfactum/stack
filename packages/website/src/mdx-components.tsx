@@ -134,7 +134,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     table: ({ children, className, ...props }) => (
       <div className="overflow-x-scroll">
         <table
-          className={clsx('py-2 bg-neutral rounded-md', className)}
+          className={clsx('py-2 w-full bg-neutral rounded-md', className)}
           {...props}
         >
           {children}
@@ -187,12 +187,23 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
         </span>
       )
     },
-    section: ({ children, ...props }) => {
-      return (
-        <section {...props}>
-          {children}
-        </section>
-      )
+    section: ({ children, className, ...props }) => {
+      if (className?.includes('footnotes')) {
+        return (
+          <section
+            className={clsx(className, ['bg-neutral mb-[-2rem] mx-[-1rem] px-[1rem] pb-[2rem]'])}
+            {...props}
+          >
+            {children}
+          </section>
+        )
+      } else {
+        return (
+          <section {...props}>
+            {children}
+          </section>
+        )
+      }
     }
   }
 }

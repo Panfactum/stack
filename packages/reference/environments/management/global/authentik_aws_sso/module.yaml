@@ -1,0 +1,5 @@
+providers:
+  - authentik
+  - aws
+  - time
+  - tls

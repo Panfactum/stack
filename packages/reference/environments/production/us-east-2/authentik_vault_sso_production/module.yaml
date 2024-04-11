@@ -1,0 +1,5 @@
+providers:
+  - authentik
+  - time
+  - tls
+module: authentik_vault_sso

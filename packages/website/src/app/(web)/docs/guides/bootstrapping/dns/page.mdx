@@ -1,10 +1,10 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import dnssecImg from './dnssec.jpg';
 import hostedZoneDetailsImg from './hosted-zone-details.jpg';
 import testRecordImg from './test-record.jpg';
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # DNS
 
@@ -166,6 +166,9 @@ Let's do this now for **every** environment:
 
    3. Set `aws_secondary_region` to your primary region.
 
+   4. Set `module` to `aws_delegated_zones` since we are using a directory name `aws_delegated_zones_<environment>` that
+      is different from the Panfactum module `aws_delegated_zones`.
+
 5. Run `terragrunt apply`.
 
 [^4]: Note that this is the first time we will take advantage of terragrunt's [dependency blocks](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#dependency)
@@ -195,4 +198,4 @@ is automatically deployed and updated without manual intervention.
 Now that you have prepared your DNS configuration, we are ready to begin setting up the Panfactum stack. Our
 next step is to configure AWS networking by creating a Virtual Private Cloud (VPC).
 
-<MarkdownGuideNav backHref={"./infrastructure-as-code"} forwardHref={"./aws-networking"} stepNumber={6} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />
+<BootstrappingGuideNav backHref={"./infrastructure-as-code"} forwardHref={"./aws-networking"} stepNumber={6} />

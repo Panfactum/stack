@@ -1,6 +1,10 @@
 {
   "modules": [
+    "authentik_aws_sso",
+    "authentik_core_resources",
+    "authentik_vault_sso",
     "aws_account",
+    "aws_account_permission_binding",
     "aws_cloudwatch_log_group",
     "aws_core_permissions",
     "aws_delegated_zones",
@@ -11,6 +15,7 @@
     "aws_ecr_pull_through_cache_addresses",
     "aws_ecr_repos",
     "aws_eks",
+    "aws_iam_identity_center_permissions",
     "aws_kms_encrypt_key",
     "aws_registered_domains",
     "aws_s3_private_bucket",
@@ -62,6 +67,8 @@
     "kube_velero",
     "kube_vpa",
     "terraform_bootstrap_resources",
+    "test_kube_pg_cluster",
+    "vault_auth_oidc",
     "vault_core_resources"
   ]
 }

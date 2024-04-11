@@ -8,12 +8,80 @@ terraform {
 }
 
 locals {
-  s3_buckets_and_objects = flatten([for arn in var.protected_s3_arns : [arn, "${arn}/*"]]) # for objects too
-  all_protected = concat(
-    local.s3_buckets_and_objects,
-    var.protected_kms_arns,
-    var.protected_dynamodb_arns
-  )
+  allowed_services = [
+    "account",
+    "application-cost-profiler",
+    "application-autoscaling",
+    "discovery",
+    "iam",
+    "s3",
+    "s3-object-lambda",
+    "s3express",
+    "backup",
+    "glacier",
+    "route53",
+    "route53resolver",
+    "route53-recovery-readiness",
+    "route53-recovery-control-config",
+    "route53-recovery-cluster",
+    "route53domains",
+    "arc-zonal-shift",
+    "resource-explorer-2",
+    "pricing",
+    "networkmanager",
+    "network-firewall",
+    "cloudtrail",
+    "cloudwatch",
+    "cloudfront",
+    "acm",
+    "lambda",
+    "waf-regional",
+    "kinesis",
+    "firehose",
+    "kinesisanalytics",
+    "guardduty",
+    "globalaccelerator",
+    "fis",
+    "emr-containers",
+    "ecs",
+    "events",
+    "scheduler",
+    "schemas",
+    "pipes",
+    "mediaconvert",
+    "elasticfilesystem",
+    "waf",
+    "wafv2",
+    "ec2",
+    "ebs",
+    "ecr",
+    "ecr-public",
+    "drs",
+    "cur",
+    "ce",
+    "cognito-identity",
+    "cognito-sync",
+    "cognito-idp",
+    "cost-optimization-hub",
+    "controltower",
+    "eks",
+    "tag",
+    "sns",
+    "sqs",
+    "ssm",
+    "kms",
+    "elasticloadbalancing",
+    "rds",
+    "autoscaling-plans",
+    "elasticache",
+    "dynamodb",
+    "identitystore",
+    "sso",
+    "logs",
+    "autoscaling",
+    "states",
+    "secretsmanager"
+  ]
 }
 
 ######################### Admin #######################################
@@ -40,11 +108,8 @@ data "aws_iam_policy_document" "admin_policy" {
       "iam:DetachRolePolicy",
       "iam:PutRolePolicy",
       "iam:PutRolePermissionsBoundary",
-      "iam:TagRole",
-      "iam:UntagRole",
       "iam:UpdateAssumeRolePolicy",
       "iam:UpdateRole",
-      "iam:UpdateRoleDescription",
       "iam:DetachUserPolicy",
       "iam:DeleteUserPolicy",
       "iam:PutUserPolicy",
@@ -66,6 +131,8 @@ data "aws_iam_policy_document" "admin_policy" {
       "iam:CreateAccessKey",
       "iam:UpdateAccessKey",
       "iam:DeleteAccessKey",
+
+      // Prevent messing with identity center
       "sso:*",
       "sso-directory:*",
 
@@ -88,9 +155,7 @@ data "aws_iam_policy_document" "admin_policy" {
       "cloudtrail:Delete*",
       "cloudtrail:Stop*"
     ]
-
-    // for now, prevent any operations on protected resources
-    not_resources = local.all_protected
+    resources = ["*"]
   }
 
   // gives some access to non-secret metadata
@@ -105,62 +170,16 @@ data "aws_iam_policy_document" "admin_policy" {
     resources = ["*"]
   }
 
-  # For admins, protected buckets:
-  #  - CAN have their objects read, updated, and deleted
-  #  - CAN have their properties listed and read
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:Get*",
-      "s3:List*",
-      "s3:Describe*",
-      "s3:PutObject",
-      "s3:RestoreObject",
-      "s3:AbortMultipartUpload",
-      "s3:DeleteObject" # Simply adds a delete marker if versioning is enabled
-    ]
-    resources = length(local.s3_buckets_and_objects) == 0 ? ["*"] : local.s3_buckets_and_objects
-  }
-
-  # For admins, protected kms keys:
-  # - CAN have their properties listed and read
-  # - CAN be used for cryptographic operations
-  statement {
-    effect = "Allow"
-    actions = [
-      "kms:Get*",
-      "kms:List*",
-      "kms:Describe*",
-      "kms:Decrypt",
-      "kms:Encrypt",
-      "kms:Generate*"
-    ]
-    resources = length(var.protected_kms_arns) == 0 ? ["*"] : var.protected_kms_arns
-  }
-
-  # For admins, protected dynamodb tables:
-  # - CAN have their properties listed and read
-  # - CAN have their items updated and queried
-  statement {
-    effect = "Allow"
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:Get*",
-      "dynamodb:List*",
-      "dynamodb:Describe*",
-      "dynamodb:PutItem",
-      "dynamodb:DeleteItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-      "dynamodb:UpdateItem"
-    ]
-    resources = length(var.protected_dynamodb_arns) == 0 ? ["*"] : var.protected_dynamodb_arns
-  }
-
   // TODO: Protect DNS
 
+  // TODO: Protect EBS snapshots
+
+  // TODO: Protect S3 object versions
+
+  // TODO: Protect KMS keys
+
 }
+
 
 ######################### Reader #######################################
 
@@ -169,39 +188,7 @@ data "aws_iam_policy_document" "reader_policy" {
     effect = "Allow"
     actions = concat(
       # Assign read-only permissions to core service classes
-      flatten([for class in [
-        "iam",
-        "s3",
-        "glacier",
-        "route53",
-        "cloudtrail",
-        "cloudwatch",
-        "cloudfront",
-        "acm",
-        "lambda",
-        "waf-regional",
-        "waf",
-        "wafv2",
-        "ec2",
-        "ebs",
-        "ecr",
-        "eks",
-        "tag",
-        "sns",
-        "sqs",
-        "ssm",
-        "kms",
-        "elasticloadbalancing",
-        "rds",
-        "autoscaling-plans",
-        "elasticache",
-        "dynamodb",
-        "identitystore",
-        "sso",
-        "logs",
-        "autoscaling",
-        "states"
-      ] : ["${class}:Get*", "${class}:List*", "${class}:Describe*"]]),
+      flatten([for class in local.allowed_services : ["${class}:Get*", "${class}:List*", "${class}:Describe*"]]),
 
       # Extra permissions
       [
@@ -214,89 +201,51 @@ data "aws_iam_policy_document" "reader_policy" {
         "sts:GetCallerIdentity",
         "tag:DescribeReportCreation",
         "sns:Check*",
-        "dynamodb:Query",
-        "dynamodb:Scan",
         "kms:Encrypt",
         "kms:Generate*",
         "eks:AccessKubernetesApi"
       ]
     )
-
-    # Deny all access to the protected resources
-    not_resources = local.all_protected
-  }
-
-  # Give the ability to start an remote port forward (but don't allow arbitrary execution on the nodes)
-  statement {
-    effect = "Allow"
-    actions = [
-      "ssm:StartSession"
-    ]
-    condition {
-      test     = "BoolIfExists"
-      values   = ["true"]
-      variable = "ssm:SessionDocumentAccessCheck"
-    }
-    resources = [
-      "arn:aws:ec2:*:*:instance/*",
-      "arn:aws:ssm:*:*:document/AWS-StartPortForwardingSessionToRemoteHost"
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "ssm:TerminateSession",
-      "ssm:ResumeSession"
-    ]
-    resources = ["arn:aws:ssm:*:*:session/$${aws:username}-*"]
+    resources = ["*"]
   }
 }
 
-######################### CI Reader #######################################
+######################### Restricted Reader #######################################
 
-data "aws_iam_policy_document" "ci_reader_policy" {
-  # For ci bots, protected buckets:
-  #  - CAN have their objects and configurations read
+data "aws_iam_policy_document" "restricted_reader_policy" {
   statement {
     effect = "Allow"
-    actions = [
-      "s3:Get*",
-      "s3:List*",
-      "s3:Describe*"
-    ]
-    resources = length(local.s3_buckets_and_objects) == 0 ? ["*"] : local.s3_buckets_and_objects
+    actions = concat(
+      # Assign read-only permissions to core service classes
+      flatten([for class in local.allowed_services : ["${class}:Get*", "${class}:List*", "${class}:Describe*"]]),
+
+      # Extra permissions
+      [
+        "iam:Generate*",
+        "cloudtrail:StartQuery",
+        "cloudtrail:LookupEvents",
+        "sts:GetCallerIdentity",
+        "sns:Check*",
+        "kms:Encrypt",
+        "kms:Generate*",
+        "eks:AccessKubernetesApi",
+        "aws-portal:ViewAccount",
+        "aws-portal:ViewBilling",
+        "aws-portal:ViewUsage"
+      ]
+    )
+    resources = ["*"]
   }
 
-  # For ci bots, protected kms keys:
-  # - CAN have their properties listed and read
+  # These actions can potentially expose sensitive data
   statement {
-    effect = "Allow"
+    effect = "Deny"
     actions = [
-      "kms:Get*",
-      "kms:List*",
-      "kms:Describe*",
-      "kms:Decrypt"
+      "s3:getObject",
+      "secretsmanager:GetSecretValue",
+      "ec2:GetPasswordData",
+      "rds:DescribeDBSnapshots"
     ]
-    resources = length(var.protected_kms_arns) == 0 ? ["*"] : var.protected_kms_arns
-  }
-
-  # For CI bots, protected dynamodb tables:
-  # - CAN have their properties listed and read
-  # - CAN have their items updated and queried
-  statement {
-    effect = "Allow"
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:Get*",
-      "dynamodb:List*",
-      "dynamodb:Describe*",
-      "dynamodb:PutItem",
-      "dynamodb:DeleteItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-      "dynamodb:UpdateItem"
-    ]
-    resources = length(var.protected_dynamodb_arns) == 0 ? ["*"] : var.protected_dynamodb_arns
+    resources = ["*"]
   }
 }

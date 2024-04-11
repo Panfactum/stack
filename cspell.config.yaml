@@ -105,7 +105,14 @@ words: [
   "pgbouncer",
   "pooler",
   "akadmin",
-  "nixos"
+  "nixos",
+  "pgadmin",
+  "configmap",
+  "oidc",
+  "webauthn",
+  "geospatial",
+  "failovers",
+  "snapshotting"
 ]
 languageSettings:
   - languageId: markdown,mdx

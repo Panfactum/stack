@@ -9,20 +9,28 @@ local _M = {}
 
 -- Use this for mutating headers AFTER the server has received headers from the upstream
 -- The variables are sourced from the Ingress annotations created by the kube_ingress module
+--
+-- NOTE: booleans nginx vars are stringified when accessed from lua
 function _M.header_filter()
   local content_type = ngx.header["Content-Type"]
+  local csp_enabled = ngx.var.pf_csp_enabled == "true"
+  local csp_override = ngx.var.pf_csp_override == "true"
+
   if content_type and content_type:find("html") then
 
-    if ngx.var.pf_csp_enabled and (ngx.var.pf_csp_override or not ngx.header["Content-Security-Policy"]) then
+    if csp_enabled and (csp_override or not ngx.header["Content-Security-Policy"]) then
       ngx.header["Content-Security-Policy"] = ngx.var.pf_csp
     end
 
-    if ngx.var.pf_cross_origin_isolation_enabled then
+    local cross_origin_isolation_enabled = ngx.var.pf_cross_origin_isolation_enabled == "true"
+    if cross_origin_isolation_enabled then
       ngx.header["Cross-Origin-Embedder-Policy"] = ngx.var.pf_cross_origin_embedder_policy
       ngx.header["Cross-Origin-Opener-Policy"] = ngx.var.pf_cross_origin_opener_policy
     end
 
-    if ngx.var.pf_permissions_policy_enabled and (ngx.var.pf_permissions_policy_override or not ngx.header["Permissions-Policy"]) then
+    local permissions_policy_enabled = ngx.var.pf_permissions_policy_enabled == "true"
+    local permissions_policy_override = ngx.var.pf_permissions_policy_override == "true"
+    if permissions_policy_enabled and (permissions_policy_override or not ngx.header["Permissions-Policy"]) then
       ngx.header["Permissions-Policy"] = ngx.var.pf_permissions_policy
     end
 
@@ -31,7 +39,7 @@ function _M.header_filter()
     ngx.header["Referrer-Policy"] = ngx.var.pf_referrer_policy
 
   else
-    if ngx.var.pf_csp_enabled and (ngx.var.pf_csp_override or not ngx.header["Content-Security-Policy"]) then
+    if csp_enabled and (csp_override or not ngx.header["Content-Security-Policy"]) then
       ngx.header["Content-Security-Policy"] = ngx.var.pf_csp_non_html
     end
   end

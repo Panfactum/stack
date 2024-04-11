@@ -182,6 +182,35 @@ module "redis" {
   extra_tags       = var.extra_tags
 }
 
+/***************************************
+* Email Templates
+***************************************/
+
+resource "kubernetes_config_map" "email_templates" {
+  metadata {
+    name      = "email-templates"
+    namespace = local.namespace
+    labels    = module.labels_server.kube_labels
+  }
+  lifecycle {
+    ignore_changes = [data]
+  }
+}
+
+/***************************************
+* Media Templates
+***************************************/
+
+resource "kubernetes_config_map" "media" {
+  metadata {
+    name      = "media"
+    namespace = local.namespace
+    labels    = module.labels_server.kube_labels
+  }
+  lifecycle {
+    ignore_changes = [data]
+  }
+}
 
 /***************************************
 * Authentik Helm Chart
@@ -241,6 +270,9 @@ resource "helm_release" "authentik" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
+        serviceAccount = {
+          create = true
+        }
         env = [
           // Authentik Settings
           {
@@ -282,7 +314,7 @@ resource "helm_release" "authentik" {
             name = "AUTHENTIK_BOOTSTRAP_TOKEN"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.bootstrap_creds.metadata[0].name
+                name = nonsensitive(kubernetes_secret.bootstrap_creds.metadata[0].name)
                 key  = "token"
               }
             }
@@ -291,7 +323,7 @@ resource "helm_release" "authentik" {
             name = "AUTHENTIK_BOOTSTRAP_PASSWORD"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.bootstrap_creds.metadata[0].name
+                name = nonsensitive(kubernetes_secret.bootstrap_creds.metadata[0].name)
                 key  = "password"
               }
             }
@@ -307,14 +339,14 @@ resource "helm_release" "authentik" {
         postgresql = {
           name     = module.database.database
           user     = module.database.superuser_username
-          password = module.database.superuser_password
+          password = module.database.superuser_password // TOOD: Pass in as environment variable
           host     = module.database.pooler_rw_service_name
           port     = module.database.pooler_rw_service_port
         }
         redis = {
           host     = module.redis.redis_master_host
           username = module.redis.superuser_name
-          password = module.redis.superuser_password
+          password = module.redis.superuser_password // TOOD: Pass in as environment variable
         }
         email = {
           host     = var.smtp_host
@@ -360,12 +392,36 @@ resource "helm_release" "authentik" {
                 }
               ]
             }
+          },
+          {
+            name = "email-templates"
+            configMap = {
+              name     = kubernetes_config_map.email_templates.metadata[0].name
+              optional = false
+            }
+          },
+          {
+            name = "media"
+            configMap = {
+              name     = kubernetes_config_map.media.metadata[0].name
+              optional = false
+            }
           }
         ]
         volumeMounts = [
           {
             name      = "postgres-certs"
             mountPath = "/etc/certs/pg"
+            readOnly  = true
+          },
+          {
+            name      = "email-templates"
+            mountPath = "/templates"
+            readOnly  = true
+          },
+          {
+            name      = "media"
+            mountPath = "/media/public"
             readOnly  = true
           }
         ]
@@ -406,12 +462,36 @@ resource "helm_release" "authentik" {
                 }
               ]
             }
+          },
+          {
+            name = "email-templates"
+            configMap = {
+              name     = kubernetes_config_map.email_templates.metadata[0].name
+              optional = false
+            }
+          },
+          {
+            name = "media"
+            configMap = {
+              name     = kubernetes_config_map.media.metadata[0].name
+              optional = false
+            }
           }
         ]
         volumeMounts = [
           {
             name      = "postgres-certs"
             mountPath = "/etc/certs/pg"
+            readOnly  = true
+          },
+          {
+            name      = "email-templates"
+            mountPath = "/templates"
+            readOnly  = true
+          },
+          {
+            name      = "media"
+            mountPath = "/media/public"
             readOnly  = true
           }
         ]
@@ -550,6 +630,12 @@ module "ingress" {
   cross_origin_isolation_enabled = true
   permissions_policy_enabled     = true
   csp_enabled                    = true
+  cross_origin_opener_policy     = "unsafe-none" // Required for SSO login pop-ups
+
+  # TODO: Open an issue in the repo to report that this
+  # unsafe configuration is required
+  csp_style_src  = "'self' 'unsafe-inline'"
+  csp_script_src = "'self' 'unsafe-inline'"
 
   pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version

@@ -1,5 +1,4 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import k9sClusterCapacityImg from './k9s-cluster-capacity.jpg';
@@ -7,6 +6,7 @@ import k9sPodMetricsProvided from './k9s-pod-metrics-provided.jpg';
 import k9sPodMetricsImg from './k9s-pod-metrics.jpg';
 import k9sVPAImg from './k9s-vpa.jpg';
 import spotNodeLabelImg from './spot-node-label.jpg';
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Autoscaling
 
@@ -284,4 +284,4 @@ recognizes that additional nodes need to be schedule.
 
 Now that autoscaling is active, we can proceed to set up inbound networking for our cluster.
 
-<MarkdownGuideNav backHref={"./service-mesh"} forwardHref={"./inbound-networking"} stepNumber={14} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />
+<BootstrappingGuideNav backHref={"./service-mesh"} forwardHref={"./inbound-networking"} stepNumber={14} />

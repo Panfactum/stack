@@ -148,6 +148,17 @@ resource "helm_release" "redis" {
       fullnameOverride = random_id.id.hex
       commonLabels     = module.kube_labels.kube_labels
 
+      commonAnnotations = {
+        "panfactum.com/db"             = "true"
+        "panfactum.com/db-type"        = "Redis"
+        "panfactum.com/reader-role"    = "reader-${var.namespace}-${random_id.id.hex}"
+        "panfactum.com/admin-role"     = "admin-${var.namespace}-${random_id.id.hex}"
+        "panfactum.com/superuser-role" = "superuser-${var.namespace}-${random_id.id.hex}"
+        "panfactum.com/vault-mount"    = "db/${var.namespace}-${random_id.id.hex}"
+        "panfactum.com/service"        = "${random_id.id.hex}-master.${var.namespace}"
+        "panfactum.com/service-port"   = "6379"
+      }
+
       global = {
         imageRegistry = var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"
         storageClass  = "ebs-standard"
@@ -350,7 +361,7 @@ resource "kubernetes_manifest" "vpa" {
 * Vault Authentication
 ***************************************/
 
-resource "vault_database_secret_backend_role" "read_only" {
+resource "vault_database_secret_backend_role" "reader" {
   backend             = "db"
   name                = "reader-${var.namespace}-${random_id.id.hex}"
   db_name             = vault_database_secret_backend_connection.redis.name
@@ -359,18 +370,18 @@ resource "vault_database_secret_backend_role" "read_only" {
   max_ttl             = 60 * 60 * 8
 }
 
-resource "vault_database_secret_backend_role" "writer" {
+resource "vault_database_secret_backend_role" "admin" {
   backend             = "db"
-  name                = "writer-${var.namespace}-${random_id.id.hex}"
+  name                = "admin-${var.namespace}-${random_id.id.hex}"
   db_name             = vault_database_secret_backend_connection.redis.name
   creation_statements = [jsonencode(["%RW~*", "&*", "+@all", "-@admin", "-@dangerous"])]
   default_ttl         = 60 * 60 * 8
   max_ttl             = 60 * 60 * 8
 }
 
-resource "vault_database_secret_backend_role" "admin" {
+resource "vault_database_secret_backend_role" "superuser" {
   backend             = "db"
-  name                = "admin-${var.namespace}-${random_id.id.hex}"
+  name                = "superuser-${var.namespace}-${random_id.id.hex}"
   db_name             = vault_database_secret_backend_connection.redis.name
   creation_statements = [jsonencode(["~*", "&*", "+@all", "-acl|deluser", "-acl|genpass", "-acl|log", "-acl|setuser"])]
   default_ttl         = 60 * 60 * 8
@@ -384,8 +395,8 @@ resource "vault_database_secret_backend_connection" "redis" {
 
   allowed_roles = [
     "reader-${var.namespace}-${random_id.id.hex}",
-    "writer-${var.namespace}-${random_id.id.hex}",
     "admin-${var.namespace}-${random_id.id.hex}",
+    "superuser-${var.namespace}-${random_id.id.hex}",
   ]
 
   redis {

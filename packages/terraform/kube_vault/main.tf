@@ -273,6 +273,7 @@ resource "helm_release" "vault" {
         statefulSet = {
           annotations = {
             "reloader.stakater.com/auto" = "true"
+            "panfactum.com/vault-addr"   = "https://${local.vault_domains[0]}"
           }
         }
         updateStrategyType = "RollingUpdate"
@@ -396,7 +397,8 @@ module "ingress" {
     service_port = 8200
   }]
   rate_limiting_enabled          = true
-  cross_origin_isolation_enabled = true
+  cross_origin_isolation_enabled = false
+  cross_origin_opener_policy     = "same-origin-allow-popups" // Required for SSO logins
   permissions_policy_enabled     = true
   csp_enabled                    = false
 

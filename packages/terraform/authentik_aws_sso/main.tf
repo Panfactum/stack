@@ -1,0 +1,140 @@
+terraform {
+  required_providers {
+    authentik = {
+      source  = "goauthentik/authentik"
+      version = "2024.2.0"
+    }
+    #    kubernetes = {
+    #      source  = "hashicorp/kubernetes"
+    #      version = "2.27.0"
+    #    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "4.0.5"
+    }
+  }
+}
+
+
+###########################################################################
+## Cert Config
+###########################################################################
+
+// These certs are only used for their random cryptographic
+// material to sign the SAML assertions. There is no
+// need to use cert-manager to manage them,
+// especially since they need to be manually uploaded to AWS
+// every time they rotate
+resource "tls_private_key" "signing" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "tls_self_signed_cert" "signing" {
+  private_key_pem = tls_private_key.signing.private_key_pem
+  subject {
+    common_name  = var.authentik_domain
+    organization = var.organization_name
+  }
+  validity_period_hours = 24 * 365 * 10
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+
+resource "authentik_certificate_key_pair" "signing" {
+  name             = "aws-signing-certs"
+  certificate_data = tls_self_signed_cert.signing.cert_pem
+  key_data         = tls_private_key.signing.private_key_pem
+}
+
+###########################################################################
+## IdP Config
+###########################################################################
+
+
+data "authentik_flow" "default-authorization-flow" {
+  slug = "default-provider-authorization-implicit-consent"
+}
+
+data "authentik_property_mapping_saml" "email" {
+  managed = "goauthentik.io/providers/saml/email"
+}
+
+resource "authentik_provider_saml" "aws" {
+  name               = "aws"
+  authorization_flow = data.authentik_flow.default-authorization-flow.id
+  acs_url            = var.aws_acs_url
+  sp_binding         = "post"
+  issuer             = var.aws_issuer
+  audience           = var.aws_issuer
+  name_id_mapping    = data.authentik_property_mapping_saml.email.id
+  signing_kp         = authentik_certificate_key_pair.signing.id
+}
+
+data "authentik_provider_saml_metadata" "aws" {
+  provider_id = authentik_provider_saml.aws.id
+}
+
+data "authentik_property_mapping_scim" "user" {
+  managed = "goauthentik.io/providers/scim/user"
+}
+
+data "authentik_property_mapping_scim" "group" {
+  managed = "goauthentik.io/providers/scim/group"
+}
+
+resource "authentik_provider_scim" "aws" {
+  count                         = var.aws_scim_enabled ? 1 : 0
+  name                          = "aws-scim"
+  url                           = var.aws_scim_url
+  token                         = var.aws_scim_token
+  exclude_users_service_account = true
+  property_mappings             = [data.authentik_property_mapping_scim.user.id]
+  property_mappings_group       = [data.authentik_property_mapping_scim.group.id]
+}
+
+
+resource "authentik_application" "aws" {
+  name              = "aws"
+  slug              = "aws"
+  protocol_provider = authentik_provider_saml.aws.id
+  meta_launch_url   = var.aws_sign_in_url
+  meta_description  = var.ui_description
+  meta_publisher    = "Panfactum"
+  group             = var.ui_group
+  open_in_new_tab   = true
+  backchannel_providers = var.aws_scim_enabled ? [
+    authentik_provider_scim.aws[0].id
+  ] : []
+}
+
+
+data "authentik_group" "superusers" {
+  name = "superusers"
+}
+
+resource "authentik_policy_binding" "superuser_access" {
+  target = authentik_application.aws.uuid
+  group  = data.authentik_group.superusers.id
+  order  = 0
+}
+
+
+data "authentik_group" "group" {
+  for_each = var.allowed_groups
+  name     = each.key
+}
+
+resource "authentik_policy_binding" "access" {
+  for_each = var.allowed_groups
+  target   = authentik_application.aws.uuid
+  group    = data.authentik_group.group[each.key].id
+  order    = 10
+}
+
+
+
+

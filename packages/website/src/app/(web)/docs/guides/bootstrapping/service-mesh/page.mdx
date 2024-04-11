@@ -1,9 +1,9 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import linkerdPods from './linkerd-pods.jpg'
 import linkerdSidecarImg from './linkerd-sidecars.jpg';
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Service Mesh
 
@@ -219,4 +219,4 @@ At this point, all the necessary components for powering *internal* cluster netw
 we configure *external* networking, we will address autoscaling
 as the cluster is likely already running 75+ containers and will soon become resource constrained.
 
-<MarkdownGuideNav backHref={"./certificate-management"} forwardHref={"./autoscaling"} stepNumber={13} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />
+<BootstrappingGuideNav backHref={"./certificate-management"} forwardHref={"./autoscaling"} stepNumber={13} />

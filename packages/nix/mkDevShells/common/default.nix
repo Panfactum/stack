@@ -74,6 +74,7 @@
     ####################################
     jq # json
     yq # yaml
+    fzf # fuzzy selector
 
     ####################################
     # Bash Scripting Utilities
@@ -89,8 +90,9 @@
     ####################################
     # AWS Utilities
     ####################################
-    awscli2 # aws CLI
-    ssm-session-manager-plugin # for connecting to hardened ec2 nodes
+    (import ./aws.nix) # aws CLI
+    (import
+      ./ssm-session-manager-plugin.nix) # for connecting to hardened ec2 nodes
     aws-nuke # nukes resources in aws accounts
 
     ####################################
@@ -135,5 +137,10 @@
       "cnpg-pdb-patch") # patches all pdbs created by the cnpg operator
     (import ./redis.nix) # redis-cli
     (import ./postgresql.nix) # psql, cli for working with postgres
+    (import ./barman.nix) # barman cli for backups and restore with postgres
+    (util.customShellScript
+      "pf-db-tunnel") # for connecting to private databases through ssh bastion
+    (util.customShellScript
+      "pf-get-db-creds") # gets database credentials from vault
   ];
 }

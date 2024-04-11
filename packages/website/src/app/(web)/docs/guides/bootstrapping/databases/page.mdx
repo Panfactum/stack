@@ -1,0 +1,212 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+
+import k9sPGClusterCreateImg from './k9s-pg-cluster-create.jpg'
+import k9sPGPodsImg from './k9s-pg-pods.jpg';
+import pgBackupS3Img from './pg-backup-s3.jpg';
+import pgAdminConnectionDetailsImg from './pgadmin-connection-details.jpg';
+import pgAdminDashboardImg from './pgadmin-dashboard.jpg';
+import pgAdminRegisterSeverImg from './pgadmin-register-server.jpg';
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Databases
+
+## Objective
+
+Deploy common and test the core databases included in the Panfactum stack.
+
+## PostgreSQL
+
+The most popular relational database in the world is [PostgreSQL](https://www.postgresql.org/). [^1] Many companies
+are able to rely on PostgresSQL to power their applications indefinitely. In addition to being extremely reliable, performant,
+and scalable, it can be easily extended to tackle many popular use cases such as full text search, AI vector database storage,
+geospatial lookups, etc.
+
+[^1]: Okay... technically, it is the embeddable [SQLite](https://www.sqlite.org/) which is included in virtually
+    all mobile devices, web browsers, computers, etc. However, while SQLite is great as a simple data store running
+    in a single process, it isn't designed to be a shared database management server like PostgreSQL.
+
+We use it in the stack to power some more advanced foundational components such as the identity provider (following
+sections).
+
+### Deploy CloudNativePG Operator
+
+While there are many ways to deploy PostgreSQL on Kubernetes, we prefer [CloudNativePG](https://cloudnative-pg.io/)
+which is a best-in-class [Kubernetes Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
+for managing the entire lifecycle of the PostgreSQL clusters in production-hardened manner.
+
+We provide a module to deploy the operator: [kube\_cloudnative\_pg](../../reference/terraform-modules/kube_cloudnative_pg).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_cloudnative_pg`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_cloudnative_pg/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `aws`, `helm`, `random`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+Note that this will only deploy the CRDs and operator. To deploy actual PostgreSQL clusters, you must
+create [Cluster](https://cloudnative-pg.io/documentation/1.22/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster) resources.
+We provide a module [kube\_pg\_cluster](../../reference/terraform-modules/kube_pg_cluster) that you can use in your
+projects to do this.
+
+### Test PostgreSQL Cluster
+
+<MarkdownAlert severity="info">
+  This section will deploy and tear down a test PostgreSQL cluster. While we recommend completing these
+  steps to gain familiarity in working with databases, you can skip this without impacting your cluster's
+  functionality.
+</MarkdownAlert>
+
+#### Deploy Test Cluster
+
+To demonstrate the capabilities of PostgreSQL running in the Panfactum stack, we have created a demo
+module called [test\_kube\_pg\_cluster](../../reference/terraform-modules/kube_pg_cluster) which is a thin
+wrapper around [kube\_pg\_cluster](../../reference/terraform-modules/kube_pg_cluster).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_cloudnative_pg` module called `test_kube_pg_cluster`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/test_kube_pg_cluster/terragrunt.hcl).
+   In your file, ensure that `skip = false`.
+
+3. Add a `module.yaml` that enables the `aws`, `helm`, `random`, `vault`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+5. In k9s, notice that there is a new Cluster resource that will go through multiple statuses as it launches (`:cluster`):
+
+   <MarkdownImage src={k9sPGClusterCreateImg} alt={"PostgreSQL cluster created in k9s"} />
+
+6. Switch to the pods view (`:pods`) and notice several new pods will come up after approximately 2-3 minutes:
+
+   <MarkdownImage src={k9sPGPodsImg} alt={"PostgreSQL pods running in the cluster"} />
+
+   Notice:
+
+   * This deployment is highly available with multiple postgres servers running (one writable primary, and a configurable
+     number of read replicas). Terminating one of the pods will automatically execute a failover. Downtime to the writable
+     master will only be a second or two. [^2]
+
+   * Two different sets of "pooler" pods are launched. These are [PgBouncer](https://www.pgbouncer.org/) instances,
+     one running in read-write mode and the other in read-only. You should establish database connections to these
+     services rather than directly to the databases to improve performance and resiliency.
+
+7. Navigate to the S3 view in the AWS web console. Notice that a new bucket was created for the cluster:
+
+   <MarkdownImage src={pgBackupS3Img} alt={"PostgreSQL WAL backups in S3"} />
+
+   The cluster comes with a component that will automatically replicate the
+   [PostgreSQL Write-Ahead Log (WAL)](https://www.postgresql.org/docs/current/wal-intro.html) to S3. This means
+   that you have the ability to rollback the database *arbitrary* points in time. [^3] This is significantly more
+   powerful than the hourly EBS snapshots deployed in the last section (although those will continue to be made as well).
+
+   While we won't cover it in this guide, you would initiate backups using [barman](https://docs.pgbarman.org/release/3.10.0/barman-cloud-restore.1.html).
+
+[^2]: You can test this by deleting one of the pods and watching the `role` label of the other pod switch from `replica` to `primary`.
+
+[^3]: Only for the last week as storing the WAL for the entire database lifetime would soon grow prohibitively expensive.
+    Additionally, note that this replication is asynchronous so there is the possibility of losing a handful of transactions
+    in a truly catastrophic scenario.
+
+#### Connect to Test Cluster
+
+We provide a handy utility to connecting to database clusters deployed via the Panfactum stack: `pf-db-tunnel`.
+
+Let's try it out:
+
+1. Switch your kubernetes context to the cluster you just deployed the database into by running `kubectx`.
+
+2. Run `pf-db-tunnel --local-port 5432` and complete the prompts.
+
+3. You should eventually receive an output like the following:
+
+   ```shell-session
+   Connecting to Vault in production-primary...
+   Retrieved Vault token.
+   Searching for all databases in production-primary...
+   Retrieving Superuser credentials for pg-d2f3.test-pg from Vault at https://vault.production.panfactum.com...
+
+   Credentials will expire in 8h or until tunnel termination:
+
+   Username: v-root-superuse-2M0ICEiTCzpOBfe6xS2P-1712854185
+   Password: rIoHh2O-eAc7GcRJDf66
+
+
+   Running a tunnel on localhost:5432 to PostgreSQL database pg-d2f3.test-pg via pg-d2f3-pooler-rw.test-pg:5432!
+   ```
+
+   This command uses `pf-tunnel` under the hood so the connection is traversing through the SSH bastion deployed
+   in [inbound networking section](./inbound-networking).
+
+   Note that the `kube_pg_cluster` also set up authentication with Vault and now provisions you dynamic credentials.
+   These credentials will automatically be revoked as soon as you close the tunnel.
+
+4. In a separate terminal, launch `pgadmin4` (included in the Panfactum stack). Once it is running, visit `http://localhost:5050/`.
+
+5. Register a new server:
+
+   <MarkdownImage src={pgAdminRegisterSeverImg} alt={"Register a new server with PgAdmin4"} />
+
+6. Set the connection details using the information displayed when you opened the tunnel:
+
+   <MarkdownImage src={pgAdminConnectionDetailsImg} alt={"Add connection details to the new server configuration in PgAdmin4"} />
+
+7. You should now see the main PgAdmin4 dashboard and can begin running commands against the database:
+
+   <MarkdownImage src={pgAdminDashboardImg} alt={"PgAdmin4 dashboard for the test database"} />
+
+#### Clean Up Test Database
+
+Once you are done working with the test database:
+
+1. Close the tunnel by running `^C` in the terminal
+
+2. Run `terragrunt destroy` in the `test_kube_pg_cluster` folder
+
+3. You will get an error like this: `Error: deleting S3 Bucket`. This is because we protect the S3 bucket
+   containing the database backups from accidental deletion. Delete this bucket manually via the web console.
+
+4. Run `terragrunt destroy` again.
+
+5. Remove the folder
+
+## Redis
+
+Rivalling PostgreSQL in popularity, is the key-value database, [Redis.](https://github.com/redis/redis) Redis
+is much simpler than PostgreSQL and is often used as an in-memory cache or job queuing system.
+
+Due to its simplicity, it does not require a full Kubernetes Operator to run effectively in a production-hardened
+manner. Instead, you can run our [kube\_redis\_sentinel](../../reference/terraform-modules/kube_redis_sentinel)
+directly.
+
+This deploys a highly-available set of Redis nodes that are managed by [Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/),
+a Redis companion project for managing failovers.
+
+Ultimately, working with Redis in the Panfactum stack is very similar to PostgreSQL, so we will not complete
+a full test here. We will make use of it in the next section when we set up your identity provider,
+so you can experiment with it then (including using `pf-db-tunnel` to connect to your Redis instances).
+
+## Other Databases
+
+Database engines are extremely powerful
+and flexible tools. We believe our stack contains the necessary databases to solve 99.9% of the problems
+organizations may face:
+
+* **Relational:** PostgreSQL
+* **Key-value:** Redis
+* **Ledger:** Kafka (Coming soon)
+
+We are focusing our investments on those core modules to provide a best-in-class experience.
+
+That said, you can easily add other database modules to the Kubernetes clusters in the Panfactum stack. Utilities like
+EBS snapshotting will automatically work. In the future,
+we will provide guides for how to extend the core Panfactum utilities such as `pf-db-tunnel` to include your
+custom database deployments.
+
+## Next Steps
+
+<BootstrappingGuideNav backHref={"./maintenance-controllers"} forwardHref={"./identity-provider"} stepNumber={17} />

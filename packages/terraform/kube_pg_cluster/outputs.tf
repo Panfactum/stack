@@ -68,11 +68,11 @@ output "db_admin_role" {
   value = vault_database_secret_backend_role.admin.name
 }
 
-output "db_writer_role" {
-  value = vault_database_secret_backend_role.writer.name
+output "db_superuser_role" {
+  value = vault_database_secret_backend_role.superuser.name
 }
 
 output "db_reader_role" {
-  value = vault_database_secret_backend_role.read_only.name
+  value = vault_database_secret_backend_role.reader.name
 }
 

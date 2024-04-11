@@ -23,6 +23,9 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-update-aws.sh $out/bin/pf-update-aws
     chmod +x $out/bin/pf-update-aws
 
+    cp ${src}/pf-get-aws-state-hash.sh $out/bin/pf-get-aws-state-hash
+    chmod +x $out/bin/pf-get-aws-state-hash
+
     cp ${src}/pf-update-kube.sh $out/bin/pf-update-kube
     chmod +x $out/bin/pf-update-kube
 
@@ -34,6 +37,9 @@ pkgs.stdenv.mkDerivation rec {
 
     cp ${src}/pf-get-ssh-state-hash.sh $out/bin/pf-get-ssh-state-hash
     chmod +x $out/bin/pf-get-ssh-state-hash
+
+    cp ${src}/pf-check-ssh.sh $out/bin/pf-check-ssh
+    chmod +x $out/bin/pf-check-ssh
 
     cp ${src}/pf-check-repo-setup.sh $out/bin/pf-check-repo-setup
     chmod +x $out/bin/pf-check-repo-setup

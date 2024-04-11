@@ -111,6 +111,8 @@ if [[ -z ${PF_AWS_DIR} ]]; then
   errors+="\033[33mEnvironment variable PF_AWS_DIR is not set. Add it to your devenv.nix file.\033[0m\n\n"
 elif ! dirs_are_equal "$files_dir"/files/aws "$(realpath "$DEVENV_ROOT/$PF_AWS_DIR")"; then
   errors+="\033[33mAWS config files are out of date. Run pf-update-aws to update.\033[0m\n\n"
+elif [[ "$(pf-get-aws-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_AWS_DIR/state.lock")" ]]; then
+  errors+="\033[33mGenerated AWS config files is out of date. A superuser must run 'pf-update-aws --build' to update.\033[0m\n\n"
 fi
 
 #################################################

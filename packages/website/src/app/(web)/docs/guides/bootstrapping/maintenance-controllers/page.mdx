@@ -1,11 +1,11 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import ebsDeleteImg from './ebs-delete.jpg'
 import ebsSnapshotsImg from './ebs-snapshots.jpg'
 import k9sBackupImg from './k9s-backup.jpg'
 import s3BackupImg from './s3-backup.jpg';
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Maintenance Controllers
 
@@ -16,8 +16,8 @@ Deploy ancillary controllers that help automatically maintain the cluster.
 ## Reloader
 
 Referencing ConfigMaps or Secrets in the manifest for a Deployment or StatefulSet is an extremely common Kubernetes
-pattern. Unfortunately, by default changes to referenced ConfigMaps or Secrets do not trigger a new rollout of pods
-for the Deployment or StatefulSet. As a result, pods might continue to run with stale data.
+pattern. Unfortunately, by default, changes to referenced ConfigMaps or Secrets do not trigger a new rollout of pods
+for Deployments or StatefulSets. As a result, pods might continue to run with stale data.
 
 The [Reloader](https://github.com/stakater/Reloader) controller was developed by [Stakater](https://www.stakater.com/)
 to address this gap. With this controller deployed in the cluster, changes to ConfigMaps or Secrets will trigger
@@ -92,7 +92,7 @@ In this section, we will add these capabilities.
 
 ### Deploy the external-snapshotter
 
-All of the cluster's persistent data is stored on [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+By default, the cluster's persistent data is stored on [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 backed by [AWS EBS volumes](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes.html). This is managed
 via the [kube\_aws\_ebs\_csi](../../reference/terraform-modules/kube_aws_ebs_csi) module we installed in
 [a prior section](./storage-interfaces).
@@ -127,7 +127,7 @@ custom resource to the cluster. A Backup enables the following functionality:
 
 We provide a module to deploy this functionality: [kube\_velero](../../reference/terraform-modules/kube_velero).
 
-By default, this will create hourly backups of the cluster and its data that will allow you to rollback your entire
+This will create hourly backups of the cluster and its data that will allow you to rollback your entire
 cluster in the case of an emergency. [^4]
 
 [^4]: Backups that include all stored data are expensive in AWS. Each copy is charged at roughly 66%
@@ -236,4 +236,4 @@ Let's verify that backup functionality is working as expected by simulating an e
 Now that we have improved the overall stability and resiliency of the cluster, we can begin deploying
 additional databases to the cluster for more serious workloads.
 
-<MarkdownGuideNav backHref={"./inbound-networking"} forwardHref={"./database-operators"} stepNumber={16} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />
+<BootstrappingGuideNav backHref={"./inbound-networking"} forwardHref={"./databases"} stepNumber={16} />

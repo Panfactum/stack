@@ -28,6 +28,16 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
+    text: '.aws Configuration',
+    path: '/aws',
+    sub: [
+      {
+        text: 'config.yaml',
+        path: '/config-yaml'
+      }
+    ]
+  },
+  {
     text: 'Terragrunt Variables',
     path: '/terragrunt-variables'
   },

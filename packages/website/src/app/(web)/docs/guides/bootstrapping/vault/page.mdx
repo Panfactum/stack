@@ -1,5 +1,4 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import readyVaultImg from './ready-vault.jpg'
@@ -7,6 +6,7 @@ import unreadyVaultImg from './unready-vault.jpg'
 import vaultEBSVolumesImg from './vault-ebs-volumes.jpg'
 import vaultPVCsImg from './vault-pvcs.jpg'
 import vaultServicesImg from './vault-services.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Hashicorp Vault
 
@@ -318,4 +318,4 @@ Let's verify the volumes were provisioned:
 Now that Vault is set up, we will use it to set up the cluster's X.509 infrastructure in the
 next section.
 
-<MarkdownGuideNav backHref={"./storage-interfaces"} forwardHref={"./certificate-management"} stepNumber={11} totalSteps={19} progressLabel={"Panfactum Bootstrapping Guide:"} />
+<BootstrappingGuideNav backHref={"./storage-interfaces"} forwardHref={"./certificate-management"} stepNumber={11} />
