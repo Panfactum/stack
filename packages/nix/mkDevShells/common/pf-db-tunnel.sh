@@ -93,7 +93,7 @@ export VAULT_ADDR
 # Step 2: Get the Vault token
 ####################################################################
 
-VAULT_TOKEN=$(get-vault-token)
+VAULT_TOKEN=$(pf-get-vault-token)
 echo "Retrieved Vault token." >&2
 
 ####################################################################

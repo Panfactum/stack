@@ -29,14 +29,12 @@ locals {
 
   server_submodule = "server"
   server_match = {
-    pf_root_module = var.pf_root_module
-    submodule      = local.server_submodule
+    id = random_id.server_id.hex
   }
 
   csi_submodule = "csi"
   csi_match = {
-    pf_root_module = var.pf_root_module
-    submodule      = local.csi_submodule
+    id = random_id.csi_id.hex
   }
 
   vault_domains = [for domain in var.environment_domains : "vault.${domain}"]
@@ -45,6 +43,16 @@ locals {
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
+}
+
+resource "random_id" "server_id" {
+  byte_length = 8
+  prefix      = "vault-"
+}
+
+resource "random_id" "csi_id" {
+  byte_length = 8
+  prefix      = "vault-csi-"
 }
 
 module "server_labels" {
@@ -58,9 +66,7 @@ module "server_labels" {
   pf_module        = var.pf_module
   region           = var.region
   is_local         = var.is_local
-  extra_tags = merge(var.extra_tags, {
-    submodule = local.server_submodule
-  })
+  extra_tags       = merge(var.extra_tags, local.server_match)
 }
 
 module "csi_labels" {
@@ -74,14 +80,28 @@ module "csi_labels" {
   pf_module        = var.pf_module
   region           = var.region
   is_local         = var.is_local
-  extra_tags = merge(var.extra_tags, {
-    submodule = local.csi_submodule
-  })
+  extra_tags       = merge(var.extra_tags, local.csi_match)
 }
 
-module "constants" {
+module "server_constants" {
   source = "../constants"
 
+  matching_labels  = local.server_match
+  pf_stack_edition = var.pf_stack_edition
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  region           = var.region
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+}
+
+module "csi_constants" {
+  source = "../constants"
+
+  matching_labels  = local.csi_match
   pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
@@ -126,10 +146,14 @@ module "unseal_key" {
   }
 
 
-  name          = "kube-${var.eks_cluster_name}-vault-unseal"
-  description   = "Vault unseal key for ${var.eks_cluster_name}"
-  user_iam_arns = [module.aws_permissions.role_arn]
+  name        = "kube-${var.eks_cluster_name}-vault-unseal"
+  description = "Vault unseal key for ${var.eks_cluster_name}"
 
+
+  superuser_iam_arns         = var.superuser_iam_arns
+  admin_iam_arns             = var.admin_iam_arns
+  reader_iam_arns            = concat([module.aws_permissions.role_arn], var.reader_iam_arns)
+  restricted_reader_iam_arns = var.restricted_reader_iam_arns
 
   pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
@@ -244,8 +268,7 @@ resource "helm_release" "vault" {
           }
         }
         pod = {
-          affinity    = module.constants.controller_node_affinity_helm
-          tolerations = module.constants.burstable_node_toleration_helm
+          tolerations = module.csi_constants.burstable_node_toleration_helm
           extraLabels = module.csi_labels.kube_labels
           annotations = {
             "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
@@ -291,25 +314,12 @@ resource "helm_release" "vault" {
           mountPath    = "/vault/data"
           storageClass = "ebs-standard-retained"
         }
-        affinity = merge({
-          podAntiAffinity = {
-            requiredDuringSchedulingIgnoredDuringExecution = [{
-              labelSelector = {
-                matchLabels = local.server_match
-              }
-              topologyKey : "kubernetes.io/hostname"
-            }]
-          }
-        }, module.constants.controller_node_affinity_helm)
-        topologySpreadConstraints = [{
-          maxSkew           = 1
-          topologyKey       = "topology.kubernetes.io/zone"
-          whenUnsatisfiable = "DoNotSchedule"
-          labelSelector = {
-            matchLabels = local.server_match
-          }
-        }]
-        priorityClassName = "system-cluster-critical"
+        affinity = merge(
+          module.server_constants.pod_anti_affinity_helm,
+          module.server_constants.controller_node_affinity_helm
+        )
+        topologySpreadConstraints = module.server_constants.topology_spread_zone_strict
+        priorityClassName         = "system-cluster-critical"
 
         extraEnvironmentVars = {
           AWS_REGION   = data.aws_region.region.name

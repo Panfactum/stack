@@ -8,7 +8,7 @@ terraform {
 }
 
 locals {
-  all_role_groups = toset(concat(var.superuser_groups, var.admin_groups, var.reader_groups, var.restricted_reader_groups))
+  all_role_groups = toset(concat(var.superuser_groups, var.admin_groups, var.reader_groups, var.restricted_reader_groups, var.billing_admin_groups))
 }
 
 ###########################################################################
@@ -90,6 +90,25 @@ resource "aws_ssoadmin_account_assignment" "restricted_reader" {
 
   instance_arn       = var.sso_instance_arn
   permission_set_arn = var.restricted_reader_permission_set_arn
+
+  principal_id   = data.aws_identitystore_group.groups[each.value].group_id
+  principal_type = "GROUP"
+
+  target_id   = var.aws_account_id
+  target_type = "AWS_ACCOUNT"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+######################### Billing Admin #######################################
+
+resource "aws_ssoadmin_account_assignment" "billing_admin" {
+  for_each = toset(var.billing_admin_groups)
+
+  instance_arn       = var.sso_instance_arn
+  permission_set_arn = var.billing_admin_permission_set_arn
 
   principal_id   = data.aws_identitystore_group.groups[each.value].group_id
   principal_type = "GROUP"

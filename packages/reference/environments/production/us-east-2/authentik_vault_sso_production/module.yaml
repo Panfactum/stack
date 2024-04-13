@@ -2,4 +2,5 @@ providers:
   - authentik
   - time
   - tls
+  - kubernetes
 module: authentik_vault_sso

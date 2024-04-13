@@ -62,7 +62,7 @@ export VAULT_ADDR
 # Step 2: Get DB Credentials
 ####################################################################
 
-VAULT_TOKEN=$(get-vault-token)
+VAULT_TOKEN=$(pf-get-vault-token)
 export VAULT_TOKEN
 
 vault read "db/creds/$ROLE"

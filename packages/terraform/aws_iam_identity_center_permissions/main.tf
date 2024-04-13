@@ -106,6 +106,23 @@ resource "aws_ssoadmin_permission_set_inline_policy" "restricted_reader" {
   inline_policy      = module.aws_core_permissions.restricted_reader_policy_json
 }
 
+######################### Billing Admin #######################################
+
+resource "aws_ssoadmin_permission_set" "billing_admin" {
+  name         = "BillingAdmin"
+  description  = "Read and write access to billing-related functionality."
+  instance_arn = local.sso_instance_arn
+  tags = merge(module.tags.tags, {
+    description = "Read and write access to billing-related functionality."
+  })
+}
+
+resource "aws_ssoadmin_permission_set_inline_policy" "billing_admin" {
+  instance_arn       = local.sso_instance_arn
+  permission_set_arn = aws_ssoadmin_permission_set.billing_admin.arn
+  inline_policy      = module.aws_core_permissions.billing_admin_policy_json
+}
+
 ###########################################################################
 ## Permission to Account Bindings
 ###########################################################################
@@ -121,8 +138,10 @@ module "permission_bindings" {
   admin_groups                         = toset(concat(each.value.superuser_groups, each.value.admin_groups))
   reader_groups                        = toset(concat(each.value.superuser_groups, each.value.admin_groups, each.value.reader_groups))
   restricted_reader_groups             = toset(concat(each.value.superuser_groups, each.value.admin_groups, each.value.reader_groups, each.value.restricted_reader_groups))
+  billing_admin_groups                 = toset(concat(each.value.superuser_groups, each.value.billing_admin_groups))
   superuser_permission_set_arn         = aws_ssoadmin_permission_set.superuser.arn
   admin_permission_set_arn             = aws_ssoadmin_permission_set.admin.arn
   reader_permission_set_arn            = aws_ssoadmin_permission_set.reader.arn
   restricted_reader_permission_set_arn = aws_ssoadmin_permission_set.restricted_reader.arn
+  billing_admin_permission_set_arn     = aws_ssoadmin_permission_set.billing_admin.arn
 }

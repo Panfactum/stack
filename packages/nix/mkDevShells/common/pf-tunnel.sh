@@ -110,7 +110,7 @@ if [[ -z $VAULT_ADDR ]]; then
 fi
 
 export VAULT_ADDR
-VAULT_TOKEN=$(get-vault-token)
+VAULT_TOKEN=$(pf-get-vault-token)
 export VAULT_TOKEN
 
 ####################################################################

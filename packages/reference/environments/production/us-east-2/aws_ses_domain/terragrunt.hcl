@@ -9,6 +9,5 @@ terraform {
 
 
 inputs = {
-  domain             = "panfactum.com"
-  dmarc_report_email = "security@panfactum.com"
+  domain = "panfactum.com"
 }

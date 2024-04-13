@@ -60,3 +60,7 @@ output "email_templates_configmap" {
 output "media_configmap" {
   value = kubernetes_config_map.media.metadata[0].name
 }
+
+output "domain" {
+  value = var.domain
+}

@@ -83,7 +83,7 @@ locals {
   is_local            = local.vars.environment == "local"
 
   # get vault_token (only if the vault provider is enabled)
-  vault_address = local.enable_vault ? (local.is_ci ? get_env("VAULT_ADDR") : lookup(local.vars, "vault_address", get_env("VAULT_ADDR"))) : ""
+  vault_address = local.enable_vault ? (local.is_ci ? get_env("VAULT_ADDR") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR"))) : ""
   vault_token   = run_cmd("--terragrunt-quiet", "get-vault-token", local.vault_address) # This will always run even if in a ternary, so no need to add ternary
 
   # check if in ci system

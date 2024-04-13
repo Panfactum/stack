@@ -93,6 +93,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_admin_iam_arns" /> [admin\_iam\_arns](#input_admin_iam_arns)
+
+Description: List of IAM arns for encryption key admins.
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### <a name="input_all_nodes_allowed_security_groups" /> [all\_nodes\_allowed\_security\_groups](#input_all_nodes_allowed_security_groups)
 
 Description: Names of security groups allowed to communicate directly with the cluster nodes.
@@ -154,6 +162,30 @@ Default:
   "0.0.0.0/0"
 ]
 ```
+
+### <a name="input_reader_iam_arns" /> [reader\_iam\_arns](#input_reader_iam_arns)
+
+Description: List of IAM arns for users who can use the encryption key for encryption and decryption.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_restricted_reader_iam_arns" /> [restricted\_reader\_iam\_arns](#input_restricted_reader_iam_arns)
+
+Description: List of IAM arns for users who can only view the encryption key.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_superuser_iam_arns" /> [superuser\_iam\_arns](#input_superuser_iam_arns)
+
+Description: List of IAM arns for encryption key superusers.
+
+Type: `list(string)`
+
+Default: `[]`
 
 ## Outputs
 

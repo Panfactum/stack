@@ -14,10 +14,6 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.10.0"
-    }
     vault = {
       source  = "hashicorp/vault"
       version = "3.25.0"
@@ -74,16 +70,17 @@ module "constants" {
 * Root Password
 ***************************************/
 
-resource "time_rotating" "superuser_password_rotation" {
-  rotation_days = 7
-}
-
+// TODO: Figure out a way to rotate this automatically
+// Currently, if we do rotate this via terraform,
+// the cluster will crash as the password is not updated
+// for all nodes simultaneously
+// Potentially need to deploy a job
+// that runs redis> CONFIG SET requirepass <your new password>
+// on each node
+// The same will likely apply to certs: https://github.com/redis/redis/issues/8756
 resource "random_password" "superuser_password" {
   length  = 64
   special = false
-  keepers = {
-    rotate = time_rotating.superuser_password_rotation.id
-  }
 }
 
 resource "kubernetes_secret" "superuser" {

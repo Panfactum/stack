@@ -134,7 +134,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     table: ({ children, className, ...props }) => (
       <div className="overflow-x-scroll">
         <table
-          className={clsx('py-2 w-full bg-neutral rounded-md', className)}
+          className={clsx('py-1 my-4 w-full bg-neutral rounded-md', className)}
           {...props}
         >
           {children}

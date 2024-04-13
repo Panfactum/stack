@@ -35,6 +35,8 @@ resource "kubernetes_config_map_v1_data" "media" {
   data = {
     "logo.svg" = var.logo_svg_b64 != null ? base64decode(var.logo_svg_b64) : file("${path.module}/logo.svg")
   }
+  field_manager = "authentik-core-resources"
+  force         = true
 }
 
 // Note: Must first disable the default brand
@@ -231,7 +233,7 @@ resource "authentik_stage_email" "email" {
 
 resource "authentik_stage_prompt_field" "password" {
   field_key              = "password"
-  label                  = "Password"
+  label                  = "New password"
   name                   = "password"
   type                   = "password"
   placeholder            = "Password"

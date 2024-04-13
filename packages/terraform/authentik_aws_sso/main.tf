@@ -4,10 +4,14 @@ terraform {
       source  = "goauthentik/authentik"
       version = "2024.2.0"
     }
-    #    kubernetes = {
-    #      source  = "hashicorp/kubernetes"
-    #      version = "2.27.0"
-    #    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.27.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
     tls = {
       source  = "hashicorp/tls"
       version = "4.0.5"
@@ -15,6 +19,27 @@ terraform {
   }
 }
 
+
+###########################################################################
+## Upload the logo
+###########################################################################
+
+resource "random_id" "logo" {
+  prefix      = "aws-"
+  byte_length = 8
+}
+
+resource "kubernetes_config_map_v1_data" "media" {
+  metadata {
+    name      = var.media_configmap
+    namespace = var.authentik_namespace
+  }
+  data = {
+    "${random_id.logo.hex}.svg" = file("${path.module}/aws.svg")
+  }
+  field_manager = random_id.logo.hex
+  force         = true
+}
 
 ###########################################################################
 ## Cert Config
@@ -104,6 +129,7 @@ resource "authentik_application" "aws" {
   meta_launch_url   = var.aws_sign_in_url
   meta_description  = var.ui_description
   meta_publisher    = "Panfactum"
+  meta_icon         = "${random_id.logo.hex}.svg"
   group             = var.ui_group
   open_in_new_tab   = true
   backchannel_providers = var.aws_scim_enabled ? [

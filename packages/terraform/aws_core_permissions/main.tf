@@ -153,7 +153,34 @@ data "aws_iam_policy_document" "admin_policy" {
 
       // Prevent disabling logging
       "cloudtrail:Delete*",
-      "cloudtrail:Stop*"
+      "cloudtrail:Stop*",
+
+      // Prevent significant DNS mistakes
+      "route53domains:CancelDomainTransferToAnotherAwsAccount",
+      "route53domains:AcceptDomainTransferFromAnotherAwsAccount",
+      "route53domains:RejectDomainTransferFromAnotherAwsAccount",
+      "route53domains:AssociateDelegationSignerToDomain",
+      "route53domains:Delete*",
+      "route53domains:Disable*",
+      "route53domains:Update*",
+      "route53domains:Transfer*",
+      "route53:DeleteHostedZone",
+      "route53:DeactivateKeySigningKey",
+      "route53:DisableHostedZoneDNSSEC",
+      "route53:EnableHostedZoneDNSSEC",
+      "route53:DisassociateVPCFromHostedZone",
+      "route53:DeleteKeySigningKey",
+
+      // Prevent data deletion
+      "ec2:DeleteSnapshot",
+      "s3:DeleteObjectVersion",
+      "backup:Delete*",
+      "backup-storage:Delete*",
+
+      // Prevent effective data deletion by removing KMS keys
+      "kms:Delete*",
+      "kms:Disable*",
+      "kms:ScheduleKeyDeletion"
     ]
     resources = ["*"]
   }
@@ -169,15 +196,6 @@ data "aws_iam_policy_document" "admin_policy" {
     ]
     resources = ["*"]
   }
-
-  // TODO: Protect DNS
-
-  // TODO: Protect EBS snapshots
-
-  // TODO: Protect S3 object versions
-
-  // TODO: Protect KMS keys
-
 }
 
 
@@ -245,6 +263,41 @@ data "aws_iam_policy_document" "restricted_reader_policy" {
       "secretsmanager:GetSecretValue",
       "ec2:GetPasswordData",
       "rds:DescribeDBSnapshots"
+    ]
+    resources = ["*"]
+  }
+}
+
+######################### Billing Admin #######################################
+
+data "aws_iam_policy_document" "billing_admin" {
+  statement {
+    effect = "Allow"
+    actions = [
+
+      // Get info about access token
+      "sts:GetCallerIdentity",
+
+      // Update account info
+      "account:*",
+
+      // Access billing information
+      "billing:*",          // https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsbilling.html
+      "bcm-data-exports:*", // https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsbillingandcostmanagementdataexports.html
+      "billingconductor:*",
+      "aws-portal:*", // https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsbillingconsole.html,
+
+
+      // Register and update some domain information
+      "route53domains:Register*",
+      "route53domains:Renew*",
+      "route53domains:UpdateDomainContact",
+      "route53domains:ResendContactReachabilityEmail",
+      "route53domains:List*",
+      "route53domains:Get*",
+      "route53domains:Check*",
+      "route53domains:Disable*",
+      "route53domains:Enable*",
     ]
     resources = ["*"]
   }

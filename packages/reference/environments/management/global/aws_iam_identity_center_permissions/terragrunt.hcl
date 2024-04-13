@@ -16,6 +16,7 @@ inputs = {
         "privileged_engineers",
         "engineers"
       ]
+      billing_admin_groups = ["billing_admins"]
     }
     production = {
       account_id               = "891377197483"
@@ -23,6 +24,7 @@ inputs = {
       admin_groups             = ["privileged_engineers"]
       reader_groups            = ["engineers"]
       restricted_reader_groups = ["restricted_engineers"]
+      billing_admin_groups     = ["billing_admins"]
     }
     development = {
       account_id = "471112902605"
@@ -34,6 +36,7 @@ inputs = {
       admin_groups = [
         "restricted_engineers"
       ]
+      billing_admin_groups = ["billing_admins"]
     }
   }
 }

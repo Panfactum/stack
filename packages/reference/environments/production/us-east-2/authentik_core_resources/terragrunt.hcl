@@ -18,11 +18,15 @@ inputs = {
 
   organization_name   = "Panfactum"
   organization_domain = "panfactum.com"
-  logo_svg_b64        = filebase64("${get_terragrunt_dir()}/logo.svg")
+
+  logo_svg_b64 = filebase64("${get_terragrunt_dir()}/logo.svg")
   #  favicon_ico_b64 = filebase64("${get_terragrunt_dir()}/favicon.ico")
 
+  superusers_require_webauthn = true
+  default_groups_enabled      = true
+
   extra_groups = {
-    test = {}
-    jack = { parent = "test" }
+    example1 = {}
+    example2 = { parent = "example1" }
   }
 }

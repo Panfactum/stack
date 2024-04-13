@@ -57,6 +57,10 @@ const SIDENAV_SECTIONS = [
   {
     text: 'Resource Tags',
     path: '/resource-tags'
+  },
+  {
+    text: 'RBAC',
+    path: '/rbac'
   }
 ]
 

@@ -50,6 +50,7 @@ variable "extra_groups" {
   default = {}
 }
 
+// It must be an SVG due to this issue: https://github.com/hashicorp/terraform-provider-kubernetes/issues/2467
 variable "logo_svg_b64" {
   description = "A stringified svg logo for displaying on the Authentik UI (base64 encoded)"
   type        = string

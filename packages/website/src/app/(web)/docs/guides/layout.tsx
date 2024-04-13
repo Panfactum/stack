@@ -42,11 +42,11 @@ const SIDENAV_SECTIONS = [
         path: '/preparing-aws'
       },
       {
-        text: 'Configuring Infrastructure-as-Code',
+        text: 'Configuring Infrastructure-as-Code (IaC)',
         path: '/configuring-infrastructure-as-code'
       },
       {
-        text: 'Bootstrapping Infrastructure-as-Code',
+        text: 'Bootstrapping IaC',
         path: '/infrastructure-as-code'
       },
       {
@@ -102,12 +102,12 @@ const SIDENAV_SECTIONS = [
         path: '/identity-provider'
       },
       {
-        text: 'Basic Observability',
-        path: '/basic-observability'
+        text: 'Federated Auth',
+        path: '/federated-auth'
       },
       {
-        text: 'Testing',
-        path: '/testing'
+        text: 'Review and Next Steps',
+        path: '/next-steps'
       }
     ]
   },

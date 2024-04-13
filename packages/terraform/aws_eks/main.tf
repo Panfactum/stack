@@ -206,6 +206,11 @@ module "encrypt_key" {
   name        = "kube-${var.cluster_name}"
   description = "Encryption key for kubernetes control plane data"
 
+  superuser_iam_arns         = var.superuser_iam_arns
+  admin_iam_arns             = var.admin_iam_arns
+  reader_iam_arns            = var.reader_iam_arns
+  restricted_reader_iam_arns = var.restricted_reader_iam_arns
+
   pf_stack_edition = var.pf_stack_edition
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit

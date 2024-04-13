@@ -14,10 +14,41 @@ terraform {
 }
 
 locals {
-  readers_group     = "system:readers"
-  bot_readers_group = "system:bot-readers"
-  admins_group      = "system:admins"
-  superusers_group  = "system:superusers"
+  restricted_readers_group = "system:restricted-readers"
+  readers_group            = "system:readers"
+  admins_group             = "system:admins"
+  superusers_group         = "system:superusers"
+
+
+  superuser_role_arns = tolist(toset(concat(
+    var.kube_superuser_role_arns,
+    ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
+    [
+      for parts in [for arn in data.aws_iam_roles.superuser.arns : split("/", arn)] :
+      format("%s/%s", parts[0], element(parts, length(parts) - 1))
+    ]
+  )))
+  admin_role_arns = tolist(toset(concat(
+    var.kube_admin_role_arns,
+    [
+      for parts in [for arn in data.aws_iam_roles.admin.arns : split("/", arn)] :
+      format("%s/%s", parts[0], element(parts, length(parts) - 1))
+    ]
+  )))
+  reader_role_arns = tolist(toset(concat(
+    var.kube_reader_role_arns,
+    [
+      for parts in [for arn in data.aws_iam_roles.reader.arns : split("/", arn)] :
+      format("%s/%s", parts[0], element(parts, length(parts) - 1))
+    ]
+  )))
+  restricted_reader_role_arns = tolist(toset(concat(
+    var.kube_restricted_reader_role_arns,
+    [
+      for parts in [for arn in data.aws_iam_roles.restricted_reader.arns : split("/", arn)] :
+      format("%s/%s", parts[0], element(parts, length(parts) - 1))
+    ]
+  )))
 }
 
 module "kube_labels" {
@@ -40,7 +71,11 @@ module "kube_labels" {
 ////////////////////////////////////////////////////////////
 
 /*******************  Superuser Permissions ***********************/
-// Access to everything
+
+data "aws_iam_roles" "superuser" {
+  name_regex  = "AWSReservedSSO_Superuser.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
 
 resource "kubernetes_cluster_role_binding" "superusers" {
   metadata {
@@ -60,8 +95,11 @@ resource "kubernetes_cluster_role_binding" "superusers" {
 }
 
 /*******************  Admin Permissions ***********************/
-// Access to a handful of resources globally
-// The rest of the access is on a per-namespace basis
+
+data "aws_iam_roles" "admin" {
+  name_regex  = "AWSReservedSSO_Admin.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
 
 resource "kubernetes_cluster_role" "admins" {
   metadata {
@@ -124,8 +162,11 @@ resource "kubernetes_cluster_role_binding" "admins" {
 }
 
 /*******************  Reader Permissions ***********************/
-// Access to a handful of resources globally
-// The rest of the access is on a per-namespace basis
+
+data "aws_iam_roles" "reader" {
+  name_regex  = "AWSReservedSSO_Reader.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
 
 resource "kubernetes_cluster_role" "readers" {
   metadata {
@@ -133,44 +174,9 @@ resource "kubernetes_cluster_role" "readers" {
     labels = module.kube_labels.kube_labels
   }
   rule {
-    api_groups = [""]
-    resources  = ["nodes", "namespaces", "pods", "configmaps", "services", "roles"]
-    verbs      = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["secrets"]
-    verbs      = ["list"]
-  }
-  rule {
-    api_groups = ["apps"]
-    resources = [
-      "daemonsets",
-      "deployments",
-      "replicasets",
-      "statefulsets",
-    ]
-    verbs = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = ["policy"]
-    resources  = ["poddisruptionbudgets", "poddisruptionbudgets/status"]
-    verbs      = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = ["networking.k8s.io"]
-    resources  = ["ingresses", "ingresses/status", "networkpolicies"]
-    verbs      = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = ["metrics.k8s.io"]
-    resources  = ["pods", "nodes"]
-    verbs      = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = ["rbac.authorization.k8s.io"]
-    resources  = ["clusterroles", "clusterrolebindings"]
-    verbs      = ["get", "list", "watch"]
+    api_groups = ["*"]
+    resources  = ["*"]
+    verbs      = ["get", "list", "watch", "view"]
   }
 }
 
@@ -191,45 +197,43 @@ resource "kubernetes_cluster_role_binding" "readers" {
   }
 }
 
-/*******************  Bot Reader Permissions ***********************/
-// Access to a handful of resources globally
-// The rest of the access is on a per-namespace basis
+/*******************  Restricted Reader Permissions ***********************/
 
-resource "kubernetes_cluster_role" "bot_readers" {
+data "aws_iam_roles" "restricted_reader" {
+  name_regex  = "AWSReservedSSO_RestrictedReader.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+resource "kubernetes_cluster_role" "restricted_readers" {
   metadata {
-    name   = local.bot_readers_group
+    name   = local.restricted_readers_group
     labels = module.kube_labels.kube_labels
   }
   rule {
+    api_groups = ["*"]
+    resources  = ["*"]
+    verbs      = ["get", "list", "watch", "view"]
+  }
+  rule {
     api_groups = [""]
-    resources  = ["nodes", "namespaces"]
-    verbs      = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = ["rbac.authorization.k8s.io"]
-    resources  = ["clusterroles", "clusterrolebindings"]
-    verbs      = ["get", "list", "watch"]
-  }
-  rule {
-    api_groups = ["apiextensions.k8s.io"]
-    resources  = ["customresourcedefinitions"]
-    verbs      = ["get", "list", "watch"]
+    resources  = ["secrets"]
+    verbs      = ["list"]
   }
 }
 
-resource "kubernetes_cluster_role_binding" "bot_readers" {
+resource "kubernetes_cluster_role_binding" "restricted_readers" {
   metadata {
-    name   = local.bot_readers_group
+    name   = local.restricted_readers_group
     labels = module.kube_labels.kube_labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.bot_readers.metadata[0].name
+    name      = kubernetes_cluster_role.restricted_readers.metadata[0].name
   }
   subject {
     kind      = "Group"
-    name      = local.bot_readers_group
+    name      = local.restricted_readers_group
     api_group = "rbac.authorization.k8s.io"
   }
 }
@@ -263,34 +267,31 @@ resource "kubernetes_config_map" "aws_auth" {
       }],
 
       // allows access to superusers
-      [for arn in concat(
-        var.kube_superuser_role_arns,
-        ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-        ) : {
+      [for arn in local.superuser_role_arns : {
         rolearn  = arn
         username = "{{SessionName}}"
         groups   = [local.superusers_group]
       }],
 
       // allows access to admins
-      [for arn in var.kube_admin_role_arns : {
+      [for arn in local.admin_role_arns : {
         rolearn  = arn
         username = "{{SessionName}}"
         groups   = [local.admins_group]
       }],
 
       // allows access to read only
-      [for arn in var.kube_reader_role_arns : {
+      [for arn in local.reader_role_arns : {
         rolearn  = arn
         username = "{{SessionName}}"
         groups   = [local.readers_group]
       }],
 
-      // allows access to bot read only
-      [for arn in var.kube_bot_reader_role_arns : {
+      // allows access to read only
+      [for arn in local.restricted_reader_role_arns : {
         rolearn  = arn
         username = "{{SessionName}}"
-        groups   = [local.bot_readers_group]
+        groups   = [local.restricted_readers_group]
       }]
     ))
   }

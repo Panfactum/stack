@@ -58,3 +58,13 @@ variable "allowed_groups" {
   default     = []
 }
 
+variable "media_configmap" {
+  description = "The configmap holding the static media that Authentik will use"
+  type        = string
+}
+
+variable "authentik_namespace" {
+  description = "The kubernetes namespace where Authentik is deployed"
+  type        = string
+}
+

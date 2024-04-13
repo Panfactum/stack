@@ -8,19 +8,24 @@ terraform {
 }
 
 dependency "kube_authentik" {
-  config_path  = "../kube_authentik"
-  skip_outputs = true
+  config_path = "../kube_authentik"
 }
 
-dependency "core_resources" {
-  config_path  = "../authentik_core_resources"
-  skip_outputs = true
+dependency "authentik_core" {
+  config_path = "../authentik_core_resources"
 }
 
 inputs = {
-  organization_name = "Panfactum"
-  vault_name        = "vault-production"
-  vault_domain      = "vault.prod.panfactum.com"
-  authentik_domain  = "authentik.panfactum.com"
-  allowed_groups    = ["superusers"]
+  authentik_namespace = dependency.kube_authentik.outputs.namespace
+  media_configmap     = dependency.kube_authentik.outputs.media_configmap
+  organization_name   = dependency.authentik_core.outputs.organization_name
+  authentik_domain    = dependency.kube_authentik.outputs.domain
+
+  vault_name   = "vault-production"
+  vault_domain = "vault.prod.panfactum.com"
+  allowed_groups = [
+    "superusers",
+    "privileged_engineers",
+    "engineers"
+  ]
 }

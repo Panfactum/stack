@@ -16,8 +16,8 @@ variable "kube_reader_role_arns" {
   default     = []
 }
 
-variable "kube_bot_reader_role_arns" {
-  description = "AWS IAM role ARNs that have elevated read access to cluster resources."
+variable "kube_restricted_reader_role_arns" {
+  description = "AWS IAM role ARNs that have restricted read-only access to cluster resources."
   type        = list(string)
   default     = []
 }

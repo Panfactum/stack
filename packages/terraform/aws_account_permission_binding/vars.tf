@@ -33,6 +33,11 @@ variable "restricted_reader_groups" {
   type        = list(string)
 }
 
+variable "billing_admin_groups" {
+  description = "The groups to receive billing admin aws access in this environment"
+  type        = list(string)
+}
+
 variable "superuser_permission_set_arn" {
   description = "The arn of the superuser set of permissions"
   type        = string
@@ -51,5 +56,10 @@ variable "reader_permission_set_arn" {
 
 variable "restricted_reader_permission_set_arn" {
   description = "The arn of the restricted reader set of permissions"
+  type        = string
+}
+
+variable "billing_admin_permission_set_arn" {
+  description = "The arn of the billing admin set of permissions"
   type        = string
 }

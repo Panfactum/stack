@@ -11,3 +11,7 @@ output "groups" {
     { for group in authentik_group.extra_groups_great_grandchildren : group.name => group.id }
   )
 }
+
+output "organization_name" {
+  value = var.organization_name
+}

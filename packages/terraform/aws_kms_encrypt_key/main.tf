@@ -46,13 +46,41 @@ module "secondary_tags" {
 ###########################################################################
 ## Access policy
 ###########################################################################
+
+data "aws_iam_roles" "superuser" {
+  name_regex  = "AWSReservedSSO_Superuser.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+data "aws_iam_roles" "admin" {
+  name_regex  = "AWSReservedSSO_Admin.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+data "aws_iam_roles" "reader" {
+  name_regex  = "AWSReservedSSO_Reader.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+data "aws_iam_roles" "restricted_reader" {
+  name_regex  = "AWSReservedSSO_RestrictedReader.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+
 data "aws_caller_identity" "current" {}
 data "aws_iam_policy_document" "key" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-      type        = "AWS"
+      identifiers = tolist(toset(concat(
+        [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        ],
+        var.superuser_iam_arns,
+        tolist(data.aws_iam_roles.superuser.arns)
+      )))
+      type = "AWS"
     }
     actions   = ["kms:*"]
     resources = ["*"]
@@ -61,38 +89,15 @@ data "aws_iam_policy_document" "key" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = concat(["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"], var.admin_iam_arns)
-      type        = "AWS"
-    }
-    actions = [
-      "kms:Create*",
-      "kms:Describe*",
-      "kms:Enable*",
-      "kms:List*",
-      "kms:Put*",
-      "kms:Update*",
-      "kms:Revoke*",
-      "kms:Disable*",
-      "kms:Get*",
-      "kms:Delete*",
-      "kms:TagResource",
-      "kms:UntagResource",
-      "kms:ScheduleKeyDeletion",
-      "kms:CancelKeyDeletion",
-      "kms:ReplicateKey",
-      "kms:UpdatePrimaryRegion"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    principals {
-      identifiers = concat(
+      identifiers = tolist(toset(concat(
         ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
+        var.superuser_iam_arns,
         var.admin_iam_arns,
-        var.user_iam_arns
-      )
+        var.reader_iam_arns,
+        tolist(data.aws_iam_roles.superuser.arns),
+        tolist(data.aws_iam_roles.admin.arns),
+        tolist(data.aws_iam_roles.reader.arns)
+      )))
       type = "AWS"
     }
     actions = [
@@ -127,11 +132,15 @@ data "aws_iam_policy_document" "key" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = concat(
+      identifiers = tolist(toset(concat(
         ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
+        var.superuser_iam_arns,
         var.admin_iam_arns,
-        var.user_iam_arns
-      )
+        var.reader_iam_arns,
+        tolist(data.aws_iam_roles.superuser.arns),
+        tolist(data.aws_iam_roles.admin.arns),
+        tolist(data.aws_iam_roles.reader.arns)
+      )))
       type = "AWS"
     }
     actions = [
@@ -145,6 +154,30 @@ data "aws_iam_policy_document" "key" {
       values   = ["true"]
       variable = "kms:GrantIsForAWSResource"
     }
+  }
+
+  statement {
+    effect = "Allow"
+    principals {
+      identifiers = tolist(toset(concat(
+        ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
+        var.superuser_iam_arns,
+        var.admin_iam_arns,
+        var.reader_iam_arns,
+        var.restricted_reader_iam_arns,
+        tolist(data.aws_iam_roles.superuser.arns),
+        tolist(data.aws_iam_roles.admin.arns),
+        tolist(data.aws_iam_roles.reader.arns),
+        tolist(data.aws_iam_roles.restricted_reader.arns)
+      )))
+      type = "AWS"
+    }
+    actions = [
+      "kms:Get*",
+      "kms:List*",
+      "kms:Describe*"
+    ]
+    resources = ["*"]
   }
 }
 

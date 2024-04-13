@@ -30,7 +30,10 @@
     (import ./kubectl.nix) # kubernetes CLI
     (import ./kubectx.nix) # switching between namespaces and contexts
     (import ./kustomize.nix) # tool for editing manifests programatically
+    (import ./kustomize.nix) # tool for editing manifests programatically
     (import ./helm.nix) # for working with Helm charts
+    (util.customShellScript
+      "pf-get-kube-token") # used for authentication within kube_config
     (import
       ./kube-capacity.nix) # for visualizing resource utilization in the cluster
     (import ./kubectl-cnpg.nix) # for managing the cnpg postgres databases
@@ -47,7 +50,7 @@
     ####################################
     (import ./vault.nix) # provides the vault cli for interacting with vault
     (util.customShellScript
-      "get-vault-token") # our helper tool for getting vault tokens during tf runs
+      "pf-get-vault-token") # our helper tool for getting vault tokens during tf runs
 
     ####################################
     # Infrastructure-as-Code

@@ -250,10 +250,10 @@
         "systems": "systems_3"
       },
       "locked": {
-        "dirtyRev": "c5fb8802c38cea568b6e239e6194c2129dc70351-dirty",
-        "dirtyShortRev": "c5fb880-dirty",
-        "lastModified": 1712663599,
-        "narHash": "sha256-l/Xn6inl1DUJLjwtQ6qbBfbSkik+UqPEZ+wY7nPMKEc=",
+        "dirtyRev": "f97cbd4f77370afa37dc70fe02c0ea6f08342bf6-dirty",
+        "dirtyShortRev": "f97cbd4-dirty",
+        "lastModified": 1712858033,
+        "narHash": "sha256-jojR8juiJEnP8Dv63KMRrQ+079ouHFLPh8v8XN1hk8Q=",
         "type": "git",
         "url": "file:///home/jack/repos/panfactum/stack"
       },
@@ -264,11 +264,11 @@
     },
     "pkgs": {
       "locked": {
-        "lastModified": 1712741485,
-        "narHash": "sha256-bCs0+MSTra80oXAsnM6Oq62WsirOIaijQ/BbUY59tR4=",
+        "lastModified": 1712867921,
+        "narHash": "sha256-edTFV4KldkCMdViC/rmpJa7oLIU8SE/S35lh/ukC7bg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b2cf36f43f9ef2ded5711b30b1f393ac423d8f72",
+        "rev": "51651a540816273b67bc4dedea2d37d116c5f7fe",
         "type": "github"
       },
       "original": {

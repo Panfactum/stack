@@ -112,7 +112,9 @@ words: [
   "webauthn",
   "geospatial",
   "failovers",
-  "snapshotting"
+  "snapshotting",
+  "TOTP",
+  "Yubikeys"
 ]
 languageSettings:
   - languageId: markdown,mdx

@@ -1,5 +1,6 @@
 providers:
   - authentik
   - aws
-  - time
   - tls
+  - random
+  - kubernetes

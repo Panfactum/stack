@@ -9,3 +9,7 @@ output "reader_policy_json" {
 output "restricted_reader_policy_json" {
   value = data.aws_iam_policy_document.restricted_reader_policy.json
 }
+
+output "billing_admin_policy_json" {
+  value = data.aws_iam_policy_document.billing_admin.json
+}

@@ -101,3 +101,32 @@ variable "all_nodes_allowed_security_groups" {
   type        = set(string)
   default     = []
 }
+
+
+################################################################################
+## KMS Access
+################################################################################
+
+variable "superuser_iam_arns" {
+  description = "List of IAM arns for encryption key superusers."
+  type        = list(string)
+  default     = []
+}
+
+variable "admin_iam_arns" {
+  description = "List of IAM arns for encryption key admins."
+  type        = list(string)
+  default     = []
+}
+
+variable "reader_iam_arns" {
+  description = "List of IAM arns for users who can use the encryption key for encryption and decryption."
+  type        = list(string)
+  default     = []
+}
+
+variable "restricted_reader_iam_arns" {
+  description = "List of IAM arns for users who can only view the encryption key."
+  type        = list(string)
+  default     = []
+}

@@ -6,7 +6,7 @@ set -eo pipefail
 
 ROLE=${1:-"MISSING"}
 
-VAULT_TOKEN=$(get-vault-token)
+VAULT_TOKEN=$(pf-get-vault-token)
 export VAULT_TOKEN
 
 vault read "db/creds/$ROLE"

@@ -65,8 +65,8 @@ if [[ -f $USER_CONFIG_FILE ]]; then
     # Setup kubeconfig
     kubectl config set-credentials "$CLUSTER_NAME" \
       --exec-api-version "client.authentication.k8s.io/v1beta1" \
-      --exec-command aws \
-      --exec-arg --region,"$CLUSTER_REGION",eks,get-token,--cluster-name,"$CLUSTER_NAME",--output,json --exec-env AWS_PROFILE="$AWS_PROFILE"
+      --exec-command pf-get-kube-token \
+      --exec-arg --region,"$CLUSTER_REGION",--cluster-name,"$CLUSTER_NAME",--profile,"$AWS_PROFILE"
 
     kubectl config set-cluster "$CLUSTER_NAME" \
       --server "$CLUSTER_URL" \

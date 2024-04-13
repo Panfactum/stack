@@ -26,7 +26,7 @@ The following input variables are required:
 
 ### <a name="input_account_access_configuration" /> [account\_access\_configuration](#input_account_access_configuration)
 
-Description: n/a
+Description: Configuration for assigning access to various AWS accounts via Identity Center
 
 Type:
 
@@ -37,6 +37,7 @@ map(object({
     admin_groups             = optional(list(string), [])
     reader_groups            = optional(list(string), [])
     restricted_reader_groups = optional(list(string), [])
+    billing_admin_groups     = optional(list(string), [])
   }))
 ```
 
@@ -50,7 +51,7 @@ The following outputs are exported:
 
 ### <a name="output_cli_config" /> [cli\_config](#output_cli_config)
 
-Description: n/a
+Description: To be used by the 'pf-aws-update --build' script
 
 ## Usage
 

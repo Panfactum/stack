@@ -147,11 +147,12 @@ Let's set this up.
 
    2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/sops/terragrunt.hcl).
 
-   3. Enable the `aws` provider in a `module.yaml`:
+   3. Create a `module.yaml` that enables the `aws` provider and uses the `aws_kms_encrypt_key` module:
 
       ```yaml
       providers:
         - aws
+      module: "aws_kms_encrypt_key"
       ```
 
    4. Run `terragrunt apply`. Take note of **both** the `arn` and `arn2` outputs as we will need in a following step.
