@@ -120,7 +120,8 @@ We are now ready to deploy Authentik:
 
 6. Once this completes, run `terragrunt output -json` to retrieve the sensitive outputs.
 
-7. Save the `akadmin_bootstrap_token` value in your `.env` as `AUTHENTIK_TOKEN`. This will be used by the [Authentik
+7. Save the `akadmin_bootstrap_token` value in your `.env` as `AUTHENTIK_TOKEN`. Save the `authentik_url` as the `authentik_url` field
+in your `global.yaml`. This will be used by the [Authentik
    terraform provider](https://registry.terraform.io/providers/goauthentik/authentik/latest/docs) in subsequent steps
    to configure Authentik.
 

@@ -64,3 +64,7 @@ output "media_configmap" {
 output "domain" {
   value = var.domain
 }
+
+output "authentik_url" {
+  value = "https://${var.domain}"
+}
