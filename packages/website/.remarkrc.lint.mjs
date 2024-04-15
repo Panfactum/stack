@@ -9,7 +9,8 @@ const remarkConfig = {
         ["remark-lint-no-dead-urls", ['error', {
             skipUrlPatterns: [
                 /^.*__currentPanfactumVersion__.*$/, // ignore custom interpolation
-                /^.*cloudflare\.com.*$/ // cloudflare returns a 403 when using cli tools to access their sites
+                /^.*cloudflare\.com.*$/, // cloudflare returns a 403 when using cli tools to access their sites
+                /^.*medium\.com.*$/ // medium returns 103
             ],
             skipLocalhost: true
         }]],

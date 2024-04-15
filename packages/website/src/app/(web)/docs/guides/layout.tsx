@@ -9,6 +9,10 @@ const SIDENAV_SECTIONS = [
     sub: [
       {
         text: 'Start Here',
+        path: '/start-here'
+      },
+      {
+        text: 'Overview',
         path: '/overview'
       },
       {

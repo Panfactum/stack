@@ -1,6 +1,6 @@
+import { headers } from 'next/headers'
 import 'katex/dist/katex.min.css'
 import './globals.css'
-
 import React, { type ReactNode } from 'react'
 
 import ThemeRegistry from '@/components/ThemeRegistry'
@@ -15,8 +15,9 @@ export const metadata = {
 export default function RootLayout (
   { children } : {children: ReactNode}
 ) {
+  const nonce = headers().get('x-nonce')
   return (
-    <ThemeRegistry options={{ key: 'mui' }}>
+    <ThemeRegistry options={{ key: 'mui', prepend: true, nonce: nonce === null ? undefined : nonce }}>
       <html lang="en">
         <body
           id="root"

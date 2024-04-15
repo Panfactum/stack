@@ -1,14 +1,13 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
-
 import authentikAdminBtnImg from './authentik-admin-button.jpg';
 import authentikAdminInterfaceImg from './authentik-admin-interface.jpg';
 import authentikBootstrapLoginImg from './authentik-bootstrap-login.jpg'
 import emailRecoveryImg from './email-recovery.jpg'
 import passwordSetupEmailImg from './password-setup-email.jpg'
-import BootstrappingGuideNav from "../BootstrappingGuideNav";
 import SESSandboxImg from './ses-sandbox.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Identity Provider
 
@@ -95,12 +94,12 @@ Let's deploy the module now:
 5. Run `terragrunt apply`.
 
 6. Log into the AWS web console and navigate to the SES service. Under "Get set up," notice that your SES configuration
-may be in [Sandbox mode](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html):
+   may be in [Sandbox mode](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html):
 
-    <MarkdownImage src={SESSandboxImg} alt="SES Sandbox mode" />
+   <MarkdownImage src={SESSandboxImg} alt="SES Sandbox mode" />
 
-    Depending on your needs, you may need to request production access to authorize your account for more permissive
-    email sending. AWS adds this extra gate-keeping step to guard against spam senders.
+   Depending on your needs, you may need to request production access to authorize your account for more permissive
+   email sending. AWS adds this extra gate-keeping step to guard against spam senders.
 
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
@@ -130,7 +129,7 @@ We are now ready to deploy Authentik:
 6. Once this completes, run `terragrunt output -json` to retrieve the sensitive outputs.
 
 7. Save the `akadmin_bootstrap_token` value in your `.env` as `AUTHENTIK_TOKEN`. Save the `authentik_url` as the `authentik_url` field
-in your `global.yaml`. This will be used by the [Authentik
+   in your `global.yaml`. This will be used by the [Authentik
    terraform provider](https://registry.terraform.io/providers/goauthentik/authentik/latest/docs) in subsequent steps
    to configure Authentik.
 
@@ -295,9 +294,9 @@ user account.
 [^2]: Static tokens will not work.
 
 [^3]: If you do not receive an email or if clicking on the link results in a "Request has been denied" error
-from Authentik, it is possible your email client is scanning the URLs which can either consume the one-time password
-reset token or even result in the email never being delivered at all. This is particularly prevalent with Microsoft Outlook SafeLinks. Ensure that you have whitelisted the Authentik
-domain as trustworthy.
+    from Authentik, it is possible your email client is scanning the URLs which can either consume the one-time password
+    reset token or even result in the email never being delivered at all. This is particularly prevalent with Microsoft Outlook SafeLinks. Ensure that you have whitelisted the Authentik
+    domain as trustworthy.
 
 ## Next Steps
 

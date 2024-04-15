@@ -53,6 +53,7 @@ export default memo(function ThemeRegistry (props: {children: ReactNode, options
     return (
       <style
         key={cache.key}
+        nonce={options.nonce}
         data-emotion={`${cache.key} ${names.join(' ')}`}
         dangerouslySetInnerHTML={{
           __html: styles

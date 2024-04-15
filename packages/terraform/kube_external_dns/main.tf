@@ -217,6 +217,7 @@ resource "helm_release" "external_dns" {
       sources    = ["service", "ingress"]
       policy     = "upsert-only"
       txtOwnerId = random_id.ids[each.key].hex
+      txtPrefix  = "external-dns-"
     })
   ]
   depends_on = [module.aws_permissions]

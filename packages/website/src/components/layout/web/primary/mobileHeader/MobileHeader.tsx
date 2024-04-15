@@ -27,7 +27,7 @@ export default memo(function MobileHeader () {
             className="bg-white text-primary font-semibold text-xs"
             size="small"
           >
-            <Link href={'/a/auth/login'}>
+            <Link href="/docs/guides/getting-started/start-here">
               Get Started
             </Link>
           </Button>

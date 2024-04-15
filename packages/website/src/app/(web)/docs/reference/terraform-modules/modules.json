@@ -66,6 +66,7 @@
     "kube_vault",
     "kube_velero",
     "kube_vpa",
+    "pf_website",
     "terraform_bootstrap_resources",
     "test_kube_pg_cluster",
     "vault_auth_oidc",

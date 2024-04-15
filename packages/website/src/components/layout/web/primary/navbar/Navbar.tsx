@@ -58,7 +58,7 @@ export default memo(function Navbar () {
             className="bg-white text-primary font-semibold"
             size="small"
           >
-            <Link href="/docs/guides/getting-started/overview">
+            <Link href="/docs/guides/getting-started/start-here">
               Get Started
             </Link>
           </Button>

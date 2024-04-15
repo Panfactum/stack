@@ -1,7 +1,6 @@
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
-
 import awsAccessPortalEmptyImg from './aws-access-portal-empty.jpg'
 import awsAccessPortalPopulatedImg from './aws-access-portal-populated.jpg'
 import awsAppImg from './aws-app.jpg';
@@ -314,7 +313,7 @@ Let's deploy it now:
 ### Configure Developer Environment for OIDC Auth to Vault
 
 1. Remove your hardcoded `VAULT_ADDR` and `VAULT_TOKEN` token from your `.env` file. Make sure that you added the
-`vault_addr` in you `region.yaml` as covered in the [inbound networking section.](./inbound-networking#deploy-the-vault-ingress)
+   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](./inbound-networking#deploy-the-vault-ingress)
 
 2. Terragrunt will automatically work with the new SSO login flow. Test this by re-applying the `vault_auth_oidc` module.
 

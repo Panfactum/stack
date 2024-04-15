@@ -18,8 +18,9 @@ const withMDX = createMDX({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined, // https://nextjs.org/docs/app/api-reference/next-config-js/output#automatically-copying-traced-files
   pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
-  distDir: process.env.LINT === "true" ? '.lint' : 'build'
+  distDir: process.env.LINT === "true" ? '.lint' : 'build',
 }
 
 export default withBundleAnalyzer(withMDX(nextConfig))

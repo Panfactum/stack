@@ -1,5 +1,5 @@
 {
-  "name": "@panfactum/app",
+  "name": "@panfactum/website",
   "private": true,
   "dependencies": {
     "@emotion/cache": "^11.11.0",

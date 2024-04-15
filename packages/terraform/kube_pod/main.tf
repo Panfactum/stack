@@ -281,9 +281,10 @@ locals {
       // Containers
       //////////////////////////////
       containers = [for container, config in local.containers : { for k, v in {
-        name    = container
-        image   = "${config.image}:${config.version}"
-        command = length(config.command) == 0 ? null : config.command
+        name            = container
+        image           = "${config.image}:${config.version}"
+        command         = length(config.command) == 0 ? null : config.command
+        imagePullPolicy = config.imagePullPolicy
 
         // NOTE: The order that these env blocks is defined in
         // is incredibly important. Do NOT move them around unless you know what you are doing.
@@ -345,9 +346,10 @@ locals {
       } : k => v if v != null }]
 
       initContainers = length(keys(local.init_containers)) == 0 ? null : [for container, config in local.init_containers : {
-        name    = container
-        image   = "${config.image}:${config.version}"
-        command = length(config.command) == 0 ? null : config.command
+        name            = container
+        image           = "${config.image}:${config.version}"
+        command         = length(config.command) == 0 ? null : config.command
+        imagePullPolicy = config.imagePullPolicy
         env = concat(
           local.common_env,
           [for k, v in config.env : {

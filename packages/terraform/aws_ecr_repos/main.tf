@@ -27,12 +27,16 @@ module "tags" {
 ## Repo setup
 ##########################################################################
 
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "trust_accounts" {
   statement {
     effect = "Allow"
     principals {
-      identifiers = [for id in var.trusted_account_ids : "arn:aws:iam::${id}:root"]
-      type        = "AWS"
+      identifiers = [
+        for id in tolist(toset(concat(var.trusted_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
+      ]
+      type = "AWS"
     }
     actions = [
       "ecr:BatchCheckLayerAvailability",

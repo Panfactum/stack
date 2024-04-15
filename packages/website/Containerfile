@@ -1,25 +1,57 @@
-FROM node:18-bullseye-slim as development
+#################################################
+## Base Image
+#################################################
+FROM node:20-bullseye-slim as base
+WORKDIR /code
+RUN chown -R 1000:1000 /code
+USER 1000
+
+#################################################
+## Dependencies Image
+#################################################
+FROM base as deps
 
 # Install package manager
+USER 0
 RUN npm i -g pnpm@8.6.12
+USER 1000
 
 # Install Dependencies
-USER 1000
-WORKDIR /code
 COPY --chown=1000 package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
-COPY --chown=1000 packages/public-app/package.json packages/public-app/
+COPY --chown=1000 packages/website/package.json packages/website/
 COPY --chown=1000 packages/eslint/ packages/eslint/
-COPY --chown=1000 packages/primary-api/ packages/primary-api/
 RUN --mount=type=cache,id=pnpm,target=/code/.pnpm,uid=1000,gid=1000 pnpm install --frozen-lockfile
 
-# Build
-COPY --chown=1000 packages/public-app/ packages/public-app/
-WORKDIR packages/public-app
+#################################################
+## Development Image
+#################################################
 
-FROM development as production
-COPY --chown=1000 packages/public-app/src/entrypoint.sh entrypoint.sh
-ENTRYPOINT ["/code/packages/public-app/entrypoint.sh"]
+FROM deps as development
+WORKDIR /code/packages/website
+COPY --chown=1000 packages/website/ .
 RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY,uid=1000,gid=1000 \
  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build
 
-# TODO: Create an actual production build without all the dev dependencies
+#################################################
+## Builder Image
+#################################################
+
+FROM deps as builder
+ENV NODE_ENV=production
+WORKDIR /code/packages/website
+COPY --chown=1000 packages/website/ .
+RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY,uid=1000,gid=1000 \
+  --mount=type=cache,id=website-build-cache,target=/code/packages/website/build/cache,uid=1000,gid=1000 \
+  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build
+
+#################################################
+## Production Image
+#################################################
+
+FROM base as production
+WORKDIR /code
+ENV NODE_ENV=production
+COPY --from=builder --chown=1000:1000 /code/packages/website/build/standalone ./
+WORKDIR /code/packages/website
+COPY --from=builder --chown=1000:1000 /code/packages/website/public ./public
+COPY --from=builder --chown=1000:1000 /code/packages/website/build/static ./build/static
