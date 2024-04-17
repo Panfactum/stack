@@ -18,8 +18,8 @@ const Links = memo(() => {
         text="Docs"
       />
       <NavbarLink
-        href="/pricing"
-        text="Pricing"
+        href="/changelog"
+        text="Changelog"
       />
       <NavbarLink
         href="/about"

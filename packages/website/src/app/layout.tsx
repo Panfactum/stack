@@ -17,6 +17,7 @@ export default function RootLayout (
 ) {
   const nonce = headers().get('x-nonce')
   return (
+
     <ThemeRegistry options={{ key: 'mui', prepend: true, nonce: nonce === null ? undefined : nonce }}>
       <html lang="en">
         <body

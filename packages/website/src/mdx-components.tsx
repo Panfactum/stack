@@ -8,7 +8,7 @@ import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
 
 import { roboto } from './app/font'
 
-const defaultTextSize = ['text-xs', 'sm:text-base']
+const defaultTextSize = ['text-sm', 'sm:text-base']
 
 const replaceCodeVariables = (str: string) => {
   return str
@@ -58,7 +58,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     p: ({ children, className, ...props }) => (
       <p
-        className={clsx('py-[0.3rem]', defaultTextSize, className)}
+        className={clsx('py-[0.4rem]', defaultTextSize, className)}
         {...props}
       >
         {children}

@@ -19,7 +19,7 @@ function MarkdownGuideNavButton (props: {href: string | undefined, tooltip: stri
     <DefaultTooltipLazy title={tooltip}>
       <Link
         href={href}
-        className="flex items-center justify-around bg-primary text-white w-28 lg:w-36 py-1.5 text-xs sm:text-base rounded-md"
+        className="flex items-center justify-around bg-primary text-white w-28 lg:w-36 py-1.5 text-base rounded-md"
       >
         {icon === 'right' ? null : <Icon className="p-0 m-[-1rem] lg:w-[2.5rem] lg:h-[2.5rem]"/>}
         {text}
@@ -97,7 +97,7 @@ export default memo(function MarkdownGuideNav (props: MarkdownGuideNavProps) {
               variant="determinate"
               value={Math.round(stepNumber / totalSteps * 100)}
             />
-            <div className="justify-center gap-3 flex lg:hidden text-xs sm:text-base">
+            <div className="justify-center gap-3 flex lg:hidden text-base">
               <div className="font-bold">
                 {progressLabel}
               </div>

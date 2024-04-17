@@ -20,7 +20,7 @@ module.exports = {
       lg: `${theme.screens.lg}px`,
       xl: `${theme.screens.xl}px`,
       "2xl": `${theme.screens["2xl"]}px`
-    }
+    },
   },
   plugins: [
     require("@tailwindcss/typography"),

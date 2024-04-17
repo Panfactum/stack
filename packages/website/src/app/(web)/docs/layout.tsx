@@ -4,8 +4,8 @@ import SecondaryWebLayout from '@/components/layout/web/secondary/SecondaryWebLa
 
 const TABS = [
   {
-    text: 'Principles',
-    href: '/docs/principles'
+    text: 'Framework',
+    href: '/docs/framework'
   },
   {
     text: 'Concepts',

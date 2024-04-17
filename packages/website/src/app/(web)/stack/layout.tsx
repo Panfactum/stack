@@ -1,13 +1,32 @@
 import type { ReactNode } from 'react'
 
-import ArticleLayout from '@/components/layout/web/article/base/ArticleLayout'
+import SecondaryWebLayout from '@/components/layout/web/secondary/SecondaryWebLayout'
+
+const TABS = [
+  {
+    text: 'Features',
+    href: '/stack/features'
+  },
+  {
+    text: 'Pricing',
+    href: '/stack/pricing'
+  },
+  {
+    text: 'Demos',
+    href: '/stack/demo'
+  },
+  {
+    text: 'Savings Calculator',
+    href: '/stack/savings'
+  }
+]
 
 export default function Layout (
   { children } : {children: ReactNode}
 ) {
   return (
-    <ArticleLayout>
+    <SecondaryWebLayout tabs={TABS}>
       {children}
-    </ArticleLayout>
+    </SecondaryWebLayout>
   )
 }

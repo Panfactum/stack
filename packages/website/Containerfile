@@ -41,7 +41,6 @@ ENV NODE_ENV=production
 WORKDIR /code/packages/website
 COPY --chown=1000 packages/website/ .
 RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY,uid=1000,gid=1000 \
-  --mount=type=cache,id=website-build-cache,target=/code/packages/website/build/cache,uid=1000,gid=1000 \
   NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build
 
 #################################################
