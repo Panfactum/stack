@@ -23,7 +23,7 @@ This is the first infrastructure component that will begin to incur nontrivial c
 and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
 
 [^1]: This cost is well worth it. Even if you were to self-manage the control plane using a tool like
-    [kops](https://github.com/kubernetes/kops), your raw infrastructure costs will likely cost at minimum /$50 / month.
+    [kops](https://github.com/kubernetes/kops), your raw infrastructure costs will likely cost at minimum /\$50 / month.
     From personal experience running many bare metal clusters, when you factor in the additional time and headache
     required to manage the control plane on your own, this is an incredible deal.
 
@@ -35,7 +35,9 @@ or [registry.k8s.io](https://github.com/kubernetes/registry.k8s.io). The cluster
 these images is critical to its operational resiliency. Unfortunately, public registries have several downsides:
 
 * They can and frequently do experience service disruptions
+
 * Many impose rate limits to the amount of images any IP is allowed to download in a given time window
+
 * Image downloads tend to be large and are subject to the bandwidth limitations of the upstream registry as well
   the intermediate network infrastructure
 
@@ -62,7 +64,9 @@ You will need a GitHub user and an associated [GitHub personal access token (PAT
 Use the following PAT settings:
 
 * Use a **classic** token.
+
 * Set the token to **never** expire.
+
 * Grant **only** the `read:packages` scope.
 
 ### Docker Hub Credentials

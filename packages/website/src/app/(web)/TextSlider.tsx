@@ -14,7 +14,7 @@ export default function TextSlider (props: TextSliderProps) {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIndex(index === items.length - 1 ? 0 : index + 1)
-    }, 4000)
+    }, 2500)
     return () => {
       clearTimeout(timeout)
     }

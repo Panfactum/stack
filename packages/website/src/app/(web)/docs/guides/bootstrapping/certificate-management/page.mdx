@@ -53,7 +53,9 @@ You should now see the cert-manager pods running:
 As you might notice, cert-manager comes with three deployments:
 
 * controller (unlabeled): The primary system for managing the certificate lifecycle
+
 * cainjector: Injects CA data into webhooks to facilitate mTLS
+
 * webhook: Validates and mutates [cert-manager CRDs](https://cert-manager.io/docs/reference/api-docs/) submitted to the Kubernetes API server
 
 Additionally, notice that several [CustomResourceDefinitions (CRDs)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
@@ -70,6 +72,7 @@ cert-manager will handle.
 Creating certificates using cert-manager is a two-step process:
 
 1. Create an "issuer" which instructs cert-manager on *how* to create a certificate.
+
 2. Create the certificate by indicating which issuer to use.
 
 You can read more about this process in the [cert-manager documentation here](https://cert-manager.io/docs/configuration/).
@@ -79,8 +82,10 @@ We provide a module to set up the issuers required by the Panfactum stack: [kube
 This module creates three different types of issuers:
 
 * An issuer for *public* certificates signed by [Let's Encrypt](https://letsencrypt.org/) used by your public services
+
 * An issuer for *internal* certificates signed by your Vault cluster [^1] for use in securing internal network traffic
   such as which webhooks
+
 * An issuer for *internal intermediate CA* certificates signed by your Vault cluster by tools like the service mesh (next section)
 
 [^1]: This module also configure Vault to act as a private CA
@@ -122,9 +127,6 @@ Let's deploy it now:
 
 [^2]: This is because cross-environment dependencies will break the CI permission model
     where each CI runner only gets access to a single environment at a time.
-
-[^3]: This is one of the few exceptions to the environment segregation principle. We recommended
-    *only* doing this for production as this should already be your must secure environment.
 
 ## Deploy the First Certificate
 

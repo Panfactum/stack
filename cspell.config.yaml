@@ -114,7 +114,12 @@ words: [
   "failovers",
   "snapshotting",
   "TOTP",
-  "Yubikeys"
+  "Yubikeys",
+  "MTTD",
+  "MTTR",
+  "kpis",
+  "featureful",
+  "triaging"
 ]
 languageSettings:
   - languageId: markdown,mdx

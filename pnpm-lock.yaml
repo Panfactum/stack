@@ -120,8 +120,8 @@ importers:
         specifier: 1.11.9
         version: 1.11.9
       iconoir-react:
-        specifier: 6.11.0
-        version: 6.11.0(react@18.2.0)
+        specifier: 7.6.0
+        version: 7.6.0(react@18.2.0)
       katex:
         specifier: ^0.16.9
         version: 0.16.9
@@ -7476,8 +7476,8 @@ packages:
       - supports-color
     dev: false
 
-  /iconoir-react@6.11.0(react@18.2.0):
-    resolution: {integrity: sha512-+1RgmEWh/9H0aYR2e8sDL5elDUYnkyOXO0E+RnwhkjhJY36Lge6r/9nv1n1FvDXoeFY48omkPUl8s/ciA0XOAg==}
+  /iconoir-react@7.6.0(react@18.2.0):
+    resolution: {integrity: sha512-BxXCCcE3xsTu+d6LMW7aITv/KTLT/KeWlcvI1qQcsYw9G9CKjUwDoxlhIyrBbrlwOkwyiLsJo0AmJOp/Q66L/Q==}
     peerDependencies:
       react: ^16.8.6 || ^17 || ^18
     dependencies:

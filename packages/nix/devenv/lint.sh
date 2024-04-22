@@ -59,7 +59,7 @@ echo >&2 "Finished shell linting!"
 echo >&2 "Starting documentation linting..."
 (
   cd "$DEVENV_ROOT/packages/website"
-  ./node_modules/.bin/remark src -e .mdx -e .md -o -S -r .remarkrc.lint.mjs
+  ./node_modules/.bin/remark src -e .mdx -e .md -o -S -r .remarkrc.mjs
 )
 echo >&2 "Finished documentation linting!"
 

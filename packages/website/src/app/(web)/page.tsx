@@ -1,4 +1,4 @@
-import { Agile, EyeEmpty, SecureWindow, Heart, FastUpCircle, Puzzle, MoneySquare, Book } from 'iconoir-react'
+import { Agile, Eye, SecureWindow, Heart, FastUpCircle, Puzzle, MoneySquare, ClipboardCheck } from 'iconoir-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactElement } from 'react'
@@ -69,7 +69,7 @@ function Pillar (props: PillarProps) {
   return (
     <Link
       href={href}
-      className="flex items-end gap-8 px-4 py-2 sm:py-4 bg-gray-dark rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 hover:cursor-pointer basis-[90%] sm:basis-[40%]"
+      className="flex text-black items-end gap-8 px-4 py-2 sm:py-4 bg-gray-dark rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 hover:cursor-pointer basis-[90%] sm:basis-[40%]"
     >
       {icon}
       <div className="text-lg sm:text-xl text font-semibold">
@@ -121,7 +121,7 @@ export default function Page () {
             <TextSlider
               items={['Cloud Native', 'Infrastructure-as-Code', 'Open', 'Self-hosted', 'Production-hardened', 'Extensible']}
             />
-            <div className={'text-center'}>framework for platform engineering</div>
+            <div className={'text-center'}>system for platform engineering</div>
           </div>
           <div className="py-4">
             <LinkButton
@@ -308,18 +308,18 @@ export default function Page () {
                 />
               )}
               title={'Automation'}
-              href={'./'}
+              href={'/docs/framework/pillars/automation'}
             />
             <Pillar
               icon={(
-                <EyeEmpty
+                <Eye
                   strokeWidth={2}
                   width={'2rem'}
                   height={'2rem'}
                 />
               )}
               title={'Observability'}
-              href={'./'}
+              href={'/docs/framework/pillars/observability'}
             />
             <Pillar
               icon={(
@@ -330,7 +330,7 @@ export default function Page () {
                 />
               )}
               title={'Security'}
-              href={'./'}
+              href={'/docs/framework/pillars/security'}
             />
 
             <Pillar
@@ -342,7 +342,7 @@ export default function Page () {
                 />
               )}
               title={'Resiliency'}
-              href={'./'}
+              href={'/docs/framework/pillars/resiliency'}
             />
             <Pillar
               icon={(
@@ -352,8 +352,8 @@ export default function Page () {
                   height={'2rem'}
                 />
               )}
-              title={'Performance & Scalability'}
-              href={'./'}
+              title={'Performance'}
+              href={'/docs/framework/pillars/performance'}
             />
             <Pillar
               icon={(
@@ -364,7 +364,7 @@ export default function Page () {
                 />
               )}
               title={'Immediate Integration'}
-              href={'./'}
+              href={'/docs/framework/pillars/immediate-integration'}
             />
             <Pillar
               icon={(
@@ -375,25 +375,25 @@ export default function Page () {
                 />
               )}
               title={'Efficiency'}
-              href={'./'}
+              href={'/docs/framework/pillars/efficiency'}
             />
             <Pillar
               icon={(
-                <Book
+                <ClipboardCheck
                   strokeWidth={2}
                   width={'2rem'}
                   height={'2rem'}
                 />
               )}
-              title={'Stewardship'}
-              href={'./'}
+              title={'Coordination'}
+              href={'/docs/framework/pillars/coordination'}
             />
           </div>
 
           <LinkButton
             size={'large'}
-            href={'.'}
-            text={'See how you stack up'}
+            href={'/docs/framework/framework/overview'}
+            text={'Learn more about the framework'}
           />
         </div>
 

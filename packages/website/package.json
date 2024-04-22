@@ -25,7 +25,7 @@
     "buffer": "6.0.3",
     "clsx": "1.2.1",
     "dayjs": "1.11.9",
-    "iconoir-react": "6.11.0",
+    "iconoir-react": "7.6.0",
     "katex": "^0.16.9",
     "next": "14.1.0",
     "postcss-flexbugs-fixes": "^5.0.2",

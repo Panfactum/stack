@@ -19,7 +19,8 @@ const remarkConfig = {
         ['remark-lint-fenced-code-flag', ['error']],
         ['remark-lint-heading-increment', ['error']],
         'remark-mdx',
-        'remark-gfm'
+        'remark-gfm',
+        'remark-math'
     ]
 }
 

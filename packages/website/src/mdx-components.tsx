@@ -5,6 +5,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { currentPanfactumVersion } from '@/app/vars'
 import CopyHeader from '@/components/markdown/CopyHeader'
 import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
+import PrettyBalancer from '@/components/ui/PrettyBalancer'
 
 import { roboto } from './app/font'
 
@@ -57,12 +58,16 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       </li>
     ),
     p: ({ children, className, ...props }) => (
+
       <p
         className={clsx('py-[0.4rem]', defaultTextSize, className)}
         {...props}
       >
-        {children}
+        <PrettyBalancer>
+          {children}
+        </PrettyBalancer>
       </p>
+
     ),
     h1: ({ children, className, ...props }) => (
       <h1
