@@ -2,7 +2,7 @@ let
   system = builtins.currentSystem;
   nixpkgsSrc = builtins.fetchGit {
     url = "https://github.com/NixOS/nixpkgs";
-    rev = "a343533bccc62400e8a9560423486a3b6c11a23b";
+    rev = "325eb628b89b9a8183256f62d017bfb499b19bd9";
     shallow = true;
   };
   pkgs = import nixpkgsSrc { inherit system; };

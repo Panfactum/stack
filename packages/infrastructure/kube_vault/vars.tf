@@ -1,7 +1,13 @@
 variable "vault_helm_version" {
   description = "The version of the vault helm chart to deploy"
   type        = string
-  default     = "0.27.0"
+  default     = "0.25.0" // This is the last open source release
+}
+
+variable "vault_image_tag" {
+  description = "The version of vault to use"
+  type        = string
+  default     = "1.14.7" // This is the last open source release
 }
 
 variable "eks_cluster_name" {

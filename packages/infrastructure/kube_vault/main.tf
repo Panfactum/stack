@@ -245,6 +245,7 @@ resource "helm_release" "vault" {
         agent = {
           image = {
             repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
+            tag        = var.vault_image_tag
           }
           resources = {
             requests = {
@@ -277,6 +278,7 @@ resource "helm_release" "vault" {
       server = {
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
+          tag        = var.vault_image_tag
         }
         resources = {
           requests = {
