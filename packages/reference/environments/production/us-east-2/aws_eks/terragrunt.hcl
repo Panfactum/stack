@@ -17,7 +17,8 @@ dependency "pull_through_cache" {
 }
 
 inputs = {
-  vpc_id = dependency.aws_vpc.outputs.vpc_id
+  vpc_id     = dependency.aws_vpc.outputs.vpc_id
+  egress_ips = dependency.aws_vpc.outputs.nat_ips
 
   cluster_name        = "production-primary"
   cluster_description = "The primary production kubernetes cluster"

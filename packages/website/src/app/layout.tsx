@@ -9,7 +9,7 @@ import { kanit } from './font'
 
 export const metadata = {
   title: 'Panfactum',
-  description: 'Software monetization platform'
+  description: 'Cloud Native System for Platform Engineering'
 }
 
 export default function RootLayout (

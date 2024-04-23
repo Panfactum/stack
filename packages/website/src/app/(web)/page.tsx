@@ -155,7 +155,7 @@ export default function Page () {
               </>
             )}
             buttonText={'See the modules'}
-            buttonHref={'/docs/reference/terraform-modules/overview'}
+            buttonHref={'/docs/reference/infrastructure-modules/overview'}
           />
           <Callout
             title={'Comprehensive Coverage'}

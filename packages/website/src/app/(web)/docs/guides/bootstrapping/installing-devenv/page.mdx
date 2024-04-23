@@ -11,7 +11,7 @@ which includes all the necessary tooling to launch and work with the stack.
 
 ## Install Prerequisite Tooling
 
-Follow this [guide section](../getting-started/install-tooling) to install a few prerequisite tools.
+Follow this [guide section](/docs/guides/getting-started/install-tooling) to install a few prerequisite tools.
 
 ## Choosing a Repository
 
@@ -28,8 +28,8 @@ setting up a dedicated "stack" repository where this code can live.
 
 This repository will contain the following pieces of functionality:
 
-* Much (if not all) of your infrastructure-as-code (`terraform`)
-* All of your configuration-as-code (`terragrunt`) for every live environment
+* Much (if not all) of your infrastructure-as-code (OpenTofu / Terraform)
+* All of your configuration-as-code (Terragrunt) for every live environment
 * All of your deployment pipelines
 * All of your local developer tooling
 * All of your immediate integration tooling for local development
@@ -45,14 +45,15 @@ Two fundamental tools codify your local developer environment:
 1. [nix](https://nix.dev/index.html): A package manager and programming language that works on all operating systems
 2. [devenv](https://devenv.sh/): A set of utilities built upon nix for creating developer environments
 
-Additionally, we provide a foundational `devenv` that automatically installs all tooling that you need to work on
+We provide a foundational `devenv` that automatically installs all tooling that you need to work on
 the Panfactum stack. These tools are versioned in tandem with the live infrastructure to ensure compatibility. They are installed in
-an isolated directory that won't interfere with other tooling on your system.
+an isolated directory that won't interfere with other tooling on your local system.
 
-The following steps will integrate the Panfactum tooling into your repo:
+The following steps will integrate the Panfactum tooling into your repository:
 
-1. Create a `devenv.nix` file in the root of your repo. We recommend starting with the below and expanding it
-   as needed. You can read more about the available syntax and options [here](https://devenv.sh/basics/).
+1. Create a `devenv.nix` file in the root of your repo. We recommend starting with the below template and expanding it
+   as needed. You can read more about the available syntax and options for devenv [here](https://devenv.sh/basics/). We also
+   provide a [dedicated guide](/docs/guides/developer-environment/customizing) for customizing your devenv.
 
    ```nix
    {config, pkgs, ...}: { }
@@ -73,7 +74,7 @@ The following steps will integrate the Panfactum tooling into your repo:
 
            # Change 'main' to be the release version that you desire
            # (or keep 'main' if you want to use the rolling release)
-           # Ensure that this matches the version you use for your terraform modules
+           # Ensure that this matches the version you use for your infrastructure modules
            panfactum.url = "github:Panfactum/stack/main";
        };
 
@@ -97,7 +98,7 @@ The following steps will integrate the Panfactum tooling into your repo:
 ## Integrate direnv
 
 [direnv](https://direnv.net/) provides a set of shell hooks that will automatically activate your devenv
-when you open the repo in your terminal. Additionally, it will automatically reload if there are any changes to the devenv
+when you navigate to the repo in your terminal. Additionally, it will automatically reload if there are any changes to the devenv
 definition and unload when you leave the repo directory.
 
 This is controlled via a `.envrc` file that should exist in the root of your repository. When you instantiated
@@ -106,16 +107,16 @@ the developer environment in the previous step, you should have seen a warning a
 Run `pf-update-envrc` to create / update the file.
 
 You should now see a warning saying that the file is blocked. Run `direnv allow` to allow the developer environment
-to automatically instantiate when opening this repo in your terminal.
+to automatically instantiate.
 
 ## Setting Global Environment Variables
 
-A handful of environment variables need to be set in order to customize the behavior
+A handful of environment variables need to be set in order to tailor the behavior
 of the Panfactum stack in your repo and organization.
 
 ### Committed
 
-We expect you to provide some variables in your `devenv.nix` file, . You configure this via the `env` key as shown below:
+We expect you to provide some variables in your `devenv.nix` file. You configure this with the `env` key as shown below:
 
 ```nix
 { config, pkgs, ...}: {
@@ -125,16 +126,16 @@ We expect you to provide some variables in your `devenv.nix` file, . You configu
 }
 ```
 
-For the full list of values you must configure, please refer to [these reference docs](../../reference/repo-variables).
+For the full list of values you must set, please refer to [these reference docs](/docs/reference/repo-variables).
 
-These changes should be committed as they should be the same for all users of the repository.
+These changes should be committed into version control as they will be shared by all users of the repository.
 
 ### Local
 
 Each developer has settings that are specific to them. These should be set in a `.env` file using the [dotenv](https://www.dotenv.org/docs/)
 syntax.
 
-For the full list of available values, please refer to [these reference docs](../../reference/dotenv).
+For the full list of available values, please refer to [these reference docs](/docs/reference/dotenv).
 
 This file should NOT be committed as the contents are specific to each user. However, you might want to include an example
 file in the repo called `.env.example` to aid your users.
@@ -163,4 +164,4 @@ For now, you will want to run the following commands to set up the basic scaffol
 
 Now that you have the tooling installed, we will need to prepare AWS for deploying infrastructure.
 
-<BootstrappingGuideNav backHref={"./overview"} forwardHref={"./preparing-aws"} stepNumber={2} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/overview"} forwardHref={"/docs/guides/bootstrapping/preparing-aws"} stepNumber={2} />

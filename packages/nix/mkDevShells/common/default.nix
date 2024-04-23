@@ -18,6 +18,10 @@
     unset PYTHONPATH
   '';
 
+  scripts = {
+    terraform.exec = "tofu $@"; # Alias terraform with tofu to prevent confusion
+  };
+
   packages = with pkgs; [
     ####################################
     # System Setup
@@ -55,8 +59,9 @@
     ####################################
     # Infrastructure-as-Code
     ####################################
-    (import ./terraform.nix) # declarative iac tool
-    (import ./terragrunt.nix) # terraform-runner
+    (import
+      ./opentofu.nix) # declarative iac tool (open alternative to terraform)
+    (import ./terragrunt.nix) # opentofu-runner
     (util.customShellScript "get-version-hash") # helper for the IaC tagging
     (util.customShellScript
       "wait-on-image") # helper for waiting on image availability

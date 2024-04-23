@@ -26,7 +26,7 @@ synchronizing DNS records from internal [Service](https://kubernetes.io/docs/con
 and [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources
 to external DNS servers like AWS Route53.
 
-We provide a module to deploy it: [kube\_external\_dns](../../reference/terraform-modules/kube_external_dns)
+We provide a module to deploy it: [kube\_external\_dns](/docs/reference/infrastructure-modules/kube_external_dns)
 
 Let's deploy it now:
 
@@ -34,7 +34,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/kube_external_dns/terragrunt.hcl).
 
-3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](./certificate-management#deploy-issuers)
+3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](/docs/guides/bootstrapping/certificate-management#deploy-issuers)
    for more information, but unless you have a specific reason not to, simply copy that input into this module.
 
 4. Add a `module.yaml` that enables the `aws`, `helm`, `random`, and `kubernetes` providers.
@@ -54,11 +54,14 @@ a *public* gateway in your VPC for inbound traffic to connect with before it is 
 Kubernetes nodes. AWS load balancers are the perfect gateways:
 
 * Highly available, distributed across all your public AZs
+
 * Highly scalable, able to handle any amount of traffic
+
 * Built-in protection against DOS attacks
+
 * Support for [PROXY protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) to preserve IP headers
 
-We provide a module to deploy it: [kube\_aws\_lb\_controller](../../reference/terraform-modules/kube_aws_lb_controller)
+We provide a module to deploy it: [kube\_aws\_lb\_controller](/docs/reference/infrastructure-modules/kube_aws_lb_controller)
 
 Let's deploy it now:
 
@@ -83,11 +86,17 @@ a [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/i
 Operating at OSI layer 7 (e.g., HTTP), the ingress system adds several key capabilities:
 
 * Logging for *all* inbound traffic in a standard format
+
 * Public TLS termination
+
 * Request routing based on domain, pathname, and HTTP headers
+
 * Compression of large responses
+
 * Rate-limiting
+
 * Standard security headers
+
 * [Web application firewall](https://www.cloudflare.com/learning/ddos/glossary/web-application-firewall-waf/) engine
 
 Additionally, it allows you to only use one AWS load balancer instead of one for each service, saving significant
@@ -96,7 +105,7 @@ costs.
 The most popular ingress controller for Kubernetes is the [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/)
 which uses [NGINX](https://www.nginx.com/) as the underlying proxy.
 
-We provide a module to deploy it: [kube\_ingress\_nginx](../../reference/terraform-modules/kube_ingress_nginx).
+We provide a module to deploy it: [kube\_ingress\_nginx](/docs/reference/infrastructure-modules/kube_ingress_nginx).
 
 ### Deploy the NGINX-Ingress Controller
 
@@ -154,7 +163,7 @@ Currently, the system has one workload that definitely needs inbound connectivit
 
 Let's set that up now:
 
-1. Return the `kube_vault` module you deployed in the [Vault guide section](./vault).
+1. Return the `kube_vault` module you deployed in the [Vault guide section](/docs/guides/bootstrapping/vault).
 
 2. Change `ingress_enabled` from `false` to `true`.
 
@@ -205,7 +214,7 @@ Let's set that up now:
    can verify this either directly via the command line (`curl -I <your_vault_address>`) or using a site such
    as [https://securityheaders.com](https://securityheaders.com).
 
-   This is accomplished by our [kube\_ingress](../../reference/terraform-modules/kube_ingress)
+   This is accomplished by our [kube\_ingress](/docs/reference/infrastructure-modules/kube_ingress)
    module. `kube_vault` uses it internally, and you can use it directly in your projects.
 
 8. Finally, you no longer need to use the finicky `kubectl port-forward` to connect with Vault. Let's update the address in your
@@ -234,7 +243,7 @@ message format](https://www.postgresql.org/docs/current/protocol.html). [^1]
     is prone to service disruptions as pods restart and move around the cluster. The bastion will use the highly available
     service infrastructure to ensure connections are preserved even if the underlying pod changes.
 
-We provide a bastion deployment module: [kube\_bastion](../../reference/terraform-modules/kube_bastion).
+We provide a bastion deployment module: [kube\_bastion](/docs/reference/infrastructure-modules/kube_bastion).
 
 This host uses certificate authentication with Vault so that you do not need to manually manage static SSH keys
 unlike SSH setups you might have used in the past. We will see that in action in a moment.
@@ -281,7 +290,7 @@ Now that the bastion is running, let's configure connectivity:
 
 3. Copy the `config.example.yaml` file to `config.yaml`.
 
-4. Update the values to the correct values for your setup. See the [reference docs](../../reference/ssh/config-yaml) for
+4. Update the values to the correct values for your setup. See the [reference docs](/docs/reference/ssh/config-yaml) for
    more information.
 
 5. Run `pf-update-ssh --build` to generate the `known_hosts` and `connection_info` files for your project. Additionally, a
@@ -336,7 +345,7 @@ private network resources such as databases without needing to manually maintain
 ## Next Steps
 
 Now that the core functionality of the cluster is live,
-[let's install a handful of maintenance controllers](./maintenance-controllers) that will ensure things continue
+let's install a handful of maintenance controllers that will ensure things continue
 to operate smoothly.
 
-<BootstrappingGuideNav backHref={"./autoscaling"} forwardHref={"./maintenance-controllers"} stepNumber={15} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/autoscaling"} forwardHref={"/docs/guides/bootstrapping/maintenance-controllers"} stepNumber={15} />

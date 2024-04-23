@@ -4,6 +4,10 @@ import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/Ar
 
 const SIDENAV_SECTIONS = [
   {
+    text: 'Infrastructure-as-Code',
+    path: '/iac'
+  },
+  {
     text: 'Networking',
     path: '/networking',
     sub: [

@@ -3,8 +3,7 @@
 # Purpose: Uses terraform-docs to create the markdown documentation
 # for each terraform module for the public website
 
-OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/(web)/docs/reference/terraform-modules"
-TF_DIR="$DEVENV_ROOT/packages/terraform"
+OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/(web)/docs/reference/infrastructure-modules"
 
 # Initialize an empty JSON object with a `modules` array
 JSON=$(jq -n '{modules: []}')
@@ -46,15 +45,15 @@ function remove_version_header() {
 }
 
 function add_type_link() {
-  sed -E 's@\*\*Type:\*\* (.*)@**Type:** [\1](./overview)@g'
+  sed -E 's@\*\*Type:\*\* (.*)@**Type:** [\1](/docs/reference/infrastructure-modules/overview)@g'
 }
 
 function add_module_source_link() {
-  sed "5i**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/terraform/$1)\n"
+  sed "5i**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/infrastructure/$1)\n"
 }
 
 # Loop through each directory in the script's directory
-for d in "$TF_DIR"/*; do
+for d in "$TERRAFORM_MODULES_DIR"/*; do
   if [ -d "$d" ]; then
     # Extract the name of the directory
     MODULE=$(basename "$d")
@@ -65,7 +64,7 @@ for d in "$TF_DIR"/*; do
     # Make the docs
     DOCS_DIR="$OUTPUT_DIR/$MODULE"
     mkdir -p "$DOCS_DIR"
-    terraform-docs -c "$TF_DIR/.terraform-docs.yml" "$d" |
+    terraform-docs -c "$TERRAFORM_MODULES_DIR/.terraform-docs.yml" "$d" |
       add_module_source_link "$MODULE" |
       add_provider_links |
       remove_version_header |

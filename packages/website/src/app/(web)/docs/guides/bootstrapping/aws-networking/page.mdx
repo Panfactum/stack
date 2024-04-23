@@ -1,8 +1,3 @@
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import natImg from './nat.jpg'
@@ -27,11 +22,11 @@ Those that do not host live infrastructure (e.g., `management`) do not need much
 
 ## Background
 
-If you are new to cloud networking, we recommend that your review the [concept documentation](../../concepts/networking/aws-primitives) before proceeding.
+If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/concepts/networking/aws-primitives) before proceeding.
 
 ## Create your VPC
 
-We will use the [aws\_vpc](../../reference/terraform-modules/aws_vpc) module to deploy the VPC.
+We will use the [aws\_vpc](/docs/reference/infrastructure-modules/aws_vpc) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
 
@@ -47,10 +42,10 @@ in each private / isolated subnet. Choosing a large VPC CIDR gives you the most 
 
 [^1]: If you need to choose a smaller block for some reason
     (e.g., [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)),
-    that is completely fine, but you will want to ensure that is isn't too small. However, a
+    that is completely fine, but you will want to ensure that it isn't too small. However, a
     hard lower limit should be a `/19` network which would provide about 8,192 ($2^{32-19}$) IP addresses.
 
-We also *strongly* recommend that you set up *at least* three of each [subnet type](../../concepts/networking/aws-primitives) (nine total).
+We also *strongly* recommend that you set up *at least* three of each [subnet type](/docs/concepts/networking/aws-primitives) (nine total).
 This allows you to have one subnet type in at least three availability zones which is required to achieve a highly available setup.
 
 More specifically, we recommend you use the following subnet configuration): [^2] [^3]
@@ -83,7 +78,7 @@ for helping to divide your network.
 
 ### Understanding NAT
 
-If you are unfamiliar with NAT, you should stop now to review the [NAT concept documentation](../../concepts/networking/nat).
+If you are unfamiliar with NAT, you should stop now to review the [NAT concept documentation](/docs/concepts/networking/nat).
 
 NAT is the one component of the VPC configuration that we have enhanced beyond the typical AWS-recommended setup.
 
@@ -94,104 +89,17 @@ NAT Gateway costs alone can produce 10-50% of total AWS spend.
 Instead, we deploy a Panfactum-enhanced version of the [fck-nat project](https://github.com/AndrewGuenther/fck-nat). Using this
 pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and reduces the costs of NAT by over 90%.
 
-See the [aws\_vpc](../../reference/terraform-modules/aws_vpc) documentation for more details and to decide if it is right for you
+See the [aws\_vpc](/docs/reference/infrastructure-modules/aws_vpc) documentation for more details and to decide if it is right for you
 (it probably is).
 
 ### Deploy the AWS VPC Module
 
-We will now deploy the [aws\_vpc](../../reference/terraform-modules/aws_vpc) module via terragrunt:
+We will now deploy the [aws\_vpc](/docs/reference/infrastructure-modules/aws_vpc) module via terragrunt:
 
 1. Set up a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
-2. Add a `terragrunt.hcl` (example below)
-
-   <Accordion>
-     <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="aws-vpc-terragrunt-hcl" id="aws-vpc-terragrunt-hcl">
-       `aws_vpc` `terragrunt.hcl`
-     </AccordionSummary>
-
-     <AccordionDetails>
-       ```hcl
-       include "panfactum" {
-         path = find_in_parent_folders("panfactum.hcl")
-         expose = true
-       }
-
-       terraform {
-         source = "github.com/Panfactum/stack.git?ref=__currentPanfactumVersion__/packages/terraform//aws_vpc"
-       }
-
-       inputs = {
-         vpc_name        = "PRODUCTION_PRIMARY"
-         vpc_cidr        = "10.0.0.0/16"
-         vpc_description = "VPC for the primary production environment."
-
-         nat_associations = {
-           "PRIVATE_A"      = "PUBLIC_A"
-           "PRIVATE_B"      = "PUBLIC_B"
-           "PRIVATE_C"      = "PUBLIC_C"
-         }
-
-         subnets = {
-           "PUBLIC_A" = {
-             az          = "us-east-2a"
-             cidr_block  = "10.0.0.0/24"
-             public      = true
-             description = "Subnet for incoming public traffic to availability zone A"
-           },
-           "PUBLIC_B" = {
-             az          = "us-east-2b"
-             cidr_block  = "10.0.1.0/24"
-             public      = true
-             description = "Subnet for incoming public traffic to availability zone B"
-           },
-           "PUBLIC_C" = {
-             az          = "us-east-2c"
-             cidr_block  = "10.0.2.0/24"
-             public      = true
-             description = "Subnet for incoming public traffic to availability zone C"
-           },
-           "PRIVATE_A" = {
-             az          = "us-east-2a"
-             cidr_block  = "10.0.64.0/18"
-             public      = false
-             description = "Subnet for private nodes in availability zone A"
-           },
-           "PRIVATE_B" = {
-             az          = "us-east-2b"
-             cidr_block  = "10.0.128.0/18"
-             public      = false
-             description = "Subnet for private nodes in availability zone B"
-           },
-           "PRIVATE_C" = {
-             az          = "us-east-2c"
-             cidr_block  = "10.0.192.0/18"
-             public      = false
-             description = "Subnet for private nodes in availability zone C"
-           },
-           "ISOLATED_A" = {
-             az          = "us-east-2a"
-             cidr_block  = "10.0.16.0/20"
-             public      = false
-             description = "Subnet for node isolated from public internet in availability zone A"
-           }
-           "ISOLATED_B" = {
-             az          = "us-east-2b"
-             cidr_block  = "10.0.32.0/20"
-             public      = false
-             description = "Subnet for node isolated from public internet in availability zone B"
-           }
-           "ISOLATED_C" = {
-             az          = "us-east-2c"
-             cidr_block  = "10.0.48.0/20"
-             public      = false
-             description = "Subnet for node isolated from public internet in availability zone C"
-           }
-         }
-       }
-       ```
-     </AccordionDetails>
-   </Accordion>
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl). Replace
+   the subnet configuration with your chosen settings.
 
 3. Enable the `aws` provider in the `module.yaml`.
 
@@ -274,4 +182,4 @@ We will now verify a few features of the network:
 
 Now that networking is set up in AWS, we can deploy your Kubernetes cluster.
 
-<BootstrappingGuideNav backHref={"./dns"} forwardHref={"./kubernetes-cluster"} stepNumber={7} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/dns"} forwardHref={"/docs/guides/bootstrapping/kubernetes-cluster"} stepNumber={7} />

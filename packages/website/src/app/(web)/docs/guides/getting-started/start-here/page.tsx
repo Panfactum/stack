@@ -33,12 +33,12 @@ export default function StartHerePage () {
   return (
     <div className="flex flex-col gap-12 py-20">
       <Option
-        href={'./overview'}
+        href={'/docs/guides/getting-started/overview'}
         text={"Connecting to your organization's stack?"}
       />
       <Or/>
       <Option
-        href={'../bootstrapping/overview'}
+        href={'/docs/guides/bootstrapping/overview'}
         text={'Deploying the stack in your organization?'}
       />
     </div>

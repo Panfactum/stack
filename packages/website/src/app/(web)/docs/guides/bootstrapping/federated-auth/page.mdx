@@ -23,6 +23,7 @@ access control (RBAC).
 Every federated authentication configuration comes in two parts:
 
 * a module for setting up the authentication provider in Authentik
+
 * a module for setting up the authentication receiver in the service provider
 
 These are split in two because the modules will often be deployed in different environments. The Authentik half
@@ -43,17 +44,17 @@ Let's get started.
   choose to keep your existing configuration. However, you will need to manually add your SSO roles
   as inputs to:
 
-  * [kube\_rbac](../../reference/terraform-modules/kube_rbac) to allow SSO authentication
+  * [kube\_rbac](/docs/reference/infrastructure-modules/kube_rbac) to allow SSO authentication
     with your Kubernetes clusters. Note that you MUST omit the /aws-reserved/sso.amazonaws.com/us-east-2/
     part of the ARN.
 
-  * [aws\_eks](../../reference/terraform-modules/aws_eks) to allow SSO authentication
+  * [aws\_eks](/docs/reference/infrastructure-modules/aws_eks) to allow SSO authentication
     with the cluster KMS encryption key.
 
-  * sops keys (deployed with [aws\_kms\_encryption\_key](../../reference/terraform-modules/aws_kms_encryption_key)) to allow SSO authentication
+  * sops keys (deployed with [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws_kms_encrypt_key)) to allow SSO authentication
     with the sops KMS encryption key.
 
-  * [kube\_vault](../../reference/terraform-modules/kube_vault) to allow SSO authentication
+  * [kube\_vault](/docs/reference/infrastructure-modules/kube_vault) to allow SSO authentication
     with the Vault KMS unseal key.
 </MarkdownAlert>
 
@@ -61,7 +62,7 @@ Let's get started.
 
 [AWS IAM Identity Center](https://aws.amazon.com/iam/identity-center/) is the AWS mechanism to log into your AWS
 organization from an external identity provider. Unfortunately, it does not have a robust configuration API,
-so we will have to configure several settings manually before we can begin terraforming.
+so we will have to configure several settings manually before we can begin deploying infrastructure-as-code.
 
 Let's do this now:
 
@@ -86,7 +87,7 @@ Let's do this now:
 ### Deploy AWS Provider in Authentik
 
 We have a module for configuring Authentik to work with Identity Center:
-[authentik\_aws\_sso](../../reference/terraform-modules/authentik_aws_sso).
+[authentik\_aws\_sso](/docs/reference/infrastructure-modules/authentik_aws_sso).
 
 Let's deploy it now:
 
@@ -165,8 +166,8 @@ Let's deploy it now:
 ### Configure AWS Identity Center Permissions
 
 We will now configure permissions in AWS Identity Center to allow your users access to accounts in your AWS
-organizations. Fortunately, AWS *does* expose APIs for this, so we can provide a terraform module
-to automatically set this up: [aws\_iam\_identity\_center\_permissions](../../reference/terraform-modules/aws_iam_identity_center_permissions).
+organizations. Fortunately, AWS *does* expose APIs for this, so we can provide an infrastructure module
+to automatically set this up: [aws\_iam\_identity\_center\_permissions](/docs/reference/infrastructure-modules/aws_iam_identity_center_permissions).
 
 Let's deploy it now:
 
@@ -174,7 +175,7 @@ Let's deploy it now:
 
 2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/aws_iam_identity_center_permissions/terragrunt.hcl).
 
-3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](../../reference/rbac),
+3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](/docs/reference/rbac),
    but you have the flexibility to choose what works best for your organization. The "groups" are groups you have created
    in Authentik and have allowed access to AWS in the `authentik_aws_sso` module above.
 
@@ -198,15 +199,15 @@ provisioned SSO credentials and roles and stop using your static root access key
 2. As AWS KMS keys are special resources that require explicit permission grants, you must re-apply
    **every** module that make use of KMS keys in order to pick up the new SSO roles. In this guide, that would be the following modules:
 
-   * sops keys deployed with the [aws\_kms\_encrypt\_key](../../reference/terraform-modules/aws_kms_encrypt_key) module
-   * EKS clusters deployed with [aws\_eks](../../reference/terraform-modules/aws_eks)
-   * Vault clusters deployed with [kube\_vaults](../../reference/terraform-modules/kube_vault)
+   * sops keys deployed with the [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws_kms_encrypt_key) module
+   * EKS clusters deployed with [aws\_eks](/docs/reference/infrastructure-modules/aws_eks)
+   * Vault clusters deployed with [kube\_vaults](/docs/reference/infrastructure-modules/kube_vault)
 
 3. Run `pf-update-aws` to scaffold files in your `$PF_AWS_DIR` directory.
 
 4. Copy the generated `config.example.yaml` file to `config.yaml`.
 
-5. Set up `config.yaml` according to [these reference docs](../../reference/aws/config-yaml).
+5. Set up `config.yaml` according to [these reference docs](/docs/reference/aws/config-yaml).
 
    1. We provide an example file [here.](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/.aws/config.yaml)
 
@@ -233,7 +234,7 @@ provisioned SSO credentials and roles and stop using your static root access key
    In general, your terragrunt variables for AWS profiles should use the `<environment>-superuser` roles as some modules
    will require superuser privileges to run. Your organization's users can override this profile
    in their personal `environment.user.yaml` files if they need to run terragrunt but do not have `superuser`
-   access. See [this guide](../terraforming/deploying-modules#local-deployments) for more information.
+   access. See [this guide](/docs/guides/iac/deploying-modules#local-deployments) for more information.
 
 9. Verify that you still have Kubernetes connectivity by running `kubectl cluster-info` for every cluster
    (after running `pf-update-kube` to reflect any changes to your `$PF_KUBE_DIR/config.user.yaml`).
@@ -260,7 +261,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 ### Deploy Vault Provider in Authentik
 
 We have a module for configuring Authentik to serve as the IdP for Vault clusters:
-[authentik\_vault\_sso](../../reference/terraform-modules/authentik_vault_sso).
+[authentik\_vault\_sso](/docs/reference/infrastructure-modules/authentik_vault_sso).
 
 Let's deploy it now:
 
@@ -281,7 +282,7 @@ Let's deploy it now:
 
 ### Deploy Vault OIDC Login Configuration
 
-We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](../../reference/terraform-modules/vault_auth_oidc).
+We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/docs/reference/infrastructure-modules/vault_auth_oidc).
 
 Let's deploy it now:
 
@@ -313,7 +314,7 @@ Let's deploy it now:
 ### Configure Developer Environment for OIDC Auth to Vault
 
 1. Remove your hardcoded `VAULT_ADDR` and `VAULT_TOKEN` token from your `.env` file. Make sure that you added the
-   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](./inbound-networking#deploy-the-vault-ingress)
+   `vault_addr` in you `region.yaml` as covered in the [inbound networking section.](/docs/guides/bootstrapping/inbound-networking#deploy-the-vault-ingress)
 
 2. Terragrunt will automatically work with the new SSO login flow. Test this by re-applying the `vault_auth_oidc` module.
 
@@ -344,4 +345,4 @@ Congratulations! You have successfully configured federated authentication, unif
 most of the static credentials from your ecosystem. In the next section we will do a final review of
 the Panfactum bootstrapping process and recommend some next steps.
 
-<BootstrappingGuideNav backHref={"./identity-provider"} forwardHref={"./next-steps"} stepNumber={19} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/identity-provider"} forwardHref={"/docs/guides/bootstrapping/next-steps"} stepNumber={19} />

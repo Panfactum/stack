@@ -4,6 +4,7 @@
 .idea
 .pre-commit-config.yaml
 .env
+.podman
 !packages/reference/.env
 !packages/reference/.direnv
 !packages/reference/.devenv

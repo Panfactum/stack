@@ -14,12 +14,12 @@ Deploy the [Linkerd2 service mesh](https://linkerd.io/).
 ## Background
 
 For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd,
-check out our [concept documentation.](../../concepts/networking/cluster-networking#service-mesh)
+check out our [concept documentation.](/docs/concepts/networking/cluster-networking#service-mesh)
 
 ## Deploy Linkerd2
 
 [Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes,
-and we provide a module for deploying it: [kube\_linkerd](../../reference/terraform-modules/kube_linkerd)
+and we provide a module for deploying it: [kube\_linkerd](/docs/reference/infrastructure-modules/kube_linkerd)
 
 This module not only deploys linkerd but also connects it to the certificate infrastructure that we
 provisioned in the previous section. It also installs linkerd-specific observability tooling that we
@@ -219,4 +219,4 @@ At this point, all the necessary components for powering *internal* cluster netw
 we configure *external* networking, we will address autoscaling
 as the cluster is likely already running 75+ containers and will soon become resource constrained.
 
-<BootstrappingGuideNav backHref={"./certificate-management"} forwardHref={"./autoscaling"} stepNumber={13} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/certificate-management"} forwardHref={"/docs/guides/bootstrapping/autoscaling"} stepNumber={13} />

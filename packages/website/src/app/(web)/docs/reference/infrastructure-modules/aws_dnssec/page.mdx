@@ -1,0 +1,51 @@
+{/* lint disable no-duplicate-headings */}
+
+# AWS DNSSEC
+
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/infrastructure/aws_dnssec)
+
+**Type:** [Utility](/docs/reference/infrastructure-modules/overview)
+
+This is a utility module used to set up [DNSSEC](https://developers.cloudflare.com/dns/dnssec/) for a set of AWS hosted zones.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_hosted_zones" /> [hosted\_zones](#input_hosted_zones)
+
+Description: Zones that will be managed by this module
+
+Type: `map(string)`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_keys" /> [keys](#output_keys)
+
+Description: The signing keys for each domain
+
+## Usage
+
+### Providers
+
+This module requires being passed in the `aws.global` provider
+as the KMS key needs to be in the `us-east-1` region.
+
+### Parent DS Record
+
+This module does **not** create the parent DS record. That is up
+to the caller.
+
+{/* lint enable no-duplicate-headings */}

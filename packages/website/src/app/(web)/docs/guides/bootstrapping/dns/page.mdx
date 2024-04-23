@@ -46,7 +46,7 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
 ## Deploy the AWS Registered Domains Module
 
 To use your domain registrations in IaC and to align them with best practices, we will now deploy the
-[aws\_registered\_domains](../../reference/terraform-modules/aws_registered_domains) module. [^1]
+[aws\_registered\_domains](/docs/reference/infrastructure-modules/aws_registered_domains) module. [^1]
 
 This module will **not** register / unregister domains, only update the registration settings. In addition,
 it will set up the root [hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) and enable [DNSSEC](https://www.cloudflare.com/dns/dnssec/how-dnssec-works/) to prevent domain hijacking.
@@ -86,7 +86,7 @@ Let's deploy the module now:
     [privacy protection](https://en.wikipedia.org/wiki/Domain_privacy), auto renewal,
     and [transfer lock](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-lock.html).
     For more information,
-    refer to the [module documentation](../../reference/terraform-modules/aws_registered_domains).
+    refer to the [module documentation](/docs/reference/infrastructure-modules/aws_registered_domains).
 
 [^2]: If the zone does not exist, you may skip this step. If you want to *keep* this zone, follow the import instructions above.
 
@@ -137,12 +137,13 @@ subdomain will be managed by its own hosted zone (not the root hosted zone). Thi
 
 * Limits the blast radius if something is misconfigured. At most, a configuration problem will impact only a single
   environment without the possibility of impacting other environments (or worse, your entire DNS infrastructure).
+
 * Limits the permissions needed to be granted to users and services in each environment. To add records to the
   subdomain `dev.panfactum.com`, a user would not need *any* access to records in other environments. This would not
   be possible if all records were stored in a single, global hosted zone.
 
-This is accomplished via a concept called [subdomain delegation](../../concepts/networking/subdomain-delegation). Panfactum's
-[aws\_delegated\_zones](../../reference/terraform-modules/aws_delegated_zones) will provide the relevant setup
+This is accomplished via a concept called [subdomain delegation](/docs/concepts/networking/subdomain-delegation). Panfactum's
+[aws\_delegated\_zones](/docs/reference/infrastructure-modules/aws_delegated_zones) will provide the relevant setup
 for this to work.
 
 Let's do this now for **every** environment:
@@ -184,7 +185,7 @@ shows both the return `A` record and the dnssec signature.
 
 ## Deploy Records
 
-If you have static records to deploy, you can use our [aws\_dns\_records](../../reference/terraform-modules/aws_dns_records)
+If you have static records to deploy, you can use our [aws\_dns\_records](/docs/reference/infrastructure-modules/aws_dns_records)
 module to deploy them to the appropriate hosted zone.
 
 Specifically, now would be a good time to migrate and/or set up your [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
@@ -198,4 +199,4 @@ is automatically deployed and updated without manual intervention.
 Now that you have prepared your DNS configuration, we are ready to begin setting up the Panfactum stack. Our
 next step is to configure AWS networking by creating a Virtual Private Cloud (VPC).
 
-<BootstrappingGuideNav backHref={"./infrastructure-as-code"} forwardHref={"./aws-networking"} stepNumber={6} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/infrastructure-as-code"} forwardHref={"/docs/guides/bootstrapping/aws-networking"} stepNumber={6} />

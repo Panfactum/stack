@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 
+import modules from '@/app/(web)/docs/reference/infrastructure-modules/modules.json'
 import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/ArticleWithNavLayout'
-
-import modules from './terraform-modules/modules.json'
 
 const SIDENAV_SECTIONS = [
   {
@@ -42,8 +41,8 @@ const SIDENAV_SECTIONS = [
     path: '/terragrunt-variables'
   },
   {
-    text: 'Terraform Modules',
-    path: '/terraform-modules',
+    text: 'Infrastructure Modules',
+    path: '/infrastructure-modules',
     sub: [
       {
         text: 'Overview',

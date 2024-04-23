@@ -1,14 +1,14 @@
 # Releases
 
-## Community Edition Releases
+## Edge Releases
 
 You can find all the releases [here](https://github.com/Panfactum/stack/releases).
 
-### Community Edition Format
+### Edge Release Format
 
-Community edition release will be of the format:
+Edge releases will be of the format:
 
-`community-<YY>-<MM>-<DD>`
+`edge.<YY>-<MM>-<DD>`
 
 These releases do not contain any SLA or semantic versioning guarantees, but we will announce breaking changes in the
 CHANGELOG.
@@ -17,25 +17,27 @@ This project maintains a strictly
 linear history. Bug fixes and
 new features will be added in new releases only (i.e., they will never be back-ported).
 
-### Community Edition Cadence
+### Edge Release Cadence
 
 We have no set cadence for the community stack, but generally we will release changes 2-5 times per month.
 
-### Community Edition Support
+### Edge Release Support
 
-We offer extended support and enhanced resolution SLAs in our enterprise edition only (see below).
+We only offer extended support and enhanced resolution SLAs for our stable releases (see below).
 
-## Enterprise Edition Releases
+## Stable Releases
 
-You can find all the supported releases [here](../../reference/releases).
+**Stable releases are available only to stack subscribers.**
 
-### Enterprise Edition Format
+You can find all the supported releases [here](/docs/reference/releases).
+
+### Stable Release Format
 
 Each release will be of the format:
 
-`<YY>-<MM>`.`<patch_number>`
+`stable.<YY>-<MM>`.`<patch_number>`
 
-For example, `24-01.5` represents the fifth patch to the major version released in January 2024.
+For example, `stablle.24-01.5` represents the fifth patch to the major version released in January 2024.
 
 While this deviates from the normal practice of many open source projects which tend to use [semantic versioning](https://semver.org/),
 we do this for good reasons:
@@ -65,11 +67,11 @@ we do this for good reasons:
     that will notify you if code changes, but only if you cut a new discrete release number. For critical items like
     security patches, we want our users to be able to receive notifications if they should update immediately.
 
-### Enterprise Edition Cadence
+### Stable Release Cadence
 
-We aim to create a new major release of the Panfactum stack **twice per year.**
+We aim to create a new major stable release of the Panfactum stack **twice per year.**
 
-We **strongly recommend** that users of the Panfactum stack update their major version **at least once a year**.
+We **strongly recommend** that users of the Panfactum stack update **at least once a year**.
 
 We **strongly recommend** that patch versions of the Panfactum stack are **applied immediately.** We only create new patches
 if there are significant fixes for bugs or security vulnerabilities.
@@ -77,19 +79,21 @@ if there are significant fixes for bugs or security vulnerabilities.
 We endeavor to never introduce breaking changes in patches. If a fix requires breaking functionality, we will
 cut a new major release.
 
-### Enterprise Edition Support
+### Stable Release Support
 
 Major releases will receive patches for significant bugs or security vulnerabilities for twelve (12) months
 following its initial release.
 
-For example, version `24-01.X` will receive support until the end of January 2025.
+For example, version `stable.24-01.X` will receive support until the end of January 2025.
 
 "Significant" will be determined by a combination of the following criteria:
 
 * Does it impact the recommended way to utilize the stack?
+
 * Does it create a clear impairment of intended functionality or a clear security vulnerability for users of the stack?
 
 If the answer to both of these questions is "yes," then it is likely:
 
 * We will attempt to resolve the issue within 30 days
+
 * We will patch supported releases

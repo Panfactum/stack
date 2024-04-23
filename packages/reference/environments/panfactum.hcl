@@ -48,12 +48,11 @@ locals {
   enable_authentik  = contains(local.providers, "authentik")
 
   # The version of the panfactum stack to deploy
-  pf_stack_edition             = lookup(local.vars, "pf_stack_edition", "community")
   pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
-  pf_stack_repo                = local.pf_stack_version == "local" ? "local" : local.pf_stack_edition == "community" ? "git@github.com:Panfactum/stack.git" : "git@github.com:Panfactum/stack.git"
+  pf_stack_repo                = local.pf_stack_version == "local" ? "local" : "git@github.com:Panfactum/stack.git"
   pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "get-version-hash", local.pf_stack_version, local.pf_stack_repo)
   pf_stack_module              = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
-  pf_stack_source              = local.pf_stack_version == "local" ? ("../../../../../terraform//${local.pf_stack_module}") : "${local.pf_stack_repo}//packages/terraform/${local.pf_stack_module}?ref=${local.pf_stack_version_commit_hash}"
+  pf_stack_source              = local.pf_stack_version == "local" ? ("../../../../../infrastructure//${local.pf_stack_module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.pf_stack_module}?ref=${local.pf_stack_version_commit_hash}"
 
   # Repo metadata
   repo_url       = get_env("PF_REPO_URL")
@@ -70,10 +69,10 @@ locals {
   version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "get-version-hash", local.version)
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
-  use_local_terraform = contains(["local", local.primary_branch], local.version)
-  terraform_dir       = get_env("PF_TERRAFORM_DIR")
-  terraform_path      = "${startswith(local.terraform_dir, "/") ? local.terraform_dir : "/${local.terraform_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
-  source              = local.use_local_terraform ? "${get_repo_root()}${local.terraform_path}" : "${local.repo_url}?ref=${local.version}${local.terraform_path}"
+  use_local_iac = contains(["local", local.primary_branch], local.version)
+  iac_dir       = get_env("PF_IAC_DIR")
+  iac_path      = "${startswith(local.iac_dir, "/") ? local.iac_dir : "/${local.iac_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
+  source        = local.use_local_iac ? "${get_repo_root()}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
 
   # Folder of shared snippets to generate
   provider_folder = "providers"
@@ -91,7 +90,7 @@ locals {
 }
 
 ################################################################
-### The main terraform source
+### The main IaC source
 ################################################################
 
 terraform {
@@ -237,8 +236,9 @@ remote_state {
 ### Terragrunt Configuration
 ################################################################
 
-terraform_version_constraint  = "~> 1.7"
-terragrunt_version_constraint = "~> 0.53"
+terraform_version_constraint  = "~> 1.6"
+terragrunt_version_constraint = "~> 0.55"
+terraform_binary              = "tofu"
 
 // If running in the CI system, enable retries on all of the errors
 retryable_errors         = local.is_ci ? [".*"] : []
@@ -252,7 +252,6 @@ inputs = {
   is_local         = local.is_local
   environment      = local.vars.environment
   region           = local.vars.region
-  pf_stack_edition = local.pf_stack_edition
   pf_stack_version = local.pf_stack_version
   pf_stack_commit  = local.pf_stack_version_commit_hash
   extra_tags       = merge(local.module_extra_tags, local.region_extra_tags, local.environment_extra_tags, local.global_extra_tags)

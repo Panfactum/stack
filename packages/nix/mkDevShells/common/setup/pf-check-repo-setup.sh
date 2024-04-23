@@ -75,8 +75,8 @@ elif ! dirs_are_equal "$files_dir"/files/terragrunt "$(realpath "$DEVENV_ROOT/$P
   errors+="\033[33mTerragrunt files are out of date. Run pf-update-terragrunt to update.\033[0m\n\n"
 fi
 
-if [[ -z ${PF_TERRAFORM_DIR} ]]; then
-  errors+="\033[33mEnvironment variable PF_TERRAFORM_DIR is not set. Add it to your devenv.nix file.\033[0m\n\n"
+if [[ -z ${PF_IAC_DIR} ]]; then
+  errors+="\033[33mEnvironment variable PF_IAC_DIR is not set. Add it to your devenv.nix file.\033[0m\n\n"
 fi
 
 #################################################

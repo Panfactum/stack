@@ -9,7 +9,9 @@ Cryptography is fundamental to modern networking. You will find it in nearly eve
 Cryptography provides three critical capabilities:
 
 * Encryption: How to prevent third parties from snooping on transmitted data
+
 * Authentication: How to verify the identity of the sender and/or recipient
+
 * Integrity: How to prevent transmitted data from tampering
 
 ## Foundational Concepts
@@ -27,6 +29,7 @@ We use this type of cryptography for two purposes:
 [^1]: Such as encrypting a file with a password
 
 * Encryption: One key encrypts the data and only the *other* key can decrypt it. [^2]
+
 * Digital signatures: One key signs arbitrary data to produce a signature, and another entity can use the *other* key
   to verify the signature was produced by the first key. [^3]
 
@@ -45,6 +48,7 @@ There are *many* algorithms used to construct the keys, but all are in service o
 For more details, we recommend taking a moment to review these learning resources:
 
 * [Article](https://ssd.eff.org/module/deep-dive-end-end-encryption-how-do-public-key-encryption-systems-work)
+
 * [Video](https://www.youtube.com/watch?v=GSIDS_lvRv4)
 
 ### X.509 Certificates
@@ -63,6 +67,7 @@ the content of the certificate metadata using digital signatures.
 This is a complex standard, so we recommend taking a moment to review these brief learning resources:
 
 * [Article](https://www.ssl.com/faqs/what-is-an-x-509-certificate/)
+
 * [Video](https://www.youtube.com/watch?v=kAaIYRJoJkc)
 
 ## TLS
@@ -76,6 +81,7 @@ which you probably use every time you connect to a site over the internet.
 We recommend the following learning resources for a brief overview of how the protocol itself works:
 
 * [Article](https://www.cloudflare.com/learning/ssl/what-happens-in-a-tls-handshake/)
+
 * [Video](https://www.youtube.com/watch?v=86cQJ0MMses)
 
 ### Motivation for TLS
@@ -91,7 +97,9 @@ Consider the scenario when one of these intermediate computers is nefarious. Thi
 This attacker can do *any* of the following:
 
 * Read the data you transmit (e.g., your passwords and bank credentials)
+
 * Impersonate the computer that you are trying to reach
+
 * Inject bad data into the messages sent between you and your destination
 
 Due to the severity of this attack, the industry standard for organizations is a [zero trust security model](https://en.wikipedia.org/wiki/Zero_trust_security_model)
@@ -100,7 +108,9 @@ where you assume any intermediate computer *could* be an attacker and implement 
 TLS (and similar protocols) are one such safeguard as it prevents MITM attacks by:
 
 * Verifying the identity of the server sending you data
+
 * Encrypting the transmitted data
+
 * Preventing any mutation of the transmitted data
 
 ### Certificate Authorities
@@ -201,12 +211,17 @@ We believe this is an inappropriate use case for the following reasons:
 
 * A typical VPN setup will allow access to *all* networked resources in the private network by default.
   This is an allow-by-default security posture that leads to security vulnerabilities and runs counter to a zero trust architecture.
+
 * The most popular VPN solutions have massive surface areas due to their number of supported
   deployment scenarios. This significantly increases the attack surface. For example, here is the [vulnerability
   list for OpenVPN](https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=openvpn). [^11]
+
 * A typical VPN setup will route *all* network traffic from the remote machine to the private network. This introduces problems:
+
   * Organizations incur significant costs for non-work traffic routed though metered networks (e.g., AWS). [^10]
+
   * Users experience degraded network performance as internet bandwidth is shared across all VPN users.
+
   * Users sacrifice privacy unnecessarily by allowing their organization to view their internet traffic.
 
 [^10]: For some clients, we have seen VPNs and related charges account for over 25% of their entire AWS bill!
@@ -218,8 +233,10 @@ software for exposing private network resources to internal stakeholders. Genera
 
 * Gate private resources *individually* with a publicly available authenticating proxies such as
   [Oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy), ideally using role-based access control and SSO.
+
 * Provision an overlay networking solution such as [ZeroTier](https://www.zerotier.com/) which provides more granular control
   of access to individual resources and traffic routing.
+
 * Utilize a point-to-point proxy solution such as [ssh tunneling](https://www.ssh.com/academy/ssh/tunneling-example) which enables
   users to expose *individual* private network resources on local computer ports.
 

@@ -60,7 +60,7 @@ module.exports = {
             },
         },
         {
-            files: ["*.mdx"],
+            files: ["**/page.mdx"],
             extends: ["plugin:mdx/recommended"],
             rules: {
                 ...standardRules,

@@ -6,7 +6,7 @@ set -eo pipefail
 FMT_ERROR=0
 
 for file in "$@"; do
-  terraform fmt -diff -check "$file" || FMT_ERROR=$?
+  tofu fmt -diff -check "$file" || FMT_ERROR=$?
 done
 
 exit ${FMT_ERROR}

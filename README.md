@@ -6,10 +6,14 @@
 This repository contains the following components of the panfactum architecture which are all versioned
 together to ensure internal consistency:
 
-- [Standard Local Development Environment](packages/nix/mkDevShells)
-- [Standard Terraform Modules](packages/terraform)
+- [Panfactum Local Development Environment](packages/nix/mkDevShells)
+
+- [Infrastructure Modules](packages/infrastructure)
+
 - [Documentation Website](packages/website)
+
 - [Reference Architecture](packages/reference)
+
 - [Bastion Host](packages/bastion)
 
 ## Maintainers

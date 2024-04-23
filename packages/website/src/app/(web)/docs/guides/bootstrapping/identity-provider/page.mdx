@@ -66,8 +66,8 @@ in the hands of a third-party leaves you vulnerable to outages and security inci
 Fortunately, there are also many production-ready self-hosted IdPs that contain all the same functionality. In our analysis,
 the most robust and well-integrated tool is [Authentik](https://goauthentik.io/).
 
-We provide both a module to deploy Authentik ([kube\_authentik](../../reference/terraform-modules/kube_authentik)) and
-many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](../../reference/terraform-modules/authentik_aws_sso)).
+We provide both a module to deploy Authentik ([kube\_authentik](/docs/reference/infrastructure-modules/kube_authentik)) and
+many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/docs/reference/infrastructure-modules/authentik_aws_sso)).
 
 ### Configure AWS SES
 
@@ -78,7 +78,7 @@ AWS provides a service called [Simple Email Service (SES)](https://aws.amazon.co
 (the standard protocol for sending email).
 
 Before using it, you must first configure SES to use the domain you want to use send email from (e.g., `panfactum.com`).
-We provide a module to do this: [aws\_ses\_domain](../../reference/terraform-modules/aws_ses_domain).
+We provide a module to do this: [aws\_ses\_domain](/docs/reference/infrastructure-modules/aws_ses_domain).
 
 Let's deploy the module now:
 
@@ -103,7 +103,7 @@ Let's deploy the module now:
 
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
-   to set this up. You can use the [aws\_dns\_records](../../reference/terraform-modules/aws_dns_records) module to
+   to set this up. You can use the [aws\_dns\_records](/docs/reference/infrastructure-modules/aws_dns_records) module to
    deploy the record like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
 
 ### Deploy Authentik
@@ -130,14 +130,14 @@ We are now ready to deploy Authentik:
 
 7. Save the `akadmin_bootstrap_token` value in your `.env` as `AUTHENTIK_TOKEN`. Save the `authentik_url` as the `authentik_url` field
    in your `global.yaml`. This will be used by the [Authentik
-   terraform provider](https://registry.terraform.io/providers/goauthentik/authentik/latest/docs) in subsequent steps
+   OpenTofu (Terraform) provider](https://registry.terraform.io/providers/goauthentik/authentik/latest/docs) in subsequent steps
    to configure Authentik.
 
 8. Navigate to the `domain` you configured in step 2 in a web browser. You should receive a login prompt like this (may have different branding):
 
    <MarkdownImage src={authentikBootstrapLoginImg} alt="Initial Authentik login page" />
 
-9. Sign-in with the username `akadmin` and the `akadmin_bootstrap_password` from your terraform outputs.
+9. Sign-in with the username `akadmin` and the `akadmin_bootstrap_password` from your module outputs.
 
 10. After successful sign-in, click the "Admin Interface" button in the top-right (if not already in the admin dashboard):
 
@@ -154,11 +154,11 @@ We are now ready to deploy Authentik:
 
 Out-of-the box, Authentik provides a nearly blank slate with only enough to facilitate the initial admin login. We
 provide a module that augments this initial setup with more secure authentication flows, recovery flows, and
-branding: [authentik\_core\_resources](../../references/terraform-modules/authentik_core_resources).
+branding: [authentik\_core\_resources](/docs/reference/infrastructure-modules/authentik_core_resources).
 
 This module also allows you to define user groups. Groups in Authentik will be assigned to roles in
 service providers as the foundational mechanism for implementing RBAC across your ecosystem. See the [Panfactum
-RBAC reference](../../reference/rbac) for more information.
+RBAC reference](/docs/reference/rbac) for more information.
 
 Of particular note is the `superusers` group which will receive root access to every system deployed by a Panfactum
 module.
@@ -179,7 +179,7 @@ Let's deploy this configuration now:
    4. Optionally, you can replace the default Panfactum branding with your own `logo_svg_b64` and
       `favicon_ico_b64` files.
 
-   5. `default_groups_enabled` will provision the [default Panfactum RBAC groups](../../reference/rbac) (`superusers` will always be deployed).
+   5. `default_groups_enabled` will provision the [default Panfactum RBAC groups](/docs/reference/rbac) (`superusers` will always be deployed).
 
    6. `extra_groups` allows you to create arbitrary additional groups.
 
@@ -257,7 +257,7 @@ user account.
 
    7. We recommend using a short-lived, expiring token as the credential will have root access to Authentik and thus
       *every* system in your ecosystem. Generally, you will only need this for initially setting up the Authentik
-      terraform modules which will not change frequently.
+      infrastructure modules which will not change frequently.
 
    8. Once the token has been created, copy it to your clipboard via the copy button on the far right of the token's
       row in the Tokens table.
@@ -303,4 +303,4 @@ user account.
 Your IdP is now fully configured and ready to be connected to the other systems set up in this guide such as AWS, Kubernetes,
 and Vault.
 
-<BootstrappingGuideNav backHref={"./databases"} forwardHref={"./federated-auth"} stepNumber={18} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/databases"} forwardHref={"/docs/guides/bootstrapping/federated-auth"} stepNumber={18} />

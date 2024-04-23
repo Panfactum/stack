@@ -30,7 +30,7 @@ this interface is extremely flexible and can also be used by other utilities to 
 The [AWS EBS CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver) allows you to provision EBS volumes for
 use in your pods. This is the recommended way to store stateful data (i.e., Database storage) within the Panfactum stack.
 
-We provide the [kube\_aws\_ebs\_csi](../../reference/terraform-modules/kube_aws_ebs_csi) module to deploy the driver.
+We provide the [kube\_aws\_ebs\_csi](/docs/reference/infrastructure-modules/kube_aws_ebs_csi) module to deploy the driver.
 
 Let's deploy it now:
 
@@ -71,7 +71,7 @@ command: `kubectl delete storageclass gp2`.
 The [Kubernetes Secrets Store CSI driver](https://secrets-store-csi-driver.sigs.k8s.io/) allows you to mount secrets
 files from third part sources such as AWS or [Hashicorp Vault](https://www.vaultproject.io/) (which we will install in the next section).
 
-We provide the [kube\_secrets\_csi](../../reference/terraform-modules/kube_secrets_csi) module to deploy the driver.
+We provide the [kube\_secrets\_csi](/docs/reference/infrastructure-modules/kube_secrets_csi) module to deploy the driver.
 
 Let's deploy it now:
 
@@ -92,4 +92,4 @@ Let's deploy it now:
 
 We will test the storage drivers in the next section where we deploy Vault (which needs persistent storage).
 
-<BootstrappingGuideNav backHref={"./internal-cluster-networking"} forwardHref={"./vault"} stepNumber={10} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/internal-cluster-networking"} forwardHref={"/docs/guides/bootstrapping/vault"} stepNumber={10} />

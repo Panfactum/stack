@@ -7,7 +7,7 @@ terraform {
   source = include.panfactum.locals.pf_stack_source
 }
 
-dependency "aws_eks" {
+dependency "cluster" {
   config_path = "../aws_eks"
 }
 
@@ -16,7 +16,7 @@ dependency "cert_issuers" {
 }
 
 inputs = {
-  eks_cluster_name = dependency.aws_eks.outputs.cluster_name
+  eks_cluster_name = dependency.cluster.outputs.cluster_name
   route53_zones    = dependency.cert_issuers.outputs.route53_zones
 
   pull_through_cache_enabled = true

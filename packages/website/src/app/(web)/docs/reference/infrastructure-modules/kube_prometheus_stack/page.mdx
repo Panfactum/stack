@@ -1,0 +1,101 @@
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes Prometheus Stack
+
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/infrastructure/kube_prometheus_stack)
+
+**Type:** [Live](/docs/reference/infrastructure-modules/overview)
+
+This module provides a deployment of the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). It includes:
+
+* The [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
+
+* Grafana
+
+* Alert Manager
+
+## Providers
+
+The following providers are needed by this module:
+
+* [azuread](#requirement_azuread) (2.41.0)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_environment_domain" /> [environment\_domain](#input_environment_domain)
+
+Description: The domain on which to bind service records.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_admin_groups" /> [admin\_groups](#input_admin_groups)
+
+Description: AAD groups that should have admin access to grafana
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_editor_groups" /> [editor\_groups](#input_editor_groups)
+
+Description: AAD groups that should have write access to grafana
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_kube_prometheus_stack_version" /> [kube\_prometheus\_stack\_version](#input_kube_prometheus_stack_version)
+
+Description: The version of cert-manager to deploy
+
+Type: `string`
+
+Default: `"48.3.1"`
+
+### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
+
+Description: AAD groups that should have read-only access to grafana
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_grafana_admin_password" /> [grafana\_admin\_password](#output_grafana_admin_password)
+
+Description: n/a
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

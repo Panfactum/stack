@@ -1,0 +1,59 @@
+{/* lint disable no-duplicate-headings */}
+
+# Karpenter NodePools
+
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/infrastructure/kube_karpenter_node_pools)
+
+**Type:** [Live](/docs/reference/infrastructure-modules/overview)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_cluster_ca_data" /> [cluster\_ca\_data](#input_cluster_ca_data)
+
+Description: The B64 encoded CA data of the API server of the eks cluster
+
+Type: `string`
+
+### <a name="input_cluster_endpoint" /> [cluster\_endpoint](#input_cluster_endpoint)
+
+Description: The URL of the API server of the eks cluster
+
+Type: `string`
+
+### <a name="input_cluster_name" /> [cluster\_name](#input_cluster_name)
+
+Description: The name of the eks cluster
+
+Type: `string`
+
+### <a name="input_node_instance_profile" /> [node\_instance\_profile](#input_node_instance_profile)
+
+Description: The instance profile to use for launched nodes
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_user_data" /> [user\_data](#output_user_data)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

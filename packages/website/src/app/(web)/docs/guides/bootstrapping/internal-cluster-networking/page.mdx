@@ -8,7 +8,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 ## Objective
 
-Install the basic kubernetes cluster networking primitives via the [kube\_cilium](../../reference/terraform-modules/kube_cilium)
+Install the basic kubernetes cluster networking primitives via the [kube\_cilium](/docs/reference/infrastructure-modules/kube_cilium)
 module.
 
 ## Background
@@ -16,12 +16,12 @@ module.
 In the Panfactum stack, we use [Cilium](https://docs.cilium.io) to handle all of the L3/L4 networking in our Kubernetes cluster.
 
 In this guide, we won't go into detail about the underlying design decisions and network concepts, so
-we recommend reviewing the [concept documentation](../../concepts/networking/cluster-networking) for more
+we recommend reviewing the [concept documentation](/docs/concepts/networking/cluster-networking) for more
 information.
 
 ## Deploy Cilium
 
-### Deploy the Terraform Module
+### Deploy the Infrastructure Module
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_cilium`.
 
@@ -82,4 +82,4 @@ We will use that to test that cilium is working as intended:
 Now that basic networking is working within the cluster, we will configure your storage
 drivers.
 
-<BootstrappingGuideNav backHref={"./kubernetes-cluster"} forwardHref={"./storage-interfaces"} stepNumber={9} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/kubernetes-cluster"} forwardHref={"/docs/guides/bootstrapping/storage-interfaces"} stepNumber={9} />

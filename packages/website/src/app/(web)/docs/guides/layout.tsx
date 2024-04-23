@@ -134,8 +134,8 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
-    text: 'Terraforming',
-    path: '/terraforming',
+    text: 'Infrastructure-as-Code',
+    path: '/iac',
     sub: [
       {
         text: 'Overview',

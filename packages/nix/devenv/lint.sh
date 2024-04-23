@@ -7,6 +7,8 @@ set -eo pipefail
 # Needed to avoid running out of memory
 export NODE_OPTIONS="--max-old-space-size=8192"
 
+export LINT="true"
+
 #######################################
 ## Install node modules
 #######################################
@@ -21,7 +23,7 @@ export NODE_OPTIONS="--max-old-space-size=8192"
 echo >&2 "Starting Terraform linting..."
 (
   cd "$TERRAFORM_MODULES_DIR"
-  terraform fmt -write=true -recursive
+  tofu fmt -write=true -recursive
 )
 echo >&2 "Finished Terraform linting!"
 
@@ -52,16 +54,6 @@ echo >&2 "Finished Nix linting!"
 echo >&2 "Starting shell linting..."
 shfmt -w "$DEVENV_ROOT"
 echo >&2 "Finished shell linting!"
-
-#######################################
-## Documentation
-#######################################
-echo >&2 "Starting documentation linting..."
-(
-  cd "$DEVENV_ROOT/packages/website"
-  ./node_modules/.bin/remark src -e .mdx -e .md -o -S -r .remarkrc.mjs
-)
-echo >&2 "Finished documentation linting!"
 
 #######################################
 ## Spell Check

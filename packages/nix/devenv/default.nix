@@ -5,7 +5,7 @@ let
     (pkgs.writeShellScriptBin name (builtins.readFile ./${name}.sh));
 in {
   env = {
-    TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/packages/terraform";
+    TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/packages/infrastructure";
   };
   packages = with pkgs; [
 
@@ -30,7 +30,7 @@ in {
     #########################################
     # IaC Tools
     #########################################
-    (import ../mkDevShells/common/terraform.nix)
+    (import ../mkDevShells/common/opentofu.nix)
     (import ../mkDevShells/common/terragrunt.nix)
     (import ../mkDevShells/common/kubectl.nix)
     terraform-docs
@@ -68,7 +68,7 @@ in {
       enable = true;
       entry = "precommit-terraform-fmt";
       description = "Terraform linting";
-      files = "^packages/terraform/(.*).tf$";
+      files = "^packages/infrastructure/(.*).tf$";
     };
     terragrunt-custom = {
       enable = true;
@@ -80,7 +80,7 @@ in {
       enable = true;
       entry = "precommit-terraform-docs";
       description = "Terraform documentation generate";
-      files = "^packages/terraform/(.*)$";
+      files = "^packages/infrastructure/(.*)$";
       pass_filenames = false;
     };
     nixfmt = {

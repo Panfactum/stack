@@ -2,16 +2,51 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Overview
 
-This series of guides will take you through the necessary steps to deploy and begin working
-with the Panfactum stack in your organization.
+## Objective
+
+This guide will take you through the necessary steps to deploy and begin working
+with the Panfactum stack in your organization. This includes:
+
+* Setting up your infrastructure-as-code repository and best-practices
+
+* Setting up the local Panfactum developer tooling
+
+* Deploying bootstrap infrastructure for every AWS environment your organization needs: state buckets, [VPCs](https://docs.aws.amazon.com/vpc/),
+  [NAT](https://en.wikipedia.org/wiki/Network_address_translation) servers, etc.
+
+* Deploying the [Authentik](https://docs.goauthentik.io/docs) identity provider that allows you to SSO into each of your service providers such as AWS
+
+* Establishing your initial role-based access controls
+
+* Deploying production-ready Kubernetes clusters on [AWS EKS](https://aws.amazon.com/eks/) that include the following capabilities:
+
+  * [Cilium](https://docs.cilium.io/en/stable/) for advanced firewall capabilities
+
+  * The [Linkerd](https://linkerd.io/) service mesh for encrypting network traffic
+
+  * [Cert-manager](https://cert-manager.io/docs/) to handle public and private X.509 infrastructure
+
+  * Inbound traffic control using the [Ingress NGINX Controller](https://kubernetes.github.io/ingress-nginx/)
+
+  * Dynamic credentialing using [Vault](https://www.vaultproject.io/)
+
+  * Cluster autoscaling using [Karpenter](https://karpenter.sh/)
+
+  * Resource right-sizing using the [Vertical Pod Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+
+  * Database modules for running [Redis](https://redis.io/) and [PostgreSQL](https://www.postgresql.org/)
+
+  * [Velero](https://velero.io/) for automated end-to-end backups of the cluster and all containing data
+
+  * And much more!
 
 ## Time Commitment
 
-| Experience Level | Description                                                                                 | Completion Time |
-| ---------------- | ------------------------------------------------------------------------------------------- | --------------- |
-| Novice           | Has limited experience working with cloud infrastructure                                    | 3-5 days        |
-| Experienced      | Has worked with infrastructure-as-code tools, AWS, and kubernetes in professional settings  | 1-2 days        |
-| Expert           | Has extensive experience guiding teams that work terraform, terragrunt, AWS, and Kubernetes | 2-4 hours       |
+| Experience Level | Description                                                                                                 | Completion Time |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- | --------------- |
+| Novice           | Has limited experience working with cloud infrastructure                                                    | 3-5 days        |
+| Experienced      | Has worked with infrastructure-as-code tools, AWS, and kubernetes in professional settings                  | 1-2 days        |
+| Expert           | Has extensive experience guiding teams that work with OpenTofu (Terraform), Terragrunt, AWS, and Kubernetes | 2-4 hours       |
 
 ## Prerequisites
 
@@ -39,4 +74,4 @@ with the Panfactum stack in your organization.
 
 To get started, let's install the Panfactum local developer environment.
 
-<BootstrappingGuideNav forwardHref={"./installing-devenv"} stepNumber={1} />
+<BootstrappingGuideNav forwardHref={"/docs/guides/bootstrapping/installing-devenv"} stepNumber={1} />

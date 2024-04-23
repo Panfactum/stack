@@ -15,7 +15,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](../../reference/terraform-modules/aws_eks) module.
+using our [aws\_eks](/docs/reference/infrastructure-modules/aws_eks) module.
 
 ## A Quick Note
 
@@ -51,7 +51,7 @@ configured to download the image from the public registry *only if it does not a
 in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
 the initial deployment.
 
-We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](../../reference/terraform-modules/aws_ecr_pull_through_cache).
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/reference/infrastructure-modules/aws_ecr_pull_through_cache).
 
 However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
 
@@ -121,13 +121,13 @@ primary cluster in the production environment.
 ### Choose Kubernetes Version
 
 We *strongly* recommend leaving this as the module default. The version was specifically chosen for compatibility
-with the rest of the Panfactum stack. See the [module documentation](../../reference/terraform-modules/aws_eks) if
+with the rest of the Panfactum stack. See the [module documentation](/docs/reference/infrastructure-modules/aws_eks) if
 you need to override either the control plane or node group versions.
 
 ### Choose Control Plane Subnets
 
 For `control_plane_subnets`, you need to enter the names of **at least 3** subnets (each in a different AZ) that
-you created in the [aws networking guide](./aws-networking). [^3] This ensures the API server is resilient to an AZ outage.
+you created in the [aws networking guide](/docs/guides/bootstrapping/aws-networking). [^3] This ensures the API server is resilient to an AZ outage.
 
 [^3]: Ensure that you choose an odd number for proper resilience to AZ outages. A requirement of `etcd`, the database
     backend for Kubernetes.
@@ -269,16 +269,16 @@ clusters. If you have never used this tool before, we recommend getting up to sp
 
 ## Deploy Kubernetes Modules
 
-In the Panfactum stack everything is deployed via terraform, including Kubernetes manifests. [^10] By constraining ourselves
+In the Panfactum stack everything is deployed via OpenTofu (Terraform) modules, including Kubernetes manifests. [^10] By constraining ourselves
 to a single IaC paradigm, we are able to greatly simplify operations for users of the stack.
 
 [^10]: Though we will often use [third-party helm charts](https://helm.sh/) under the hood.
 
 ### Set up Kubernetes Provider
 
-In order to start using our kubernetes terraform modules, we must first configure the
-[kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
-some additional [terragrunt variables](../../reference/terragrunt-variables).
+In order to start using our kubernetes modules, we must first configure the
+[Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
+some additional [terragrunt variables](/docs/reference/terragrunt-variables).
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 
@@ -288,12 +288,12 @@ In the `region.yaml` file for the region where you deployed the cluster, add the
 
 See [this file](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
 
-Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
+The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
 
 ### RBAC
 
 Up until now, we have been using implicit EKS authentication to communicate with the cluster (the IAM user that created
-the cluster automatically has cluster access). We will now deploy the [kube\_rbac](../../reference/terraform-modules/kube_rbac)
+the cluster automatically has cluster access). We will now deploy the [kube\_rbac](/docs/reference/infrastructure-modules/kube_rbac)
 module which will allow other users to authenticate (and eventually use dynamic rather than static credentials). This relies
 on a paradigm called [role-based access control](https://en.wikipedia.org/wiki/Role-based_access_control)
 which we will cover in more detail as we set up user roles and SSO.
@@ -344,7 +344,7 @@ is depended on for proper cluster operation, we want to give them higher priorit
 
 The Panfactum stack defines
 several priority levels to ensure that your cluster remains as healthy as possible even in adverse circumstances such
-as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](../../reference/terraform-modules/kube_priority_classes)
+as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](/docs/reference/infrastructure-modules/kube_priority_classes)
 module.
 
 Let's deploy this module:
@@ -362,4 +362,4 @@ Let's deploy this module:
 Congratulations! You have officially deployed Kubernetes using infrastructure-as-code.
 Now that the cluster is running, we will begin working on the internal networking stack.
 
-<BootstrappingGuideNav backHref={"./aws-networking"} forwardHref={"./internal-cluster-networking"} stepNumber={8} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/aws-networking"} forwardHref={"/docs/guides/bootstrapping/internal-cluster-networking"} stepNumber={8} />

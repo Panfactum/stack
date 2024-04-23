@@ -49,7 +49,7 @@ You do **not** need to create organizational units (OUs) or governance policies 
 
 You will want to create **one account for each environment** your organization intends to use.
 
-An *environment* is a set of infrastructure components that is **isolated** from the infrastructure
+An *environment* is a set of infrastructure components that is isolated from the infrastructure
 components of other environments. In other words, what happens to one environment should not impact what happens
 to another. [^2]
 
@@ -58,24 +58,31 @@ to another. [^2]
 
 Here are some guidelines to think about as you are choosing your set of environments:
 
-* You can always add more as needed.
+* You can always add more as needed in the future.
+
 * You will always have the `management` environment which contains root configurations for many utilities such as AWS. This includes the
-  first AWS account that you created above.
+  initial AWS account that you created above.
+
 * If you are a solo developer or early stage team, you might need just one additional environment: `production`. This environment would
   receive new changes immediately and make them live to all users.
-* As things grow in scale, you will likely want to adopt the practice of *promoting changes* across a set of environments.
+
+* As your organization scales, you will likely want to adopt the practice of *promoting changes* across a set of environments.
   We recommend the following setup:
+
   * `development`: The *integration* environment. New changes are immediately deployed to this environment and made available
     to internal stakeholders. If you follow [GitHub flow](https://githubflow.github.io/) [^3], code merged to your
     `main` branch gets deployed here.
-  * `staging`: (Optional) If you have end-to-end test suites, you should have this environment where code from `development` is periodically promoted
-    and tested for production-readiness.
-    It is important to keep a dedicated environment for this as end-to-end tests frequently reset the environment to a clean starting state which may cause collaboration
+
+  * `staging`: (Optional) If you have end-to-end test suites, code from `development` will be periodically promoted here
+    to test for production-readiness.
+    It is important to keep a dedicated environment for end-to-end tests as you will frequently reset the environment to a clean starting state which may cause collaboration
     problems if done directly in `development`.
+
   * `production`: Once testing in `development` (or `staging`) has been completed, changes are promoted to `production` to make
-    them live to all users.
+    new code live to all users.
+
 * If you have a *really* large organization, you might create separate sets of `development`, `staging`, and `production` environments for each
-  organization unit. Typically, this would be done only if each organization unit is managed completely independently of one another.
+  organization unit. Typically, this would be done only when each organization unit is managed completely independently of one another.
 
 [^3]: We assume you do.
 
@@ -107,10 +114,10 @@ Once you have decided on the set of environments, use the following steps to cre
 
 ## Create Access Keys for Each Account
 
-Eventually, we will hook up single-sign-on (SSO) for each account, and you will no longer need to manage static
+Eventually, we will hook up single sign-on (SSO) for each account, and you will no longer need to manage static
 credentials. However, we do need to begin provisioning infrastructure before we reach that step.
 
-To do this, we need access keys that will allow your CLI tooling such as terraform to work.
+To do this, we need access keys that will allow your CLI tooling such as OpenTofu (Terraform) to work.
 
 Repeat the following steps for **every account**:
 
@@ -120,21 +127,24 @@ Repeat the following steps for **every account**:
 
    <MarkdownImage src={securityCredentialImg} alt={"Access security credentials"} placeholder={"blur"} />
 
-3. Now is the perfect time to setup MFA for the root user. This is incredibly important as this user will (a) always
+3. Now is the perfect time to set up MFA for the root user. This is incredibly important as this user will (a) always
    exist and (b) have complete access to all of your AWS systems. Select "Assign MFA device" from the Multi-factor
    authentication section and complete the setup for your desired second factor.
 
 4. Next you will create an Access key via "Create access key."
+
    1. You will receive a dialog warning that "Root user access
       keys are not recommended." Don't worry. Once we have SSO established, we will remove these access keys permanently and
       prevent anyone in your organization from needing static AWS credentials.
+
    2. Save **both** the access key id and secret access key in a safe place. We will need them in the next steps.
 
-5. Open your [stack repo](../getting-started/repo-setup) locally. We will be setting up your [AWS configuration and
-   credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) files in your `PF_AWS_DIR` directory ([reference](../../reference/repo-variables))
+5. Open your [stack repo](/docs/guides/bootstrapping/installing-devenv) locally. We will be setting up your [AWS configuration and
+   credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) files in your `PF_AWS_DIR` directory ([reference](/docs/reference/repo-variables))
    which by default is the `.aws` folder in your repo. We keep this configuration in the repo so that it does not interact with other
    settings already present on your computer.
-   1. Run `pf-update-aws` to setup this directory.
+
+   1. Run `pf-update-aws` to set up this directory.
 
    2. In this directory, create a file called `config`. For each account you created, add a block that matches the pattern below. Replace
       `<profile_name>` with a semantic profile name (e.g., `development-superuser`). [^6] Replace `<aws_region>` with the main [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
@@ -174,4 +184,4 @@ Repeat the following steps for **every account**:
 Once you are able to successfully utilize the `aws` CLI to interact with each account, you are ready
 to configure terragrunt to begin deploying infrastructure.
 
-<BootstrappingGuideNav backHref={"./installing-devenv"} forwardHref={"./configuring-infrastructure-as-code"} stepNumber={3} />
+<BootstrappingGuideNav backHref={"/docs/guides/bootstrapping/installing-devenv"} forwardHref={"/docs/guides/bootstrapping/configuring-infrastructure-as-code"} stepNumber={3} />

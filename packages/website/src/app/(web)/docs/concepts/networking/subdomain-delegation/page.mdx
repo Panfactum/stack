@@ -45,8 +45,10 @@ Here are the important notes:
 * When you query a delegated domain name (i.e., `dig test.dev.panfactum.com`), the resolution process works as follows: [^1]
 
   * Check the `.com` [TLD](https://en.wikipedia.org/wiki/Top-level_domain) for the nameservers of `panfactum.com`.
+
   * Check the nameservers for `panfactum.com` (in the production account) for the [A record](https://www.cloudflare.com/learning/dns/dns-records/dns-a-record/) `test.dev.panfactum.com`. Notice that there are
     `NS` records delegating `dev.panfactum.com` to another nameserver (in the development account).
+
   * Check the nameservers for `dev.panfactum.com` for the A record `test.dev.panfactum.com`. Notice that this record exists. Return the associated IP address.
 
 [^1]: This is simplified process. For a more complete overview, we recommend [this video](https://www.youtube.com/watch?v=g6R9gRWIIK8).

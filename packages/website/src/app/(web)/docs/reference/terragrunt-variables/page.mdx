@@ -17,25 +17,24 @@ Used for consistency across labels and tags.
 
 Used to configure the `terraform.source` option when deploying a module.
 
-| Variable           | Type   | Description                                                                                                                                                                                                                                                 | Recommended File   |
-| :----------------- | :----- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
-| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_TERRAFORM_DIR` you are using.  Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                         | `environment.yaml` |
-| `pf_stack_edition` | string | Configures `include.panfactum.locals.pf_stack_source`. The edition of the Panfactum stack you are using. One of: `community`, `enterprise`, `local`.                                                                                                        | `global.yaml`      |
-| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                                       | `environment.yaml` |
-| `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_TERRAFORM_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/terraform` to use. Defaults to the name of the module directory. | `module.yaml`      |
+| Variable           | Type   | Description                                                                                                                                                                                                                                                | Recommended File   |
+| :----------------- | :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_IAC_DIR` you are using.  Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                              | `environment.yaml` |
+| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                                      | `environment.yaml` |
+| `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_IAC_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory. | `module.yaml`      |
 
 ## State Backend Setup
 
-The Panfactum setup stores terraform state files in an S3 bucket in each environment's AWS account. To configure this
+The Panfactum setup stores OpenTofu (Terraform) state files in an S3 bucket in each environment's AWS account. To configure this
 behavior, the following variables must be set:
 
-| Variable              | Type   | Description                                                             | Recommended File   |
-| :-------------------- | :----- | :---------------------------------------------------------------------- | :----------------- |
-| `tf_state_account_id` | string | The AWS account ID for the account containing the S3 terraform backend  | `environment.yaml` |
-| `tf_state_profile`    | string | The AWS profile to use for authenticating with the S3 terraform backend | `environment.yaml` |
-| `tf_state_region`     | string | The AWS region to use for the S3 terraform bucket                       | `environment.yaml` |
-| `tf_state_bucket`     | string | The name of the state bucket                                            | `environment.yaml` |
-| `tf_state_lock_table` | string | The name of the DynamoDB table for the state locks                      | `environment.yaml` |
+| Variable              | Type   | Description                                                   | Recommended File   |
+| :-------------------- | :----- | :------------------------------------------------------------ | :----------------- |
+| `tf_state_account_id` | string | The AWS account ID for the account containing the S3 backend  | `environment.yaml` |
+| `tf_state_profile`    | string | The AWS profile to use for authenticating with the S3 backend | `environment.yaml` |
+| `tf_state_region`     | string | The AWS region to use for the S3 bucket                       | `environment.yaml` |
+| `tf_state_bucket`     | string | The name of the state bucket                                  | `environment.yaml` |
+| `tf_state_lock_table` | string | The name of the DynamoDB table for the state locks            | `environment.yaml` |
 
 ## Providers
 

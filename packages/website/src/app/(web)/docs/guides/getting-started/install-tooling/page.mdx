@@ -31,11 +31,6 @@ Please install these tools:
 * You must enable [nix flakes](https://zero-to-nix.com/concepts/flakes) by following [these instructions](https://nixos.wiki/wiki/Flakes).
   If you do not use `NixOS` or `home-manager`, we recommend adding the appropriate flags to your `~/.config/nix/nix.conf`.
 
-* Our stack depends on some "unfree" packages such as `terraform` which are not technically [open source software](https://thenewstack.io/hashicorp-abandons-open-source-for-business-source-license/).
-  That said, using any of these tools in your stack is free as long as you are not developing competing products. You must whitelist
-  the ability to download these tools by following these [instructions](https://nixos.wiki/wiki/Unfree_Software). We recommend
-  adding the appropriate settings to your `~/.config/nixpkgs/config.nix` settings file.
-
 #### `direnv`
 
 * Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
@@ -48,4 +43,4 @@ Please install these tools:
 
 We are now ready to launch your organization's developer environment.
 
-<MarkdownGuideNav backHref={"./overview"} forwardHref={"./boot-developer-environment"} stepNumber={2} totalSteps={4} progressLabel={"Getting Started Guide:"} />
+<MarkdownGuideNav backHref={"/docs/guides/getting-started/overview"} forwardHref={"/docs/guides/getting-started/boot-developer-environment"} stepNumber={2} totalSteps={4} progressLabel={"Getting Started Guide:"} />

@@ -1,0 +1,72 @@
+{/* lint disable no-duplicate-headings */}
+
+# AWS Delegated Zones
+
+**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/infrastructure/aws_delegated_zones)
+
+**Type:** [Live](/docs/reference/infrastructure-modules/overview)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_root_domain_names" /> [root\_domain\_names](#input_root_domain_names)
+
+Description: Root domain names that need to be delegated.
+
+Type: `set(string)`
+
+### <a name="input_subdomain_identifiers" /> [subdomain\_identifiers](#input_subdomain_identifiers)
+
+Description: The subdomain path segments
+
+Type: `set(string)`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_record_manager_role_arn" /> [record\_manager\_role\_arn](#output_record_manager_role_arn)
+
+Description: The ARN of the IAM role used to manage DNS records.
+
+### <a name="output_zones" /> [zones](#output_zones)
+
+Description: Zone information
+
+## Usage
+
+### Create / Delete
+
+This module does **not** register domains but rather adopts domains
+that you have already registered and updates their information.
+Additionally, destroying this module does un-register the domains;
+it only removes them from the terraform state.
+
+### Contact Information
+
+There are three different domain contacts:
+
+* Registrant: The owner of the domain
+* Admin: The person responsible for administrative decisions about the domain
+* Tech: The person responsible for executing changes for the domain
+
+It is possible for the same person to serve multiple roles.
+
+These people will be contacted in the case of billing issues, abuse, or required
+changes. Their information is **not** publicly available, but will be made
+available to the registrar (AWS).
+
+{/* lint enable no-duplicate-headings */}

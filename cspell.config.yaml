@@ -119,7 +119,13 @@ words: [
   "MTTR",
   "kpis",
   "featureful",
-  "triaging"
+  "triaging",
+  "templating",
+  "Pulumi",
+  "Gruntwork",
+  "KodeKloud",
+  "tfvars",
+  "Spacelift"
 ]
 languageSettings:
   - languageId: markdown,mdx

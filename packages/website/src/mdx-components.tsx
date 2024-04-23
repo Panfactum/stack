@@ -35,7 +35,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     ul: ({ children, className, ...props }) => (
       <ul
-        className={clsx('py-0.5 m-0 pl-4', className)}
+        className={clsx('py-0.5 m-0 pl-8', className)}
         {...props}
       >
         {children}
@@ -43,7 +43,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     ol: ({ children, className, ...props }) => (
       <ol
-        className={clsx('py-0.5 m-0 pl-4', className)}
+        className={clsx('py-0.5 m-0 pl-8', className)}
         {...props}
       >
         {children}
@@ -151,7 +151,9 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
         className={clsx('p-1 pb-3 align-top', defaultTextSize, className)}
         {...props}
       >
-        {children}
+        <PrettyBalancer>
+          {children}
+        </PrettyBalancer>
       </td>
     ),
     th: ({ children, className, ...props }) => (
@@ -196,7 +198,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
       if (className?.includes('footnotes')) {
         return (
           <section
-            className={clsx(className, ['bg-neutral mb-[-2rem] mx-[-1rem] px-[1rem] pb-[2rem]'])}
+            className={clsx(className, ['bg-neutral mt-[2rem] mb-[-2rem] mx-[-1rem] px-[1rem] pb-[2rem]'])}
             {...props}
           >
             {children}
