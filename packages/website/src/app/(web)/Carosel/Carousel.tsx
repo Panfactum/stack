@@ -17,14 +17,15 @@ import kubernetesImg from './kubernetes.svg'
 import linkerdImg from './linkerd.svg'
 import nginxImg from './nginx.svg'
 import nixImg from './nix.svg'
+import opentofuImg from './opentofu.svg'
 import postgresImg from './postgres.svg'
 import prometheusImg from './prometheus.svg'
 import redisImg from './redis.svg'
-import terraformImg from './terraform.svg'
 import tiltImg from './tilt.svg'
 import vaultImg from './vault.svg'
 import veleroImg from './velero.svg'
 
+// Use on SVGs that need to be converted to white text
 function WhiteSVG (props: ImageProps) {
   return (
     <Image
@@ -33,6 +34,19 @@ function WhiteSVG (props: ImageProps) {
       height={40}
       className={'h-[25px] sm:h-[40px]'}
       style={{ filter: 'invert(100%) sepia(100%) saturate(0%) hue-rotate(296deg) brightness(108%) contrast(106%)' }}
+    />
+  )
+}
+
+// Use on SVGs that are already white text
+function GrayscaleSVG (props: ImageProps) {
+  return (
+    <Image
+      {...props}
+      alt={props.alt}
+      height={40}
+      className={'h-[25px] sm:h-[40px]'}
+      style={{ filter: 'grayscale(1)' }}
     />
   )
 }
@@ -66,9 +80,9 @@ export default function Carousel () {
         src={kubernetesImg as string}
         alt={'Kubernetes'}
       />
-      <WhiteSVG
-        src={terraformImg as string}
-        alt={'Terraform'}
+      <GrayscaleSVG
+        src={opentofuImg as string}
+        alt={'OpenTofu'}
       />
       <div className="flex flex-shrink-0 items-center min-w-[100px] w-[100px] text-gray-dark text-2xl gap-2 font-semibold">
         <WhiteSVG
@@ -149,9 +163,9 @@ export default function Carousel () {
         src={kubernetesImg as string}
         alt={'Kubernetes'}
       />
-      <WhiteSVG
-        src={terraformImg as string}
-        alt={'Terraform'}
+      <GrayscaleSVG
+        src={opentofuImg as string}
+        alt={'OpenTofu'}
       />
       <div className="flex flex-shrink-0 items-center min-w-[100px] w-[100px] text-white text-2xl gap-2 font-semibold">
         <WhiteSVG
