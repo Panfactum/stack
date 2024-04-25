@@ -3,31 +3,23 @@
 #################################################################
 
 locals {
-  global_file       = find_in_parent_folders("global.yaml", "DNE")
-  global_raw_vars   = local.global_file != "DNE" ? yamldecode(file(local.global_file)) : null
-  global_user_file  = find_in_parent_folders("global.user.yaml", "DNE")
-  global_user_vars  = local.global_user_file != "DNE" ? yamldecode(file(local.global_user_file)) : null
+  global_raw_vars   = try(yamldecode(file(find_in_parent_folders("global.yaml"))), null)
+  global_user_vars  = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), null)
   global_vars       = merge({}, local.global_raw_vars, local.global_user_vars)
   global_extra_tags = lookup(local.global_vars, "extra_tags", {})
 
-  environment_file       = find_in_parent_folders("environment.yaml", "DNE")
-  environment_raw_vars   = local.environment_file != "DNE" ? yamldecode(file(local.environment_file)) : null
-  environment_user_file  = find_in_parent_folders("environment.user.yaml", "DNE")
-  environment_user_vars  = local.environment_user_file != "DNE" ? yamldecode(file(local.environment_user_file)) : null
+  environment_raw_vars   = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), null)
+  environment_user_vars  = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), null)
   environment_vars       = merge({}, local.environment_raw_vars, local.environment_user_vars)
   environment_extra_tags = lookup(local.environment_vars, "extra_tags", {})
 
-  region_file       = find_in_parent_folders("region.yaml", "DNE")
-  region_raw_vars   = local.region_file != "DNE" ? yamldecode(file(local.region_file)) : null
-  region_user_file  = find_in_parent_folders("region.user.yaml", "DNE")
-  region_user_vars  = local.region_user_file != "DNE" ? yamldecode(file(local.region_user_file)) : null
+  region_raw_vars   = try(yamldecode(file(find_in_parent_folders("region.yaml"))), null)
+  region_user_vars  = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), null)
   region_vars       = merge({}, local.region_raw_vars, local.region_user_vars)
   region_extra_tags = lookup(local.region_vars, "extra_tags", {})
 
-  module_file       = "${get_terragrunt_dir()}/module.yaml"
-  module_raw_vars   = fileexists(local.module_file) ? yamldecode(file(local.module_file)) : null
-  module_user_file  = "${get_terragrunt_dir()}/module.user.yaml"
-  module_user_vars  = fileexists(local.module_user_file) ? yamldecode(file(local.module_user_file)) : null
+  module_raw_vars   = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), null)
+  module_user_vars  = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), null)
   module_vars       = merge({}, local.module_raw_vars, local.module_user_vars)
   module_extra_tags = lookup(local.module_vars, "extra_tags", {})
 
