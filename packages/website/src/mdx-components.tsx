@@ -153,9 +153,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
         className={clsx('p-1 pb-3 align-top', defaultTextSize, className)}
         {...props}
       >
-        <PrettyBalancer>
-          {children}
-        </PrettyBalancer>
+        {children}
       </td>
     ),
     th: ({ children, className, ...props }) => (
