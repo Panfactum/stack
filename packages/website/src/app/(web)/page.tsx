@@ -138,7 +138,7 @@ export default function Page () {
             title={'Plug-and-Play'}
             text={(
               <>
-                With 100+ ready-for-production terraform modules and a fully codified
+                With 100+ ready-for-production infrastructure modules and a fully codified
                 {' '}
                 <PageLink
                   href={'https://devenv.sh/'}

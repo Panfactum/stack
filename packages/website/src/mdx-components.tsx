@@ -1,6 +1,7 @@
 import { clsx } from 'clsx'
 import type { MDXComponents } from 'mdx/types'
-import type { ReactElement, ReactNode } from 'react'
+import Link from 'next/link'
+import type { ReactElement, ReactNode, Ref } from 'react'
 
 import { currentPanfactumVersion } from '@/app/vars'
 import CopyHeader from '@/components/markdown/CopyHeader'
@@ -27,7 +28,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ...components,
     strong: ({ children, className, ...props }) => (
       <strong
-        className={clsx('font-semibold', className)}
+        className={clsx('font-semibold inline', className)}
         {...props}
       >
         {children}
@@ -109,14 +110,15 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
         {children}
       </h4>
     ),
-    a: ({ children, href, className, ...props }) => (
-      <a
+    a: ({ children, href, className, ref, ...props }) => (
+      <Link
         href={replaceCodeVariables(href || '')}
-        className={clsx(' markdown', className)}
+        className={clsx('inline markdown', className)}
+        ref={ref as Ref<HTMLAnchorElement> | undefined}
         {...props}
       >
         {children}
-      </a>
+      </Link>
     ),
     code: ({ children, ...props }) => {
       let actualChildren = children

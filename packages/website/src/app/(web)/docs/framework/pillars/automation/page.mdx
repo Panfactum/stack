@@ -74,31 +74,31 @@ These are common goals to help organizations improve their performance on the ke
 of impact and optimal approach will depend on your organization's unique context.**
 
 | Category       | Code    | Goal                                                                                                                                              |
-| -------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+|----------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | Developer Env  | `A.E.1` | All tooling necessary to begin developing on a codebase should be installable in a single command.                                                |
-| Developer Env  | `A.E.2` | All developers in the same organizational unit should share the exact same versions of all required tooling.                                      |
-| Developer Env  | `A.E.3` | A developer should be able to launch an isolated copy of the organizational unit's entire system, including equivalent infrastructure.            |
-| Developer Env  | `A.E.4` | Where feasible, integration tests should be able to be triggered locally prior to committing and pushing code.                                    |
-| Developer Env  | `A.E.5` | Where applicable, developers should have scripts that automatically seed test databases with production-like data.                                |
-| Developer Env  | `A.E.6` | Where applicable, developers should have scripts that automatically re-apply the latest database schema changes.                                  |
-| Developer Env  | `A.E.7` | Multi-step operations that are either done frequently or in times of urgency (disaster recovery) are codified as scripts that can be run locally. |
+|                | `A.E.2` | All developers in the same organizational unit should share the exact same versions of all required tooling.                                      |
+|                | `A.E.3` | A developer should be able to launch an isolated copy of the organizational unit's entire system, including equivalent infrastructure.            |
+|                | `A.E.4` | Where feasible, integration tests should be able to be triggered locally prior to committing and pushing code.                                    |
+|                | `A.E.5` | Where applicable, developers should have scripts that automatically seed test databases with production-like data.                                |
+|                | `A.E.6` | Where applicable, developers should have scripts that automatically re-apply the latest database schema changes.                                  |
+|                | `A.E.7` | Multi-step operations that are either done frequently or in times of urgency (disaster recovery) are codified as scripts that can be run locally. |
 | Infrastructure | `A.F.1` | All infrastructure should be codified using infrastructure-as-code.                                                                               |
-| Infrastructure | `A.F.2` | All system settings should be codified using configuration-as-code.                                                                               |
+|                | `A.F.2` | All system settings should be codified using configuration-as-code.                                                                               |
 | Standards      | `A.S.1` | Each organizational unit's standard code integration and deployment processes should be included in shared documentation.                         |
-| Standards      | `A.S.2` | All repos in the same organizational unit should share the same CI/CD automation code.                                                            |
-| Standards      | `A.S.3` | All repos in the same organizational unit should share the same developer environment configuration.                                              |
-| Standards      | `A.S.4` | All repos should have an automatic means to generate a Changelog in standard format.                                                              |
+|                | `A.S.2` | All repos in the same organizational unit should share the same CI/CD automation code.                                                            |
+|                | `A.S.3` | All repos in the same organizational unit should share the same developer environment configuration.                                              |
+|                | `A.S.4` | All repos should have an automatic means to generate a Changelog in standard format.                                                              |
 | Integration    | `A.I.1` | Prior to integration, every commit should generate build artifacts.                                                                               |
-| Integration    | `A.I.2` | Prior to integration, every commit should run unit and integration tests and generate an associated code coverage report.                         |
-| Integration    | `A.I.3` | Prior to integration, every commit should should trigger static code analysis of 1st-party code.                                                  |
-| Integration    | `A.I.4` | Prior to integration, every commit should should trigger dependency vulnerability scanning.                                                       |
-| Integration    | `A.I.5` | Prior to integration, every commit should should verify alignment with organization standards by running code linting.                            |
-| Integration    | `A.I.6` | Proposed integrations should create previews of system under the proposed changes.                                                                |
-| Integration    | `A.I.7` | Authors should be notified of commits that cannot be integrated.                                                                                  |
+|                | `A.I.2` | Prior to integration, every commit should run unit and integration tests and generate an associated code coverage report.                         |
+|                | `A.I.3` | Prior to integration, every commit should should trigger static code analysis of 1st-party code.                                                  |
+|                | `A.I.4` | Prior to integration, every commit should should trigger dependency vulnerability scanning.                                                       |
+|                | `A.I.5` | Prior to integration, every commit should should verify alignment with organization standards by running code linting.                            |
+|                | `A.I.6` | Proposed integrations should create previews of system under the proposed changes.                                                                |
+|                | `A.I.7` | Authors should be notified of commits that cannot be integrated.                                                                                  |
 | Deployment     | `A.D.1` | Deploying new changes to an environment should be attainable in a single command.                                                                 |
-| Deployment     | `A.D.2` | Newly integrated code should be automatically deployed to a development / testing environment.                                                    |
-| Deployment     | `A.D.3` | Deployment to production environments should be gated by end-to-end test suites.                                                                  |
-| Deployment     | `A.D.4` | Triggering a deploying to a live environment should create a diff documenting the changes. This *may* be used as a deployment gate.               |
-| Deployment     | `A.D.5` | Infrastructure, application, *and* configuration code changes should be deployed (and rolled back) atomically, in the same pipeline.              |
-| Deployment     | `A.D.6` | Notifications should be sent for deployment successes and failures.                                                                               |
-| Deployment     | `A.D.7` | Errors or significant increases in error rates should trigger automatic rollbacks of deployments.                                                 |
+|                | `A.D.2` | Newly integrated code should be automatically deployed to a development / testing environment.                                                    |
+|                | `A.D.3` | Deployment to production environments should be gated by end-to-end test suites.                                                                  |
+|                | `A.D.4` | Triggering a deploying to a live environment should create a diff documenting the changes. This *may* be used as a deployment gate.               |
+|                | `A.D.5` | Infrastructure, application, *and* configuration code changes should be deployed (and rolled back) atomically, in the same pipeline.              |
+|                | `A.D.6` | Notifications should be sent for deployment successes and failures.                                                                               |
+|                | `A.D.7` | Errors or significant increases in error rates should trigger automatic rollbacks of deployments.                                                 |

@@ -125,7 +125,11 @@ words: [
   "Gruntwork",
   "KodeKloud",
   "tfvars",
-  "Spacelift"
+  "Spacelift",
+  "auditability",
+  "mitigations",
+  "OTEL",
+  "syslogs",
 ]
 languageSettings:
   - languageId: markdown,mdx
