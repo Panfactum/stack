@@ -43,11 +43,11 @@ Let's do this now:
 
 6. Run `terragrunt apply`.
 
-7. If the module deploys successfully, you will see three vault instances which are in the unready state:
+7. Note that this deployment may or may not succeed, but you should see three vault instances which are in the unready state:
 
    <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
 
-   Checking the logs of one of the Vault pods will show error messages that look like this:
+   Checking the logs of one of the Vault pods will show error messages that look like this (the exact order and information may appear different):
 
    ```shell-session
    │ 2024-03-19T13:06:57.989Z [WARN]  failed to unseal core: error="stored unseal keys are supported, but none were found"                   │
@@ -63,7 +63,7 @@ Let's do this now:
    │ 2024-03-19T13:06:59.719Z [ERROR] core: failed to retry join raft cluster: retry=2s err="failed to get raft challenge"
    ```
 
-   This is because Vault must be manually initialized on first use.
+   **This is because Vault must be manually initialized on first use.**
 
 ## Initialize Vault
 

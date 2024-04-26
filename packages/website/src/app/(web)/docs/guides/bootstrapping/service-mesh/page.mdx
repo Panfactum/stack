@@ -164,6 +164,10 @@ the cli. Run this now: `linkerd viz install | kubectl apply -f -`.
 
 ### Inject Sidecars
 
+<MarkdownAlert severity="warning">
+    Do not begin this step until the Viz components from the previous step are fully deployed.
+</MarkdownAlert>
+
 Linkerd works by injecting sidecar containers into your pods to connect them to the mesh. This happens on
 pod *creation* so already existing pods will not have any sidecars injected. Let's restart them to connect
 them to the mesh:
@@ -176,7 +180,7 @@ them to the mesh:
 
 4. Press `r` to restart.
 
-5. Perform a similar restart to `:statefulsets`.
+5. Perform a similar restart to `:statefulsets` and `:daemonsets`.
 
 6. Notice that the new pods have linkerd sidecar containers:
 

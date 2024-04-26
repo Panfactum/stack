@@ -32,9 +32,9 @@ module "kube_labels" {
 
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
+  environment      = var.environment
   region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags
@@ -50,6 +50,7 @@ module "constants" {
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   pf_root_module   = var.pf_root_module
+  environment      = var.environment
   region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags
@@ -66,8 +67,8 @@ module "namespace" {
 
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
   pf_root_module   = var.pf_root_module
+  environment      = var.environment
   region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags
@@ -83,6 +84,7 @@ module "cert" {
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   pf_root_module   = var.pf_root_module
+  environment      = var.environment
   region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags

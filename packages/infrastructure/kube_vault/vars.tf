@@ -1,7 +1,7 @@
 variable "vault_helm_version" {
   description = "The version of the vault helm chart to deploy"
   type        = string
-  default     = "0.25.0" // This is the last open source release
+  default     = "0.27.0"
 }
 
 variable "vault_image_tag" {

@@ -113,8 +113,8 @@ module "tls_cert" {
 
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
   pf_root_module   = var.pf_root_module
+  environment      = var.environment
   region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags
