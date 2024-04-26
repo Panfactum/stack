@@ -334,7 +334,7 @@ as intended.
    This time it used the root vault token you set in your `.env` file, but in the future it will use your organization's
    SSO which we will configure in a later section.
 
-5. For fun, run `kubectl rollout restart bastion -n bastion` to restart the bastion instances. Notice that the tunnel
+5. For fun, run `kubectl rollout restart deployment -n bastion` to restart the bastion instances. Notice that the tunnel
    recovers gracefully even during disruption to the underlying nodes.
 
 6. Close the tunnel with `^C`.
