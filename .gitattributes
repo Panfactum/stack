@@ -11,3 +11,8 @@
 *.bmp filter=lfs diff=lfs merge=lfs -text
 *.svg filter=lfs diff=lfs merge=lfs -text
 *.sketch filter=lfs diff=lfs merge=lfs -text
+
+# Include these files in normal git tracking so they can be used by terragrunt
+packages/infrastructure/authentik_core_resources/logo.svg !filter !diff !merge text
+packages/infrastructure/authentik_aws_sso/aws.svg !filter !diff !merge text
+packages/infrastructure/authentik_vault_sso/vault.svg !filter !diff !merge text
