@@ -104,7 +104,8 @@ Let's deploy it now:
    3. Set the `aws_issuer` as the "IAM Identity Center issuer URL" from the page you
       opened in the prior section.
 
-   4. Set `aws_scim_enabled` to `false` and omit `aws_scim_url` and `aws_scim_token` for now.
+   4. Set `aws_scim_enabled` to `false` and omit `aws_scim_url` and `aws_scim_token` for now. Additionally, you may
+    omit reading in the secrets file via `sops_decrypt_file`.
 
    5. For `allowed_groups`, provide *all* the groups that you want to allow to access AWS (we will assign roles later).
 
@@ -137,7 +138,7 @@ Let's deploy it now:
     2. Set `aws_scim_url` to the "SCIM endpoint" from the previous step.
 
     3. Set `aws_scim_token` to the secret "Access token" from the previous step. Ensure that you save it in an encrypted
-       sops file.
+       sops file and read it into your `terragrunt.hcl` via `sops_decrypt_file`.
 
 12. Re-apply the module via `terragrunt apply`.
 

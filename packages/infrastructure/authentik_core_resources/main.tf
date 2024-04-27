@@ -155,10 +155,13 @@ resource "authentik_stage_authenticator_validate" "mfa" {
   name                  = "panfactum-authenticator-validate"
   device_classes        = ["webauthn", "totp"]
   not_configured_action = "configure"
-  configuration_stages = [
+
+  # Sort required due to
+  # https://github.com/goauthentik/terraform-provider-authentik/issues/377
+  configuration_stages = sort([
     authentik_stage_authenticator_webauthn.webauthn_setup.id,
     authentik_stage_authenticator_totp.totp_setup.id
-  ]
+  ])
 }
 
 // This allows only webauthn which should be used for superusers
@@ -247,11 +250,13 @@ resource "authentik_stage_prompt" "password" {
   fields = [
     authentik_stage_prompt_field.password.id
   ]
-  validation_policies = [
+  # Sort required due to
+  # https://github.com/goauthentik/terraform-provider-authentik/issues/377
+  validation_policies = sort([
     authentik_policy_password.password_length.id,
     authentik_policy_password.password_pwnd.id,
     authentik_policy_password.password_complexity.id
-  ]
+  ])
 }
 
 resource "authentik_policy_password" "password_length" {
