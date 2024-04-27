@@ -130,6 +130,8 @@ words: [
   "mitigations",
   "OTEL",
   "syslogs",
+  "HITRUST",
+  "exfiltrated"
 ]
 languageSettings:
   - languageId: markdown,mdx
