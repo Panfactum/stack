@@ -42,7 +42,7 @@
       ./kube-capacity.nix) # for visualizing resource utilization in the cluster
     (import ./kubectl-cnpg.nix) # for managing the cnpg postgres databases
     (import ./linkerd.nix) # utility for working with the service mesh
-    (util.customNixModule "cilium") # for managing the cilium CNI
+    (import ./cilium) # for managing the cilium CNI
     (import ./cmctl.nix) # for working with cert-manager
     (import ./stern.nix) # log aggregator for quick cli log inspection
     (import ./velero.nix) # backups of cluster state
