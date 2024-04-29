@@ -55,7 +55,9 @@ function Callout (props: CalloutProps) {
       <LinkButton
         href={buttonHref}
       >
-        {buttonText}
+        <Balancer>
+          {buttonText}
+        </Balancer>
       </LinkButton>
     </div>
   )
@@ -177,22 +179,6 @@ export default function Page () {
             buttonHref={'/docs/reference/infrastructure-modules/overview'}
           />
           <Callout
-            title={'Comprehensive Coverage'}
-            text={(
-              <>
-                The Panfactum stack covers
-                {' '}
-                <b>everything</b>
-                {' '}
-                needed to build a world-class platform engineering practice
-                in any software organization
-                at any scale.
-              </>
-            )}
-            buttonText={'Check out the Features'}
-            buttonHref={'/docs/guides/bootstrapping/overview'}
-          />
-          <Callout
             title={'Step-by-Step Guides'}
             text={(
               <>
@@ -205,6 +191,17 @@ export default function Page () {
             )}
             buttonText={'Use the bootstrapping guide'}
             buttonHref={'/docs/guides/bootstrapping/overview'}
+          />
+          <Callout
+            title={'Deploy on your Infrastructure'}
+            text={(
+              <>
+                Run your entire platform from the comfort and safety of your own AWS infrastructure.
+                The stack does not create unnecessary abstractions or depend on any external management systems.
+              </>
+            )}
+            buttonText={'Connect to a demo instance'}
+            buttonHref={'/stack/demo'}
           />
           <Callout
             title={'Open and Extensible'}
@@ -320,7 +317,7 @@ export default function Page () {
               ratio={0.99}
               preferNative={false}
             >
-              The Panfactum framework measures platform engineering effectiveness across eight core
+              The Panfactum framework measures platform engineering effectiveness with 250+ measures across eight core
               pillars.
             </Balancer>
           </h3>
