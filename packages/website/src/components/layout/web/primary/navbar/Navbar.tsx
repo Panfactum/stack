@@ -1,8 +1,7 @@
-import Button from '@mui/material/Button'
-import Image from 'next/image'
-import Link from 'next/link'
-import { memo } from 'react'
+import React, { memo } from 'react'
 
+import CTA from '@/components/layout/web/primary/CTA'
+import Logo from '@/components/layout/web/primary/Logo'
 import NavbarContainer from '@/components/layout/web/primary/navbar/NavbarContainer'
 import NavbarLink from '@/components/layout/web/primary/navbar/NavbarLink'
 
@@ -33,19 +32,9 @@ export default memo(function Navbar () {
   return (
     <NavbarContainer>
       <div className="flex flex-row justify-between px-4 h-full items-center max-w-[1280px] mx-auto">
-
-        <Link
-          href="/"
-          className="text-white text-3xl hidden sm:flex items-center gap-x-1"
-        >
-          <Image
-            alt="Panfactum Logo"
-            src="/logo.svg"
-            width={40}
-            height={40}
-          />
-          Panfactum
-        </Link>
+        <div className="hidden sm:block">
+          <Logo/>
+        </div>
         <nav
           className="flex flex-row gap-2 justify-self-center h-full w-full sm:w-fit"
           aria-label="primary-navigation-bar"
@@ -53,18 +42,10 @@ export default memo(function Navbar () {
           <Links/>
         </nav>
         <div className="hidden sm:block">
-          <Button
-            variant="contained"
-            className="bg-white text-primary font-semibold"
-            size="small"
-          >
-            <Link href="/docs/guides/getting-started/start-here">
-              Get Started
-            </Link>
-          </Button>
+          <CTA/>
         </div>
       </div>
-      <div />
+      <div/>
     </NavbarContainer>
   )
 })
