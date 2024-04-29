@@ -6,18 +6,20 @@ import Balancer from 'react-wrap-balancer'
 
 import Carousel from '@/app/(web)/Carosel/Carousel'
 import TextSlider from '@/app/(web)/TextSlider'
+import { discordServerLink } from '@/app/vars'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
 
+import discordIconImg from './discord.svg'
 import { colors } from '../../../theme'
 
-function LinkButton (props: {href: string, text: string, size?: 'large' | 'small'}) {
-  const { href, text, size = 'small' } = props
+function LinkButton (props: {href: string, children: string | ReactElement, size?: 'large' | 'small', color?: 'blue' | 'grey'}) {
+  const { href, children, size = 'small', color = 'blue' } = props
   return (
     <Link
       href={href}
-      className={`bg-primary text-white rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100`}
+      className={`${color === 'blue' ? 'bg-primary' : 'bg-secondary'} text-white rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center`}
     >
-      {text}
+      {children}
     </Link>
   )
 }
@@ -51,9 +53,10 @@ function Callout (props: CalloutProps) {
         </p>
       </div>
       <LinkButton
-        text={buttonText}
         href={buttonHref}
-      />
+      >
+        {buttonText}
+      </LinkButton>
     </div>
   )
 }
@@ -102,7 +105,7 @@ export default function Page () {
     >
       <div >
         <div
-          className="bg-neutral flex flex-col items-center px-8 py-6 sm:py-10"
+          className="bg-neutral flex flex-col items-center px-8 pt-6 sm:pt-10 pb-4"
           style={{
             background: `radial-gradient(circle, ${colors.neutral}99 70%, ${colors.primary}FF 300%)`
           }}
@@ -123,11 +126,27 @@ export default function Page () {
             />
             <div className={'text-center'}>system for platform engineering</div>
           </div>
-          <div className="py-4">
+          <div className="py-4 flex gap-4 flex-wrap">
             <LinkButton
-              text={'Get Started'}
               href={'/docs/guides/getting-started/start-here'}
-            />
+            >
+              Get Started
+            </LinkButton>
+            <LinkButton
+              href={discordServerLink}
+              color='grey'
+            >
+              <div className="flex items-center gap-3">
+                <span className="hidden sm:inline-block">Connect</span>
+                <Image
+                  height={30}
+                  width={30}
+                  src={discordIconImg as string}
+                  alt={'Join the discord server'}
+                  className="h-[25px] sm:h-[30px] w-[25px] sm:w-[30px]"
+                />
+              </div>
+            </LinkButton>
           </div>
         </div>
       </div>
@@ -281,21 +300,29 @@ export default function Page () {
       </div>
 
       <div
-        className="flex flex-col px-8 py-8 md:py-16 gap-4 border-y-4 border-y-solid border-y-primary"
+        className="flex flex-col px-8 py-8 sm:py-12 gap-4 border-y-4 border-y-solid border-y-primary"
         style={{
           background: `radial-gradient(circle, ${colors.neutral}99 70%, ${colors.primary}FF 300%)`
         }}
       >
         <h2 className="text-3xl sm:text-4xl text-center w-full">
-          Benchmark your Platform Engineering Practice
+          <Balancer
+            ratio={0.99}
+            preferNative={false}
+          >
+            Benchmark your Platform Engineering Practice
+          </Balancer>
         </h2>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 items-center">
 
-          <h3 className="text-lg sm:text-xl font-medium text-center">
-            <PrettyBalancer>
+          <h3 className="text-lg sm:text-xl font-medium text-center w-full">
+            <Balancer
+              ratio={0.99}
+              preferNative={false}
+            >
               The Panfactum framework measures platform engineering effectiveness across eight core
               pillars.
-            </PrettyBalancer>
+            </Balancer>
           </h3>
 
           <div className="flex flex-wrap gap-4 justify-center">
@@ -393,8 +420,9 @@ export default function Page () {
           <LinkButton
             size={'large'}
             href={'/docs/framework/framework/overview'}
-            text={'Learn more about the framework'}
-          />
+          >
+            Learn more about the framework
+          </LinkButton>
         </div>
 
       </div>
@@ -414,8 +442,9 @@ export default function Page () {
 
               <LinkButton
                 href={'.'}
-                text={'Find a Partner'}
-              />
+              >
+                Find a Partner
+              </LinkButton>
             </div>
             <div className="flex flex-col gap-4 items-center min-w-[90%] sm:min-w-[45%] basis-[90%] sm:basis-[45%] bg-neutral p-4 rounded-xl justify-between border-solid border-gray-dark border-4">
               <p className="text-lg sm:text-xl text-center">
@@ -426,8 +455,9 @@ export default function Page () {
 
               <LinkButton
                 href={'.'}
-                text={'Become a Partner'}
-              />
+              >
+                Become a Partner
+              </LinkButton>
             </div>
           </div>
 

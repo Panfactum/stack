@@ -3,7 +3,7 @@ import type { MDXComponents } from 'mdx/types'
 import Link from 'next/link'
 import type { ReactElement, ReactNode, Ref } from 'react'
 
-import { currentPanfactumVersion } from '@/app/vars'
+import { currentPanfactumVersion, discordServerLink } from '@/app/vars'
 import CopyHeader from '@/components/markdown/CopyHeader'
 import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
@@ -15,6 +15,7 @@ const defaultTextSize = ['text-sm', 'sm:text-base']
 const replaceCodeVariables = (str: string) => {
   return str
     .replaceAll('__currentPanfactumVersion__', currentPanfactumVersion)
+    .replaceAll('__discordServerLink__', discordServerLink)
 }
 
 const makeIdFromChildren = (children: ReactNode) => {
