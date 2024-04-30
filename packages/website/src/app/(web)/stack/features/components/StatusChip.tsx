@@ -15,7 +15,7 @@ export default function StatusChip (props: {status: Status}) {
       : status === 'alpha' ? 'Alpha' : 'Beta'
 
   return (
-    <div className={clsx('font-semibold py-1 px-4 rounded-lg w-fit whitespace-nowrap h-fit', color)}>
+    <div className={clsx('font-semibold py-1 px-4 rounded-lg w-fit whitespace-nowrap h-fit text-sm sm:text-base', color)}>
       {text}
     </div>
   )

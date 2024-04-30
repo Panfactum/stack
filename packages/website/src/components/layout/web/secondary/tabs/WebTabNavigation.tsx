@@ -59,7 +59,7 @@ export default function WebTabNavigation (props: IWebTabNavigationProps) {
             value={text}
             href={href}
             component={Link}
-            className={`normal-case whitespace-nowrap flex-shrink-0 basis-auto text-black min-h-[2.2rem] h-[2.2rem] min-w-[40px] lg:min-w-[60px] px-4 lg:px-6 py-2 lg:py-4 text-sm sm:text-base ${text === value ? 'font-semibold' : 'font-normal'}`}
+            className={`normal-case whitespace-nowrap flex-shrink-0 basis-auto text-black min-h-[2.2rem] h-[2.2rem] min-w-[40px] lg:min-w-[60px] px-4 lg:px-6 pt-2 pb-3 lg:py-4 text-sm sm:text-base ${text === value ? 'font-semibold' : 'font-normal'}`}
           />
         ))}
       </Tabs>

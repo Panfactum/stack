@@ -41,7 +41,7 @@ function CustomAccordionSummary (props: AccordionSummaryProps) {
   return (
     <AccordionSummary
       expandIcon={<ExpandMoreIcon className="text-white"/>}
-      className="bg-primary text-white text-xl"
+      className="bg-primary text-white text-lg sm:text-xl"
       {...props}
     />
   )
@@ -88,7 +88,7 @@ export default function FeatureList (props: FeatureListProps) {
               key={title}
               className="flex justify-between items-center gap-4 px-4 py-2 even:bg-gray-light odd:bg-neutral"
             >
-              <div className="font-medium text-lg">
+              <div className="font-medium sm:text-lg">
                 <Balancer>
                   {title}
                   {' '}
