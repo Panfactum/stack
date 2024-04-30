@@ -10,7 +10,7 @@ const Links = memo(() => {
     <>
       <NavbarLink
         href="/stack"
-        text="The Stack"
+        text="Stack"
       />
       <NavbarLink
         href="/docs"

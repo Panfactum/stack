@@ -70,7 +70,7 @@ const Banner = styled.div`
 export default function Carousel () {
   return (
     <Banner
-      className="bg-primary h-[50px] sm:h-[80px] border-y-gray-dark border-y-4 flex items-center gap-10 sm:gap-20"
+      className="bg-primary h-[50px] sm:h-[80px] border-y-gray-dark border-y-4 flex items-center gap-10 sm:gap-20 z-10"
     >
       <WhiteSVG
         src={awsImg as string}

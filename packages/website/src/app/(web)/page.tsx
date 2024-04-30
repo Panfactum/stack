@@ -12,12 +12,12 @@ import PrettyBalancer from '@/components/ui/PrettyBalancer'
 import discordIconImg from './discord.svg'
 import { colors } from '../../../theme'
 
-function LinkButton (props: {href: string, children: string | ReactElement, size?: 'large' | 'small', color?: 'blue' | 'grey'}) {
+function LinkButton (props: {href: string, children: string | ReactElement, size?: 'large' | 'small', color?: 'blue' | 'grey' | 'white'}) {
   const { href, children, size = 'small', color = 'blue' } = props
   return (
     <Link
       href={href}
-      className={`${color === 'blue' ? 'bg-primary' : 'bg-secondary'} text-white rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center`}
+      className={`${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center`}
     >
       {children}
     </Link>
@@ -153,7 +153,29 @@ export default function Page () {
         </div>
       </div>
       <Carousel/>
-      <div className="px-8 py-8 md:py-16">
+      <div className="px-8 pb-6 sm:pb-12">
+        <div className="max-w-[1280px] mx-auto text-center bg-neutral border-gray-dark border-solid border-b-4 border-x-4 rounded-b-xl mb-6 px-6 py-6 flex flex-col items-center gap-5">
+          <h1 className="font-semibold text-3xl sm:text-4xl">
+            The Stack
+          </h1>
+          <p className="text-lg sm:text-xl">
+            <Balancer>
+              The
+              {' '}
+              <em>Panfactum Stack</em>
+              {' '}
+              is an integrated set of infrastructure modules and local tooling aimed
+              at providing the best experience for building, deploying, and managing software on AWS
+              and Kubernetes.
+            </Balancer>
+          </p>
+          <LinkButton
+            href={'/stack/features'}
+            color={'blue'}
+          >
+            See the full feature list
+          </LinkButton>
+        </div>
         <div className="max-w-[1280px] mx-auto flex gap-6 sm:gap-10 flex-wrap justify-center">
           <Callout
             title={'Plug-and-Play'}
@@ -207,7 +229,7 @@ export default function Page () {
             title={'Open and Extensible'}
             text={(
               <>
-                Eliminate vendor lock-in and friction. Panfactum is completely open and uses
+                Eliminate vendor lock-in and friction. Panfactum is source-available and uses
                 {' '}
                 <b>only</b>
                 {' '}
