@@ -77,9 +77,10 @@ export default function Page () {
           features={[
             { title: 'Deployed on EKS', status: 'stable' },
             { title: 'Hardened OS', description: 'Provided by Bottlerocket', status: 'stable' },
-            { title: 'Automatic security patches', status: 'stable' },
+            { title: 'Automatic Security Patches', status: 'stable' },
             { title: 'Cluster Autoscaling', description: 'Provided by Karpenter', status: 'stable' },
-            { title: 'Ingress Networking with automatic DNS', status: 'stable' },
+            { title: 'Ingress Networking with Automatic DNS', status: 'stable' },
+            { title: 'Multi-AZ High-Availability', status: 'stable' },
             {
               title: 'Hashicorp Vault',
               description: 'Provides a Vault deployment for managing cluster secrets',
@@ -91,7 +92,7 @@ export default function Page () {
               status: 'stable'
             },
             {
-              title: 'Metrics visibility',
+              title: 'Metrics Visibility',
               description: 'Expose cluster metrics with the metrics-server and kube-state-metrics',
               status: 'stable'
             },
@@ -205,8 +206,8 @@ export default function Page () {
         <FeatureList
           title="Observability"
           features={[
-            { title: 'Logs Collection', description: 'Provided by Loki', status: 'coming-soon' },
-            { title: 'Metrics Collection', description: 'Provided by Prometheus', status: 'coming-soon' },
+            { title: 'Log Collection', description: 'Provided by Loki', status: 'coming-soon' },
+            { title: 'Metric Collection', description: 'Provided by Prometheus', status: 'coming-soon' },
             { title: 'Tracing', description: 'Provided by OTEL', status: 'coming-soon' },
             { title: 'Real User Monitoring (RUM)', description: 'Provided by Grafana Faro', status: 'coming-soon' },
             { title: 'Dashboards & Query Engine', description: 'Provided by Grafana', status: 'coming-soon' },
