@@ -3,6 +3,7 @@
     "authentik_aws_sso",
     "authentik_core_resources",
     "authentik_vault_sso",
+    "authentik_zoho_sso",
     "aws_account",
     "aws_account_permission_binding",
     "aws_cloudwatch_log_group",

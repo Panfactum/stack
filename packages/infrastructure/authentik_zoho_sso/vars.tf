@@ -1,33 +1,16 @@
-variable "aws_acs_url" {
-  description = "The ACS url provided by AWS when configuring an external identity provider"
+variable "zoho_acs_url" {
+  description = "The ACS url provided by Zoho when configuring an external identity provider"
   type        = string
 }
-variable "aws_sign_in_url" {
-  description = "The sign-in url provided by AWS when configuring an external identity provider"
-  type        = string
-}
-
-variable "aws_issuer" {
-  description = "The Issuer url provided by AWS when configuring an external identity provider"
+variable "zoho_sign_in_url" {
+  description = "The sign-in url provided by Zoho when configuring an external identity provider"
   type        = string
 }
 
-variable "aws_scim_enabled" {
-  description = "Whether to enable SCIM with AWS"
-  type        = bool
-  default     = false
-}
-variable "aws_scim_url" {
-  description = "The SCIM endpoint provided by AWS"
+variable "zoho_issuer" {
+  description = "The issuer provided by Zoho when configuring an external identity provider"
   type        = string
-  default     = ""
-}
-
-variable "aws_scim_token" {
-  description = "The SCIM token provided by AWS"
-  sensitive   = true
-  type        = string
-  default     = ""
+  default     = "zoho.com"
 }
 
 variable "authentik_domain" {
@@ -43,13 +26,13 @@ variable "organization_name" {
 variable "ui_description" {
   description = "The description to display in the Authentik web dashboard"
   type        = string
-  default     = "Amazon Web Services - IAM Identity Center SSO Login"
+  default     = "Zoho"
 }
 
 variable "ui_group" {
   description = "The section in the Authentik web dashboard that this will appear in"
   type        = string
-  default     = "Amazon Web Services"
+  default     = "Admin"
 }
 
 variable "allowed_groups" {

@@ -16,3 +16,4 @@
 packages/infrastructure/authentik_core_resources/logo.svg !filter !diff !merge text
 packages/infrastructure/authentik_aws_sso/aws.svg !filter !diff !merge text
 packages/infrastructure/authentik_vault_sso/vault.svg !filter !diff !merge text
+packages/infrastructure/authentik_zoho_sso/zoho.svg !filter !diff !merge text

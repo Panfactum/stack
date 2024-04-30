@@ -128,6 +128,7 @@ module "ingress" {
   }]
 
   cors_enabled                   = true
+  cross_origin_embedder_policy   = "credentialless"
   csp_enabled                    = true
   cross_origin_isolation_enabled = true
   rate_limiting_enabled          = true

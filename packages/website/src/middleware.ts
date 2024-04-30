@@ -2,12 +2,11 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 export function middleware (request: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
   const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${process.env.NODE_ENV === 'production' ? '' : '\'unsafe-eval\''};
+    default-src 'self' https://pagesense-collect.zoho.com https://cdn.pagesense.io;
+    script-src 'self' 'unsafe-inline' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://static.zohocdn.com ${process.env.NODE_ENV === 'production' ? '' : '\'unsafe-eval\''};
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data:;
+    img-src 'self' https://pagesense-collect.zoho.com blob: data:;
     font-src 'self' https:;
     object-src 'none';
     base-uri 'self';
@@ -21,7 +20,6 @@ export function middleware (request: NextRequest) {
     .trim()
 
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-nonce', nonce)
 
   requestHeaders.set(
     'Content-Security-Policy',
