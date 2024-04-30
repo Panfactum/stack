@@ -9,6 +9,8 @@ export default memo(function DefaultTooltip (props: DefaultTooltipProps) {
   return (
     <Tooltip
       {...props}
+      enterTouchDelay={0}
+      leaveTouchDelay={10000}
       title={(
         <div className="text-base lg:text-lg">
           {props.title}

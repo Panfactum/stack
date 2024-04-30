@@ -1,4 +1,5 @@
 import React from 'react'
+import Balancer from 'react-wrap-balancer'
 
 import FeatureList from '@/app/(web)/stack/features/components/FeatureList'
 import StatusChip from '@/app/(web)/stack/features/components/StatusChip'
@@ -10,7 +11,7 @@ export default function Page () {
         Features
       </h2>
       <p className="w-full mb-3 text-center italic">
-        Feature statuses represent the state as of the last edge release
+        <Balancer>Feature statuses represent the state as of the last edge release</Balancer>
       </p>
       <div className="w-full max-w-3xl mx-auto rounded-xl overflow-hidden">
 
@@ -339,23 +340,23 @@ export default function Page () {
           ]}
         />
       </div>
-      <div className="flex flex-col w-full max-w-3xl mx-auto gap-3 pt-8">
-        <div className="flex flex-row gap-3 items-center">
-          <StatusChip status={'stable'}/>
-          <p className="text-lg font-medium">Ready for production use</p>
-        </div>
-        <div className="flex flex-row gap-3 items-center">
-          <StatusChip status={'beta'}/>
-          <p className="text-lg font-medium">Safe to use, but API might change as public feedback collected</p>
-        </div>
-        <div className="flex flex-row gap-3 items-center">
-          <StatusChip status={'alpha'}/>
-          <p className="text-lg font-medium">Internal use and private testing only</p>
-        </div>
-        <div className="flex flex-row gap-3 items-center">
-          <StatusChip status={'coming-soon'}/>
-          <p className="text-lg font-medium">On the development roadmap</p>
-        </div>
+      <div className="inline-grid grid-cols-[min-content_auto] auto-cols-auto w-full max-w-3xl mx-auto pt-8 gap-y-8">
+        <StatusChip status={'stable'}/>
+        <p className="text-lg font-medium px-4">
+          <Balancer>Ready for production use</Balancer>
+        </p>
+        <StatusChip status={'beta'}/>
+        <p className="text-lg font-medium px-4">
+          <Balancer>Safe to use, but API might change as public feedback collected</Balancer>
+        </p>
+        <StatusChip status={'alpha'}/>
+        <p className="text-lg font-medium px-4">
+          <Balancer>Internal use and private testing only</Balancer>
+        </p>
+        <StatusChip status={'coming-soon'}/>
+        <p className="text-lg font-medium px-4">
+          <Balancer>On the development roadmap</Balancer>
+        </p>
       </div>
     </div>
   )

@@ -164,7 +164,7 @@ export default function Page () {
               {' '}
               <em>Panfactum Stack</em>
               {' '}
-              is an integrated set of infrastructure modules and local tooling aimed
+              is an integrated set of OpenTofu (Terraform) modules and local tooling aimed
               at providing the best experience for building, deploying, and managing software on AWS
               and Kubernetes.
             </Balancer>

@@ -10,6 +10,7 @@ import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import type { ReactElement } from 'react'
 import React from 'react'
+import Balancer from 'react-wrap-balancer'
 
 import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
 
@@ -85,15 +86,19 @@ export default function FeatureList (props: FeatureListProps) {
           {features.map(({ title, description, status }) => (
             <div
               key={title}
-              className="flex justify-between px-4 py-2 even:bg-gray-light odd:bg-neutral"
+              className="flex justify-between items-center gap-4 px-4 py-2 even:bg-gray-light odd:bg-neutral"
             >
-              <div className="flex items-center gap-2 font-medium text-lg">
-                {title}
-                {description && (
-                  <DefaultTooltipLazy title={description}>
-                    <HelpOutlineIcon/>
-                  </DefaultTooltipLazy>
-                )}
+              <div className="font-medium text-lg">
+                <Balancer>
+                  {title}
+                  {' '}
+                  {description && (
+                    <DefaultTooltipLazy title={description}>
+                      <HelpOutlineIcon className="inline relative top-[6px]"/>
+                    </DefaultTooltipLazy>
+                  )}
+                </Balancer>
+
               </div>
               <div>
                 <StatusChip status={status}/>
