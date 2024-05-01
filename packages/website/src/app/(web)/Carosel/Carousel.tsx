@@ -51,7 +51,7 @@ function GrayscaleSVG (props: ImageProps) {
   )
 }
 
-const bounce = keyframes`
+const scroll = keyframes`
   0% {
       margin-left: 50px;
   }
@@ -62,7 +62,7 @@ const bounce = keyframes`
 
 const Banner = styled.div`
     & > :first-child {
-        animation: ${bounce} 180s linear infinite;
+        animation: ${scroll} 180s linear infinite;
     }
 
 `

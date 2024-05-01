@@ -41,7 +41,7 @@ function CustomAccordionSummary (props: AccordionSummaryProps) {
   return (
     <AccordionSummary
       expandIcon={<ExpandMoreIcon className="text-white"/>}
-      className="bg-primary text-white text-lg sm:text-xl"
+      className="bg-primary font-medium text-white text-lg sm:text-xl"
       {...props}
     />
   )

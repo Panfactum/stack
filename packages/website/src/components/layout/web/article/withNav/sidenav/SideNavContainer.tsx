@@ -20,7 +20,6 @@ const SideNavContainer = styled.aside`
   min-width: ${WEB_ARTICLE_SIDEBAR_WIDTH_PX}px;
   width: ${WEB_ARTICLE_SIDEBAR_WIDTH_PX}px;
   border-right: ${({ theme }) => `2px solid ${theme.palette.primary.light}`};
-  overflow-y: scroll;
   position: sticky;
   top: calc(${WEB_TABBAR_HEIGHT_REM}rem + ${WEB_NAVBAR_HEIGHT_REM}rem + ${WEB_NAVBAR_BORDER_WIDTH_PX}px);
   

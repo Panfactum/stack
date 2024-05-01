@@ -9,6 +9,7 @@ import TextSlider from '@/app/(web)/TextSlider'
 import { discordServerLink } from '@/app/vars'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
 
+import { Gears, Gears2, Gears3 } from './Gears'
 import discordIconImg from './discord.svg'
 import { colors } from '../../../theme'
 
@@ -17,7 +18,7 @@ function LinkButton (props: {href: string, children: string | ReactElement, size
   return (
     <Link
       href={href}
-      className={`${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center`}
+      className={`${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center text-center`}
     >
       {children}
     </Link>
@@ -36,6 +37,9 @@ function Callout (props: CalloutProps) {
   return (
     <div
       className="flex flex-col w-[90%] sm:w-[45%] justify-between gap-2 px-4 py-4 bg-neutral border-solid border-gray-dark border-4 rounded-lg"
+      style={{
+        background: `radial-gradient(circle, ${colors.neutral}BB 80%, ${colors.primary}FF 300%)`
+      }}
     >
       <div className="flex flex-col gap-2">
         <h2 className="text-xl sm:text-2xl">
@@ -109,7 +113,7 @@ export default function Page () {
         <div
           className="bg-neutral flex flex-col items-center px-8 pt-6 sm:pt-10 pb-4"
           style={{
-            background: `radial-gradient(circle, ${colors.neutral}99 70%, ${colors.primary}FF 300%)`
+            background: `radial-gradient(circle, ${colors.neutral}AA 70%, ${colors.primary}FF 300%)`
           }}
         >
           <Image
@@ -153,28 +157,47 @@ export default function Page () {
         </div>
       </div>
       <Carousel/>
-      <div className="px-8 pb-6 sm:pb-12">
-        <div className="max-w-[1280px] mx-auto text-center bg-neutral border-gray-dark border-solid border-b-4 border-x-4 rounded-b-xl mb-6 px-6 py-6 flex flex-col items-center gap-5">
-          <h1 className="font-semibold text-3xl sm:text-4xl">
-            The Stack
-          </h1>
-          <p className="text-lg sm:text-xl">
-            <Balancer>
-              The
-              {' '}
-              <em>Panfactum Stack</em>
-              {' '}
-              is an integrated set of OpenTofu (Terraform) modules and local tooling aimed
-              at providing the best experience for building, deploying, and managing software on AWS
-              and Kubernetes.
-            </Balancer>
-          </p>
-          <LinkButton
-            href={'/stack/features'}
-            color={'blue'}
-          >
-            See the full feature list
-          </LinkButton>
+      <div
+        className="px-8 py-6 sm:py-12"
+      >
+        <div
+          className="max-w-[1280px] mx-auto text-center bg-neutral border-gray-dark border-solid border-4 rounded-xl mb-6 px-6 py-6 flex flex-wrap lg:flex-nowrap items-center gap-5"
+          style={{
+            background: `radial-gradient(ellipse, ${colors.neutral}99 70%, ${colors.primary}FF 300%)`
+          }}
+        >
+          <span className="hidden lg:inline">
+            <Gears/>
+          </span>
+          <span className="lg:hidden mx-auto">
+            <Gears3/>
+          </span>
+          <div className="flex flex-col gap-4 items-center">
+
+            <h1 className="font-semibold text-3xl sm:text-4xl">
+              The Stack
+            </h1>
+            <p className="text-lg sm:text-xl">
+              <Balancer>
+                The
+                {' '}
+                <em>Panfactum Stack</em>
+                {' '}
+                is an integrated set of OpenTofu (Terraform) modules and local tooling aimed
+                at providing the best experience for building, deploying, and managing software on AWS
+                and Kubernetes.
+              </Balancer>
+            </p>
+            <LinkButton
+              href={'/stack/features'}
+              color={'blue'}
+            >
+              See the full feature list
+            </LinkButton>
+          </div>
+          <span className="hidden lg:inline">
+            <Gears2/>
+          </span>
         </div>
         <div className="max-w-[1280px] mx-auto flex gap-6 sm:gap-10 flex-wrap justify-center">
           <Callout

@@ -1,11 +1,10 @@
 import { clsx } from 'clsx'
 import type { MDXComponents } from 'mdx/types'
 import Link from 'next/link'
-import type { ReactElement, ReactNode, Ref } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 import { currentPanfactumVersion, discordServerLink } from '@/app/vars'
 import CopyHeader from '@/components/markdown/CopyHeader'
-import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
 
 import { roboto } from './app/font'
@@ -111,16 +110,32 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
         {children}
       </h4>
     ),
-    a: ({ children, href, className, ref, ...props }) => (
-      <Link
-        href={replaceCodeVariables(href || '')}
-        className={clsx('inline markdown', className)}
-        ref={ref as Ref<HTMLAnchorElement> | undefined}
-        {...props}
-      >
-        {children}
-      </Link>
-    ),
+    a: ({ children, href, className, ref, ...props }) => {
+      // Inline scrolling to scroll anchors does not work properly with the Next Link component
+      if (typeof href === 'string' && href.startsWith('#')) {
+        return (
+          <a
+            href={replaceCodeVariables(href || '')}
+            className={clsx('inline markdown', className)}
+            ref={ref as Ref<HTMLAnchorElement> | undefined}
+            {...props}
+          >
+            {children}
+          </a>
+        )
+      } else {
+        return (
+          <Link
+            href={replaceCodeVariables(href || '')}
+            className={clsx('inline markdown', className)}
+            ref={ref as Ref<HTMLAnchorElement> | undefined}
+            {...props}
+          >
+            {children}
+          </Link>
+        )
+      }
+    },
     code: ({ children, ...props }) => {
       let actualChildren = children
 
@@ -189,9 +204,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
           className="footnote inline-flex align-top"
           {...props}
         >
-          <DefaultTooltipLazy title={'Click for footnote'}>
-            {children as ReactElement}
-          </DefaultTooltipLazy>
+          {children}
         </span>
       )
     },

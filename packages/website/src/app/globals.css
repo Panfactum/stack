@@ -337,7 +337,7 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
 
     /* Need to set this in order to allow setting scroll-margin-top */
     html {
-        overflow:scroll;
+        overflow-y: scroll;
     }
 
     /* Set some global styles to all elements for consistency */
