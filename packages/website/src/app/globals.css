@@ -403,6 +403,11 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
         @apply bg-neutral text-sm;
         display: inline;
     }
+
+    /* The default bold was too blocky */
+    b {
+        font-weight: 600;
+    }
 }
 
 .MuiAlert-message code {

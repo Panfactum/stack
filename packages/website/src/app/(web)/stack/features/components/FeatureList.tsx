@@ -1,5 +1,4 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import type {
   AccordionDetailsProps,
   AccordionProps,
@@ -41,7 +40,7 @@ function CustomAccordionSummary (props: AccordionSummaryProps) {
   return (
     <AccordionSummary
       expandIcon={<ExpandMoreIcon className="text-white"/>}
-      className="bg-primary font-medium text-white text-lg sm:text-xl"
+      className="bg-primary font-normal text-white text-lg sm:text-xl"
       {...props}
     />
   )
@@ -72,12 +71,16 @@ export default function FeatureList (props: FeatureListProps) {
     <CustomAccordion>
       <CustomAccordionSummary>
         <div className="flex items-center gap-4">
-          {title}
-          {helpText && (
-            <DefaultTooltipLazy title={helpText}>
-              <HelpOutlineIcon/>
-            </DefaultTooltipLazy>
-          )}
+
+          {helpText === undefined
+            ? title
+            : (
+              <DefaultTooltipLazy title={helpText}>
+                <span className="underline decoration-dotted decoration-white decoration-2 underline-offset-4">
+                  {title}
+                </span>
+              </DefaultTooltipLazy>
+            )}
         </div>
 
       </CustomAccordionSummary>
@@ -90,13 +93,15 @@ export default function FeatureList (props: FeatureListProps) {
             >
               <div className="font-medium sm:text-lg">
                 <Balancer>
-                  {title}
-                  {' '}
-                  {description && (
-                    <DefaultTooltipLazy title={description}>
-                      <HelpOutlineIcon className="inline relative top-[6px]"/>
-                    </DefaultTooltipLazy>
-                  )}
+                  {description === undefined
+                    ? title
+                    : (
+                      <DefaultTooltipLazy title={description}>
+                        <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                          {title}
+                        </span>
+                      </DefaultTooltipLazy>
+                    )}
                 </Balancer>
 
               </div>

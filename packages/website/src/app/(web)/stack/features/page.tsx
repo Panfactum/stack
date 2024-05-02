@@ -7,9 +7,9 @@ import StatusChip from '@/app/(web)/stack/features/components/StatusChip'
 export default function Page () {
   return (
     <div className="flex flex-col w-full max-w-5xl mx-auto py-10 min-h-[90vh] px-4">
-      <h2 className="w-full text-3xl mb-3 text-center">
-        Features
-      </h2>
+      <h1 className="w-full text-3xl sm:text-5xl mb-3 text-center">
+        Panfactum Stack Features
+      </h1>
       <p className="w-full mb-3 text-center italic">
         <Balancer>Feature statuses represent the state as of the last edge release</Balancer>
       </p>

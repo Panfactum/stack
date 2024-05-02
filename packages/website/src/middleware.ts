@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server'
 
 export function middleware (request: NextRequest) {
   const cspHeader = `
-    default-src 'self' https://pagesense-collect.zoho.com https://cdn.pagesense.io;
-    script-src 'self' 'unsafe-inline' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://static.zohocdn.com ${process.env.NODE_ENV === 'production' ? '' : '\'unsafe-eval\''};
+    default-src 'self' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://crm.zoho.com https://crm.zohopublic.com;
+    script-src 'self' 'unsafe-inline' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://static.zohocdn.com https://crm.zohopublic.com ${process.env.NODE_ENV === 'production' ? '' : '\'unsafe-eval\''};
     style-src 'self' 'unsafe-inline';
-    img-src 'self' https://pagesense-collect.zoho.com blob: data:;
+    img-src 'self' https://pagesense-collect.zoho.com https://crm.zohopublic.com blob: data:;
     font-src 'self' https:;
     object-src 'none';
     base-uri 'self';
-    form-action 'self';
+    form-action 'self' https://crm.zoho.com;
     frame-ancestors 'none';
     upgrade-insecure-requests;
 `

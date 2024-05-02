@@ -18,7 +18,7 @@ function LinkButton (props: {href: string, children: string | ReactElement, size
   return (
     <Link
       href={href}
-      className={`${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-semibold w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center text-center`}
+      className={`${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-medium w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center text-center`}
     >
       {children}
     </Link>
@@ -42,7 +42,7 @@ function Callout (props: CalloutProps) {
       }}
     >
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl sm:text-2xl">
+        <h2 className="text-xl sm:text-2xl font-medium">
           <PrettyBalancer>
             {title}
           </PrettyBalancer>
@@ -81,7 +81,7 @@ function Pillar (props: PillarProps) {
       className="flex text-black items-end gap-8 px-4 py-2 sm:py-4 bg-gray-dark rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 hover:cursor-pointer basis-[90%] sm:basis-[40%]"
     >
       {icon}
-      <div className="text-lg sm:text-xl text font-semibold">
+      <div className="text-lg sm:text-xl text font-medium">
         {title}
       </div>
     </Link>
@@ -123,10 +123,10 @@ export default function Page () {
             width={120}
             height={120}
           />
-          <h1 className="text-4xl sm:text-7xl font-bold">
+          <h1 className="text-4xl sm:text-7xl font-semibold">
             Panfactum
           </h1>
-          <div className="text-xl sm:text-3xl font-semibold flex flex-col items-center py-2">
+          <div className="text-xl sm:text-3xl font-medium flex flex-col items-center py-2">
             <TextSlider
               items={['Cloud Native', 'Infrastructure-as-Code', 'Open', 'Self-hosted', 'Production-hardened', 'Extensible']}
             />
@@ -188,12 +188,21 @@ export default function Page () {
                 and Kubernetes.
               </Balancer>
             </p>
-            <LinkButton
-              href={'/stack/features'}
-              color={'blue'}
-            >
-              See the full feature list
-            </LinkButton>
+            <div className="flex gap-4 flex-wrap justify-center">
+              <LinkButton
+                href={'/stack/features'}
+                color={'blue'}
+              >
+                Features
+              </LinkButton>
+              <LinkButton
+                href={'/stack/pricing'}
+                color='grey'
+              >
+                Pricing
+              </LinkButton>
+            </div>
+
           </div>
           <span className="hidden lg:inline">
             <Gears2/>
@@ -347,24 +356,18 @@ export default function Page () {
           background: `radial-gradient(circle, ${colors.neutral}99 70%, ${colors.primary}FF 300%)`
         }}
       >
-        <h2 className="text-3xl sm:text-4xl text-center w-full">
-          <Balancer
-            ratio={0.99}
-            preferNative={false}
-          >
+        <h2 className="text-3xl sm:text-4xl text-center w-full font-semibold">
+          <Balancer>
             Benchmark your Platform Engineering Practice
           </Balancer>
         </h2>
         <div className="max-w-4xl mx-auto flex flex-col gap-6 items-center">
 
-          <h3 className="text-lg sm:text-xl font-medium text-center w-full">
-            <Balancer
-              ratio={0.99}
-              preferNative={false}
-            >
+          <h3 className="text-lg sm:text-xl font-normal text-center w-full">
+            <PrettyBalancer>
               The Panfactum framework measures platform engineering effectiveness with 250+ measures across eight core
               pillars.
-            </Balancer>
+            </PrettyBalancer>
           </h3>
 
           <div className="flex flex-wrap gap-4 justify-center">
@@ -471,7 +474,7 @@ export default function Page () {
 
       <div className="px-8 py-8 md:py-16 gap-4">
         <div className="flex flex-col max-w-6xl mx-auto gap-8 items-center">
-          <h2 className="text-3xl sm:text-4xl text-center w-full">
+          <h2 className="text-3xl sm:text-4xl text-center w-full font-semibold">
             Partner Network
           </h2>
           <div className="flex flex-wrap justify-center gap-10">

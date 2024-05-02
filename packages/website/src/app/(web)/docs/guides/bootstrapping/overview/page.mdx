@@ -19,25 +19,15 @@ with the Panfactum stack in your organization. This includes:
 * Establishing your initial role-based access controls
 
 * Deploying production-ready Kubernetes clusters on [AWS EKS](https://aws.amazon.com/eks/) that include the following capabilities:
-
   * [Cilium](https://docs.cilium.io/en/stable/) for advanced firewall capabilities
-
   * The [Linkerd](https://linkerd.io/) service mesh for encrypting network traffic
-
   * [Cert-manager](https://cert-manager.io/docs/) to handle public and private X.509 infrastructure
-
   * Inbound traffic control using the [Ingress NGINX Controller](https://kubernetes.github.io/ingress-nginx/)
-
   * Dynamic credentialing using [Vault](https://www.vaultproject.io/)
-
   * Cluster autoscaling using [Karpenter](https://karpenter.sh/)
-
   * Resource right-sizing using the [Vertical Pod Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
-
   * Database modules for running [Redis](https://redis.io/) and [PostgreSQL](https://www.postgresql.org/)
-
   * [Velero](https://velero.io/) for automated end-to-end backups of the cluster and all containing data
-
   * And much more!
 
 ## Time Commitment
@@ -51,18 +41,25 @@ with the Panfactum stack in your organization. This includes:
 ## Prerequisites
 
 * A credit card that you can use to pay for the AWS infrastructure. Expect to spend at minimum \$150 / month / Kubernetes cluster.
+
 * This guide does **not** assume that you have any existing AWS infrastructure. However, in many
   circumstances you may already have an AWS organization. If you do, please take note:
+
   * You do **not** need a new [AWS organization](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html).
     In fact, it is usually easier to reuse your existing one.
+
   * You will need [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to the [management account](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_getting-started_concepts.html) of your existing AWS organization. The
     management account is used to provision new accounts in your organization and to set up organization-level settings such as AWS SSO.
+
   * While it is possible to reuse existing AWS accounts, we recommend using net new accounts for this guide to avoid infrastructure
     conflicts.[^1]
+
   * If you do choose to reuse existing AWS accounts, you will need [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to
     those accounts.
+
 * A domain name selected that you want to use to access your infrastructure. It is preferable if you have **not**
   purchased it yet (but it is alright if you have).
+
 * This guide assumes that you will use AWS as your [domain name registrar](https://www.cloudflare.com/learning/dns/glossary/what-is-a-domain-name-registrar/). If you
   already have domain names with another registrar such as Cloudflare, GoDaddy, Namecheap, etc., you will need admin access to those accounts. This
   allows you to transfer those domain names into AWS which is required to complete this guide successfully.

@@ -5,7 +5,3 @@ repository might look like.
 
 It doesn't just contain relevant example files, but it actually defines the live infrastructure
 we use in our demos.
-
-## Components
-
-TODO
