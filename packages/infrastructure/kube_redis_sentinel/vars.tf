@@ -67,9 +67,3 @@ variable "minimum_memory_mb" {
     error_message = "Must specify at least 50Mb of memory"
   }
 }
-
-variable "unsafe_tls_disabled" {
-  description = "Whether to disable TLS encryption for the redis nodes. This flag is for internal use only and may be removed at any time."
-  type        = bool
-  default     = false
-}

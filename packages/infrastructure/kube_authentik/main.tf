@@ -163,10 +163,6 @@ module "redis" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
 
-  // This is required due to this bug:
-  // https://github.com/Panfactum/stack/issues/17
-  unsafe_tls_disabled = true
-
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

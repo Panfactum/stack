@@ -93,34 +93,6 @@ resource "kubernetes_secret" "superuser" {
   }
 }
 
-
-/***************************************
-* Redis
-***************************************/
-
-module "tls_cert" {
-  source      = "../kube_internal_cert"
-  common_name = random_id.id.hex
-  service_names = [
-    random_id.id.hex,
-    "${random_id.id.hex}-master",
-    "${random_id.id.hex}-headless"
-  ]
-  secret_name        = "${random_id.id.hex}-certs"
-  namespace          = var.namespace
-  include_localhost  = true
-  include_subdomains = true
-
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
-  environment      = var.environment
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-}
-
-
 /***************************************
 * Redis
 ***************************************/
@@ -165,13 +137,12 @@ resource "helm_release" "redis" {
         existingSecretPasswordKey = "password"
       }
 
+      networkPolicy = {
+        enabled = false
+      }
+
       tls = {
-        enabled         = !var.unsafe_tls_disabled
-        existingSecret  = module.tls_cert.secret_name
-        authClients     = false
-        certFilename    = "tls.crt"
-        certKeyFilename = "tls.key"
-        certCAFilename  = "ca.crt"
+        enabled = false // We rely on the service mesh for TLS
       }
 
       // Needed to communicate with the kube api for setting failover labels
@@ -189,17 +160,13 @@ resource "helm_release" "redis" {
         automountServiceAccountToken = true
 
         extraFlags = concat(
-          var.unsafe_tls_disabled ? [] : ["--tls-port", "6379", "--port", "0"],
           var.persistence_enabled ? [] : ["--appendonly", "no"]
         )
 
         podLabels = module.kube_labels.kube_labels
         podAnnotations = {
-
-          // This is temporarily disabled b/c of https://github.com/linkerd/linkerd2/issues/12382
-          #"config.linkerd.io/opaque-ports" = "6379,26379"
+          "config.linkerd.io/opaque-ports"                      = "6379,26379"
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-          "config.linkerd.io/skip-inbound-ports"                = "6379,26379"
         }
 
         // For whatever reason the kubelet has trouble
@@ -371,7 +338,7 @@ resource "vault_database_secret_backend_connection" "redis" {
   redis {
     host     = "${random_id.id.hex}-master.${var.namespace}"
     port     = 6379
-    tls      = !var.unsafe_tls_disabled
+    tls      = false
     password = random_password.superuser_password.result
     username = "default" // This is the main superuser
   }

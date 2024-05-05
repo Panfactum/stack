@@ -87,7 +87,7 @@ module "kube_labels_pooler" {
   pf_module        = var.pf_module
   region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, local.pooler_r_match_labels)
+  extra_tags       = merge(var.extra_tags, each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels)
 }
 
 module "constants" {
@@ -108,7 +108,7 @@ module "constants_pooler" {
   for_each = toset(["r", "rw"])
   source   = "../constants"
 
-  matching_labels = local.pooler_rw_match_labels
+  matching_labels = each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels
 
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit

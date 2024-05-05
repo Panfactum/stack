@@ -265,8 +265,9 @@ resource "helm_release" "linkerd" {
         image = {
           name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy"
         }
-        logFormat = "json"
-        logLevel  = var.log_level
+        nativeSidecar = true
+        logFormat     = "json"
+        logLevel      = var.log_level
         resources = {
 
           // We provide both a request and a limit
