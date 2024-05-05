@@ -130,6 +130,15 @@ resource "helm_release" "redis" {
         storageClass  = "ebs-standard"
       }
 
+      kubectl = {
+        requests = {
+          memory = "20Mi"
+        }
+        limits = {
+          memory = "30Mi"
+        }
+      }
+
       auth = {
         enabled                   = true
         sentinel                  = true

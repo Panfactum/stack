@@ -60,10 +60,10 @@ variable "vpa_enabled" {
 variable "minimum_memory_mb" {
   description = "The minimum memory in Mb to use for the redis nodes"
   type        = number
-  default     = 50
+  default     = 25
 
   validation {
-    condition     = var.minimum_memory_mb >= 50
-    error_message = "Must specify at least 50Mb of memory"
+    condition     = var.minimum_memory_mb >= 25
+    error_message = "Must specify at least 25Mb of memory"
   }
 }
