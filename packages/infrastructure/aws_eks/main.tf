@@ -24,26 +24,31 @@ data "aws_region" "region" {}
 module "tags" {
   source = "../aws_tags"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  extra_tags       = var.extra_tags
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "constants" {
   source = "../constants"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "node_settings" {
@@ -54,13 +59,15 @@ module "node_settings" {
   max_pods         = 25
   is_spot          = false
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 ##########################################################################
@@ -208,13 +215,15 @@ module "encrypt_key" {
   reader_iam_arns            = var.reader_iam_arns
   restricted_reader_iam_arns = var.restricted_reader_iam_arns
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 resource "aws_eks_addon" "coredns" {
@@ -236,13 +245,15 @@ module "aws_cloudwatch_log_group" {
   name        = "/aws/eks/${var.cluster_name}/cluster"
   description = "Collects logs for our AWS EKS Cluster"
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 ##########################################################################

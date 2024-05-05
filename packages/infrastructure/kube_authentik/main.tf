@@ -56,14 +56,17 @@ module "pull_through" {
 module "labels_server" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, local.server_matching_labels)
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.server_matching_labels)
 }
 
 module "constants_server" {
@@ -71,26 +74,33 @@ module "constants_server" {
 
   matching_labels = local.server_matching_labels
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.server_matching_labels)
 }
 
 module "labels_worker" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, local.worker_matching_labels)
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.worker_matching_labels)
 }
 
 module "constants_worker" {
@@ -98,13 +108,17 @@ module "constants_worker" {
 
   matching_labels = local.worker_matching_labels
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.worker_matching_labels)
 }
 
 module "namespace" {
@@ -112,13 +126,15 @@ module "namespace" {
 
   namespace = local.name
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -139,13 +155,15 @@ module "database" {
   pgbouncer_pool_mode         = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
   burstable_instances_enabled = true
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 
@@ -163,13 +181,15 @@ module "redis" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -627,13 +647,15 @@ module "ingress" {
   csp_style_src  = "'self' 'unsafe-inline'"
   csp_script_src = "'self' 'unsafe-inline'"
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 
   depends_on = [helm_release.authentik]
 }

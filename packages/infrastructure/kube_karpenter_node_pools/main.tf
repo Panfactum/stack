@@ -114,26 +114,31 @@ locals {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "constants" {
   source = "../constants"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "node_settings_burstable" {
@@ -145,13 +150,15 @@ module "node_settings_burstable" {
   max_pods         = 20
   is_spot          = true
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "node_settings_spot" {
@@ -163,13 +170,15 @@ module "node_settings_spot" {
   max_pods         = 40
   is_spot          = true
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "node_settings" {
@@ -181,13 +190,15 @@ module "node_settings" {
   max_pods         = 40
   is_spot          = false
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /********************************************************************************************************************

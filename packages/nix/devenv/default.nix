@@ -26,6 +26,7 @@ in {
     #########################################
     jq
     hcl2json
+    gawk
 
     #########################################
     # IaC Tools
@@ -35,7 +36,8 @@ in {
     (import ../mkDevShells/common/kubectl.nix)
     terraform-docs
     (customShellScript "generate-tf-docs")
-    (customShellScript "generate-common-tf")
+    (customShellScript "generate-tf-common")
+    (customShellScript "generate-tf")
 
     #########################################
     # Linters

@@ -38,26 +38,31 @@ module "pull_through" {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "constants" {
   source = "../constants"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -69,13 +74,15 @@ module "namespace" {
 
   namespace = local.name
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 
@@ -106,13 +113,15 @@ module "linkerd_identity_issuer" {
   duration     = "2160h0m0s"
   renew_before = "1680h0m0s"
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 ///////////////////////////////////////////
@@ -158,13 +167,15 @@ module "linkerd_policy_validator" {
   duration             = "2160h0m0s"
   renew_before         = "1680h0m0s"
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 
@@ -178,13 +189,15 @@ module "linkerd_proxy_injector" {
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 
@@ -197,13 +210,15 @@ module "linkerd_profile_validator" {
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 

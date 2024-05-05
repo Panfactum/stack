@@ -66,28 +66,34 @@ resource "random_id" "pooler_r_id" {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, local.cluster_match_labels)
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.cluster_match_labels)
 }
 
 module "kube_labels_pooler" {
   for_each = toset(["r", "rw"])
   source   = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels)
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels)
 }
 
 module "constants" {
@@ -95,13 +101,16 @@ module "constants" {
 
   matching_labels = local.cluster_match_labels
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "constants_pooler" {
@@ -110,13 +119,16 @@ module "constants_pooler" {
 
   matching_labels = each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -140,13 +152,15 @@ module "s3_bucket" {
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 data "aws_iam_policy_document" "s3_access" {
@@ -175,13 +189,15 @@ module "irsa" {
   // the service account for us, so we let it to the annotations
   annotate_service_account = false
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -206,12 +222,15 @@ module "server_certs" {
     "${local.cluster_name}-pooler-rw"
   ]
 
+  # generate: pass_common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
+  # end-generate
+
   extra_tags = merge(var.extra_tags, {
     "cnpg.io/reload" = ""
   })
@@ -229,12 +248,15 @@ module "client_certs" {
   usages      = ["client auth"]
   common_name = "streaming_replica"
 
+  # generate: pass_common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
-  pf_root_module   = var.pf_root_module
   environment      = var.environment
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
+  # end-generate
+
   extra_tags = merge(var.extra_tags, {
     "cnpg.io/reload" = ""
   })
@@ -666,10 +688,15 @@ module "pooler_certs" {
   usages      = ["client auth"]
   common_name = "cnpg_pooler_pgbouncer"
 
-  environment    = var.environment
-  pf_root_module = var.pf_root_module
-  region         = var.region
-  is_local       = var.is_local
+  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  # end-generate
+
   extra_tags = merge(var.extra_tags, {
     "cnpg.io/reload" = ""
   })

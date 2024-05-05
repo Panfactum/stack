@@ -368,12 +368,16 @@ locals {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
+  # end-generate
+
   extra_tags = merge(var.extra_tags, var.extra_pod_labels, {
     pod-template-id = random_id.pod_template_id.hex
   })
@@ -384,13 +388,19 @@ module "constants" {
 
   matching_labels = local.match_labels
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, var.extra_pod_labels, {
+    pod-template-id = random_id.pod_template_id.hex
+  })
 }
 
 resource "random_id" "pod_template_id" {

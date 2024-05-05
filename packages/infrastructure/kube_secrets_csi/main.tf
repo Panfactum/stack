@@ -30,26 +30,31 @@ module "pull_through" {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, { service = local.service })
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "constants" {
   source = "../constants"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -62,13 +67,15 @@ module "namespace" {
   namespace      = local.service
   linkerd_inject = false // TODO: ?
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************

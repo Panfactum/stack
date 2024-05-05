@@ -17,14 +17,16 @@ terraform {
 module "tags" {
   source = "../aws_tags"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  extra_tags       = var.extra_tags
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 data "aws_region" "current" {}
@@ -129,13 +131,15 @@ module "dnssec" {
 
   hosted_zones = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 
   depends_on = [time_sleep.wait_for_ns_update]
 }
@@ -171,12 +175,14 @@ module "iam_role" {
   hosted_zone_ids                           = [for zone, config in aws_route53_zone.zones : config.zone_id]
   additional_account_ids_with_record_access = var.additional_account_ids_with_record_access
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 

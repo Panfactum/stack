@@ -37,14 +37,16 @@ module "pull_through" {
 module "base_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 resource "random_id" "controller_id" {
@@ -55,14 +57,17 @@ resource "random_id" "controller_id" {
 module "controller_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, { id = random_id.controller_id.hex })
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.controller_id.hex })
 }
 
 resource "random_id" "webhook" {
@@ -73,14 +78,17 @@ resource "random_id" "webhook" {
 module "webhook_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, { id = random_id.webhook.hex })
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.webhook.hex })
 }
 
 resource "random_id" "ca_injector" {
@@ -91,14 +99,17 @@ resource "random_id" "ca_injector" {
 module "ca_injector_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, { id = random_id.ca_injector.hex })
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.ca_injector.hex })
 }
 
 module "constants_controller" {
@@ -106,13 +117,17 @@ module "constants_controller" {
 
   matching_labels = { id = random_id.controller_id.hex }
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.controller_id.hex })
 }
 
 module "constants_webhook" {
@@ -120,13 +135,17 @@ module "constants_webhook" {
 
   matching_labels = { id = random_id.webhook.hex }
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.webhook.hex })
 }
 
 module "constants_ca_injector" {
@@ -134,13 +153,17 @@ module "constants_ca_injector" {
 
   matching_labels = { id = random_id.ca_injector.hex }
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.ca_injector.hex })
 }
 
 /***************************************
@@ -152,13 +175,15 @@ module "namespace" {
 
   namespace = local.name
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -190,13 +215,16 @@ module "webhook_cert" {
   secret_name   = local.webhook_secret
   namespace     = local.namespace
 
+  # generate: pass_common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
-  extra_tags       = module.webhook_labels.kube_labels
+  # end-generate
+
+  extra_tags = module.webhook_labels.kube_labels
 }
 
 

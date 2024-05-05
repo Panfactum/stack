@@ -12,13 +12,16 @@ terraform {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
+  # end-generate
+
   extra_tags = merge(var.extra_tags, {
     service = var.service_name
   })
@@ -48,13 +51,19 @@ module "pod_template" {
   tolerations       = var.tolerations
   restart_policy    = var.restart_policy
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, {
+    service = var.service_name
+  })
 }
 
 resource "kubernetes_manifest" "deployment" {

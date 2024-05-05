@@ -23,14 +23,16 @@ data "aws_caller_identity" "current" {}
 module "tags" {
   source = "../aws_tags"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  extra_tags       = var.extra_tags
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 ##########################################################################
@@ -407,12 +409,15 @@ module "log_bucket" {
 
   access_policy = data.aws_iam_policy_document.log_delivery.json
 
-  environment    = var.environment
-  region         = var.region
-  pf_root_module = var.pf_root_module
-  pf_module      = var.pf_module
-  extra_tags     = var.extra_tags
-  is_local       = var.is_local
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 resource "aws_flow_log" "flow_logs" {

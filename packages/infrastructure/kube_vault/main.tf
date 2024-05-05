@@ -58,55 +58,69 @@ resource "random_id" "csi_id" {
 module "server_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, local.server_match)
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.server_match)
 }
 
 module "csi_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = merge(var.extra_tags, local.csi_match)
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.csi_match)
 }
 
 module "server_constants" {
   source = "../constants"
 
-  matching_labels  = local.server_match
+  matching_labels = local.server_match
+
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.server_match)
 }
 
 module "csi_constants" {
   source = "../constants"
 
-  matching_labels  = local.csi_match
+  matching_labels = local.csi_match
+
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.csi_match)
 }
 
 data "aws_region" "region" {}
@@ -121,13 +135,15 @@ module "namespace" {
 
   namespace = local.name
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -150,13 +166,15 @@ module "unseal_key" {
   reader_iam_arns            = concat([module.aws_permissions.role_arn], var.reader_iam_arns)
   restricted_reader_iam_arns = var.restricted_reader_iam_arns
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 
@@ -190,13 +208,15 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.sa.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -407,13 +427,15 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = false
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 
   depends_on = [helm_release.vault]
 }

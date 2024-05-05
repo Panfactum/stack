@@ -34,28 +34,31 @@ locals {
 module "kube_labels" {
   source = "../kube_labels"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
+  region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  region           = var.region
   is_local         = var.is_local
-  extra_tags = merge(var.extra_tags, {
-    service = local.name
-  })
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 module "constants" {
   source = "../constants"
 
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -67,13 +70,15 @@ module "namespace" {
 
   namespace = local.name
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -131,13 +136,15 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.runners.json
   ip_allow_list             = var.ip_allow_list
 
+  # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
-  pf_root_module   = var.pf_root_module
   region           = var.region
+  pf_root_module   = var.pf_root_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
+  # end-generate
 }
 
 /***************************************
@@ -167,25 +174,6 @@ resource "vault_kubernetes_auth_backend_role" "runners" {
   token_explicit_max_ttl           = 60 * 60 // Force it to expire after 1 hour
   token_policies                   = [vault_policy.runners.name]
   token_bound_cidrs                = ["10.0.0.0/16"] // Only allow this token to be used from inside the cluster
-}
-
-/***************************************
-* AAD Permissions
-***************************************/
-
-module "aad_permissions" {
-  source                    = "../kube_sa_auth_aad"
-  service_account           = kubernetes_service_account.runners.metadata[0].name
-  service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
-  aad_sp_object_owners      = var.aad_sp_object_owners
-  ip_allow_list             = var.ip_allow_list
-  service_principal_groups  = [var.aad_group]
-  msgraph_roles             = ["Policy.Read.All", "Policy.ReadWrite.ConditionalAccess", "Application.Read.All"]
-  environment               = var.environment
-  pf_root_module            = var.pf_root_module
-  region                    = var.region
-  is_local                  = var.is_local
 }
 
 /***************************************

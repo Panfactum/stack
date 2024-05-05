@@ -33,7 +33,6 @@
     "kube_cert_manager",
     "kube_cilium",
     "kube_cloudnative_pg",
-    "kube_cnpg_pdb_patcher",
     "kube_cronjob",
     "kube_deployment",
     "kube_descheduler",
