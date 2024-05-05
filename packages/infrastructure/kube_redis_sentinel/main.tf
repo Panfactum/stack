@@ -221,10 +221,10 @@ resource "helm_release" "redis" {
       }
 
       sentinel = {
-        enabled                  = true
-        automaticClusterRecovery = true
-        downAfterMilliseconds    = 1000 * 30
-        failoverTimeout          = 1000 * 60 * 3
+        enabled                 = true
+        automateClusterRecovery = true
+        downAfterMilliseconds   = 2000
+        failoverTimeout         = 1000 * 60 * 3
 
 
         service = {
