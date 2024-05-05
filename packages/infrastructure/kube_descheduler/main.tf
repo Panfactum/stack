@@ -158,6 +158,15 @@ resource "helm_release" "descheduler" {
                   ]
                 }
               },
+              {
+                name = "RemovePodsViolatingInterPodAntiAffinity"
+              },
+              {
+                name = "RemoveDuplicates"
+              },
+              {
+                name = "RemovePodsViolatingNodeTaints"
+              }
             ]
             plugins = {
               balance = {
