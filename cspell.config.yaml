@@ -131,7 +131,8 @@ words: [
   "OTEL",
   "syslogs",
   "HITRUST",
-  "exfiltrated"
+  "exfiltrated",
+  "distroless"
 ]
 languageSettings:
   - languageId: markdown,mdx
