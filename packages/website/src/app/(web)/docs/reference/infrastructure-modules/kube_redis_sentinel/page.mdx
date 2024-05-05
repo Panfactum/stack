@@ -38,9 +38,9 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_disruptions_enabled" /> [disruptions\_enabled](#input_disruptions_enabled)
+### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
 
-Description: Whether temporary disruptions are allowed for the redis cluster
+Description: Whether the database nodes can be scheduled on burstable instances
 
 Type: `bool`
 
@@ -93,6 +93,14 @@ Description: The number of redis replicas to deploy
 Type: `number`
 
 Default: `3`
+
+### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on spot instances
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_unsafe_tls_disabled" /> [unsafe\_tls\_disabled](#input_unsafe_tls_disabled)
 

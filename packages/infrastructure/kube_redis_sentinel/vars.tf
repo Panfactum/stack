@@ -32,11 +32,18 @@ variable "replica_count" {
   }
 }
 
-variable "disruptions_enabled" {
-  description = "Whether temporary disruptions are allowed for the redis cluster"
+variable "spot_instances_enabled" {
+  description = "Whether the database nodes can be scheduled on spot instances"
   type        = bool
   default     = false
 }
+
+variable "burstable_instances_enabled" {
+  description = "Whether the database nodes can be scheduled on burstable instances"
+  type        = bool
+  default     = false
+}
+
 
 variable "persistence_enabled" {
   description = "Whether the redis data will be stored on disk"

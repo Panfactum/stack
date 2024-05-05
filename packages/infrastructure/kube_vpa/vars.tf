@@ -4,6 +4,12 @@ variable "vertical_autoscaler_helm_version" {
   default     = "4.4.5"
 }
 
+variable "vertical_autoscaler_image_version" {
+  description = "The version of VPA image deploy"
+  type        = string
+  default     = "1.1.1"
+}
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool

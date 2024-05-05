@@ -211,7 +211,7 @@ resource "helm_release" "redis" {
 
         priorityClassName         = module.constants.database_priority_class_name
         affinity                  = module.constants.pod_anti_affinity_helm
-        tolerations               = var.disruptions_enabled ? module.constants.burstable_node_toleration_helm : []
+        tolerations               = var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : null
         topologySpreadConstraints = module.constants.topology_spread_zone_strict
 
         // Recommended by the helm chart docs
@@ -295,31 +295,6 @@ resource "kubernetes_manifest" "pdb" {
   }
   depends_on = [helm_release.redis]
 }
-
-// This will prevent the master from begin disrupted
-resource "kubernetes_manifest" "pdb_master" {
-  count = var.disruptions_enabled ? 0 : 1
-  manifest = {
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = random_id.id.hex
-      namespace = var.namespace
-      labels    = module.kube_labels.kube_labels
-    }
-    spec = {
-      selector = {
-        matchLabels = merge(
-          module.kube_labels.kube_labels,
-          { isMaster = "true" }
-        )
-      }
-      maxUnavailable = 0
-    }
-  }
-  depends_on = [helm_release.redis]
-}
-
 
 resource "kubernetes_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0

@@ -306,6 +306,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       instances             = var.pg_instances
       primaryUpdateStrategy = "unsupervised"
       primaryUpdateMethod   = "switchover"
+      enablePDB             = false // We perform our own PDB logic
 
       // This is required for Vault as vault uses
       // the superuser to dynamically provision the less-privileged users
@@ -382,6 +383,9 @@ resource "kubernetes_manifest" "postgres_cluster" {
         enablePodAntiAffinity = true
         topologyKey           = "kubernetes.io/hostname"
         podAntiAffinityType   = "required"
+
+        // Allow the clusters to be scheduled on particular node types
+        tolerations = var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : null
       }
 
       resources = {
@@ -466,13 +470,13 @@ resource "kubernetes_manifest" "scheduled_backup" {
 }
 
 # TODO: Re-enable once https://github.com/cloudnative-pg/cloudnative-pg/issues/2574 is addressed
-#resource "kubernetes_manifest" "vpa_dbs" {
+#resource "kubernetes_manifest" "vpa" {
 #  count = var.vpa_enabled ? 1: 0
 #  manifest = {
 #    apiVersion = "autoscaling.k8s.io/v1"
 #    kind  = "VerticalPodAutoscaler"
 #    metadata = {
-#      name = var.pg_cluster_name
+#      name = local.cluster_name
 #      namespace = var.pg_cluster_namespace
 #      labels = module.kube_labels.kube_labels
 #    }
@@ -480,7 +484,7 @@ resource "kubernetes_manifest" "scheduled_backup" {
 #      targetRef = {
 #        apiVersion = "postgresql.cnpg.io/v1"
 #        kind = "Cluster"
-#        name = var.pg_cluster_name
+#        name = local.cluster_name
 #      }
 #      updatePolicy = {
 #        updateMode = "Auto"
@@ -489,6 +493,28 @@ resource "kubernetes_manifest" "scheduled_backup" {
 #  }
 #  depends_on = [kubernetes_manifest.postgres_cluster]
 #}
+
+
+resource "kubernetes_manifest" "pdb" {
+  manifest = {
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      // Using the PDB name local.cluster-name will result in the operator deleting it
+      // as we have disabled the operator pdb functionality
+      name      = "${local.cluster_name}-pf-pdb"
+      namespace = var.pg_cluster_namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      selector = {
+        matchLabels = local.cluster_match_labels
+      }
+      maxUnavailable = 1
+    }
+  }
+  depends_on = [kubernetes_manifest.postgres_cluster]
+}
 
 /***************************************
 * Vault Authentication
@@ -752,46 +778,25 @@ resource "kubernetes_manifest" "connection_pooler" {
 # TODO: These will not work until
 # https://github.com/cloudnative-pg/cloudnative-pg/issues/4210
 # is resovled
-#resource "kubernetes_manifest" "vpa_pooler_rw" {
-#  count = var.vpa_enabled ? 1 : 0
+#resource "kubernetes_manifest" "vpa_pooler" {
+#  for_each = var.vpa_enabled ? toset(["r", "rw"]) : []
 #  manifest = {
 #    apiVersion = "autoscaling.k8s.io/v1"
 #    kind  = "VerticalPodAutoscaler"
 #    metadata = {
-#      name = "${local.cluster_name}-pooler-rw"
+#      name      = "${local.cluster_name}-pooler-${each.key}"
 #      namespace = var.pg_cluster_namespace
-#      labels = module.kube_labels_pooler_rw.kube_labels
+#      labels    = module.kube_labels_pooler[each.key].kube_labels
 #    }
 #    spec = {
 #      targetRef = {
 #        apiVersion = "postgresql.cnpg.io/v1"
 #        kind = "Pooler"
-#        name = "${local.cluster_name}-pooler-rw"
+#        name = "${local.cluster_name}-pooler-${each.key}"
 #      }
 #    }
 #  }
-#  depends_on = [kubernetes_manifest.connection_pooler_rw]
-#}
-#
-#resource "kubernetes_manifest" "vpa_pooler_rr" {
-#  count = var.vpa_enabled ? 1 : 0
-#  manifest = {
-#    apiVersion = "autoscaling.k8s.io/v1"
-#    kind  = "VerticalPodAutoscaler"
-#    metadata = {
-#      name = "${local.cluster_name}-pooler-r"
-#      namespace = var.pg_cluster_namespace
-#      labels = module.kube_labels_pooler_r.kube_labels
-#    }
-#    spec = {
-#      targetRef = {
-#        apiVersion = "postgresql.cnpg.io/v1"
-#        kind = "Pooler"
-#        name = "${local.cluster_name}-pooler-r"
-#      }
-#    }
-#  }
-#  depends_on = [kubernetes_manifest.connection_pooler_r]
+#  depends_on = [kubernetes_manifest.connection_pooler]
 #}
 
 resource "kubernetes_manifest" "pdb_pooler" {

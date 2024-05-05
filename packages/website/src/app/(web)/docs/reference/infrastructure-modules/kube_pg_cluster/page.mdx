@@ -68,6 +68,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on burstable instances
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_log_connections_enabled" /> [log\_connections\_enabled](#input_log_connections_enabled)
 
 Description: Whether to log each connection
@@ -127,6 +135,14 @@ Default: `"1.22.1"`
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on spot instances
 
 Type: `bool`
 

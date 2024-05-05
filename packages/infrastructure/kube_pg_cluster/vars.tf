@@ -48,6 +48,18 @@ variable "backups_enabled" {
   default     = true
 }
 
+variable "spot_instances_enabled" {
+  description = "Whether the database nodes can be scheduled on spot instances"
+  type        = bool
+  default     = false
+}
+
+variable "burstable_instances_enabled" {
+  description = "Whether the database nodes can be scheduled on burstable instances"
+  type        = bool
+  default     = false
+}
+
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool

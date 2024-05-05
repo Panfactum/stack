@@ -128,15 +128,16 @@ module "namespace" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name           = var.eks_cluster_name
-  pg_cluster_namespace       = local.namespace
-  pg_storage_gb              = 10
-  pg_memory_mb               = 1000
-  pg_cpu_millicores          = 250
-  pg_instances               = 2
-  aws_iam_ip_allow_list      = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-  pgbouncer_pool_mode        = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
+  eks_cluster_name            = var.eks_cluster_name
+  pg_cluster_namespace        = local.namespace
+  pg_storage_gb               = 10
+  pg_memory_mb                = 1000
+  pg_cpu_millicores           = 250
+  pg_instances                = 2
+  aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  pgbouncer_pool_mode         = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
+  burstable_instances_enabled = true
 
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
@@ -155,12 +156,12 @@ module "database" {
 module "redis" {
   source = "../kube_redis_sentinel"
 
-  namespace                  = local.namespace
-  replica_count              = 3
-  disruptions_enabled        = true
-  persistence_enabled        = false
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-  vpa_enabled                = var.vpa_enabled
+  namespace                   = local.namespace
+  replica_count               = 3
+  burstable_instances_enabled = true
+  persistence_enabled         = false
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  vpa_enabled                 = var.vpa_enabled
 
   // This is required due to this bug:
   // https://github.com/Panfactum/stack/issues/17

@@ -154,6 +154,7 @@ resource "helm_release" "vpa" {
 
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-recommender"
+          tag        = var.vertical_autoscaler_image_version
         }
 
         podAnnotations = {
@@ -199,6 +200,7 @@ resource "helm_release" "vpa" {
 
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-updater"
+          tag        = var.vertical_autoscaler_image_version
         }
 
         podAnnotations = {
@@ -230,6 +232,7 @@ resource "helm_release" "vpa" {
 
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-admission-controller"
+          tag        = var.vertical_autoscaler_image_version
         }
 
         annotations = {
