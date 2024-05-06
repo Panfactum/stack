@@ -1,7 +1,7 @@
 # Downtime Visibility
 
 Keeping your systems online is one of the largest responsibilities of platform engineering. Downtime not only
-means you aren't delivering value to your users at that moment, but it also undermines your organization's
+means you aren't delivering value to your users, but it also undermines your organization's
 public reputation, potentially causing users to reconsider their relationship with your service.
 
 However, preventing downtime doesn't start with deploying a highly-available Kubernetes cluster. It involves creating
@@ -37,8 +37,8 @@ We recommend the following exercise:
 3. Devise some standard way for evaluating whether those application flows are functional. There are many potential approaches
    which we will discuss in the next section.
 
-The key is to evaluate the question of downtime from the perspective of your users, not from the
-perspective of your infrastructure. Why is this critical?
+It is critical to evaluate the question of downtime from the perspective of your users, not from the
+perspective of your infrastructure. Why?
 
 * The business impact (\$\$\$) of downtime can only be measured in the context of what business value is being disrupted.
 
@@ -52,11 +52,11 @@ perspective of your infrastructure. Why is this critical?
 
 ### Continuous Testing
 
-The gold standard for measurement of downtime is continuous testing in production. In other words, you should
+The gold standard for measuring downtime is continuous testing in production. In other words, you should
 have an automated mechanism that simulates the application flows that you want to ensure are functional. These tests should regularly
 run against your production system. Test failures should alert the team to downtime in that application component.
 
-While this produces an extremely high signal-to-noise ratio, it also presents many challenges:
+While this produces an extremely high signal-to-noise ratio, it also presents challenges:
 
 * Designing the test runners themselves
 
@@ -86,7 +86,7 @@ While this is an easier technical lift than continuous testing, it suffers from 
   * Over-reporting: Consider the authentication scenario above. A `403` error might simply indicate that the user
     entered an incorrect password. However, an engineer might accidentally capture that as a downtime error.
 
-  * Under-reporting: Consider the scenario where the observability code fails to load due to a server error
+  * Under-reporting: Consider the scenario where the observability integration fails to load due to a server error
     that also impacts other systems. That impact would not be captured unless you explicitly designed around
     this failure scenario.
 

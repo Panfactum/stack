@@ -1,24 +1,24 @@
 # Key Performance Indicators (KPIs)
 
-Every organization should align on a handful of concrete metrics it will use to assess engineering effectiveness.
+Every organization should align on a handful of concrete metrics that it will use to assess engineering effectiveness.
 
-*There is no best set of metrics.* The importance lies in the act of alignment and measurement.
+*There is no best set of metrics.* The importance lies primary in the acts of alignment and measurement.
 
 Additionally, these metrics will likely *not* be solely attributable to the platform. That is
-okay. Your goal is to provide overall awareness and then provide options for improvements to the platform that would improve those
-metrics (not shoulder total responsibility for the overall numbers).
+okay. The goal is to provide overall awareness, not shoulder total responsibility for the overall numbers. That said,
+tracking KPIs will inevitably surface opportunities for platform improvement.
 
-We recommend choosing 5-10 metrics to focus on. Any less would have too little specificity. Any more would introduce
+We recommend choosing around ten metrics to focus on. Any less would have too little specificity. Any more would introduce
 too much measurement overhead.
 
 You should set aside time to review the metrics with your engineering leadership team at least once a quarter.
 
-Below are the metrics that we recommend as a starting point:
+Below are some metrics that we recommend as a starting point:
 
 ## Change failure rate (CFR)
 
 Typically, organizations will have some way of tracking work via tickets / cards / issues. In this system,
-there is usually a distinction between bugs / problem tickets and feature / enhancement tickets.
+there is usually a distinction between bug / problem tickets and feature / enhancement tickets.
 
 This metrics captures the ratio:
 
@@ -47,16 +47,16 @@ will provide a sufficient set.
 
 ## Mean time to respond (MTTR)
 
-For bugs that make it to production, MTTR measures:
+As a counterpart to MTTD, we recommend tracking MTTR:
 
 $$
 \text{time}_{resolved} - \text{time}_{detected}
 $$
 
-As the counterpart to MTTD, MTTR captures how effective your organization is at fixing issues that make it to
-production. Usually this is easier to measure as it can be computed as the time between when a bug ticket is opened and when it is closed.
+MTTR captures your organization's effectiveness in fixing issues that make it to
+production. Usually this is easier to measure than MTTD as it can be computed as the time between when a bug ticket is opened and when it is closed.
 
-As many organizations triage bugs into different severity levels with different resolution SLAs, it is usually best
+Since many organizations triage bugs into different severity levels with different resolution SLAs, it is usually best
 to compute this metric independently for each severity level.
 
 ## Error Rates
@@ -77,7 +77,7 @@ Note that you should *not* measure the error counts directly. No matter how many
 generates, it should only be counted as failed a single time. [^2]
 
 [^2]: Why? Consider one system that has 100x the raw error count as another but also 10% of the error rate. Which system is preferred?
-    The system with the lower error rate would be preferable as a greater proportion of actions complete successfully.
+    The system with the lower error _rate_ would be preferable as a greater proportion of actions complete successfully.
 
 While an overall error rate is useful, it is best to provide error rates per subsystem to help pinpoint
 areas of concern. Your observability platform should be capable of collecting and displaying this information
@@ -91,7 +91,7 @@ be the only performance metric your organization ought to care about. [^3]
 [^3]: At larger scales, you might also be concerned about efficiency, but we address that in the infrastructure
     and tooling costs KPIs.
 
-However, what is an *acceptable* latency is extremely context specific. For a user-interaction to complete, it could
+However, the specific latency target will be context specific. For a user-interaction to complete, it could
 be 100ms. For a data pipeline, it could be 24 hours.
 
 As a result, we recommend setting performance targets for different subsystems. For example,
@@ -106,6 +106,9 @@ $$
 This can easily roll up to a global metric. It can also be used to directly compare the performance of different
 subsystems for the purpose of determining which systems need intervention. Again, your observability platform should be capable
 of collecting and displaying this information with relative ease.
+
+System latency will have tremendous impact on your organization's user satisfaction and conversion rates. For
+more information, see the [performance pillar.](/docs/framework/pillars/performance)
 
 ## Recovery time objective (RTO)
 
@@ -145,6 +148,9 @@ $$
 The start time is typically when a ticket is moved to an "in progress" category meaning a developer has started
 working on it. The released time is when the code has been deployed to production.
 
+A high development latency means your organization has too much work-in-progress and struggles to deploy changes rapidly
+and iteratively.
+
 ## Infrastructure and Tooling Costs
 
 For most software development organizations, staffing costs will significantly exceed infrastructure and tooling costs.
@@ -154,7 +160,7 @@ that reductions in infrastructure spend can result in enough budget bandwidth fo
 This is straightforward (if tedious) to measure, but we recommend checking into these aggregate numbers at least once
 per quarter and dedicating a couple of hours to assessing if there are any easy, high ROI wins.
 
-Additionally, we recommend breaking out costs into two buckets:
+Additionally, we recommend dividing costs into two buckets:
 
 * Costs that scale with number of developers
 * Costs that scale with number of users
