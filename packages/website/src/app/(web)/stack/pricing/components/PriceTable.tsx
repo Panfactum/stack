@@ -116,10 +116,10 @@ function PriceTableRow (props: PriceTableRowProps) {
 
 export default function PriceTable () {
   return (
-    <table className="border-collapse text-base lg:text-lg table-fixed min-w-[990px]">
+    <table className="border-collapse text-base lg:text-lg table-fixed min-w-[850px] lg:min-w-[990px]">
       <thead>
         <tr>
-          <th className="invisible w-[10em]">Feature</th>
+          <th className="invisible w-[11em] w-[10em]">Feature</th>
           <PriceTableColHeader>Community</PriceTableColHeader>
           <PriceTableColHeader>Startup</PriceTableColHeader>
           <PriceTableColHeader>Enterprise</PriceTableColHeader>

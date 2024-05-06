@@ -38,7 +38,7 @@ function CustomAccordionSummary (props: AccordionSummaryProps) {
   return (
     <AccordionSummary
       expandIcon={<ExpandMoreIcon className="text-white"/>}
-      className="bg-primary text-white text-lg sm:text-xl font-normal"
+      className="bg-primary text-white text-base sm:text-xl font-normal"
       {...props}
     />
   )
@@ -78,7 +78,7 @@ export default function FAQ (props: FAQProps) {
         {answerSections.map((answer, i) => (
           <p
             key={i}
-            className="py-2 text-lg"
+            className="py-2 text-sm sm:text-lg"
           >
             <PrettyBalancer>
               {answer}

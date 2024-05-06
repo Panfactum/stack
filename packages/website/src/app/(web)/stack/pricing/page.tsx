@@ -29,7 +29,7 @@ export default function Page () {
       <div className="overflow-x-auto w-full py-2">
         <PriceTable/>
       </div>
-      <p className="w-full mb-3 italic">
+      <p className="text-sm lg:text-base w-full mb-3 italic">
         Licenses are provided only to end-users of the Panfactum stack.
         Individual licenses
         {' '}
@@ -49,7 +49,7 @@ export default function Page () {
           <div className="flex flex-col">
             <h3 className="text-xl font-medium tracking-wide">Annual Payment</h3>
             <PrettyBalancer>
-              <p>
+              <p className="text-sm lg:text-base">
                 <b>15% off</b>
                 {' '}
                 for customers who pay annually.
@@ -57,13 +57,13 @@ export default function Page () {
             </PrettyBalancer>
 
           </div>
-          <div>
+          <div className="text-sm lg:text-base">
             <em>Does not include one-time services.</em>
           </div>
         </div>
         <div className="flex flex-col basis-[100%] sm:basis-[30%] bg-neutral rounded-xl p-3">
           <h3 className="text-xl font-medium tracking-wide">Panfactum Partners</h3>
-          <p>
+          <p className="text-sm lg:text-base">
             Up to
             {' '}
             <b>50% off</b>
@@ -75,14 +75,14 @@ export default function Page () {
           <div className="flex flex-col">
             <h3 className="text-xl font-medium tracking-wide">Non-profits</h3>
             <PrettyBalancer>
-              <p>
+              <p className="text-sm lg:text-base">
                 <b>50% off</b>
                 {' '}
                 for registered non-profit organizations.
               </p>
             </PrettyBalancer>
           </div>
-          <div>
+          <div className="text-sm lg:text-base">
             <em>Does not include one-time services.</em>
           </div>
         </div>
@@ -93,17 +93,30 @@ export default function Page () {
       <FAQ
         title={'Do you offer trials?'}
         answerSections={[
-          'Any organization of any size is licensed to use software included the community plan to create proofs-of-concept free of charge and without needing to register with Panfactum.',
+          'Yes! Any organization of any size is licensed to use software included the community plan to create proofs-of-concept free of charge and without needing to register with Panfactum.',
           <>
             A
             {' '}
             <em>proof-of-concept</em>
             {' '}
             is a deployment of Panfactum infrastructure modules used to inform a purchasing decision. Proof-of-concept
-            infrastructure may only be run continuously for
+            infrastructure may be run continuously for up to
             {' '}
-            <b>30 days.</b>
+            <b>90 days.</b>
+          </>,
+          <>
+            We also offer 90-day trials of the stable releases.
+            {' '}
+            <Link
+              href={'/stack/pricing/contact'}
+              className="text-primary underline hover:cursor-pointer"
+            >
+              Contact us
+            </Link>
+            {' '}
+            to request a license key.
           </>
+
         ]}
       />
       <FAQ
@@ -115,8 +128,8 @@ export default function Page () {
             className="m-0"
           >
             <li>Develop in the open so anyone can inspect and / or extend the Stack</li>
-            <li>Avoid gating useful features behind cost-prohibitive licenses</li>
-            <li>Allow for complete flexibility of deployment scenarios without fear of unit-based pricing / limits</li>
+            <li>Avoid gating features useful to organizations of all sizes behind cost-prohibitive licenses</li>
+            <li>Allow for complete flexibility of deployment scenarios without fear of unit-based pricing / limits or active telemetry in deployed infrastructure</li>
           </ul>,
           'While we believe strongly that these goals are best for our users, they do limit what we can do to properly fund ongoing work at Panfactum.',
           'In other words, we still need a sustainable business model to ensure that we never have to change our license terms in the future once you are already running the Stack.',
@@ -126,7 +139,7 @@ export default function Page () {
       <FAQ
         title={'Does the Panfactum Stack require dedicated DevOps / platform engineers to operate?'}
         answerSections={[
-          'No. If you are familiar with building and shipping code, you can easily deploy and manage the Panfactum Stack.',
+          'No! If you are familiar with building and shipping code, you can easily deploy and manage the Panfactum Stack.',
           <>
             While the Stack contains functionality that would only normally be possible with dedicated infrastructure
             teams, we provide
@@ -357,12 +370,14 @@ export default function Page () {
       <h2 className="w-full text-3xl mt-16 mb-3 text-center">
         Ready to Deploy?
       </h2>
-      <p className="text-lg text-center mb-3">
-        The first step is to connect with us so we can issue you a license!
+      <p className="text-base sm:text-lg text-center mb-3">
+        <PrettyBalancer>
+          The first step is to connect with us so we can issue you a license!
+        </PrettyBalancer>
       </p>
       <Link
         href={'/stack/pricing/contact'}
-        className="bg-primary text-white py-1 px-4 rounded w-fit mx-auto text-2xl"
+        className="bg-primary text-white py-1 px-4 rounded w-fit mx-auto text-lg sm:text-2xl"
       >
         Connect
       </Link>
