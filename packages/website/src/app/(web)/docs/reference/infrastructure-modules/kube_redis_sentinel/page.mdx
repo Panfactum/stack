@@ -12,6 +12,16 @@ This is deployed in a single master, many replica configuration. Failover is han
 by [Redis Sentinel](https://redis.io/docs/management/sentinel/) which is also
 deployed by this module.
 
+## Extra Redis Configuration
+
+You can add extra Redis configuration flags via the `redis_flags` module variable.
+
+These flags are passed as commandline arguments to the redis servers. This ensures they
+will be of the highest precedence.
+
+For more information about passing flags through the commandline and available options,
+see [this documentation](https://redis.io/docs/latest/operate/oss_and_stack/management/config/).
+
 ## Providers
 
 The following providers are needed by this module:
@@ -85,6 +95,14 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_redis_flags" /> [redis\_flags](#input_redis_flags)
+
+Description: Extra configuration flags to pass to each redis node
+
+Type: `list(string)`
+
+Default: `[]`
 
 ### <a name="input_replica_count" /> [replica\_count](#input_replica_count)
 

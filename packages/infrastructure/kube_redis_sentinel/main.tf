@@ -176,7 +176,8 @@ resource "helm_release" "redis" {
         automountServiceAccountToken = true
 
         extraFlags = concat(
-          var.persistence_enabled ? [] : ["--appendonly", "no"]
+          var.persistence_enabled ? [] : ["--appendonly", "no"],
+          var.redis_flags
         )
 
         podLabels = module.kube_labels.kube_labels

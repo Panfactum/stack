@@ -32,6 +32,13 @@ variable "replica_count" {
   }
 }
 
+variable "redis_flags" {
+  description = "Extra configuration flags to pass to each redis node"
+  type        = list(string)
+  default     = []
+}
+
+
 variable "spot_instances_enabled" {
   description = "Whether the database nodes can be scheduled on spot instances"
   type        = bool
