@@ -132,7 +132,13 @@ words: [
   "syslogs",
   "HITRUST",
   "exfiltrated",
-  "distroless"
+  "distroless",
+  "OLTP",
+  "OLAP",
+  "discoverability",
+  "TTFB",
+  "autoscale",
+  "contentful"
 ]
 languageSettings:
   - languageId: markdown,mdx

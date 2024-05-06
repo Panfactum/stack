@@ -120,7 +120,7 @@ These are common goals to help organizations improve their performance on the ke
 of impact and optimal approach will depend on your organization's unique context.**
 
 | Category              | Code     | Goal                                                                                                                                     |
-| :-------------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+|:----------------------|:---------|:-----------------------------------------------------------------------------------------------------------------------------------------|
 | High Availability     | `R.A.1`  | Services always deployed with at least one online replica.                                                                               |
 |                       | `R.A.2`  | Service replicas never deployed to the same underlying host.                                                                             |
 |                       | `R.A.3`  | Service replicas are balanced evenly across failure domains.                                                                             |
@@ -142,6 +142,7 @@ of impact and optimal approach will depend on your organization's unique context
 | Automated Remediation | `R.R.1`  | Service updates are deployed in a [blue-green fashion.](https://en.wikipedia.org/wiki/Blue%E2%80%93green_deployment)                     |
 |                       | `R.R.2`  | Database schema changes include both upgrade and downgrade logic.                                                                        |
 |                       | `R.R.3`  | System updates include automatic rollback logic.                                                                                         |
+|                       | `R.R.4`  | Atomic system writes are wrapped in transactions that enable rollbacks in case of a partial failure.                                     |
 | Disaster Recovery     | `R.D.1`  | Databases backups can always be restored to any point in the previous hour.                                                              |
 |                       | `R.D.2`  | Databases backups contain deletion prevention controls.                                                                                  |
 |                       | `R.D.3`  | Databases backups are stored on systems with 99.999999999% (11 nines) durability guarantees.                                             |
