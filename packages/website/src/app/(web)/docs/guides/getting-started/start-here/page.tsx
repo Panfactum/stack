@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Getting Started'
+  title: 'Start Here'
 }
 
 function Option (props: {href: string, text:string}) {
