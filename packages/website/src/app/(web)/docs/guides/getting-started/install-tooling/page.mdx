@@ -16,23 +16,20 @@ Install the necessary tooling to begin working with the Panfactum stack.
 
 Please install these tools:
 
-| Tool      | Purpose                                                         | Installation Docs                                                                                                         |
-|-----------|-----------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `git`     | Primary version control tool                                    | [Docs](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)                                                     |
-| `git-lfs` | Git extension for working with large binary blobs               | [Docs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) |
-| `nix`     | Package management tool used to install all other dependencies  | [Docs](https://nixos.org/download.html)                                                                                   |
-| `direnv`  | Automatically loads tooling when entering the project directory | [Docs](https://direnv.net/docs/installation.html)                                                                         |
+| Tool      | Version   | Purpose                                                         | Installation Docs                                                                                                         |
+| --------- | --------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `git`     | `~> 2.40` | Primary version control tool                                    | [Docs](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)                                                     |
+| `git-lfs` | `~> 3.4`  | Git extension for working with large binary blobs               | [Docs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) |
+| `nix`     | `~> 2.18` | Package management tool used to install all other dependencies  | [Docs](https://github.com/DeterminateSystems/nix-installer)                                                               |
+| `direnv`  | `~> 2.32` | Automatically loads tooling when entering the project directory | [Docs](https://direnv.net/docs/installation.html)                                                                         |
 
 ### Installation Notes
 
-#### `nix`
-
-* You must enable [nix flakes](https://zero-to-nix.com/concepts/flakes) by following [these instructions](https://nixos.wiki/wiki/Flakes).
-  If you do not use `NixOS` or `home-manager`, we recommend adding the appropriate flags to your `~/.config/nix/nix.conf`.
-
-#### `direnv`
-
 * Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
+
+* If you choose **not** use the [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer) when installing nix,
+  you will need to ensure that you complete these [extra setup steps manually](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#installation-differences)
+  in order to enable functionality such as Nix flakes.
 
 ## Next Steps
 

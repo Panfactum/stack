@@ -4,4 +4,4 @@
 !config.yaml
 !connection_info
 !config.example.yaml
-!stack.lock
+!state.lock

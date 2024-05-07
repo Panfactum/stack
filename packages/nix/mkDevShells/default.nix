@@ -13,8 +13,12 @@
       customNixModule = module:
         import ./${dir}/${module}.nix { pkgs = panfactumResolvedPkgs; };
       customShellScript = name:
-        (panfactumResolvedPkgs.writeShellScriptBin name
-          (builtins.readFile ./${dir}/${name}.sh));
+        (panfactumResolvedPkgs.writeScriptBin name
+          (builtins.readFile ./${dir}/${name}.sh)).overrideAttrs (old: {
+            buildCommand = ''
+              ${old.buildCommand}
+               patchShebangs $out'';
+          });
     };
 
     # Devenv

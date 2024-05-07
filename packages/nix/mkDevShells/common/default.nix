@@ -48,6 +48,7 @@
     (import ./velero.nix) # backups of cluster state
     (util.customShellScript
       "pf-tunnel") # for connecting to private network resources through ssh bastion
+    (import ./k9s.nix) # kubernetes tui
 
     ####################################
     # Hashicorp Vault
@@ -73,20 +74,9 @@
     less # better pager
 
     ####################################
-    # Network Utilities
-    ####################################
-    curl # submit network requests from the CLI
-
-    ####################################
-    # Parsing Utilities
-    ####################################
-    jq # json
-    yq # yaml
-    fzf # fuzzy selector
-
-    ####################################
     # Bash Scripting Utilities
     ####################################
+    bash # shell
     parallel # run bash commands in parallel
     ripgrep # better alternative to grep
     rsync # file synchronization
@@ -94,6 +84,10 @@
     zx # General purpose data compression utility
     entr # Re-running scripts when files change
     bc # bash calculator
+    jq # json
+    yq # yaml
+    fzf # fuzzy selector
+    getopt # for parsing command-line arguments
 
     ####################################
     # AWS Utilities
@@ -137,6 +131,10 @@
     ####################################
     dig # dns lookup
     mtr # better traceroute alternative
+    openssh # ssh client and server
+    autossh # automatically restart tunnels
+    step-cli # working with certificates
+    curl # submit network requests from the CLI
 
     ####################################
     # Database Tools

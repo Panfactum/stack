@@ -28,7 +28,7 @@ usage() {
   echo "" >&2
   echo "<bastion>: The name of the bastion to use as listed in $PF_SSH_DIR/config.yaml." >&2
   echo "" >&2
-  echo "<remote-address>: The remote address to connect with. Must contain the hostname and the port." >&2
+  echo "<remote-address>: The remote address to connect with. Must contain the hostname and the port. (example.com:443)" >&2
   echo "" >&2
   echo "<local-port>: (Optional) The local port to bind to." >&2
   exit 1
@@ -72,8 +72,12 @@ while true; do
 done
 
 # Check for mandatory options
-if [[ -z $BASTION || -z $REMOTE_ADDRESS ]]; then
-  usage
+if [[ -z $BASTION ]]; then
+  echo "bastion is a required argument" >&2
+  exit 1
+elif [[ -z $REMOTE_ADDRESS ]]; then
+  echo "remote-address is a required argument" >&2
+  exit 1
 fi
 
 ####################################################################

@@ -33,7 +33,10 @@ Now that you have the tooling installed:
    direnv: export +AWS_CONFIG_FILE +AWS_SHARED_CREDENTIALS_FILE +C_INCLUDE_PATH +DEVENV_DOTFILE +DEVENV_PROFILE ...
    ```
 
-   This may take several minutes to complete as the remaining local development dependencies are installed.
+   This may take several minutes to complete as the remaining local development dependencies are installed. Fortunately, these steps are
+   cached and subsequent shell launches should be nearly instant. [^1]
+
+   [^1]: On MacOS, the initial installation can take up to 30 minutes as most utilities are recompiled from source.
 
 5. If everything completes successfully, you should have the following environment variables set (check via `printenv | grep DEVENV`):
 

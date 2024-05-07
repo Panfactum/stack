@@ -1,6 +1,6 @@
 {
   inputs = {
-    panfactum.url = "/home/jack/repos/panfactum/stack";
+    panfactum.url = "path:../..";
     pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
   };
 

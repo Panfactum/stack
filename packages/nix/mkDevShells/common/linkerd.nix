@@ -1,8 +1,8 @@
 let
   channel = "edge";
-  version = "24.3.3";
-  sha256 = "sha256-Kyt6VBeuUPy1i54iVcZt0mwp+gfCQx2xBMWtJh+NM3s=";
-  vendorHash = "sha256-D4lASQSJ7tbssnfUdSBuc+js2rI3ivjw3qovTSZLr60=";
+  version = "24.5.1";
+  sha256 = "sha256-Q+EvW45pClmyCifO72nl2XwqByMfZcVW9PLCHetDZdA=";
+  vendorHash = "sha256-sLLgTZN7Zvxkf9J1omh/YGMBUgAtvQD+nbhSuR7/PZg=";
   system = builtins.currentSystem;
   nixpkgsSrc = builtins.fetchGit {
     url = "https://github.com/NixOS/nixpkgs";
