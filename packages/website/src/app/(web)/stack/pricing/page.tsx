@@ -1,11 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
-import Balancer from 'react-wrap-balancer'
 
 import FAQ from '@/app/(web)/stack/pricing/components/FAQ'
 import PriceTable from '@/app/(web)/stack/pricing/components/PriceTable'
 import { discordServerLink } from '@/app/vars'
+import Balancer from '@/components/ui/Balancer'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
+
+export const metadata: Metadata = {
+  title: 'Pricing'
+}
 
 export default function Page () {
   return (

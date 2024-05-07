@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation'
 
 export default function Page () {
-  redirect('/docs/guides/getting-started/start-here')
+  permanentRedirect('/docs/guides/getting-started/start-here')
 }

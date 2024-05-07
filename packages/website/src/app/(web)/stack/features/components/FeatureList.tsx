@@ -9,9 +9,9 @@ import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import type { ReactElement } from 'react'
 import React from 'react'
-import Balancer from 'react-wrap-balancer'
 
 import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
+import Balancer from '@/components/ui/Balancer'
 
 import type { Status } from './StatusChip'
 import StatusChip from './StatusChip'

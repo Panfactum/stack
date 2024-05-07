@@ -7,10 +7,11 @@ import { memo } from 'react'
 interface NavbarLinkProps {
   href: string;
   text: string;
+  prefix: string;
 }
-export default memo(function NavbarLink ({ href, text }: NavbarLinkProps) {
+export default memo(function NavbarLink ({ href, text, prefix }: NavbarLinkProps) {
   const path = usePathname()
-  const active = path.startsWith(href)
+  const active = path.startsWith(prefix)
   return (
     <Link
       href={href}

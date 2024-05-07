@@ -1,7 +1,12 @@
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import Form from './Form'
+
+export const metadata: Metadata = {
+  title: 'License Request Form'
+}
 
 export default function Page () {
   return (

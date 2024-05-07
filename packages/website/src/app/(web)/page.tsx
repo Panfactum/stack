@@ -2,11 +2,11 @@ import { Agile, Eye, SecureWindow, Heart, FastUpCircle, Puzzle, MoneySquare, Cli
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactElement } from 'react'
-import Balancer from 'react-wrap-balancer'
 
 import Carousel from '@/app/(web)/Carosel/Carousel'
 import TextSlider from '@/app/(web)/TextSlider'
 import { discordServerLink } from '@/app/vars'
+import Balancer from '@/components/ui/Balancer'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
 
 import { Gears, Gears2, Gears3 } from './Gears'

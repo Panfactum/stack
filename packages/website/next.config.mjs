@@ -1,6 +1,7 @@
 import remarkGfm from 'remark-gfm'
 import remarkPrism from 'remark-prism'
 import remarkMath from 'remark-math';
+import customPlugin from './plugin.remark.mjs'
 import createMDX from '@next/mdx'
 import createBundleAnalyzer from '@next/bundle-analyzer'
 import rehypeKatex from "rehype-katex";
@@ -11,8 +12,8 @@ const withBundleAnalyzer = createBundleAnalyzer({
 const withMDX = createMDX({
   // Add markdown plugins here, as desired
   options: {
-    remarkPlugins: [remarkGfm, [remarkPrism, {transformInlineCode: false}], remarkMath],
-    rehypePlugins: [rehypeKatex],
+    remarkPlugins: [customPlugin, remarkGfm, [remarkPrism, {transformInlineCode: false}], remarkMath],
+    rehypePlugins: [rehypeKatex]
   },
 })
 

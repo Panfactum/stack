@@ -3,6 +3,7 @@
 
 const remarkConfig = {
     plugins: [
+        "remark-frontmatter", // Required, otherwise the frontmatter gets deleted
         "remark-preset-lint-consistent", // Check that markdown is consistent.
         "remark-preset-lint-recommended", // Few recommended rules.
         ["remark-lint-list-item-indent", "space"],

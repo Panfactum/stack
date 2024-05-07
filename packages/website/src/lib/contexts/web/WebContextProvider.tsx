@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { memo, useMemo, useState } from 'react'
+import { Provider as BalancerProvider } from 'react-wrap-balancer'
 
 import { SecondaryTabsVisibleContext } from '@/lib/contexts/web/SecondaryTabsVisible'
 
@@ -14,8 +15,10 @@ export default memo(function WebContextProvider ({ children }: {children: ReactN
   }), [secondaryTabsVisible, setSecondaryTabsVisible])
 
   return (
-    <SecondaryTabsVisibleContext.Provider value={secondaryTabsVisibleContextValue}>
-      {children}
-    </SecondaryTabsVisibleContext.Provider>
+    <BalancerProvider>
+      <SecondaryTabsVisibleContext.Provider value={secondaryTabsVisibleContextValue}>
+        {children}
+      </SecondaryTabsVisibleContext.Provider>
+    </BalancerProvider>
   )
 })

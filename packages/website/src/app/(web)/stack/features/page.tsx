@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import React from 'react'
-import Balancer from 'react-wrap-balancer'
 
 import FeatureList from '@/app/(web)/stack/features/components/FeatureList'
 import StatusChip from '@/app/(web)/stack/features/components/StatusChip'
+import Balancer from '@/components/ui/Balancer'
+
+export const metadata: Metadata = {
+  title: 'Features'
+}
 
 export default function Page () {
   return (

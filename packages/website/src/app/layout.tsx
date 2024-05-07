@@ -1,5 +1,6 @@
 import 'katex/dist/katex.min.css'
 import './globals.css'
+import type { Metadata } from 'next'
 import Script from 'next/script'
 import React, { type ReactNode } from 'react'
 
@@ -7,8 +8,11 @@ import ThemeRegistry from '@/components/ThemeRegistry'
 
 import { kanit } from './font'
 
-export const metadata = {
-  title: 'Panfactum',
+export const metadata: Metadata = {
+  title: {
+    default: 'Panfactum',
+    template: '%s | Panfactum'
+  },
   description: 'Cloud Native System for Platform Engineering'
 }
 

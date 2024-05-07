@@ -9,19 +9,23 @@ const Links = memo(() => {
   return (
     <>
       <NavbarLink
-        href="/stack"
+        href="/stack/features"
+        prefix="/stack"
         text="Stack"
       />
       <NavbarLink
-        href="/docs"
+        href="/docs/index"
+        prefix="/docs"
         text="Docs"
       />
       <NavbarLink
         href="/changelog"
+        prefix="/changelog"
         text="Changelog"
       />
       <NavbarLink
         href="/about"
+        prefix="/about"
         text="About"
       />
     </>
