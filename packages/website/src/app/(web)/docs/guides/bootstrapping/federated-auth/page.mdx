@@ -105,7 +105,7 @@ Let's deploy it now:
       opened in the prior section.
 
    4. Set `aws_scim_enabled` to `false` and omit `aws_scim_url` and `aws_scim_token` for now. Additionally, you may
-    omit reading in the secrets file via `sops_decrypt_file`.
+      omit reading in the secrets file via `sops_decrypt_file`.
 
    5. For `allowed_groups`, provide *all* the groups that you want to allow to access AWS (we will assign roles later).
 
@@ -208,7 +208,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 
 4. Copy the generated `config.example.yaml` file to `config.yaml`.
 
-5. Set up `config.yaml` according to [these reference docs](/docs/reference/aws/config-yaml).
+5. Set up `config.yaml` according to [these reference docs](/docs/reference/configuration/aws).
 
    1. We provide an example file [here.](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/.aws/config.yaml)
 

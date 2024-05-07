@@ -18,7 +18,6 @@ function dirs_are_equal() {
 
     # Compare the source file with the destination file
     if ! cmp -s "$src_file" "$dest_file"; then
-      echo "$src_file" "$dest_file"
       return 1
     fi
   done < <(find "$source_dir" -type f)
@@ -100,7 +99,9 @@ if [[ -z ${PF_KUBE_DIR} ]]; then
 elif ! dirs_are_equal "$files_dir"/files/kube "$(realpath "$DEVENV_ROOT/$PF_KUBE_DIR")"; then
   errors+="\033[33mKubernetes config files are out of date. Run pf-update-kube to update.\033[0m\n\n"
 elif [[ "$(pf-get-kube-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_KUBE_DIR/state.lock")" ]]; then
-  errors+="\033[33mKubernetes config files are out of date. Run pf-update-kube to update.\033[0m\n\n"
+  errors+="\033[33mKubernetes config files are out of date. A superuser must run 'pf-update-kube --build' to update.\033[0m\n\n"
+elif [[ "$(pf-get-kube-user-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_KUBE_DIR/state.user.lock")" ]]; then
+  errors+="\033[33mkubeconfig is out of date. Run pf-update-kube to update.\033[0m\n\n"
 fi
 
 #################################################

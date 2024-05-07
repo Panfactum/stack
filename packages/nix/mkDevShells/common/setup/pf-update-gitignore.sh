@@ -39,3 +39,5 @@ addIgnoreIfNeeded .devenv
 addIgnoreIfNeeded .direnv
 
 echo ".gitignore updated" 1>&2
+
+pf-check-repo-setup

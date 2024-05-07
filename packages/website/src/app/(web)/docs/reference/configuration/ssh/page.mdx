@@ -1,9 +1,11 @@
-# config.yaml
+# SSH Configuration Files
 
-This file instructs the `pf-update-ssh --build` command how to generate the bastion connecting settings
+## config.yaml
+
+This file instructs the `pf-update-ssh --build` command how to generate the bastion connection settings
 files (`known_hosts` and `connection_info`).
 
-## Format
+### Format
 
 YAML Schema
 
@@ -15,7 +17,7 @@ bastions = list(object({
 }))
 ```
 
-## bastions
+#### bastions
 
 The `bastions` key contains an array of objects:
 

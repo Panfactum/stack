@@ -1,3 +1,6 @@
+# Copy this file to `config.yaml`
+# `config.yaml` file should be committed to version control (automatically setup via .gitignore)
+
 # Lists all of your bastion hosts
 bastions:
   - name: "example-primary" # The name of this bastion host (will be referenced in other commands like pf-tunnel)

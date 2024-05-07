@@ -194,49 +194,76 @@ issues.
 
 ## Connect to the Cluster
 
+### Set up cluster\_info Metadata and CA Certs
+
+The Panfactum devenv comes with utilities that make connecting to your cluster a breeze.
+
+First, we want to save important cluster metadata into your repository so other users can easily access the information
+even if they do not have permissions to interact directly with the infrastructure modules.
+
+To download this metadata:
+
+1. To `$PF_KUBE_DIR` [^20], add a `config.yaml` file that looks like this:
+
+   [^20]: By default, this is set to `.kube` in the root of your repository.
+
+   ```yaml
+   clusters:
+     - module: "production/us-east-2/aws_eks"
+   ```
+
+   Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
+   terragrunt directory under `$PF_ENVIRONMENTS_DIR`.
+
+2. Replace `module` with the appropriate path for the cluster you just launched.
+
+3. Run `pf-update-kube --build` to dynamically generate a `cluster_info` file and download your cluster's CA certs.
+
+As you add additional clusters, you will need to update `config.yaml` and re-run `pf-update-kube --build`. More
+information about this file can be found [here](/docs/reference/configuration/kubernetes).
+
 ### Set up Kubeconfig
 
 All utilities in the kubernetes ecosystem rely on
 [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) files to configure
 their access to various Kubernetes clusters.
 
-In the Panfactum stack, that file is stored in your repo in the `$PF_KUBE_DIR` directory. [^9] By default, this is set
-to `.kube`. This should have been created when you ran `pf-update-kube` to resolve the warnings when you first
-installed the Panfactum devenv.
+In the Panfactum stack, that file is stored in your repo in the `$PF_KUBE_DIR` directory. [^9]
 
 [^9]: We store the config file in your repo and not in the typical location (`~/.kube/config`) so that it does not
     interfere with other projects you are working on.
 
-The Panfactum devenv comes with utilities that make connecting to your cluster a breeze.
+To generate your kubeconfig:
 
-To your `$PF_KUBE_DIR`, add a `config.user.yaml` file that looks like this: [^7]
+1. Add a `config.user.yaml` file that looks like this: [^7]
 
-[^7]: This file is specific to every user as different users will have different access levels to the various
-    clusters. Every user will need to set up their own `$PF_KUBE_DIR/config.user.yaml`. This file is not committed to version control.
+   [^7]: This file is specific to every user as different users will have different access levels to the various
+       clusters. Every user will need to set up their own `$PF_KUBE_DIR/config.user.yaml`. This file is not committed to version control.
 
-```yaml
-clusters:
-  - module: "production/us-east-2/aws_eks"
-    aws_profile: "production-superuser"
-```
+   ```yaml
+   clusters:
+     - name: "production-primary"
+       aws_profile: "production-superuser"
+   ```
 
-Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
-terragrunt directory under `$PF_ENVIRONMENTS_DIR` and `aws_profile` is the AWS profile you want to use to authenticate
-with the cluster (more on this later).
+2. Replace `name` with the name of the EKS cluster which can be found in `cluster_info`.
 
-Replace `module` with the appropriate path for the cluster you just launched. For now, use the `aws_profile` you
-are using for terragrunt in that environment.
+3. Replace `aws_profile` with the AWS profile you want to use to authenticate
+   with the cluster. For now, use the AWS profile that you used to deploy the `aws_eks` module for the cluster.
 
-Run `pf-update-kube` to dynamically build your kubeconfig file. [^8]
+4. Run `pf-update-kube` to generate your kubeconfig file.
 
-[^8]: This will create a kubeconfig file at `$PF_KUBE_DIR/config`. The `pf-update-kube` config
-    only updates this file to include the clusters defined in your `config.user.yaml` file. If desired, you can manually
-    add additional clusters to this file as well. This file will not be committed to version control as it is specific to every
-    user.
+Remember that you will need to update your `config.user.yaml` and re-run `pf-update-kube` as you add additional clusters. More
+information about this file can be found [here](/docs/reference/configuration/kubernetes).
+
+<MarkdownAlert severity="warning">
+  *Every* one of your users will need to set up their own `config.user.yaml` file, and we provide instructions
+  for them [here](/docs/guides/getting-started/connect-to-infrastructure).
+</MarkdownAlert>
 
 ### Verify Connection
 
-1. Run `kubectx` to list all of the clusters that were set up in the previous section. Selecting one will set your
+1. Run `kubectx` to list all the clusters that were set up in the previous section. Selecting one will set your
    Kubernetes [context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
    which defines which cluster your commandline tools like `kubectl` will target. Select one now.
 
@@ -278,7 +305,7 @@ to a single IaC paradigm, we are able to greatly simplify operations for users o
 
 In order to start using our kubernetes modules, we must first configure the
 [Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
-some additional [terragrunt variables](/docs/reference/terragrunt-variables).
+some additional [terragrunt variables](/docs/reference/configuration/terragrunt-variables).
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 

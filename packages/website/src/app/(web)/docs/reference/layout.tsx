@@ -9,36 +9,34 @@ const SIDENAV_SECTIONS = [
     path: '/releases'
   },
   {
-    text: 'Repo Environment Variables',
-    path: '/repo-variables'
-  },
-  {
-    text: '.env Environment Variables',
-    path: '/dotenv'
-  },
-  {
-    text: '.ssh Configuration',
-    path: '/ssh',
+    text: 'Configuration',
+    path: '/configuration',
     sub: [
       {
-        text: 'config.yaml',
-        path: '/config-yaml'
-      }
-    ]
-  },
-  {
-    text: '.aws Configuration',
-    path: '/aws',
-    sub: [
+        text: 'Devenv Variables',
+        path: '/repo-variables'
+      },
       {
-        text: 'config.yaml',
-        path: '/config-yaml'
+        text: '.env Variables',
+        path: '/dotenv'
+      },
+      {
+        text: 'Terragrunt Variables',
+        path: '/terragrunt-variables'
+      },
+      {
+        text: 'SSH Config Files',
+        path: '/ssh'
+      },
+      {
+        text: 'AWS Config Files',
+        path: '/aws'
+      },
+      {
+        text: 'K8s Config Files',
+        path: '/kubernetes'
       }
     ]
-  },
-  {
-    text: 'Terragrunt Variables',
-    path: '/terragrunt-variables'
   },
   {
     text: 'Infrastructure Modules',

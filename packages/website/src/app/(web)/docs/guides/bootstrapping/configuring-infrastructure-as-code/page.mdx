@@ -64,14 +64,14 @@ We extend that pattern with one more rule:
 This is a **critically important** concept. Again, **one** branch will define exactly what is deployed across
 **all** environments.
 
-Pick the branch you want to use and make sure it is set as the `PF_REPO_PRIMARY_BRANCH` (per the [docs](/docs/reference/repo-variables)).
+Pick the branch you want to use and make sure it is set as the `PF_REPO_PRIMARY_BRANCH` (per the [docs](/docs/reference/configuration/repo-variables)).
 
 ### Choose Environments Folder
 
 We store all configuration-as-code for all environment in a directory in the repo we canonically call
 the "environments folder" or "environments directory."
 
-Pick the folder you want to use and make sure it is set as the `PF_ENVIRONMENTS_DIR` (per the [docs](/docs/reference/repo-variables)).
+Pick the folder you want to use and make sure it is set as the `PF_ENVIRONMENTS_DIR` (per the [docs](/docs/reference/configuration/repo-variables)).
 
 ### Configure Environments Folder
 
@@ -97,7 +97,7 @@ A few rules about these files:
 
 * These files are optional, but you will use them to configure your providers and other behavior (described in detail later).
 
-* They can each contain *any and every key* found in this [reference document](/docs/reference/terragrunt-variables).
+* They can each contain *any and every key* found in this [reference document](/docs/reference/configuration/terragrunt-variables).
 
 * You should commit these files to version control.
 
@@ -167,7 +167,7 @@ Ultimately, your environments folder should closely resemble that of
 
 In order to begin deploying infrastructure modules, we must first configure terragrunt via our terragrunt variables
 which will be set in the `global.yaml`, `environment.yaml`, and `region.yaml` files
-(see [reference docs](http://localhost:3000/docs/reference/terragrunt-variables)).
+(see [reference docs](http://localhost:3000/docs/reference/configuration/terragrunt-variables)).
 
 ### Metadata
 

@@ -147,3 +147,5 @@ fi
 pf-get-aws-state-hash >"$DEVENV_ROOT/$PF_AWS_DIR/state.lock"
 
 echo "AWS config files in $PF_AWS_DIR were updated." 1>&2
+
+pf-check-repo-setup

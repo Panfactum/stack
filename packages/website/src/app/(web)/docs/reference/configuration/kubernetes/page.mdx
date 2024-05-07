@@ -1,0 +1,64 @@
+# Kubernetes Configuration Files
+
+## config.yaml
+
+[Example File](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/reference/.kube/config.yaml)
+
+This file instructs the `pf-update-kube --build` command how to generate the cluster connection info file (`cluster_info`).
+
+This command must be run by a superuser with root access to all clusters. This enables non-superusers to use
+`cluster_info` to setup their personal kubeconfig files without needing access to the infrastructure modules (via `pf-update-kube`).
+
+### config.yaml Format
+
+YAML Schema
+
+```hcl
+clusters = list(object({
+    module = string
+}))
+```
+
+The `clusters` key contains an array of objects:
+
+| Value    | Description                                                                                 | Example              |
+| -------- | ------------------------------------------------------------------------------------------- | -------------------- |
+| `module` | The path to the `aws_eks` module deployment relative to the `PF_ENVIRONMENTS_DIR` directory | `env/region/aws_eks` |
+
+## config.user.yaml
+
+[Example File](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/reference/.kube/config.user.yaml)
+
+This file instructs the `pf-update-kube` command how to generate a user-specific [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) file.
+
+This is required because each user will have different access levels to each cluster. Running `pf-kube-update` requires that the
+`cluster_info` file is set up (via `pf-update-kube --build`).
+
+### config.user.yaml Format
+
+YAML Schema
+
+```hcl
+clusters = list(object({
+    name = string
+    aws_profile = string
+}))
+```
+
+The `clusters` key contains an array of objects:
+
+| Value         | Description                                                                                                    | Example                |
+| ------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `name`        | The name of the cluster. The full list of available cluster names can be found in `$PF_KUBE_DIR/cluster_info`. | `production-primary`   |
+| `aws_profile` | The AWS profile to use to authenticate with the cluster. Must be a valid profile in `$PF_AWS_DIR/config`.      | `production-superuser` |
+
+## cluster\_info
+
+[Example File](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/reference/.kube/cluster_info)
+
+This is a space-delimited file with each line representing metadata for a particular cluster. The columns are:
+
+* cluster name
+* cluster region
+* cluster API server URL
+* md5 hash of the CA cert data for the API server

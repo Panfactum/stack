@@ -34,7 +34,7 @@ which can be very helpful for updating all the modules in a particular environme
 ### Local Deployments
 
 When working with modules locally, it can be helpful to override your organization's values in the [standard terragrunt
-configuration files.](/docs/reference/terragrunt-variables) For example, you may want to use a different provider configuration to pull in your specific
+configuration files.](/docs/reference/configuration/terragrunt-variables) For example, you may want to use a different provider configuration to pull in your specific
 AWS profile, or you may want to test a specific module version.
 
 Each of the standard files has `.user.yaml` counterparts that will override the normal file values:
@@ -111,7 +111,7 @@ inputs = {
 
 **Before you deploy a module**, you must setup your [OpenTofu (Terraform) providers](https://opentofu.org/docs/language/providers/).
 
-We provide ready-made configuration for many providers (see the [full list here](/docs/reference/terragrunt-variables)).
+We provide ready-made configuration for many providers (see the [full list here](/docs/reference/configuration/terragrunt-variables)).
 
 To enable a provider, add the provider under `providers` key of the module's `module.yaml`.
 
@@ -124,7 +124,7 @@ providers:
 ```
 
 Some providers require extra configuration variables. To view each provider's required
-configuration variables, see the [reference docs](/docs/reference/terragrunt-variables).
+configuration variables, see the [reference docs](/docs/reference/configuration/terragrunt-variables).
 
 Generally, you will want to configure a provider on an environment-wide or region-wide basis (i.e.,
 in the `environment.yaml` or `region.yaml` files).

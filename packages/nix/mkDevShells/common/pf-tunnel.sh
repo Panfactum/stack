@@ -84,7 +84,7 @@ fi
 # Step 2: Find the bastion address and port number
 ####################################################################
 
-read -r BASTION_DOMAIN BASTION_PORT <<<"$(grep -m 1 "$BASTION" "$CONNECTION_INFO_FILE" | awk '{print $2, $3}')"
+read -r BASTION_DOMAIN BASTION_PORT <<<"$(grep -m 1 "$BASTION " "$CONNECTION_INFO_FILE" | awk '{print $2, $3}')"
 
 if [[ -z $BASTION_DOMAIN || -z $BASTION_PORT ]]; then
   echo "Error: $BASTION not found in $CONNECTION_INFO_FILE. Ensure this name is correct or run pf-update-ssh to regenerate this file." >&2

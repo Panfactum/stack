@@ -47,7 +47,7 @@ function CustomAccordionSummary (props: AccordionSummaryProps) {
 function CustomAccordianDetails (props: AccordionDetailsProps) {
   return (
     <AccordionDetails
-      className="bg-neutral p-0 border-solid border-secondary border-x-[1px] border-b-[1px] px-4"
+      className="bg-neutral p-0 border-solid border-secondary border-x-[1px] border-b-[1px] px-4 py-2"
       {...props}
     />
   )

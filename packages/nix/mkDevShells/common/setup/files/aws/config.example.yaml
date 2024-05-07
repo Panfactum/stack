@@ -1,3 +1,6 @@
+# Copy this file to `config.yaml`
+# `config.yaml` file should be committed to version control (automatically setup via .gitignore)
+
 sso_start_url: https://example.awsapps.com/start # The AWS access-portal sign-in url
 sso_region: us-east-2 # The AWS sso region (found on the IAM identity center Dashboard page)
 default_aws_region: us-east-2 # The default region for configured aws profiles

@@ -96,3 +96,5 @@ fi
 pf-get-ssh-state-hash >"$DEVENV_ROOT/$PF_SSH_DIR/state.lock"
 
 echo "ssh config files in $PF_SSH_DIR were updated." 1>&2
+
+pf-check-repo-setup

@@ -1,0 +1,19 @@
+# Devenv Values
+
+The following values should be set in the `env` key of the `devenv.nix` file in each repository.
+
+| Value                    | Required | Description                                                                                       | Example                    |   |
+|--------------------------|----------|---------------------------------------------------------------------------------------------------|----------------------------|---|
+| `PF_REPO_NAME`           | x        | The name of this repository.                                                                      | `repo`                     |   |
+| `PF_REPO_URL`            | x        | The URL of this repository. Must NOT include any protocol prefix (e.g., `http://`, `git@`, etc.). | `github.com/user/repo`     |   |
+| `PF_REPO_PRIMARY_BRANCH` | x        | The name of your primary git integration branch.                                                  | `main`                     |   |
+| `PF_ENVIRONMENTS_DIR`    |          | Path to your environments directory.                                                              | `environments` (default)   |   |
+| `PF_IAC_DIR`             |          | Path to your infrastructure code directory.                                                       | `infrastructure` (default) |   |
+| `PF_AWS_DIR`             |          | Path to the `.aws` configuration directory                                                        | `.aws` (default)           |   |
+| `PF_KUBE_DIR`            |          | Path to the `.kube` configuration directory                                                       | `.kube` (default)          |   |
+| `PF_SSH_DIR`             |          | Path to the `.ssh` configuration directory                                                        | `.ssh` (default)           |   |
+
+## Notes
+
+* All environment variables representing directory paths (i.e., end in `_DIR`) are relative to the repository root and
+  MUST NOT include a `/` prefix or suffix.
