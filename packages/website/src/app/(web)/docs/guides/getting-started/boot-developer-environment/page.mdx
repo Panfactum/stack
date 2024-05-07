@@ -51,7 +51,14 @@ Now that you have the tooling installed:
 
 ## Setting up User Variables
 
-At the root of the repo, you should create a `.env` file that follows the [dotenv](https://www.dotenv.org/) format.
+The repository has two sets of top-level configuration variables that will control the devenv's behavior:
+
+- shared: Set up in the repo's `devenv.nix` by your organization's administrators ([docs](/docs/reference/configuration/repo-variables))
+- personal: Unique to you and set up in a top-level `.env` file ([docs](/docs/reference/configuration/dotenv))
+
+As the shared variables should have already been set up, we will now configure your personal variables.
+
+In the root of the repo, create a `.env` file that follows the [dotenv](https://www.dotenv.org/) format.
 
 For the complete list of values, see the Panfactum [reference docs](/docs/reference/configuration/dotenv).
 

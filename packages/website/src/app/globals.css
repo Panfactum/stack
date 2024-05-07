@@ -388,7 +388,7 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
 
     /* Footnote links */
     span.footnote > a.markdown {
-        @apply text-sm text-white bg-primary font-semibold cursor-pointer;
+        @apply text-xs sm:text-sm text-white bg-primary font-semibold cursor-pointer;
         border-radius: 5px;
         padding: 0 5px;
     }

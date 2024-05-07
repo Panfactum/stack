@@ -168,6 +168,34 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
+    text: 'Networking',
+    path: '/networking',
+    sub: [
+      {
+        text: 'SSH Tunneling',
+        path: '/ssh-tunnel'
+      },
+      {
+        text: 'Database Connections',
+        path: '/database-connections'
+      }
+    ]
+  },
+  {
+    text: 'User Management',
+    path: '/user-management',
+    sub: [
+      {
+        text: 'Provisioning',
+        path: '/provisioning-new-user'
+      },
+      {
+        text: 'New User Setup',
+        path: '/setting-up-new-user'
+      }
+    ]
+  },
+  {
     text: 'Panfactum Versioning',
     path: '/versioning',
     sub: [
