@@ -11,7 +11,7 @@ import type {
 } from '@/components/layout/web/article/withNav/types'
 
 const NavLink = memo((props: IArticleNavLinkProps & ITreeProps) => {
-  const { path, text, basePath } = props
+  const { path, text, basePath, onNavigate } = props
   const currentPath = usePathname()
   const linkPath = `${basePath}${path}`
   const active = currentPath.startsWith(linkPath)
@@ -30,13 +30,10 @@ const NavLink = memo((props: IArticleNavLinkProps & ITreeProps) => {
     })
 
   return (
-    <div
-      className="flex items-center py-1"
-      id={linkPath}
-    >
-
+    <div className="flex items-center py-1">
       <Link
         href={linkPath}
+        onClick={onNavigate}
         className={`${active ? 'text-black font-semibold' : 'text-secondary'} hover:cursor-pointer hover:text-black flex grow items-stretch justify-between leading-5 pr-1`}
       >
         <div>
