@@ -11,7 +11,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 Deploy your first modules using Terragrunt and OpenTofu (Terraform).
 
-## Setup State Backends
+## Set Up State Backends
 
 To begin deploying infrastructure, you will first need a state backend... which is itself infrastructure.
 In fact, we provide an infrastructure module for setting up the backend: [tf\_bootstrap\_resources](/docs/reference/infrastructure-modules/tf_bootstrap_resources).
@@ -118,7 +118,7 @@ Now you will boostrap the state backends for your other environments by repeatin
 for **every** environment. You can simply copy the `tf_boostrap_resources` directory into the
 equivalent location in every other environment to get started.
 
-## Setup sops
+## Set Up sops
 
 Terragrunt uses [sops](https://github.com/getsops/sops) to store secret configuration values. This allows you to commit
 secrets *in encrypted form* directly to version control which comes with a host of benefits:
@@ -219,6 +219,11 @@ Let's set this up.
    3. Run `sops -d test.yaml` ((d)ecrypt). Notice the original file contents should have been output to your terminal.
 
    4. Delete the file.
+
+<MarkdownAlert severity="info">
+    The above instructions for configuring `.sops.yaml` are _recommendations_, and you should adapt this file
+    in whatever way best meets your organization's preferences. The full specification can be found [here](https://github.com/getsops/sops?tab=readme-ov-file#using-sopsyaml-conf-to-select-kms-pgp-and-age-for-new-files).
+</MarkdownAlert>
 
 ## Deploy the AWS Account Module
 
