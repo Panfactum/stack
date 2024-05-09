@@ -74,7 +74,7 @@ export default function CustomRenderedTabs ({ isXSmall, value, tabs }: CustomRen
             value={text}
             href={href}
             component={Link}
-            className={`normal-case whitespace-nowrap text-black min-h-[2.2rem] h-[2.2rem] px-4 lg:px-6 pt-2 pb-3 lg:py-4 text-sm sm:text-base ${text === value ? 'font-semibold' : 'font-normal'}`}
+            className={`normal-case whitespace-nowrap text-black min-h-[2.2rem] h-[2.2rem] px-4 lg:px-6 pt-2 pb-3 lg:py-4 basis-auto text-sm sm:text-base ${text === value ? 'font-semibold' : 'font-normal'}`}
           />
         ))}
       </Tabs>
