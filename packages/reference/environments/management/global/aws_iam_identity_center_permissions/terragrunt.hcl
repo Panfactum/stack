@@ -23,7 +23,7 @@ inputs = {
       superuser_groups         = ["superusers"]
       admin_groups             = ["privileged_engineers"]
       reader_groups            = ["engineers"]
-      restricted_reader_groups = ["restricted_engineers"]
+      restricted_reader_groups = ["restricted_engineers", "demo_users"]
       billing_admin_groups     = ["billing_admins"]
     }
     development = {

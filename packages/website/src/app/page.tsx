@@ -255,7 +255,7 @@ export default function Page () {
               </>
             )}
             buttonText={'Connect to a demo instance'}
-            buttonHref={'/stack/demo'}
+            buttonHref={'/stack/demo/live'}
           />
           <Callout
             title={'Open and Extensible'}

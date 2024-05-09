@@ -37,6 +37,7 @@ inputs = {
     "privileged_engineers",
     "engineers",
     "restricted_engineers",
-    "billing_admins"
+    "billing_admins",
+    "demo_users"
   ]
 }

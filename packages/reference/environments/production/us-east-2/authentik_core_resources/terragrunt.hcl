@@ -26,7 +26,8 @@ inputs = {
   default_groups_enabled      = true
 
   extra_groups = {
-    example1 = {}
-    example2 = { parent = "example1" }
+    example1   = {}
+    example2   = { parent = "example1" }
+    demo_users = {}
   }
 }
