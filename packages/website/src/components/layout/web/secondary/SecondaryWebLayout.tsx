@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { memo } from 'react'
 
-import type { IWebTabNavigationProps } from '@/components/layout/web/secondary/tabs/WebTabNavigation'
-import WebTabNavigation from '@/components/layout/web/secondary/tabs/WebTabNavigation'
+import type { IWebTabNavigationProps } from '@/components/layout/web/secondary/tabs/CustomTabs'
+import CustomTabs from '@/components/layout/web/secondary/tabs/CustomTabs'
 
 interface IWebContentLayoutProps {
   children: ReactNode
@@ -17,7 +17,7 @@ export default memo(function SecondaryWebLayout (props: IWebContentLayoutProps) 
       className="bg-gray-light h-full"
       id={'secondary-web-layout'}
     >
-      <WebTabNavigation
+      <CustomTabs
         tabs={tabs}
         id={id}
       />

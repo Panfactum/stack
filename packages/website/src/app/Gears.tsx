@@ -3,7 +3,7 @@
 import { css, keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
 
-import { colors } from '../../../theme'
+import { colors } from '../../theme'
 
 const rotate = keyframes`
   0% {

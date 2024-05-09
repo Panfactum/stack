@@ -1,12 +1,9 @@
 'use client'
 
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
-import TabContainer from '@/components/layout/web/secondary/tabs/TabContainer'
+import CustomRenderedTabs from '@/components/layout/web/secondary/tabs/CustomRenderedTabs'
 import { SecondaryTabsVisibleContext } from '@/lib/contexts/web/SecondaryTabsVisible'
 import { useLocalStorage } from '@/lib/hooks/state/useLocalStorage'
 import useIsXSmall from '@/lib/hooks/ui/useIsXSmall'
@@ -19,20 +16,11 @@ export interface IWebTabNavigationProps {
   }>
 }
 
-export default function WebTabNavigation (props: IWebTabNavigationProps) {
+export default function CustomTabs (props: IWebTabNavigationProps) {
   const { tabs, id } = props
   const pathname = usePathname()
   const value = tabs.find(tab => pathname.startsWith(tab.href))?.text ?? false
   const isXSmall = useIsXSmall()
-  const tabIndicatorProps = useMemo(() => {
-    return !isXSmall
-      ? {}
-      : {
-        sx: {
-          top: 0
-        }
-      }
-  }, [isXSmall])
 
   // Under each tab, we save the user's last location so that when they return to the tab their location is restored
   const [savedLocations, setSavedLocations] = useLocalStorage<{[href: string]: string}>(`saved-locations-${id}`, {})
@@ -81,39 +69,19 @@ export default function WebTabNavigation (props: IWebTabNavigationProps) {
 
   // Calculate the hrefs to actually use on the tab links
   // depending on whether there is a saved and validated location for each tab
-  const hrefs = tabs.reduce<{[text: typeof tabs[number]['text']]: string}>((acc, tab) => {
+  const savedTabs = tabs.map(tab => {
     const savedLocation = savedLocations[tab.href]
     return {
-      ...acc,
-      [tab.text]: savedLocation && validatedLocations[savedLocation] ? savedLocation : tab.href
+      text: tab.text,
+      href: savedLocation && validatedLocations[savedLocation] ? savedLocation : tab.href
     }
-  }, {})
+  })
 
   return (
-    <TabContainer>
-      <Tabs
-        aria-label="secondary tab navigation"
-        variant={isXSmall ? 'scrollable' : 'fullWidth'}
-        scrollButtons="auto"
-        allowScrollButtonsMobile={true}
-        centered={!isXSmall}
-        value={value}
-        className={'min-h-0'}
-        TabIndicatorProps={tabIndicatorProps}
-      >
-        {tabs.map(({ text }) => (
-          <Tab
-            key={text}
-            id={`nav-tab-${text}`}
-            disableRipple
-            label={text}
-            value={text}
-            href={hrefs[text] ?? '/not-found'}
-            component={Link}
-            className={`normal-case whitespace-nowrap flex-shrink-0 basis-auto text-black min-h-[2.2rem] h-[2.2rem] min-w-[40px] lg:min-w-[60px] px-4 lg:px-6 pt-2 pb-3 lg:py-4 text-sm sm:text-base ${text === value ? 'font-semibold' : 'font-normal'}`}
-          />
-        ))}
-      </Tabs>
-    </TabContainer>
+    <CustomRenderedTabs
+      isXSmall={isXSmall}
+      value={value}
+      tabs={savedTabs}
+    />
   )
 }

@@ -3,15 +3,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactElement } from 'react'
 
-import Carousel from '@/app/(web)/Carosel/Carousel'
-import TextSlider from '@/app/(web)/TextSlider'
+import Carousel from '@/app/Carosel/Carousel'
+import TextSlider from '@/app/TextSlider'
 import { discordServerLink } from '@/app/vars'
 import Balancer from '@/components/ui/Balancer'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
 
 import { Gears, Gears2, Gears3 } from './Gears'
 import discordIconImg from './discord.svg'
-import { colors } from '../../../theme'
+import { colors } from '../../theme'
 
 function LinkButton (props: {href: string, children: string | ReactElement, size?: 'large' | 'small', color?: 'blue' | 'grey' | 'white'}) {
   const { href, children, size = 'small', color = 'blue' } = props

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import modules from '@/app/(web)/docs/reference/infrastructure-modules/modules.json'
+import modules from '@/app/docs/reference/infrastructure-modules/modules.json'
 import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/ArticleWithNavLayout'
 
 const SIDENAV_SECTIONS = [

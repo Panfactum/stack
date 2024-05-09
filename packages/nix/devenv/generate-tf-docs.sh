@@ -3,7 +3,7 @@
 # Purpose: Uses terraform-docs to create the markdown documentation
 # for each terraform module for the public website
 
-OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/(web)/docs/reference/infrastructure-modules"
+OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/docs/reference/infrastructure-modules"
 
 # Initialize an empty JSON object with a `modules` array
 JSON=$(jq -n '{modules: []}')

@@ -60,6 +60,9 @@ export default memo(function TopNav (props: IArticleNavProps) {
         anchor={'top'}
         open={open}
         onClose={toggleDrawer}
+        classes={{
+          paper: 'max-h-[75vh]'
+        }}
       >
         <Nav
           {...props}
