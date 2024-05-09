@@ -4,7 +4,7 @@ set -eo pipefail
 
 # Purpose: Returns a state hash used to determine if pf-update-kube needs to be rerun.
 
-SCRIPT_HASH="$(md5sum "$(which pf-update-kube)" | cut -d" " -f1)"
+SCRIPT_HASH="$(tail -n +2 "$(which pf-update-kube)" | md5sum | cut -d" " -f1)"
 CLUSTER_INFO_HASH=""
 USER_CONFIG_HASH=""
 

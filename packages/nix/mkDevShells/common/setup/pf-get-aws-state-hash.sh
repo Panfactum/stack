@@ -4,7 +4,7 @@ set -eo pipefail
 
 # Purpose: Returns a state hash used to determine if pf-update-aws --build needs to be rerun.
 
-SCRIPT_HASH="$(md5sum "$(which pf-update-aws)" | cut -d" " -f1)"
+SCRIPT_HASH="$(tail -n +2 "$(which pf-update-aws)" | md5sum | cut -d" " -f1)"
 CONFIG_HASH=""
 
 if [[ -n ${PF_AWS_DIR} ]]; then
