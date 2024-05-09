@@ -22,7 +22,10 @@ export default function Layout (
   { children } : {children: ReactNode}
 ) {
   return (
-    <SecondaryWebLayout tabs={TABS}>
+    <SecondaryWebLayout
+      tabs={TABS}
+      id={'about'}
+    >
       <ArticleLayout>
         {children}
       </ArticleLayout>

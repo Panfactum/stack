@@ -25,7 +25,10 @@ export default function Layout (
   { children } : {children: ReactNode}
 ) {
   return (
-    <SecondaryWebLayout tabs={TABS}>
+    <SecondaryWebLayout
+      tabs={TABS}
+      id={'stack'}
+    >
       {children}
     </SecondaryWebLayout>
   )

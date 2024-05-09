@@ -6,17 +6,21 @@ import WebTabNavigation from '@/components/layout/web/secondary/tabs/WebTabNavig
 
 interface IWebContentLayoutProps {
   children: ReactNode
+  id: string;
   tabs: IWebTabNavigationProps['tabs']
 }
 
 export default memo(function SecondaryWebLayout (props: IWebContentLayoutProps) {
-  const { children, tabs } = props
+  const { children, tabs, id } = props
   return (
     <div
       className="bg-gray-light h-full"
       id={'secondary-web-layout'}
     >
-      <WebTabNavigation tabs={tabs}/>
+      <WebTabNavigation
+        tabs={tabs}
+        id={id}
+      />
       {children}
     </div>
   )
