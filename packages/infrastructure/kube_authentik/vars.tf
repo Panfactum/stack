@@ -1,7 +1,7 @@
 variable "authentik_helm_version" {
   description = "The version of the Authentik helm chart to deploy"
   type        = string
-  default     = "2024.2.2"
+  default     = "2024.4.2"
 }
 
 variable "eks_cluster_name" {

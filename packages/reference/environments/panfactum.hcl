@@ -246,5 +246,5 @@ inputs = {
   region           = local.vars.region
   pf_stack_version = local.pf_stack_version
   pf_stack_commit  = local.pf_stack_version_commit_hash
-  extra_tags       = merge(local.global_extra_tags, local.environment_extra_tags, local.region_extra_tags, local.module_extra_tags)
+  extra_tags       = merge(local.module_extra_tags, local.region_extra_tags, local.environment_extra_tags, local.global_extra_tags)
 }
