@@ -14,7 +14,7 @@ terraform {
 ***************************************/
 
 resource "vault_jwt_auth_backend" "oidc" {
-  description        = "Authentication against Azure AD"
+  description        = "Authentication using OIDC"
   path               = "oidc"
   type               = "oidc"
   oidc_client_id     = var.client_id
