@@ -1,3 +1,9 @@
+<p align="center">
+    <img src="https://panfactum.com/logo.svg" height="150" alt="authentik logo">
+</p>
+
+---
+
 # Panfactum Stack
 
 [![CLA assistant](https://cla-assistant.io/readme/badge/Panfactum/stack)](https://cla-assistant.io/Panfactum/stack)
