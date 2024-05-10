@@ -97,6 +97,11 @@ resource "kubernetes_manifest" "cronjob" {
       "metadata.annotations"
     ],
 
+    // Annotations added to the pod (such as via kubectl rollout restart)
+    [
+      "spec.template.metadata.annotations"
+    ],
+
     // The prevents an error when the kubernetes API server changes the units used
     // in these fields during the apply
     [for i, k in keys(module.pod_template.containers) : [
