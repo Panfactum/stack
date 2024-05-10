@@ -8,7 +8,7 @@ sections:
     - requirements
     - outputs
 header-from: README.md
-footer-from: USAGE.md
+footer-from: FOOTER.md
 settings:
   anchor: true
   html: true

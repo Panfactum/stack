@@ -1,7 +1,5 @@
 # AWS IAM Identity Center Permissions
 
-**Type:** Live
-
 Creates the three core permission tiers for each AWS account:
 
    1. `superusers` - Maps to the `arn:aws:iam::aws:policy/AdministratorAccess` managed policy

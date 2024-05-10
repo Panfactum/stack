@@ -1,0 +1,206 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Authentik
+
+<ModuleHeader name="kube_authentik" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/kube_authentik" status="stable" type="live" />
+
+This module deploys an [Authentik](https://goauthentik.io/) instance to the
+Kubernetes cluster.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_akadmin_email" /> [akadmin\_email](#input_akadmin_email)
+
+Description: The email address to use for the root authentik administrator. Warning: must be changed manually once applied.
+
+Type: `string`
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_email_from_address" /> [email\_from\_address](#input_email_from_address)
+
+Description: The 'from' address to use for sent emails
+
+Type: `string`
+
+### <a name="input_smtp_host" /> [smtp\_host](#input_smtp_host)
+
+Description: The SMTP server for email sending
+
+Type: `string`
+
+### <a name="input_smtp_password" /> [smtp\_password](#input_smtp_password)
+
+Description: The password to use for SMTP authentication for email sending
+
+Type: `string`
+
+### <a name="input_smtp_user" /> [smtp\_user](#input_smtp_user)
+
+Description: The user to use for SMTP authentication for email sending
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_authentik_helm_version" /> [authentik\_helm\_version](#input_authentik_helm_version)
+
+Description: The version of the Authentik helm chart to deploy
+
+Type: `string`
+
+Default: `"2024.4.2"`
+
+### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_domain" /> [domain](#input_domain)
+
+Description: A list of domains from which authentik will serve traffic
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_error_reporting_enabled" /> [error\_reporting\_enabled](#input_error_reporting_enabled)
+
+Description: True iff errors should be reported to authentik for telemetry purposes
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
+
+Description: Whether to enable ingress to the Authentik server
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level for the operator pods
+
+Type: `string`
+
+Default: `"error"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_akadmin_bootstrap_password" /> [akadmin\_bootstrap\_password](#output_akadmin_bootstrap_password)
+
+Description: The initial password for the root akadmin user. Only used on initial bootstrapping.
+
+### <a name="output_akadmin_bootstrap_token" /> [akadmin\_bootstrap\_token](#output_akadmin_bootstrap_token)
+
+Description: The initial API token for the root akadmin user. Only used on initial bootstrapping.
+
+### <a name="output_akadmin_email" /> [akadmin\_email](#output_akadmin_email)
+
+Description: The email for the root akadmin user.
+
+### <a name="output_authentik_url" /> [authentik\_url](#output_authentik_url)
+
+Description: n/a
+
+### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
+
+Description: n/a
+
+### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
+
+Description: n/a
+
+### <a name="output_db_superuser_password" /> [db\_superuser\_password](#output_db_superuser_password)
+
+Description: n/a
+
+### <a name="output_db_superuser_role" /> [db\_superuser\_role](#output_db_superuser_role)
+
+Description: n/a
+
+### <a name="output_db_superuser_username" /> [db\_superuser\_username](#output_db_superuser_username)
+
+Description: n/a
+
+### <a name="output_domain" /> [domain](#output_domain)
+
+Description: n/a
+
+### <a name="output_email_templates_configmap" /> [email\_templates\_configmap](#output_email_templates_configmap)
+
+Description: n/a
+
+### <a name="output_media_configmap" /> [media\_configmap](#output_media_configmap)
+
+Description: n/a
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
+
+### <a name="output_redis_admin_role" /> [redis\_admin\_role](#output_redis_admin_role)
+
+Description: n/a
+
+### <a name="output_redis_reader_role" /> [redis\_reader\_role](#output_redis_reader_role)
+
+Description: n/a
+
+### <a name="output_redis_superuser_role" /> [redis\_superuser\_role](#output_redis_superuser_role)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

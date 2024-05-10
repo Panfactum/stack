@@ -9,7 +9,11 @@ OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/docs/reference/infrastructure-
 JSON=$(jq -n '{modules: []}')
 
 # Remove the old docs
-find "$OUTPUT_DIR" -type d | grep '_' | xargs rm -rf
+rm -rf "$OUTPUT_DIR/aws"
+rm -rf "$OUTPUT_DIR/kubernetes"
+rm -rf "$OUTPUT_DIR/authentik"
+rm -rf "$OUTPUT_DIR/vault"
+rm -rf "$OUTPUT_DIR/utility"
 
 function skip_injected_variables() {
   awk '
@@ -44,12 +48,9 @@ function remove_version_header() {
   sed '/^Version:$/d'
 }
 
-function add_type_link() {
-  sed -E 's@\*\*Type:\*\* (.*)@**Type:** [\1](/docs/reference/infrastructure-modules/overview)@g'
-}
-
-function add_module_source_link() {
-  sed "5i**Source Code:** [Link](https://github.com/Panfactum/stack/tree/__currentPanfactumVersion__/packages/infrastructure/$1)\n"
+function add_header() {
+  sed -E "1iimport ModuleHeader from \"../../ModuleHeader\";\n" |
+    sed -E "6i<ModuleHeader name=\"$1\" sourceHref=\"https://github.com/Panfactum/stack/tree/main/packages/infrastructure/$1\" status=\"$2\" type=\"$3\"/>"
 }
 
 # Loop through each directory in the script's directory
@@ -58,18 +59,27 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
     # Extract the name of the directory
     MODULE=$(basename "$d")
 
+    # Ready the config
+    TYPE=$(yq -r '.type' "$d/config.yaml")
+    STATUS=$(yq -r '.status' "$d/config.yaml")
+    GROUP=$(yq -r '.group' "$d/config.yaml")
+
+    # Don't generate documentation for utility modules
+    if [[ $TYPE == "utility" ]]; then
+      continue
+    fi
+
     # Append the directory name to the modules array in the JSON object
-    JSON=$(jq --arg module "$MODULE" '.modules += [$module]' <<<"$JSON")
+    JSON=$(jq --arg module "$MODULE" --arg group "$GROUP" '.modules += [{"module": $module, "group": $group}]' <<<"$JSON")
 
     # Make the docs
-    DOCS_DIR="$OUTPUT_DIR/$MODULE"
+    DOCS_DIR="$OUTPUT_DIR/$GROUP/$MODULE"
     mkdir -p "$DOCS_DIR"
     terraform-docs -c "$TERRAFORM_MODULES_DIR/.terraform-docs.yml" "$d" |
-      add_module_source_link "$MODULE" |
       add_provider_links |
       remove_version_header |
       rename_provider_header |
-      add_type_link |
+      add_header "$MODULE" "$STATUS" "$TYPE" |
       skip_injected_variables \
         >"$DOCS_DIR/page.mdx"
   fi

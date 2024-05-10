@@ -1,7 +1,5 @@
 # Kubernetes Priority Classes
 
-**Type:** Live
-
 Sets up additional priority classes in addition to the default ones provided
 by Kubernetes:
 

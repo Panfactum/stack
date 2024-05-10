@@ -1,7 +1,5 @@
 # Kubernetes Deployment
 
-**Type:** Submodule
-
 This module provides our standard set up for a configurable Kubernetes Deployment. It includes:
 
 - A deployment

@@ -23,7 +23,7 @@ The [Reloader](https://github.com/stakater/Reloader) controller was developed by
 to address this gap. With this controller deployed in the cluster, changes to ConfigMaps or Secrets will trigger
 rolling upgrades on the resources that reference them.
 
-We provide a module to deploy this controller: [kube\_reloader](/docs/reference/infrastructure-modules/kube_reloader).
+We provide a module to deploy this controller: [kube\_reloader](/docs/reference/infrastructure-modules/kubernetes/kube_reloader).
 
 Let's deploy the Reloader now:
 
@@ -66,7 +66,7 @@ the Descheduler respects
 [PodDisruptionBudgets](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) which we provide for
 all Panfactum modules.
 
-We provide a module for the Descheduler: [kube\_descheduler](/docs/reference/infrastructure-modules/kube_descheduler).
+We provide a module for the Descheduler: [kube\_descheduler](/docs/reference/infrastructure-modules/kubernetes/kube_descheduler).
 
 Let's deploy it now:
 
@@ -94,7 +94,7 @@ In this section, we will add these capabilities.
 
 By default, the cluster's persistent data is stored on [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 backed by [AWS EBS volumes](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes.html). This is managed
-via the [kube\_aws\_ebs\_csi](/docs/reference/infrastructure-modules/kube_aws_ebs_csi) module we installed in
+via the [kube\_aws\_ebs\_csi](/docs/reference/infrastructure-modules/kubernetes/kube_aws_ebs_csi) module we installed in
 [a prior section](/docs/guides/bootstrapping/storage-interfaces).
 
 EBS volumes support point-in-time snapshots that can be used to rollback data to a particular moment. We
@@ -103,7 +103,7 @@ via the [external-snapshotter](https://github.com/kubernetes-csi/external-snapsh
 us to create [VolumeSnapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/)
 in Kubernetes that will in turn create EBS snapshots in AWS.
 
-We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](/docs/reference/infrastructure-modules/kube_external_snapshotter).
+We provide a module to deploy the external-snapshotter: [kube\_external\_snapshotter](/docs/reference/infrastructure-modules/kubernetes/kube_external_snapshotter).
 
 Let's deploy it now:
 
@@ -125,7 +125,7 @@ custom resource to the cluster. A Backup enables the following functionality:
 * The ability to restore the cluster and its data from the Backup by creating a [Restore](https://velero.io/docs/v1.13/api-types/restore/)
 * The ability to regularly schedule (and garbage collect) Backups via a [Schedule](https://velero.io/docs/v1.13/api-types/schedule/)
 
-We provide a module to deploy this functionality: [kube\_velero](/docs/reference/infrastructure-modules/kube_velero).
+We provide a module to deploy this functionality: [kube\_velero](/docs/reference/infrastructure-modules/kubernetes/kube_velero).
 
 This will create hourly backups of the cluster and its data that will allow you to rollback your entire
 cluster in the case of an emergency. [^4]

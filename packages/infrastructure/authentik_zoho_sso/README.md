@@ -1,3 +1,1 @@
-# AWS SSO with Zoho
-
-**Type:** Live
+# Authentik SSO with Zoho

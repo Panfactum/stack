@@ -25,7 +25,7 @@ Vault serves several important purposes in the Panfactum stack:
 
 ## Deploy Vault
 
-We will use the [kube\_vault](/docs/reference/infrastructure-modules/kube_vault) infrastructure module to deploy
+We will use the [kube\_vault](/docs/reference/infrastructure-modules/kubernetes/kube_vault) infrastructure module to deploy
 Vault in a highly available manner using
 [it's integrated Raft storage backend](https://developer.hashicorp.com/vault/docs/configuration/storage/raft).
 
@@ -204,7 +204,7 @@ a remote terminal session to perform the initialization:
 One of the major benefits of Vault is that it can be [configured directly with OpenTofu (Terraform)](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
 alongside our other infrastructure components. The Panfactum stack includes several
 modules for working with Vault. In this section we will deploy some foundational configuration
-via the [vault\_core\_resources](/docs/reference/infrastructure-modules/vault_core_resources) module.
+via the [vault\_core\_resources](/docs/reference/infrastructure-modules/vault/vault_core_resources) module.
 
 ### Connect to Vault
 
@@ -264,7 +264,7 @@ Here is how we will work around this issue:
 
 ### Deploy Configuration Module
 
-Let's now deploy [vault\_core\_resources](/docs/reference/infrastructure-modules/vault_core_resources):
+Let's now deploy [vault\_core\_resources](/docs/reference/infrastructure-modules/vault/vault_core_resources):
 
 1. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
 

@@ -45,11 +45,58 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Overview',
         path: '/overview'
+      },
+      {
+        text: 'AWS',
+        path: '/aws',
+        sub: modules.modules
+          .filter(module => module.group === 'aws')
+          .map(({ module }) => ({
+            text: module,
+            path: `/${module}`
+          }))
+      },
+      {
+        text: 'Authentik',
+        path: '/authentik',
+        sub: modules.modules
+          .filter(module => module.group === 'authentik')
+          .map(({ module }) => ({
+            text: module,
+            path: `/${module}`
+          }))
+      },
+      {
+        text: 'Kubernetes',
+        path: '/kubernetes',
+        sub: modules.modules
+          .filter(module => module.group === 'kubernetes')
+          .map(({ module }) => ({
+            text: module,
+            path: `/${module}`
+          }))
+      },
+      {
+        text: 'Vault',
+        path: '/vault',
+        sub: modules.modules
+          .filter(module => module.group === 'vault')
+          .map(({ module }) => ({
+            text: module,
+            path: `/${module}`
+          }))
+      },
+      {
+        text: 'Utility',
+        path: '/utility',
+        sub: modules.modules
+          .filter(module => module.group === 'utility')
+          .map(({ module }) => ({
+            text: module,
+            path: `/${module}`
+          }))
       }
-    ].concat(modules.modules.map(module => ({
-      text: module,
-      path: `/${module}`
-    })))
+    ]
   },
   {
     text: 'Resource Tags',

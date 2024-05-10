@@ -14,7 +14,7 @@ Deploy your first modules using Terragrunt and OpenTofu (Terraform).
 ## Set Up State Backends
 
 To begin deploying infrastructure, you will first need a state backend... which is itself infrastructure.
-In fact, we provide an infrastructure module for setting up the backend: [tf\_bootstrap\_resources](/docs/reference/infrastructure-modules/tf_bootstrap_resources).
+In fact, we provide an infrastructure module for setting up the backend: [tf\_bootstrap\_resources](/docs/reference/infrastructure-modules/utility/tf_bootstrap_resources).
 
 This creates a circular dependency that we will resolve as follows:
 
@@ -31,7 +31,7 @@ required to bootstrap an S3 backend if they do not already exist. This greatly s
 
 To take advantage of this, we will create our first terragrunt deployment:
 
-1. Generate a deployment directory for [tf\_bootstrap\_resources](/docs/reference/infrastructure-modules/tf_bootstrap_resources):
+1. Generate a deployment directory for [tf\_bootstrap\_resources](/docs/reference/infrastructure-modules/utility/tf_bootstrap_resources):
    `environments/management/global/tf_bootstrap_resources`
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__currentPanfactumVersion__/packages/reference/environments/management/global/tf_bootstrap_resources/terragrunt.hcl).
@@ -149,7 +149,7 @@ We will configure sops to use *AWS KMS* for the encryption keys. This provides s
 
 Let's set this up.
 
-1. In **every environment**, create a deployment of the [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws_kms_encrypt_key) module.
+1. In **every environment**, create a deployment of the [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws/aws_kms_encrypt_key) module.
 
    1. Add a new directory called `sops` to the `global` region.
 
@@ -228,7 +228,7 @@ Let's set this up.
 ## Deploy the AWS Account Module
 
 Now that you have both the state backends and encryption keys established, we will put them both to use in deploying
-the [aws\_account](/docs/reference/infrastructure-modules/aws_account) module. This module adds some critical metadata
+the [aws\_account](/docs/reference/infrastructure-modules/aws/aws_account) module. This module adds some critical metadata
 to your account including setting up its alias and contact information.
 
 Let's set it up.

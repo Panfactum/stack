@@ -1,7 +1,5 @@
 # Terraform / OpenTofu Bootstrap Resources
 
-**Type:** Live
-
 Sets up the AWS resources necessary to begin using OpenTofu (Terraform) in an AWS account:
 
 - S3 state bucket

@@ -1,7 +1,5 @@
 # Kubernetes GHA ARC Runners
 
-**Type:** Live
-
 This module provides:
 - deployments of ARC [runner scale sets](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller) that can be
 targeted in GHA workflows to execute our CI/CD scripts

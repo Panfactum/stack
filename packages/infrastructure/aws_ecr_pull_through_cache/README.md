@@ -1,7 +1,5 @@
 # AWS ECR Pull Through Cache
 
-**Type:** Live
-
 This module sets up [AWS ECR](https://aws.amazon.com/ecr/)
 to serve as a pull through cache for publicly available container images
 used in your Kubernetes clusters.

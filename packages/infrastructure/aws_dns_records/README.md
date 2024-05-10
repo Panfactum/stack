@@ -1,7 +1,5 @@
 # AWS DNS Records
 
-**Type:** Live
-
 This module is used to deploy the following DNS record types
 to the indicated hosted zones:
 

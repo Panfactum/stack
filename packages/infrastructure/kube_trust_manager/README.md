@@ -1,7 +1,5 @@
 # Kubernetes trust-manager
 
-**Type:** Live
-
 This module create a deployment of cert-manager's 
 [trust-manager](https://cert-manager.io/docs/trust/trust-manager/).
 

@@ -44,17 +44,17 @@ Let's get started.
   choose to keep your existing configuration. However, you will need to manually add your SSO roles
   as inputs to:
 
-  * [kube\_rbac](/docs/reference/infrastructure-modules/kube_rbac) to allow SSO authentication
+  * [kube\_rbac](/docs/reference/infrastructure-modules/kubernetes/kube_rbac) to allow SSO authentication
     with your Kubernetes clusters. Note that you MUST omit the /aws-reserved/sso.amazonaws.com/us-east-2/
     part of the ARN.
 
-  * [aws\_eks](/docs/reference/infrastructure-modules/aws_eks) to allow SSO authentication
+  * [aws\_eks](/docs/reference/infrastructure-modules/aws/aws_eks) to allow SSO authentication
     with the cluster KMS encryption key.
 
-  * sops keys (deployed with [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws_kms_encrypt_key)) to allow SSO authentication
+  * sops keys (deployed with [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws/aws_kms_encrypt_key)) to allow SSO authentication
     with the sops KMS encryption key.
 
-  * [kube\_vault](/docs/reference/infrastructure-modules/kube_vault) to allow SSO authentication
+  * [kube\_vault](/docs/reference/infrastructure-modules/kubernetes/kube_vault) to allow SSO authentication
     with the Vault KMS unseal key.
 </MarkdownAlert>
 
@@ -87,7 +87,7 @@ Let's do this now:
 ### Deploy AWS Provider in Authentik
 
 We have a module for configuring Authentik to work with Identity Center:
-[authentik\_aws\_sso](/docs/reference/infrastructure-modules/authentik_aws_sso).
+[authentik\_aws\_sso](/docs/reference/infrastructure-modules/authentik/authentik_aws_sso).
 
 Let's deploy it now:
 
@@ -168,7 +168,7 @@ Let's deploy it now:
 
 We will now configure permissions in AWS Identity Center to allow your users access to accounts in your AWS
 organizations. Fortunately, AWS *does* expose APIs for this, so we can provide an infrastructure module
-to automatically set this up: [aws\_iam\_identity\_center\_permissions](/docs/reference/infrastructure-modules/aws_iam_identity_center_permissions).
+to automatically set this up: [aws\_iam\_identity\_center\_permissions](/docs/reference/infrastructure-modules/aws/aws_iam_identity_center_permissions).
 
 Let's deploy it now:
 
@@ -200,9 +200,9 @@ provisioned SSO credentials and roles and stop using your static root access key
 2. As AWS KMS keys are special resources that require explicit permission grants, you must re-apply
    **every** module that make use of KMS keys in order to pick up the new SSO roles. In this guide, that would be the following modules:
 
-   * sops keys deployed with the [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws_kms_encrypt_key) module
-   * EKS clusters deployed with [aws\_eks](/docs/reference/infrastructure-modules/aws_eks)
-   * Vault clusters deployed with [kube\_vaults](/docs/reference/infrastructure-modules/kube_vault)
+   * sops keys deployed with the [aws\_kms\_encrypt\_key](/docs/reference/infrastructure-modules/aws/aws_kms_encrypt_key) module
+   * EKS clusters deployed with [aws\_eks](/docs/reference/infrastructure-modules/aws/aws_eks)
+   * Vault clusters deployed with [kube\_vaults](/docs/reference/infrastructure-modules/kubernetes/kube_vault)
 
 3. Run `pf-update-aws` to scaffold files in your `$PF_AWS_DIR` directory.
 
@@ -262,7 +262,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 ### Deploy Vault Provider in Authentik
 
 We have a module for configuring Authentik to serve as the IdP for Vault clusters:
-[authentik\_vault\_sso](/docs/reference/infrastructure-modules/authentik_vault_sso).
+[authentik\_vault\_sso](/docs/reference/infrastructure-modules/authentik/authentik_vault_sso).
 
 Let's deploy it now:
 
@@ -283,7 +283,7 @@ Let's deploy it now:
 
 ### Deploy Vault OIDC Login Configuration
 
-We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/docs/reference/infrastructure-modules/vault_auth_oidc).
+We also provide a module to configure Vault to work with the above Authentik configuration: [vault\_auth\_oidc](/docs/reference/infrastructure-modules/vault/vault_auth_oidc).
 
 Let's deploy it now:
 

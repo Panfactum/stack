@@ -15,7 +15,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](/docs/reference/infrastructure-modules/aws_eks) module.
+using our [aws\_eks](/docs/reference/infrastructure-modules/aws/aws_eks) module.
 
 ## A Quick Note
 
@@ -51,7 +51,7 @@ configured to download the image from the public registry *only if it does not a
 in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
 the initial deployment.
 
-We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/reference/infrastructure-modules/aws_ecr_pull_through_cache).
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/reference/infrastructure-modules/aws/aws_ecr_pull_through_cache).
 
 However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
 
@@ -121,7 +121,7 @@ primary cluster in the production environment.
 ### Choose Kubernetes Version
 
 We *strongly* recommend leaving this as the module default. The version was specifically chosen for compatibility
-with the rest of the Panfactum stack. See the [module documentation](/docs/reference/infrastructure-modules/aws_eks) if
+with the rest of the Panfactum stack. See the [module documentation](/docs/reference/infrastructure-modules/aws/aws_eks) if
 you need to override either the control plane or node group versions.
 
 ### Choose Control Plane Subnets
@@ -320,7 +320,7 @@ The Kubernetes modules deployed in this region will now appropriately deploy to 
 ### RBAC
 
 Up until now, we have been using implicit EKS authentication to communicate with the cluster (the IAM user that created
-the cluster automatically has cluster access). We will now deploy the [kube\_rbac](/docs/reference/infrastructure-modules/kube_rbac)
+the cluster automatically has cluster access). We will now deploy the [kube\_rbac](/docs/reference/infrastructure-modules/kubernetes/kube_rbac)
 module which will allow other users to authenticate (and eventually use dynamic rather than static credentials). This relies
 on a paradigm called [role-based access control](https://en.wikipedia.org/wiki/Role-based_access_control)
 which we will cover in more detail as we set up user roles and SSO.
@@ -371,7 +371,7 @@ is depended on for proper cluster operation, we want to give them higher priorit
 
 The Panfactum stack defines
 several priority levels to ensure that your cluster remains as healthy as possible even in adverse circumstances such
-as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](/docs/reference/infrastructure-modules/kube_priority_classes)
+as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](/docs/reference/infrastructure-modules/kubernetes/kube_priority_classes)
 module.
 
 Let's deploy this module:

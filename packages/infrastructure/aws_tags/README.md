@@ -1,3 +1,1 @@
 # AWS Tags
-
-Type: Internal

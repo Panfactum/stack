@@ -35,7 +35,7 @@ While there are many ways to deploy PostgreSQL on Kubernetes, we prefer [CloudNa
 which is a best-in-class [Kubernetes Operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 for managing the entire lifecycle of the PostgreSQL clusters in production-hardened manner.
 
-We provide a module to deploy the operator: [kube\_cloudnative\_pg](/docs/reference/infrastructure-modules/kube_cloudnative_pg).
+We provide a module to deploy the operator: [kube\_cloudnative\_pg](/docs/reference/infrastructure-modules/kubernetes/kube_cloudnative_pg).
 
 Let's deploy it now:
 
@@ -49,7 +49,7 @@ Let's deploy it now:
 
 Note that this will only deploy the CRDs and operator. To deploy actual PostgreSQL clusters, you must
 create [Cluster](https://cloudnative-pg.io/documentation/1.22/cloudnative-pg.v1/#postgresql-cnpg-io-v1-Cluster) resources.
-We provide a module [kube\_pg\_cluster](/docs/reference/infrastructure-modules/kube_pg_cluster) that you can use in your
+We provide a module [kube\_pg\_cluster](/docs/reference/infrastructure-modules/kubernetes/kube_pg_cluster) that you can use in your
 projects to do this.
 
 ### Test PostgreSQL Cluster
@@ -63,8 +63,8 @@ projects to do this.
 #### Deploy Test Cluster
 
 To demonstrate the capabilities of PostgreSQL running in the Panfactum stack, we have created a demo
-module called [test\_kube\_pg\_cluster](/docs/reference/infrastructure-modules/kube_pg_cluster) which is a thin
-wrapper around [kube\_pg\_cluster](/docs/reference/infrastructure-modules/kube_pg_cluster).
+module called [test\_kube\_pg\_cluster](/docs/reference/infrastructure-modules/kubernetes/kube_pg_cluster) which is a thin
+wrapper around [kube\_pg\_cluster](/docs/reference/infrastructure-modules/kubernetes/kube_pg_cluster).
 
 Let's deploy it now:
 
@@ -180,7 +180,7 @@ Rivalling PostgreSQL in popularity, is the key-value database, [Redis.](https://
 is much simpler than PostgreSQL and is often used as an in-memory cache or job queuing system.
 
 Due to its simplicity, it does not require a full Kubernetes Operator to run effectively in a production-hardened
-manner. Instead, you can run our [kube\_redis\_sentinel](/docs/reference/infrastructure-modules/kube_redis_sentinel)
+manner. Instead, you can run our [kube\_redis\_sentinel](/docs/reference/infrastructure-modules/kubernetes/kube_redis_sentinel)
 directly.
 
 This deploys a highly-available set of Redis nodes that are managed by [Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/),

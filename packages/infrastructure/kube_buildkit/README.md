@@ -1,3 +1,1 @@
 # Buildkit
-
-**Type:** Live

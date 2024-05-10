@@ -1,7 +1,5 @@
 # Kubernetes Node Settings
 
-**Type:** Internal
-
 This module is intended to setup the `user-data.toml` that Bottlerocket OS uses to launch.
 
 The configuration settings are documented [here](https://github.com/bottlerocket-os/bottlerocket).
