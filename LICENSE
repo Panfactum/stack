@@ -5,10 +5,27 @@ Parameters
 
 Licensor:             Panfactum, LLC.
 Licensed Work:        The Licensed Work is (c) 2024 Panfactum, Inc.
-Additional Use Grant: You may make production use of the Licensed Work,
-                      provided such use does not include offering the Licensed Work
-                      to third parties on a hosted or embedded basis which is
-                      competitive with Panfactum's service offerings.
+Additional Use Grant: "Production use" as defined in this license refers
+                      to any deployment of the stack that supports the commercial
+                      efforts of an organization. This includes but is not
+                      limited to deploying the stack in development or staging
+                      environments to support software development. This does NOT
+                      include proof-of-concept deployments.
+
+                      A "proof-of-concept" is a deployment of the Panfactum stack
+                      used to inform a purchasing decision where infrastructure
+                      is deployed for fewer than 90 continuous days.
+
+                      Any individual or organization may freely make production
+                      use of this work for non-commercial purposes.
+
+                      Any organizations receiving less than $1M USD in gross revenue
+                      for the trailing 12 months may also freely make production use
+                      of this work.
+
+                      To receive a more permissive license and deployment support, visit
+                      https://panfactum.com/stack/pricing.
+
 Change Date:          Two years from the date the Licensed Work is published.
 Change License:       MPL 2.0
 
