@@ -95,7 +95,7 @@ if [[ $BUILD_CONFIG -eq 1 ]]; then
     echo -e "cluster_info updated!\n" >&2
     echo -e "-----------------------------------------------------------" >&2
   else
-    echo "Error: No configuration file exists at $CONFIG_FILE. See (TODO)" >&2
+    echo "Error: No configuration file exists at $CONFIG_FILE. See https://panfactum.com/docs/reference/configuration/kubernetes." >&2
     exit 1
   fi
 fi
@@ -178,9 +178,6 @@ if [[ -f $CLUSTER_INFO_FILE ]]; then
       echo -e "Done!\n" >&2
     done
 
-    # Save the state hash
-    pf-get-kube-user-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.user.lock"
-
     echo -e "All clusters configured!\n" >&2
   else
     echo -e "\nWarning: No configuration file exists at $USER_CONFIG_FILE. Skipping kubeconfig setup!\n" >&2
@@ -188,6 +185,10 @@ if [[ -f $CLUSTER_INFO_FILE ]]; then
 else
   echo -e "\nWarning: No cluster_info file exists at $CLUSTER_INFO_FILE. A superuser must run 'pf-update-kube --build' to generate this file. Skipping kubeconfig setup!\n" >&2
 fi
+
+# Save the state hash
+pf-get-kube-user-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.user.lock"
+
 echo -e "-----------------------------------------------------------" >&2
 
 echo -e "\nKubernetes config files in $PF_KUBE_DIR were updated." 1>&2
