@@ -49,6 +49,14 @@ locals {
       format("%s/%s", parts[0], element(parts, length(parts) - 1))
     ]
   )))
+
+  resource_rows    = [for row in split("\n", file("${path.module}/resources.txt")) : split(" ", row) if length(row) > 1]
+  secret_resources = ["secrets"]
+  non_secret_resources = { for row in local.resource_rows : row[1] => {
+    resources = tolist(setsubtract(toset(split(",", row[0])), toset(local.secret_resources)))
+    api_group = row[1]
+  } }
+
 }
 
 module "kube_labels" {
@@ -210,10 +218,23 @@ resource "kubernetes_cluster_role" "restricted_readers" {
     name   = local.restricted_readers_group
     labels = module.kube_labels.kube_labels
   }
+  dynamic "rule" {
+    for_each = local.non_secret_resources
+    content {
+      api_groups = [rule.value.api_group, ""]
+      resources  = rule.value.resources
+      verbs      = ["list", "get", "watch"]
+    }
+  }
   rule {
-    api_groups = ["*"]
+    api_groups = [""]
+    resources  = ["pods/log"]
+    verbs      = ["get", "list"]
+  }
+  rule {
+    api_groups = ["metrics.k8s.io"]
     resources  = ["*"]
-    verbs      = ["get", "list", "watch", "view"]
+    verbs      = ["get", "list"]
   }
   rule {
     api_groups = [""]

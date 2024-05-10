@@ -26,9 +26,17 @@ so we provide a few users in case one is already in-use:
 Complete the [getting started guide](/docs/guides/getting-started/overview), but with the following adjustments:
 
 1. When the guide asks you to download your organization's stack repository. Instead, you will download [this repository](https://github.com/Panfactum/stack)
-and treat `packages/reference` as if it were the root directory of your organization's repository.
+   and treat `packages/reference` as if it were the root directory of your organization's repository.
 
 2. When the guide asks you to visit your organization's identity provider, use [ours](https://authentik.panfactum.com).
+
+3. When you need to create your `.kube/config.user.yaml`, you should use this file:
+
+   ```yaml
+   clusters:
+     - name: "production-primary"
+       aws_profile: "production-restricted-reader"
+   ```
 
 ## Important Notes
 
