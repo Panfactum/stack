@@ -32,6 +32,7 @@ rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source"/ "$destination"/
 
 CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config.yaml"
 AWS_CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config"
+AWS_TMP_CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config.tmp"
 
 if [[ $BUILD_AWS_CONFIG == "1" ]]; then
   if [[ -f $CONFIG_FILE ]]; then
@@ -40,12 +41,6 @@ if [[ $BUILD_AWS_CONFIG == "1" ]]; then
       echo "Error: PF_ENVIRONMENTS_DIR is not set. Add it to your devenv.nix file." >&2
       exit 1
     fi
-
-    # Remove the old config file
-    if [[ -f $AWS_CONFIG_FILE ]]; then
-      rm "$AWS_CONFIG_FILE"
-    fi
-    touch "$AWS_CONFIG_FILE"
 
     ############################################################
     ## Step 2.1: Parse the config file
@@ -75,6 +70,7 @@ if [[ $BUILD_AWS_CONFIG == "1" ]]; then
     }
 
     function append_to_config() {
+      touch "$AWS_TMP_CONFIG_FILE"
       NUMBER_OF_ACCOUNTS=$(echo "$1" | jq -r 'length')
       for ((i = 0; i < NUMBER_OF_ACCOUNTS; i++)); do
         ACCOUNT_NAME=$(echo "$1" | jq -r ".[$i].account_name")
@@ -110,7 +106,7 @@ if [[ $BUILD_AWS_CONFIG == "1" ]]; then
             echo "sso_region = ${SSO_REGION}"
             echo "sso_registration_scopes = sso:account:access"
             echo ""
-          } >>"$AWS_CONFIG_FILE"
+          } >>"$AWS_TMP_CONFIG_FILE"
         done
       done
     }
@@ -137,6 +133,11 @@ if [[ $BUILD_AWS_CONFIG == "1" ]]; then
       append_to_config "$EXTRA_ROLES"
       echo "Roles added." >&2
     fi
+
+    ############################################################
+    ## Step 2.5: Make the tmp config the real config
+    ############################################################
+    mv "$AWS_TMP_CONFIG_FILE" "$AWS_CONFIG_FILE"
 
   else
     echo "Warning: No configuration file exists at $CONFIG_FILE Skipping config setup..." >&2
