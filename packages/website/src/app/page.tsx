@@ -5,9 +5,10 @@ import type { ReactElement } from 'react'
 
 import Carousel from '@/app/Carosel/Carousel'
 import TextSlider from '@/app/TextSlider'
-import { discordServerLink } from '@/app/vars'
 import Balancer from '@/components/ui/Balancer'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
+import VersionedDocsLink from '@/components/ui/VersionedDocsLink'
+import { discordServerLink, isValidVersionSlug } from '@/lib/constants'
 
 import { Gears, Gears2, Gears3 } from './Gears'
 import discordIconImg from './discord.svg'
@@ -15,10 +16,27 @@ import { colors } from '../../theme'
 
 function LinkButton (props: {href: string, children: string | ReactElement, size?: 'large' | 'small', color?: 'blue' | 'grey' | 'white'}) {
   const { href, children, size = 'small', color = 'blue' } = props
+  const className = `${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-medium w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center text-center`
+
+  // Ensures that we use the appropriate version for docs links
+  if (href.startsWith('/')) {
+    const segments = href.split('/')
+    if (segments.length >= 3 && segments[1] === 'docs' && isValidVersionSlug(segments[2])) {
+      return (
+        <VersionedDocsLink
+          path={`/${segments.slice(3).join('/')}`}
+          className={className}
+        >
+          {children}
+        </VersionedDocsLink>
+      )
+    }
+  }
+
   return (
     <Link
       href={href}
-      className={`${color === 'blue' ? 'bg-primary text-white' : color === 'grey' ? 'bg-secondary text-white' : 'bg-white text-primary'} rounded-lg ${size === 'small' ? 'px-4 py-2 text-base sm:text-lg' : 'px-6 py-4 text-lg sm:text-xl'} font-medium w-fit shadow-md hover:shadow-lg hover:-translate-y-1 transition-all ease-linear duration-100 flex items-center text-center`}
+      className={className}
     >
       {children}
     </Link>
@@ -134,7 +152,7 @@ export default function Page () {
           </div>
           <div className="py-4 flex gap-4 flex-wrap">
             <LinkButton
-              href={'/docs/guides/getting-started/start-here'}
+              href={'/docs/edge/guides/getting-started/start-here'}
             >
               Get Started
             </LinkButton>
@@ -230,7 +248,7 @@ export default function Page () {
               </>
             )}
             buttonText={'See the modules'}
-            buttonHref={'/docs/reference/infrastructure-modules/overview'}
+            buttonHref={'/docs/edge/reference/infrastructure-modules/overview'}
           />
           <Callout
             title={'Step-by-Step Guides'}
@@ -244,7 +262,7 @@ export default function Page () {
               </>
             )}
             buttonText={'Use the bootstrapping guide'}
-            buttonHref={'/docs/guides/bootstrapping/overview'}
+            buttonHref={'/docs/edge/guides/bootstrapping/overview'}
           />
           <Callout
             title={'Deploy on your Infrastructure'}

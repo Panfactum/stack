@@ -1,0 +1,138 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# AWS SSO with Authentik
+
+<ModuleHeader name="authentik_aws_sso" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/authentik_aws_sso" status="stable" type="live" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [authentik](#requirement_authentik) (2024.2.0)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [tls](#requirement_tls) (4.0.5)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_authentik_domain" /> [authentik\_domain](#input_authentik_domain)
+
+Description: The domain name of the authentik instance
+
+Type: `string`
+
+### <a name="input_authentik_namespace" /> [authentik\_namespace](#input_authentik_namespace)
+
+Description: The kubernetes namespace where Authentik is deployed
+
+Type: `string`
+
+### <a name="input_aws_acs_url" /> [aws\_acs\_url](#input_aws_acs_url)
+
+Description: The ACS url provided by AWS when configuring an external identity provider
+
+Type: `string`
+
+### <a name="input_aws_issuer" /> [aws\_issuer](#input_aws_issuer)
+
+Description: The Issuer url provided by AWS when configuring an external identity provider
+
+Type: `string`
+
+### <a name="input_aws_sign_in_url" /> [aws\_sign\_in\_url](#input_aws_sign_in_url)
+
+Description: The sign-in url provided by AWS when configuring an external identity provider
+
+Type: `string`
+
+### <a name="input_media_configmap" /> [media\_configmap](#input_media_configmap)
+
+Description: The configmap holding the static media that Authentik will use
+
+Type: `string`
+
+### <a name="input_organization_name" /> [organization\_name](#input_organization_name)
+
+Description: The name of your organization
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_allowed_groups" /> [allowed\_groups](#input_allowed_groups)
+
+Description: Only members of these groups can access AWS
+
+Type: `set(string)`
+
+Default: `[]`
+
+### <a name="input_aws_scim_enabled" /> [aws\_scim\_enabled](#input_aws_scim_enabled)
+
+Description: Whether to enable SCIM with AWS
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_aws_scim_token" /> [aws\_scim\_token](#input_aws_scim_token)
+
+Description: The SCIM token provided by AWS
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_aws_scim_url" /> [aws\_scim\_url](#input_aws_scim_url)
+
+Description: The SCIM endpoint provided by AWS
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_ui_description" /> [ui\_description](#input_ui_description)
+
+Description: The description to display in the Authentik web dashboard
+
+Type: `string`
+
+Default: `"Amazon Web Services - IAM Identity Center SSO Login"`
+
+### <a name="input_ui_group" /> [ui\_group](#input_ui_group)
+
+Description: The section in the Authentik web dashboard that this will appear in
+
+Type: `string`
+
+Default: `"Amazon Web Services"`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_saml_metadata" /> [saml\_metadata](#output_saml_metadata)
+
+Description: n/a
+
+## Usage
+
+1. You have to enable AWS SSO in the root account via the web console
+   before applying this module for the first time.
+
+2. The SAML metadata document from the IdP needs to be uploaded to AWS MANUALLY.
+
+3. SCIM provisioning must be configured MANUALLY. Group assignments won't work until this step is completed.
+
+4. The user portal URL needs to be configured MANUALLY in the aws web console in the SSO settings.
+
+{/* lint enable no-duplicate-headings */}

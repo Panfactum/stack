@@ -1,0 +1,75 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Linkerd2 Service Mesh
+
+<ModuleHeader name="kube_linkerd" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/kube_linkerd" status="stable" type="live" />
+
+This module deploys the [Linkerd2 service mesh.](https://linkerd.io/)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_vault_ca_crt" /> [vault\_ca\_crt](#input_vault_ca_crt)
+
+Description: The vault certificate authority public certificate.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_linkerd_helm_version" /> [linkerd\_helm\_version](#input_linkerd_helm_version)
+
+Description: The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)
+
+Type: `string`
+
+Default: `"2024.5.1"`
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level for the Linkerd pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

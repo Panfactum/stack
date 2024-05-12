@@ -1,7 +1,7 @@
 import { memo } from 'react'
 
-import CTA from '@/components/layout/web/primary/CTA'
 import Logo from '@/components/layout/web/primary/Logo'
+import CTA from '@/components/layout/web/primary/cta/CTA'
 import MobileHeaderContainer from '@/components/layout/web/primary/mobileHeader/MobileHeaderContainer'
 
 export default memo(function MobileHeader () {

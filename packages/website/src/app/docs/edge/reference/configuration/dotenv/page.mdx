@@ -1,0 +1,10 @@
+# User-specific Environment Values
+
+The following values can be used in the `.env` file of the infrastructure repo to control interactions with the Panfactum stack:
+
+| Value                 | Required | Description                                                                                                                  |
+|-----------------------|----------|------------------------------------------------------------------------------------------------------------------------------|
+| `LOCAL_DEV_NAMESPACE` | X        | A short name code that should be unique to you. Used for spinning up personal development stacks in the development cluster. |
+| `CI`                  |          | Should be left blank or set to `false` unless you are attempting to emulate / test the CI system.                            |
+| `VAULT_ADDR`          |          | The [Vault](https://www.vaultproject.io/) instance to connect to for authentication to your system.                          |
+| `AUTHENIK_TOKEN`      |          | The [Authentik](https://goauthentik.io/) API token to use for terraforming.                                                  |

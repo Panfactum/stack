@@ -138,7 +138,8 @@ words: [
   "discoverability",
   "TTFB",
   "autoscale",
-  "contentful"
+  "contentful",
+  "upvotes"
 ]
 languageSettings:
   - languageId: markdown,mdx

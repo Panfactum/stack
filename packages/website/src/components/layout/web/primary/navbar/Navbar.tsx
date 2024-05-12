@@ -1,7 +1,8 @@
 import React, { memo } from 'react'
 
-import CTA from '@/components/layout/web/primary/CTA'
 import Logo from '@/components/layout/web/primary/Logo'
+import CTA from '@/components/layout/web/primary/cta/CTA'
+import ChangeLogLink from '@/components/layout/web/primary/navbar/ChangeLogLink'
 import NavbarContainer from '@/components/layout/web/primary/navbar/NavbarContainer'
 import NavbarLink from '@/components/layout/web/primary/navbar/NavbarLink'
 
@@ -18,11 +19,7 @@ const Links = memo(() => {
         prefix="/docs"
         text="Docs"
       />
-      <NavbarLink
-        href="/changelog"
-        prefix="/changelog"
-        text="Changelog"
-      />
+      <ChangeLogLink/>
       <NavbarLink
         href="/about"
         prefix="/about"
@@ -36,16 +33,17 @@ export default memo(function Navbar () {
   return (
     <NavbarContainer>
       <div className="flex flex-row justify-between px-4 h-full items-center max-w-[1280px] mx-auto">
-        <div className="hidden sm:block">
+        <div className="hidden sm:block basis-1/3">
           <Logo/>
         </div>
         <nav
-          className="flex flex-row gap-2 justify-self-center h-full w-full sm:w-fit"
+          className="flex flex-row gap-2 h-full w-full sm:w-fit"
           aria-label="primary-navigation-bar"
         >
           <Links/>
         </nav>
-        <div className="hidden sm:block">
+
+        <div className="hidden sm:block basis-1/3">
           <CTA/>
         </div>
       </div>

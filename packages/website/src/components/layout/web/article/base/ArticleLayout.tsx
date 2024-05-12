@@ -5,7 +5,7 @@ import ArticleContainer from '@/components/layout/web/article/base/ArticleContai
 
 export default memo(function ArticleLayout ({ children }: {children: ReactNode}) {
   return (
-    <ArticleContainer>
+    <ArticleContainer withSidebar={false}>
       {children}
     </ArticleContainer>
   )

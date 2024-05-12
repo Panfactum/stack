@@ -1,0 +1,95 @@
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+
+import ebsCSILaunchImg from './ebs-csi-launch.jpg'
+import secretsCSILaunchImg from './secrets-csi-launch.jpg'
+import storageClassesImg from './storage-classes.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Container Storage Interface (CSI) Drivers
+
+## Objective
+
+Deploy the various CSI drivers used by the Panfactum stack.
+
+## Background
+
+Compared to networking, storage in kubernetes is relatively straightforward. Storage is exposed to pods
+via two mechanisms:
+
+* Directly from the available storage on the host operating system [^1]
+* Dynamically, using a [Container Storage Interface (CSI)](https://kubernetes.io/blog/2019/01/15/container-storage-interface-ga/) driver
+
+[^1]: This type of storage should be considered ephemeral (temporary) as it inherently linked to the lifetime of the underlying
+    nodes. In the Panfactum stack, nodes can be replaced at any time.
+
+The primary use case for CSI is for attaching storage managed by cloud providers (e.g., [AWS EBS](https://aws.amazon.com/ebs/)). That said,
+this interface is extremely flexible and can also be used by other utilities to directly mount files inside your pods.
+
+## Deploy AWS EBS CSI Driver
+
+The [AWS EBS CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver) allows you to provision EBS volumes for
+use in your pods. This is the recommended way to store stateful data (i.e., Database storage) within the Panfactum stack.
+
+We provide the [kube\_aws\_ebs\_csi](/docs/edge/reference/infrastructure-modules/kubernetes/kube_aws_ebs_csi) module to deploy the driver.
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_aws_ebs_csi`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_aws_ebs_csi/terragrunt.hcl).
+
+3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, `random`, and `helm` providers.
+
+5. Run `terragrunt apply`.
+
+6. Verify the pods deployed successfully:
+   <MarkdownImage src={ebsCSILaunchImg} alt="AWS EBS CSI launched successfully" />
+
+### Storage Classes
+
+Note that there are now a few [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) resources
+in the cluster:
+
+<MarkdownImage src={storageClassesImg} alt="Storage classes in the cluster" />
+
+The following classes were installed by the `kube_aws_ebs_csi` module:
+
+* `ebs-standard`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes and deletes the volumes automatically
+  when the utilizing resource is deleted (default)
+* `ebs-standard-retained`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes but never deletes the underlying
+  volumes (recommended for production databases)
+
+Notice that there is also one named `gp2`. Unfortunately, EKS installs this automatically, but it uses legacy storage
+technology that is both more expensive and less performant. Even more unfortunately, this is set as the default storage
+class. To avoid accidentally using it, you should manually delete it now with the following
+command: `kubectl delete storageclass gp2`.
+
+## Deploy the Kubernetes Secrets Store CSI Driver
+
+The [Kubernetes Secrets Store CSI driver](https://secrets-store-csi-driver.sigs.k8s.io/) allows you to mount secrets
+files from third part sources such as AWS or [Hashicorp Vault](https://www.vaultproject.io/) (which we will install in the next section).
+
+We provide the [kube\_secrets\_csi](/docs/edge/reference/infrastructure-modules/kubernetes/kube_secrets_csi) module to deploy the driver.
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_secrets_csi`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_secrets_csi/terragrunt.hcl).
+
+3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+
+5. Run `terragrunt apply`.
+
+6. Verify the pods deployed successfully:
+   <MarkdownImage src={secretsCSILaunchImg} alt="Secrets CSI launched successfully" />
+
+## Next Steps
+
+We will test the storage drivers in the next section where we deploy Vault (which needs persistent storage).
+
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/internal-cluster-networking"} forwardHref={"/docs/edge/guides/bootstrapping/vault"} stepNumber={10} />

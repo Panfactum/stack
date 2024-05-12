@@ -2,10 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
+import { useLocalStorage } from 'usehooks-ts'
 
 import CustomRenderedTabs from '@/components/layout/web/secondary/tabs/CustomRenderedTabs'
 import { SecondaryTabsVisibleContext } from '@/lib/contexts/web/SecondaryTabsVisible'
-import { useLocalStorage } from '@/lib/hooks/state/useLocalStorage'
 import useIsXSmall from '@/lib/hooks/ui/useIsXSmall'
 
 export interface IWebTabNavigationProps {
@@ -23,7 +23,7 @@ export default function CustomTabs (props: IWebTabNavigationProps) {
   const isXSmall = useIsXSmall()
 
   // Under each tab, we save the user's last location so that when they return to the tab their location is restored
-  const [savedLocations, setSavedLocations] = useLocalStorage<{[href: string]: string}>(`saved-locations-${id}`, {})
+  const [savedLocations, setSavedLocations] = useLocalStorage<{[href: string]: string}>(`saved-locations-${id}`, {}, { initializeWithValue: false })
 
   // This indicated whether saved locations are still valid so that we don't end up navigating users to non-existant urls
   const [validatedLocations, setValidatedLocations] = useState<{[path: string]: boolean}>({})

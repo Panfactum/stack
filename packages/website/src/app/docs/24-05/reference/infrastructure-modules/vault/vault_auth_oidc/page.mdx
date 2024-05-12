@@ -1,0 +1,97 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Vault OIDC Authentication
+
+<ModuleHeader name="vault_auth_oidc" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/vault_auth_oidc" status="stable" type="live" />
+
+Allows SSO logins to the Vault instance via OIDC.
+
+To be used with the [authentik\_vault\_sso](/docs/24-05/reference/infrastructure-modules/authentik/authentik_vault_sso) module.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_client_id" /> [client\_id](#input_client_id)
+
+Description: The client id for the OIDC authentication
+
+Type: `string`
+
+### <a name="input_client_secret" /> [client\_secret](#input_client_secret)
+
+Description: The client secret for the OIDC authentication
+
+Type: `string`
+
+### <a name="input_oidc_discovery_url" /> [oidc\_discovery\_url](#input_oidc_discovery_url)
+
+Description: The discover url for OIDC authentication
+
+Type: `string`
+
+### <a name="input_oidc_issuer" /> [oidc\_issuer](#input_oidc_issuer)
+
+Description: The bound issuer for OIDC authentication
+
+Type: `string`
+
+### <a name="input_oidc_redirect_uris" /> [oidc\_redirect\_uris](#input_oidc_redirect_uris)
+
+Description: The allowed redirect URIs for OIDC authentication
+
+Type: `list(string)`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_admin_groups" /> [admin\_groups](#input_admin_groups)
+
+Description: Groups that should have read and write access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
+
+Description: Groups that should have read-only access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_superuser_groups" /> [superuser\_groups](#input_superuser_groups)
+
+Description: Groups that should have superuser access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_token_lifetime_seconds" /> [token\_lifetime\_seconds](#input_token_lifetime_seconds)
+
+Description: Number of seconds before generated tokens expire
+
+Type: `number`
+
+Default: `28800`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

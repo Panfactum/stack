@@ -186,7 +186,7 @@ export default function PriceTable () {
               Learn more
               {' '}
               <Link
-                href="/docs/guides/versioning/releases"
+                href="/docs/edge/guides/versioning/releases"
                 className="text-white underline hover:cursor-pointer"
               >
                 here.

@@ -10,7 +10,7 @@ const remarkConfig = {
         process.env.LINT_CHECK_DEAD_URLS === "true" ? ["remark-lint-no-dead-urls", ['error', {
             skipUrlPatterns: [
                 /^.*__discordServerLink__.*$/, // ignore custom interpolation
-                /^.*__currentPanfactumVersion__.*$/, // ignore custom interpolation
+                /^.*__PANFACTUM_VERSION.*$/, // ignore custom interpolation
                 /^.*cloudflare\.com.*$/, // cloudflare returns a 403 when using cli tools to access their sites
                 /^.*medium\.com.*$/ // medium returns 103
             ],

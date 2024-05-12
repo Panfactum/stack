@@ -36,7 +36,7 @@ const StyledArticleContainer = styled.article<{withSidebar?: boolean, secondaryT
 
     // The total content width should NEVER exceed WEB_ARTICLE_MAX_WIDTH_PX so if a sidebar exists we need to take that into
     // account when determining the max width of the article. The sidebar is only embedded in the document layout on larger screens.
-    max-width: ${({ withSidebar = false }) => withSidebar ? `min(${WEB_ARTICLE_MAX_WIDTH_PX - WEB_ARTICLE_SIDEBAR_WIDTH_PX}px, calc(100vw - ${WEB_ARTICLE_SIDEBAR_WIDTH_PX}px))` : `${WEB_ARTICLE_MAX_WIDTH_PX}px`};
+    max-width: ${`min(${WEB_ARTICLE_MAX_WIDTH_PX - WEB_ARTICLE_SIDEBAR_WIDTH_PX}px, calc(100vw - ${WEB_ARTICLE_SIDEBAR_WIDTH_PX}px))`};
   }
 `
 

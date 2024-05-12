@@ -1,3 +1,5 @@
+'use client'
+
 import type { Components, Theme as MUITheme } from '@mui/material'
 import { createTheme } from '@mui/material'
 

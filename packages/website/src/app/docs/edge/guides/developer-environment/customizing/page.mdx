@@ -1,0 +1,188 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
+# Customizing
+
+The Panfactum stack comes with a preloaded `devenv` that contains both essential and convenience utilities
+for working with the stack. However, it is likely that you will want to include additional utilities that are
+specific to your organization.
+
+## Basics
+
+After completing the [getting started guide](/docs/edge/guides/bootstrapping/installing-devenv), you should have a `devenv.nix`
+file in the root of your repository.
+
+You can add **any** option here that you would in a blank `devenv` setup. For the complete list of options,
+please review [these docs](https://devenv.sh/reference/options/).
+
+We strongly encourage you to go through [this brief devenv guide](https://devenv.sh/basics/) to get a sense for all the possibilities.
+
+## Triggering Automatic Updates on New Files
+
+You may find it easier to split out your `devenv.nix` into multiple files. If you want the `devenv` to reload
+automatically when those files change, you need to add new `nix_direnv_watch_file` directives to your
+`.envrc` file.
+
+For example, if you add a new file called `node.nix`, your `.envrc` file should contain the line
+
+```bash
+nix_direnv_watch_file node.nix
+```
+
+## Adding New Tools
+
+### From nixpkgs
+
+Your `devenv.nix` should have an input variable called `pkgs`. This variable represents all packages
+available in the [nixpkgs GitHub repository](https://github.com/NixOS/nixpkgs).
+`nixpkgs` is the **largest** software repository in the world ([graph](https://repology.org/repositories/graphs)),
+so an enormous amount of utilities are readily available to you.
+
+To add a package such as `nodejs_20`, update your `devenv.nix` with the following:
+
+```nix
+{ config, pkgs, ... }: {
+  packages = with pkgs; [
+    nodejs_20
+  ];
+}
+```
+
+<MarkdownAlert severity="info">
+  [This search interface](https://search.nixos.org/packages) is very helpful for finding packages.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+  All packages defined in the `nixpkgs` GitHub repo are updated together,
+  and **many** updates are made to the repository each day.
+  `pkgs` refers to the set of packages defined by a **specific commit** in `nixpkgs`.
+  That commit is determined by the `inputs.pkgs.url` field in your `flake.nix`.
+
+  However, if you specify a branch such as `nixos-23.11` (via `inputs.pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";`),
+  the commit hash is pinned in the `flake.lock` file and will not be automatically updated.
+
+  To update the commit hash, you must run `nix flake update`, and the commit hash will update to the latest commit
+  on that branch.
+
+  In general, we recommend pinning the commit directly in the `flake.nix` to avoid ambiguity. For example,
+  `inputs.pkgs.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";`.
+</MarkdownAlert>
+
+### Specific Version from nixpkgs
+
+Since all of `nixpkgs` is versioned atomically, you may find yourself in the following scenario:
+
+> You want a version of utility `A` that is found at `nixpkgs` commit `XXX` and also a version of utility
+> `B` that is found at commit `YYY`.
+
+Fortunately, you can create a nix expression that represents a package from a specific commit of `nixpkgs`
+rather than the global `pkgs` variable.
+
+For example, if you wanted the `nodejs_20` package from the `c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611`
+commit, you can create the following nix expression in a file called `node.nix` (make sure you `git add` it):
+
+```nix
+let
+  system = builtins.currentSystem;
+  nixpkgsSrc = builtins.fetchGit {
+    url = "https://github.com/NixOS/nixpkgs";
+    rev = "c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
+    shallow = true;
+  };
+  pkgs = import nixpkgsSrc { inherit system; };
+in pkgs.nodejs_20
+```
+
+You would include this in your `devenv.nix` as follows:
+
+```nix
+{ config, pkgs, ... }: {
+  packages = with pkgs; [
+    (import ./node.nix)
+  ];
+}
+```
+
+<MarkdownAlert severity="info">
+  [This search interface](https://www.nixhub.io/) is incredibly
+  helpful at finding the specific `nixpkgs` commit hash that contains specific versions of your desired tool.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+  When you are updating the `nixpkgsSrc.url`, you MUST update the sha256 in order to trigger a rebuild. Simply
+  changing the URL will not invalidate the cache.
+</MarkdownAlert>
+
+### Custom Scripts
+
+You may want to include custom shell scripts in your developer environment.
+
+Imagine that you have the following script called `foobar.sh` that you want users to be able to call by
+executing `foobar` anywhere in the developer environment:
+
+```bash
+#!/usr/bin/env bash
+
+echo "Foobar"
+```
+
+You would include this in your `devenv.nix` as follows:
+
+```nix
+{ config, pkgs, ... }: {
+  packages = with pkgs; [
+    (writeShellScriptBin name (builtins.readFile ./foobar.sh))
+  ];
+}
+```
+
+### Wrapping an Existing Tool
+
+Occasionally, you may want to use a package but automatically pass in default flags or
+environment variables for users of your developer environment.
+
+There is a handy package called
+[makeWrapper](https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/setup-hooks/make-wrapper.sh)
+that allows you to do this.
+
+For example, let's say you want to always add `-n cilium` to calls of the `cilium` CLI. Simply create the following
+`cilium.nix` file (make sure to `git add` it):
+
+```nix
+{ pkgs }:
+pkgs.symlinkJoin {
+  name = "cilium-cli";
+  paths = [ pkgs.cilium-cli ];
+  buildInputs = [ pkgs.makeWrapper ];
+  postBuild = ''
+    wrapProgram $out/bin/cilium \
+      --add-flags "-n cilium"
+  '';
+}
+```
+
+You would include this in your `devenv.nix` as follows:
+
+```nix
+{ config, pkgs, ... }: {
+  packages = with pkgs; [
+    (import ./cilium.nix { inherit pkgs; })
+  ];
+}
+```
+
+### Build a Custom Utility
+
+If you are looking to package a custom binary, you will need to learn how nix derivations work.
+
+We strongly encourage you to go through the [nix pills](https://nixos.org/guides/nix-pills/why-you-should-give-it-a-try)
+tutorial for a good beginner overview.
+
+The [nixpkgs manual](https://ryantm.github.io/nixpkgs/#preface) contains very detailed instructions
+for best practices in creating nix packages for the most popular language ecosystems.
+
+## Best Practices
+
+* Use `devenv` to define **all** of your utilities in order to ensure
+  consistency across developers and machines.
+
+* Use `devenv` to define your [pre-commit hooks](https://devenv.sh/pre-commit-hooks/)

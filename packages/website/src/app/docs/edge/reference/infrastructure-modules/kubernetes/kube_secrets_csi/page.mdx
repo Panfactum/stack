@@ -1,0 +1,62 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes Secrets CSI
+
+<ModuleHeader name="kube_secrets_csi" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/kube_secrets_csi" status="stable" type="live" />
+
+This module provides the CSI driver for provisioning external secrets (e.g., from vault) as volume mounts
+and kubernetes secrets. See the [docs](https://secrets-store-csi-driver.sigs.k8s.io/).
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_secrets_store_csi_helm_version" /> [secrets\_store\_csi\_helm\_version](#input_secrets_store_csi_helm_version)
+
+Description: The version of the secrets-store-csi-driver helm chart to deploy
+
+Type: `string`
+
+Default: `"1.4.2"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

@@ -4,9 +4,10 @@ import React from 'react'
 
 import FAQ from '@/app/stack/pricing/components/FAQ'
 import PriceTable from '@/app/stack/pricing/components/PriceTable'
-import { discordServerLink } from '@/app/vars'
 import Balancer from '@/components/ui/Balancer'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
+import VersionedDocsLink from '@/components/ui/VersionedDocsLink'
+import { discordServerLink } from '@/lib/constants'
 
 export const metadata: Metadata = {
   title: 'Pricing'
@@ -149,12 +150,12 @@ export default function Page () {
             While the Stack contains functionality that would only normally be possible with dedicated infrastructure
             teams, we provide
             {' '}
-            <Link
-              href={'/docs/guides/bootstrapping/overview'}
+            <VersionedDocsLink
+              path={'/guides/bootstrapping/overview'}
               className="text-primary underline hover:cursor-pointer"
             >
               detailed step-by-step guides
-            </Link>
+            </VersionedDocsLink>
             {' '}
             that allow organizations to manage the system for less than 4 person-hours / month.
           </>,

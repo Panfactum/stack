@@ -3,7 +3,7 @@
 # Purpose: Uses terraform-docs to create the markdown documentation
 # for each terraform module for the public website
 
-OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/docs/reference/infrastructure-modules"
+OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/docs/edge/reference/infrastructure-modules"
 
 # Initialize an empty JSON object with a `modules` array
 JSON=$(jq -n '{modules: []}')
@@ -50,7 +50,7 @@ function remove_version_header() {
 
 function add_header() {
   sed -E "1iimport ModuleHeader from \"../../ModuleHeader\";\n" |
-    sed -E "6i<ModuleHeader name=\"$1\" sourceHref=\"https://github.com/Panfactum/stack/tree/main/packages/infrastructure/$1\" status=\"$2\" type=\"$3\"/>"
+    sed -E "6i<ModuleHeader name=\"$1\" sourceHref=\"https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/$1\" status=\"$2\" type=\"$3\"/>"
 }
 
 # Loop through each directory in the script's directory

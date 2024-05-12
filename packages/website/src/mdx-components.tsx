@@ -3,17 +3,19 @@ import type { MDXComponents } from 'mdx/types'
 import Link from 'next/link'
 import type { ReactNode, Ref } from 'react'
 
-import { currentPanfactumVersion, discordServerLink } from '@/app/vars'
 import CopyHeader from '@/components/markdown/CopyHeader'
 import PrettyBalancer from '@/components/ui/PrettyBalancer'
+import {
+  discordServerLink,
+  replaceVersionPlaceholders
+} from '@/lib/constants'
 
 import { roboto } from './app/font'
 
 const defaultTextSize = ['text-sm', 'sm:text-base']
 
 const replaceCodeVariables = (str: string) => {
-  return str
-    .replaceAll('__currentPanfactumVersion__', currentPanfactumVersion)
+  return replaceVersionPlaceholders(str)
     .replaceAll('__discordServerLink__', discordServerLink)
 }
 

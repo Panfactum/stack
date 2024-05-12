@@ -1,0 +1,392 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
+
+import eksDashboardImg from './eks-dashboard.jpg'
+import k9sReadyImg from './k9s-ready.jpg'
+import k9sImg from './k9s.jpg'
+import pullThroughSVG from './pull-through-cache.svg'
+import terminateNodeImg from './terminate-node.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Kubernetes Cluster
+
+## Objective
+
+Deploy a Kubernetes cluster on
+[AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
+using our [aws\_eks](/docs/24-05/reference/infrastructure-modules/aws/aws_eks) module.
+
+## A Quick Note
+
+This is the first infrastructure component that will begin to incur nontrivial cost. EKS costs at minimum {"$"}75 / month,
+and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
+
+[^1]: This cost is well worth it. Even if you were to self-manage the control plane using a tool like
+    [kops](https://github.com/kubernetes/kops), your raw infrastructure costs will likely cost at minimum /\$50 / month.
+    From personal experience running many bare metal clusters, when you factor in the additional time and headache
+    required to manage the control plane on your own, this is an incredible deal.
+
+## Configure Pull Through Cache
+
+Many of the utilities we will run on the cluster are distributed as images from public registries such as
+[quay.io](https://quay.io/), [ghcr.io](https://github.com/features/packages), [docker.io](https://www.docker.com/),
+or [registry.k8s.io](https://github.com/kubernetes/registry.k8s.io). The cluster's ability to download
+these images is critical to its operational resiliency. Unfortunately, public registries have several downsides:
+
+* They can and frequently do experience service disruptions
+
+* Many impose rate limits to the amount of images any IP is allowed to download in a given time window
+
+* Image downloads tend to be large and are subject to the bandwidth limitations of the upstream registry as well
+  the intermediate network infrastructure
+
+To address these problems, we will configure a [pull through cache using AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html).
+Conceptually this works as follows:
+
+<MarkdownSVGImage src={pullThroughSVG} alt="Model for how pull through image caches operate in AWS" />
+
+Instead of cluster nodes pulling images directly from a public registry, they will pull them from ECR which is then
+configured to download the image from the public registry *only if it does not already contain the image
+in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
+the initial deployment.
+
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/24-05/reference/infrastructure-modules/aws/aws_ecr_pull_through_cache).
+
+However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
+
+[^13]: Yes, even though we are only using their public images. This appears to be an AWS limitation.
+
+### GitHub Credentials
+
+You will need a GitHub user and an associated [GitHub personal access token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+
+Use the following PAT settings:
+
+* Use a **classic** token.
+
+* Set the token to **never** expire.
+
+* Grant **only** the `read:packages` scope.
+
+### Docker Hub Credentials
+
+You will need a Docker Hub user an [associated access token](https://docs.docker.com/security/for-developers/access-tokens/).
+
+This token should have the `Public Repo Read-only` access permissions.
+
+### Deploy the Pull Through Cache Module
+
+The following instructions apply for **every** environment-region combination where you will deploy Kubernetes cluster:
+
+1. Choose the region where you want to deploy clusters.
+
+2. Add an `aws_ecr_pull_through_cache` directory to that region.
+
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_24_05__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
+
+4. Add a `module.yaml` that enables the `aws` provider.
+
+5. Run `terragrunt apply`.
+
+In the following sections, modules will have `pull_through_cache_enabled` as an input. Setting this to `true`
+will use the pull through cache that you just deployed. This is the default in the examples that we provide.
+
+<MarkdownAlert severity="warning">
+  This should only be deployed *once* per environment-region combination. If you have multiple clusters
+  in the same region, you do **not** need to deploy the pull through cache multiple times.
+</MarkdownAlert>
+
+## Deploying the Cluster
+
+### Set up Terragrunt
+
+1. Choose the region where you want to deploy the cluster.
+
+2. Add an `aws_eks` directory to that region.
+
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_24_05__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl).
+
+4. Add a `module.yaml` that enables **both** the `aws` and `tls` providers.
+
+5. Do **NOT** apply the module yet.
+
+### Choose a Cluster Name
+
+Your cluster name should be globally unique within your organization and descriptive. We will use it
+as an identifier in many tools, and it should be immediately apparent which cluster is being referred to if
+referenced by name. A good name would look like `production-primary` indicating that this cluster is the
+primary cluster in the production environment.
+
+### Choose Kubernetes Version
+
+We *strongly* recommend leaving this as the module default. The version was specifically chosen for compatibility
+with the rest of the Panfactum stack. See the [module documentation](/docs/24-05/reference/infrastructure-modules/aws/aws_eks) if
+you need to override either the control plane or node group versions.
+
+### Choose Control Plane Subnets
+
+For `control_plane_subnets`, you need to enter the names of **at least 3** subnets (each in a different AZ) that
+you created in the [aws networking guide](/docs/24-05/guides/bootstrapping/aws-networking). [^3] This ensures the API server is resilient to an AZ outage.
+
+[^3]: Ensure that you choose an odd number for proper resilience to AZ outages. A requirement of `etcd`, the database
+    backend for Kubernetes.
+
+We assume that you will use the three **public** subnets so that you can access the API server from your local machine. [^2]
+We will do deeper into securing the API server in a subsequent section.
+
+[^2]: In fact, the rest of this guide depends on you doing this.
+
+### Choose a Service CIDR
+
+For `service_cidr`, you will want to a private CIDR range that does not conflict with your VPC or any of it's subnets. That
+is because Kubernetes performs its own routing and networking independently of AWS.
+
+If you've been following the recommendations in this guide, we *strongly* recommend `172.20.0.0/16`.
+
+### Choose Node Subnets
+
+For `controller_node_subnets`, you have an important decision to make: how many availability zones do you want your nodes
+to run in.
+
+More AZs will result in higher resiliency, but it will also result in increased cost as network traffic that crosses
+availability zones incurs additional charge. [^6]
+
+[^6]: In practice, this is fairly minimal unless you have very chatty applications. As a result, it is normally best to
+    run whatever you'd run in production in all environments. This allows for better testing and issue emulation.
+
+We generally recommend using three AZs, but in development or test environments it is perfectly acceptable to
+choose one. [^4]
+
+[^4]: Note that this must be an odd number in order for many high availability algorithms to work in the case of an
+    AZ outage (e.g., [Raft](https://raft.github.io/)).
+
+The subnets you choose should be **private** and should each be in a different AZ if you are using more than one.
+
+### Choose Node Count and Size
+
+The nodes created by this module are used to run cluster-critical controllers, without which your cluster will not
+function properly. [^5] You should use at least three to facilitate the high-availability algorithms used by some of the
+controllers. The `t3a.large` is the minimum recommended instance size if using three nodes.
+
+[^5]: Additional "worker" nodes will be dynamically provisioned by [Karpenter](https://karpenter.sh/) in a future section of this guide.
+
+### Deploy the Cluster
+
+<MarkdownAlert severity="warning">
+  When you deploy the cluster, ensure that you are using the credentials for the `root` user. You should already
+  be if you haven't deviated from this guide.
+
+  In EKS, the user that creates the cluster implicitly has admin access to the Kubernetes API server. This is critical
+  in the case that you accidentally break cluster authentication and need to recover. The `root`
+  user is the only user that can never be accidentally deleted; using another user may result in you losing your
+  ability to recover the cluster in an emergency.
+</MarkdownAlert>
+
+You are now ready to run `terragrunt apply`.
+
+This may take up to 30 minutes to complete.
+
+When it is ready, you should see your EKS cluster in the AWS web console reporting as `Active` and without any health
+issues.
+
+<MarkdownImage src={eksDashboardImg} alt="Kubernetes cluster dashboard in AWS web console" />
+
+## Connect to the Cluster
+
+### Set Up cluster\_info Metadata and CA Certs
+
+The Panfactum devenv comes with utilities that make connecting to your cluster a breeze.
+
+First, we want to save important cluster metadata into your repository so other users can easily access the information
+even if they do not have permissions to interact directly with the infrastructure modules.
+
+To download this metadata:
+
+1. Add a `config.yaml` file to your `$PF_KUBE_DIR` directory: [^20]
+
+   [^20]: By default, this is set to `.kube` in the root of your repository.
+
+   ```yaml
+   clusters:
+     - module: "production/us-east-2/aws_eks"
+   ```
+
+   Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
+   terragrunt directory under `$PF_ENVIRONMENTS_DIR`.
+
+2. Replace `module` with the appropriate path for the cluster you just launched.
+
+3. Run `pf-update-kube --build` to dynamically generate a `cluster_info` file and download your cluster's CA certs.
+
+As you add additional clusters, you will need to update `config.yaml` and re-run `pf-update-kube --build`. More
+information about this file can be found [here](/docs/24-05/reference/configuration/kubernetes).
+
+### Set up Kubeconfig
+
+All utilities in the kubernetes ecosystem rely on
+[kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) files to configure
+their access to various Kubernetes clusters.
+
+In the Panfactum stack, that file is stored in your repo in the `$PF_KUBE_DIR` directory. [^9]
+
+[^9]: We store the config file in your repo and not in the typical location (`~/.kube/config`) so that it does not
+    interfere with other projects you are working on.
+
+To generate your kubeconfig:
+
+1. Add a `config.user.yaml` file that looks like this: [^7]
+
+   [^7]: This file is specific to every user as different users will have different access levels to the various
+       clusters. Every user will need to set up their own `$PF_KUBE_DIR/config.user.yaml`. This file is not committed to version control.
+
+   ```yaml
+   clusters:
+     - name: "production-primary"
+       aws_profile: "production-superuser"
+   ```
+
+2. Replace `name` with the name of the EKS cluster which can be found in `cluster_info`.
+
+3. Replace `aws_profile` with the AWS profile you want to use to authenticate
+   with the cluster. For now, use the AWS profile that you used to deploy the `aws_eks` module for the cluster.
+
+4. Run `pf-update-kube` to generate your kubeconfig file.
+
+Remember that you will need to update your `config.user.yaml` and re-run `pf-update-kube` as you add additional clusters. More
+information about this file can be found [here](/docs/24-05/reference/configuration/kubernetes).
+
+<MarkdownAlert severity="warning">
+  *Every* one of your users will need to set up their own `config.user.yaml` file, and we provide instructions
+  for them [here](/docs/24-05/guides/getting-started/connect-to-infrastructure).
+</MarkdownAlert>
+
+### Verify Connection
+
+1. Run `kubectx` to list all the clusters that were set up in the previous section. Selecting one will set your
+   Kubernetes [context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
+   which defines which cluster your commandline tools like `kubectl` will target. Select one now.
+
+2. Run `kubectl cluster-info`.
+
+   You should receive a result that looks like this:
+
+   ```shell-session
+   Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com
+   CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   ```
+
+### Use k9s
+
+Most of our cluster introspection and debugging will be done from a TUI called [k9s](https://k9scli.io/). This comes
+bundled with the Panfactum devenv.
+
+Let's verify what pods are running in the cluster:
+
+1. Run `k9s`
+2. Type `:pods⏎` to list all pods in the cluster
+3. k9s will filter results by [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+   and by default it is set to the `default` namespace. Press `0` to switch the filter to all namespaces.
+4. You should see a minimal list of pods that looks like this:
+
+   <MarkdownImage src={k9sImg} alt="k9s listing all pods" />
+
+k9s is an incredibly powerful tool, and it is our recommended way for operators to interact directly with their
+clusters. If you have never used this tool before, we recommend getting up to speed with [these tutorials](https://k9scli.io/topics/video/).
+
+## Deploy Kubernetes Modules
+
+In the Panfactum stack everything is deployed via OpenTofu (Terraform) modules, including Kubernetes manifests. [^10] By constraining ourselves
+to a single IaC paradigm, we are able to greatly simplify operations for users of the stack.
+
+[^10]: Though we will often use [third-party helm charts](https://helm.sh/) under the hood.
+
+### Set up Kubernetes Provider
+
+In order to start using our kubernetes modules, we must first configure the
+[Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
+some additional [terragrunt variables](/docs/24-05/reference/configuration/terragrunt-variables).
+
+In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
+
+* `kube_config_context`: The context in your `kubeconfig` file to use for connecting to the cluster in this region.
+  If this was set up using `pf-update-kube`, this is just the name of the cluster.
+* `kube_api_server`: This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
+
+See [this file](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_24_05__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
+
+The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
+
+### RBAC
+
+Up until now, we have been using implicit EKS authentication to communicate with the cluster (the IAM user that created
+the cluster automatically has cluster access). We will now deploy the [kube\_rbac](/docs/24-05/reference/infrastructure-modules/kubernetes/kube_rbac)
+module which will allow other users to authenticate (and eventually use dynamic rather than static credentials). This relies
+on a paradigm called [role-based access control](https://en.wikipedia.org/wiki/Role-based_access_control)
+which we will cover in more detail as we set up user roles and SSO.
+
+Since we are using an EKS cluster, authentication will work
+via the [AWS IAM Authenticator for Kubernetes](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). Users
+will use their IAM credentials to authenticate with the Kubernetes API server (hence why we have `aws_profile` set
+for each cluster in the `config.user.yaml` file).
+
+Authentication is controlled via a [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) found at
+`kube-system/aws-auth`. [^11]
+
+[^11]: The `<namespace>/<resource>` syntax is common in the Kubernetes ecosystem. `kube-system/aws-auth`
+    should be interpreted as the `aws-auth` resource in the `kube-system` namespace. We use this syntax because most resources
+    in Kubernetes are scoped to particular [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
+
+Let's deploy this module now:
+
+1. Adjacent to your `aws_eks` module, add a `kube_rbac` directory.
+
+2. Set up a `terragunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_24_05__/packages/reference/environments/production/us-east-2/kube_rbac/terragrunt.hcl).
+   For now, you **only** need to set the `aws_node_role_arn` input. We
+   will set up the other inputs when we configure SSO for your infrastructure.
+
+3. Enable **both** the `aws` and `kubernetes` providers in the `module.yaml`.
+
+4. Run `terragrunt apply`.
+
+5. To verify that cluster authentication is still functional, we will need to terminate a node and make sure the replacement node
+   is able to rejoin the cluster. [^12] Select one of the nodes and terminate it as shown below:
+   <MarkdownImage src={terminateNodeImg} alt="Terminating a Kubernetes node to verify nodes' ability to join the cluster" />
+
+6. The autoscaling group should notice the missing node within a few minutes and launch a new node to replace the terminated node.
+   If the node is able to reconnect, you should be able to see it as `Ready` within k9s (`:nodes`):
+   <MarkdownImage src={k9sReadyImg} alt="k9s showing node successfully joining the cluster" />
+
+7. If the node joins successfully, you have successfully set up your initial Kubernetes RBAC.
+
+[^12]: EC2 VMs are assigned IAM roles, and we only allow certain IAM roles to assume the necessary permissions to join
+    the cluster as a Kubernetes node. This is defined in the `aws-auth` ConfigMap alongside the human user authentication
+    directives.
+
+### Priority Classes
+
+[Priority classes](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/) in Kubernetes
+instruct the cluster which pods to prioritize running should the cluster become resource constrained. If a utility
+is depended on for proper cluster operation, we want to give them higher priority.
+
+The Panfactum stack defines
+several priority levels to ensure that your cluster remains as healthy as possible even in adverse circumstances such
+as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](/docs/24-05/reference/infrastructure-modules/kubernetes/kube_priority_classes)
+module.
+
+Let's deploy this module:
+
+1. Adjacent to your `aws_eks` module, add a `kube_priority_classes` directory.
+
+2. Set up a `terragunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_24_05__/packages/reference/environments/production/us-east-2/kube_priority_classes/terragrunt.hcl).
+
+3. Enable the `kubernetes` providers in the `module.yaml`.
+
+4. Run `terragrunt apply`.
+
+## Next Steps
+
+Congratulations! You have officially deployed Kubernetes using infrastructure-as-code.
+Now that the cluster is running, we will begin working on the internal networking stack.
+
+<BootstrappingGuideNav backHref={"/docs/24-05/guides/bootstrapping/aws-networking"} forwardHref={"/docs/24-05/guides/bootstrapping/internal-cluster-networking"} stepNumber={8} />

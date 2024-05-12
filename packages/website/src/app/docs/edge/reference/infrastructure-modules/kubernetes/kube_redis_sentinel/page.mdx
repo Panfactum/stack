@@ -1,0 +1,179 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Redis with Sentinel
+
+<ModuleHeader name="kube_redis_sentinel" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/kube_redis_sentinel" status="stable" type="submodule" />
+
+This module deploys a highly-available set of [Redis](https://redis.io/docs/) nodes.
+
+This is deployed in a single master, many replica configuration. Failover is handled
+by [Redis Sentinel](https://redis.io/docs/management/sentinel/) which is also
+deployed by this module.
+
+## Extra Redis Configuration
+
+You can add extra Redis configuration flags via the `redis_flags` module variable.
+
+These flags are passed as commandline arguments to the redis servers. This ensures they
+will be of the highest precedence.
+
+For more information about passing flags through the commandline and available options,
+see [this documentation](https://redis.io/docs/latest/operate/oss_and_stack/management/config/).
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace to deploy to the redis instances into
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on burstable instances
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_helm_version" /> [helm\_version](#input_helm_version)
+
+Description: The version of the bitnami/redis helm chart to use
+
+Type: `string`
+
+Default: `"19.0.2"`
+
+### <a name="input_minimum_memory_mb" /> [minimum\_memory\_mb](#input_minimum_memory_mb)
+
+Description: The minimum memory in Mb to use for the redis nodes
+
+Type: `number`
+
+Default: `25`
+
+### <a name="input_persistence_enabled" /> [persistence\_enabled](#input_persistence_enabled)
+
+Description: Whether the redis data will be stored on disk
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_persistence_size_gb" /> [persistence\_size\_gb](#input_persistence_size_gb)
+
+Description: How many GB to allocate for persistent storage
+
+Type: `number`
+
+Default: `5`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_redis_flags" /> [redis\_flags](#input_redis_flags)
+
+Description: Extra configuration flags to pass to each redis node
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_replica_count" /> [replica\_count](#input_replica_count)
+
+Description: The number of redis replicas to deploy
+
+Type: `number`
+
+Default: `3`
+
+### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on spot instances
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_admin_role" /> [admin\_role](#output_admin_role)
+
+Description: n/a
+
+### <a name="output_reader_role" /> [reader\_role](#output_reader_role)
+
+Description: n/a
+
+### <a name="output_redis_host" /> [redis\_host](#output_redis_host)
+
+Description: A service address that points to all redis nodes
+
+### <a name="output_redis_master_host" /> [redis\_master\_host](#output_redis_master_host)
+
+Description: A service address that points to only the writable redis master
+
+### <a name="output_redis_port" /> [redis\_port](#output_redis_port)
+
+Description: n/a
+
+### <a name="output_redis_sentinel_host" /> [redis\_sentinel\_host](#output_redis_sentinel_host)
+
+Description: A service address that points to the redis sentinels
+
+### <a name="output_redis_sentinel_port" /> [redis\_sentinel\_port](#output_redis_sentinel_port)
+
+Description: n/a
+
+### <a name="output_superuser_name" /> [superuser\_name](#output_superuser_name)
+
+Description: The name of the superuser of the database
+
+### <a name="output_superuser_password" /> [superuser\_password](#output_superuser_password)
+
+Description: The password for root user of the database
+
+### <a name="output_superuser_role" /> [superuser\_role](#output_superuser_role)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

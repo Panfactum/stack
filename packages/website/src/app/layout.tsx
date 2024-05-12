@@ -1,11 +1,13 @@
 import 'katex/dist/katex.min.css'
 import './globals.css'
+import { ThemeProvider } from '@mui/material/styles'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import React, { type ReactNode } from 'react'
 
-import ThemeRegistry from '@/components/ThemeRegistry'
 import WebLayout from '@/components/layout/web/primary/WebLayout'
+import { theme } from '@/components/theme'
 import WebContextProvider from '@/lib/contexts/web/WebContextProvider'
 
 import { kanit } from './font'
@@ -34,13 +36,15 @@ export default function RootLayout (
             strategy="afterInteractive"
           />
         )}
-        <ThemeRegistry options={{ key: 'mui', prepend: true }}>
-          <WebContextProvider>
-            <WebLayout>
-              {children}
-            </WebLayout>
-          </WebContextProvider>
-        </ThemeRegistry>
+        <AppRouterCacheProvider>
+          <ThemeProvider theme={theme}>
+            <WebContextProvider>
+              <WebLayout>
+                {children}
+              </WebLayout>
+            </WebContextProvider>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
 
