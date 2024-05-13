@@ -139,7 +139,8 @@ words: [
   "TTFB",
   "autoscale",
   "contentful",
-  "upvotes"
+  "upvotes",
+  "hostable"
 ]
 languageSettings:
   - languageId: markdown,mdx

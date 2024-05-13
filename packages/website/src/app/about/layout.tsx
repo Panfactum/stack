@@ -9,8 +9,8 @@ const TABS = [
     href: '/about/mission'
   },
   {
-    text: 'History',
-    href: '/about/history'
+    text: 'Company',
+    href: '/about/company'
   },
   {
     text: 'Contact',
