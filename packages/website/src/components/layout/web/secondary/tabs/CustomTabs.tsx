@@ -27,6 +27,7 @@ export default function CustomTabs (props: IWebTabNavigationProps) {
 
   // This indicated whether saved locations are still valid so that we don't end up navigating users to non-existant urls
   const [validatedLocations, setValidatedLocations] = useState<{[path: string]: boolean}>({})
+  const [isValidating, setIsValidating] = useState(false)
 
   // This updates the tab's saved location with the pathname changes
   useEffect(() => {
@@ -37,19 +38,29 @@ export default function CustomTabs (props: IWebTabNavigationProps) {
     }
     // We explicitly do NOT want this to rerun when validatedLocations changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, tabs, JSON.stringify(savedLocations)])
+  }, [pathname, tabs])
 
   // This updates validated locations every time saved locations changes
   useEffect(() => {
     let shouldUpdate = true
     const locationsToTest = Object.values(savedLocations).filter(location => !Object.prototype.hasOwnProperty.call(validatedLocations, location))
-    void Promise.all(locationsToTest
-      .map(location => fetch(location, { method: 'HEAD' }).then(res => [location, res.ok] as const))
-    ).then(res => {
-      if (shouldUpdate) {
-        setValidatedLocations({ ...validatedLocations, ...Object.fromEntries(res) })
-      }
-    })
+    if (!isValidating) {
+      setIsValidating(true)
+      void Promise.all(locationsToTest
+        .map(location => fetch(location, { method: 'HEAD' })
+          .then(res => [location, res.ok] as const)
+          .catch(_ => [location, false] as const)
+        )
+      ).then(res => {
+        if (shouldUpdate) {
+          setValidatedLocations({ ...validatedLocations, ...Object.fromEntries(res) })
+        }
+      }).finally(() => {
+        if (shouldUpdate) {
+          setIsValidating(false)
+        }
+      })
+    }
 
     // Ensures we don't have an error if the promise resolves after the component unmounts
     return () => {

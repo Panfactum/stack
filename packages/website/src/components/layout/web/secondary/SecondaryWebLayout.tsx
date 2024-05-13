@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { memo } from 'react'
 
 import type { IWebTabNavigationProps } from '@/components/layout/web/secondary/tabs/CustomTabs'
 import CustomTabs from '@/components/layout/web/secondary/tabs/CustomTabs'
@@ -10,7 +9,7 @@ interface IWebContentLayoutProps {
   tabs: IWebTabNavigationProps['tabs']
 }
 
-export default memo(function SecondaryWebLayout (props: IWebContentLayoutProps) {
+export default function SecondaryWebLayout (props: IWebContentLayoutProps) {
   const { children, tabs, id } = props
   return (
     <div
@@ -24,4 +23,4 @@ export default memo(function SecondaryWebLayout (props: IWebContentLayoutProps) 
       {children}
     </div>
   )
-})
+}

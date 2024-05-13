@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { memo } from 'react'
 
 import ArticleContainer from '@/components/layout/web/article/base/ArticleContainer'
 import ArticleWithNavContainer from '@/components/layout/web/article/withNav/ArticleWithNavContainer'
@@ -12,7 +11,7 @@ interface Props {
   navSections: IArticleNavProps['sections']
   basePath: IArticleNavProps['basePath']
 }
-export default memo(function ArticleWithSideNavLayout ({ children, navSections, basePath }: Props) {
+export default function ArticleWithSideNavLayout ({ children, navSections, basePath }: Props) {
   return (
     <ArticleWithNavContainer>
       <SideNav
@@ -31,4 +30,4 @@ export default memo(function ArticleWithSideNavLayout ({ children, navSections, 
 
     </ArticleWithNavContainer>
   )
-})
+}

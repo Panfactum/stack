@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { memo, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Provider as BalancerProvider } from 'react-wrap-balancer'
 import { useLocalStorage } from 'usehooks-ts'
 
@@ -10,7 +10,7 @@ import { SecondaryTabsVisibleContext } from '@/lib/contexts/web/SecondaryTabsVis
 
 import { DocsVersionContext } from './DocsVersion'
 
-export default memo(function WebContextProvider ({ children }: {children: ReactNode}) {
+export default function WebContextProvider ({ children }: {children: ReactNode}) {
   // Secondary Tab State
   const [secondaryTabsVisible, setSecondaryTabsVisible] = useState(false)
   const secondaryTabsVisibleContextValue = useMemo(() => ({
@@ -35,4 +35,4 @@ export default memo(function WebContextProvider ({ children }: {children: ReactN
       </SecondaryTabsVisibleContext.Provider>
     </BalancerProvider>
   )
-})
+}
