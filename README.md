@@ -15,9 +15,9 @@ Check out our demos [here.](https://panfactum.com/stack/demo/live)
 
 ## Installation
 
-If you'd like to add the Panfactum stack to your organization, see our [deployment guide.](https://panfactum.com/docs/guides/bootstrapping/overview)
+If you'd like to add the Panfactum stack to your organization, see our [deployment guide.](https://panfactum.com/docs/edge/guides/bootstrapping/overview)
 
-If you'd like to connect to an existing stack, see the [new user guide.](https://panfactum.com/docs/guides/getting-started/overview)
+If you'd like to connect to an existing stack, see the [new user guide.](https://panfactum.com/docs/edge/guides/getting-started/overview)
 
 ## Structure
 
