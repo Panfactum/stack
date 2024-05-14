@@ -4,19 +4,14 @@ variable "argo_helm_version" {
   default     = "0.41.1"
 }
 
-variable "argo_image_tag" {
-  description = "The version of argo to use"
+variable "argo_domain" {
+  description = "The domain to use for the argo UI. Must be in a subdomain available to the environment."
   type        = string
-  default     = "v3.5.6"
 }
 
-variable "environment_domains" {
-  description = "The public domains on which the argo subdomain will be created for argo connectivity (e.g., the input `production.panfactum.com` will expose argo on `argo.production.panfactum.com`)."
-  type        = list(string)
-  validation {
-    condition     = length(var.environment_domains) >= 1
-    error_message = "Must specify at least one domain in environment_domains"
-  }
+variable "vault_domain" {
+  description = "The domain of the Vault instance running in the cluster."
+  type        = string
 }
 
 variable "vpa_enabled" {
@@ -28,12 +23,22 @@ variable "vpa_enabled" {
 variable "ingress_enabled" {
   description = "Whether or not to enable the ingress for routing traffic to argo"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
   default     = false
+}
+
+variable "log_level" {
+  description = "The log level for the argo pods"
+  type        = string
+  default     = "info"
+  validation {
+    condition     = contains(["info", "error", "warn", "debug"], var.log_level)
+    error_message = "Invalid log_level provided."
+  }
 }
 

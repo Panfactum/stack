@@ -6,9 +6,6 @@ import ModuleHeader from "../../ModuleHeader";
 
 <ModuleHeader name="kube_argo" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo" status="alpha" type="live" />
 
-This module deploys [Hashicorp Vault](https://www.vaultproject.io/) to the cluster via the [helm chart](https://github.com/hashicorp/vault-helm).
-TODO: fill this out
-
 ## Providers
 
 The following providers are needed by this module:
@@ -19,15 +16,25 @@ The following providers are needed by this module:
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_environment_domains" /> [environment\_domains](#input_environment_domains)
+### <a name="input_argo_domain" /> [argo\_domain](#input_argo_domain)
 
-Description: The public domains on which the argo subdomain will be created for argo connectivity (e.g., the input `production.panfactum.com` will expose argo on `argo.production.panfactum.com`).
+Description: The domain to use for the argo UI. Must be in a subdomain available to the environment.
 
-Type: `list(string)`
+Type: `string`
+
+### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+
+Description: The domain of the Vault instance running in the cluster.
+
+Type: `string`
 
 ## Optional Inputs
 
@@ -41,21 +48,21 @@ Type: `string`
 
 Default: `"0.41.1"`
 
-### <a name="input_argo_image_tag" /> [argo\_image\_tag](#input_argo_image_tag)
-
-Description: The version of argo to use
-
-Type: `string`
-
-Default: `"v3.5.6"`
-
 ### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
 
 Description: Whether or not to enable the ingress for routing traffic to argo
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level for the argo pods
+
+Type: `string`
+
+Default: `"info"`
 
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
@@ -75,11 +82,7 @@ Default: `false`
 
 ## Outputs
 
-The following outputs are exported:
-
-### <a name="output_argo_urls" /> [argo\_urls](#output_argo_urls)
-
-Description: n/a
+No outputs.
 
 ## Usage
 

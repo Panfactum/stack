@@ -14,6 +14,14 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "3.25.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.10.0"
+    }
   }
 }
 
@@ -22,17 +30,15 @@ locals {
   name      = "argo"
   namespace = module.namespace.namespace
 
-  controller_submodule = "controller"
   controller_match = {
     id = random_id.controller_id.hex
   }
 
-  server_submodule = "server"
   server_match = {
     id = random_id.server_id.hex
   }
 
-  argo_domains = [for domain in var.environment_domains : "argo.${domain}"]
+  configmap_name = "argo-controller"
 }
 
 module "pull_through" {
@@ -139,6 +145,58 @@ module "namespace" {
 }
 
 /***************************************
+* Vault IdP Setup
+***************************************/
+
+resource "vault_identity_oidc_key" "argo" {
+  name               = "argo"
+  allowed_client_ids = ["*"]
+  rotation_period    = 60 * 60 * 8
+  verification_ttl   = 60 * 60 * 24
+}
+
+data "vault_identity_group" "rbac_groups" {
+  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers"])
+  group_name = each.key
+}
+
+resource "vault_identity_oidc_assignment" "argo" {
+  name      = "argo"
+  group_ids = [for group in data.vault_identity_group.rbac_groups : group.id]
+}
+
+resource "vault_identity_oidc_client" "argo" {
+  name = "argo"
+  key  = vault_identity_oidc_key.argo.name
+  redirect_uris = [
+    "https://${var.argo_domain}/oauth2/callback"
+  ]
+  assignments = [
+    vault_identity_oidc_assignment.argo.name
+  ]
+  id_token_ttl     = 60 * 60 * 8
+  access_token_ttl = 60 * 60 * 8
+}
+
+resource "vault_identity_oidc_scope" "groups" {
+  name        = "groups"
+  template    = "{\"groups\": {{identity.entity.groups.names}}}" // This MUST be this exact string (not JSON-encoded)
+  description = "Groups scope"
+}
+
+resource "vault_identity_oidc_provider" "argo" {
+  name          = "argo"
+  https_enabled = true
+  issuer_host   = var.vault_domain
+  allowed_client_ids = [
+    vault_identity_oidc_client.argo.client_id
+  ]
+  scopes_supported = [
+    vault_identity_oidc_scope.groups.name
+  ]
+}
+
+/***************************************
 * Argo Deployment
 ***************************************/
 
@@ -149,8 +207,8 @@ resource "kubernetes_secret" "sso_info" {
     labels    = module.server_labels.kube_labels
   }
   data = {
-    client-id     = "FILL IN (from vault when in module)"
-    client-secret = "FILL IN (from vault when in module)"
+    client-id     = vault_identity_oidc_client.argo.client_id
+    client-secret = vault_identity_oidc_client.argo.client_secret
   }
 }
 
@@ -167,11 +225,7 @@ resource "helm_release" "argo" {
 
   values = [
     yamlencode({
-
-      images = {
-        tag = var.argo_image_tag
-      }
-      singleNamespace = false
+      fullnameOverride = "argo"
 
       workflow = {
         serviceAccount = {
@@ -186,16 +240,21 @@ resource "helm_release" "argo" {
         clusterWorkflowTemplates = {
           enabled = false
         }
+        configMap = {
+          create = true
+          name   = local.configmap_name
+        }
         deploymentAnnotations = {
-          "reloader.stakater.com/auto" = "true"
+          "configmap.reloader.stakater.com/reload" = local.configmap_name
+          "secret.reloader.stakater.com/reload"    = kubernetes_secret.sso_info.metadata[0].name
         }
         image = {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
         }
-        #initialDelay = "" // TODO: https://github.com/argoproj/argo/issues/4107 https://github.com/argoproj/argo-workflows/pull/4224
+
         logging = {
           format = "json"
-          level  = "debug" // TODO: set to reasonable default based on log volume
+          level  = var.log_level
         }
         pdb = {
           enabled        = true
@@ -205,109 +264,217 @@ resource "helm_release" "argo" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels = module.controller_labels.kube_labels
-        #podSecurityContext = {} // TODO
-        #priorityClassName = "" // TODO
-        replicas = 2
-        #resourceRateLimit = {} // TODO
-        #resources = {} // TODO
-        #tolerations = [] // TODO
+        podLabels         = module.controller_labels.kube_labels
+        priorityClassName = module.controller_constants.cluster_important_priority_class_name
+        replicas          = 2
+        resources = {
+          requests = {
+            memory = "100Mi"
+            cpu    = "100m"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+        tolerations               = module.controller_constants.burstable_node_toleration_helm
         topologySpreadConstraints = module.controller_constants.topology_spread_zone_preferred
-        workflowNamespaces        = [] // TODO: Looks like in a multiNamespace set up for this chart you have to enumerate the active namespaces, look into this more
       }
 
-
-      // TODO: Main Container and Executor
       executor = {
         image = {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
         }
-        # resources = {} // TODO
-        # securityContext = {} // TODO
+        resources = {
+          requests = {
+            memory = "100Mi"
+            cpu    = "100m"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
       }
 
       server = {
         authModes = ["sso"]
+        sso = {
+          enabled     = true
+          issuer      = vault_identity_oidc_provider.argo.issuer
+          redirectUrl = "https://${var.argo_domain}/oauth2/callback"
+          clientId = {
+            name = kubernetes_secret.sso_info.metadata[0].name
+            key  = "client-id"
+          }
+          clientSecret = {
+            name = kubernetes_secret.sso_info.metadata[0].name
+            key  = "client-secret"
+          }
+          rbac = {
+            enabled = true
+          }
+          scopes        = ["openid", "groups"]
+          sessionExpiry = "8h"
+        }
         deploymentAnnotations = {
-          "reloader.stakater.com/auto" = "true"
+          "configmap.reloader.stakater.com/reload" = local.configmap_name
+          "secret.reloader.stakater.com/reload"    = kubernetes_secret.sso_info.metadata[0].name
         }
         image = {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
         }
         logging = {
           format = "json"
-          level  = "debug" // TODO: set to blah blah blah
+          level  = var.log_level
         }
-        pdb = {
-          enabled        = true
-          maxUnavailable = 1
-        }
+
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
         podLabels = module.server_labels.kube_labels
-        #podSecurityContext = {} // TODO
-        #priorityClassName = "" // TODO
-        replicas = 3
-        #resources = {} // TODO
-        sso = { // TODO: Maybe add session expiry
-          enabled     = true
-          issuer      = "https://<your_vault_url>/v1/identity/oidc/provider/default" // Fill in from vault when in module
-          redirectUrl = "https://<your_argo_domain>/oauth2/callback"                 // Defined as your argo domain /oauth2/callback, is also an input into the vault OIDC App, so maybe a local
-          rbac = {
-            enabled = true
-          }
-          scopes = ["groups"]
-        }
-        #tolerations = [] // TODO
+
+        replicas                  = 2
+        priorityClassName         = module.server_constants.cluster_important_priority_class_name
+        tolerations               = module.server_constants.burstable_node_toleration_helm
         topologySpreadConstraints = module.server_constants.topology_spread_zone_preferred
+        pdb = {
+          enabled        = true
+          maxUnavailable = 1
+        }
+
+        resources = {
+          requests = {
+            memory = "100Mi"
+            cpu    = "100m"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+
       }
     })
   ]
   depends_on = [kubernetes_secret.sso_info]
 }
 
-resource "kubernetes_service_account" "admin" { // TODO: Come back and tie in vault groups when ready
+/***************************************
+* Argo RBAC
+***************************************/
+
+resource "time_rotating" "token_rotation" {
+  rotation_days = 7
+}
+
+resource "kubernetes_service_account" "superuser" {
   metadata {
-    name      = "argo-admin"
+    name      = "argo-superuser"
     namespace = local.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'superusers' in groups" // Just set to true for this to be the default permissions on sign in
-      "workflows.argoproj.io/rbac-rule-precedence" : "0"
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "0"
+      "workflows.argoproj.io/service-account-token.name" = kubernetes_secret.superuser_token.metadata[0].name
     }
   }
 }
 
-resource "kubernetes_role_binding" "admin_binding" {
+resource "kubernetes_cluster_role_binding" "superuser_binding" {
   metadata {
-    name      = "argo-admin"
-    namespace = local.namespace
+    name = "argo-superuser"
   }
   subject {
     kind      = "ServiceAccount"
-    name      = "argo-admin"
+    name      = kubernetes_service_account.superuser.metadata[0].name
     namespace = local.namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-argo-workflows-admin" // This is a built in role in the chart
+    name      = "argo-admin" // This is a built in role in the chart
+  }
+}
+
+resource "kubernetes_secret" "superuser_token" {
+  metadata {
+    name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
+    namespace = local.namespace
+  }
+  type = "kubernetes.io/service-account-token"
+}
+
+resource "kubernetes_service_account" "admin" {
+  metadata {
+    name      = "argo-admin"
+    namespace = local.namespace
+    annotations = {
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "1"
+      "workflows.argoproj.io/service-account-token.name" = kubernetes_secret.admin_token.metadata[0].name
+    }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "admin_binding" {
+  metadata {
+    name = "argo-admin"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.admin.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-edit" // This is a built in role in the chart
   }
 }
 
 resource "kubernetes_secret" "admin_token" {
   metadata {
-    name      = "${kubernetes_service_account.admin.metadata[0].name}.service-account-token"
+    name      = "argo-admin-${md5(time_rotating.token_rotation.id)}"
+    namespace = local.namespace
+  }
+  type = "kubernetes.io/service-account-token"
+}
+
+resource "kubernetes_service_account" "reader" {
+  metadata {
+    name      = "argo-reader"
     namespace = local.namespace
     annotations = {
-      "kubernetes.io/service-account.name" = kubernetes_service_account.admin.metadata[0].name
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "2"
+      "workflows.argoproj.io/service-account-token.name" = kubernetes_secret.reader_token.metadata[0].name
     }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "reader_binding" {
+  metadata {
+    name = "argo-reader"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.reader.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-view" // This is a built in role in the chart
+  }
+}
+
+resource "kubernetes_secret" "reader_token" {
+  metadata {
+    name      = "argo-reader-${md5(time_rotating.token_rotation.id)}"
+    namespace = local.namespace
   }
   type = "kubernetes.io/service-account-token"
 }
 
 /***************************************
-* Argo Autoscaling
+* Autoscaling
 ***************************************/
 
 resource "kubernetes_manifest" "vpa_controller" {
@@ -324,7 +491,7 @@ resource "kubernetes_manifest" "vpa_controller" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "vault-csi-provider" // TODO: Grab name and fill in
+        name       = "argo-workflow-controller"
       }
     }
   }
@@ -345,7 +512,7 @@ resource "kubernetes_manifest" "vpa_server" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "vault" // TODO: Grab name and fill in
+        name       = "argo-server"
       }
     }
   }
@@ -361,18 +528,17 @@ module "ingress" {
   source = "../kube_ingress"
 
   namespace = local.namespace
-  name      = "argo"
+  name      = "argo-server"
   ingress_configs = [{
-    domains      = local.argo_domains
-    service      = "argo-argo-workflows-server" // TODO: Naming was unclear for the resources but wasn't focused on renaming the resources to eliminate the stutter, maybe update in the chart then change here?
+    domains      = [var.argo_domain]
+    service      = "argo-server"
     service_port = 2746
   }]
-  // TODO: Have Jack configure as needed
+
   rate_limiting_enabled          = true
-  cross_origin_isolation_enabled = false
-  cross_origin_opener_policy     = "same-origin-allow-popups"
+  cross_origin_isolation_enabled = true
   permissions_policy_enabled     = true
-  csp_enabled                    = false
+  csp_enabled                    = true
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
