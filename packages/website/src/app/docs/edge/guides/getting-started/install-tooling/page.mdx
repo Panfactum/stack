@@ -9,7 +9,7 @@ Install the necessary tooling to begin working with the Panfactum stack.
 ## Supported Systems
 
 * Linux
-* MacOS (Intel or ARM)
+* macOS (Intel or ARM, `Sonoma` or later)
 * Windows (via `WSLv2`)
 
 ## Installation
@@ -30,6 +30,9 @@ Please install these tools:
 * If you choose **not** use the [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer) when installing nix,
   you will need to ensure that you complete these [extra setup steps manually](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#installation-differences)
   in order to enable functionality such as Nix flakes.
+
+* If you are using an earlier version of macOS, you may run into [this issue](https://github.com/DeterminateSystems/nix-installer/issues/558) where the `nix` binary
+cannot be found. Add `export PATH="$NIX_LINK/bin:/nix/var/nix/profiles/default/bin:$PATH` to your `~/.zshrc` to resolve the issue.
 
 ## Next Steps
 
