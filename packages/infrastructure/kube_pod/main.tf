@@ -284,6 +284,7 @@ locals {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
+        workingDir      = config.workingDir
         imagePullPolicy = config.imagePullPolicy
 
         // NOTE: The order that these env blocks is defined in
@@ -349,6 +350,7 @@ locals {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
+        workingDir      = config.workingDir
         imagePullPolicy = config.imagePullPolicy
         env = concat(
           local.common_env,
