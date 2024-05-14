@@ -29,7 +29,6 @@ export default function WebContextProvider ({ children }: {children: ReactNode})
     <BalancerProvider>
       <SecondaryTabsVisibleContext.Provider value={secondaryTabsVisibleContextValue}>
         <DocsVersionContext.Provider value={docsVersionContextValue}>
-
           {children}
         </DocsVersionContext.Provider>
       </SecondaryTabsVisibleContext.Provider>
