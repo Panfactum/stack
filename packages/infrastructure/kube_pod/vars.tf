@@ -11,7 +11,7 @@ variable "containers" {
     image              = string
     version            = string
     command            = list(string)
-    working_dir         = optional(string, null)
+    working_dir        = optional(string, null)
     imagePullPolicy    = optional(string, "IfNotPresent")
     minimum_memory     = optional(number, 100)      # The minimum amount of memory in megabytes
     minimum_cpu        = optional(number, 10)       # The minimum amount of cpu millicores
