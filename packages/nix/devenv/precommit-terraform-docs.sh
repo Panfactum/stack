@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-DOCS_DIR="$DEVENV_ROOT/packages/website/src/app/docs/reference/infrastructure-modules"
+DOCS_DIR="$DEVENV_ROOT/packages/website/src/app/docs/edge/reference/infrastructure-modules"
 
 # Generate the docs
 generate-tf-docs
