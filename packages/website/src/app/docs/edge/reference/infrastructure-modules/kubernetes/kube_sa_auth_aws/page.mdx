@@ -4,7 +4,7 @@ import ModuleHeader from "../../ModuleHeader";
 
 # AWS Authentication via Kubernetes Service Account
 
-<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
+<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
 
 Gives a kubernetes service account in an EKS cluster access to an AWS IAM role through IRSA.
 
@@ -100,7 +100,7 @@ inside the cluster (this also includes the cluster's public NAT IPs).
 This limits the usefulness of tokens that are extracted from the cluster by an attacker.
 
 The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
-assigned in the [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) and [aws\_eks](/docs/edge/reference/infrastructure-modules/aws/aws_eks)
+assigned in the [aws\_vpc](/docs/reference/infrastructure-modules/aws/aws_vpc) and [aws\_eks](/docs/reference/infrastructure-modules/aws/aws_eks)
 modules. If you need additional IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
 
 {/* lint enable no-duplicate-headings */}

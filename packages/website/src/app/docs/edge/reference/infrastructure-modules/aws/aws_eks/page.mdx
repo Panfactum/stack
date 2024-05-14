@@ -4,7 +4,7 @@ import ModuleHeader from "../../ModuleHeader";
 
 # Elastic Kubernetes Service (EKS)
 
-<ModuleHeader name="aws_eks" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/aws_eks" status="stable" type="live" />
+<ModuleHeader name="aws_eks" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_eks" status="stable" type="live" />
 
 This module provides our standard setup for a configurable AWS EKS Cluster.
 It includes:
@@ -16,7 +16,7 @@ It includes:
 * A set of controller [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
   with a static size for running cluster-critical
   controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
-  Autoscaled nodes are deployed via our [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
+  Autoscaled nodes are deployed via our [kube\_karpenter](/docs/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
 
 * [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
   for both the cluster control plane and for the node groups.

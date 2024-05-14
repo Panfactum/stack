@@ -30,6 +30,12 @@ variable "pg_storage_gb" {
   type        = number
 }
 
+variable "pg_shutdown_timeout" {
+  description = "The number of seconds to wait for open connections to close before shutting down postgres nodes"
+  type        = number
+  default     = null
+}
+
 variable "backups_force_delete" {
   description = "Whether to delete backups on destroy"
   type        = bool

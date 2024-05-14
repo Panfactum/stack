@@ -5,7 +5,24 @@ Learn more [here](/docs/edge/guides/versioning/releases)._
 
 _To use stable Panfactum releases, please see [our available licenses](/stack/pricing)._
 
+{/* lint disable no-duplicate-headings */}
+
+## Unreleased
+
+### Added
+
+- `pg_shutdown_timeout` variable to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
+to control how long the postgres instances will wait for active connections to close before shutting down.
+
+### Fixed
+
+- Fixed an issue where simultaneous, graceful shutdown of _all_ postgres nodes in a [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
+would cause unnecessary downtime when the primary was running on a spot instance.
+
+
 ## edge.24-05-12
 
 The initial edge release of the Panfactum stack!
+
+{/* lint enable no-duplicate-headings */}
 

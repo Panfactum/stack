@@ -4,7 +4,7 @@ import ModuleHeader from "../../ModuleHeader";
 
 # Postgres Cluster on Kubernetes
 
-<ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/main/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule" />
+<ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule" />
 
 ## Providers
 
@@ -107,6 +107,14 @@ Description: The amount of memory to allocate to the postgres pods (in Mi)
 Type: `number`
 
 Default: `1000`
+
+### <a name="input_pg_shutdown_timeout" /> [pg\_shutdown\_timeout](#input_pg_shutdown_timeout)
+
+Description: The number of seconds to wait for open connections to close before shutting down postgres nodes
+
+Type: `number`
+
+Default: `null`
 
 ### <a name="input_pg_version" /> [pg\_version](#input_pg_version)
 

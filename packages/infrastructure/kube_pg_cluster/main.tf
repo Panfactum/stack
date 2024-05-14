@@ -41,6 +41,8 @@ locals {
   pooler_r_match_labels = {
     id = random_id.pooler_r_id.hex
   }
+
+  stopDelay = var.pg_shutdown_timeout ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
 }
 
 module "pull_through" {
@@ -350,6 +352,11 @@ resource "kubernetes_manifest" "postgres_cluster" {
         })
       }
 
+      startDelay           = 60 * 10
+      stopDelay            = local.stopDelay
+      smartShutdownTimeout = local.stopDelay - 10
+      switchoverDelay      = local.stopDelay
+      failoverDelay        = 60
 
       bootstrap = {
         initdb = {
