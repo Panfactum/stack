@@ -77,6 +77,10 @@
       "group": "utility"
     },
     {
+      "module": "kube_argo",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_authentik",
       "group": "kubernetes"
     },
