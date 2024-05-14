@@ -13,6 +13,8 @@ _To use stable Panfactum releases, please see [our available licenses](/stack/pr
 
 - `pg_shutdown_timeout` variable to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
 to control how long the postgres instances will wait for active connections to close before shutting down.
+- optional `working_dir` variable to [kube_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment) 
+and [kube_pod](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pod) to provide an optional `workingDir` to the [Pod Container Entrypoint](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#entrypoint)
 
 ### Fixed
 

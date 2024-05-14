@@ -350,7 +350,7 @@ locals {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
-        workingDir      = config.workingDir
+        workingDir      = config.working_dir
         imagePullPolicy = config.imagePullPolicy
         env = concat(
           local.common_env,
