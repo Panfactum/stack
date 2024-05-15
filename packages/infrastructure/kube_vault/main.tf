@@ -36,8 +36,6 @@ locals {
   csi_match = {
     id = random_id.csi_id.hex
   }
-
-  vault_domains = [for domain in var.environment_domains : "vault.${domain}"]
 }
 
 module "pull_through" {
@@ -311,7 +309,7 @@ resource "helm_release" "vault" {
         statefulSet = {
           annotations = {
             "reloader.stakater.com/auto" = "true"
-            "panfactum.com/vault-addr"   = "https://${local.vault_domains[0]}"
+            "panfactum.com/vault-addr"   = "https://${var.vault_domain}"
           }
         }
         updateStrategyType = "RollingUpdate"
@@ -417,7 +415,7 @@ module "ingress" {
   namespace = local.namespace
   name      = "vault"
   ingress_configs = [{
-    domains      = local.vault_domains
+    domains      = [var.vault_domain]
     service      = "vault-active"
     service_port = 8200
   }]

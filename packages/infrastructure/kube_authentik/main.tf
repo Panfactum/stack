@@ -350,14 +350,14 @@ resource "helm_release" "authentik" {
         postgresql = {
           name     = module.database.database
           user     = module.database.superuser_username
-          password = module.database.superuser_password // TOOD: Pass in as environment variable
+          password = module.database.superuser_password // TODO: Pass in as environment variable
           host     = module.database.pooler_rw_service_name
           port     = module.database.pooler_rw_service_port
         }
         redis = {
           host     = module.redis.redis_master_host
           username = module.redis.superuser_name
-          password = module.redis.superuser_password // TOOD: Pass in as environment variable
+          password = module.redis.superuser_password // TODO: Pass in as environment variable
         }
         email = {
           host     = var.smtp_host

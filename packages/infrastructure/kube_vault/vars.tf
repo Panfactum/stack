@@ -21,13 +21,9 @@ variable "vault_storage_size_gb" {
   default     = 20
 }
 
-variable "environment_domains" {
-  description = "The public domains on which the vault subdomain will be created for vault connectivity (e.g., the input `production.panfactum.com` will expose vault on `vault.production.panfactum.com`)."
-  type        = list(string)
-  validation {
-    condition     = length(var.environment_domains) >= 1
-    error_message = "Must specify at least one domain in environment_domains"
-  }
+variable "vault_domain" {
+  description = "The public domain for the Vault cluster"
+  type        = string
 }
 
 variable "vpa_enabled" {

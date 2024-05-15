@@ -16,8 +16,10 @@ dependency "vault" {
 }
 
 inputs = {
+  eks_cluster_name = dependency.cluster.outputs.cluster_name
+
   argo_domain  = "argo.prod.panfactum.com"
-  vault_domain = dependency.vault.outputs.vault_domains[0]
+  vault_domain = dependency.vault.outputs.vault_domain
 
   pull_through_cache_enabled = true
   vpa_enabled                = true

@@ -42,7 +42,7 @@ locals {
     id = random_id.pooler_r_id.hex
   }
 
-  stopDelay = var.pg_shutdown_timeout ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
+  stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
 }
 
 module "pull_through" {

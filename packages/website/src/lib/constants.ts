@@ -1,6 +1,6 @@
 export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum LLC.`
 
-export const PANFACTUM_VERSION_EDGE = 'main'
+export const PANFACTUM_VERSION_EDGE = 'edge.24-05-15'
 export const PANFACTUM_VERSION_24_05 = '24-05.0'
 
 export function replaceVersionPlaceholders (str: string) {

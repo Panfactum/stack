@@ -52,3 +52,15 @@ variable "aws_iam_ip_allow_list" {
   type        = list(string)
   default     = []
 }
+
+variable "workflow_archive_ttl" {
+  description = "Length of time that previously run workflow states are stored"
+  type        = string
+  default     = "60d"
+}
+
+variable "workflow_archive_backups_enabled" {
+  description = "Whether to enable backups of the workflow archives"
+  type        = bool
+  default     = false
+}

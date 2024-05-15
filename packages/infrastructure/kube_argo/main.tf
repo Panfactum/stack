@@ -271,6 +271,59 @@ module "aws_permissions" {
   # end-generate
 }
 
+resource "kubernetes_config_map" "artifacts" {
+  metadata {
+    name      = "artifact-repositories" # Must be named this
+    namespace = local.namespace
+    labels    = module.controller_labels.kube_labels
+    annotations = {
+      "workflows.argoproj.io/default-artifact-repository"       = "s3"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
+    }
+  }
+  data = {
+    s3 = yamlencode({
+      s3 = {
+        endpoint = "s3.amazonaws.com"
+        bucket   = module.artifact_bucket.bucket_name
+        region   = data.aws_region.current.name
+      }
+    })
+  }
+}
+
+/***************************************
+* Database Backend
+***************************************/
+
+module "database" {
+  source = "../kube_pg_cluster"
+
+  eks_cluster_name            = var.eks_cluster_name
+  pg_cluster_namespace        = local.namespace
+  pg_storage_gb               = 10
+  pg_memory_mb                = 1000
+  pg_cpu_millicores           = 250
+  pg_instances                = 2
+  pg_shutdown_timeout         = 30
+  aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  burstable_instances_enabled = true
+  backups_enabled             = var.workflow_archive_backups_enabled
+  backups_force_delete        = true
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
 /***************************************
 * Argo Workflows
 ***************************************/
@@ -303,6 +356,18 @@ resource "kubernetes_secret" "sso_info" {
   }
 }
 
+resource "kubernetes_secret" "postgres_creds" {
+  metadata {
+    name      = "argo-postgres-creds"
+    namespace = local.namespace
+    labels    = module.controller_labels.kube_labels
+  }
+  data = {
+    username = module.database.superuser_username
+    password = module.database.superuser_password
+  }
+}
+
 resource "helm_release" "argo" {
   namespace       = local.namespace
   name            = "argo"
@@ -323,11 +388,13 @@ resource "helm_release" "argo" {
           create = true
         }
         rbac = {
-          create = true // Creates a ServiceAccount so that pods can complete workflows successfully (report status back to argo)
+          create = true
         }
       }
 
+      useStaticCredentials = false
       artifactRepository = {
+        archiveLogs = true
         s3 = {
           endpoint = "s3.amazonaws.com"
           bucket   = module.artifact_bucket.bucket_name
@@ -347,9 +414,30 @@ resource "helm_release" "argo" {
           create = true
           name   = local.configmap_name
         }
+        persistence = {
+          archive           = true
+          archiveTTL        = var.workflow_archive_ttl
+          nodeStatusOffLoad = true # Helps to circumvent etcd limits on workload sizes
+          postgresql = {
+            host      = module.database.pooler_rw_service_name
+            port      = module.database.pooler_rw_service_port
+            tableName = "argo_workflows"
+            ssl       = true
+            sslMode   = "require"
+            userNameSecret = {
+              name = kubernetes_secret.postgres_creds.metadata[0].name
+              key  = "username"
+            }
+            passwordSecret = {
+              name = kubernetes_secret.postgres_creds.metadata[0].name
+              key  = "password"
+            }
+          }
+        }
+
         deploymentAnnotations = {
           "configmap.reloader.stakater.com/reload" = local.configmap_name
-          "secret.reloader.stakater.com/reload"    = kubernetes_secret.sso_info.metadata[0].name
+          "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${kubernetes_secret.postgres_creds.metadata[0].name}"
         }
         image = {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
@@ -363,7 +451,6 @@ resource "helm_release" "argo" {
           enabled        = true
           maxUnavailable = 1
         }
-        #persistence = {} // TODO: Look into Postgres config for this
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
@@ -424,7 +511,7 @@ resource "helm_release" "argo" {
         }
         deploymentAnnotations = {
           "configmap.reloader.stakater.com/reload" = local.configmap_name
-          "secret.reloader.stakater.com/reload"    = kubernetes_secret.sso_info.metadata[0].name
+          "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${kubernetes_secret.postgres_creds.metadata[0].name}"
         }
         image = {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
@@ -461,6 +548,7 @@ resource "helm_release" "argo" {
       }
     })
   ]
+  depends_on = [module.database]
 }
 
 /***************************************
@@ -479,7 +567,7 @@ resource "kubernetes_service_account" "superuser" {
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "0"
-      "workflows.argoproj.io/service-account-token.name" = kubernetes_secret.superuser_token.metadata[0].name
+      "workflows.argoproj.io/service-account-token.name" = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
     }
   }
 }
@@ -506,6 +594,9 @@ resource "kubernetes_secret" "superuser_token" {
     name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
     labels    = module.server_labels.kube_labels
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.superuser.metadata[0].name
+    }
   }
   type = "kubernetes.io/service-account-token"
 }
@@ -518,7 +609,7 @@ resource "kubernetes_service_account" "admin" {
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "1"
-      "workflows.argoproj.io/service-account-token.name" = kubernetes_secret.admin_token.metadata[0].name
+      "workflows.argoproj.io/service-account-token.name" = "argo-admin-${md5(time_rotating.token_rotation.id)}"
     }
   }
 }
@@ -545,6 +636,9 @@ resource "kubernetes_secret" "admin_token" {
     name      = "argo-admin-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
     labels    = module.server_labels.kube_labels
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.admin.metadata[0].name
+    }
   }
   type = "kubernetes.io/service-account-token"
 }
@@ -557,7 +651,7 @@ resource "kubernetes_service_account" "reader" {
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "2"
-      "workflows.argoproj.io/service-account-token.name" = kubernetes_secret.reader_token.metadata[0].name
+      "workflows.argoproj.io/service-account-token.name" = "argo-reader-${md5(time_rotating.token_rotation.id)}"
     }
   }
 }
@@ -584,6 +678,9 @@ resource "kubernetes_secret" "reader_token" {
     name      = "argo-reader-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
     labels    = module.server_labels.kube_labels
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.reader.metadata[0].name
+    }
   }
   type = "kubernetes.io/service-account-token"
 }

@@ -30,11 +30,11 @@ Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_environment_domains" /> [environment\_domains](#input_environment_domains)
+### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
 
-Description: The public domains on which the vault subdomain will be created for vault connectivity (e.g., the input `production.panfactum.com` will expose vault on `vault.production.panfactum.com`).
+Description: The public domain for the Vault cluster
 
-Type: `list(string)`
+Type: `string`
 
 ## Optional Inputs
 
@@ -132,7 +132,7 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_vault_domains" /> [vault\_domains](#output_vault_domains)
+### <a name="output_vault_domain" /> [vault\_domain](#output_vault_domain)
 
 Description: n/a
 
@@ -140,7 +140,7 @@ Description: n/a
 
 Description: n/a
 
-### <a name="output_vault_urls" /> [vault\_urls](#output_vault_urls)
+### <a name="output_vault_url" /> [vault\_url](#output_vault_url)
 
 Description: n/a
 

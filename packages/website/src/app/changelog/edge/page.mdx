@@ -11,6 +11,12 @@ _To use stable Panfactum releases, please see [our available licenses](/stack/pr
 
 ## edge.24-05-15
 
+### Breaking Changes
+
+- [kube_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault) now takes `vault_domain`
+as an input instead of `environment_domains`. This change was made as having multiple domains for Vault
+is incompatible with using Vault as an intermediary IdP.
+
 ### Added
 
 - New [kube_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector) module for deploying
