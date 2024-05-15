@@ -9,7 +9,14 @@ _To use stable Panfactum releases, please see [our available licenses](/stack/pr
 
 ## Unreleased
 
+## edge.24-05-15
+
 ### Added
+
+- New [kube_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector) module for deploying
+the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
+namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
+the module as a part of the foundational Stack.
 
 - `pg_shutdown_timeout` variable to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
 to control how long the postgres instances will wait for active connections to close before shutting down.

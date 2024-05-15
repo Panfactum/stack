@@ -140,7 +140,8 @@ words: [
   "autoscale",
   "contentful",
   "upvotes",
-  "hostable"
+  "hostable",
+  "emberstack"
 ]
 languageSettings:
   - languageId: markdown,mdx

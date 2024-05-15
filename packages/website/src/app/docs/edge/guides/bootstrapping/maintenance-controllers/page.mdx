@@ -41,6 +41,53 @@ began a rolling upgrade.
 
 [^1]: Certificate data is stored as a Secret which the pods reference.
 
+## Reflector
+
+ConfigMaps and Secrets are namespaced resources. As a result, they can only be accessed by other resources deployed
+in the same namespace. This can pose a barrier when you want to share global configuration or secret values
+across the entire cluster.
+
+The [Reflector](https://github.com/emberstack/kubernetes-reflector) controller was developed to solve this problem.
+With this controller deployed in the cluster, you can provide annotations on ConfigMaps and Secrets that
+will cause them to be automatically synchronized across namespaces.
+
+We provide a module to deploy this controller: [kube\_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector).
+
+Let's deploy the Reflector now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_reflector`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_reflector/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
+
+4. Run `terragrunt apply`.
+
+Let's test that the Reflector is working:
+
+1. Create a new, reflected ConfigMap:
+
+   ```bash
+   kubectl apply -f - <<EOF
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: test-reflector
+     namespace: reflector
+     annotations:
+       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+   data:
+     foo: bar
+   EOF
+   ```
+
+2. Run `kubectl get configmap -A | grep test-reflector` to verify the ConfigMap was created in all namespaces.
+
+3. Run `kubectl -n reflector delete configmap test-reflector` to delete the original ConfigMap.
+
+4. Re-run `kubectl get configmap -A | grep test-reflector` to verify all the reflected ConfigMaps were also deleted.
+
 ## Descheduler
 
 By default, Kubernetes scheduling only concerns itself with *initially* placing pods on nodes. However, there
@@ -203,6 +250,7 @@ Let's verify that backup functionality is working as expected by simulating an e
 8. Let's verify that the data has been restored as well. Run `vault token lookup`. If this returns valid information
    about your token, that means that the Vault data was successfully restored from the backup:
 
+   {/* spellchecker: disable */}
    ```shell-session
    Key                 Value
    ---                 -----
@@ -222,6 +270,7 @@ Let's verify that backup functionality is working as expected by simulating an e
    ttl                 0s
    type                service
    ```
+   {/* spellchecker: enable */}
 
 9. Once you have verified that functionality is successfully restored, delete the backup:
    `velero delete backup test`.

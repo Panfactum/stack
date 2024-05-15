@@ -30,6 +30,12 @@ Description: The domain to use for the argo UI. Must be in a subdomain available
 
 Type: `string`
 
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster that contains the service account.
+
+Type: `string`
+
 ### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
 
 Description: The domain of the Vault instance running in the cluster.
@@ -47,6 +53,14 @@ Description: The version of the argo helm chart to deploy
 Type: `string`
 
 Default: `"0.41.1"`
+
+### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
 
 ### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
 
@@ -82,7 +96,15 @@ Default: `false`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_artifact_bucket_arn" /> [artifact\_bucket\_arn](#output_artifact_bucket_arn)
+
+Description: ARN of the S3 bucket holding workflow artifacts
+
+### <a name="output_artifact_bucket_name" /> [artifact\_bucket\_name](#output_artifact_bucket_name)
+
+Description: Name of the S3 bucket holding workflow artifacts
 
 ## Usage
 

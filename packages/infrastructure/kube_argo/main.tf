@@ -25,6 +25,8 @@ terraform {
   }
 }
 
+data "aws_region" "current" {}
+
 locals {
 
   name      = "argo"
@@ -197,8 +199,97 @@ resource "vault_identity_oidc_provider" "argo" {
 }
 
 /***************************************
-* Argo Deployment
+* S3 Artifact Repository
 ***************************************/
+
+resource "random_id" "bucket_name" {
+  byte_length = 8
+  prefix      = "argo-"
+}
+
+module "artifact_bucket" {
+  source      = "../aws_s3_private_bucket"
+  bucket_name = random_id.bucket_name.hex
+  description = "Artifact repository for Argo"
+
+  intelligent_transitions_enabled = true
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+data "aws_iam_policy_document" "argo" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject"
+    ]
+    resources = ["${module.artifact_bucket.bucket_arn}/*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket"
+    ]
+    resources = [module.artifact_bucket.bucket_arn]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetBucketLocation"
+    ]
+    resources = ["arn:aws:s3:::*"]
+  }
+}
+
+module "aws_permissions" {
+  source = "../kube_sa_auth_aws"
+
+  service_account           = kubernetes_service_account.argo_server.metadata[0].name
+  service_account_namespace = local.namespace
+  eks_cluster_name          = var.eks_cluster_name
+  iam_policy_json           = data.aws_iam_policy_document.argo.json
+  ip_allow_list             = var.aws_iam_ip_allow_list
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+/***************************************
+* Argo Workflows
+***************************************/
+
+resource "kubernetes_service_account" "argo_controller" {
+  metadata {
+    name      = "${local.name}-controller"
+    namespace = local.namespace
+    labels    = module.controller_labels.kube_labels
+  }
+}
+
+resource "kubernetes_service_account" "argo_server" {
+  metadata {
+    name      = "${local.name}-server"
+    namespace = local.namespace
+    labels    = module.controller_labels.kube_labels
+  }
+}
 
 resource "kubernetes_secret" "sso_info" {
   metadata {
@@ -236,9 +327,21 @@ resource "helm_release" "argo" {
         }
       }
 
+      artifactRepository = {
+        s3 = {
+          endpoint = "s3.amazonaws.com"
+          bucket   = module.artifact_bucket.bucket_name
+          region   = data.aws_region.current.name
+        }
+      }
+
       controller = {
         clusterWorkflowTemplates = {
           enabled = false
+        }
+        serviceAccount = {
+          create = false
+          name   = kubernetes_service_account.argo_controller.metadata[0].name
         }
         configMap = {
           create = true
@@ -296,6 +399,10 @@ resource "helm_release" "argo" {
       }
 
       server = {
+        serviceAccount = {
+          create = false
+          name   = kubernetes_service_account.argo_server.metadata[0].name
+        }
         authModes = ["sso"]
         sso = {
           enabled     = true
@@ -354,7 +461,6 @@ resource "helm_release" "argo" {
       }
     })
   ]
-  depends_on = [kubernetes_secret.sso_info]
 }
 
 /***************************************
@@ -369,6 +475,7 @@ resource "kubernetes_service_account" "superuser" {
   metadata {
     name      = "argo-superuser"
     namespace = local.namespace
+    labels    = module.server_labels.kube_labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "0"
@@ -379,7 +486,8 @@ resource "kubernetes_service_account" "superuser" {
 
 resource "kubernetes_cluster_role_binding" "superuser_binding" {
   metadata {
-    name = "argo-superuser"
+    name   = "argo-superuser"
+    labels = module.server_labels.kube_labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -397,6 +505,7 @@ resource "kubernetes_secret" "superuser_token" {
   metadata {
     name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
+    labels    = module.server_labels.kube_labels
   }
   type = "kubernetes.io/service-account-token"
 }
@@ -405,6 +514,7 @@ resource "kubernetes_service_account" "admin" {
   metadata {
     name      = "argo-admin"
     namespace = local.namespace
+    labels    = module.server_labels.kube_labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "1"
@@ -415,7 +525,8 @@ resource "kubernetes_service_account" "admin" {
 
 resource "kubernetes_cluster_role_binding" "admin_binding" {
   metadata {
-    name = "argo-admin"
+    name   = "argo-admin"
+    labels = module.server_labels.kube_labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -433,6 +544,7 @@ resource "kubernetes_secret" "admin_token" {
   metadata {
     name      = "argo-admin-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
+    labels    = module.server_labels.kube_labels
   }
   type = "kubernetes.io/service-account-token"
 }
@@ -441,6 +553,7 @@ resource "kubernetes_service_account" "reader" {
   metadata {
     name      = "argo-reader"
     namespace = local.namespace
+    labels    = module.server_labels.kube_labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "2"
@@ -451,7 +564,8 @@ resource "kubernetes_service_account" "reader" {
 
 resource "kubernetes_cluster_role_binding" "reader_binding" {
   metadata {
-    name = "argo-reader"
+    name   = "argo-reader"
+    labels = module.server_labels.kube_labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -469,6 +583,7 @@ resource "kubernetes_secret" "reader_token" {
   metadata {
     name      = "argo-reader-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
+    labels    = module.server_labels.kube_labels
   }
   type = "kubernetes.io/service-account-token"
 }
