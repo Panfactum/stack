@@ -1,0 +1,228 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes GHA ARC Runners
+
+<ModuleHeader name="kube_gha_arc_runners" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_gha_arc_runners" status="alpha" type="live" />
+
+This module provides:
+
+* deployments of ARC [runner scale sets](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller) that can be
+  targeted in GHA workflows to execute our CI/CD scripts
+
+The runners come pre-equipped with the following:
+
+* a configured environment using `devenv`
+  through our custom container image found here
+* permissions needed to execute changes to
+  the infrastructure through dynamic credentials:
+  * admin access to the containing cluster
+  * admin access to the AWS account containing the cluster
+  * admin access to the vault instance in the cluster
+  * ownership over the AAD apps created in the environment
+
+## Maintainer Notes
+
+* In order to authenticate with the GitHub API, we have set
+  up a GitHub app following [this guide](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api). It is manually managed (no IaC - yet). It has the following parameters:
+  * Name: `arc-cicd`
+  * App Id: `379858`
+  * Installation Id: `41013864`
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_aad_group" /> [aad\_group](#input_aad_group)
+
+Description: The group the GHA runner service principal should join
+
+Type: `string`
+
+### <a name="input_arc_controller_service_account_name" /> [arc\_controller\_service\_account\_name](#input_arc_controller_service_account_name)
+
+Description: The name of the ARC controller's service account
+
+Type: `string`
+
+### <a name="input_arc_controller_service_account_namespace" /> [arc\_controller\_service\_account\_namespace](#input_arc_controller_service_account_namespace)
+
+Description: The namespace of the ARC controller
+
+Type: `string`
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_gha_runner_env_prefix" /> [gha\_runner\_env\_prefix](#input_gha_runner_env_prefix)
+
+Description: The prefix to append to each runner's name
+
+Type: `string`
+
+### <a name="input_gha_runner_max_replicas" /> [gha\_runner\_max\_replicas](#input_gha_runner_max_replicas)
+
+Description: The maximum number of runners to use
+
+Type: `number`
+
+### <a name="input_github_app_id" /> [github\_app\_id](#input_github_app_id)
+
+Description: The app id for the GitHub app used to authenticate the runner
+
+Type: `string`
+
+### <a name="input_github_app_installation_id" /> [github\_app\_installation\_id](#input_github_app_installation_id)
+
+Description: The installation id for the GitHub app used to authenticate the runner
+
+Type: `string`
+
+### <a name="input_github_app_private_key" /> [github\_app\_private\_key](#input_github_app_private_key)
+
+Description: The private key for the GitHub app used to authenticate the runner
+
+Type: `string`
+
+### <a name="input_github_config_url" /> [github\_config\_url](#input_github_config_url)
+
+Description: The url for the organization that the runner will belong to
+
+Type: `string`
+
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+### <a name="input_large_runner_config" /> [large\_runner\_config](#input_large_runner_config)
+
+Description: Configuration for the large runner
+
+Type:
+
+```hcl
+object({
+    min_replicas   = optional(number, 0)
+    tmp_space_gb   = number # The number of GB of disk space to allocate to the runner
+    memory_mb      = number # The number of MB of memory to allocate to the runner
+    cpu_millicores = number # The number of millicores of cpu to allocate to the runner
+  })
+```
+
+### <a name="input_medium_runner_config" /> [medium\_runner\_config](#input_medium_runner_config)
+
+Description: Configuration for the medium runner
+
+Type:
+
+```hcl
+object({
+    min_replicas   = optional(number, 0)
+    tmp_space_gb   = number # The number of GB of disk space to allocate to the runner
+    memory_mb      = number # The number of MB of memory to allocate to the runner
+    cpu_millicores = number # The number of millicores of cpu to allocate to the runner
+  })
+```
+
+### <a name="input_runner_image" /> [runner\_image](#input_runner_image)
+
+Description: The runner image to use
+
+Type: `string`
+
+### <a name="input_small_runner_config" /> [small\_runner\_config](#input_small_runner_config)
+
+Description: Configuration for the small runner
+
+Type:
+
+```hcl
+object({
+    min_replicas   = optional(number, 0)
+    tmp_space_gb   = number # The number of GB of disk space to allocate to the runner
+    memory_mb      = number # The number of MB of memory to allocate to the runner
+    cpu_millicores = number # The number of millicores of cpu to allocate to the runner
+  })
+```
+
+### <a name="input_tf_lock_table" /> [tf\_lock\_table](#input_tf_lock_table)
+
+Description: The tf lock table to clear when runners are terminated
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_extra_env_secrets" /> [extra\_env\_secrets](#input_extra_env_secrets)
+
+Description: A key-value mapping of extra secret environment variables for the runner pods
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_gha_runner_scale_set_version" /> [gha\_runner\_scale\_set\_version](#input_gha_runner_scale_set_version)
+
+Description: The version of the arc scale set to deploy
+
+Type: `string`
+
+Default: `"0.6.1"`
+
+### <a name="input_scale_set_name" /> [scale\_set\_name](#input_scale_set_name)
+
+Description: How the scale set will be referenced in GHA workflows
+
+Type: `string`
+
+Default: `"self-hosted"`
+
+### <a name="input_vault_internal_address" /> [vault\_internal\_address](#input_vault_internal_address)
+
+Description: The address of the vault cluster for this CI runner
+
+Type: `string`
+
+Default: `"http://vault-active.vault.svc.cluster.local:8200"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_sp_object_ids" /> [sp\_object\_ids](#output_sp_object_ids)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

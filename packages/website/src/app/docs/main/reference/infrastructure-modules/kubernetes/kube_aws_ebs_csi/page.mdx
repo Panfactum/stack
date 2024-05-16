@@ -1,0 +1,78 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# AWS EBS CSI
+
+<ModuleHeader name="kube_aws_ebs_csi" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_aws_ebs_csi" status="stable" type="live" />
+
+This module provides the CSI driver for provisioning EBS resources to pods in the cluster via
+[aws-ebs-csi-driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver).
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_aws_ebs_csi_driver_helm_version" /> [aws\_ebs\_csi\_driver\_helm\_version](#input_aws_ebs_csi_driver_helm_version)
+
+Description: The version of the aws-ebs-csi-driver helm chart to deploy
+
+Type: `string`
+
+Default: `"2.28.1"`
+
+### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

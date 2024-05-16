@@ -9,7 +9,7 @@ It includes:
 - A set of controller [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
   with a static size for running cluster-critical
   controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
-  Autoscaled nodes are deployed via our [kube_karpenter](/docs/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
+  Autoscaled nodes are deployed via our [kube_karpenter](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
 
 - [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
   for both the cluster control plane and for the node groups. 

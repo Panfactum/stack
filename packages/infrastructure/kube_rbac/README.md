@@ -18,7 +18,7 @@ input variables), and the description of the intended permission level.
 
 ## Maintainer Notes
 
-- This requires the cluster first be deployed via the [aws_eks module](/docs/reference/infrastructure-modules/aws/aws_eks).
+- This requires the cluster first be deployed via the [aws_eks module](/docs/main/reference/infrastructure-modules/aws/aws_eks).
 
 - You will need to import the `kubernetes_config_map.aws_auth` resource and apply those changes in order for the nodes
   to successfully register. You will need to use the credentials of the cluster owner (the IAM entity that originally created the cluster).

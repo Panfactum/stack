@@ -1,0 +1,41 @@
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
+
+# Install Tooling
+
+## Objective
+
+Install the necessary tooling to begin working with the Panfactum stack.
+
+## Supported Systems
+
+* Linux
+* macOS (Intel or ARM, `Sonoma` or later)
+* Windows (via `WSLv2`)
+
+## Installation
+
+Please install these tools:
+
+| Tool      | Version   | Purpose                                                         | Installation Docs                                                                                                         |
+| --------- | --------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `git`     | `~> 2.40` | Primary version control tool                                    | [Docs](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)                                                     |
+| `git-lfs` | `~> 3.4`  | Git extension for working with large binary blobs               | [Docs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) |
+| `nix`     | `~> 2.18` | Package management tool used to install all other dependencies  | [Docs](https://github.com/DeterminateSystems/nix-installer)                                                               |
+| `direnv`  | `~> 2.32` | Automatically loads tooling when entering the project directory | [Docs](https://direnv.net/docs/installation.html)                                                                         |
+
+### Installation Notes
+
+* Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
+
+* If you choose **not** use the [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer) when installing nix,
+  you will need to ensure that you complete these [extra setup steps manually](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#installation-differences)
+  in order to enable functionality such as Nix flakes.
+
+* If you are using an earlier version of macOS, you may run into [this issue](https://github.com/DeterminateSystems/nix-installer/issues/558) where the `nix` binary
+cannot be found. Add `export PATH="$NIX_LINK/bin:/nix/var/nix/profiles/default/bin:$PATH` to your `~/.zshrc` to resolve the issue.
+
+## Next Steps
+
+We are now ready to launch your organization's developer environment.
+
+<MarkdownGuideNav backHref={"/docs/edge/guides/getting-started/overview"} forwardHref={"/docs/edge/guides/getting-started/boot-developer-environment"} stepNumber={2} totalSteps={4} progressLabel={"Getting Started Guide:"} />

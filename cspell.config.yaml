@@ -141,7 +141,9 @@ words: [
   "contentful",
   "upvotes",
   "hostable",
-  "emberstack"
+  "emberstack",
+  "NATS",
+  "nats"
 ]
 languageSettings:
   - languageId: markdown,mdx

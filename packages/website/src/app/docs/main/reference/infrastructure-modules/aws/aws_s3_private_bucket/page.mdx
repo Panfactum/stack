@@ -1,0 +1,139 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Private S3 Bucket
+
+<ModuleHeader name="aws_s3_private_bucket" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_s3_private_bucket" status="stable" type="submodule" />
+
+This module provides our standard configuration for private S3 buckets.
+
+Notably it includes:
+
+* versioning
+
+* access control
+
+* storage tiering and expiration
+
+* encryption
+
+* public access blocks
+
+* ownership controls
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_bucket_name" /> [bucket\_name](#input_bucket_name)
+
+Description: The name of the s3 bucket.
+
+Type: `string`
+
+### <a name="input_description" /> [description](#input_description)
+
+Description: A statement of purpose for the S3 bucket.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_access_policy" /> [access\_policy](#input_access_policy)
+
+Description: AWS access policy for the bucket.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_audit_log_enabled" /> [audit\_log\_enabled](#input_audit_log_enabled)
+
+Description: Whether the bucket's audit log should be stored.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_expire_after_days" /> [expire\_after\_days](#input_expire_after_days)
+
+Description: Whether objects older than indicated days should be deleted. (0 to disable)
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_expire_old_versions" /> [expire\_old\_versions](#input_expire_old_versions)
+
+Description: Whether old object versions should be expired.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_force_destroy" /> [force\_destroy](#input_force_destroy)
+
+Description: Whether the bucket can be deleted if objects still exist in it.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_intelligent_transitions_enabled" /> [intelligent\_transitions\_enabled](#input_intelligent_transitions_enabled)
+
+Description: Whether objects should be subject to intelligent access tiering.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_kms_master_key_id" /> [kms\_master\_key\_id](#input_kms_master_key_id)
+
+Description: If provided, will use this CMK for bucket encryption (SSS-KMS) rather than the SSE-S3 key
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_timed_transitions_enabled" /> [timed\_transitions\_enabled](#input_timed_transitions_enabled)
+
+Description: Whether objects should be transitioned to lower storage tiers after a certain amount of time.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_versioning_enabled" /> [versioning\_enabled](#input_versioning_enabled)
+
+Description: Whether object versioning is enabled.
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_bucket_arn" /> [bucket\_arn](#output_bucket_arn)
+
+Description: n/a
+
+### <a name="output_bucket_name" /> [bucket\_name](#output_bucket_name)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

@@ -1,0 +1,268 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes Deployment
+
+<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_deployment" status="alpha" type="submodule" />
+
+This module provides our standard set up for a configurable Kubernetes Deployment. It includes:
+
+* A deployment
+
+* A secret object to hold configurable secrets for the deployment
+
+* Configurable environment variables
+
+* A service account with associated role and role binding
+
+* Horizontal pod autoscaling
+
+* A service for routing traffic
+
+* An ingress that provides some basic routing rules
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_containers" /> [containers](#input_containers)
+
+Description: A list of container configurations for the pod
+
+Type:
+
+```hcl
+list(object({
+    name               = string
+    init               = optional(bool, false)
+    image              = string
+    version            = string
+    command            = list(string)
+    imagePullPolicy    = optional(string, "IfNotPresent")
+    minimum_memory     = optional(number, 100)      #The minimum amount of memory in megabytes
+    minimum_cpu        = optional(number, 10)       # The minimum amount of cpu millicores
+    run_as_root        = optional(bool, false)      # Whether to run the container as root
+    uid                = optional(number, 1000)     # user to use when running the container if not root
+    linux_capabilities = optional(list(string), []) # Default is drop ALL
+    readonly           = optional(bool, true)       # Whether to use a readonly file system
+    env                = optional(map(string), {})  # Environment variables specific to the container
+    healthcheck_port   = optional(number, null)     # The number of the port for the healthcheck
+    healthcheck_type   = optional(string, null)     # Either HTTP or TCP
+    healthcheck_route  = optional(string, null)     # The route if using HTTP healthchecks
+  }))
+```
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+### <a name="input_service_name" /> [service\_name](#input_service_name)
+
+Description: The name of the service this deployment is for
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_common_env" /> [common\_env](#input_common_env)
+
+Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_deployment_update_type" /> [deployment\_update\_type](#input_deployment_update_type)
+
+Description: The type of update that the deployment should use
+
+Type: `string`
+
+Default: `"RollingUpdate"`
+
+### <a name="input_dynamic_secrets" /> [dynamic\_secrets](#input_dynamic_secrets)
+
+Description: Dynamic variable secrets
+
+Type:
+
+```hcl
+list(object({             // key is the secret provider class
+    secret_provider_class = string // name of the secret provider class
+    mount_path            = string // absolute path of where to mount the secret
+    env_var               = string // name of the env var that will have a path to the secret mount
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
+
+Description: The maximum number of instances of the service
+
+Type: `number`
+
+Default: `10`
+
+### <a name="input_min_replicas" /> [min\_replicas](#input_min_replicas)
+
+Description: The desired (minimum) number of instances of the service
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+
+Description: Node label preferences for the pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+
+Description: Node label requirements for the pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
+
+Description: Annotations to add to the pods in the deployment
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_ports" /> [ports](#input_ports)
+
+Description: The port the application is listening on inside the container
+
+Type:
+
+```hcl
+map(object({
+    service_port = number
+    pod_port     = number
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
+
+Description: The priority class to use for pods in the deployment
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
+
+Description: The pod restart policy
+
+Type: `string`
+
+Default: `"Always"`
+
+### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
+
+Description: A mapping of Kubernetes secret names to their absolute mount paths in the containers of the deployment
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_secrets" /> [secrets](#input_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_service_account" /> [service\_account](#input_service_account)
+
+Description: The name of the service account to use for this deployment
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
+
+Description: A list of paths that contain empty temporary directories
+
+Type:
+
+```hcl
+map(object({
+    size_gb = optional(number, 1)
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_tolerations" /> [tolerations](#input_tolerations)
+
+Description: A list of tolerations for the pods
+
+Type:
+
+```hcl
+list(object({
+    key      = string
+    operator = string
+    value    = string
+    effect   = string
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+
+Description: The labels unique to this deployment that can be used to select the pods in this deployment
+
+### <a name="output_service" /> [service](#output_service)
+
+Description: The name of the kubernetes service created for this deployment.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

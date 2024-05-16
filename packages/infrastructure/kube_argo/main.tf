@@ -40,6 +40,14 @@ locals {
     id = random_id.server_id.hex
   }
 
+  events_controller_match = {
+    id = random_id.events_controller_id.hex
+  }
+
+  webhook_match = {
+    id = random_id.webhook_id.hex
+  }
+
   configmap_name = "argo-controller"
 }
 
@@ -56,6 +64,16 @@ resource "random_id" "controller_id" {
 resource "random_id" "server_id" {
   byte_length = 8
   prefix      = "argo-"
+}
+
+resource "random_id" "events_controller_id" {
+  byte_length = 8
+  prefix      = "argo-events-controller-"
+}
+
+resource "random_id" "webhook_id" {
+  byte_length = 8
+  prefix      = "argo-webhook-"
 }
 
 module "controller_labels" {
@@ -88,6 +106,38 @@ module "server_labels" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, local.server_match)
+}
+
+module "events_controller_labels" {
+  source = "../kube_labels"
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.events_controller_match)
+}
+
+module "webhook_labels" {
+  source = "../kube_labels"
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.webhook_match)
 }
 
 module "controller_constants" {
@@ -124,6 +174,42 @@ module "server_constants" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, local.server_match)
+}
+
+module "events_controller_constants" {
+  source = "../constants"
+
+  matching_labels = local.events_controller_match
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.events_controller_match)
+}
+
+module "webhook_constants" {
+  source = "../constants"
+
+  matching_labels = local.webhook_match
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.webhook_match)
 }
 
 /***************************************
@@ -373,7 +459,7 @@ resource "helm_release" "argo" {
   name            = "argo"
   repository      = "https://argoproj.github.io/argo-helm"
   chart           = "argo-workflows"
-  version         = var.argo_helm_version
+  version         = var.argo_workflows_helm_version
   recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
@@ -447,16 +533,20 @@ resource "helm_release" "argo" {
           format = "json"
           level  = var.log_level
         }
+
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
+        podLabels                 = module.controller_labels.kube_labels
+        priorityClassName         = module.controller_constants.cluster_important_priority_class_name
+        replicas                  = 2
+        tolerations               = module.controller_constants.burstable_node_toleration_helm
+        affinity                  = module.controller_constants.pod_anti_affinity_helm
+        topologySpreadConstraints = module.controller_constants.topology_spread_zone_preferred
         pdb = {
           enabled        = true
           maxUnavailable = 1
         }
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
-        podLabels         = module.controller_labels.kube_labels
-        priorityClassName = module.controller_constants.cluster_important_priority_class_name
-        replicas          = 2
         resources = {
           requests = {
             memory = "100Mi"
@@ -466,8 +556,6 @@ resource "helm_release" "argo" {
             memory = "130Mi"
           }
         }
-        tolerations               = module.controller_constants.burstable_node_toleration_helm
-        topologySpreadConstraints = module.controller_constants.topology_spread_zone_preferred
       }
 
       executor = {
@@ -529,12 +617,12 @@ resource "helm_release" "argo" {
         replicas                  = 2
         priorityClassName         = module.server_constants.cluster_important_priority_class_name
         tolerations               = module.server_constants.burstable_node_toleration_helm
+        affinity                  = module.server_constants.pod_anti_affinity_helm
         topologySpreadConstraints = module.server_constants.topology_spread_zone_preferred
         pdb = {
           enabled        = true
           maxUnavailable = 1
         }
-
         resources = {
           requests = {
             memory = "100Mi"
@@ -551,143 +639,36 @@ resource "helm_release" "argo" {
   depends_on = [module.database]
 }
 
-/***************************************
-* Argo RBAC
-***************************************/
+module "ingress" {
+  count  = var.ingress_enabled ? 1 : 0
+  source = "../kube_ingress"
 
-resource "time_rotating" "token_rotation" {
-  rotation_days = 7
+  namespace = local.namespace
+  name      = "argo-server"
+  ingress_configs = [{
+    domains      = [var.argo_domain]
+    service      = "argo-server"
+    service_port = 2746
+  }]
+
+  rate_limiting_enabled          = true
+  cross_origin_isolation_enabled = true
+  permissions_policy_enabled     = true
+  csp_enabled                    = true
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+
+  depends_on = [helm_release.argo]
 }
 
-resource "kubernetes_service_account" "superuser" {
-  metadata {
-    name      = "argo-superuser"
-    namespace = local.namespace
-    labels    = module.server_labels.kube_labels
-    annotations = {
-      "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence"       = "0"
-      "workflows.argoproj.io/service-account-token.name" = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
-    }
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "superuser_binding" {
-  metadata {
-    name   = "argo-superuser"
-    labels = module.server_labels.kube_labels
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.superuser.metadata[0].name
-    namespace = local.namespace
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "argo-admin" // This is a built in role in the chart
-  }
-}
-
-resource "kubernetes_secret" "superuser_token" {
-  metadata {
-    name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
-    namespace = local.namespace
-    labels    = module.server_labels.kube_labels
-    annotations = {
-      "kubernetes.io/service-account.name" = kubernetes_service_account.superuser.metadata[0].name
-    }
-  }
-  type = "kubernetes.io/service-account-token"
-}
-
-resource "kubernetes_service_account" "admin" {
-  metadata {
-    name      = "argo-admin"
-    namespace = local.namespace
-    labels    = module.server_labels.kube_labels
-    annotations = {
-      "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence"       = "1"
-      "workflows.argoproj.io/service-account-token.name" = "argo-admin-${md5(time_rotating.token_rotation.id)}"
-    }
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "admin_binding" {
-  metadata {
-    name   = "argo-admin"
-    labels = module.server_labels.kube_labels
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.admin.metadata[0].name
-    namespace = local.namespace
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "argo-edit" // This is a built in role in the chart
-  }
-}
-
-resource "kubernetes_secret" "admin_token" {
-  metadata {
-    name      = "argo-admin-${md5(time_rotating.token_rotation.id)}"
-    namespace = local.namespace
-    labels    = module.server_labels.kube_labels
-    annotations = {
-      "kubernetes.io/service-account.name" = kubernetes_service_account.admin.metadata[0].name
-    }
-  }
-  type = "kubernetes.io/service-account-token"
-}
-
-resource "kubernetes_service_account" "reader" {
-  metadata {
-    name      = "argo-reader"
-    namespace = local.namespace
-    labels    = module.server_labels.kube_labels
-    annotations = {
-      "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence"       = "2"
-      "workflows.argoproj.io/service-account-token.name" = "argo-reader-${md5(time_rotating.token_rotation.id)}"
-    }
-  }
-}
-
-resource "kubernetes_cluster_role_binding" "reader_binding" {
-  metadata {
-    name   = "argo-reader"
-    labels = module.server_labels.kube_labels
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.reader.metadata[0].name
-    namespace = local.namespace
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "argo-view" // This is a built in role in the chart
-  }
-}
-
-resource "kubernetes_secret" "reader_token" {
-  metadata {
-    name      = "argo-reader-${md5(time_rotating.token_rotation.id)}"
-    namespace = local.namespace
-    labels    = module.server_labels.kube_labels
-    annotations = {
-      "kubernetes.io/service-account.name" = kubernetes_service_account.reader.metadata[0].name
-    }
-  }
-  type = "kubernetes.io/service-account-token"
-}
-
-/***************************************
-* Autoscaling
-***************************************/
 
 resource "kubernetes_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
@@ -732,37 +713,329 @@ resource "kubernetes_manifest" "vpa_server" {
 }
 
 /***************************************
-* Argo Ingress
+* Argo Events
 ***************************************/
 
-module "ingress" {
-  count  = var.ingress_enabled ? 1 : 0
-  source = "../kube_ingress"
+resource "helm_release" "argo_events" {
+  namespace       = local.namespace
+  name            = "argo-events"
+  repository      = "https://argoproj.github.io/argo-helm"
+  chart           = "argo-events"
+  version         = var.argo_events_helm_version
+  recreate_pods   = false
+  cleanup_on_fail = true
+  wait            = true
+  wait_for_jobs   = true
 
-  namespace = local.namespace
-  name      = "argo-server"
-  ingress_configs = [{
-    domains      = [var.argo_domain]
-    service      = "argo-server"
-    service_port = 2746
-  }]
+  values = [
+    yamlencode({
+      fullnameOverride     = "argo-events"
+      createAggregateRoles = true
 
-  rate_limiting_enabled          = true
-  cross_origin_isolation_enabled = true
-  permissions_policy_enabled     = true
-  csp_enabled                    = true
+      global = {
+        image = {
+          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/argoproj/argo-events"
+        }
+      }
 
-  # generate: pass_common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+      configs = {
+        jetstream = {
+          versions = [{
+            version              = "default"
+            natsImage            = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/library/nats:${var.event_bus_nats_version}"
+            metricsExporterImage = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/natsio/prometheus-nats-exporter:${var.event_bus_prometheus_nats_exporter_version}"
+            configReloaderImage  = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/natsio/nats-server-config-reloader:${var.event_bus_nats_server_config_reloader_version}"
+            startCommand         = "/nats-server"
+          }]
+        }
+      }
 
+      controller = {
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
+        podLabels                 = module.events_controller_labels.kube_labels
+        priorityClassName         = module.events_controller_constants.cluster_important_priority_class_name
+        replicas                  = 2
+        tolerations               = module.events_controller_constants.burstable_node_toleration_helm
+        affinity                  = module.events_controller_constants.pod_anti_affinity_helm
+        topologySpreadConstraints = module.events_controller_constants.topology_spread_zone_preferred
+        pdb = {
+          enabled        = true
+          maxUnavailable = 1
+          labels         = module.events_controller_labels.kube_labels
+        }
+        resources = {
+          requests = {
+            memory = "100Mi"
+            cpu    = "100m"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+      }
+
+      webhook = {
+        enabled = true
+        podAnnotations = {
+          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        }
+        podLabels                 = module.webhook_labels.kube_labels
+        priorityClassName         = module.webhook_constants.cluster_important_priority_class_name
+        replicas                  = 2
+        tolerations               = module.webhook_constants.burstable_node_toleration_helm
+        affinity                  = module.webhook_constants.pod_anti_affinity_helm
+        topologySpreadConstraints = module.webhook_constants.topology_spread_zone_preferred
+        pdb = {
+          enabled        = true
+          maxUnavailable = 1
+          labels         = module.webhook_labels.kube_labels
+        }
+        resources = {
+          requests = {
+            memory = "100Mi"
+            cpu    = "100m"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+      }
+    })
+  ]
+}
+
+resource "kubernetes_manifest" "vpa_events_controller" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "argo-events-controller-manager"
+      namespace = local.namespace
+      labels    = module.events_controller_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "argo-events-controller-manager"
+      }
+    }
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+resource "kubernetes_manifest" "vpa_webhook" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "events-webhook"
+      namespace = local.namespace
+      labels    = module.server_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "events-webhook"
+      }
+    }
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+/***************************************
+* Argo RBAC
+***************************************/
+
+resource "time_rotating" "token_rotation" {
+  rotation_days = 7
+}
+
+resource "kubernetes_service_account" "superuser" {
+  metadata {
+    name      = "argo-superuser"
+    namespace = local.namespace
+    labels    = module.server_labels.kube_labels
+    annotations = {
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "0"
+      "workflows.argoproj.io/service-account-token.name" = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
+    }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "superuser_binding" {
+  metadata {
+    name   = "argo-superuser"
+    labels = module.server_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.superuser.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-admin" // This is a built in role in the chart
+  }
   depends_on = [helm_release.argo]
 }
 
+resource "kubernetes_cluster_role_binding" "superuser_events_binding" {
+  metadata {
+    name   = "argo-events-superuser"
+    labels = module.server_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.superuser.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-events-aggregate-to-admin" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+resource "kubernetes_secret" "superuser_token" {
+  metadata {
+    name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
+    namespace = local.namespace
+    labels    = module.server_labels.kube_labels
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.superuser.metadata[0].name
+    }
+  }
+  type = "kubernetes.io/service-account-token"
+}
+
+resource "kubernetes_service_account" "admin" {
+  metadata {
+    name      = "argo-admin"
+    namespace = local.namespace
+    labels    = module.server_labels.kube_labels
+    annotations = {
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "1"
+      "workflows.argoproj.io/service-account-token.name" = "argo-admin-${md5(time_rotating.token_rotation.id)}"
+    }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "admin_binding" {
+  metadata {
+    name   = "argo-admin"
+    labels = module.server_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.admin.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-edit" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo]
+}
+
+resource "kubernetes_cluster_role_binding" "admin_events_binding" {
+  metadata {
+    name   = "argo-events-admin"
+    labels = module.server_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.admin.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-events-aggregate-to-edit" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+resource "kubernetes_secret" "admin_token" {
+  metadata {
+    name      = "argo-admin-${md5(time_rotating.token_rotation.id)}"
+    namespace = local.namespace
+    labels    = module.server_labels.kube_labels
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.admin.metadata[0].name
+    }
+  }
+  type = "kubernetes.io/service-account-token"
+}
+
+resource "kubernetes_service_account" "reader" {
+  metadata {
+    name      = "argo-reader"
+    namespace = local.namespace
+    labels    = module.server_labels.kube_labels
+    annotations = {
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "2"
+      "workflows.argoproj.io/service-account-token.name" = "argo-reader-${md5(time_rotating.token_rotation.id)}"
+    }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "reader_binding" {
+  metadata {
+    name   = "argo-reader"
+    labels = module.server_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.reader.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-view" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo]
+}
+
+resource "kubernetes_cluster_role_binding" "reader_events_binding" {
+  metadata {
+    name   = "argo-events-reader"
+    labels = module.server_labels.kube_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.reader.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-events-aggregate-to-view" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+resource "kubernetes_secret" "reader_token" {
+  metadata {
+    name      = "argo-reader-${md5(time_rotating.token_rotation.id)}"
+    namespace = local.namespace
+    labels    = module.server_labels.kube_labels
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account.reader.metadata[0].name
+    }
+  }
+  type = "kubernetes.io/service-account-token"
+}
 

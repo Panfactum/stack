@@ -1,7 +1,13 @@
-variable "argo_helm_version" {
-  description = "The version of the argo helm chart to deploy"
+variable "argo_workflows_helm_version" {
+  description = "The version of the argo workflows helm chart to deploy"
   type        = string
   default     = "0.41.1"
+}
+
+variable "argo_events_helm_version" {
+  description = "The version of the argo events helm chart to deploy"
+  type        = string
+  default     = "2.4.4"
 }
 
 variable "argo_domain" {
@@ -63,4 +69,22 @@ variable "workflow_archive_backups_enabled" {
   description = "Whether to enable backups of the workflow archives"
   type        = bool
   default     = false
+}
+
+variable "event_bus_nats_version" {
+  description = "The version of nats to use for the event bus"
+  type        = string
+  default     = "2.10.14"
+}
+
+variable "event_bus_prometheus_nats_exporter_version" {
+  description = "The version of prometheus-nats-exporter to use for the event bus"
+  type        = string
+  default     = "0.15.0"
+}
+
+variable "event_bus_nats_server_config_reloader_version" {
+  description = "The version of nats-server-config-reloader to use for the event bus"
+  type        = string
+  default     = "0.14.2"
 }

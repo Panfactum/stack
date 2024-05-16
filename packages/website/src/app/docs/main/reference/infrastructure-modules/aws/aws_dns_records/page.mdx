@@ -1,0 +1,58 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# AWS DNS Records
+
+<ModuleHeader name="aws_dns_records" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_dns_records" status="stable" type="live" />
+
+This module is used to deploy the following DNS record types
+to the indicated hosted zones:
+
+* [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
+* [TXT](https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_zones" /> [zones](#input_zones)
+
+Description: Zone configurations. Keys are the domain names.
+
+Type:
+
+```hcl
+map(object({
+    mx_records = optional(list(object({
+      subdomain = string
+      records   = list(string)
+      ttl       = optional(number, 86400)
+    })), [])
+    txt_records = optional(list(object({
+      subdomain = string
+      records   = list(string)
+      ttl       = optional(number, 300)
+    })), [])
+  }))
+```
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}
