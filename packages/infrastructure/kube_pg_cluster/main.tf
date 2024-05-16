@@ -410,7 +410,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       affinity = {
         // Ensures that the postgres cluster instances are never scheduled on the same node
         enablePodAntiAffinity = true
-        topologyKey           = "kubernetes.io/hostname"
+        topologyKey           = (var.burstable_instances_enabled || var.spot_instances_enabled) ? "node.kubernetes.io/instance-type" : "kubernetes.io/hostname"
         podAntiAffinityType   = "required"
 
         // Allow the clusters to be scheduled on particular node types
@@ -776,7 +776,7 @@ resource "kubernetes_manifest" "connection_pooler" {
           topologySpreadConstraints = module.constants_pooler[each.key].topology_spread_zone_preferred
           tolerations               = module.constants_pooler[each.key].burstable_node_toleration_helm
           affinity = merge(
-            module.constants_pooler[each.key].pod_anti_affinity_helm,
+            module.constants_pooler[each.key].pod_anti_affinity_instance_type_helm,
             {
               podAffinity = {
                 // Try to schedule poolers on the same nodes as db instances to reduce network latency

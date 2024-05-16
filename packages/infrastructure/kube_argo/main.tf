@@ -537,12 +537,10 @@ resource "helm_release" "argo" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels                 = module.controller_labels.kube_labels
-        priorityClassName         = module.controller_constants.cluster_important_priority_class_name
-        replicas                  = 2
-        tolerations               = module.controller_constants.burstable_node_toleration_helm
-        affinity                  = module.controller_constants.pod_anti_affinity_helm
-        topologySpreadConstraints = module.controller_constants.topology_spread_zone_preferred
+        podLabels         = module.controller_labels.kube_labels
+        priorityClassName = module.controller_constants.cluster_important_priority_class_name
+        replicas          = 1
+        tolerations       = module.controller_constants.burstable_node_toleration_helm
         pdb = {
           enabled        = true
           maxUnavailable = 1
@@ -754,12 +752,10 @@ resource "helm_release" "argo_events" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels                 = module.events_controller_labels.kube_labels
-        priorityClassName         = module.events_controller_constants.cluster_important_priority_class_name
-        replicas                  = 2
-        tolerations               = module.events_controller_constants.burstable_node_toleration_helm
-        affinity                  = module.events_controller_constants.pod_anti_affinity_helm
-        topologySpreadConstraints = module.events_controller_constants.topology_spread_zone_preferred
+        podLabels         = module.events_controller_labels.kube_labels
+        priorityClassName = module.events_controller_constants.cluster_important_priority_class_name
+        replicas          = 1
+        tolerations       = module.events_controller_constants.burstable_node_toleration_helm
         pdb = {
           enabled        = true
           maxUnavailable = 1

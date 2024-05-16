@@ -37,3 +37,8 @@ output "node_security_group_id" {
   description = "ID of the security group assigned to controller nodes"
   value       = aws_security_group.all_nodes.id
 }
+
+output "dns_service_ip" {
+  description = "The IP address of the cluster's DNS service."
+  value       = var.dns_service_ip
+}

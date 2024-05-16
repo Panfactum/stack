@@ -2,6 +2,7 @@
 api-server = "${API_SERVER_ADDR}"
 cluster-certificate = "${CLUSTER_CA_DATA}"
 cluster-name = "${CLUSTER_NAME}"
+cluster-dns-ip = "${CLUSTER_DNS_IP}"
 max-pods = ${MAX_PODS}
 shutdown-grace-period = "${SHUTDOWN_GRACE_PERIOD}"
 shutdown-grace-period-for-critical-pods = "${SHUTDOWN_GRACE_PERIOD_FOR_CRITICAL_PODS}"

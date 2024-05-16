@@ -36,7 +36,7 @@ locals {
   }]
   node_preferences = concat(
     local.input_node_preferences,
-    var.allowed_spot ? module.constants.spot_node_affinity_helm.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution : []
+    var.spot_instances_enabled ? module.constants.spot_node_affinity_helm.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution : []
   )
   node_requirements = {
     nodeSelectorTerms = [{
@@ -150,11 +150,20 @@ locals {
         sizeLimit = "${config.size_gb}Gi"
       }
     }],
-    [for path, config in var.secret_mounts : {
-      name = path
+    [for name, config in var.secret_mounts : {
+      name = "secret-${name}"
       secret = {
-        secretName = path
+        secretName = name
         optional   = false
+        readOnly   = true
+      }
+    }],
+    [for name, config in var.config_map_mounts : {
+      name = "config-map-${name}"
+      configMap = {
+        name     = name
+        optional = false
+        readOnly = true
       }
     }],
     [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -179,7 +188,12 @@ locals {
   }]
 
   common_secret_volume_mounts = [for name, mount in var.secret_mounts : {
-    name      = name
+    name      = "secret-${name}"
+    mountPath = mount
+  }]
+
+  common_config_map_volume_mounts = [for name, mount in var.config_map_mounts : {
+    name      = "config-map-${name}"
     mountPath = mount
   }]
 
@@ -191,6 +205,7 @@ locals {
   common_volume_mounts = concat(
     local.common_tmp_volume_mounts,
     local.common_secret_volume_mounts,
+    local.common_config_map_volume_mounts,
     local.common_dynamic_secret_volume_mounts
   )
 
@@ -201,7 +216,8 @@ locals {
   ************************************************/
   tolerations = concat(
     var.tolerations,
-    var.allowed_spot ? module.constants.spot_node_toleration_helm : []
+    var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : [],
+    var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : []
   )
 
   /************************************************
@@ -257,6 +273,7 @@ locals {
       securityContext = {
         fsGroup = var.mount_owner
       }
+      dnsPolicy = var.dns_policy
 
       ///////////////////////////
       // Scheduling
@@ -268,7 +285,7 @@ locals {
           preferredDuringSchedulingIgnoredDuringExecution = length(local.node_preferences) == 0 ? null : local.node_preferences
           requiredDuringSchedulingIgnoredDuringExecution  = length(keys(var.node_requirements)) == 0 ? null : local.node_requirements
         } : k => v if v != null }
-      }, module.constants.pod_anti_affinity_helm)
+      }, var.pod_anti_affinity_type == "node" ? module.constants.pod_anti_affinity_helm : var.pod_anti_affinity_type == "instance_type" ? module.constants.pod_anti_affinity_instance_type_helm : {})
       topologySpreadConstraints = module.constants.topology_spread_zone_preferred
       restartPolicy             = var.restart_policy
 
@@ -284,7 +301,7 @@ locals {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
-        imagePullPolicy = config.imagePullPolicy
+        imagePullPolicy = config.image_pull_policy
 
         // NOTE: The order that these env blocks is defined in
         // is incredibly important. Do NOT move them around unless you know what you are doing.
@@ -296,28 +313,28 @@ locals {
           }]
         )
 
-        startupProbe = config.healthcheck_type != null ? { for k, v in {
-          httpGet = config.healthcheck_type == "HTTP" ? {
-            path   = config.healthcheck_route
-            port   = config.healthcheck_port
+        startupProbe = config.liveness_check_type != null ? { for k, v in {
+          httpGet = config.liveness_check_type == "HTTP" ? {
+            path   = config.liveness_check_route
+            port   = config.liveness_check_port
             scheme = "HTTP"
           } : null
-          tcpSocket = config.healthcheck_type == "TCP" ? {
-            port = config.healthcheck_port
+          tcpSocket = config.liveness_check_type == "TCP" ? {
+            port = config.liveness_check_port
           } : null
           failureThreshold = 120
           periodSeconds    = 1
           timeoutSeconds   = 3
         } : k => v if v != null } : null
 
-        readinessProbe = config.healthcheck_type != null ? { for k, v in {
-          httpGet = config.healthcheck_type == "HTTP" ? {
-            path   = config.healthcheck_route
-            port   = config.healthcheck_port
+        readinessProbe = config.liveness_check_type != null ? { for k, v in {
+          httpGet = (config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "HTTP" ? {
+            path   = config.ready_check_route != null ? config.ready_check_route : config.liveness_check_route
+            port   = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
             scheme = "HTTP"
           } : null
-          tcpSocket = config.healthcheck_type == "TCP" ? {
-            port = config.healthcheck_port
+          tcpSocket = (config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "TCP" ? {
+            port = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
           } : null
           successThreshold = 1
           failureThreshold = 3
@@ -325,14 +342,14 @@ locals {
           timeoutSeconds   = 3
         } : k => v if v != null } : null
 
-        livenessProbe = config.healthcheck_type != null ? { for k, v in {
-          httpGet = config.healthcheck_type == "HTTP" ? {
-            path   = config.healthcheck_route
-            port   = config.healthcheck_port
+        livenessProbe = config.liveness_check_type != null ? { for k, v in {
+          httpGet = config.liveness_check_type == "HTTP" ? {
+            path   = config.liveness_check_route
+            port   = config.liveness_check_port
             scheme = "HTTP"
           } : null
-          tcpSocket = config.healthcheck_type == "TCP" ? {
-            port = config.healthcheck_port
+          tcpSocket = config.liveness_check_type == "TCP" ? {
+            port = config.liveness_check_port
           } : null
           successThreshold = 1
           failureThreshold = 15
@@ -349,7 +366,7 @@ locals {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
-        imagePullPolicy = config.imagePullPolicy
+        imagePullPolicy = config.image_pull_policy
         env = concat(
           local.common_env,
           [for k, v in config.env : {
@@ -404,7 +421,7 @@ module "constants" {
 }
 
 resource "random_id" "pod_template_id" {
-  prefix      = "${var.pf_root_module}-"
+  prefix      = "pod-"
   byte_length = 8
 }
 

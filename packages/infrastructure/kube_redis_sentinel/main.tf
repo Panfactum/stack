@@ -194,7 +194,7 @@ resource "helm_release" "redis" {
         }
 
         priorityClassName         = module.constants.database_priority_class_name
-        affinity                  = module.constants.pod_anti_affinity_helm
+        affinity                  = (var.burstable_instances_enabled || var.spot_instances_enabled) ? module.constants.pod_anti_affinity_instance_type_helm : module.constants.pod_anti_affinity_helm
         tolerations               = var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : null
         topologySpreadConstraints = module.constants.topology_spread_zone_strict
 

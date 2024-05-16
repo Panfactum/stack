@@ -38,12 +38,12 @@ export default function StartHerePage () {
   return (
     <div className="flex flex-col gap-12 py-20">
       <Option
-        href={'/docs/edge/guides/getting-started/overview'}
+        href={'/docs/main/guides/getting-started/overview'}
         text={"Connecting to your organization's stack?"}
       />
       <Or/>
       <Option
-        href={'/docs/edge/guides/bootstrapping/overview'}
+        href={'/docs/main/guides/bootstrapping/overview'}
         text={'Deploying the stack in your organization?'}
       />
     </div>

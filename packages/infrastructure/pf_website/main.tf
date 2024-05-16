@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -97,18 +95,11 @@ module "website_deployment" {
         "node",
         "server.js"
       ]
-      healthcheck_type  = "HTTP"
-      healthcheck_port  = local.port
-      healthcheck_route = local.healthcheck_route
+      liveness_check_type  = "HTTP"
+      liveness_check_port  = local.port
+      liveness_check_route = local.healthcheck_route
     }
   ]
-
-  ports = {
-    http = {
-      pod_port     = local.port
-      service_port = local.port
-    }
-  }
 
   vpa_enabled = var.vpa_enabled
 
@@ -123,6 +114,28 @@ module "website_deployment" {
   # end-generate
 }
 
+resource "kubernetes_service" "service" {
+  metadata {
+    name      = local.name
+    namespace = local.namespace
+    labels    = module.labels.kube_labels
+  }
+  spec {
+    internal_traffic_policy = "Cluster"
+    ip_families             = ["IPv4"]
+    ip_family_policy        = "SingleStack"
+    selector                = module.website_deployment.match_labels
+    port {
+      name        = "http"
+      port        = local.port
+      protocol    = "TCP"
+      target_port = local.port
+    }
+  }
+
+  depends_on = [module.website_deployment]
+}
+
 module "ingress" {
   source = "../kube_ingress"
 
@@ -131,7 +144,7 @@ module "ingress" {
 
   ingress_configs = [{
     domains      = [var.website_domain]
-    service      = module.website_deployment.service
+    service      = local.name
     service_port = local.port
   }]
 
@@ -151,4 +164,6 @@ module "ingress" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
+
+  depends_on = [kubernetes_service.service]
 }

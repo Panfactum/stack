@@ -227,11 +227,11 @@ module "bastion" {
         "-o", "HostKey=/run/sshd/id_rsa",
         "-o", "PORT=${var.bastion_port}"
       ]
-      run_as_root        = true
-      linux_capabilities = ["SYS_CHROOT", "SETGID", "SETUID"]
-      healthcheck_port   = var.bastion_port
-      healthcheck_type   = "TCP"
-      minimum_memory     = 10
+      run_as_root         = true
+      linux_capabilities  = ["SYS_CHROOT", "SETGID", "SETUID"]
+      liveness_check_port = var.bastion_port
+      liveness_check_type = "TCP"
+      minimum_memory      = 10
     },
 
     // SSHD requires that root be the only

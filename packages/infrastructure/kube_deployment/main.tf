@@ -28,28 +28,32 @@ module "kube_labels" {
 }
 
 module "pod_template" {
-  source       = "../kube_pod"
-  allowed_spot = true
+  source = "../kube_pod"
 
   namespace           = var.namespace
   service_account     = var.service_account
   priority_class_name = var.priority_class_name
+  dns_policy          = var.dns_policy
   pod_annotations     = var.pod_annotations
 
   containers = var.containers
 
-  secret_mounts   = var.secret_mounts
-  secrets         = var.secrets
-  common_env      = var.common_env
-  dynamic_secrets = var.dynamic_secrets
+  config_map_mounts = var.config_map_mounts
+  secret_mounts     = var.secret_mounts
+  secrets           = var.secrets
+  common_env        = var.common_env
+  dynamic_secrets   = var.dynamic_secrets
 
   tmp_directories = var.tmp_directories
   mount_owner     = var.mount_owner
 
-  node_preferences  = var.node_preferences
-  node_requirements = var.node_requirements
-  tolerations       = var.tolerations
-  restart_policy    = var.restart_policy
+  node_preferences            = var.node_preferences
+  node_requirements           = var.node_requirements
+  spot_instances_enabled      = var.spot_instances_enabled
+  burstable_instances_enabled = var.burstable_instances_enabled
+  pod_anti_affinity_type      = var.pod_anti_affinity_type != null ? var.pod_anti_affinity_type : (var.spot_instances_enabled || var.burstable_instances_enabled) ? "instance_type" : "node"
+  tolerations                 = var.tolerations
+  restart_policy              = var.restart_policy
 
   # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -226,30 +230,6 @@ resource "kubernetes_manifest" "vpa_server" {
 #    }
 #  }
 #}
-
-resource "kubernetes_service" "service" {
-  metadata {
-    name      = var.service_name
-    namespace = var.namespace
-    labels = merge(
-      module.kube_labels.kube_labels,
-      {}
-    )
-  }
-  spec {
-    type = "ClusterIP"
-    dynamic "port" {
-      for_each = var.ports
-      content {
-        port        = port.value.service_port
-        target_port = port.value.pod_port
-        protocol    = "TCP"
-        name        = port.key
-      }
-    }
-    selector = module.pod_template.match_labels
-  }
-}
 
 resource "kubernetes_manifest" "pdb" {
   manifest = {

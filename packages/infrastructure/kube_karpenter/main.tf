@@ -606,18 +606,17 @@ resource "helm_release" "karpenter" {
         }
       }
 
-      // This is a critical controller as it ensures there is enough space
-      // in the cluster to run the other controller
       priorityClassName = "system-cluster-critical"
 
-      replicas                  = 2
-      tolerations               = module.constants.burstable_node_toleration_helm
-      topologySpreadConstraints = module.constants.topology_spread_zone_preferred
-      affinity = merge(
-        module.constants.controller_node_with_burstable_affinity_helm,
-        module.constants.pod_anti_affinity_helm
-      )
-
+      replicas = 1
+      strategy = {
+        type          = "Recreate"
+        rollingUpdate = null
+      }
+      nodeSelector = {
+        "kubernetes.io/os"    = "linux",
+        "panfactum.com/class" = "controller" # MUST be scheduled on controller nodes (controller by EKS)
+      }
       settings = {
         clusterName       = var.cluster_name
         interruptionQueue = aws_sqs_queue.karpenter.name

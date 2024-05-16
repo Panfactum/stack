@@ -145,6 +145,36 @@ resource "helm_release" "secrets_csi_driver" {
             }
           }
         }
+        tolerations = concat(
+          [
+            {
+              key      = "node.kubernetes.io/not-ready"
+              operator = "Exists"
+              effect   = "NoExecute"
+            },
+            {
+              key      = "node.kubernetes.io/unreachable"
+              operator = "Exists"
+              effect   = "NoExecute"
+            },
+            {
+              key      = "node.kubernetes.io/disk-pressure"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "node.kubernetes.io/memory-pressure"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "node.kubernetes.io/pid-pressure"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            }
+          ],
+          module.constants.burstable_node_toleration_helm
+        )
 
         daemonsetAnnotations = {
           "reloader.stakater.com/auto" = "true"

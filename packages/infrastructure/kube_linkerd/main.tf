@@ -258,6 +258,10 @@ resource "helm_release" "linkerd" {
       controllerReplicas        = 2
       enablePodAntiAffinity     = true
       enablePodDisruptionBudget = true
+      deploymentStrategy = {
+        type          = "Recreate"
+        rollingUpdate = null
+      }
 
       # Was never able to get the CNI to work.
       # Given the additional downside of this breaking init containers,
@@ -319,6 +323,7 @@ resource "helm_release" "linkerd" {
       priorityClassName = "system-cluster-critical"
 
       nodeAffinity = module.constants.controller_node_affinity_helm.nodeAffinity
+      tolerations  = module.constants.burstable_node_toleration_helm
 
       policyValidator = {
         externalSecret = true

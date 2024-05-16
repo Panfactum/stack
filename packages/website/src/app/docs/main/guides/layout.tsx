@@ -241,7 +241,7 @@ export default function Layout (
   return (
     <ArticleWithSideNavLayout
       navSections={SIDENAV_SECTIONS}
-      basePath={'/docs/edge/guides'}
+      basePath={'/docs/main/guides'}
     >
       {children}
     </ArticleWithSideNavLayout>

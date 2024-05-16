@@ -60,6 +60,17 @@ variable "service_cidr" {
   type        = string
 }
 
+variable "dns_service_ip" {
+  description = "The IP address of the cluster's DNS service. Must be inside the service_cidr range."
+  type        = string
+}
+
+variable "core_dns_addon_enabled" {
+  description = "FOR BACKWARDS COMPATIBILITY AND MIGRATIONS ONLY"
+  type        = bool
+  default     = false
+}
+
 ######################################################################################
 # EKS add-ons versions
 # For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html

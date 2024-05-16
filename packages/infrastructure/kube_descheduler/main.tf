@@ -117,14 +117,7 @@ resource "helm_release" "descheduler" {
       }
       deschedulingInterval = "5m"
 
-      replicas = 2
-      leaderElection = {
-        enabled = true
-      }
-      affinity = merge(
-        module.constants.controller_node_with_burstable_affinity_helm,
-        module.constants.pod_anti_affinity_helm
-      )
+      replicas    = 1
       tolerations = module.constants.burstable_node_toleration_helm
 
       resources = {

@@ -40,22 +40,25 @@ Type:
 
 ```hcl
 list(object({
-    name               = string
-    init               = optional(bool, false)
-    image              = string
-    version            = string
-    command            = list(string)
-    imagePullPolicy    = optional(string, "IfNotPresent")
-    minimum_memory     = optional(number, 100)      #The minimum amount of memory in megabytes
-    minimum_cpu        = optional(number, 10)       # The minimum amount of cpu millicores
-    run_as_root        = optional(bool, false)      # Whether to run the container as root
-    uid                = optional(number, 1000)     # user to use when running the container if not root
-    linux_capabilities = optional(list(string), []) # Default is drop ALL
-    readonly           = optional(bool, true)       # Whether to use a readonly file system
-    env                = optional(map(string), {})  # Environment variables specific to the container
-    healthcheck_port   = optional(number, null)     # The number of the port for the healthcheck
-    healthcheck_type   = optional(string, null)     # Either HTTP or TCP
-    healthcheck_route  = optional(string, null)     # The route if using HTTP healthchecks
+    name                 = string
+    init                 = optional(bool, false)
+    image                = string
+    version              = string
+    command              = list(string)
+    image_pull_policy    = optional(string, "IfNotPresent")
+    minimum_memory       = optional(number, 100)      #The minimum amount of memory in megabytes
+    minimum_cpu          = optional(number, 10)       # The minimum amount of cpu millicores
+    run_as_root          = optional(bool, false)      # Whether to run the container as root
+    uid                  = optional(number, 1000)     # user to use when running the container if not root
+    linux_capabilities   = optional(list(string), []) # Default is drop ALL
+    readonly             = optional(bool, true)       # Whether to use a readonly file system
+    env                  = optional(map(string), {})  # Environment variables specific to the container
+    liveness_check_port  = optional(number, null)     # The number of the port for the liveness_check
+    liveness_check_type  = optional(string, null)     # Either HTTP or TCP
+    liveness_check_route = optional(string, null)     # The route if using HTTP liveness_checks
+    ready_check_port     = optional(number, null)     # The number of the port for the ready_check (default to liveness_check_port)
+    ready_check_type     = optional(string, null)     # Either HTTP or TCP (default to liveness_check_type)
+    ready_check_route    = optional(string, null)     # The route if using HTTP ready_checks (default to liveness_check_route)
   }))
 ```
 
@@ -75,9 +78,25 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
+
+Description: Whether the pods can be scheduled on burstable instances
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_common_env" /> [common\_env](#input_common_env)
 
 Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
+
+Description: A list ConfigMap names to their absolute mount paths in the containers of the deployment
 
 Type: `map(string)`
 
@@ -90,6 +109,14 @@ Description: The type of update that the deployment should use
 Type: `string`
 
 Default: `"RollingUpdate"`
+
+### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
+
+Description: The DNS policy for the pods
+
+Type: `string`
+
+Default: `"ClusterFirst"`
 
 ### <a name="input_dynamic_secrets" /> [dynamic\_secrets](#input_dynamic_secrets)
 
@@ -155,6 +182,14 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_pod_anti_affinity_type" /> [pod\_anti\_affinity\_type](#input_pod_anti_affinity_type)
+
+Description: The podAntiAffinity to use for the pods. 'none' for no anti-affinity. `instance_type` for only one of each pod per instance type. 'node' for only one of each pod per node.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_ports" /> [ports](#input_ports)
 
 Description: The port the application is listening on inside the container
@@ -210,6 +245,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+
+Description: Whether the pods can be scheduled on spot instances
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
 
 Description: A list of paths that contain empty temporary directories
@@ -256,10 +299,6 @@ The following outputs are exported:
 ### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
 
 Description: The labels unique to this deployment that can be used to select the pods in this deployment
-
-### <a name="output_service" /> [service](#output_service)
-
-Description: The name of the kubernetes service created for this deployment.
 
 ## Usage
 

@@ -14,6 +14,7 @@ locals {
   shutdown_grace_period_for_critical_pods     = var.is_spot ? "1m0s" : "5m0s"
   user_data = templatefile("${path.module}/user-data.toml", {
     API_SERVER_ADDR                             = var.cluster_endpoint
+    CLUSTER_DNS_IP                              = var.cluster_dns_service_ip
     CLUSTER_CA_DATA                             = var.cluster_ca_data
     CLUSTER_NAME                                = var.cluster_name
     MAX_PODS                                    = var.max_pods

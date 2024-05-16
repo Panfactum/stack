@@ -377,7 +377,9 @@ resource "helm_release" "authentik" {
         }
 
         replicas = 2
-
+        deploymentStrategy = {
+          type = "Recreate"
+        }
         priorityClassName = module.constants_server.database_priority_class_name
         affinity = merge(
           module.constants_server.controller_node_with_burstable_affinity_helm,

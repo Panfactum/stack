@@ -6,22 +6,25 @@ variable "namespace" {
 variable "containers" {
   description = "A list of container configurations for the pod"
   type = list(object({
-    name               = string
-    init               = optional(bool, false)
-    image              = string
-    version            = string
-    command            = list(string)
-    imagePullPolicy    = optional(string, "IfNotPresent")
-    minimum_memory     = optional(number, 100)      # The minimum amount of memory in megabytes
-    minimum_cpu        = optional(number, 10)       # The minimum amount of cpu millicores
-    run_as_root        = optional(bool, false)      # Whether to run the container as root
-    uid                = optional(number, 1000)     # user to use when running the container if not root
-    linux_capabilities = optional(list(string), []) # Default is drop ALL
-    readonly           = optional(bool, true)       # Whether to use a readonly file system
-    env                = optional(map(string), {})  # Environment variables specific to the container
-    healthcheck_port   = optional(number, null)     # The number of the port for the healthcheck
-    healthcheck_type   = optional(string, null)     # Either HTTP or TCP
-    healthcheck_route  = optional(string, null)     # The route if using HTTP healthchecks
+    name                 = string
+    init                 = optional(bool, false)
+    image                = string
+    version              = string
+    command              = list(string)
+    image_pull_policy    = optional(string, "IfNotPresent")
+    minimum_memory       = optional(number, 100)      # The minimum amount of memory in megabytes
+    minimum_cpu          = optional(number, 10)       # The minimum amount of cpu millicores
+    run_as_root          = optional(bool, false)      # Whether to run the container as root
+    uid                  = optional(number, 1000)     # user to use when running the container if not root
+    linux_capabilities   = optional(list(string), []) # Default is drop ALL
+    readonly             = optional(bool, true)       # Whether to use a readonly file system
+    env                  = optional(map(string), {})  # Environment variables specific to the container
+    liveness_check_port  = optional(number, null)     # The number of the port for the liveness_check
+    liveness_check_type  = optional(string, null)     # Either HTTP or TCP
+    liveness_check_route = optional(string, null)     # The route if using HTTP liveness_checks
+    ready_check_port     = optional(number, null)     # The number of the port for the ready_check (default to liveness_check_port)
+    ready_check_type     = optional(string, null)     # Either HTTP or TCP (default to liveness_check_type)
+    ready_check_route    = optional(string, null)     # The route if using HTTP ready_checks (default to liveness_check_route)
   }))
 }
 
@@ -29,12 +32,6 @@ variable "restart_policy" {
   description = "The pod restart policy"
   type        = string
   default     = "Always"
-}
-
-variable "allowed_spot" {
-  type        = bool
-  description = "True iff allowed to run on spot nodes"
-  default     = false
 }
 
 variable "common_env" {
@@ -67,6 +64,12 @@ variable "tmp_directories" {
     size_gb = optional(number, 1)
   }))
   default = {}
+}
+
+variable "config_map_mounts" {
+  description = "A list ConfigMap names to their absolute mount paths in the containers of the deployment"
+  type        = map(string)
+  default     = {}
 }
 
 variable "secret_mounts" {
@@ -125,4 +128,32 @@ variable "priority_class_name" {
   description = "The priority class to use for pods in the deployment"
   type        = string
   default     = null
+}
+
+variable "dns_policy" {
+  description = "The DNS policy for the pod"
+  type        = string
+  default     = "ClusterFirst"
+}
+
+variable "spot_instances_enabled" {
+  description = "Whether the pods can be scheduled on spot instances"
+  type        = bool
+  default     = false
+}
+
+variable "burstable_instances_enabled" {
+  description = "Whether the pods can be scheduled on burstable instances"
+  type        = bool
+  default     = false
+}
+
+variable "pod_anti_affinity_type" {
+  description = "The podAntiAffinity to use for the pods. 'none' for no anti-affinity. `instance_type` for only one of each pod per instance type. 'node' for only one of each pod per node."
+  type        = string
+  default     = "none"
+  validation {
+    condition     = contains(["none", "instance_type", "node"], var.pod_anti_affinity_type)
+    error_message = "Invalid pod_anti_affinity_type"
+  }
 }

@@ -139,10 +139,13 @@ We will do deeper into securing the API server in a subsequent section.
 
 ### Choose a Service CIDR
 
-For `service_cidr`, you will want to a private CIDR range that does not conflict with your VPC or any of it's subnets. That
+For `service_cidr`, you will want to a private CIDR range that does not conflict with your VPC or any of its subnets. That
 is because Kubernetes performs its own routing and networking independently of AWS.
 
 If you've been following the recommendations in this guide, we *strongly* recommend `172.20.0.0/16`.
+
+You will also need to choose a `dns_service_ip` which **must** be in the `service_cidr`. If you use the
+`172.20.0.0/16` CIDR, then you should use `172.20.0.10` as this is the EKS default.
 
 ### Choose Node Subnets
 
@@ -389,4 +392,4 @@ Let's deploy this module:
 Congratulations! You have officially deployed Kubernetes using infrastructure-as-code.
 Now that the cluster is running, we will begin working on the internal networking stack.
 
-<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/aws-networking"} forwardHref={"/docs/edge/guides/bootstrapping/internal-cluster-networking"} stepNumber={8} />
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/aws-networking"} forwardHref={"/docs/main/guides/bootstrapping/internal-cluster-networking"} stepNumber={8} />

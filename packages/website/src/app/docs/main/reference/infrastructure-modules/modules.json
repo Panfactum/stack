@@ -121,6 +121,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_core_dns",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_cronjob",
       "group": "kubernetes"
     },

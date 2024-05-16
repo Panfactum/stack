@@ -17,3 +17,8 @@ variable "node_instance_profile" {
   description = "The instance profile to use for launched nodes"
   type        = string
 }
+
+variable "cluster_dns_service_ip" {
+  description = "The IP address of the cluster's DNS service."
+  type        = string
+}

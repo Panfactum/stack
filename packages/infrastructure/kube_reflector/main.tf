@@ -117,8 +117,7 @@ resource "helm_release" "reflector" {
       }
       podLabels = module.kube_labels.kube_labels
 
-      replicaCount      = 2
-      affinity          = module.constants.pod_anti_affinity_helm
+      replicaCount      = 1
       tolerations       = module.constants.burstable_node_toleration_helm
       priorityClassName = module.constants.cluster_important_priority_class_name
       resources = {

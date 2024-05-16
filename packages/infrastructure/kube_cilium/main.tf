@@ -249,28 +249,74 @@ resource "helm_release" "cilium" {
         }
       }
 
+      tolerations = concat(
+        [
+          {
+            key      = module.constants.cilium_taint.key
+            operator = "Exists"
+            effect   = module.constants.cilium_taint.effect
+          },
+          {
+            key      = "node.kubernetes.io/not-ready"
+            operator = "Exists"
+            effect   = "NoExecute"
+          },
+          {
+            key      = "node.kubernetes.io/not-ready"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+          {
+            key      = "node.kubernetes.io/unreachable"
+            operator = "Exists"
+            effect   = "NoExecute"
+          },
+          {
+            key      = "node.kubernetes.io/disk-pressure"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+          {
+            key      = "node.kubernetes.io/memory-pressure"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+          {
+            key      = "node.kubernetes.io/pid-pressure"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          }
+        ],
+        module.constants.burstable_node_toleration_helm
+      )
+
       operator = {
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/cilium/operator"
         }
         replicas = 2
-        tolerations = [
+        updateStrategy = {
+          type          = "Recreate"
+          rollingUpdate = null
+        }
+        tolerations = concat([
 
           // This is needed b/c the cilium agents on each node need the operator
           // to be running in order for them to remove this taint
           {
             key      = module.constants.cilium_taint.key
-            operator = "Equal"
-            value    = module.constants.cilium_taint.value
+            operator = "Exists"
             effect   = module.constants.cilium_taint.effect
           }
-        ]
+          ],
+          module.constants.burstable_node_toleration_helm
+        )
 
         podLabels = module.operator_labels.kube_labels
 
         affinity = merge(
           module.constants.controller_node_affinity_helm,
-          module.constants.pod_anti_affinity_helm
+          module.constants.pod_anti_affinity_instance_type_helm
         )
 
         resources = {

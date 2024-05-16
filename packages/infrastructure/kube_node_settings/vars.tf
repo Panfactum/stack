@@ -27,3 +27,8 @@ variable "is_spot" {
   type        = bool
   default     = false
 }
+
+variable "cluster_dns_service_ip" {
+  description = "The IP address of the cluster's DNS service."
+  type        = string
+}
