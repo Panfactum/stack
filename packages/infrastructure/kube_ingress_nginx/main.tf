@@ -214,6 +214,9 @@ resource "helm_release" "nginx_ingress" {
         }
 
         replicaCount = var.min_replicas
+        updateStrategy = {
+          type = "Recreate"
+        }
 
         annotations = {
           // Required b/c the webhook certificate doesn't automatically renew
@@ -353,7 +356,7 @@ resource "helm_release" "nginx_ingress" {
         maxUnavailable  = 1
 
         tolerations               = module.constants.burstable_node_toleration_helm
-        affinity                  = module.constants.pod_anti_affinity_helm
+        affinity                  = module.constants.pod_anti_affinity_instance_type_helm
         topologySpreadConstraints = module.constants.topology_spread_zone_strict
 
         // We need to change these from the defaults

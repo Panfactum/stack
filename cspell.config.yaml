@@ -140,7 +140,12 @@ words: [
   "autoscale",
   "contentful",
   "upvotes",
-  "hostable"
+  "hostable",
+  "emberstack",
+  "NATS",
+  "nats",
+  "thanos",
+  "poolers"
 ]
 languageSettings:
   - languageId: markdown,mdx

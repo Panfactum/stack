@@ -400,8 +400,11 @@ resource "helm_release" "alb_controller" {
       priorityClassName = module.constants.cluster_important_priority_class_name
       affinity = merge(
         module.constants.controller_node_with_burstable_affinity_helm,
-        module.constants.pod_anti_affinity_helm
+        module.constants.pod_anti_affinity_instance_type_helm
       )
+      updateStrategy = {
+        type = "Recreate"
+      }
       tolerations               = module.constants.burstable_node_toleration_helm
       topologySpreadConstraints = module.constants.topology_spread_zone_strict
       podDisruptionBudget = {

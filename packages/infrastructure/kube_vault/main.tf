@@ -36,8 +36,6 @@ locals {
   csi_match = {
     id = random_id.csi_id.hex
   }
-
-  vault_domains = [for domain in var.environment_domains : "vault.${domain}"]
 }
 
 module "pull_through" {
@@ -311,7 +309,7 @@ resource "helm_release" "vault" {
         statefulSet = {
           annotations = {
             "reloader.stakater.com/auto" = "true"
-            "panfactum.com/vault-addr"   = "https://${local.vault_domains[0]}"
+            "panfactum.com/vault-addr"   = "https://${var.vault_domain}"
           }
         }
         updateStrategyType = "RollingUpdate"
@@ -330,11 +328,12 @@ resource "helm_release" "vault" {
           storageClass = "ebs-standard-retained"
         }
         affinity = merge(
-          module.server_constants.pod_anti_affinity_helm,
+          module.server_constants.pod_anti_affinity_instance_type_helm,
           module.server_constants.controller_node_affinity_helm
         )
+        tolerations               = module.server_constants.burstable_node_toleration_helm
         topologySpreadConstraints = module.server_constants.topology_spread_zone_strict
-        priorityClassName         = "system-cluster-critical"
+        priorityClassName         = module.server_constants.cluster_important_priority_class_name # Vault can go down temporarily without disrupting the cluster
 
         extraEnvironmentVars = {
           AWS_REGION   = data.aws_region.region.name
@@ -417,7 +416,7 @@ module "ingress" {
   namespace = local.namespace
   name      = "vault"
   ingress_configs = [{
-    domains      = local.vault_domains
+    domains      = [var.vault_domain]
     service      = "vault-active"
     service_port = 8200
   }]

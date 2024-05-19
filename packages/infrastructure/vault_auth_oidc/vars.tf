@@ -26,7 +26,7 @@ variable "oidc_redirect_uris" {
 }
 
 variable "oidc_issuer" {
-  description = "The bound issuer for OIDC authentication"
+  description = "The bound issuer for OIDC authentication to Vault"
   type        = string
 }
 

@@ -148,6 +148,9 @@ resource "helm_release" "metrics_server" {
       // High Availability Config
       ////////////////////////////////////////
       replicas = 2
+      updateStrategy = {
+        type = "Recreate"
+      }
       affinity = merge(
         module.constants.controller_node_with_burstable_affinity_helm,
         module.constants.pod_anti_affinity_helm

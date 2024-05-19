@@ -3,7 +3,7 @@
 # Purpose: Uses terraform-docs to create the markdown documentation
 # for each terraform module for the public website
 
-OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/docs/edge/reference/infrastructure-modules"
+OUTPUT_DIR="$DEVENV_ROOT/packages/website/src/app/docs/main/reference/infrastructure-modules"
 
 # Initialize an empty JSON object with a `modules` array
 JSON=$(jq -n '{modules: []}')
@@ -35,7 +35,7 @@ function skip_injected_variables() {
 }
 
 function add_provider_links() {
-  sed -E 's@\[(helm|kubernetes|aws|time|local|vault|time|random)\]\(#requirement\\(.*)\) \((.*)\)@[\1](https://registry.terraform.io/providers/hashicorp/\1/\3/docs) (\3)@g'
+  sed -E 's@\[(helm|kubernetes|aws|time|local|vault|time|random|authentik)\]\(#requirement\\(.*)\) \((.*)\)@[\1](https://registry.terraform.io/providers/hashicorp/\1/\3/docs) (\3)@g'
 }
 
 function rename_provider_header() {

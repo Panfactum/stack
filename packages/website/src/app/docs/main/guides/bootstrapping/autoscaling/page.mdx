@@ -1,0 +1,305 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
+
+import k9sClusterCapacityImg from './k9s-cluster-capacity.jpg';
+import k9sPodMetricsProvided from './k9s-pod-metrics-provided.jpg';
+import k9sPodMetricsImg from './k9s-pod-metrics.jpg';
+import k9sVPAImg from './k9s-vpa.jpg';
+import spotNodeLabelImg from './spot-node-label.jpg';
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Autoscaling
+
+## Objective
+
+Deploy the necessary metrics and autoscaling components to automatically rightsize the cluster.
+
+## Background
+
+In Kubernetes, there are three distinct flavors of autoscaling:
+
+* [Horizontal Pod Autoscaling (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/): A built-in controller
+  that adjusts the **number of pods** for a Deployment or StatefulSet. This can be extended to incorporate event-driven
+  autoscaling with tools like [KEDA](https://keda.sh/).
+
+* [Vertical Pod Autoscaling (VPA)](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler): A specific controller
+  that can be installed to automatically adjust the **resource requests and limits** of pods based on historical usage.
+
+* Cluster Autoscaling: A category of controllers that will adjust **the number of nodes** running in the cluster. The two
+  most popular projects are the [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+  and [Karpenter](https://karpenter.sh/).
+
+The Panfactum stack makes use of all three types of autoscaling.
+
+## Deploy Metrics Server
+
+For autoscaling to work, the Kubernetes API server must provide realtime metrics about individual container
+CPU and memory usage. Interestingly, this is not built-in to Kubernetes by default but rather
+powered by [an API extension](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/)
+provided by the [metrics-server](https://github.com/kubernetes-sigs/metrics-server) project.
+
+We provide a module to deploy the server: [kube\_metrics\_server](/docs/main/reference/infrastructure-modules/kubernetes/kube_metrics_server).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_linkerd` module called `kube_metrics_server`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_metrics_server/terragrunt.hcl).
+
+3. Set `vpa_enabled` to `false`. We will enable it when we deploy the VPA.
+
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+
+5. Run `terragrunt apply`.
+
+Let's test to ensure it is working as intended:
+
+1. Open k9s (or restart if it is already open).
+
+2. Notice that k9s is now reporting your total cluster resource utilization:
+
+   <MarkdownImage src={k9sClusterCapacityImg} alt="Cluster capacity displayed in k9s" />
+
+3. Navigate to the pods view. Notice that all pods are now reporting CPU and memory metrics:
+
+   <MarkdownImage src={k9sPodMetricsImg} alt="Pod metrics displayed in k9s" />
+
+   The `N/A` fields for the `/R` and `/L` columns indicate that many pods have not had their
+   [resource requests (R) or limits (L)](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) set.
+   When we install the VPA, these will automatically be set.
+
+4. To diagnose utilization issues in the cluster, we bundle a CLI utility called `kube-capacity` for consolidating
+   granular metrics across the entire cluster. Run `kube-capacity -uc` now:
+
+   ```shell-session
+   NODE                                         NAMESPACE            POD                                                 CONTAINER                 CPU REQUESTS   CPU LIMITS    CPU UTIL    MEMORY REQUESTS   MEMORY LIMITS   MEMORY UTIL
+   *                                            *                    *                                                   *                         1240m (21%)    3700m (63%)   514m (8%)   1740Mi (9%)       5334Mi (29%)    4596Mi (25%)
+   ....
+   ip-10-0-213-182.us-east-2.compute.internal   *                    *                                                   *                         360m (18%)     1200m (62%)   161m (8%)   530Mi (8%)        1238Mi (20%)    1420Mi (23%)
+   ip-10-0-213-182.us-east-2.compute.internal   cilium               cilium-4d4gf                                        *                         100m (5%)      0m (0%)       25m (1%)    10Mi (0%)         0Mi (0%)        126Mi (2%)
+   ip-10-0-213-182.us-east-2.compute.internal   cilium               cilium-4d4gf                                        cilium-agent              0m (0%)        0m (0%)       25m (1%)    0Mi (0%)          0Mi (0%)        126Mi (2%)
+   ip-10-0-213-182.us-east-2.compute.internal   aws-ebs-csi-driver   ebs-csi-node-ph26m                                  *                         30m (1%)       100m (5%)     2m (0%)     120Mi (1%)        768Mi (12%)     26Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   aws-ebs-csi-driver   ebs-csi-node-ph26m                                  ebs-plugin                10m (0%)       0m (0%)       1m (0%)     40Mi (0%)         256Mi (4%)      11Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   aws-ebs-csi-driver   ebs-csi-node-ph26m                                  linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   aws-ebs-csi-driver   ebs-csi-node-ph26m                                  liveness-probe            10m (0%)       0m (0%)       1m (0%)     40Mi (0%)         256Mi (4%)      8Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   aws-ebs-csi-driver   ebs-csi-node-ph26m                                  node-driver-registrar     10m (0%)       0m (0%)       1m (0%)     40Mi (0%)         256Mi (4%)      4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   cert-manager         jetstack-cert-manager-7b467c7747-xhbrx              *                         10m (0%)       100m (5%)     2m (0%)     10Mi (0%)         10Mi (0%)       16Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   cert-manager         jetstack-cert-manager-7b467c7747-xhbrx              cert-manager-controller   0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        13Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   cert-manager         jetstack-cert-manager-7b467c7747-xhbrx              linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-destination-96c96755b-8thzg                 *                         10m (0%)       100m (5%)     3m (0%)     10Mi (0%)         10Mi (0%)       45Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-destination-96c96755b-8thzg                 destination               0m (0%)        0m (0%)       2m (0%)     0Mi (0%)          0Mi (0%)        22Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-destination-96c96755b-8thzg                 linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        8Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-destination-96c96755b-8thzg                 policy                    0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        6Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-destination-96c96755b-8thzg                 sp-validator              0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        10Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-identity-cc6dffdf-tt9jm                     *                         10m (0%)       100m (5%)     1m (0%)     10Mi (0%)         10Mi (0%)       15Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-identity-cc6dffdf-tt9jm                     identity                  0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        11Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-identity-cc6dffdf-tt9jm                     linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-proxy-injector-8497c6bd8-dwv6j              *                         10m (0%)       100m (5%)     1m (0%)     10Mi (0%)         10Mi (0%)       19Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-proxy-injector-8497c6bd8-dwv6j              linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   linkerd              linkerd-proxy-injector-8497c6bd8-dwv6j              proxy-injector            0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        16Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   metrics-server       metrics-server-6df8ffd998-65mkb                     *                         100m (5%)      100m (5%)     4m (0%)     200Mi (3%)        10Mi (0%)       24Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   metrics-server       metrics-server-6df8ffd998-65mkb                     linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   metrics-server       metrics-server-6df8ffd998-65mkb                     metrics-server            100m (5%)      0m (0%)       3m (0%)     200Mi (3%)        0Mi (0%)        20Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   secrets-csi          secrets-csi-secrets-store-csi-driver-zch5w          *                         70m (3%)       400m (20%)    1m (0%)     140Mi (2%)        400Mi (6%)      26Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   secrets-csi          secrets-csi-secrets-store-csi-driver-zch5w          linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   secrets-csi          secrets-csi-secrets-store-csi-driver-zch5w          liveness-probe            10m (0%)       100m (5%)     1m (0%)     20Mi (0%)         100Mi (1%)      8Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   secrets-csi          secrets-csi-secrets-store-csi-driver-zch5w          node-driver-registrar     10m (0%)       100m (5%)     1m (0%)     20Mi (0%)         100Mi (1%)      4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   secrets-csi          secrets-csi-secrets-store-csi-driver-zch5w          secrets-store             50m (2%)       200m (10%)    1m (0%)     100Mi (1%)        200Mi (3%)      12Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-1                                             *                         10m (0%)       100m (5%)     41m (2%)    10Mi (0%)         10Mi (0%)       52Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-1                                             linkerd-proxy             0m (0%)        0m (0%)       4m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-1                                             vault                     0m (0%)        0m (0%)       38m (1%)    0Mi (0%)          0Mi (0%)        49Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-csi-provider-4cndp                            *                         10m (0%)       100m (5%)     3m (0%)     10Mi (0%)         10Mi (0%)       34Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-csi-provider-4cndp                            linkerd-proxy             0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        4Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-csi-provider-4cndp                            vault-agent               0m (0%)        0m (0%)       2m (0%)     0Mi (0%)          0Mi (0%)        25Mi (0%)
+   ip-10-0-213-182.us-east-2.compute.internal   vault                vault-csi-provider-4cndp                            vault-csi-provider        0m (0%)        0m (0%)       1m (0%)     0Mi (0%)          0Mi (0%)        6Mi (0%)
+   ```
+
+## Deploy the Vertical Pod Autoscaler
+
+Now that we are capturing resource utilization data,
+we can use the vertical pod autoscaler to automatically rightsize your pod's CPU and memory
+[resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) based on historical usage.
+
+We provide a module to deploy the VPA: [kube\_vpa](/docs/main/reference/infrastructure-modules/kubernetes/kube_vpa).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_metrics_server` module called `kube_vpa`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_vpa/terragrunt.hcl).
+
+3. Set `vpa_enabled` to `false`. We will enable it in a moment.
+
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+
+5. Run `terragrunt apply`.
+
+6. Once the module has successfully deployed, return to all of the previously deployed kubernetes
+   modules and set `vpa_enabled` to `true`:
+   * `kube_aws_ebs_csi`
+   * `kube_cert_manager`
+   * `kube_cilium`
+   * `kube_linkerd`
+   * `kube_metrics_server`
+   * `kube_secrets_csi`
+   * `kube_trust_manager`
+   * `kube_vault`
+   * `kube_vpa`
+
+7. Navigate up to the directory containing all of these modules (this should be the parent of `kube_vpa`). Run
+   `terragrunt run-all apply` to apply all of the modules at once. Note that this might cause your Vault proxy
+   to disconnect as pods are restarted and thus result in an incomplete apply. Simply reconnect the proxy and try the command again.
+
+8. After all these modules are updated, you should now see many VPA resources in k9s (`:vpa`). After a minute or two, they
+   should begin to provide resource estimates:
+
+   <MarkdownImage src={k9sVPAImg} alt="VPA resources in k9s" />
+
+9. Return to the pod view. Notice that all request columns are populated as well as the memory limit column:
+
+   <MarkdownImage src={k9sPodMetricsProvided} alt="Resource requests and limits are set" />
+
+   * We set **requests** for both CPU and memory so that the Kubernetes scheduler  can
+     accurately decide which enough resources available for pods during the pod-to-node assignment phase.
+
+   * We set **memory limits** so that memory leaks in any application will not consume unbounded memory on the node
+     and thus cause all other pods on the node to crash with OOM errors.
+
+   * We do **not set cpu limits** because if a node's CPU is constrained, CPU will automatically be shared
+     across all pods *proportional to each pod's CPU request.* [^3]
+
+   [^3]: In general, it is best to avoid setting CPU limits in order to allow CPU to occasionally spike as needed. If the
+       CPU utilization remains high, *cluster autoscaling* will kick in to provision net new nodes.
+
+<MarkdownAlert severity="info">
+  When you first install the VPA, you will see many pods evicted over the first few hours. As the VPA collects
+  utilization data, it will update its recommendations for resource settings. If a pod's current resource
+  settings significantly deviate from an updated recommendation, the VPA will evict the pod to update its
+  resource settings.
+
+  Unfortunately, there is currently no way for a pod to have its resources updated in-place.
+
+  That said, we provide [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+  for all of the Panfactum components, so you should not see any service disruptions despite the evictions.
+</MarkdownAlert>
+
+## Deploy Karpenter
+
+Historically, cluster autoscaling has almost always been done by the [cluster-autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+addon. However, this controller had several limitations and required lots of configuration to provide the optimal
+setup for your organization.
+
+Fortunately, a new provide has emerged, [Karpenter](https://karpenter.sh/), which provides both more flexibility, better
+performance, and better cost optimization. Specifically:
+
+* You do not need to choose instance types in advance as it will query your cloud providers
+  API for the *entire* list of available instance types and prices and then spin up the exact right instance types
+  that are the best fit for your workloads at the lowest cost
+
+* If you allow it, it will prioritize utilizing [spot
+  instances](https://aws.amazon.com/ec2/spot/) for up to a **90% discount** over list price. Moreover, it will periodically
+  check if existing workloads can be migrated to cheaper instances as prices change over time.
+
+* It incorporates the functionality provided by the [aws-node-termination-handler](https://github.com/aws/aws-node-termination-handler)
+  removing the need to run it altogether.
+
+* It scales extremely well with the ability to spin up and down 100s of nodes at a time.
+
+We provide an infrastructure module to deploy it: [kube\_karpenter](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter).
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_vpa` module called `kube_karpenter`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
+
+3. For the first time, you can leave `vpa_enabled` set to `true`.
+
+4. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for the `controller_node_subnets` unless you have a specific reason not to.
+
+5. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+
+6. Run `terragrunt apply`.
+
+### Deploy NodePools
+
+Karpenter requires some instructions about how to perform autoscaling such as what [AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
+to use for the underlying nodes. It looks for those instructions in [NodePool](https://karpenter.sh/docs/concepts/nodepools/) custom resources.
+
+The Panfactum stack comes with two default NodePools:
+
+* linux [spot nodes](https://aws.amazon.com/ec2/spot/)
+
+  * labeled with `panfactum.com/class` set to `spot`
+
+  * highest scheduling precedence
+
+  * assigned a [taint](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) to prevent workloads that cannot tolerate
+    arbitrary disruption from accidentally being scheduled on one: `{ key = "spot", value = "true", effect = "NoSchedule" }`
+
+* linux on-demand nodes
+
+  * labeled with `panfactum.com/class` set to `worker` [^1]
+
+[^1]: The EKS-managed nodes created by `aws_eks` have a class of `controller`.
+
+Those are defined in the [kube\_karpenter\_node\_pools](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter_node_pools) module.
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_karpenter` module called `kube_karpenter_node_pools`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl).
+
+3. Add a `module.yaml` that enables the `kubernetes` provider.
+
+4. Run `terragrunt apply`.
+
+### Test Cluster Autoscaling
+
+Let's verify that autoscaling now works as expected.
+
+All deployments in the Panfactum stack are configured to disallow multiple replicas of the same pod to run on the
+same node. [^2] As a result, we can increase the number of replicas in one of our pods and ensure that Karpenter
+recognizes that additional nodes need to be schedule.
+
+[^2]: To prevent service disruption if a node goes offline.
+
+1. In K9s, navigate to `:deployments`.
+
+2. Highlight the `jetstack-cert-manager` deployment and press `s` to trigger the scale dialogue.
+
+3. Increase this to a substantial number such as `25`.
+
+4. Immediately, Karpenter should recognize that new nodes are required to run these pods and begin to provision them.
+   After 30-60 seconds, the nodes will be registered with Kubernetes and you should see them under `:nodes`.
+
+5. Describe some of the new nodes by pressing `d` when highlighting one. Notice that many of these new nodes are spot instances.
+
+   <MarkdownImage src={spotNodeLabelImg} alt="Labels indicating that Karpenter spun up spot instances" />
+
+6. Scale `jetstack-cert-manager` back down to `2`. Karpenter will automatically take care of the node
+   cleanup and de-provisioning. This will happen slower than the scale-up as scaling down happens in batches
+   to avoid cluster thrash or service disruption. However, this should complete within 15 minutes.
+
+### Adjust EKS Node Pools
+
+Now that Karpenter is successfully running, we can dramatically decrease the nodes in the base EKS node
+pool in order to allow Karpenter to handle autoscaling more efficiently (approximately $100 / month cost
+savings over the current settings).
+
+In your `aws_eks` modules, we recommend the following changes:
+
+- Set `controller_node_count` to `1`. [^4]
+- Set `controller_node_instance_types` to `["t3a.medium"]`.
+
+[^4]: We must keep at least one node around as Karpenter must run on a node that it itself did **not** provision.
+
+Note that this change might cause temporary cluster disruption as the core controllers are repositioned on
+Karpenter nodes.
+
+## Next Steps
+
+Now that autoscaling is active, we can proceed to set up inbound networking for our cluster.
+
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/service-mesh"} forwardHref={"/docs/main/guides/bootstrapping/inbound-networking"} stepNumber={14} />

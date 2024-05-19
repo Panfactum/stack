@@ -17,5 +17,5 @@ inputs = {
   pull_through_cache_enabled = true
   vpa_enabled                = true
   ingress_enabled            = true
-  environment_domains        = ["production.panfactum.com", "prod.panfactum.com"]
+  vault_domain               = "vault.prod.panfactum.com"
 }

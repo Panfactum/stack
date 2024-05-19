@@ -1,5 +1,9 @@
-output "vault_urls" {
-  value = [for domain in local.vault_domains : "https://${domain}"]
+output "vault_url" {
+  value = "https://${var.vault_domain}"
+}
+
+output "vault_domain" {
+  value = var.vault_domain
 }
 
 output "vault_internal_url" {

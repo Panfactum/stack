@@ -1,13 +1,49 @@
 # Edge Releases
 
-_Edge releases do not receive patches nor make any backwards compatibility guarantees.
-Learn more [here](/docs/edge/guides/versioning/releases)._
+*Edge releases do not receive patches nor make any backwards compatibility guarantees.
+Learn more [here](/docs/edge/guides/versioning/releases).*
 
-_To use stable Panfactum releases, please see [our available licenses](/stack/pricing)._
+*To use stable Panfactum releases, please see [our available licenses](/stack/pricing).*
 
 {/* lint disable no-duplicate-headings */}
 
 ## Unreleased
+
+### Breaking Changes
+
+* We have added removed the EKS CoreDNS addon and replaced it with the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns)
+  module in order to provide better guarantees about the behavior of DNS in the Panfactum stack. In order to migrate:
+
+  1. Add the `dns_service_ip` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/kubernetes/aws_eks) deployments
+     by following [this guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr). Double check that the `dns_service_ip` is the
+     same IP as defined by `kube-system/kube-dns`.
+
+  2. Additionally, set `core_dns_addon_enabled` to `true`.
+
+  3. Apply the updated module `aws_eks` module.
+
+  4. Add the `cluster_dns_service_ip` input to your [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter_node_pools)
+     module like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl),
+     and re-apply the module. Ensure that all of your nodes have been replaced with the new configuration.
+
+  5. Deploy `kube_core_dns` by following [this guide](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns).
+      Note that this deployment will fail as the original addon service is still running and the IP is already taken.
+
+  6. Delete `kube-system/kube-dns` and re-apply `kube_core_dns`. Note that while the service is deleted, DNS will be
+     temporarily unavailable in your cluster.
+
+  7. Once you've validated that DNS is working in the cluster, remove the `core_dns_addon_enabled` input
+     from the `aws_eks` module and re-apply.
+
+* We have stabilized the label selectors in [kube\_pod](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pod) but
+  this requires one final label update for already-deployed Deployments. This will cause re-applies
+  of [kube\_bastion](/docs/edge/reference/infrastructure-modules/kubernetes/kube_bastion) to fail (and any first-party modules that rely on [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
+  To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
+
+- [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) has two
+new flags, `pg_bouncer_read_only_enabled` (default `false`) and `pg_bouncer_read_write_enabled` (default `true`), which will enable
+the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
+to have idle resources.
 
 ### Added
 
@@ -15,16 +51,58 @@ _To use stable Panfactum releases, please see [our available licenses](/stack/pr
 to control how long the postgres instances will wait for active connections to close before shutting down.
 - optional `working_dir` variable to [kube_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment) 
 and [kube_pod](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pod) to provide an optional `workingDir` to the [Pod Container Entrypoint](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#entrypoint)
+- [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel) has a new flag,
+`lfu_cache_enabled`, that will configure the Redis cluster automatically evict records under memory pressure
+based on an approximated Least Frequently Used algorithm.
+
+### Changed
+
+* After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
+modules to have `controller_node_count` set to `1` and `controller_node_instance_types` set to `["t3a.medium"]`.
+This will decrease the costs of the base cluster by about 40% without impacting cluster availability or resiliency.
+The single remaining node is used primarily as a place for Karpenter to run (Karpenter cannot run on instances that it itself
+provisions).
+
+* [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) now only deploys
+  a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall
+  resource utilization of this fairly heavyweight controller.
+
+* Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
+  in order to reduce resource utilization in the Stack.
+
+* Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
+  deployment strategy to improve timing and efficiency of applying Panfactum upgrades.
+
+### Fixes
+
+- PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has been fixed,
+but the fix will not retroactively adjust existing PVCs as they are immutable.
+
+## edge.24-05-15
+
+### Breaking Changes
+
+* [kube\_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault) now takes `vault_domain`
+  as an input instead of `environment_domains`. This change was made as having multiple domains for Vault
+  is incompatible with using Vault as an intermediary IdP.
+
+### Added
+
+* New [kube\_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector) module for deploying
+  the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
+  namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
+  the module as a part of the foundational Stack.
+
+* `pg_shutdown_timeout` variable to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
+  to control how long the postgres instances will wait for active connections to close before shutting down.
 
 ### Fixed
 
-- Fixed an issue where simultaneous, graceful shutdown of _all_ postgres nodes in a [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
-would cause unnecessary downtime when the primary was running on a spot instance.
-
+* Fixed an issue where simultaneous, graceful shutdown of *all* postgres nodes in a [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster)
+  would cause unnecessary downtime when the primary was running on a spot instance.
 
 ## edge.24-05-12
 
 The initial edge release of the Panfactum stack!
 
 {/* lint enable no-duplicate-headings */}
-

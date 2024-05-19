@@ -92,6 +92,19 @@ output "pod_anti_affinity_helm" {
   }
 }
 
+output "pod_anti_affinity_instance_type_helm" {
+  value = {
+    podAntiAffinity = {
+      requiredDuringSchedulingIgnoredDuringExecution = [{
+        topologyKey = "node.kubernetes.io/instance-type"
+        labelSelector = {
+          matchLabels = var.matching_labels
+        }
+      }]
+    }
+  }
+}
+
 output "spot_node_preferences" {
   value = {
     "panfactum.com/class" = {

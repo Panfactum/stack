@@ -113,21 +113,17 @@ resource "helm_release" "reloader" {
         logFormat              = "json"
         readOnlyRootFilesystem = true
         matchLabels            = local.matching_labels
-        enableHA               = true
+        enableHA               = false
         deployment = {
           image = {
             name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/stakater/reloader"
           }
           labels = module.kube_labels.kube_labels
 
-          replicas          = 2
+          replicas          = 1
           priorityClassName = module.constants.cluster_important_priority_class_name
-          affinity = merge(
-            module.constants.controller_node_with_burstable_affinity_helm,
-            module.constants.pod_anti_affinity_helm
-          )
-          tolerations               = module.constants.burstable_node_toleration_helm
-          topologySpreadConstraints = module.constants.topology_spread_zone_preferred
+          tolerations       = module.constants.burstable_node_toleration_helm
+
 
           pod = {
             annotations = {

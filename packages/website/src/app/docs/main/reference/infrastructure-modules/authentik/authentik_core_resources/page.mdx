@@ -1,0 +1,128 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Authentik Core Resources
+
+<ModuleHeader name="authentik_core_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/authentik_core_resources" status="stable" type="live" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [authentik](https://registry.terraform.io/providers/hashicorp/authentik/2024.2.0/docs) (2024.2.0)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_authentik_namespace" /> [authentik\_namespace](#input_authentik_namespace)
+
+Description: The kubernetes namespace where Authentik is deployed
+
+Type: `string`
+
+### <a name="input_email_templates_configmap" /> [email\_templates\_configmap](#input_email_templates_configmap)
+
+Description: The configmap holding the email templates that Authentik will use
+
+Type: `string`
+
+### <a name="input_media_configmap" /> [media\_configmap](#input_media_configmap)
+
+Description: The configmap holding the static media that Authentik will use
+
+Type: `string`
+
+### <a name="input_organization_domain" /> [organization\_domain](#input_organization_domain)
+
+Description: The domain name of the organization for which Authentik serves as the IdP
+
+Type: `string`
+
+### <a name="input_organization_name" /> [organization\_name](#input_organization_name)
+
+Description: The name of the organization for which Authentik serves as the IdP
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_default_groups_enabled" /> [default\_groups\_enabled](#input_default_groups_enabled)
+
+Description: Whether to create the default Panfactum RBAC groups
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_extra_groups" /> [extra\_groups](#input_extra_groups)
+
+Description: Whether to create the default Panfactum RBAC groups
+
+Type:
+
+```hcl
+map(object({
+    parent           = optional(string)
+    require_webauthn = optional(bool, false)
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_favicon_ico_b64" /> [favicon\_ico\_b64](#input_favicon_ico_b64)
+
+Description: A stringified ico image for displaying on the Authentik web UI (base64 encoded)
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_logo_svg_b64" /> [logo\_svg\_b64](#input_logo_svg_b64)
+
+Description: A stringified svg logo for displaying on the Authentik UI (base64 encoded)
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_session_duration" /> [session\_duration](#input_session_duration)
+
+Description: The session duration for user logins. See [https://docs.goauthentik.io/docs/flow/stages/user\_login/](https://docs.goauthentik.io/docs/flow/stages/user_login/)
+
+Type: `string`
+
+Default: `"hours=8;minutes=0;seconds=0"`
+
+### <a name="input_superusers_require_webauthn" /> [superusers\_require\_webauthn](#input_superusers_require_webauthn)
+
+Description: True iff superusers must use webauthn MFA to authenticate
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_groups" /> [groups](#output_groups)
+
+Description: n/a
+
+### <a name="output_organization_name" /> [organization\_name](#output_organization_name)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

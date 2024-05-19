@@ -17,8 +17,9 @@ dependency "cluster" {
 }
 
 inputs = {
-  cluster_name          = dependency.cluster.outputs.cluster_name
-  cluster_endpoint      = dependency.cluster.outputs.cluster_url
-  cluster_ca_data       = dependency.cluster.outputs.cluster_ca_data
-  node_instance_profile = dependency.cluster.outputs.node_instance_profile
+  cluster_name           = dependency.cluster.outputs.cluster_name
+  cluster_endpoint       = dependency.cluster.outputs.cluster_url
+  cluster_dns_service_ip = dependency.cluster.outputs.dns_service_ip
+  cluster_ca_data        = dependency.cluster.outputs.cluster_ca_data
+  node_instance_profile  = dependency.cluster.outputs.node_instance_profile
 }

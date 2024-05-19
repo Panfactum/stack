@@ -109,6 +109,11 @@ resource "vault_identity_group_alias" "superusers" {
   name           = each.key
 }
 
+resource "vault_identity_group" "rbac_superusers" {
+  name             = "rbac-superusers"
+  type             = "internal"
+  member_group_ids = [for group in vault_identity_group.superusers : group.id]
+}
 
 /*************************  Admins ***********************************/
 
@@ -174,6 +179,12 @@ resource "vault_identity_group_alias" "admins" {
   name           = each.key
 }
 
+resource "vault_identity_group" "rbac_admins" {
+  name             = "rbac-admins"
+  type             = "internal"
+  member_group_ids = [for group in vault_identity_group.admins : group.id]
+}
+
 /*************************  Readers ***********************************/
 
 data "vault_policy_document" "readers" {
@@ -228,4 +239,9 @@ resource "vault_identity_group_alias" "readers" {
   name           = each.key
 }
 
+resource "vault_identity_group" "rbac_readers" {
+  name             = "rbac-readers"
+  type             = "internal"
+  member_group_ids = [for group in vault_identity_group.readers : group.id]
+}
 

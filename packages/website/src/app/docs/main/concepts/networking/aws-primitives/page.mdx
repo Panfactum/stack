@@ -1,0 +1,62 @@
+# AWS Networking Primitives
+
+## Virtual Private Cloud
+
+A *VPC* is an AWS abstraction that represents a private [local area network (LAN)](https://en.wikipedia.org/wiki/Local_area_network).
+This is analogous to the network that you would find in a typical home or office, simply deployed across several AWS datacenters
+within a single AWS region.
+
+Most AWS resources that require network connectivity are deployed in a VPC. Resources within the same VPC can connect to
+one another while those outside the VPC cannot (by default).
+
+A VPC has a set of available IP addresses defined as a [CIDR block](https://aws.amazon.com/what-is/cidr/) For example,
+`10.0.0.0/8`, which represents the range `10.0.0.0` - `10.255.255.255`.
+
+Setting up your VPC is the first step in getting your AWS account ready to run networked infrastructure.
+
+## Subnets
+
+The top-level VPC CIDR block is broken into mutually exclusive [subnets](https://en.wikipedia.org/wiki/Subnet) which are
+"sub-networks" of the main VPC network. For example, subnet X might be `10.0.0.0/16` (`10.0.0.0` - `10.0.255.255`), and
+subnet Y might be `10.1.0.0/16` (`10.1.0.0` - `10.1.255.255`). Note how their IP ranges do not overlap.
+
+Subnets have many independent configuration options that control the networking of resources deployed into them.
+One of the most notable properties of a subnet is its [AWS Availability Zone](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones)
+(AZ) which represents a physical geographical location. [^1]
+
+[^1]: Technically this is not necessarily a single building, but you can conceptualize it as a single datacenter that
+    is isolated from all other datacenters in the same region. If one AZ fails, the other AZs should continue
+    to run uninterrupted. This is how you achieve high-availability deployments in AWS.
+
+When you deploy a resource into a VPC, you will choose which
+subnet it is assigned to. This will control what IP address it receives, where it is located, and how its traffic
+is routed.
+
+After choosing a VPC CIDR, you will need to decide how to divide it into your subnet CIDRs.
+There are three types of subnets that you will want to have in your VPC: [^3]
+
+* Public: Resources in these subnets will receive public IP addresses and can communicate
+  bidirectionally with the public internet.
+* Private: Resources in these subnets will *NOT* receive public IP addresses. Nothing outside your VPC can
+  initiate connections with these resources directly, but these resources *CAN* initiate outbound
+  traffic to the public internet via the NAT nodes (see next section).
+* Isolated: Resources in these subnets are completely disconnected from the public internet and can
+  only communicate with resources in the same VPC.
+
+As a summarized perspective:
+
+| Subnet Type | Inbound Traffic | Outbound Traffic | Internal Traffic | Use Case         |
+| ----------- | --------------- | ---------------- | ---------------- | ---------------- |
+| Public      | X               | X                | X                | Load Balancers   |
+| Private     |                 | X                | X                | Kubernetes Nodes |
+| Isolated    |                 |                  | X                | Managed Database |
+
+[^3]: These types are not direct properties on the subnet but are defined by how each subnet's route table is configured
+
+## DNS
+
+As you begin deploying resources you will want
+to connect to your resources via a public [domain name](https://en.wikipedia.org/wiki/Domain_name)
+(e.g., `panfactum.com`) rather than by IP address (`1.2.3.4`). AWS Route 53 allows you to purchase domain
+names and set up [DNS records](https://www.cloudflare.com/learning/dns/dns-records/) in a *Hosted Zone* which is
+the AWS abstraction for a DNS server.

@@ -201,6 +201,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_reflector",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_reloader",
       "group": "kubernetes"
     },

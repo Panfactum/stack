@@ -1,0 +1,268 @@
+{
+  "modules": [
+    {
+      "module": "authentik_aws_sso",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_core_resources",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_vault_sso",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_zoho_sso",
+      "group": "authentik"
+    },
+    {
+      "module": "aws_account",
+      "group": "aws"
+    },
+    {
+      "module": "aws_cloudwatch_log_group",
+      "group": "aws"
+    },
+    {
+      "module": "aws_delegated_zones",
+      "group": "aws"
+    },
+    {
+      "module": "aws_dns_records",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ecr_pull_through_cache",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ecr_repos",
+      "group": "aws"
+    },
+    {
+      "module": "aws_eks",
+      "group": "aws"
+    },
+    {
+      "module": "aws_iam_identity_center_permissions",
+      "group": "aws"
+    },
+    {
+      "module": "aws_kms_encrypt_key",
+      "group": "aws"
+    },
+    {
+      "module": "aws_registered_domains",
+      "group": "aws"
+    },
+    {
+      "module": "aws_s3_private_bucket",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ses_domain",
+      "group": "aws"
+    },
+    {
+      "module": "aws_tags",
+      "group": "aws"
+    },
+    {
+      "module": "aws_vpc",
+      "group": "aws"
+    },
+    {
+      "module": "constants",
+      "group": "utility"
+    },
+    {
+      "module": "kube_argo",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo_event_bus",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_authentik",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_ebs_csi",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_lb_controller",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_bastion",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_buildkit",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cert_issuers",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cert_manager",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cilium",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cloudnative_pg",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_core_dns",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cronjob",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_deployment",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_descheduler",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_external_dns",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_external_snapshotter",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_gha_arc_runners",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_gha_arc_systems",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_ingress",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_ingress_nginx",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_internal_cert",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_karpenter",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_karpenter_node_pools",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_labels",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_linkerd",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_metrics_server",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_monitoring",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_namespace",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pg_cluster",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_priority_classes",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_rbac",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_redis_sentinel",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_reflector",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_reloader",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sa_auth_aws",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sa_auth_pg",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_secrets_csi",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_trust_manager",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_vault",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_velero",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_vpa",
+      "group": "kubernetes"
+    },
+    {
+      "module": "pf_website",
+      "group": "example"
+    },
+    {
+      "module": "test_kube_pg_cluster",
+      "group": "example"
+    },
+    {
+      "module": "tf_bootstrap_resources",
+      "group": "utility"
+    },
+    {
+      "module": "vault_auth_oidc",
+      "group": "vault"
+    },
+    {
+      "module": "vault_core_resources",
+      "group": "vault"
+    }
+  ]
+}

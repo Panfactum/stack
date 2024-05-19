@@ -52,12 +52,13 @@ module "constants" {
 }
 
 module "node_settings" {
-  source           = "../kube_node_settings"
-  cluster_name     = aws_eks_cluster.cluster.name
-  cluster_ca_data  = aws_eks_cluster.cluster.certificate_authority[0].data
-  cluster_endpoint = aws_eks_cluster.cluster.endpoint
-  max_pods         = 25
-  is_spot          = false
+  source                 = "../kube_node_settings"
+  cluster_name           = aws_eks_cluster.cluster.name
+  cluster_ca_data        = aws_eks_cluster.cluster.certificate_authority[0].data
+  cluster_dns_service_ip = var.dns_service_ip
+  cluster_endpoint       = aws_eks_cluster.cluster.endpoint
+  max_pods               = 25
+  is_spot                = false
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -226,7 +227,13 @@ module "encrypt_key" {
   # end-generate
 }
 
+moved {
+  from = aws_eks_addon.coredns
+  to   = aws_eks_addon.coredns[0]
+}
+
 resource "aws_eks_addon" "coredns" {
+  count                       = var.core_dns_addon_enabled ? 1 : 0
   cluster_name                = aws_eks_cluster.cluster.name
   addon_name                  = "coredns"
   addon_version               = var.coredns_version
@@ -346,9 +353,6 @@ resource "aws_eks_node_group" "controllers" {
 
   instance_types = var.controller_node_instance_types
 
-  // Todo: We need to enable this as we cannot
-  // control the PDBs for the postgres clusters.
-  // Remove when 1.23 of cnpg is released
   force_update_version = true
 
   launch_template {
@@ -374,9 +378,8 @@ resource "aws_eks_node_group" "controllers" {
   taint {
     effect = "NO_SCHEDULE"
     key    = module.constants.cilium_taint.key
-    value  = "true"
+    value  = module.constants.cilium_taint.value
   }
-
   lifecycle {
     create_before_destroy = true
   }

@@ -42,7 +42,12 @@ locals {
     id = random_id.pooler_r_id.hex
   }
 
-  stopDelay = var.pg_shutdown_timeout ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
+  stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
+
+  poolers_to_enable = toset(concat(
+    var.pg_bouncer_read_only_enabled ? ["r"] : [],
+    var.pg_bouncer_read_write_enabled ? ["rw"] : []
+  ))
 }
 
 module "pull_through" {
@@ -410,7 +415,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       affinity = {
         // Ensures that the postgres cluster instances are never scheduled on the same node
         enablePodAntiAffinity = true
-        topologyKey           = "kubernetes.io/hostname"
+        topologyKey           = (var.burstable_instances_enabled || var.spot_instances_enabled) ? "node.kubernetes.io/instance-type" : "kubernetes.io/hostname"
         podAntiAffinityType   = "required"
 
         // Allow the clusters to be scheduled on particular node types
@@ -429,7 +434,6 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       storage = {
         pvcTemplate = {
-          accessModes = ["ReadWriteOnce"]
           resources = {
             requests = {
               storage = "${var.pg_storage_gb}Gi"
@@ -711,7 +715,7 @@ module "pooler_certs" {
 
 
 resource "kubernetes_manifest" "connection_pooler" {
-  for_each = toset(["rw", "r"])
+  for_each = local.poolers_to_enable
   manifest = {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Pooler"
@@ -776,7 +780,7 @@ resource "kubernetes_manifest" "connection_pooler" {
           topologySpreadConstraints = module.constants_pooler[each.key].topology_spread_zone_preferred
           tolerations               = module.constants_pooler[each.key].burstable_node_toleration_helm
           affinity = merge(
-            module.constants_pooler[each.key].pod_anti_affinity_helm,
+            module.constants_pooler[each.key].pod_anti_affinity_instance_type_helm,
             {
               podAffinity = {
                 // Try to schedule poolers on the same nodes as db instances to reduce network latency
@@ -834,7 +838,7 @@ resource "kubernetes_manifest" "connection_pooler" {
 #}
 
 resource "kubernetes_manifest" "pdb_pooler" {
-  for_each = toset(["r", "rw"])
+  for_each = local.poolers_to_enable
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
