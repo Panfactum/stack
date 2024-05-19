@@ -64,6 +64,14 @@ Type: `string`
 
 Default: `"19.0.2"`
 
+### <a name="input_lfu_cache_enabled" /> [lfu\_cache\_enabled](#input_lfu_cache_enabled)
+
+Description: Whether redis will be deployed as an LFU cache
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_minimum_memory_mb" /> [minimum\_memory\_mb](#input_minimum_memory_mb)
 
 Description: The minimum memory in Mb to use for the redis nodes
@@ -136,6 +144,10 @@ The following outputs are exported:
 
 Description: n/a
 
+### <a name="output_master_set" /> [master\_set](#output_master_set)
+
+Description: n/a
+
 ### <a name="output_reader_role" /> [reader\_role](#output_reader_role)
 
 Description: n/a
@@ -143,6 +155,10 @@ Description: n/a
 ### <a name="output_redis_host" /> [redis\_host](#output_redis_host)
 
 Description: A service address that points to all redis nodes
+
+### <a name="output_redis_host_list" /> [redis\_host\_list](#output_redis_host_list)
+
+Description: n/a
 
 ### <a name="output_redis_master_host" /> [redis\_master\_host](#output_redis_master_host)
 

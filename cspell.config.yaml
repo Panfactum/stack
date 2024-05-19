@@ -143,7 +143,9 @@ words: [
   "hostable",
   "emberstack",
   "NATS",
-  "nats"
+  "nats",
+  "thanos",
+  "poolers"
 ]
 languageSettings:
   - languageId: markdown,mdx

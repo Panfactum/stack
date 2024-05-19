@@ -177,8 +177,21 @@ resource "helm_release" "redis" {
 
         extraFlags = concat(
           var.persistence_enabled ? [] : ["--appendonly", "no"],
+          var.lfu_cache_enabled ? ["--maxmemory", "$MEMORY_REQUEST", "--maxmemory-policy", "allkeys-lfu", "--activedefrag", "yes"] : [],
           var.redis_flags
         )
+
+        extraEnvVars = [
+          {
+            name = "MEMORY_REQUEST"
+            valueFrom = {
+              resourceFieldRef = {
+                containerName = "redis"
+                resource      = "requests.memory"
+              }
+            }
+          }
+        ]
 
         podLabels = module.kube_labels.kube_labels
         podAnnotations = {

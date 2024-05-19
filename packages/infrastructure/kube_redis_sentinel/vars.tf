@@ -58,6 +58,12 @@ variable "persistence_enabled" {
   default     = false
 }
 
+variable "lfu_cache_enabled" {
+  description = "Whether redis will be deployed as an LFU cache"
+  type        = bool
+  default     = false
+}
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool

@@ -185,6 +185,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_monitoring",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_namespace",
       "group": "kubernetes"
     },
@@ -194,10 +198,6 @@
     },
     {
       "module": "kube_priority_classes",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_prometheus_stack",
       "group": "kubernetes"
     },
     {

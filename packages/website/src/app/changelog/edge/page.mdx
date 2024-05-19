@@ -40,7 +40,24 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   of [kube\_bastion](/docs/edge/reference/infrastructure-modules/kubernetes/kube_bastion) to fail (and any first-party modules that rely on [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
   To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
 
+- [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) has two
+new flags, `pg_bouncer_read_only_enabled` (default `false`) and `pg_bouncer_read_write_enabled` (default `true`), which will enable
+the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
+to have idle resources.
+
+### Added
+
+- [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel) has a new flag,
+`lfu_cache_enabled`, that will configure the Redis cluster automatically evict records under memory pressure
+based on an approximated Least Frequently Used algorithm.
+
 ### Changed
+
+* After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
+modules to have `controller_node_count` set to `1` and `controller_node_instance_types` set to `["t3a.medium"]`.
+This will decrease the costs of the base cluster by about 40% without impacting cluster availability or resiliency.
+The single remaining node is used primarily as a place for Karpenter to run (Karpenter cannot run on instances that it itself
+provisions).
 
 * [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) now only deploys
   a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall

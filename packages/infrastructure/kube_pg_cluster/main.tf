@@ -43,6 +43,11 @@ locals {
   }
 
   stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
+
+  poolers_to_enable = toset(concat(
+    var.pg_bouncer_read_only_enabled ? ["r"] : [],
+    var.pg_bouncer_read_write_enabled ? ["rw"] : []
+  ))
 }
 
 module "pull_through" {
@@ -711,7 +716,7 @@ module "pooler_certs" {
 
 
 resource "kubernetes_manifest" "connection_pooler" {
-  for_each = toset(["rw", "r"])
+  for_each = local.poolers_to_enable
   manifest = {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Pooler"
@@ -834,7 +839,7 @@ resource "kubernetes_manifest" "connection_pooler" {
 #}
 
 resource "kubernetes_manifest" "pdb_pooler" {
-  for_each = toset(["r", "rw"])
+  for_each = local.poolers_to_enable
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"

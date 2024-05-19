@@ -9,4 +9,4 @@ patches:
   - path: admission-cert.yaml
     target:
       kind: Certificate
-      name: prometheus-kube-prometheus-admission
+      name: monitoring-admission
