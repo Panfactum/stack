@@ -31,6 +31,7 @@ list(object({
     image              = string
     version            = string
     command            = list(string)
+    working_dir        = optional(string, null)
     minimum_memory     = optional(number, 100)      #The minimum amount of memory in megabytes
     minimum_cpu        = optional(number, 10)       # The minimum amount of cpu millicores
     run_as_root        = optional(bool, false)      # Whether to run the container as root
@@ -100,14 +101,6 @@ list(object({             // key is the secret provider class
 ```
 
 Default: `[]`
-
-### <a name="input_is_local" /> [is\_local](#input_is_local)
-
-Description: Whether this module is a part of a local development cronjob
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
 

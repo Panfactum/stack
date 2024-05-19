@@ -145,7 +145,8 @@ words: [
   "NATS",
   "nats",
   "thanos",
-  "poolers"
+  "poolers",
+  "alertmanager"
 ]
 languageSettings:
   - languageId: markdown,mdx

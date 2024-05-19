@@ -302,6 +302,7 @@ locals {
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
         imagePullPolicy = config.image_pull_policy
+        workingDir      = config.working_dir
 
         // NOTE: The order that these env blocks is defined in
         // is incredibly important. Do NOT move them around unless you know what you are doing.
@@ -362,11 +363,12 @@ locals {
         volumeMounts    = length(local.common_volume_mounts) == 0 ? null : local.common_volume_mounts
       } : k => v if v != null }]
 
-      initContainers = length(keys(local.init_containers)) == 0 ? null : [for container, config in local.init_containers : {
+      initContainers = length(keys(local.init_containers)) == 0 ? null : [for container, config in local.init_containers : { for k, v in {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
         imagePullPolicy = config.image_pull_policy
+        workingDir      = config.working_dir
         env = concat(
           local.common_env,
           [for k, v in config.env : {
@@ -377,7 +379,7 @@ locals {
         resources       = local.security_context[config.name]
         securityContext = local.security_context[config.name]
         volumeMounts    = length(local.common_volume_mounts) == 0 ? null : local.common_volume_mounts
-      }]
+      } : k => v if v != null }]
     } : k => v if v != null }
   }
 }

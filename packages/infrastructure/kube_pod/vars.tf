@@ -12,6 +12,7 @@ variable "containers" {
     version              = string
     command              = list(string)
     image_pull_policy    = optional(string, "IfNotPresent")
+    working_dir          = optional(string, null)
     minimum_memory       = optional(number, 100)      # The minimum amount of memory in megabytes
     minimum_cpu          = optional(number, 10)       # The minimum amount of cpu millicores
     run_as_root          = optional(bool, false)      # Whether to run the container as root
