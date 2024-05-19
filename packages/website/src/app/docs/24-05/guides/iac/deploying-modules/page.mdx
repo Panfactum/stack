@@ -70,7 +70,7 @@ You will also likely want to include a `terraform` source such as the following:
 
 ```hcl
 terraform {
-  source = "github.com/Panfactum/stack.git/packages/infrastructure//aws_eks"
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/aws_eks"
 }
 ```
 
@@ -99,7 +99,7 @@ include "panfactum" {
 }
 
 terraform {
-   source = "github.com/Panfactum/stack.git/packages/terraform//aws_eks"
+   source = "github.com/Panfactum/stack.git//packages/terraform/aws_eks"
 }
 
 inputs = {
