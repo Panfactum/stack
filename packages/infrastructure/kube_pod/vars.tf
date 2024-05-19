@@ -6,12 +6,12 @@ variable "namespace" {
 variable "containers" {
   description = "A list of container configurations for the pod"
   type = list(object({
-    name               = string
-    init               = optional(bool, false)
-    image              = string
-    version            = string
-    command            = list(string)
-    working_dir        = optional(string, null)
+    name                 = string
+    init                 = optional(bool, false)
+    image                = string
+    version              = string
+    command              = list(string)
+    working_dir          = optional(string, null)
     image_pull_policy    = optional(string, "IfNotPresent")
     minimum_memory       = optional(number, 100)      # The minimum amount of memory in megabytes
     minimum_cpu          = optional(number, 10)       # The minimum amount of cpu millicores
