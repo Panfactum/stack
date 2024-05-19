@@ -226,10 +226,13 @@ In **every** `region.yaml` file, set the following keys:
 * `aws_region`: Set this to the AWS region code for the directory (e.g., `us-west-2`). For the `global` region,
   set the region to your primary AWS region which would normally be what you used for `tf_state_region` above.
 
-* `aws_secondary_region`: Set this to the `aws_region` from above.
+* `aws_secondary_region`: Set this to a *different* region than `aws_region` from above. This value is primarily
+  used to create regional backups, so set this to the region where you want your backups to live. [^2]
 
 *The secondary values are used by some modules that configure resources in multiple AWS accounts or regions. What we
 have just done is default them to primary values, and we will override them on a per-module basis as needed.*
+
+[^2]: You do not have to a have a region folder for the backup region.
 
 ## Next Steps
 
