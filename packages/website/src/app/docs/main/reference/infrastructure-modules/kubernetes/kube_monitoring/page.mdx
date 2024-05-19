@@ -48,6 +48,46 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_additional_tracked_resource_labels" /> [additional\_tracked\_resource\_labels](#input_additional_tracked_resource_labels)
+
+Description: Kubernetes resource labels to include in metric labels
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_additional_tracked_resources" /> [additional\_tracked\_resources](#input_additional_tracked_resources)
+
+Description: Additional Kubernetes resources to track in kube-state-metrics
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_alertmanager_local_storage_initial_size_gb" /> [alertmanager\_local\_storage\_initial\_size\_gb](#input_alertmanager_local_storage_initial_size_gb)
+
+Description: Number of GB to use for the local alertmanager storage (before autoscaled)
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_alertmanager_log_level" /> [alertmanager\_log\_level](#input_alertmanager_log_level)
+
+Description: The log level for the alertmanager pods
+
+Type: `string`
+
+Default: `"info"`
+
+### <a name="input_alertmanager_storage_class_name" /> [alertmanager\_storage\_class\_name](#input_alertmanager_storage_class_name)
+
+Description: The storage class to use for local alertmanager storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
 ### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
@@ -95,6 +135,14 @@ Description: Number of days the raw metrics resolution should be kept
 Type: `number`
 
 Default: `15`
+
+### <a name="input_monitoring_etcd_enabled" /> [monitoring\_etcd\_enabled](#input_monitoring_etcd_enabled)
+
+Description: Whether to monitor the Kubernetes API server's etcd instances. Only enable for debugging purposes as it contains a huge amount of metrics.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_prometheus_default_scrape_interval_seconds" /> [prometheus\_default\_scrape\_interval\_seconds](#input_prometheus_default_scrape_interval_seconds)
 

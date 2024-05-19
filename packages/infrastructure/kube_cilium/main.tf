@@ -259,12 +259,6 @@ resource "helm_release" "cilium" {
           {
             key      = "node.kubernetes.io/not-ready"
             operator = "Exists"
-            effect   = "NoExecute"
-          },
-          {
-            key      = "node.kubernetes.io/not-ready"
-            operator = "Exists"
-            effect   = "NoSchedule"
           },
           {
             key      = "node.kubernetes.io/unreachable"

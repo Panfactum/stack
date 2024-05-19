@@ -70,6 +70,16 @@ variable "prometheus_log_level" {
   }
 }
 
+variable "alertmanager_log_level" {
+  description = "The log level for the alertmanager pods"
+  type        = string
+  default     = "info"
+  validation {
+    condition     = contains(["info", "error", "warn", "debug"], var.alertmanager_log_level)
+    error_message = "Invalid alertmanager_log_level provided."
+  }
+}
+
 variable "thanos_log_level" {
   description = "The log level for the thanos pods"
   type        = string
@@ -138,4 +148,34 @@ variable "thanos_bucket_web_enable" {
   description = "Whether to enable the web dashboard for the Thanos bucket analyzer which can show debugging information about your metrics data"
   type        = bool
   default     = true
+}
+
+variable "alertmanager_storage_class_name" {
+  description = "The storage class to use for local alertmanager storage"
+  type        = string
+  default     = "ebs-standard"
+}
+
+variable "alertmanager_local_storage_initial_size_gb" {
+  description = "Number of GB to use for the local alertmanager storage (before autoscaled)"
+  type        = number
+  default     = 2
+}
+
+variable "monitoring_etcd_enabled" {
+  description = "Whether to monitor the Kubernetes API server's etcd instances. Only enable for debugging purposes as it contains a huge amount of metrics."
+  type        = bool
+  default     = false
+}
+
+variable "additional_tracked_resource_labels" {
+  description = "Kubernetes resource labels to include in metric labels"
+  type        = list(string)
+  default     = []
+}
+
+variable "additional_tracked_resources" {
+  description = "Additional Kubernetes resources to track in kube-state-metrics"
+  type        = list(string)
+  default     = []
 }

@@ -4,3 +4,4 @@ providers:
   - kubernetes
   - random
   - aws
+  - vault

@@ -434,7 +434,6 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       storage = {
         pvcTemplate = {
-          accessModes = ["ReadWriteOnce"]
           resources = {
             requests = {
               storage = "${var.pg_storage_gb}Gi"

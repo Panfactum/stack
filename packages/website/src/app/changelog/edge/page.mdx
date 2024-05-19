@@ -69,6 +69,11 @@ provisions).
 * Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
   deployment strategy to improve timing and efficiency of applying Panfactum upgrades.
 
+### Fixes
+
+- PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has been fixed,
+but the fix will not retroactively adjust existing PVCs as they are immutable.
+
 ## edge.24-05-15
 
 ### Breaking Changes

@@ -30,6 +30,46 @@ locals {
   name      = "monitoring"
   namespace = module.namespace.namespace
 
+  default_tracked_labels = [
+    "panfactum.com/environment",
+    "panfactum.com/module",
+    "panfactum.com/region",
+    "panfactum.com/root-module",
+    "panfactum.com/stack-commit",
+    "panfactum.com/stack-version"
+  ]
+  labels_to_track = tolist(toset(concat(local.default_tracked_labels, var.additional_tracked_resource_labels)))
+
+  default_tracked_resources = [
+    "certificatesigningrequests",
+    "configmaps",
+    "cronjobs",
+    "daemonsets",
+    "deployments",
+    "endpoints",
+    "horizontalpodautoscalers",
+    "ingresses",
+    "jobs",
+    "leases",
+    "limitranges",
+    "mutatingwebhookconfigurations",
+    "namespaces",
+    "networkpolicies",
+    "nodes",
+    "persistentvolumeclaims",
+    "persistentvolumes",
+    "poddisruptionbudgets",
+    "pods",
+    "replicasets",
+    "resourcequotas",
+    "secrets",
+    "services",
+    "statefulsets",
+    "storageclasses",
+    "validatingwebhookconfigurations"
+  ]
+  resources_to_track = tolist(toset(concat(local.default_tracked_resources, var.additional_tracked_resources)))
+
   default_resources = {
     requests = {
       memory = "100Mi"
@@ -97,6 +137,10 @@ locals {
 
   thanos_query_frontend_match = {
     id = random_id.thanos_query_frontend.hex
+  }
+
+  alertmanager_match = {
+    id = random_id.alertmanager.hex
   }
 
   thanos_store_gateway_index_config = {
@@ -204,6 +248,11 @@ resource "random_id" "thanos_query_frontend" {
 resource "random_id" "thanos_bucket_web" {
   byte_length = 8
   prefix      = "thanos-bucket-web-"
+}
+
+resource "random_id" "alertmanager" {
+  byte_length = 8
+  prefix      = "alertmanager-"
 }
 
 module "kube_labels_operator" {
@@ -396,6 +445,22 @@ module "kube_labels_thanos_query_frontend" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, local.thanos_query_frontend_match)
+}
+
+module "kube_labels_alertmanager" {
+  source = "../kube_labels"
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.alertmanager_match)
 }
 
 module "constants_operator" {
@@ -612,6 +677,24 @@ module "constants_thanos_query_frontend" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, local.thanos_query_frontend_match)
+}
+
+module "constants_alertmanager" {
+  source = "../constants"
+
+  matching_labels = local.alertmanager_match
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.alertmanager_match)
 }
 
 
@@ -836,6 +919,18 @@ resource "helm_release" "prometheus_stack" {
         enabled = true
       }
 
+      defaultRules = {
+        create = true
+        rules = {
+          etcd                   = var.monitoring_etcd_enabled
+          kubeSchedulerAlerting  = false // Not exposed in EKS
+          kubeSchedulerRecording = false // Not exposed in EKS
+          kubernetesSystem       = false // Not exposed in EKS
+          kubeControllerManager  = false // Not exposed in EKS
+          kubeProxy              = false // We do not use kube-proxy
+        }
+      }
+
       //////////////////////////////////////////////////////////
       // Prometheus Operator
       //////////////////////////////////////////////////////////
@@ -942,12 +1037,119 @@ resource "helm_release" "prometheus_stack" {
         image        = local.default_k8s_image
         customLabels = module.kube_labels_kube_state_metrics.kube_labels
         extraArgs = [
-          "--metric-labels-allowlist=pods=[*]"
+          "--metric-labels-allowlist=*=[${join(",", local.labels_to_track)}]"
         ]
         updateStrategy = "Recreate"
         tolerations    = module.constants_kube_state_metrics.burstable_node_toleration_helm
+        resources      = local.default_resources
 
-        resources = local.default_resources
+        collectors = local.resources_to_track
+
+        prometheus = {
+          monitor = {
+            metricRelabelings = concat(
+              // Removes the panfactum.com/ prefix
+              [for label in [
+                "label_panfactum_com_environment",
+                "label_panfactum_com_region",
+                "label_panfactum_com_stack_version",
+                "label_panfactum_com_stack_commit",
+                "label_panfactum_com_module",
+                "label_panfactum_com_root_module"
+                ] : {
+                sourceLabels = ["__name__", label],
+                regex        = "(.*_labels);(.+)"
+                targetLabel  = "label_${trimprefix(label, "label_panfactum_com_")}"
+                replacement  = "$2"
+                action       = "replace"
+                }
+              ],
+              [
+                {
+                  regex  = ".*panfactum_com.*"
+                  action = "labeldrop"
+                },
+
+                // This addresses a bug in a previous version of the stack
+                // where the access mode array contained duplicate entries
+                // for postgres deployments. This causes duplicate samples
+                // to be sent to prometheus which triggers alerts.
+                {
+                  action       = "drop"
+                  regex        = "kube_persistentvolumeclaim_access_mode"
+                  sourceLabels = ["__name__"]
+                },
+              ]
+            )
+          }
+        }
+      }
+
+      //////////////////////////////////////////////////////////
+      // etcd
+      //////////////////////////////////////////////////////////
+      kubeEtcd = {
+        enabled = var.monitoring_etcd_enabled
+      }
+
+      //////////////////////////////////////////////////////////
+      // Kubernetes API server monitoring
+      //////////////////////////////////////////////////////////
+      kubeApiServer = {
+        enabled = true
+        serviceMonitor = {
+          metricRelabelings = [
+            {
+              action       = "drop"
+              regex        = "apiserver_request_duration_seconds_.*" # Use apiserver_request_sli_duration_seconds_ instead
+              sourceLabels = ["__name__"]
+            },
+            # These aren't really important to track and they use a lot of space
+            {
+              action       = "drop"
+              regex        = "apiserver_request_body_size_.*"
+              sourceLabels = ["__name__"]
+            },
+            {
+              action       = "drop"
+              regex        = "apiserver_response_body_size_.*"
+              sourceLabels = ["__name__"]
+            },
+            {
+              action       = "drop"
+              regex        = "kubernetes_feature_enabled"
+              sourceLabels = ["__name__"]
+            }
+          ]
+        }
+      }
+
+      //////////////////////////////////////////////////////////
+      // Kubernetes Scheduler
+      //////////////////////////////////////////////////////////
+      kubeScheduler = {
+        enabled = false // not exposed in EKS
+      }
+
+      //////////////////////////////////////////////////////////
+      // kube-proxy
+      //////////////////////////////////////////////////////////
+      kubeProxy = {
+        enabled = false // we do not use kube-proxy
+      }
+
+      //////////////////////////////////////////////////////////
+      // Kubernetes Controller Manager
+      //////////////////////////////////////////////////////////
+      kubeControllerManager = {
+        enabled = false // not exposed in EKS
+      }
+
+      //////////////////////////////////////////////////////////
+      // coreDNS
+      //////////////////////////////////////////////////////////
+      coreDns = {
+        enabled = false // we monitor this in our own module
       }
 
       //////////////////////////////////////////////////////////
@@ -987,7 +1189,7 @@ resource "helm_release" "prometheus_stack" {
           logLevel          = var.prometheus_log_level
           logFormat         = "json"
           scrapeInterval    = "${var.prometheus_default_scrape_interval_seconds}s"
-          retention         = "6h" // This should be 3x the block window (2h) and then data will get shipped to s3 by thanos
+          retention         = "1h" // This is only for local retention (before data is shipped to s3 by thanos)
           disableCompaction = true
 
           storageSpec = {
@@ -1011,6 +1213,7 @@ resource "helm_release" "prometheus_stack" {
             logLevel  = var.prometheus_log_level
             logFormat = "json"
             resources = local.default_resources
+            blockSize = "30m"
             objectStorageConfig = {
               secret = {
                 type = "s3"
@@ -1022,6 +1225,47 @@ resource "helm_release" "prometheus_stack" {
               }
             }
           }
+        }
+      }
+
+      //////////////////////////////////////////////////////////
+      // Alert Manager
+      //////////////////////////////////////////////////////////
+      alertmanager = {
+        enabled = true
+        service = {
+          labels = module.kube_labels_alertmanager.kube_labels
+        }
+        alertmanagerSpec = {
+          podMetadata = {
+            labels = module.kube_labels_alertmanager.kube_labels
+          }
+          image     = local.default_image
+          logLevel  = var.alertmanager_log_level
+          logFormat = "json"
+
+          storage = {
+            volumeClaimTemplate = {
+              spec = {
+                storageClassName = var.alertmanager_storage_class_name
+                resources = {
+                  requests = {
+                    storage = "${var.alertmanager_local_storage_initial_size_gb}Gi"
+                  }
+                }
+                annotations = {
+                  "velero.io/exclude-from-backup" = "true"
+                }
+              }
+            }
+          }
+
+          replicas                  = 2
+          resources                 = local.default_resources
+          affinity                  = module.constants_alertmanager.pod_anti_affinity_instance_type_helm
+          tolerations               = module.constants_alertmanager.burstable_node_toleration_helm
+          topologySpreadConstraints = module.constants_alertmanager.topology_spread_zone_strict
+          priorityClassName         = module.constants_alertmanager.cluster_important_priority_class_name
         }
       }
 
@@ -1655,7 +1899,6 @@ resource "kubernetes_manifest" "pdb_thanos_query_frontend" {
 }
 
 resource "kubernetes_manifest" "pdb_thanos_query" {
-  count = var.thanos_bucket_web_enable ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -1672,6 +1915,25 @@ resource "kubernetes_manifest" "pdb_thanos_query" {
     }
   }
   depends_on = [helm_release.thanos]
+}
+
+resource "kubernetes_manifest" "alertmanager" {
+  manifest = {
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "alertmanager"
+      namespace = local.namespace
+      labels    = module.kube_labels_alertmanager.kube_labels
+    }
+    spec = {
+      selector = {
+        matchLabels = local.alertmanager_match
+      }
+      maxUnavailable = 1
+    }
+  }
+  depends_on = [helm_release.prometheus_stack]
 }
 
 /***************************************
@@ -1933,6 +2195,27 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
     }
   }
   depends_on = [helm_release.thanos]
+}
+
+resource "kubernetes_manifest" "vpa_alertmanager" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "alertmanager"
+      namespace = local.namespace
+      labels    = module.kube_labels_alertmanager.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "monitoring.coreos.com/v1"
+        kind       = "Alertmanager"
+        name       = "monitoring"
+      }
+    }
+  }
+  depends_on = [helm_release.prometheus_stack]
 }
 
 
