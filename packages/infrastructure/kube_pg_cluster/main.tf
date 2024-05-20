@@ -352,9 +352,13 @@ resource "kubernetes_manifest" "postgres_cluster" {
       }
 
       inheritedMetadata = {
-        labels = merge(module.kube_labels.kube_labels, {
-          pg-cluster = local.cluster-label
-        })
+        labels = merge(
+          module.kube_labels.kube_labels,
+          module.constants.disable_lifetime_eviction_label,
+          {
+            pg-cluster = local.cluster-label
+          }
+        )
       }
 
       startDelay           = 60 * 10
@@ -743,7 +747,10 @@ resource "kubernetes_manifest" "connection_pooler" {
       }
       template = {
         metadata = {
-          labels = module.kube_labels_pooler[each.key].kube_labels
+          labels = merge(
+            module.kube_labels_pooler[each.key].kube_labels,
+            module.constants_pooler[each.key].disable_lifetime_eviction_label
+          )
           annotations = {
             "linkerd.io/inject" = "disabled"
           }

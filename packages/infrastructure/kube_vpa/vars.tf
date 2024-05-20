@@ -28,3 +28,20 @@ variable "log_verbosity" {
   default     = 0
 }
 
+variable "prometheus_enabled" {
+  description = "Whether to enable prometheus as the storage backend for the VPA recommender"
+  type        = bool
+  default     = false
+}
+
+variable "thanos_query_frontend_url" {
+  description = "The address of the thanos query frontend to be used by the VPA recommender"
+  type        = string
+  default     = null
+}
+
+variable "history_length_hours" {
+  description = "The number of prior hours of metrics data that will be used for VPA recommendations"
+  type        = number
+  default     = 1 // TODO: Make 24
+}

@@ -133,10 +133,10 @@ resource "helm_release" "reloader" {
 
           resources = {
             requests = {
-              memory = "100Mi"
+              memory = "200Mi"
             }
             limits = {
-              memory = "130Mi"
+              memory = "260Mi"
             }
           }
         }

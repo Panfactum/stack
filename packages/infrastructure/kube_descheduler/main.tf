@@ -240,6 +240,12 @@ resource "helm_release" "descheduler" {
                 name = "PodLifeTime"
                 args = {
                   maxPodLifeTimeSeconds = 60 * 60 * 4
+                  labelSelector = {
+                    matchExpressions = [{
+                      key      = "panfactum.com/prevent-lifetime-eviction"
+                      operator = "DoesNotExist"
+                    }]
+                  }
                 }
               },
             ]

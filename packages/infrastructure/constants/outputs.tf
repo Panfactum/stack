@@ -167,3 +167,9 @@ output "topology_spread_zone_preferred" {
 output "ci_uid" {
   value = 1001
 }
+
+output "disable_lifetime_eviction_label" {
+  value = {
+    "panfactum.com/prevent-lifetime-eviction" = "true"
+  }
+}

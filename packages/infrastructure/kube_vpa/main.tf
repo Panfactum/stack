@@ -185,20 +185,62 @@ resource "helm_release" "vpa" {
         affinity     = module.constants_recommender.controller_node_with_burstable_affinity_helm
         tolerations  = module.constants_recommender.burstable_node_toleration_helm
 
-        extraArgs = {
+        extraArgs = merge({
           // Better packing
           "pod-recommendation-min-cpu-millicores" = 2
           "pod-recommendation-min-memory-mb"      = 10
 
-          // Lower half-life so we have better intra-day scaling
-          "cpu-histogram-decay-half-life"    = "2h0m0s"
-          "memory-histogram-decay-half-life" = "2h0m0s"
+          // After 8 halvings, the metrics will essentially be ignored
+          "cpu-histogram-decay-half-life"    = "${max(1, floor(var.history_length_hours / 8))}h0m0s"
+          "memory-histogram-decay-half-life" = "${max(1, floor(var.history_length_hours / 8))}h0m0s"
 
           // Provide 30% headroom (instead of the 15% default)
           "recommendation-margin-fraction" = 0.3
 
-          v = var.log_verbosity
-        }
+          v = 5
+          }, var.prometheus_enabled ? {
+          // When prometheus is enabled, the initial recommendations will be
+          // provided by prometheus queries instead of the VPACheckpoint objects
+          //
+          // CPU: rate(container_cpu_usage_seconds_total{job="kubelet", pod=~".+", container!="POD", container!=""}[<history-resolution>])
+          // MEMORY: container_memory_working_set_bytes{job="kubelet", pod=~".+", container!="POD", container!=""}
+          //
+          // Those queries will look back <history-length> time at <history-resolution> steps in order to provide
+          // initial data for the internal histogram buckets.
+          //
+          // In order to match the metrics with actual VPA resources, pod labels are used which are provided
+          // by kube-state-metrics via kube_pod_labels{}[<history-length>. This must go back all the way to the <history-length> (lots of data!)
+          // Pods not found in kube_pod_labels{} will be dropped from the assessments.
+          //
+          // After loading this initial metrics, the recommender will no longer query prometheus and instead
+          // rely on live monitoring of the kubernetes API for updating its internal recommendations
+          //
+          // Using Prometheus has the following weaknesses:
+          // - Prometheus and kube-state-metrics need to be running for at least <history-length> in order for the VPA
+          // to provide accurate recommendations. BEWARE: Ignoring this recommendation will likely cause some of your
+          // VPAs to not work at all due to the way that the recommender drops AggregateCollectionStates for VPA targets
+          // that have no historical data. This will likely cause a cascading failure in your system!!!
+          //
+          // - Because prometheus focused on pods, time periods with more pods (high churn / more replicas) will have
+          // more samples added to the histogram bucket and thus be weighted more heavily
+          //
+          // - As this only runs at recommender startup, this will cause a significant resource burst (on both prometheus and the recommender),
+          // which may cause system components to crash if not planned for in advance. As a result, <history-length> should be kept reasonable.
+          //
+          // - OOMs are not tracked in the metrics history so will essentially be forgotten every time the recommender restarts
+          prometheus-address           = var.thanos_query_frontend_url
+          storage                      = "prometheus"
+          prometheus-cadvisor-job-name = "kubelet"
+          container-pod-name-label     = "pod"
+          container-name-label         = "container"
+          container-namespace-label    = "namespace"
+          pod-namespace-label          = "namespace"
+          pod-name-label               = "pod"
+          metric-for-pod-labels        = "kube_pod_labels{}[${var.history_length_hours}h]" #
+          pod-label-prefix             = "label_"
+          history-length               = "${var.history_length_hours}h"
+          history-resolution           = "${max(floor(var.history_length_hours * 60 / 100), 1)}m" # Gets the last 100 samples
+        } : {})
 
         resources = {
           requests = {

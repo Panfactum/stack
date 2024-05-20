@@ -35,6 +35,7 @@ locals {
   namespace = module.namespace.namespace
 
   default_tracked_labels = [
+    # Panfactum labels
     "panfactum.com/environment",
     "panfactum.com/module",
     "panfactum.com/region",
@@ -42,7 +43,26 @@ locals {
     "panfactum.com/stack-commit",
     "panfactum.com/stack-version"
   ]
-  labels_to_track = tolist(toset(concat(local.default_tracked_labels, var.additional_tracked_resource_labels)))
+
+  # Required for VPA to work
+  extra_pod_labels = [
+    "app.kubernetes.io/instance",
+    "app.kubernetes.io/name",
+    "app.kubernetes.io/managed-by",
+    "app.kubernetes.io/component",
+    "pod-template-id",
+    "k8s-app",
+    "id",
+    "linkerd.io/control-plane-component",
+    "linkerd.io/control-plane-ns",
+    "linkerd.io/proxy-deployment",
+    "app",
+    "release",
+    "name",
+    "io.cilium/app"
+  ]
+  labels_to_track     = tolist(toset(concat(local.default_tracked_labels, var.additional_tracked_resource_labels)))
+  pod_labels_to_track = tolist(toset(concat(local.extra_pod_labels, local.labels_to_track)))
 
   default_tracked_resources = [
     "certificatesigningrequests",
@@ -1041,11 +1061,18 @@ resource "helm_release" "prometheus_stack" {
         image        = local.default_k8s_image
         customLabels = module.kube_labels_kube_state_metrics.kube_labels
         extraArgs = [
-          "--metric-labels-allowlist=*=[${join(",", local.labels_to_track)}]"
+          "--metric-labels-allowlist=pods=[${join(",", local.pod_labels_to_track)}]"
         ]
         updateStrategy = "Recreate"
         tolerations    = module.constants_kube_state_metrics.burstable_node_toleration_helm
-        resources      = local.default_resources
+        resources = {
+          requests = {
+            memory = "200Mi"
+          }
+          limits = {
+            memory = "260Mi"
+          }
+        }
 
         collectors = local.resources_to_track
 
@@ -2271,27 +2298,28 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
   depends_on = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "vpa_alertmanager" {
-  count = var.vpa_enabled ? 1 : 0
-  manifest = {
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "alertmanager"
-      namespace = local.namespace
-      labels    = module.kube_labels_alertmanager.kube_labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "monitoring.coreos.com/v1"
-        kind       = "Alertmanager"
-        name       = "monitoring"
-      }
-    }
-  }
-  depends_on = [helm_release.prometheus_stack]
-}
-
+// This will not work until https://github.com/prometheus-operator/prometheus-operator/issues/6609
+// is implemented
+#resource "kubernetes_manifest" "vpa_alertmanager" {
+#  count = var.vpa_enabled ? 1 : 0
+#  manifest = {
+#    apiVersion = "autoscaling.k8s.io/v1"
+#    kind       = "VerticalPodAutoscaler"
+#    metadata = {
+#      name      = "alertmanager"
+#      namespace = local.namespace
+#      labels    = module.kube_labels_alertmanager.kube_labels
+#    }
+#    spec = {
+#      targetRef = {
+#        apiVersion = "monitoring.coreos.com/v1"
+#        kind       = "Alertmanager"
+#        name       = "monitoring"
+#      }
+#    }
+#  }
+#  depends_on = [helm_release.prometheus_stack]
+#}
 
 /***************************************
 * SSO Login for Grafana

@@ -8,6 +8,39 @@ import ModuleHeader from "../../ModuleHeader";
 
 This module provides a deployment of the [vertical-pod-autoscaler](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler) project.
 
+## Usage
+
+### Metrics History
+
+Set `history_length_hours` to the number of hours of historical metrics that you want to use for the initial VPA
+recommendations.
+
+Metrics are weighted based on an exponential decay algorithm so more recent data will be weighted more heavily
+than older data. Metrics older than `history_length_hours` will no longer impact calculations.
+
+If using Prometheus, 100 samples will be taken from this range in order to seed the internal VPA database. Do
+not set `history_length_hours` to greater than 1 week as this will cause significant strain on the Prometheus instance.
+
+### Using the Prometheus Backend
+
+*Alpha Quality: Do not use*
+
+The VPA can use Prometheus as the source of its recommendations when setting pod resources.
+To enable this in the Panfactum stack:
+
+* Ensure you have deployed [kube\_monitoring](/docs/edge/reference/infrastructure-modules/kubernetes/kube_monitoring).
+  Note that `kube_monitoring` **must** have been deployed for at least `history_length_hours`
+  in order for the VPA to work properly.
+
+* Set `prometheus_enabled` to `true`.
+
+* Add the `thanos_query_frontend_url` input from the `kube_monitoring` output.
+
+* Apply the module.
+
+* If you had previously deployed the VPA without Prometheus, delete all `Verticalpodautoscalercheckpoints`:
+  `kubectl delete -A verticalpodautoscalercheckpoints.autoscaling.k8s.io --all`.
+
 ## Providers
 
 The following providers are needed by this module:
@@ -26,6 +59,14 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### <a name="input_history_length_hours" /> [history\_length\_hours](#input_history_length_hours)
+
+Description: The number of prior hours of metrics data that will be used for VPA recommendations
+
+Type: `number`
+
+Default: `1`
+
 ### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
 
 Description: The log verbosity (0-9) for the VPA pods
@@ -34,6 +75,14 @@ Type: `number`
 
 Default: `0`
 
+### <a name="input_prometheus_enabled" /> [prometheus\_enabled](#input_prometheus_enabled)
+
+Description: Whether to enable prometheus as the storage backend for the VPA recommender
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
@@ -41,6 +90,14 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_thanos_query_frontend_url" /> [thanos\_query\_frontend\_url](#input_thanos_query_frontend_url)
+
+Description: The address of the thanos query frontend to be used by the VPA recommender
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_vertical_autoscaler_helm_version" /> [vertical\_autoscaler\_helm\_version](#input_vertical_autoscaler_helm_version)
 

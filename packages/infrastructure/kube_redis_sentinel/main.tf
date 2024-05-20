@@ -193,7 +193,10 @@ resource "helm_release" "redis" {
           }
         ]
 
-        podLabels = module.kube_labels.kube_labels
+        podLabels = merge(
+          module.kube_labels.kube_labels,
+          module.constants.disable_lifetime_eviction_label
+        )
         podAnnotations = {
           "config.linkerd.io/opaque-ports"                      = "6379,26379"
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
