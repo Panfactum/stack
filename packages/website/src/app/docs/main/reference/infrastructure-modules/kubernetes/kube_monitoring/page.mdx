@@ -28,6 +28,8 @@ The following providers are needed by this module:
 
 * [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
 ## Required Inputs
 
 The following input variables are required:
@@ -41,6 +43,12 @@ Type: `string`
 ### <a name="input_grafana_domain" /> [grafana\_domain](#input_grafana_domain)
 
 Description: The domain on which to expose Grafana.
+
+Type: `string`
+
+### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+
+Description: The domain of the Vault instance running in the cluster.
 
 Type: `string`
 
@@ -95,6 +103,22 @@ Description: A list of IPs that can use the service account token to authenticat
 Type: `list(string)`
 
 Default: `[]`
+
+### <a name="input_grafana_basic_auth_enabled" /> [grafana\_basic\_auth\_enabled](#input_grafana_basic_auth_enabled)
+
+Description: Whether to enable username and password authentication. Should only be enabled during debugging.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_grafana_log_level" /> [grafana\_log\_level](#input_grafana_log_level)
+
+Description: The log level for the grafana pods
+
+Type: `string`
+
+Default: `"error"`
 
 ### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
 

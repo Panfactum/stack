@@ -157,7 +157,8 @@ locals {
       "nginx.ingress.kubernetes.io/limit-rpm"              = "1000"
       "nginx.ingress.kubernetes.io/limit-burst-multiplier" = "3"
       "nginx.ingress.kubernetes.io/limit-whitelist"        = join(", ", [])
-    }
+    },
+    var.annotations
   )
 
   rewrite_configs = flatten([for config in var.ingress_configs : [for rewrite_rule in config.rewrite_rules : merge(config, rewrite_rule)]])

@@ -77,7 +77,7 @@ resource "kubernetes_config_map_v1_data" "media" {
     namespace = var.authentik_namespace
   }
   data = {
-    "${random_id.logo.hex}.svg" = file("${path.module}/vault.svg")
+    "/media/public/${random_id.logo.hex}.svg" = file("${path.module}/vault.svg")
   }
   field_manager = random_id.logo.hex
   force         = true
@@ -100,15 +100,26 @@ data "authentik_scope_mapping" "profile" {
   managed = "goauthentik.io/providers/oauth2/scope-profile"
 }
 
+data "authentik_scope_mapping" "email" {
+  managed = "goauthentik.io/providers/oauth2/scope-email"
+}
+
+data "authentik_scope_mapping" "openid" {
+  managed = "goauthentik.io/providers/oauth2/scope-openid"
+}
+
+
 resource "authentik_provider_oauth2" "vault" {
   name               = var.vault_name
   authorization_flow = data.authentik_flow.default-authorization-flow.id
   client_id          = random_id.client_id.hex
   signing_key        = authentik_certificate_key_pair.signing.id
   redirect_uris      = local.redirect_uris
-  property_mappings = [
-    data.authentik_scope_mapping.profile.id
-  ]
+  property_mappings = sort([
+    data.authentik_scope_mapping.profile.id,
+    data.authentik_scope_mapping.email.id,
+    data.authentik_scope_mapping.openid.id
+  ])
 }
 
 resource "authentik_application" "vault" {

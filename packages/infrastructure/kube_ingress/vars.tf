@@ -30,6 +30,12 @@ variable "ingress_configs" {
   }))
 }
 
+variable "annotations" {
+  description = "Extra annotations to add to the ingress objects"
+  type        = map(string)
+  default     = {}
+}
+
 variable "rate_limiting_enabled" {
   description = "Whether to enable rate limiting"
   type        = bool

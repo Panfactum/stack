@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "3.25.0"
+    }
   }
 }
 
@@ -813,7 +817,7 @@ module "metrics_bucket" {
   # end-generate
 }
 
-data "aws_iam_policy_document" "argo" {
+data "aws_iam_policy_document" "prometheus" {
   statement {
     effect = "Allow"
     actions = [
@@ -869,7 +873,7 @@ module "aws_permissions" {
   service_account           = kubernetes_service_account.prometheus.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.argo.json
+  iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
   # generate: pass_common_vars.snippet.txt
@@ -1313,6 +1317,22 @@ resource "helm_release" "prometheus_stack" {
             ssl_mode      = "require"
           }
 
+          users = {
+            viewers_can_edit  = true
+            editors_can_admin = true
+            hidden_users      = "admin"
+            home_page         = "https://${var.grafana_domain}/dashboards/"
+          }
+
+          log = {
+            mode  = "console"
+            level = var.grafana_log_level
+          }
+
+          "log.console" = {
+            format = "json"
+          }
+
           security = {
             # From https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-security-hardening
             cookie_secure                    = true
@@ -1323,23 +1343,30 @@ resource "helm_release" "prometheus_stack" {
             hide_version                     = true
           }
 
-          #          "auth.azuread" = {
-          #            name                       = "Azure AD"
-          #            enabled                    = true
-          #            allow_sign_up              = true
-          #            auto_login                 = true
-          #            client_id                  = module.oauth_app.application_id
-          #            client_secret              = module.oauth_app.client_secret
-          #            scopes                     = "openid profile email"
-          #            auth_url                   = "https://login.microsoftonline.com/${var.azuread_tenant_id}/oauth2/v2.0/authorize"
-          #            token_url                  = "https://login.microsoftonline.com/${var.azuread_tenant_id}/oauth2/v2.0/token"
-          #            allowed_grousp             = join(" ", [for group in data.azuread_group.groups : group.object_id])
-          #            allowed_organizations      = var.azuread_tenant_id
-          #            role_attribute_strict      = false
-          #            allow_assign_grafana_admin = true
-          #            skip_org_role_sync         = false
-          #            use_pkce                   = true
-          #          }
+          auth = {
+            disable_login_form = !var.grafana_basic_auth_enabled
+          }
+
+          "auth.basic" = {
+            enabled = var.grafana_basic_auth_enabled
+          }
+
+          "auth.generic_oauth" = {
+            enabled                    = true
+            name                       = "Vault"
+            client_id                  = vault_identity_oidc_client.oidc.client_id
+            client_secret              = vault_identity_oidc_client.oidc.client_secret
+            auth_url                   = "https://${var.vault_domain}/ui/vault/identity/oidc/provider/grafana/authorize"
+            api_url                    = "${vault_identity_oidc_provider.oidc.issuer}/userinfo"
+            token_url                  = "${vault_identity_oidc_provider.oidc.issuer}/token"
+            scopes                     = "openid profile"
+            role_attribute_path        = "contains(groups[*], 'rbac-superusers') && 'Admin' || contains(groups[*], 'rbac-admins') && 'Editor' || 'Viewer'"
+            email_attribute_path       = "email"
+            name_attribute_path        = "name"
+            allow_assign_grafana_admin = true
+            auto_login                 = !var.grafana_basic_auth_enabled
+            use_pkce                   = true
+          }
         }
 
         replicas = 2
@@ -1369,6 +1396,53 @@ resource "helm_release" "prometheus_stack" {
   depends_on = [module.grafana_db]
 }
 
+/***************************************
+* Vault IdP Setup
+***************************************/
+
+resource "vault_identity_oidc_key" "oidc" {
+  name               = "grafana"
+  allowed_client_ids = ["*"]
+  rotation_period    = 60 * 60 * 8
+  verification_ttl   = 60 * 60 * 24
+}
+
+data "vault_identity_group" "rbac_groups" {
+  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers"])
+  group_name = each.key
+}
+
+resource "vault_identity_oidc_assignment" "oidc" {
+  name      = "grafana"
+  group_ids = [for group in data.vault_identity_group.rbac_groups : group.id]
+}
+
+resource "vault_identity_oidc_client" "oidc" {
+  name = "grafana"
+  key  = vault_identity_oidc_key.oidc.name
+  redirect_uris = [
+    "https://${var.grafana_domain}/login/generic_oauth",
+  ]
+  assignments = [
+    vault_identity_oidc_assignment.oidc.name
+  ]
+  id_token_ttl     = 60 * 60 * 8
+  access_token_ttl = 60 * 60 * 8
+}
+
+resource "vault_identity_oidc_provider" "oidc" {
+  name = "grafana"
+
+  https_enabled = true
+  issuer_host   = var.vault_domain
+  allowed_client_ids = [
+    vault_identity_oidc_client.oidc.client_id
+  ]
+  scopes_supported = [
+    "profile"
+  ]
+}
+
 
 /***************************************
 * Thanos
@@ -1389,7 +1463,7 @@ module "aws_permissions_thanos_compactor" {
   service_account           = kubernetes_service_account.thanos_compactor.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.argo.json
+  iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
   # generate: pass_common_vars.snippet.txt
@@ -1417,7 +1491,7 @@ module "aws_permissions_thanos_store_gateway" {
   service_account           = kubernetes_service_account.thanos_store_gateway.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.argo.json
+  iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
   # generate: pass_common_vars.snippet.txt
@@ -1445,7 +1519,7 @@ module "aws_permissions_thanos_ruler" {
   service_account           = kubernetes_service_account.thanos_ruler.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.argo.json
+  iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
   # generate: pass_common_vars.snippet.txt
@@ -1473,7 +1547,7 @@ module "aws_permissions_thanos_bucket_web" {
   service_account           = kubernetes_service_account.thanos_bucket_web.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.argo.json
+  iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
   # generate: pass_common_vars.snippet.txt
@@ -2228,6 +2302,33 @@ resource "kubernetes_manifest" "vpa_alertmanager" {
 * Grafana Ingress
 ***************************************/
 
+#module "proxy" {
+#  count  = var.ingress_enabled ? 1 : 0
+#  source = "../kube_vault_proxy"
+#
+#  namespace = local.namespace
+#  pull_through_cache_enabled = var.pull_through_cache_enabled
+#  vpa_enabled = var.vpa_enabled
+#  domain = var.grafana_domain
+#  vault_domain = var.vault_domain
+#  upstream_service_name = "grafana"
+#
+#  # generate: pass_common_vars.snippet.txt
+#  pf_stack_version = var.pf_stack_version
+#  pf_stack_commit  = var.pf_stack_commit
+#  environment      = var.environment
+#  region           = var.region
+#  pf_root_module   = var.pf_root_module
+#  is_local         = var.is_local
+#  extra_tags       = var.extra_tags
+#  # end-generate
+#
+#  depends_on = [
+#    helm_release.prometheus_stack
+#  ]
+#}
+
+
 module "ingress" {
   count  = var.ingress_enabled ? 1 : 0
   source = "../kube_ingress"
@@ -2255,5 +2356,7 @@ module "ingress" {
   extra_tags       = var.extra_tags
   # end-generate
 
-  depends_on = [helm_release.prometheus_stack]
+  depends_on = [
+    helm_release.prometheus_stack,
+  ]
 }

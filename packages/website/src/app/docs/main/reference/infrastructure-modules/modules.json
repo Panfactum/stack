@@ -237,6 +237,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_vault_proxy",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_velero",
       "group": "kubernetes"
     },

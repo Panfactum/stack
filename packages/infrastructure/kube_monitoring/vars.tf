@@ -32,6 +32,28 @@ variable "grafana_domain" {
   type        = string
 }
 
+variable "grafana_basic_auth_enabled" {
+  description = "Whether to enable username and password authentication. Should only be enabled during debugging."
+  type        = bool
+  default     = true // TODO: Change to false
+}
+
+variable "grafana_log_level" {
+  description = "The log level for the grafana pods"
+  type        = string
+  default     = "error"
+  validation {
+    condition     = contains(["info", "error", "warn", "debug", "critical"], var.grafana_log_level)
+    error_message = "Invalid grafana_log_level provided."
+  }
+}
+
+variable "vault_domain" {
+  description = "The domain of the Vault instance running in the cluster."
+  type        = string
+}
+
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
