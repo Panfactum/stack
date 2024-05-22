@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     aws = {
       source  = "hashicorp/aws"
@@ -177,10 +179,26 @@ resource "helm_release" "redis" {
 
         extraFlags = concat(
           var.persistence_enabled ? [] : ["--appendonly", "no"],
+          var.lfu_cache_enabled ? ["--maxmemory", "$MEMORY_REQUEST", "--maxmemory-policy", "allkeys-lfu", "--activedefrag", "yes"] : [],
           var.redis_flags
         )
 
-        podLabels = module.kube_labels.kube_labels
+        extraEnvVars = [
+          {
+            name = "MEMORY_REQUEST"
+            valueFrom = {
+              resourceFieldRef = {
+                containerName = "redis"
+                resource      = "requests.memory"
+              }
+            }
+          }
+        ]
+
+        podLabels = merge(
+          module.kube_labels.kube_labels,
+          module.constants.disable_lifetime_eviction_label
+        )
         podAnnotations = {
           "config.linkerd.io/opaque-ports"                      = "6379,26379"
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
@@ -255,6 +273,35 @@ resource "helm_release" "redis" {
           limits = {
             memory = "130Mi"
           }
+        }
+      }
+
+      kubectl = {
+        requests = {
+          memory = "100Mi"
+        }
+        limits = {
+          memory = "130Mi"
+        }
+      }
+
+      metrics = {
+        enabled = var.monitoring_enabled
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+        serviceMonitor = {
+          enabled   = var.monitoring_enabled
+          interval  = "60s"
+          namespace = var.namespace
+        }
+        prometheusRule = {
+          enabled = var.monitoring_enabled
         }
       }
     })

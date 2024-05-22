@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -81,6 +83,8 @@ resource "helm_release" "trust_manager" {
         enabled = true
       }
 
+      commonLabels = module.trust_manager_labels.kube_labels
+
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/trust-manager"
       }
@@ -89,9 +93,15 @@ resource "helm_release" "trust_manager" {
         trust = {
           namespace = var.namespace
         }
-        podLabels = module.trust_manager_labels.kube_labels
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+
+        metrics = {
+          service = {
+            enabled = var.monitoring_enabled
+            servicemonitor = {
+              enabled  = var.monitoring_enabled
+              interval = "60s"
+            }
+          }
         }
       }
 

@@ -18,4 +18,7 @@ inputs = {
   vpa_enabled                = true
   ingress_enabled            = true
   vault_domain               = "vault.prod.panfactum.com"
+
+  # Alpha: Do not use
+  monitoring_enabled = true
 }

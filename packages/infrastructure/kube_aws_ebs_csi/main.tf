@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -169,6 +173,7 @@ resource "helm_release" "ebs_csi_driver" {
       labels = module.kube_labels.kube_labels
 
       controller = {
+
         replicaCount = 2
         tolerations  = module.constants.burstable_node_toleration_helm
         affinity = merge(
@@ -192,6 +197,11 @@ resource "helm_release" "ebs_csi_driver" {
           limits = {
             memory = "130Mi"
           }
+        }
+        enableMetrics = var.monitoring_enabled
+        serviceMonitor = {
+          labels   = module.kube_labels.kube_labels
+          interval = "60s"
         }
       }
 

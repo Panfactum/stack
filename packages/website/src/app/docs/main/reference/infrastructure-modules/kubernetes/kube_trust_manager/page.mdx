@@ -21,6 +21,8 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Required Inputs
@@ -30,6 +32,14 @@ No required inputs.
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_namespace" /> [namespace](#input_namespace)
 

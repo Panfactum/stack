@@ -105,3 +105,21 @@ variable "pgbouncer_pool_mode" {
     error_message = "pool_mode must be one of: session, transaction, or statement"
   }
 }
+
+variable "pg_bouncer_read_only_enabled" {
+  description = "Whether to enable a pgbouncer deployment in read-only mode"
+  type        = bool
+  default     = false
+}
+
+variable "pg_bouncer_read_write_enabled" {
+  description = "Whether to enable a pgbouncer deployment in read-write mode"
+  type        = bool
+  default     = true
+}
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}

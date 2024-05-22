@@ -22,6 +22,10 @@ listener "tcp" {
   telemetry {
     # Necessary for Prometheus Operator
     unauthenticated_metrics_access = "true"
+
+    disable_hostname = true
+    enable_hostname_label = true
+    prometheus_retention_time = "2m"
   }
 }
 

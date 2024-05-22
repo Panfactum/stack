@@ -42,3 +42,11 @@ output "superuser_role" {
 output "reader_role" {
   value = vault_database_secret_backend_role.superuser.name
 }
+
+output "master_set" {
+  value = "mymaster"
+}
+
+output "redis_host_list" {
+  value = [for i in range(var.replica_count) : "${random_id.id.hex}-node-${i}.${random_id.id.hex}-headless.${var.namespace}"]
+}

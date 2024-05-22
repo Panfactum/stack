@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/time"
       version = "0.10.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -859,7 +863,7 @@ resource "kubernetes_service_account" "superuser" {
     labels    = module.server_labels.kube_labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence"       = "0"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "100"
       "workflows.argoproj.io/service-account-token.name" = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
     }
   }
@@ -920,7 +924,7 @@ resource "kubernetes_service_account" "admin" {
     labels    = module.server_labels.kube_labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence"       = "1"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "99"
       "workflows.argoproj.io/service-account-token.name" = "argo-admin-${md5(time_rotating.token_rotation.id)}"
     }
   }
@@ -981,7 +985,7 @@ resource "kubernetes_service_account" "reader" {
     labels    = module.server_labels.kube_labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence"       = "2"
+      "workflows.argoproj.io/rbac-rule-precedence"       = "98"
       "workflows.argoproj.io/service-account-token.name" = "argo-reader-${md5(time_rotating.token_rotation.id)}"
     }
   }

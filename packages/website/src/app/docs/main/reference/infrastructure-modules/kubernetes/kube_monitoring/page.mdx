@@ -1,0 +1,313 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Prometheus Stack
+
+<ModuleHeader name="kube_monitoring" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_monitoring" status="alpha" type="live" />
+
+This module provides a deployment of the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). It includes:
+
+* The [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
+
+* Grafana
+
+* Alert Manager
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_grafana_domain" /> [grafana\_domain](#input_grafana_domain)
+
+Description: The domain on which to expose Grafana.
+
+Type: `string`
+
+### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+
+Description: The domain of the Vault instance running in the cluster.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_additional_tracked_resource_labels" /> [additional\_tracked\_resource\_labels](#input_additional_tracked_resource_labels)
+
+Description: Kubernetes resource labels to include in metric labels
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_additional_tracked_resources" /> [additional\_tracked\_resources](#input_additional_tracked_resources)
+
+Description: Additional Kubernetes resources to track in kube-state-metrics
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_alertmanager_local_storage_initial_size_gb" /> [alertmanager\_local\_storage\_initial\_size\_gb](#input_alertmanager_local_storage_initial_size_gb)
+
+Description: Number of GB to use for the local alertmanager storage (before autoscaled)
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_alertmanager_log_level" /> [alertmanager\_log\_level](#input_alertmanager_log_level)
+
+Description: The log level for the alertmanager pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### <a name="input_alertmanager_storage_class_name" /> [alertmanager\_storage\_class\_name](#input_alertmanager_storage_class_name)
+
+Description: The storage class to use for local alertmanager storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
+### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_grafana_basic_auth_enabled" /> [grafana\_basic\_auth\_enabled](#input_grafana_basic_auth_enabled)
+
+Description: Whether to enable username and password authentication. Should only be enabled during debugging.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_grafana_log_level" /> [grafana\_log\_level](#input_grafana_log_level)
+
+Description: The log level for the grafana pods
+
+Type: `string`
+
+Default: `"error"`
+
+### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
+
+Description: Whether or not to enable the ingress for routing public traffic to prometheus stack components
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_kube_prometheus_stack_version" /> [kube\_prometheus\_stack\_version](#input_kube_prometheus_stack_version)
+
+Description: The version of the kube-prometheus-stack to deploy
+
+Type: `string`
+
+Default: `"58.5.3"`
+
+### <a name="input_metrics_retention_resolution_1h" /> [metrics\_retention\_resolution\_1h](#input_metrics_retention_resolution_1h)
+
+Description: Number of days 1h metrics resolution should be kept
+
+Type: `number`
+
+Default: `1825`
+
+### <a name="input_metrics_retention_resolution_5m" /> [metrics\_retention\_resolution\_5m](#input_metrics_retention_resolution_5m)
+
+Description: Number of days 5m metrics resolution should be kept
+
+Type: `number`
+
+Default: `90`
+
+### <a name="input_metrics_retention_resolution_raw" /> [metrics\_retention\_resolution\_raw](#input_metrics_retention_resolution_raw)
+
+Description: Number of days the raw metrics resolution should be kept
+
+Type: `number`
+
+Default: `15`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_monitoring_etcd_enabled" /> [monitoring\_etcd\_enabled](#input_monitoring_etcd_enabled)
+
+Description: Whether to monitor the Kubernetes API server's etcd instances. Only enable for debugging purposes as it contains a huge amount of metrics.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prometheus_default_scrape_interval_seconds" /> [prometheus\_default\_scrape\_interval\_seconds](#input_prometheus_default_scrape_interval_seconds)
+
+Description: The default interval between prometheus scrapes (in seconds)
+
+Type: `number`
+
+Default: `60`
+
+### <a name="input_prometheus_local_storage_initial_size_gb" /> [prometheus\_local\_storage\_initial\_size\_gb](#input_prometheus_local_storage_initial_size_gb)
+
+Description: Number of GB to use for the local prometheus storage (before autoscaled)
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_prometheus_log_level" /> [prometheus\_log\_level](#input_prometheus_log_level)
+
+Description: The log level for the prometheus pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### <a name="input_prometheus_operator_log_level" /> [prometheus\_operator\_log\_level](#input_prometheus_operator_log_level)
+
+Description: The log level for the prometheus operator pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### <a name="input_prometheus_storage_class_name" /> [prometheus\_storage\_class\_name](#input_prometheus_storage_class_name)
+
+Description: The storage class to use for local prometheus storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_thanos_bucket_web_enable" /> [thanos\_bucket\_web\_enable](#input_thanos_bucket_web_enable)
+
+Description: Whether to enable the web dashboard for the Thanos bucket analyzer which can show debugging information about your metrics data
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_thanos_chart_version" /> [thanos\_chart\_version](#input_thanos_chart_version)
+
+Description: The version of the bitnami/thanos helm chart to deploy
+
+Type: `string`
+
+Default: `"15.4.7"`
+
+### <a name="input_thanos_compactor_disk_storage_gb" /> [thanos\_compactor\_disk\_storage\_gb](#input_thanos_compactor_disk_storage_gb)
+
+Description: Number of GB for the ephemeral thanos compactor disk. See [https://thanos.io/tip/components/compact.md/#disk](https://thanos.io/tip/components/compact.md/#disk)
+
+Type: `number`
+
+Default: `100`
+
+### <a name="input_thanos_compactor_storage_class_name" /> [thanos\_compactor\_storage\_class\_name](#input_thanos_compactor_storage_class_name)
+
+Description: The storage class to use for the thanos compactor local storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
+### <a name="input_thanos_image_version" /> [thanos\_image\_version](#input_thanos_image_version)
+
+Description: The version of thanos images to use
+
+Type: `string`
+
+Default: `"v0.35.0"`
+
+### <a name="input_thanos_log_level" /> [thanos\_log\_level](#input_thanos_log_level)
+
+Description: The log level for the thanos pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### <a name="input_thanos_store_gateway_storage_class_name" /> [thanos\_store\_gateway\_storage\_class\_name](#input_thanos_store_gateway_storage_class_name)
+
+Description: The storage class to use for the thanos store gateway local storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_grafana_admin_password" /> [grafana\_admin\_password](#output_grafana_admin_password)
+
+Description: n/a
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
+
+### <a name="output_thanos_query_frontend_url" /> [thanos\_query\_frontend\_url](#output_thanos_query_frontend_url)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

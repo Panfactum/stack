@@ -58,6 +58,12 @@ variable "persistence_enabled" {
   default     = false
 }
 
+variable "lfu_cache_enabled" {
+  description = "Whether redis will be deployed as an LFU cache"
+  type        = bool
+  default     = false
+}
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
@@ -73,4 +79,10 @@ variable "minimum_memory_mb" {
     condition     = var.minimum_memory_mb >= 25
     error_message = "Must specify at least 25Mb of memory"
   }
+}
+
+variable "monitoring_enabled" {
+  description = "Whether to allow monitoring CRs to be deployed in the namespace"
+  type        = bool
+  default     = false
 }

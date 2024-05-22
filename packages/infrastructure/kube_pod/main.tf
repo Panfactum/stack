@@ -155,7 +155,6 @@ locals {
       secret = {
         secretName = name
         optional   = false
-        readOnly   = true
       }
     }],
     [for name, config in var.config_map_mounts : {
@@ -163,7 +162,6 @@ locals {
       configMap = {
         name     = name
         optional = false
-        readOnly = true
       }
     }],
     [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -190,11 +188,13 @@ locals {
   common_secret_volume_mounts = [for name, mount in var.secret_mounts : {
     name      = "secret-${name}"
     mountPath = mount
+    readOnly  = true
   }]
 
   common_config_map_volume_mounts = [for name, mount in var.config_map_mounts : {
     name      = "config-map-${name}"
     mountPath = mount
+    readOnly  = true
   }]
 
   common_dynamic_secret_volume_mounts = [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -261,13 +261,13 @@ locals {
   ************************************************/
 
   pod = {
-    metadata = { for k, v in {
+    metadata = {
       labels = module.kube_labels.kube_labels
       annotations = merge({
         "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
       }, var.pod_annotations)
-    } : k => v if v != null }
-    spec = { for k, v in {
+    }
+    spec = {
       priorityClassName  = var.priority_class_name
       serviceAccountName = var.service_account
       securityContext = {
@@ -281,10 +281,10 @@ locals {
       tolerations = length(local.tolerations) == 0 ? null : local.tolerations
 
       affinity = merge({
-        nodeAffinity = { for k, v in {
+        nodeAffinity = {
           preferredDuringSchedulingIgnoredDuringExecution = length(local.node_preferences) == 0 ? null : local.node_preferences
           requiredDuringSchedulingIgnoredDuringExecution  = length(keys(var.node_requirements)) == 0 ? null : local.node_requirements
-        } : k => v if v != null }
+        }
       }, var.pod_anti_affinity_type == "node" ? module.constants.pod_anti_affinity_helm : var.pod_anti_affinity_type == "instance_type" ? module.constants.pod_anti_affinity_instance_type_helm : {})
       topologySpreadConstraints = module.constants.topology_spread_zone_preferred
       restartPolicy             = var.restart_policy
@@ -297,11 +297,12 @@ locals {
       /////////////////////////////
       // Containers
       //////////////////////////////
-      containers = [for container, config in local.containers : { for k, v in {
+      containers = [for container, config in local.containers : {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
         imagePullPolicy = config.image_pull_policy
+        workingDir      = config.working_dir
 
         // NOTE: The order that these env blocks is defined in
         // is incredibly important. Do NOT move them around unless you know what you are doing.
@@ -313,11 +314,11 @@ locals {
           }]
         )
 
-        startupProbe = config.liveness_check_type != null ? { for k, v in {
+        startupProbe = config.liveness_check_type != null ? {
           httpGet = config.liveness_check_type == "HTTP" ? {
             path   = config.liveness_check_route
             port   = config.liveness_check_port
-            scheme = "HTTP"
+            scheme = config.liveness_check_scheme
           } : null
           tcpSocket = config.liveness_check_type == "TCP" ? {
             port = config.liveness_check_port
@@ -325,13 +326,13 @@ locals {
           failureThreshold = 120
           periodSeconds    = 1
           timeoutSeconds   = 3
-        } : k => v if v != null } : null
+        } : null
 
-        readinessProbe = config.liveness_check_type != null ? { for k, v in {
+        readinessProbe = config.liveness_check_type != null ? {
           httpGet = (config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "HTTP" ? {
             path   = config.ready_check_route != null ? config.ready_check_route : config.liveness_check_route
             port   = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
-            scheme = "HTTP"
+            scheme = config.ready_check_scheme != null ? config.ready_check_scheme : config.liveness_check_scheme
           } : null
           tcpSocket = (config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "TCP" ? {
             port = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
@@ -340,13 +341,13 @@ locals {
           failureThreshold = 3
           periodSeconds    = 1
           timeoutSeconds   = 3
-        } : k => v if v != null } : null
+        } : null
 
-        livenessProbe = config.liveness_check_type != null ? { for k, v in {
+        livenessProbe = config.liveness_check_type != null ? {
           httpGet = config.liveness_check_type == "HTTP" ? {
             path   = config.liveness_check_route
             port   = config.liveness_check_port
-            scheme = "HTTP"
+            scheme = config.liveness_check_scheme
           } : null
           tcpSocket = config.liveness_check_type == "TCP" ? {
             port = config.liveness_check_port
@@ -355,18 +356,19 @@ locals {
           failureThreshold = 15
           periodSeconds    = 1
           timeoutSeconds   = 3
-        } : k => v if v != null } : null
+        } : null
 
         resources       = local.resources[config.name]
         securityContext = local.security_context[config.name]
         volumeMounts    = length(local.common_volume_mounts) == 0 ? null : local.common_volume_mounts
-      } : k => v if v != null }]
+      }]
 
       initContainers = length(keys(local.init_containers)) == 0 ? null : [for container, config in local.init_containers : {
         name            = container
         image           = "${config.image}:${config.version}"
         command         = length(config.command) == 0 ? null : config.command
         imagePullPolicy = config.image_pull_policy
+        workingDir      = config.working_dir
         env = concat(
           local.common_env,
           [for k, v in config.env : {
@@ -374,11 +376,11 @@ locals {
             value = v
           }]
         )
-        resources       = local.security_context[config.name]
+        resources       = local.resources[config.name]
         securityContext = local.security_context[config.name]
         volumeMounts    = length(local.common_volume_mounts) == 0 ? null : local.common_volume_mounts
       }]
-    } : k => v if v != null }
+    }
   }
 }
 

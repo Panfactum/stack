@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -307,6 +309,17 @@ resource "helm_release" "velero" {
         useSecret = false // required to use IRSA
       }
 
+      metrics = {
+        enabled        = var.monitoring_enabled
+        scrapeInterval = "60s"
+        serviceMonitor = {
+          enabled = var.monitoring_enabled
+        }
+        prometheusRule = {
+          enabled = var.monitoring_enabled
+        }
+      }
+
       configuration = {
         backupStorageLocation = [{
           name       = "s3"
@@ -361,6 +374,18 @@ resource "helm_release" "velero" {
 
   depends_on = [module.aws_permissions]
 }
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "velero-dashboard"
+    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "velero.json" = file("${path.module}/dashboard.json")
+  }
+}
+
 
 resource "kubernetes_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0

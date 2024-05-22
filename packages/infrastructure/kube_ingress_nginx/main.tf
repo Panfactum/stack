@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -104,7 +108,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace            = local.name
-  linkerd_inject       = false // TODO: ?
   loadbalancer_enabled = true
 
   # generate: pass_common_vars.snippet.txt
@@ -206,7 +209,10 @@ resource "helm_release" "nginx_ingress" {
   values = [
     yamlencode({
       fullnameOverride = "nginx"
-      commonLabels     = module.labels.kube_labels,
+      commonLabels = merge(
+        module.labels.kube_labels,
+        module.constants.disable_lifetime_eviction_label
+      )
 
       controller = {
         image = {
@@ -214,9 +220,6 @@ resource "helm_release" "nginx_ingress" {
         }
 
         replicaCount = var.min_replicas
-        updateStrategy = {
-          type = "Recreate"
-        }
 
         annotations = {
           // Required b/c the webhook certificate doesn't automatically renew
@@ -224,13 +227,6 @@ resource "helm_release" "nginx_ingress" {
         }
 
         podAnnotations = {
-          // Attach the service mesh sidecar
-          "linkerd.io/inject" = "enabled"
-
-          // Ensure the proxy
-          // remains active as long as the controller is active
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-
           // Ensure the pods are restarted when the plugin code changes
           "panfactum.com/plugin-hash" = filemd5("${path.module}/plugin.lua")
 
@@ -339,9 +335,15 @@ resource "helm_release" "nginx_ingress" {
           })
         }
         metrics = {
-          enabled  = true
+          enabled  = true // This is always enabled for the health checks
           port     = 10254
           portName = "metrics"
+
+          serviceMonitor = {
+            enabled        = var.monitoring_enabled
+            namespace      = local.namespace
+            scrapeInterval = "60s"
+          }
         }
 
 
@@ -438,6 +440,17 @@ resource "helm_release" "nginx_ingress" {
   }
 
   depends_on = [module.webhook_cert]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "nginx-dashboard"
+    labels = merge(module.labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "nginx-ingress.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 resource "kubernetes_service" "nginx_healthcheck" {

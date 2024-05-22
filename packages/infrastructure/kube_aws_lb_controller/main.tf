@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -443,6 +447,12 @@ resource "helm_release" "alb_controller" {
       // This appears to be the only way to use cert-manager for the certificate generation;
       // manually spinning up certificates does not work
       enableCertManager = true
+
+      serviceMonitor = {
+        enabled   = var.monitoring_enabled
+        namespace = local.namespace
+        interval  = "60s"
+      }
     })
   ]
 

@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -23,7 +27,7 @@ module "kube_labels" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, {
-    service = var.service_name
+    service = var.name
   })
 }
 
@@ -66,17 +70,17 @@ module "pod_template" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, {
-    service = var.service_name
+    service = var.name
   })
 }
 
-resource "kubernetes_manifest" "deployment" {
-  manifest = {
+resource "kubectl_manifest" "deployment" {
+  yaml_body = yamlencode({
     apiVersion = "apps/v1"
     kind       = "Deployment"
     metadata = {
       namespace = var.namespace
-      name      = var.service_name
+      name      = var.name
       labels    = module.kube_labels.kube_labels
       annotations = {
         "reloader.stakater.com/auto" = "true"
@@ -92,47 +96,10 @@ resource "kubernetes_manifest" "deployment" {
       }
       template = module.pod_template.pod_template
     }
-  }
-  computed_fields = flatten(concat(
-
-    // The defaults used by the provider
-    [
-      "metadata.labels",
-      "metadata.annotations"
-    ],
-
-    // Annotations added to the pod (such as via kubectl rollout restart)
-    [
-      "spec.template.metadata.annotations"
-    ],
-
-    // The prevents an error when the kubernetes API server changes the units used
-    // in these fields during the apply
-    [for i, k in keys(module.pod_template.containers) : [
-      "spec.template.spec.containers[${i}].resources.requests",
-      "spec.template.spec.containers[${i}].resources.limits",
-    ]],
-    [for i, k in keys(module.pod_template.init_containers) : [
-      "spec.template.spec.initContainers[${i}].resources.requests",
-      "spec.template.spec.initContainers[${i}].resources.limits",
-    ]],
-
-    // Runs into an issue when using empty lists
-    [for i, k in keys(module.pod_template.containers) : [
-      "spec.template.spec.containers[${i}].securityContext.capabilities",
-    ]],
-    [for i, k in keys(module.pod_template.init_containers) : [
-      "spec.template.spec.initContainers[${i}].securityContext.capabilities",
-    ]],
-    [
-      "spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution",
-      "spec.template.spec.affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution"
-    ]
-  ))
-
-  field_manager {
-    force_conflicts = true
-  }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  wait_for_rollout  = var.wait_for_rollout
 }
 
 resource "kubernetes_manifest" "vpa_server" {
@@ -141,7 +108,7 @@ resource "kubernetes_manifest" "vpa_server" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = var.service_name
+      name      = var.name
       namespace = var.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -149,7 +116,7 @@ resource "kubernetes_manifest" "vpa_server" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = var.service_name
+        name       = var.name
       }
       updatePolicy = {
         updateMode = "Auto"
@@ -165,7 +132,7 @@ resource "kubernetes_manifest" "vpa_server" {
       }
     }
   }
-  depends_on = [kubernetes_manifest.deployment]
+  depends_on = [kubectl_manifest.deployment]
 }
 
 
@@ -236,7 +203,7 @@ resource "kubernetes_manifest" "pdb" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = "${var.service_name}-pdb"
+      name      = "${var.name}-pdb"
       namespace = var.namespace
       labels    = module.kube_labels.kube_labels
     }

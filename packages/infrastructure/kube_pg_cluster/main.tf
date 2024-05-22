@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     aws = {
       source  = "hashicorp/aws"
@@ -43,6 +45,11 @@ locals {
   }
 
   stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
+
+  poolers_to_enable = toset(concat(
+    var.pg_bouncer_read_only_enabled ? ["r"] : [],
+    var.pg_bouncer_read_write_enabled ? ["rw"] : []
+  ))
 }
 
 module "pull_through" {
@@ -311,9 +318,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       namespace = var.pg_cluster_namespace
       labels    = module.kube_labels.kube_labels
       annotations = {
-        // We cannot disable native postgres tls encryption in this operator
-        // so we will disable our service mesh overlay
-        "linkerd.io/inject" = "disabled"
+        "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
 
         "panfactum.com/db"             = "true"
         "panfactum.com/db-type"        = "PostgreSQL"
@@ -347,9 +352,17 @@ resource "kubernetes_manifest" "postgres_cluster" {
       }
 
       inheritedMetadata = {
-        labels = merge(module.kube_labels.kube_labels, {
-          pg-cluster = local.cluster-label
-        })
+        labels = merge(
+          module.kube_labels.kube_labels,
+          module.constants.disable_lifetime_eviction_label,
+          {
+            pg-cluster = local.cluster-label
+          }
+        )
+        annotations = {
+          "linkerd.io/inject"                    = "enabled"
+          "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
+        }
       }
 
       startDelay           = 60 * 10
@@ -357,6 +370,10 @@ resource "kubernetes_manifest" "postgres_cluster" {
       smartShutdownTimeout = local.stopDelay - 10
       switchoverDelay      = local.stopDelay
       failoverDelay        = 60
+
+      monitoring = {
+        enablePodMonitor = var.monitoring_enabled
+      }
 
       bootstrap = {
         initdb = {
@@ -429,7 +446,6 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       storage = {
         pvcTemplate = {
-          accessModes = ["ReadWriteOnce"]
           resources = {
             requests = {
               storage = "${var.pg_storage_gb}Gi"
@@ -488,7 +504,7 @@ resource "kubernetes_manifest" "scheduled_backup" {
       namespace = var.pg_cluster_namespace
     }
     spec = {
-      schedule             = "0 3 * * 1" // 3AM on sundays
+      schedule             = "0 0 0 * * 0" // midnight on Sunday
       backupOwnerReference = "cluster"
       cluster = {
         name = local.cluster_name
@@ -711,7 +727,7 @@ module "pooler_certs" {
 
 
 resource "kubernetes_manifest" "connection_pooler" {
-  for_each = toset(["rw", "r"])
+  for_each = local.poolers_to_enable
   manifest = {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Pooler"
@@ -737,11 +753,17 @@ resource "kubernetes_manifest" "connection_pooler" {
           log_disconnections = var.log_connections_enabled ? 1 : 0
         }
       }
+      monitoring = {
+        enablePodMonitor = var.monitoring_enabled
+      }
       template = {
         metadata = {
-          labels = module.kube_labels_pooler[each.key].kube_labels
+          labels = merge(
+            module.kube_labels_pooler[each.key].kube_labels,
+            module.constants_pooler[each.key].disable_lifetime_eviction_label
+          )
           annotations = {
-            "linkerd.io/inject" = "disabled"
+            "linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
           }
         }
         spec = {
@@ -834,7 +856,7 @@ resource "kubernetes_manifest" "connection_pooler" {
 #}
 
 resource "kubernetes_manifest" "pdb_pooler" {
-  for_each = toset(["r", "rw"])
+  for_each = local.poolers_to_enable
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"

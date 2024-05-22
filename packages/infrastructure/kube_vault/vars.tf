@@ -50,6 +50,12 @@ variable "pull_through_cache_enabled" {
   default     = false
 }
 
+variable "monitoring_enabled" {
+  description = "Whether to allow monitoring CRs to be deployed in the namespace"
+  type        = bool
+  default     = false
+}
+
 ################################################################################
 ## KMS Access
 ################################################################################

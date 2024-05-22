@@ -26,4 +26,7 @@ inputs = {
   log_level                  = "info"
   pull_through_cache_enabled = true
   vpa_enabled                = true
+
+  # Alpha: Do not use
+  monitoring_enabled = true
 }

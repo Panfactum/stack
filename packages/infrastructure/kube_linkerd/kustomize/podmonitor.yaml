@@ -1,0 +1,8 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: linkerd-proxy
+spec:
+  selector:
+    matchLabels:
+      linkerd.io/control-plane-ns: linkerd

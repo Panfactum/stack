@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     vault = {
@@ -30,14 +28,25 @@ resource "vault_jwt_auth_backend" "oidc" {
 }
 
 resource "vault_jwt_auth_backend_role" "default" {
-  backend                = vault_jwt_auth_backend.oidc.path
-  role_name              = "default"
-  oidc_scopes            = ["profile"]
-  user_claim             = "sub"
-  groups_claim           = "groups"
+  backend      = vault_jwt_auth_backend.oidc.path
+  role_name    = "default"
+  oidc_scopes  = ["openid", "profile", "email"]
+  user_claim   = "sub"
+  groups_claim = "groups"
+  claim_mappings = {
+    email = "email"
+    name  = "name"
+  }
   allowed_redirect_uris  = var.oidc_redirect_uris
   max_age                = var.token_lifetime_seconds
   token_explicit_max_ttl = var.token_lifetime_seconds
+  verbose_oidc_logging   = true
+}
+
+resource "vault_identity_oidc_scope" "profile" {
+  name        = "profile"
+  template    = "{\"groups\": {{identity.entity.groups.names}}, \"email\": {{identity.entity.aliases.${vault_jwt_auth_backend.oidc.accessor}.metadata.email}}, \"name\": {{identity.entity.aliases.${vault_jwt_auth_backend.oidc.accessor}.metadata.name}}}" // This MUST be this exact string (not JSON-encoded)
+  description = "Profile scope"
 }
 
 

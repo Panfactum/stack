@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: prometheus-kube-prometheus-admission
+  name: monitoring-admission
 spec:
   privateKey:
     algorithm: "ECDSA"

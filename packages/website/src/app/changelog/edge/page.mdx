@@ -11,7 +11,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Breaking Changes
 
-* We have added removed the EKS CoreDNS addon and replaced it with the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns)
+* We have removed the EKS CoreDNS addon and replaced it with the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns)
   module in order to provide better guarantees about the behavior of DNS in the Panfactum stack. In order to migrate:
 
   1. Add the `dns_service_ip` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/kubernetes/aws_eks) deployments
@@ -27,7 +27,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
      and re-apply the module. Ensure that all of your nodes have been replaced with the new configuration.
 
   5. Deploy `kube_core_dns` by following [this guide](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns).
-      Note that this deployment will fail as the original addon service is still running and the IP is already taken.
+     Note that this deployment will fail as the original addon service is still running and the IP is already taken.
 
   6. Delete `kube-system/kube-dns` and re-apply `kube_core_dns`. Note that while the service is deleted, DNS will be
      temporarily unavailable in your cluster.
@@ -40,7 +40,52 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   of [kube\_bastion](/docs/edge/reference/infrastructure-modules/kubernetes/kube_bastion) to fail (and any first-party modules that rely on [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
   To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
 
+- [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) has two
+  new flags, `pg_bouncer_read_only_enabled` (default `false`) and `pg_bouncer_read_write_enabled` (default `true`), which will enable
+  the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
+  to have idle resources. This is a *breaking* change as `pg_bouncer_read_only_enabled` is set to `false` by default.
+
+### Added
+
+* (Alpha) We've added a monitoring stack [kube\_monitoring](/docs/edge/reference/infrastructure-modules/kubernetes/kube_monitoring)
+  which includes HA [Prometheus](https://prometheus.io/docs/introduction/overview/), the
+  [Prometheus Operator](https://prometheus-operator.dev/), [Thanos](https://thanos.io/) metrics storage on
+  S3 (with deduplication, caching, and down-sampling), the [Node Exporter](https://github.com/prometheus/node_exporter),
+  [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics), [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/),
+  and [Grafana](https://grafana.com/) (with SSO enabled and 20+ custom dashboards).
+
+  Additionally, most modules
+  now have an additional `monitoring_enabled` (default `false`) flag that can be turned on to being shipping data
+  to Prometheus for viewing and querying via Grafana.
+
+* (Alpha) [kube\_cilium](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cilium) now has a new debugging
+  mode, `hubble_enabled` (default `false`), that will capture extensive TCP-level metrics about the cluster
+  as well as expose a debugging UI via HTTPS.
+
+* (Alpha) [kube\_linkerd](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cilium) now deploys [Linkerd Viz](https://linkerd.io/2.15/features/dashboard/)
+  when `monitoring_enabled = true`. This provides a service mesh dashboard and the ability to capture and introspect
+  raw HTTP requests sent in realtime.
+
+* We've included a new Kubernetes provider, [kubectl](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/kubectl_manifest),
+  to augment the original [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) provider.
+  The `kubectl` provider allows more flexibility in deploying raw Kubernetes manifests which is required by our templating
+  system. This provider will automatically be enabled the `kubernetes` provider is enabled, so no additional changes
+  are required from end users.
+
+* [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel) has a new flag,
+  `lfu_cache_enabled`, that will configure the Redis cluster automatically evict records under memory pressure
+  based on an approximated Least Frequently Used algorithm.
+
 ### Changed
+
+* Disabled evictions of database pods based on max lifetimes. This improves
+  the stability of databases deployed by Panfactum modules.
+
+* After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
+  modules to have `controller_node_count` set to `1` and `controller_node_instance_types` set to `["t3a.medium"]`.
+  This will decrease the costs of the base cluster by about 40% without impacting cluster availability or resiliency.
+  The single remaining node is used primarily as a place for Karpenter to run (Karpenter cannot run on instances that it itself
+  provisions).
 
 * [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) now only deploys
   a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall
@@ -51,6 +96,14 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
   deployment strategy to improve timing and efficiency of applying Panfactum upgrades.
+
+- [kube\_vpa](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vpa) has a new `history_length_hours` (default `24`)
+  that will control how far back it will analyze metrics for computing its recommendations.
+
+### Fixes
+
+* PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has been fixed,
+  but the fix will not retroactively adjust existing PVCs as they are immutable.
 
 ## edge.24-05-15
 

@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -129,6 +133,17 @@ resource "helm_release" "descheduler" {
         }
       }
 
+      service = {
+        enabled = var.monitoring_enabled
+      }
+
+      serviceMonitor = {
+        enabled          = var.monitoring_enabled
+        namespace        = local.namespace
+        additionalLabels = module.kube_labels.kube_labels
+        interval         = "60s"
+      }
+
       deschedulerPolicyAPIVersion = "descheduler/v1alpha2"
       deschedulerPolicy = {
         maxNoOfPodsToEvictPerNode      = 10
@@ -240,6 +255,12 @@ resource "helm_release" "descheduler" {
                 name = "PodLifeTime"
                 args = {
                   maxPodLifeTimeSeconds = 60 * 60 * 4
+                  labelSelector = {
+                    matchExpressions = [{
+                      key      = "panfactum.com/prevent-lifetime-eviction"
+                      operator = "DoesNotExist"
+                    }]
+                  }
                 }
               },
             ]

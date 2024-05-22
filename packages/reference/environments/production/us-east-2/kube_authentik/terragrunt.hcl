@@ -34,4 +34,7 @@ inputs = {
   email_from_address = "no-reply@panfactum.com"
 
   akadmin_email = "it@panfactum.com"
+
+  # Alpha: Do not use
+  monitoring_enabled = true
 }

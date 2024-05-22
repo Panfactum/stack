@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -142,6 +146,17 @@ resource "helm_release" "cnpg" {
         "--log-level=${var.log_level}"
       ]
 
+      monitoring = {
+        podMonitorEnabled          = var.monitoring_enabled
+        podMonitorAdditionalLabels = module.kube_labels.kube_labels
+        grafanaDashboard = {
+          create = var.monitoring_enabled
+          labels = merge(
+            module.kube_labels.kube_labels
+          )
+        }
+      }
+
       priorityClassName = module.constants.cluster_important_priority_class_name
       replicaCount      = 2
       affinity = merge(
@@ -163,7 +178,7 @@ resource "helm_release" "cnpg" {
 
       config = {
         data = {
-          INHERITED_ANNOTATIONS = "linkerd.io/*"
+          INHERITED_ANNOTATIONS = "linkerd.io/*, config.linkerd.io/*"
           INHERITED_LABELS      = "region, service, version_tag, module, app"
         }
       }

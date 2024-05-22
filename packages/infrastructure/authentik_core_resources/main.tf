@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
     time = {
       source  = "hashicorp/time"
       version = "0.10.0"

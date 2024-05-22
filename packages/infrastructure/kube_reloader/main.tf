@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -133,15 +135,18 @@ resource "helm_release" "reloader" {
 
           resources = {
             requests = {
-              memory = "100Mi"
+              memory = "200Mi"
             }
             limits = {
-              memory = "130Mi"
+              memory = "260Mi"
             }
           }
         }
         podDisruptionBudget = {
           enabled = false
+        }
+        podMonitor = {
+          enabled = var.monitoring_enabled
         }
       }
     })

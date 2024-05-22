@@ -21,3 +21,9 @@ variable "service_ip" {
   type        = string
   default     = "172.20.0.10"
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}

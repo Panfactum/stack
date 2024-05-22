@@ -48,3 +48,9 @@ variable "log_level" {
     error_message = "Invalid log_level provided."
   }
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to allow monitoring CRs to be deployed in the namespace"
+  type        = bool
+  default     = false
+}

@@ -16,6 +16,8 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
@@ -63,6 +65,14 @@ Description: The minimum number of nginx-ingress replicas to deploy
 Type: `number`
 
 Default: `3`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_nginx_ingress_helm_version" /> [nginx\_ingress\_helm\_version](#input_nginx_ingress_helm_version)
 

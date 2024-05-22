@@ -32,3 +32,9 @@ variable "log_verbosity" {
   }
 }
 
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}
+

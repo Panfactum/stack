@@ -79,6 +79,7 @@ variable "containers" {
     image              = string
     version            = string
     command            = list(string)
+    working_dir        = optional(string, null)
     minimum_memory     = optional(number, 100)      #The minimum amount of memory in megabytes
     minimum_cpu        = optional(number, 10)       # The minimum amount of cpu millicores
     run_as_root        = optional(bool, false)      # Whether to run the container as root
@@ -113,12 +114,6 @@ variable "secret_mounts" {
   description = "A mapping of Kubernetes secret names to their absolute mount paths in the containers of the cronjob"
   type        = map(string)
   default     = {}
-}
-
-variable "is_local" {
-  description = "Whether this module is a part of a local development cronjob"
-  type        = bool
-  default     = false
 }
 
 variable "pod_annotations" {

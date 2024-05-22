@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -17,6 +15,10 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
   }
 }
@@ -202,6 +204,13 @@ resource "helm_release" "external_dns" {
         }
       }
 
+      // Monitoring
+      serviceMonitor = {
+        enabled          = var.monitoring_enabled
+        namespace        = local.namespace
+        additionalLabels = module.kube_labels.kube_labels
+        interval         = "60s"
+      }
 
       // Provider configuration
       provider = {
@@ -224,6 +233,17 @@ resource "helm_release" "external_dns" {
     })
   ]
   depends_on = [module.aws_permissions]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "external-dns-dashboard"
+    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "external-dns.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 resource "kubernetes_manifest" "vpa" {

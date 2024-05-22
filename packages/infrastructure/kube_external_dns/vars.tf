@@ -45,3 +45,9 @@ variable "log_level" {
     error_message = "Invalid log_level provided."
   }
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}
