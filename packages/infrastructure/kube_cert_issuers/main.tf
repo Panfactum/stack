@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -246,6 +250,22 @@ resource "kubernetes_manifest" "internal_ci" {
         }
       }
     }
+  }
+}
+
+# Make sure this CA data is available in all namespaces for mTLS
+resource "kubernetes_config_map" "ca_bundle" {
+  metadata {
+    name      = "internal-ca"
+    labels    = module.kube_labels.kube_labels
+    namespace = var.namespace
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
+    }
+  }
+  data = {
+    "ca.crt" = vault_pki_secret_backend_root_cert.pki_internal.issuing_ca
   }
 }
 

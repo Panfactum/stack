@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 

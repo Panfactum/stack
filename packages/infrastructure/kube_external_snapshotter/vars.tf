@@ -23,3 +23,9 @@ variable "log_verbosity" {
   type        = number
   default     = 0
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}

@@ -3,8 +3,8 @@ variable "namespace" {
   type        = string
 }
 
-variable "service_name" {
-  description = "The name of the service this deployment is for"
+variable "name" {
+  description = "The name of this deployment"
   type        = string
 }
 
@@ -86,26 +86,28 @@ variable "ports" {
 variable "containers" {
   description = "A list of container configurations for the pod"
   type = list(object({
-    name                 = string
-    init                 = optional(bool, false)
-    image                = string
-    version              = string
-    command              = list(string)
-    image_pull_policy    = optional(string, "IfNotPresent")
-    working_dir          = optional(string, null)
-    minimum_memory       = optional(number, 100)      #The minimum amount of memory in megabytes
-    minimum_cpu          = optional(number, 10)       # The minimum amount of cpu millicores
-    run_as_root          = optional(bool, false)      # Whether to run the container as root
-    uid                  = optional(number, 1000)     # user to use when running the container if not root
-    linux_capabilities   = optional(list(string), []) # Default is drop ALL
-    readonly             = optional(bool, true)       # Whether to use a readonly file system
-    env                  = optional(map(string), {})  # Environment variables specific to the container
-    liveness_check_port  = optional(number, null)     # The number of the port for the liveness_check
-    liveness_check_type  = optional(string, null)     # Either HTTP or TCP
-    liveness_check_route = optional(string, null)     # The route if using HTTP liveness_checks
-    ready_check_port     = optional(number, null)     # The number of the port for the ready_check (default to liveness_check_port)
-    ready_check_type     = optional(string, null)     # Either HTTP or TCP (default to liveness_check_type)
-    ready_check_route    = optional(string, null)     # The route if using HTTP ready_checks (default to liveness_check_route)
+    name                  = string
+    init                  = optional(bool, false)
+    image                 = string
+    version               = string
+    command               = list(string)
+    image_pull_policy     = optional(string, "IfNotPresent")
+    working_dir           = optional(string, null)
+    minimum_memory        = optional(number, 100)      #The minimum amount of memory in megabytes
+    minimum_cpu           = optional(number, 10)       # The minimum amount of cpu millicores
+    run_as_root           = optional(bool, false)      # Whether to run the container as root
+    uid                   = optional(number, 1000)     # user to use when running the container if not root
+    linux_capabilities    = optional(list(string), []) # Default is drop ALL
+    readonly              = optional(bool, true)       # Whether to use a readonly file system
+    env                   = optional(map(string), {})  # Environment variables specific to the container
+    liveness_check_port   = optional(number, null)     # The number of the port for the liveness_check
+    liveness_check_type   = optional(string, null)     # Either HTTP or TCP
+    liveness_check_route  = optional(string, null)     # The route if using HTTP liveness_checks
+    liveness_check_scheme = optional(string, "HTTP")   # HTTP or HTTPS
+    ready_check_port      = optional(number, null)     # The number of the port for the ready_check (default to liveness_check_port)
+    ready_check_type      = optional(string, null)     # Either HTTP or TCP (default to liveness_check_type)
+    ready_check_route     = optional(string, null)     # The route if using HTTP ready_checks (default to liveness_check_route)
+    ready_check_scheme    = optional(string, null)     # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
   }))
 }
 
@@ -190,5 +192,11 @@ variable "pod_anti_affinity_type" {
     condition     = contains(["none", "instance_type", "node"], var.pod_anti_affinity_type == null ? "none" : var.pod_anti_affinity_type)
     error_message = "Invalid pod_anti_affinity_type"
   }
+}
+
+variable "wait_for_rollout" {
+  description = "Whether to wait for the deployment rollout before allowing terraform to proceed"
+  type        = bool
+  default     = false
 }
 

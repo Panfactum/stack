@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
     helm = {
       source  = "hashicorp/helm"
       version = "2.12.1"
@@ -74,15 +78,21 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # generate: pass_common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(
+    var.extra_tags,
+    {
+      "linkerd.io/extension" = "viz"
+    }
+  )
 }
 
 
@@ -409,6 +419,87 @@ resource "helm_release" "linkerd" {
         }
       }
 
+      prometheusUrl = var.monitoring_enabled ? "http://thanos-query-frontend.monitoring.svc.cluster.local:9090" : null
+      podMonitor = {
+        enabled        = var.monitoring_enabled
+        scrapeInterval = "60s"
+        proxy = {
+          enabled = true
+        }
+        controller = {
+          enabled = true
+        }
+      }
+
+    })
+  ]
+
+  // The default pod monitor scrapes all pods, even
+  // ones without the proxy which generates prometheus errors
+  dynamic "postrender" {
+    for_each = var.monitoring_enabled ? ["1"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
+
+  depends_on = [
+    helm_release.linkerd_crds,
+    kubernetes_manifest.linkerd_bundle,
+    module.linkerd_policy_validator,
+    module.linkerd_proxy_injector,
+    module.linkerd_identity_issuer,
+    module.linkerd_profile_validator
+  ]
+}
+
+/***************************************
+* Linkerd Viz
+***************************************/
+
+resource "helm_release" "viz" {
+  count           = var.monitoring_enabled ? 1 : 0
+  namespace       = local.namespace
+  name            = "linkerd-viz"
+  repository      = "https://helm.linkerd.io/edge"
+  chart           = "linkerd-viz"
+  version         = var.linkerd_helm_version
+  recreate_pods   = false
+  cleanup_on_fail = true
+  wait            = true
+  wait_for_jobs   = true
+
+  values = [
+    yamlencode({
+      defaultRegistry       = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd"
+      defaultLogFormat      = "json"
+      defaultLogLevel       = var.log_level
+      tolerations           = module.constants.burstable_node_toleration_helm
+      enablePodAntiAffinity = true
+      podLabels             = module.kube_labels.kube_labels
+      commonLabels          = module.kube_labels.kube_labels
+
+      prometheusUrl = "http://thanos-query-frontend.monitoring.svc.cluster.local:9090"
+      prometheus = {
+        enabled = false // We use our external prometheus
+      }
+
+      metricsAPI = {
+        replicas = 1
+      }
+
+      tap = {
+        replicas = 2
+      }
+
+      tapInjector = {
+        replicas = 2
+      }
+
+      dashboard = {
+        replicas = 2
+      }
+
     })
   ]
 
@@ -421,6 +512,11 @@ resource "helm_release" "linkerd" {
     module.linkerd_profile_validator
   ]
 }
+
+/***************************************
+* Autoscaling
+***************************************/
+
 
 resource "kubernetes_manifest" "vpa_identity" {
   count = var.vpa_enabled ? 1 : 0
@@ -440,6 +536,7 @@ resource "kubernetes_manifest" "vpa_identity" {
       }
     }
   }
+  depends_on = [helm_release.linkerd]
 }
 
 resource "kubernetes_manifest" "vpa_destination" {
@@ -460,6 +557,7 @@ resource "kubernetes_manifest" "vpa_destination" {
       }
     }
   }
+  depends_on = [helm_release.linkerd]
 }
 
 resource "kubernetes_manifest" "vpa_proxy_injectory" {
@@ -480,4 +578,179 @@ resource "kubernetes_manifest" "vpa_proxy_injectory" {
       }
     }
   }
+  depends_on = [helm_release.linkerd]
+}
+
+resource "kubernetes_manifest" "vpa_metrics_api" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "linkerd-metrics-api"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "metrics-api"
+      }
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+resource "kubernetes_manifest" "pdb_metrics_api" {
+  manifest = {
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-metrics-api"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          "linkerd.io/extension"        = "viz"
+          "linkerd.io/proxy-deployment" = "metrics-api"
+        }
+      }
+      maxUnavailable = 1
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+resource "kubernetes_manifest" "vpa_tap_injector" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "linkerd-tap-injector"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "tap-injector"
+      }
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+resource "kubernetes_manifest" "pdb_tap_injector" {
+  manifest = {
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-tap-injector"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          "linkerd.io/extension"        = "viz"
+          "linkerd.io/proxy-deployment" = "tap-injector"
+        }
+      }
+      maxUnavailable = 1
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+resource "kubernetes_manifest" "vpa_web" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "linkerd-web"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "web"
+      }
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+
+resource "kubernetes_manifest" "pdb_web" {
+  manifest = {
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-web"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          "linkerd.io/extension"        = "viz"
+          "linkerd.io/proxy-deployment" = "web"
+        }
+      }
+      maxUnavailable = 1
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+
+resource "kubernetes_manifest" "vpa_tap" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "linkerd-tap"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "tap"
+      }
+    }
+  }
+  depends_on = [helm_release.viz]
+}
+
+resource "kubernetes_manifest" "pdb_tap" {
+  manifest = {
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-tap"
+      namespace = local.namespace
+      labels    = module.kube_labels.kube_labels
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          "linkerd.io/extension"        = "viz"
+          "linkerd.io/proxy-deployment" = "tap"
+        }
+      }
+      maxUnavailable = 1
+    }
+  }
+  depends_on = [helm_release.viz]
 }

@@ -24,4 +24,5 @@ inputs = {
   pull_through_cache_enabled = true
   vpa_enabled                = true
   ingress_enabled            = true
+  monitoring_enabled         = true
 }

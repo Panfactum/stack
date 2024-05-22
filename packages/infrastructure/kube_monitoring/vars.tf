@@ -75,7 +75,7 @@ variable "pull_through_cache_enabled" {
 variable "prometheus_operator_log_level" {
   description = "The log level for the prometheus operator pods"
   type        = string
-  default     = "info"
+  default     = "warn"
   validation {
     condition     = contains(["info", "error", "warn", "debug"], var.prometheus_operator_log_level)
     error_message = "Invalid prometheus_operator_log_level provided."
@@ -85,7 +85,7 @@ variable "prometheus_operator_log_level" {
 variable "prometheus_log_level" {
   description = "The log level for the prometheus pods"
   type        = string
-  default     = "info"
+  default     = "warn"
   validation {
     condition     = contains(["info", "error", "warn", "debug"], var.prometheus_log_level)
     error_message = "Invalid prometheus_log_level provided."
@@ -95,7 +95,7 @@ variable "prometheus_log_level" {
 variable "alertmanager_log_level" {
   description = "The log level for the alertmanager pods"
   type        = string
-  default     = "info"
+  default     = "warn"
   validation {
     condition     = contains(["info", "error", "warn", "debug"], var.alertmanager_log_level)
     error_message = "Invalid alertmanager_log_level provided."
@@ -105,7 +105,7 @@ variable "alertmanager_log_level" {
 variable "thanos_log_level" {
   description = "The log level for the thanos pods"
   type        = string
-  default     = "info"
+  default     = "warn"
   validation {
     condition     = contains(["info", "error", "warn", "debug"], var.thanos_log_level)
     error_message = "Invalid thanos_log_level provided."
@@ -200,4 +200,10 @@ variable "additional_tracked_resources" {
   description = "Additional Kubernetes resources to track in kube-state-metrics"
   type        = list(string)
   default     = []
+}
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
 }

@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -44,6 +48,7 @@ module "namespace_labels" {
     "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
     "loadbalancer/enabled"                    = var.loadbalancer_enabled ? "true" : "false"
     name                                      = var.namespace
+    "monitoring/enabled"                      = var.monitoring_enabled ? "true" : "false"
   })
 }
 

@@ -151,6 +151,15 @@ generate "kubernetes_provider" {
   }) : ""
 }
 
+generate "kubectl_provider" {
+  path      = "kubectl.tf"
+  if_exists = "overwrite_terragrunt"
+  contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl.tftpl", {
+    kube_api_server     = local.enable_kubernetes ? local.vars.kube_api_server : ""
+    kube_config_context = local.enable_kubernetes ? local.vars.kube_config_context : ""
+  }) : ""
+}
+
 generate "helm_provider" {
   path      = "helm.tf"
   if_exists = "overwrite_terragrunt"

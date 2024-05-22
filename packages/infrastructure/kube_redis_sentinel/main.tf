@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     aws = {
       source  = "hashicorp/aws"
@@ -271,6 +273,35 @@ resource "helm_release" "redis" {
           limits = {
             memory = "130Mi"
           }
+        }
+      }
+
+      kubectl = {
+        requests = {
+          memory = "100Mi"
+        }
+        limits = {
+          memory = "130Mi"
+        }
+      }
+
+      metrics = {
+        enabled = var.monitoring_enabled
+        resources = {
+          requests = {
+            memory = "100Mi"
+          }
+          limits = {
+            memory = "130Mi"
+          }
+        }
+        serviceMonitor = {
+          enabled   = var.monitoring_enabled
+          interval  = "60s"
+          namespace = var.namespace
+        }
+        prometheusRule = {
+          enabled = var.monitoring_enabled
         }
       }
     })

@@ -43,5 +43,11 @@ variable "thanos_query_frontend_url" {
 variable "history_length_hours" {
   description = "The number of prior hours of metrics data that will be used for VPA recommendations"
   type        = number
-  default     = 1 // TODO: Make 24
+  default     = 24
+}
+
+variable "monitoring_enabled" {
+  description = "Whether to allow monitoring CRs to be deployed in the namespace"
+  type        = bool
+  default     = true
 }

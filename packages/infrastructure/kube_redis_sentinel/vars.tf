@@ -80,3 +80,9 @@ variable "minimum_memory_mb" {
     error_message = "Must specify at least 25Mb of memory"
   }
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to allow monitoring CRs to be deployed in the namespace"
+  type        = bool
+  default     = false
+}

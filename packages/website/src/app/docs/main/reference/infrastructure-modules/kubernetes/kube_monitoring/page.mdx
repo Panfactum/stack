@@ -22,6 +22,8 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
@@ -86,7 +88,7 @@ Description: The log level for the alertmanager pods
 
 Type: `string`
 
-Default: `"info"`
+Default: `"warn"`
 
 ### <a name="input_alertmanager_storage_class_name" /> [alertmanager\_storage\_class\_name](#input_alertmanager_storage_class_name)
 
@@ -160,6 +162,14 @@ Type: `number`
 
 Default: `15`
 
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_monitoring_etcd_enabled" /> [monitoring\_etcd\_enabled](#input_monitoring_etcd_enabled)
 
 Description: Whether to monitor the Kubernetes API server's etcd instances. Only enable for debugging purposes as it contains a huge amount of metrics.
@@ -190,7 +200,7 @@ Description: The log level for the prometheus pods
 
 Type: `string`
 
-Default: `"info"`
+Default: `"warn"`
 
 ### <a name="input_prometheus_operator_log_level" /> [prometheus\_operator\_log\_level](#input_prometheus_operator_log_level)
 
@@ -198,7 +208,7 @@ Description: The log level for the prometheus operator pods
 
 Type: `string`
 
-Default: `"info"`
+Default: `"warn"`
 
 ### <a name="input_prometheus_storage_class_name" /> [prometheus\_storage\_class\_name](#input_prometheus_storage_class_name)
 
@@ -262,7 +272,7 @@ Description: The log level for the thanos pods
 
 Type: `string`
 
-Default: `"info"`
+Default: `"warn"`
 
 ### <a name="input_thanos_store_gateway_storage_class_name" /> [thanos\_store\_gateway\_storage\_class\_name](#input_thanos_store_gateway_storage_class_name)
 

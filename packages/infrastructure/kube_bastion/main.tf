@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -197,7 +201,7 @@ resource "kubernetes_secret" "bastion_host" {
 module "bastion" {
   source          = "../kube_deployment"
   namespace       = module.namespace.namespace
-  service_name    = local.name
+  name            = local.name
   service_account = kubernetes_service_account.bastion.metadata[0].name
 
   min_replicas        = 2

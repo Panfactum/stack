@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -293,6 +295,16 @@ resource "helm_release" "vault" {
         enabled = true
       }
 
+      serverTelemetry = {
+        serviceMonitor = {
+          enabled  = var.monitoring_enabled
+          interval = "60s"
+        }
+        prometheusRules = {
+          enabled = var.monitoring_enabled
+        }
+      }
+
       server = {
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
@@ -357,6 +369,17 @@ resource "helm_release" "vault" {
     })
   ]
   depends_on = [module.aws_permissions]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "vault-dashboard"
+    labels = merge(module.server_labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "vault.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 /***************************************

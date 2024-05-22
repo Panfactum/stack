@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -17,6 +15,10 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
   }
 }
@@ -247,6 +249,60 @@ resource "helm_release" "external_snapshotter" {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
 }
+
+resource "kubernetes_service" "service" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name      = "external-snapshotter-controller"
+    namespace = local.namespace
+    labels    = module.kube_labels_controller.kube_labels
+  }
+  spec {
+    internal_traffic_policy = "Cluster"
+    ip_families             = ["IPv4"]
+    ip_family_policy        = "SingleStack"
+    selector                = local.controller_match_labels
+    port {
+      name        = "http"
+      port        = 8080
+      protocol    = "TCP"
+      target_port = "http"
+    }
+  }
+
+  depends_on = [helm_release.external_snapshotter]
+}
+
+resource "kubernetes_manifest" "service_monitor" {
+  count = var.monitoring_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "external-snapshotter"
+      namespace = local.namespace
+      labels    = module.kube_labels_controller.kube_labels
+    }
+    spec = {
+      endpoints = [{
+        honorLabels = true
+        interval    = "60s"
+        port        = "http"
+        scheme      = "http"
+        path        = "/metrics"
+      }]
+      jobLabel = "external-snapshotter"
+      namespaceSelector = {
+        matchNames = [local.namespace]
+      }
+      selector = {
+        matchLabels = local.controller_match_labels
+      }
+    }
+  }
+  depends_on = [helm_release.external_snapshotter]
+}
+
 
 resource "kubernetes_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0

@@ -24,6 +24,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -762,6 +766,7 @@ module "grafana_db" {
   burstable_instances_enabled = true
   backups_enabled             = false
   backups_force_delete        = true
+  monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -789,6 +794,7 @@ module "thanos_redis_cache" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
   minimum_memory_mb           = 100
+  monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -913,10 +919,30 @@ resource "kubernetes_secret" "grafana_creds" {
     namespace = local.namespace
   }
   data = {
-    admin-user        = "admin"
-    admin-password    = random_password.grafana_admin_pw.result
-    database-password = module.grafana_db.superuser_password
+    admin-user         = "admin"
+    admin-password     = random_password.grafana_admin_pw.result
+    database-password  = module.grafana_db.superuser_password
+    oidc-client-secret = vault_identity_oidc_client.oidc.client_secret
   }
+}
+
+module "prometheus_cert" {
+  source = "../kube_internal_cert"
+
+  common_name   = "system:serviceaccount:${local.namespace}:${kubernetes_service_account.prometheus.metadata[0].name}"
+  service_names = ["prometheus"]
+  secret_name   = "prometheus-identity-cert"
+  namespace     = local.namespace
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 resource "helm_release" "prometheus_stack" {
@@ -1021,6 +1047,33 @@ resource "helm_release" "prometheus_stack" {
         fullnameOverride  = "node-exporter"
         priorityClassName = "system-node-critical"
         podLabels         = module.kube_labels_node_exporter.kube_labels
+        image             = local.default_image
+
+        # This is required because linkerd cannot proxy containers that have access to the host network
+        # which this requires in order to collect its metrics.
+        # Without this, requests would not have mTLS.
+        kubeRBACProxy = {
+          enabled   = true
+          image     = local.default_image
+          resources = local.default_resources
+        }
+
+        prometheus = {
+          monitor = {
+            enabled        = true
+            scheme         = "https"
+            scrapeInterval = "${var.prometheus_default_scrape_interval_seconds}s"
+            # TODO: This is deprecated and we should use the identity certs instead;
+            # however, this issue is a blocker: https://github.com/prometheus-community/helm-charts/issues/4552
+            bearerTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+            tlsConfig = {
+              # TODO: We need to do this because the self-signed certs are based on the pod hostname which is dynamic
+              # When this is fixed, we can update this: https://github.com/prometheus-community/helm-charts/issues/4552
+              insecureSkipVerify = true
+            }
+          }
+        }
+
         tolerations = concat(
           [
             {
@@ -1075,6 +1128,83 @@ resource "helm_release" "prometheus_stack" {
         }
 
         collectors = local.resources_to_track
+
+        rbac = {
+          extraRules = [
+            {
+              apiGroups = ["autoscaling.k8s.io"]
+              resources = ["verticalpodautoscalers"]
+              verbs     = ["list", "watch"]
+            }
+          ]
+        }
+
+        customResourceState = {
+          enabled = true
+          config = {
+            kind = "CustomResourceStateMetrics"
+            spec = {
+              resources = [
+                {
+                  groupVersionKind = {
+                    group   = "autoscaling.k8s.io"
+                    kind    = "VerticalPodAutoscaler"
+                    version = "v1"
+                  }
+                  labelsFromPath = {
+                    verticalpodautoscaler = ["metadata", "name"]
+                    namespace             = ["metadata", "namespace"]
+                    target_api_version    = ["apiVersion"]
+                    target_kind           = ["spec", "targetRef", "kind"]
+                    target_name           = ["spec", "targetRef", "name"]
+                  }
+                  metrics = [
+                    {
+                      name = "vpa_containerrecommendations_target"
+                      help = "VPA container recommendations for memory."
+                      each = {
+                        type = "Gauge"
+                        gauge = {
+                          path      = ["status", "recommendation", "containerRecommendations"]
+                          valueFrom = ["target", "memory"]
+                          labelsFromPath = {
+                            container = ["containerName"]
+                          }
+                        }
+                      }
+                      commonLabels = {
+                        resource = "memory"
+                        unit     = "byte"
+                      }
+                    },
+                    {
+                      name = "vpa_containerrecommendations_target"
+                      help = "VPA container recommendations for CPU."
+                      each = {
+                        type = "Gauge"
+                        gauge = {
+                          path      = ["status", "recommendation", "containerRecommendations"]
+                          valueFrom = ["target", "cpu"]
+                          labelsFromPath = {
+                            container = ["containerName"]
+                          }
+                        }
+                      }
+                      commonLabels = {
+                        resource = "cpu"
+                        unit     = "core"
+                      }
+                    },
+                  ]
+                }
+              ]
+            }
+          }
+        }
+
+        selfMonitor = {
+          enabled = true
+        }
 
         prometheus = {
           monitor = {
@@ -1222,6 +1352,31 @@ resource "helm_release" "prometheus_stack" {
           scrapeInterval    = "${var.prometheus_default_scrape_interval_seconds}s"
           retention         = "1h" // This is only for local retention (before data is shipped to s3 by thanos)
           disableCompaction = true
+          ruleNamespaceSelector = {
+            matchLabels = { "monitoring/enabled" = "true" }
+          }
+          ruleSelector                  = {}
+          ruleSelectorNilUsesHelmValues = false
+          serviceMonitorNamespaceSelector = {
+            matchLabels = { "monitoring/enabled" = "true" }
+          }
+          serviceMonitorSelector                  = {}
+          serviceMonitorSelectorNilUsesHelmValues = false
+          podMonitorNamespaceSelector = {
+            matchLabels = { "monitoring/enabled" = "true" }
+          }
+          podMonitorSelector                  = {}
+          podMonitorSelectorNilUsesHelmValues = false
+          probeNamespaceSelector = {
+            matchLabels = { "monitoring/enabled" = "true" }
+          }
+          probeSelector                  = {}
+          probeSelectorNilUsesHelmValues = false
+          scrapeConfigNamespaceSelector = {
+            matchLabels = { "monitoring/enabled" = "true" }
+          }
+          scrapeConfigSelector                  = {}
+          scrapeConfigSelectorNilUsesHelmValues = false
 
           storageSpec = {
             volumeClaimTemplate = {
@@ -1239,6 +1394,24 @@ resource "helm_release" "prometheus_stack" {
             whenDeleted = "Delete"
             whenScaled  = "Delete"
           }
+
+          volumes = [
+            {
+              name = "identity-certs"
+              secret = {
+                defaultMode = 420
+                secretName  = module.prometheus_cert.secret_name
+              }
+            }
+          ]
+          volumeMounts = [
+            {
+              mountPath = "/etc/prometheus/identity-certs"
+              name      = "identity-certs"
+              readOnly  = true
+            }
+          ]
+
           thanos = {
             image     = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/thanos/thanos:${var.thanos_image_version}"
             logLevel  = var.prometheus_log_level
@@ -1304,12 +1477,11 @@ resource "helm_release" "prometheus_stack" {
       // Grafana
       //////////////////////////////////////////////////////////
       grafana = {
-        enabled = true
-        global = {
-          image = local.default_docker_image
-        }
-        extraLabels = module.kube_labels_grafana.kube_labels
-        podLabels   = module.kube_labels_grafana.kube_labels
+        enabled                  = true
+        defaultDashboardsEnabled = false // We load custom ones
+        image                    = local.default_docker_image
+        extraLabels              = module.kube_labels_grafana.kube_labels
+        podLabels                = module.kube_labels_grafana.kube_labels
         annotations = {
           "reloader.stakater.com/auto" = "true"
         }
@@ -1326,6 +1498,16 @@ resource "helm_release" "prometheus_stack" {
               key  = "database-password"
             }
           }
+          GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET = {
+            secretKeyRef = {
+              name = kubernetes_secret.grafana_creds.metadata[0].name
+              key  = "oidc-client-secret"
+            }
+          }
+        }
+        sidecar = {
+          image     = local.default_image
+          resources = local.default_image
         }
         "grafana.ini" = {
           server = {
@@ -1382,7 +1564,7 @@ resource "helm_release" "prometheus_stack" {
             enabled                    = true
             name                       = "Vault"
             client_id                  = vault_identity_oidc_client.oidc.client_id
-            client_secret              = vault_identity_oidc_client.oidc.client_secret
+            client_secret              = "replace-me" # Replaced by environment variable, but a default must be set
             auth_url                   = "https://${var.vault_domain}/ui/vault/identity/oidc/provider/grafana/authorize"
             api_url                    = "${vault_identity_oidc_provider.oidc.issuer}/userinfo"
             token_url                  = "${vault_identity_oidc_provider.oidc.issuer}/token"
@@ -1631,6 +1813,10 @@ resource "helm_release" "thanos" {
         affinity                  = module.constants_thanos_query.pod_anti_affinity_instance_type_helm
         tolerations               = module.constants_thanos_query.burstable_node_toleration_helm
         resources                 = local.default_resources
+
+        networkPolicy = {
+          enabled = false
+        }
       }
       queryFrontend = {
         enabled = true
@@ -1664,6 +1850,10 @@ resource "helm_release" "thanos" {
         affinity                  = module.constants_thanos_query_frontend.pod_anti_affinity_instance_type_helm
         tolerations               = module.constants_thanos_query_frontend.burstable_node_toleration_helm
         resources                 = local.default_resources
+
+        networkPolicy = {
+          enabled = false
+        }
       }
 
       bucketweb = {
@@ -1685,6 +1875,10 @@ resource "helm_release" "thanos" {
         podLabels   = module.kube_labels_thanos_bucket_web.kube_labels
         tolerations = module.constants_thanos_bucket_web.burstable_node_toleration_helm
         resources   = local.default_resources
+
+        networkPolicy = {
+          enabled = false
+        }
       }
       compactor = {
         enabled = true
@@ -1737,6 +1931,10 @@ resource "helm_release" "thanos" {
             memory = "260Mi"
           }
         }
+
+        networkPolicy = {
+          enabled = false
+        }
       }
       storegateway = {
         enabled   = true
@@ -1779,6 +1977,10 @@ resource "helm_release" "thanos" {
         affinity                  = module.constants_thanos_store_gateway.pod_anti_affinity_instance_type_helm
         tolerations               = module.constants_thanos_store_gateway.burstable_node_toleration_helm
         resources                 = local.default_resources
+
+        networkPolicy = {
+          enabled = false
+        }
       }
       ruler = {
         enabled = true
@@ -1799,6 +2001,10 @@ resource "helm_release" "thanos" {
             }]
           }]
         })
+
+        networkPolicy = {
+          enabled = false
+        }
       }
       metrics = {
         enabled = true
@@ -2237,6 +2443,14 @@ resource "kubernetes_manifest" "vpa_thanos_store_gateway" {
       labels    = module.kube_labels_thanos_store_gateway.kube_labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "storegateway"
+          minAllowed = {
+            memory = "300Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "StatefulSet"
@@ -2283,7 +2497,7 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
         containerPolicies = [{
           containerName = "query"
           minAllowed = {
-            memory = "100Mi"
+            memory = "200Mi"
           }
         }]
       }
@@ -2322,9 +2536,16 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
 #}
 
 /***************************************
-* SSO Login for Grafana
+* Extra Dashboards
 ***************************************/
 
+resource "kubernetes_config_map" "dashboard" {
+  metadata {
+    name   = "panfactum-dashboards"
+    labels = merge(module.kube_labels_grafana.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = { for name in fileset("${path.module}/dashboards", "*.json") : name => file("${path.module}/dashboards/${name}") }
+}
 
 /***************************************
 * Grafana Ingress

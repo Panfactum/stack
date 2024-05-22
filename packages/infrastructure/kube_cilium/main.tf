@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -284,6 +288,51 @@ resource "helm_release" "cilium" {
         module.constants.burstable_node_toleration_helm
       )
 
+      prometheus = {
+        enabled = var.monitoring_enabled
+        serviceMonitor = {
+          enabled  = var.monitoring_enabled
+          jobLabel = "cilium-agent"
+          labels   = module.agent_labels.kube_labels
+          interval = "60s"
+        }
+      }
+
+      // TODO: Need to finish this up
+      hubble = {
+        enabled           = var.hubble_enabled
+        enableOpenMetrics = false
+        metrics = {
+          enabled = [
+            "dns:query;ignoreAAAA",
+            "drop",
+            "tcp",
+            "flow",
+            "port-distribution",
+            "icmp",
+            "httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction"
+          ]
+
+          serviceMonitor = {
+            enabled  = var.hubble_enabled && var.monitoring_enabled
+            interval = "60s"
+            jobLabel = "hubble"
+          }
+        }
+
+        tls = {
+          enabled = false
+        }
+
+        relay = {
+          enabled = var.hubble_enabled
+        }
+
+        ui = {
+          enabled = var.hubble_enabled
+        }
+      }
+
       operator = {
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/cilium/operator"
@@ -333,6 +382,15 @@ resource "helm_release" "cilium" {
           { name : "AWS_ROLE_ARN", value = module.aws_permissions.role_arn },
           { name : "AWS_REGION", value = data.aws_region.region.name }
         ]
+
+        prometheus = {
+          serviceMonitor = {
+            enabled  = var.monitoring_enabled
+            interval = "60s"
+            jobLabel = "cilium-operator"
+            labels   = module.operator_labels.kube_labels
+          }
+        }
       }
     })
   ]

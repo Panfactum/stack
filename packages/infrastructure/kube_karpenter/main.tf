@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
     helm = {
       source  = "hashicorp/helm"
       version = "2.12.1"
@@ -606,6 +610,14 @@ resource "helm_release" "karpenter" {
         }
       }
 
+      serviceMonitor = {
+        enabled          = var.monitoring_enabled
+        additionalLabels = module.kube_labels.kube_labels
+        endpointConfig = {
+          scrapeInterval = "60s"
+        }
+      }
+
       priorityClassName = "system-cluster-critical"
 
       replicas = 1
@@ -647,6 +659,17 @@ resource "helm_release" "karpenter" {
       }
     })
   ]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "karpenter-dashboard"
+    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "karpenter.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 resource "kubernetes_manifest" "vpa" {

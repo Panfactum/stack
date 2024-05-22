@@ -12,6 +12,8 @@ Sets up a Kubernetes namespace and grants namespace-scoped permissions to specif
 
 The following providers are needed by this module:
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Required Inputs
@@ -71,6 +73,14 @@ Description: Whether the namespace is going to create LoadBalancer services
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
 

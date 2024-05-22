@@ -117,3 +117,9 @@ variable "pg_bouncer_read_write_enabled" {
   type        = bool
   default     = true
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}

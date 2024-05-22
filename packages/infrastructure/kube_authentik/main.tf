@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -155,6 +159,7 @@ module "database" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   pgbouncer_pool_mode         = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
   burstable_instances_enabled = true
+  monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -181,6 +186,7 @@ module "redis" {
   persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
+  monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -392,6 +398,18 @@ resource "helm_release" "authentik" {
           labels = module.labels_server.kube_labels
         }
 
+        metrics = {
+          enabled = var.monitoring_enabled
+          service = {
+            labels = module.labels_server.kube_labels
+          }
+          serviceMonitor = {
+            enabled  = var.monitoring_enabled
+            interval = "60s"
+            labels   = module.labels_server.kube_labels
+          }
+        }
+
         volumes = [
           {
             name = "postgres-certs"
@@ -534,6 +552,17 @@ resource "helm_release" "authentik" {
     module.database,
     module.redis
   ]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "authentik-dashboard"
+    labels = merge(module.labels_server.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "authentik.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 resource "kubernetes_manifest" "pdb_server" {

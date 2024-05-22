@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -127,6 +131,17 @@ resource "helm_release" "descheduler" {
         limits = {
           memory = "130Mi"
         }
+      }
+
+      service = {
+        enabled = var.monitoring_enabled
+      }
+
+      serviceMonitor = {
+        enabled          = var.monitoring_enabled
+        namespace        = local.namespace
+        additionalLabels = module.kube_labels.kube_labels
+        interval         = "60s"
       }
 
       deschedulerPolicyAPIVersion = "descheduler/v1alpha2"

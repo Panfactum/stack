@@ -50,3 +50,9 @@ variable "pull_through_cache_enabled" {
   type        = bool
   default     = false
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}

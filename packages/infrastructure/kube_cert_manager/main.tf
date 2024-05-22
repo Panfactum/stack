@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -418,10 +422,30 @@ resource "helm_release" "cert_manager" {
           }
         }
       }
+
+      prometheus = {
+        enabled = var.monitoring_enabled
+        servicemonitor = {
+          enabled  = var.monitoring_enabled
+          interval = "60s"
+          labels   = module.controller_labels.kube_labels
+        }
+      }
     })
   ]
 
   depends_on = [module.webhook_cert]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "cert-manager-dashboard"
+    labels = merge(module.controller_labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "cert-manager.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 resource "kubernetes_manifest" "vpa_controller" {

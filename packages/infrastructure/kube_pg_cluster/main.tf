@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     aws = {
       source  = "hashicorp/aws"
@@ -316,9 +318,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       namespace = var.pg_cluster_namespace
       labels    = module.kube_labels.kube_labels
       annotations = {
-        // We cannot disable native postgres tls encryption in this operator
-        // so we will disable our service mesh overlay
-        "linkerd.io/inject" = "disabled"
+        "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
 
         "panfactum.com/db"             = "true"
         "panfactum.com/db-type"        = "PostgreSQL"
@@ -359,6 +359,10 @@ resource "kubernetes_manifest" "postgres_cluster" {
             pg-cluster = local.cluster-label
           }
         )
+        annotations = {
+          "linkerd.io/inject"                    = "enabled"
+          "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
+        }
       }
 
       startDelay           = 60 * 10
@@ -366,6 +370,10 @@ resource "kubernetes_manifest" "postgres_cluster" {
       smartShutdownTimeout = local.stopDelay - 10
       switchoverDelay      = local.stopDelay
       failoverDelay        = 60
+
+      monitoring = {
+        enablePodMonitor = var.monitoring_enabled
+      }
 
       bootstrap = {
         initdb = {
@@ -496,7 +504,7 @@ resource "kubernetes_manifest" "scheduled_backup" {
       namespace = var.pg_cluster_namespace
     }
     spec = {
-      schedule             = "0 3 * * 1" // 3AM on sundays
+      schedule             = "0 0 0 * * 0" // midnight on Sunday
       backupOwnerReference = "cluster"
       cluster = {
         name = local.cluster_name
@@ -745,6 +753,9 @@ resource "kubernetes_manifest" "connection_pooler" {
           log_disconnections = var.log_connections_enabled ? 1 : 0
         }
       }
+      monitoring = {
+        enablePodMonitor = var.monitoring_enabled
+      }
       template = {
         metadata = {
           labels = merge(
@@ -752,7 +763,7 @@ resource "kubernetes_manifest" "connection_pooler" {
             module.constants_pooler[each.key].disable_lifetime_eviction_label
           )
           annotations = {
-            "linkerd.io/inject" = "disabled"
+            "linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
           }
         }
         spec = {

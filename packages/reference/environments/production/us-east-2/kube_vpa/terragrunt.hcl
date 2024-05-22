@@ -23,6 +23,6 @@ inputs = {
   log_verbosity              = 1
 
   # Alpha: Do not use
-  prometheus_enabled        = true
+  prometheus_enabled        = false
   thanos_query_frontend_url = dependency.monitoring.outputs.thanos_query_frontend_url
 }

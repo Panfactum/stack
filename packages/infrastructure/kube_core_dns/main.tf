@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
@@ -69,8 +73,7 @@ module "constants" {
 module "namespace" {
   source = "../kube_namespace"
 
-  namespace      = local.name
-  linkerd_inject = false
+  namespace = local.name
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -100,6 +103,8 @@ resource "kubernetes_cluster_role" "core_dns" {
     name   = local.name
     labels = module.labels.kube_labels
   }
+
+  # Required for CoreDNS
   rule {
     api_groups = [""]
     resources  = ["endpoints", "services", "pods", "namespaces"]
@@ -109,6 +114,13 @@ resource "kubernetes_cluster_role" "core_dns" {
     api_groups = ["discovery.k8s.io"]
     resources  = ["endpointslices"]
     verbs      = ["list", "watch"]
+  }
+
+  # Required for the authenticating proxy
+  rule {
+    api_groups = ["authorization.k8s.io"]
+    resources  = ["subjectaccessreviews"]
+    verbs      = ["create"]
   }
 }
 
@@ -132,8 +144,6 @@ resource "kubernetes_cluster_role_binding" "core_dns" {
 /***********************************************
 * CoreDNS Deployment
 ************************************************/
-
-
 resource "kubernetes_config_map" "config" {
   metadata {
     name      = local.name
@@ -145,41 +155,94 @@ resource "kubernetes_config_map" "config" {
   }
 }
 
+module "metrics_cert" {
+  count  = var.monitoring_enabled ? 1 : 0
+  source = "../kube_internal_cert"
+
+  service_names = ["core-dns"]
+  secret_name   = "core-dns-metrics-certs"
+  namespace     = local.namespace
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
 module "core_dns" {
   source          = "../kube_deployment"
   namespace       = module.namespace.namespace
-  service_name    = local.name
+  name            = local.name
   service_account = kubernetes_service_account.core_dns.metadata[0].name
+  pod_annotations = {
+    "linkerd.io/inject" = "disabled"
+  }
 
   min_replicas                = 2
   max_replicas                = 2
   burstable_instances_enabled = true
   priority_class_name         = "system-cluster-critical"
   dns_policy                  = "Default"
-  containers = [
-    {
-      name    = "coredns"
-      image   = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/coredns/coredns"
-      version = var.core_dns_image_version
-      command = [
-        "/coredns",
-        "-conf",
-        "/etc/coredns/Corefile"
-      ]
-      linux_capabilities   = ["NET_BIND_SERVICE"]
-      liveness_check_port  = "8080"
-      liveness_check_type  = "HTTP"
-      liveness_check_route = "/health"
-      ready_check_type     = "HTTP"
-      ready_check_port     = "8181"
-      ready_check_route    = "/ready"
-      minimum_memory       = 10
-    }
-  ]
+  containers = concat(
+    [
+      {
+        name    = "coredns"
+        image   = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/coredns/coredns"
+        version = var.core_dns_image_version
+        command = [
+          "/coredns",
+          "-conf",
+          "/etc/coredns/Corefile"
+        ]
+        linux_capabilities   = ["NET_BIND_SERVICE"]
+        liveness_check_port  = "8080"
+        liveness_check_type  = "HTTP"
+        liveness_check_route = "/health"
+        ready_check_type     = "HTTP"
+        ready_check_port     = "8181"
+        ready_check_route    = "/ready"
+        minimum_memory       = 30
+      }
+    ],
+    var.monitoring_enabled ? [
+      {
+        name    = "proxy"
+        image   = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/brancz/kube-rbac-proxy"
+        version = "v0.17.1"
+        # Note we don't need a config because
+        # prometheus is authorized to `get` the `/metrics` non-resource url
+        # See https://github.com/brancz/kube-rbac-proxy/tree/master/examples/non-resource-url
+        command = [
+          "/usr/local/bin/kube-rbac-proxy",
+          "--secure-listen-address=:4353",
+          "--upstream=http://127.0.0.1:9153",
+          "--proxy-endpoints-port=8888",
+          "--tls-cert-file=/etc/metrics-certs/tls.crt",
+          "--tls-private-key-file=/etc/metrics-certs/tls.key",
+          "--client-ca-file=/etc/internal-ca/ca.crt"
+        ]
+        liveness_check_port   = "8888"
+        liveness_check_type   = "HTTP"
+        liveness_check_route  = "/healthz"
+        liveness_check_scheme = "HTTPS"
+        minimum_memory        = 10
+      }
+    ] : []
+  )
 
-  config_map_mounts = {
+  config_map_mounts = merge({
     "${kubernetes_config_map.config.metadata[0].name}" = "/etc/coredns"
-  }
+    }, var.monitoring_enabled ? {
+    internal-ca = "/etc/internal-ca"
+  } : {})
+  secret_mounts = merge({}, var.monitoring_enabled ? {
+    "${module.metrics_cert[0].secret_name}" = "/etc/metrics-certs"
+  } : {})
 
   vpa_enabled = var.vpa_enabled
 
@@ -198,7 +261,7 @@ resource "kubernetes_service" "core_dns" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = merge(module.labels.kube_labels, module.core_dns.match_labels)
   }
   spec {
     cluster_ip              = var.service_ip
@@ -221,11 +284,76 @@ resource "kubernetes_service" "core_dns" {
     }
     port {
       name        = "metrics"
-      port        = 9153
+      port        = 4353
       protocol    = "TCP"
-      target_port = 9153
+      target_port = 4353
     }
   }
 
   depends_on = [module.core_dns]
+}
+
+resource "kubernetes_manifest" "service_monitor" {
+  count = var.monitoring_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "core-dns"
+      namespace = local.namespace
+      labels    = module.labels.kube_labels
+    }
+    spec = {
+      endpoints = [{
+        honorLabels = true
+        interval    = "60s"
+        port        = "metrics"
+        path        = "/metrics"
+
+        # We have to scrape via HTTPS b/c we cannot have a linkerd sidecar
+        # running on the pod without disrupting UDP traffic
+        scheme = "https"
+        tlsConfig = {
+          caFile     = "/etc/prometheus/identity-certs/ca.crt"
+          certFile   = "/etc/prometheus/identity-certs/tls.crt"
+          keyFile    = "/etc/prometheus/identity-certs/tls.key"
+          serverName = "core-dns.${local.namespace}"
+        }
+      }]
+      jobLabel = "core-dns"
+      namespaceSelector = {
+        matchNames = [local.namespace]
+      }
+      selector = {
+        matchLabels = module.core_dns.match_labels
+      }
+    }
+  }
+  depends_on = [kubernetes_service.core_dns]
+}
+
+resource "kubernetes_manifest" "monitoring_rules" {
+  count = var.monitoring_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "PrometheusRule"
+    metadata = {
+      name      = "core-dns"
+      namespace = local.namespace
+      labels    = module.labels.kube_labels
+    }
+    spec = yamldecode(file("${path.module}/rules.yaml"))
+  }
+  depends_on = [kubernetes_manifest.service_monitor]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "core-dns-dashboard"
+    labels = merge(module.labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "coredns.json" = file("${path.module}/dashboard.json")
+  }
 }

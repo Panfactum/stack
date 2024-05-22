@@ -1,10 +1,12 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -185,6 +187,15 @@ resource "helm_release" "vpa" {
         affinity     = module.constants_recommender.controller_node_with_burstable_affinity_helm
         tolerations  = module.constants_recommender.burstable_node_toleration_helm
 
+        metrics = {
+          serviceMonitor = {
+            enabled   = var.monitoring_enabled
+            namespace = local.namespace
+            interval  = "60s"
+            timeout   = "10s"
+          }
+        }
+
         extraArgs = merge({
           // Better packing
           "pod-recommendation-min-cpu-millicores" = 2
@@ -197,7 +208,7 @@ resource "helm_release" "vpa" {
           // Provide 30% headroom (instead of the 15% default)
           "recommendation-margin-fraction" = 0.3
 
-          v = 5
+          v = var.log_verbosity
           }, var.prometheus_enabled ? {
           // When prometheus is enabled, the initial recommendations will be
           // provided by prometheus queries instead of the VPACheckpoint objects
@@ -270,6 +281,15 @@ resource "helm_release" "vpa" {
         affinity     = module.constants_updater.controller_node_with_burstable_affinity_helm
         tolerations  = module.constants_updater.burstable_node_toleration_helm
 
+        metrics = {
+          serviceMonitor = {
+            enabled   = var.monitoring_enabled
+            namespace = local.namespace
+            interval  = "60s"
+            timeout   = "10s"
+          }
+        }
+
         extraArgs = {
           "min-replicas" = 0 // We don't care b/c we use pdbs
           v              = var.log_verbosity
@@ -306,9 +326,18 @@ resource "helm_release" "vpa" {
         replicaCount = 2
         affinity = merge(
           module.constants_admission_controller.controller_node_with_burstable_affinity_helm,
-          module.constants_admission_controller.pod_anti_affinity_helm
+          module.constants_admission_controller.pod_anti_affinity_instance_type_helm
         )
         tolerations = module.constants_admission_controller.burstable_node_toleration_helm
+
+        metrics = {
+          serviceMonitor = {
+            enabled   = var.monitoring_enabled
+            namespace = local.namespace
+            interval  = "60s"
+            timeout   = "10s"
+          }
+        }
 
         podDisruptionBudget = {
           minAvailable = 1
@@ -340,6 +369,17 @@ resource "helm_release" "vpa" {
       }
     })
   ]
+}
+
+resource "kubernetes_config_map" "dashboard" {
+  count = var.monitoring_enabled ? 1 : 0
+  metadata {
+    name   = "vpa-dashboard"
+    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+  }
+  data = {
+    "vpa.json" = file("${path.module}/dashboard.json")
+  }
 }
 
 /***************************************
