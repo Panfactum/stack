@@ -65,14 +65,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_annotations" /> [annotations](#input_annotations)
-
-Description: Extra annotations to add to the ingress objects
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_cors_allowed_methods" /> [cors\_allowed\_methods](#input_cors_allowed_methods)
 
 Description: The methods to allow on CORS requests
@@ -368,6 +360,22 @@ Description: The worker-src content security policy
 Type: `string`
 
 Default: `null`
+
+### <a name="input_extra_annotations" /> [extra\_annotations](#input_extra_annotations)
+
+Description: Extra annotations to add to the ingress objects
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_configuration_snippet" /> [extra\_configuration\_snippet](#input_extra_configuration_snippet)
+
+Description: An extra NGINX configuration snippet to add to the route handlers
+
+Type: `string`
+
+Default: `""`
 
 ### <a name="input_extra_response_headers" /> [extra\_response\_headers](#input_extra_response_headers)
 

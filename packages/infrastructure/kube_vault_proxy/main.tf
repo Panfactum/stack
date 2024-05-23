@@ -82,24 +82,24 @@ resource "random_id" "oauth2_proxy" {
 ***************************************/
 
 resource "vault_identity_oidc_key" "oidc" {
-  name               = var.upstream_service_name
+  name               = random_id.oauth2_proxy.hex
   allowed_client_ids = ["*"]
   rotation_period    = 60 * 60 * 8
   verification_ttl   = 60 * 60 * 24
 }
 
 data "vault_identity_group" "rbac_groups" {
-  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers"])
+  for_each   = var.allowed_vault_roles
   group_name = each.key
 }
 
 resource "vault_identity_oidc_assignment" "oidc" {
-  name      = var.upstream_service_name
+  name      = random_id.oauth2_proxy.hex
   group_ids = [for group in data.vault_identity_group.rbac_groups : group.id]
 }
 
 resource "vault_identity_oidc_client" "oidc" {
-  name = var.upstream_service_name
+  name = random_id.oauth2_proxy.hex
   key  = vault_identity_oidc_key.oidc.name
   redirect_uris = [
     "https://${var.domain}/oauth2/callback",
@@ -112,7 +112,7 @@ resource "vault_identity_oidc_client" "oidc" {
 }
 
 resource "vault_identity_oidc_provider" "oidc" {
-  name = var.upstream_service_name
+  name = random_id.oauth2_proxy.hex
 
   https_enabled = true
   issuer_host   = var.vault_domain
@@ -147,7 +147,7 @@ resource "kubernetes_secret" "oauth2_proxy" {
 
 resource "helm_release" "oauth2_proxy" {
   namespace       = var.namespace
-  name            = "oauth2-proxy"
+  name            = random_id.oauth2_proxy.hex
   repository      = "https://oauth2-proxy.github.io/manifests"
   chart           = "oauth2-proxy"
   version         = var.oauth2_proxy_helm_version
@@ -181,6 +181,10 @@ resource "helm_release" "oauth2_proxy" {
       }
       customLabels = module.kube_labels.kube_labels
       podLabels    = module.kube_labels.kube_labels
+      podAnnotations = {
+        "config.linkerd.io/proxy-memory-request" = "5Mi" # We can use lower requests / limits here b/c this will never receive much traffic
+        "config.linkerd.io/proxy-memory-limit"   = "20Mi"
+      }
       replicaCount = 2
       strategy = {
         type          = "Recreate"
@@ -208,7 +212,7 @@ resource "kubernetes_manifest" "vpa" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "oauth2-proxy"
+      name      = random_id.oauth2_proxy.hex
       namespace = var.namespace
       labels    = module.kube_labels.kube_labels
     }
@@ -216,7 +220,7 @@ resource "kubernetes_manifest" "vpa" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "oauth2-proxy"
+        name       = random_id.oauth2_proxy.hex
       }
     }
   }
@@ -234,7 +238,7 @@ module "ingress" {
   name      = "oauth2-proxy"
   ingress_configs = [{
     domains      = [var.domain]
-    service      = "oauth2-proxy"
+    service      = random_id.oauth2_proxy.hex
     service_port = 80
     path_prefix  = "/oauth2"
   }]

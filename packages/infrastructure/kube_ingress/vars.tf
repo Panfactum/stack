@@ -30,7 +30,7 @@ variable "ingress_configs" {
   }))
 }
 
-variable "annotations" {
+variable "extra_annotations" {
   description = "Extra annotations to add to the ingress objects"
   type        = map(string)
   default     = {}
@@ -535,4 +535,10 @@ variable "extra_response_headers" {
   description = "A key-value mapping of extra headers to add to every response"
   type        = map(string)
   default     = {}
+}
+
+variable "extra_configuration_snippet" {
+  description = "An extra NGINX configuration snippet to add to the route handlers"
+  type        = string
+  default     = ""
 }
