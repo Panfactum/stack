@@ -1619,7 +1619,7 @@ resource "vault_identity_oidc_key" "oidc" {
 }
 
 data "vault_identity_group" "rbac_groups" {
-  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers"])
+  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers", "rbac-restricted-readers"])
   group_name = each.key
 }
 

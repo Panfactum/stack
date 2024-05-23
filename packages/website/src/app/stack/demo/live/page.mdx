@@ -1,3 +1,5 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 # Live Demo
 
 We maintain a live reference environment running the latest edge release of the Panfactum stack. We make it
@@ -20,6 +22,24 @@ so we provide a few users in case one is already in-use:
 | `demo+3@panfactum.com` | `kq3p5DYsTQjNW5bLcUZC#bpDexFF&Tm@$kds59VY` | [Generate](https://piellardj.github.io/totp-generator/?secret=E5KUX2WTHVZPWDH77HDX6W5CUQYIPEKM\&digits=6\&period=30\&algorithm=SHA-1) |
 | `demo+4@panfactum.com` | `YxymPJYJ&jcVY$7mwZ9K9Jn33a79M5YHzHdSz@3y` | [Generate](https://piellardj.github.io/totp-generator/?secret=BEGCCITVTUE3NY4YY6ZZNEM4VYA6AHSH\&digits=6\&period=30\&algorithm=SHA-1) |
 | `demo+5@panfactum.com` | `f7CbJN^cNwUEz$L@RwHiCeWMnAM%UeZ5h~W$Cp5n` | [Generate](https://piellardj.github.io/totp-generator/?secret=EC2VXFXZOGIYOKDICAV4FP36F4VP66JL\&digits=6\&period=30\&algorithm=SHA-1) |
+
+## Dashboards
+
+<MarkdownAlert severity="warning">
+    If presented with a Vault login screen, choose the `OIDC` login method and leave the Role blank.
+</MarkdownAlert>
+
+You can use the above credentials to gain read-only access to the following dashboards in our live reference environment.
+
+- [Authentik Dashboard](https://authentik.panfactum.com/if/admin/#/administration/overview) (Identity Provider)
+
+- [Vault](https://vault.prod.panfactum.com) (Secrets Engine)
+
+- [Grafana](https://grafana.prod.panfactum.com) (Observability Platform)
+
+- [Argo Workflows](https://argo.prod.panfactum.com) (Workflow and CI / CD Engine)
+
+- [Thanos Bucket](https://thanos-bucket.prod.panfactum.com) (Authenticating Proxy Demo)
 
 ## Recommended Walkthrough
 

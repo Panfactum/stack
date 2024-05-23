@@ -23,8 +23,9 @@ inputs = {
   oidc_redirect_uris = dependency.vault_sso.outputs.oidc_redirect_uris
   oidc_issuer        = dependency.vault_sso.outputs.oidc_issuer
 
-  superuser_groups = ["superusers"]
-  admin_groups     = ["privileged_engineers"]
-  reader_groups    = ["engineers"]
+  superuser_groups         = ["superusers"]
+  admin_groups             = ["privileged_engineers"]
+  reader_groups            = ["engineers"]
+  restricted_reader_groups = ["restricted_engineers", "demo_users"]
 }
 

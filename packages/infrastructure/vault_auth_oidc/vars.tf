@@ -47,3 +47,9 @@ variable "reader_groups" {
   type        = list(string)
   default     = []
 }
+
+variable "restricted_reader_groups" {
+  description = "Groups that should have restricted read-only access to this Vault"
+  type        = list(string)
+  default     = []
+}

@@ -26,6 +26,8 @@ inputs = {
   allowed_groups = [
     "superusers",
     "privileged_engineers",
-    "engineers"
+    "engineers",
+    "restricted_engineers",
+    "demo_users"
   ]
 }

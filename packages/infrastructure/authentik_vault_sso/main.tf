@@ -81,7 +81,7 @@ resource "kubernetes_config_map_v1_data" "media" {
     namespace = var.authentik_namespace
   }
   data = {
-    "/media/public/${random_id.logo.hex}.svg" = file("${path.module}/vault.svg")
+    "${random_id.logo.hex}.svg" = file("${path.module}/vault.svg")
   }
   field_manager = random_id.logo.hex
   force         = true
@@ -133,7 +133,7 @@ resource "authentik_application" "vault" {
   meta_launch_url   = "https://${var.vault_domain}/ui/vault/auth?with=oidc"
   meta_description  = var.ui_description
   meta_publisher    = "Panfactum"
-  meta_icon         = "${random_id.logo.hex}.svg"
+  meta_icon         = "/media/public/${random_id.logo.hex}.svg"
   group             = var.ui_group
   open_in_new_tab   = true
 }

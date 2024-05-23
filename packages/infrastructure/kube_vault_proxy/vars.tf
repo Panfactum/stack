@@ -40,5 +40,5 @@ variable "allowed_email_domains" {
 variable "allowed_vault_roles" {
   description = "Roles from Vault that are allowed to access the upstream resources"
   type        = set(string)
-  default     = ["rbac-superusers", "rbac-admins", "rbac-readers"]
+  default     = ["rbac-superusers", "rbac-admins", "rbac-readers", "rbac-restricted-readers"]
 }

@@ -248,7 +248,7 @@ resource "vault_identity_oidc_key" "argo" {
 }
 
 data "vault_identity_group" "rbac_groups" {
-  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers"])
+  for_each   = toset(["rbac-superusers", "rbac-admins", "rbac-readers", "rbac-restricted-readers"])
   group_name = each.key
 }
 
@@ -984,7 +984,7 @@ resource "kubernetes_service_account" "reader" {
     namespace = local.namespace
     labels    = module.server_labels.kube_labels
     annotations = {
-      "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups"
+      "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups or 'rbac-restricted-readers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "98"
       "workflows.argoproj.io/service-account-token.name" = "argo-reader-${md5(time_rotating.token_rotation.id)}"
     }

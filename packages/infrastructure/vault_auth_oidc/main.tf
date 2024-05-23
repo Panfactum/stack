@@ -254,3 +254,63 @@ resource "vault_identity_group" "rbac_readers" {
   member_group_ids = [for group in vault_identity_group.readers : group.id]
 }
 
+/************************* Restricted Readers ***********************************/
+
+data "vault_policy_document" "restricted_readers" {
+  rule {
+    path         = "secret/*"
+    capabilities = ["list"]
+    description  = "allow list on secrets, but not read"
+  }
+  rule {
+    path         = "auth/*"
+    capabilities = ["read", "list"]
+    description  = "allow read on auth"
+  }
+  rule {
+    path         = "identity/*"
+    capabilities = ["read", "list"]
+    description  = "allow read on identity"
+  }
+  rule {
+    path         = "pki/*"
+    capabilities = ["list"]
+    description  = "allow listing pki infrastructure, but not read"
+  }
+  rule {
+    path         = "db/creds/restricted-reader*"
+    capabilities = ["read", "list"]
+    description  = "allows getting credentials for restricted read-only database roles"
+  }
+  rule {
+    path         = "ssh/*"
+    capabilities = ["read", "list"]
+    description  = "allows getting ssh keys signed for bastion authentication"
+  }
+}
+
+resource "vault_policy" "restricted_readers" {
+  name   = "restricted-reader"
+  policy = data.vault_policy_document.restricted_readers.hcl
+}
+
+resource "vault_identity_group" "restricted_readers" {
+  for_each = toset(var.restricted_reader_groups)
+  name     = each.key
+  type     = "external"
+  policies = [vault_policy.restricted_readers.name]
+}
+
+resource "vault_identity_group_alias" "restricted_readers" {
+  for_each       = toset(var.restricted_reader_groups)
+  canonical_id   = vault_identity_group.restricted_readers[each.key].id
+  mount_accessor = vault_jwt_auth_backend.oidc.accessor
+  name           = each.key
+}
+
+resource "vault_identity_group" "rbac_restricted_readers" {
+  name             = "rbac-restricted-readers"
+  type             = "internal"
+  member_group_ids = [for group in vault_identity_group.restricted_readers : group.id]
+}
+
