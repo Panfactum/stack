@@ -147,7 +147,8 @@ words: [
   "thanos",
   "poolers",
   "alertmanager",
-  "mschnee"
+  "mschnee",
+  "jlevydev"
 ]
 languageSettings:
   - languageId: markdown,mdx

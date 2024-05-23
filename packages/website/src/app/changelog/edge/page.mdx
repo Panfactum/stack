@@ -66,6 +66,11 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   when `monitoring_enabled = true`. This provides a service mesh dashboard and the ability to capture and introspect
   raw HTTP requests sent in realtime.
 
+* (Alpha) We've added the [Argo Workflow](https://argoproj.github.io/workflows/) engine to the stack
+via the [kube_argo](/docs/edge/reference/infrastructure-modules/kubernetes/kube_argo) module. This will
+serve as the basis for the future, integrated CI / CD systems and can also be used to process
+arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](https://github.com/jlevydev))
+
 - A new module, [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault_proxy), that
   can be used to add SSO to web assets that do not have integrated SSO. The module SSO is configured out-of-the-box
   to work with the cluster's Vault instance.
