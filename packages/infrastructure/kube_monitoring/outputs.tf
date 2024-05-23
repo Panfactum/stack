@@ -10,3 +10,7 @@ output "grafana_admin_password" {
 output "thanos_query_frontend_url" {
   value = "http://thanos-query-frontend.${local.namespace}.svc.cluster.local:9090"
 }
+
+output "bucket_web_url" {
+  value = "https://${local.bucket_web_domain}"
+}

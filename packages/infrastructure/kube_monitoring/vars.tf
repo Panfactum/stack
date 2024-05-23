@@ -172,6 +172,12 @@ variable "thanos_bucket_web_enable" {
   default     = true
 }
 
+variable "thanos_bucket_web_domain" {
+  description = "Domain to host the Thanos bucket web UI on. If not provided, will be on the same subdomain as grafana but with the thanos-bucket identifier (thanos-bucket.\\<grafana-subdomain\\>)"
+  type        = string
+  default     = null
+}
+
 variable "alertmanager_storage_class_name" {
   description = "The storage class to use for local alertmanager storage"
   type        = string

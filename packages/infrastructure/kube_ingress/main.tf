@@ -116,7 +116,8 @@ locals {
         x_xss_protection               = var.x_xss_protection
         x_frame_options                = var.x_frame_options
 
-        extra_response_headers = var.extra_response_headers
+        extra_response_headers      = var.extra_response_headers
+        extra_configuration_snippet = var.extra_configuration_snippet
       })
 
       // Since we use regex in all our ingress routing, this MUST be set to true
@@ -162,7 +163,7 @@ locals {
       "nginx.ingress.kubernetes.io/limit-burst-multiplier" = "3"
       "nginx.ingress.kubernetes.io/limit-whitelist"        = join(", ", [])
     },
-    var.annotations
+    var.extra_annotations
   )
 
   rewrite_configs = flatten([for config in var.ingress_configs : [for rewrite_rule in config.rewrite_rules : merge(config, rewrite_rule)]])

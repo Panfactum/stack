@@ -2,7 +2,7 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Prometheus Stack
+# Panfactum Monitoring Stack
 
 <ModuleHeader name="kube_monitoring" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_monitoring" status="alpha" type="live" />
 
@@ -226,6 +226,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_thanos_bucket_web_domain" /> [thanos\_bucket\_web\_domain](#input_thanos_bucket_web_domain)
+
+Description: Domain to host the Thanos bucket web UI on. If not provided, will be on the same subdomain as grafana but with the thanos-bucket identifier (thanos-bucket.\<grafana-subdomain>)
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_thanos_bucket_web_enable" /> [thanos\_bucket\_web\_enable](#input_thanos_bucket_web_enable)
 
 Description: Whether to enable the web dashboard for the Thanos bucket analyzer which can show debugging information about your metrics data
@@ -293,6 +301,10 @@ Default: `false`
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_bucket_web_url" /> [bucket\_web\_url](#output_bucket_web_url)
+
+Description: n/a
 
 ### <a name="output_grafana_admin_password" /> [grafana\_admin\_password](#output_grafana_admin_password)
 

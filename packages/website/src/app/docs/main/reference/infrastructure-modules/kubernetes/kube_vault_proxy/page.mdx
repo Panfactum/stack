@@ -4,10 +4,33 @@ import ModuleHeader from "../../ModuleHeader";
 
 # Vault OAuth2 Proxy
 
-<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vault_proxy" status="alpha" type="submodule" />
+<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vault_proxy" status="stable" type="submodule" />
 
 This module provides a deployment of the [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy)
 that requires authentication with the cluster's Vault instance.
+
+## Usage
+
+### Setup
+
+This module is intended to be used in conjunction with the [kube\_ingress](/docs/main/reference/infrastructure-modules/kubernetes/kube_ingress)
+module. `domain` should be set to a domain used in `kube_ingress` and the `upstream_ingress_annotations` output
+should be passed to the `extra_annotations` input of `kube_ingress`.
+
+Once this is configured, request to the `kube_ingress` endpoints will trigger a request to an `oauth2-proxy` deployment
+via the [NGINX external authentication stanza](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#external-authentication). Clients will be required
+to authenticate with Vault before the main request is allowed to be forwarded to the upstream.
+
+The authentication response is cached via a cookie so this sequence only occurs on the initial request, ensuring
+the whole process adds very little overhead.
+
+### Authorization
+
+There are a few means to validate users. Each of these can be used simultaneously, and a user must meet **all**
+the constraints to be authorized.
+
+* **allowed\_email\_domains**: Email domains that are allowed (sourced from Authentik)
+* **allowed\_vault\_roles**: The user's role in the cluster's Vault instance (one of `rbac-superusers`, `rbac-admins`, `rbac-readers`, `rbac-restricted-readers`)
 
 ## Providers
 
@@ -41,12 +64,6 @@ Description: The namespace to deploy the proxy into
 
 Type: `string`
 
-### <a name="input_upstream_service_name" /> [upstream\_service\_name](#input_upstream_service_name)
-
-Description: The name of the upstream service
-
-Type: `string`
-
 ### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
 
 Description: The domain of the Vault instance running in the cluster.
@@ -68,6 +85,22 @@ Default:
 ```json
 [
   "*"
+]
+```
+
+### <a name="input_allowed_vault_roles" /> [allowed\_vault\_roles](#input_allowed_vault_roles)
+
+Description: Roles from Vault that are allowed to access the upstream resources
+
+Type: `set(string)`
+
+Default:
+
+```json
+[
+  "rbac-superusers",
+  "rbac-admins",
+  "rbac-readers"
 ]
 ```
 

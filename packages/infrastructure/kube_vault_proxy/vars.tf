@@ -31,13 +31,14 @@ variable "vault_domain" {
   type        = string
 }
 
-variable "upstream_service_name" {
-  description = "The name of the upstream service"
-  type        = string
-}
-
 variable "allowed_email_domains" {
   description = "Email domains allowed to authenticate with the proxy"
   type        = list(string)
   default     = ["*"]
+}
+
+variable "allowed_vault_roles" {
+  description = "Roles from Vault that are allowed to access the upstream resources"
+  type        = set(string)
+  default     = ["rbac-superusers", "rbac-admins", "rbac-readers"]
 }

@@ -211,6 +211,8 @@ locals {
     }
   }
 
+  grafana_subdomain = join(".", slice(split(".", var.grafana_domain), 1, length(split(".", var.grafana_domain))))
+  bucket_web_domain = var.thanos_bucket_web_domain != null ? var.thanos_bucket_web_domain : "thanos-bucket.${local.grafana_subdomain}"
 }
 
 module "pull_through" {
@@ -2548,34 +2550,68 @@ resource "kubernetes_config_map" "dashboard" {
 }
 
 /***************************************
-* Grafana Ingress
+* Ingresses
 ***************************************/
 
-#module "proxy" {
-#  count  = var.ingress_enabled ? 1 : 0
-#  source = "../kube_vault_proxy"
-#
-#  namespace = local.namespace
-#  pull_through_cache_enabled = var.pull_through_cache_enabled
-#  vpa_enabled = var.vpa_enabled
-#  domain = var.grafana_domain
-#  vault_domain = var.vault_domain
-#  upstream_service_name = "grafana"
-#
-#  # generate: pass_common_vars.snippet.txt
-#  pf_stack_version = var.pf_stack_version
-#  pf_stack_commit  = var.pf_stack_commit
-#  environment      = var.environment
-#  region           = var.region
-#  pf_root_module   = var.pf_root_module
-#  is_local         = var.is_local
-#  extra_tags       = var.extra_tags
-#  # end-generate
-#
-#  depends_on = [
-#    helm_release.prometheus_stack
-#  ]
-#}
+module "authenticating_proxy" {
+  count  = var.ingress_enabled && var.thanos_bucket_web_enable ? 1 : 0
+  source = "../kube_vault_proxy"
+
+  namespace                  = local.namespace
+  pull_through_cache_enabled = var.pull_through_cache_enabled
+  vpa_enabled                = var.vpa_enabled
+  domain                     = local.bucket_web_domain
+  vault_domain               = var.vault_domain
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+
+  depends_on = [
+    helm_release.prometheus_stack
+  ]
+}
+
+module "bucket_web_ingress" {
+  count  = var.ingress_enabled && var.thanos_bucket_web_enable ? 1 : 0
+  source = "../kube_ingress"
+
+  namespace = local.namespace
+  name      = "bucket-web"
+  ingress_configs = [{
+    domains      = [local.bucket_web_domain]
+    service      = "thanos-bucketweb"
+    service_port = 8080
+  }]
+
+  rate_limiting_enabled          = true
+  cross_origin_isolation_enabled = true
+  permissions_policy_enabled     = true
+  csp_enabled                    = true
+  csp_default_src                = "'self' 'unsafe-inline'"
+  extra_annotations              = module.authenticating_proxy[0].upstream_ingress_annotations
+  extra_configuration_snippet    = file("${path.module}/bucket_configuration_snippet.txt") # Blocks mutating requests
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+
+  depends_on = [
+    helm_release.prometheus_stack,
+  ]
+}
 
 
 module "ingress" {

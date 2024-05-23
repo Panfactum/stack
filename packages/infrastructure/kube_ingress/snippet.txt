@@ -24,3 +24,5 @@ set $pf_permissions_policy "${permissions_policy}";
 set $pf_x_xss_protection "${x_xss_protection}";
 set $pf_x_frame_options "${x_frame_options}";
 set $pf_referrer_policy "${referrer_policy}";
+
+${extra_configuration_snippet}
