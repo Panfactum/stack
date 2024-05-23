@@ -98,6 +98,9 @@ variable which allows for additional commands in the [NGINX configuration snippe
   a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall
   resource utilization of this fairly heavyweight controller.
 
+- Kubernetes labels applied via the `extra_tags` terragrunt input are now sanitized for valid characters automatically (invalid characters
+are replaced with `.`). ([@mschnee](https://github.com/mschnee))
+
 * Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
   in order to reduce resource utilization in the Stack.
 
@@ -109,8 +112,8 @@ variable which allows for additional commands in the [NGINX configuration snippe
 
 ### Fixes
 
-* PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has been fixed,
-  but the fix will not retroactively adjust existing PVCs as they are immutable.
+* PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has no functional impact,
+but confused monitoring systems. This has been fixed, but the fix will not retroactively adjust existing PVCs as they are immutable.
 
 ## edge.24-05-15
 
