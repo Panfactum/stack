@@ -75,9 +75,9 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source       = "../kube_deployment"
-  namespace    = module.namespace.namespace
-  service_name = local.name
+  source    = "../kube_deployment"
+  namespace = module.namespace.namespace
+  name      = local.name
 
   min_replicas = 2
   max_replicas = 2

@@ -12,6 +12,8 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
@@ -46,9 +48,17 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_argo_helm_version" /> [argo\_helm\_version](#input_argo_helm_version)
+### <a name="input_argo_events_helm_version" /> [argo\_events\_helm\_version](#input_argo_events_helm_version)
 
-Description: The version of the argo helm chart to deploy
+Description: The version of the argo events helm chart to deploy
+
+Type: `string`
+
+Default: `"2.4.4"`
+
+### <a name="input_argo_workflows_helm_version" /> [argo\_workflows\_helm\_version](#input_argo_workflows_helm_version)
+
+Description: The version of the argo workflows helm chart to deploy
 
 Type: `string`
 
@@ -61,6 +71,30 @@ Description: A list of IPs that can use the service account token to authenticat
 Type: `list(string)`
 
 Default: `[]`
+
+### <a name="input_event_bus_nats_server_config_reloader_version" /> [event\_bus\_nats\_server\_config\_reloader\_version](#input_event_bus_nats_server_config_reloader_version)
+
+Description: The version of nats-server-config-reloader to use for the event bus
+
+Type: `string`
+
+Default: `"0.14.2"`
+
+### <a name="input_event_bus_nats_version" /> [event\_bus\_nats\_version](#input_event_bus_nats_version)
+
+Description: The version of nats to use for the event bus
+
+Type: `string`
+
+Default: `"2.10.14"`
+
+### <a name="input_event_bus_prometheus_nats_exporter_version" /> [event\_bus\_prometheus\_nats\_exporter\_version](#input_event_bus_prometheus_nats_exporter_version)
+
+Description: The version of prometheus-nats-exporter to use for the event bus
+
+Type: `string`
+
+Default: `"0.15.0"`
 
 ### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
 

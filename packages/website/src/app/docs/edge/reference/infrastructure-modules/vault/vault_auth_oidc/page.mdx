@@ -8,7 +8,7 @@ import ModuleHeader from "../../ModuleHeader";
 
 Allows SSO logins to the Vault instance via OIDC.
 
-To be used with the [authentik\_vault\_sso](/docs/reference/infrastructure-modules/authentik/authentik_vault_sso) module.
+To be used with the [authentik\_vault\_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_vault_sso) module.
 
 ## Providers
 
@@ -65,6 +65,14 @@ Default: `[]`
 ### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
 
 Description: Groups that should have read-only access to this Vault
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_restricted_reader_groups" /> [restricted\_reader\_groups](#input_restricted_reader_groups)
+
+Description: Groups that should have restricted read-only access to this Vault
 
 Type: `list(string)`
 

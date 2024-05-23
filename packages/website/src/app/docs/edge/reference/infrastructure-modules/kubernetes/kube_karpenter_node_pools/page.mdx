@@ -10,6 +10,8 @@ import ModuleHeader from "../../ModuleHeader";
 
 The following providers are needed by this module:
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Required Inputs
@@ -19,6 +21,12 @@ The following input variables are required:
 ### <a name="input_cluster_ca_data" /> [cluster\_ca\_data](#input_cluster_ca_data)
 
 Description: The B64 encoded CA data of the API server of the eks cluster
+
+Type: `string`
+
+### <a name="input_cluster_dns_service_ip" /> [cluster\_dns\_service\_ip](#input_cluster_dns_service_ip)
+
+Description: The IP address of the cluster's DNS service.
 
 Type: `string`
 

@@ -16,7 +16,7 @@ It includes:
 * A set of controller [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
   with a static size for running cluster-critical
   controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
-  Autoscaled nodes are deployed via our [kube\_karpenter](/docs/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
+  Autoscaled nodes are deployed via our [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
 
 * [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
   for both the cluster control plane and for the node groups.
@@ -84,6 +84,12 @@ Description: List of names for subnets that controller nodes should be deployed 
 
 Type: `list(string)`
 
+### <a name="input_dns_service_ip" /> [dns\_service\_ip](#input_dns_service_ip)
+
+Description: The IP address of the cluster's DNS service. Must be inside the service\_cidr range.
+
+Type: `string`
+
 ### <a name="input_service_cidr" /> [service\_cidr](#input_service_cidr)
 
 Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
@@ -139,6 +145,14 @@ Description: The version of kubernetes to use on the nodes
 Type: `string`
 
 Default: `"1.29"`
+
+### <a name="input_core_dns_addon_enabled" /> [core\_dns\_addon\_enabled](#input_core_dns_addon_enabled)
+
+Description: FOR BACKWARDS COMPATIBILITY AND MIGRATIONS ONLY
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_coredns_version" /> [coredns\_version](#input_coredns_version)
 
@@ -213,6 +227,10 @@ Description: The AWS region to which the EKS cluster is deployed
 ### <a name="output_cluster_url" /> [cluster\_url](#output_cluster_url)
 
 Description: The URL for the Kubernetes API server
+
+### <a name="output_dns_service_ip" /> [dns\_service\_ip](#output_dns_service_ip)
+
+Description: The IP address of the cluster's DNS service.
 
 ### <a name="output_node_instance_profile" /> [node\_instance\_profile](#output_node_instance_profile)
 

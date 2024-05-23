@@ -2,11 +2,11 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Reloader
+# CoreDNS
 
-<ModuleHeader name="kube_reloader" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_reloader" status="stable" type="live" />
+<ModuleHeader name="kube_core_dns" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_core_dns" status="stable" type="live" />
 
-This module equips our cluster with the [reloader](https://github.com/stakater/Reloader), a utility that refreshes Pods when configmaps or secrets they rely on change.
+This launches a deployment of [CoreDNS](https://coredns.io/) instances that will serve as the cluster's DNS servers.
 
 ## Providers
 
@@ -14,13 +14,15 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
-
 * [kubectl](#requirement_kubectl) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [tls](#requirement_tls) (4.0.5)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Required Inputs
 
@@ -30,9 +32,17 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### <a name="input_core_dns_image_version" /> [core\_dns\_image\_version](#input_core_dns_image_version)
+
+Description: The version of the image to use for the deployment
+
+Type: `string`
+
+Default: `"1.11.1"`
+
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
-Description: Whether to allow monitoring CRs to be deployed in the namespace
+Description: Whether to add active monitoring to the deployed systems
 
 Type: `bool`
 
@@ -46,13 +56,13 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_reloader_helm_version" /> [reloader\_helm\_version](#input_reloader_helm_version)
+### <a name="input_service_ip" /> [service\_ip](#input_service_ip)
 
-Description: The image version of the stakater/reloader helm chart
+Description: The IP address that the DNS service will be exposed on
 
 Type: `string`
 
-Default: `"1.0.72"`
+Default: `"172.20.0.10"`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

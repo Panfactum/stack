@@ -26,31 +26,7 @@ The following outputs are exported:
 
 ### <a name="output_kube_labels" /> [kube\_labels](#output_kube_labels)
 
-### Description
-
-The `kube_labels` module provides a set of standard labels for kubernetes resources.
-
-This module also applies the `extra_tags` set in configuration as kubernetes labels.
-
-Because [kubernetes label names and values have stricter requirements](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set) than AWS resource tags do, the invalid characters will be replaced with a `.`.  For example
-```yaml
-extra_tags:
-  panfactum.com/stack-version: 1
-  "my:business:namespace": "operations"
-  "my:business:region:": "Europe"
-  "my-business.com/foo:bar": "baz"
-```
-
-Becomes
-```terraform
-{
-    "panfactum.com/stack-version" = 1
-    "my.business.namespace" = "operations"
-    "my.business.region" = "Europe"
-    "my-business.com/foo.bar" = "baz
-}
-
-```
+Description: n/a
 
 ## Usage
 

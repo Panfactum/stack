@@ -12,6 +12,8 @@ Our standard module for configuring ingress traffic in the cluster
 
 The following providers are needed by this module:
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
@@ -358,6 +360,22 @@ Description: The worker-src content security policy
 Type: `string`
 
 Default: `null`
+
+### <a name="input_extra_annotations" /> [extra\_annotations](#input_extra_annotations)
+
+Description: Extra annotations to add to the ingress objects
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_configuration_snippet" /> [extra\_configuration\_snippet](#input_extra_configuration_snippet)
+
+Description: An extra NGINX configuration snippet to add to the route handlers
+
+Type: `string`
+
+Default: `""`
 
 ### <a name="input_extra_response_headers" /> [extra\_response\_headers](#input_extra_response_headers)
 

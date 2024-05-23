@@ -24,7 +24,7 @@ input variables), and the description of the intended permission level.
 
 ## Maintainer Notes
 
-* This requires the cluster first be deployed via the [aws\_eks module](/docs/reference/infrastructure-modules/aws/aws_eks).
+* This requires the cluster first be deployed via the [aws\_eks module](/docs/edge/reference/infrastructure-modules/aws/aws_eks).
 
 * You will need to import the `kubernetes_config_map.aws_auth` resource and apply those changes in order for the nodes
   to successfully register. You will need to use the credentials of the cluster owner (the IAM entity that originally created the cluster).
@@ -34,6 +34,8 @@ input variables), and the description of the intended permission level.
 The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 

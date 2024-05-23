@@ -28,6 +28,8 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
@@ -64,6 +66,14 @@ Type: `string`
 
 Default: `"19.0.2"`
 
+### <a name="input_lfu_cache_enabled" /> [lfu\_cache\_enabled](#input_lfu_cache_enabled)
+
+Description: Whether redis will be deployed as an LFU cache
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_minimum_memory_mb" /> [minimum\_memory\_mb](#input_minimum_memory_mb)
 
 Description: The minimum memory in Mb to use for the redis nodes
@@ -71,6 +81,14 @@ Description: The minimum memory in Mb to use for the redis nodes
 Type: `number`
 
 Default: `25`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_persistence_enabled" /> [persistence\_enabled](#input_persistence_enabled)
 
@@ -136,6 +154,10 @@ The following outputs are exported:
 
 Description: n/a
 
+### <a name="output_master_set" /> [master\_set](#output_master_set)
+
+Description: n/a
+
 ### <a name="output_reader_role" /> [reader\_role](#output_reader_role)
 
 Description: n/a
@@ -143,6 +165,10 @@ Description: n/a
 ### <a name="output_redis_host" /> [redis\_host](#output_redis_host)
 
 Description: A service address that points to all redis nodes
+
+### <a name="output_redis_host_list" /> [redis\_host\_list](#output_redis_host_list)
+
+Description: n/a
 
 ### <a name="output_redis_master_host" /> [redis\_master\_host](#output_redis_master_host)
 

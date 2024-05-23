@@ -7,11 +7,11 @@ specific system / environment.** They are not global and a user can (and will) h
 in different environment.
 
 | Role                | Access Description                                                                                                                                                |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `superuser`         | Complete, unmitigated, root access.                                                                                                                               |
 | `admin`             | Read and write access to most resources. Prevented from some actions that could cause irrecoverable data loss and/or persistent security vulnerabilities.         |
 | `reader`            | Read access to all resources (including secrets).                                                                                                                 |
-| `restricted_reader` | Read access to all resources (excluding secrets).  Not deployed in resources that only store sensitive information (e.g., Vault).                                 |
+| `restricted_reader` | Read access to all resources (excluding secrets).                                                                                                                 |
 | `billing_admin`     | Read and write access only to resources required for billing and cost management.  Not deployed in resources that don't have billing functionality (e.g., Vault). |
 
 ## Default Groups

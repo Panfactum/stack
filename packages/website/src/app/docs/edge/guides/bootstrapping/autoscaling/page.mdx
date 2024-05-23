@@ -282,6 +282,22 @@ recognizes that additional nodes need to be schedule.
    cleanup and de-provisioning. This will happen slower than the scale-up as scaling down happens in batches
    to avoid cluster thrash or service disruption. However, this should complete within 15 minutes.
 
+### Adjust EKS Node Pools
+
+Now that Karpenter is successfully running, we can dramatically decrease the nodes in the base EKS node
+pool in order to allow Karpenter to handle autoscaling more efficiently (approximately $100 / month cost
+savings over the current settings).
+
+In your `aws_eks` modules, we recommend the following changes:
+
+- Set `controller_node_count` to `1`. [^4]
+- Set `controller_node_instance_types` to `["t3a.medium"]`.
+
+[^4]: We must keep at least one node around as Karpenter must run on a node that it itself did **not** provision.
+
+Note that this change might cause temporary cluster disruption as the core controllers are repositioned on
+Karpenter nodes.
+
 ## Next Steps
 
 Now that autoscaling is active, we can proceed to set up inbound networking for our cluster.
