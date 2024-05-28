@@ -148,7 +148,8 @@ words: [
   "poolers",
   "alertmanager",
   "mschnee",
-  "jlevydev"
+  "jlevydev",
+  "autoresizer"
 ]
 languageSettings:
   - languageId: markdown,mdx

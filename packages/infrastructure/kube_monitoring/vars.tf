@@ -166,6 +166,12 @@ variable "thanos_store_gateway_storage_class_name" {
   default     = "ebs-standard"
 }
 
+variable "thanos_ruler_storage_class_name" {
+  description = "The storage class to use for the thanos ruler local storage"
+  type        = string
+  default     = "ebs-standard"
+}
+
 variable "thanos_bucket_web_enable" {
   description = "Whether to enable the web dashboard for the Thanos bucket analyzer which can show debugging information about your metrics data"
   type        = bool

@@ -21,6 +21,24 @@ variable "persistence_size_gb" {
   default     = 5
 }
 
+variable "persistence_storage_limit_gb" {
+  description = "The maximum number of gigabytes of storage to provision for each redis node"
+  type        = number
+  default     = null
+}
+
+variable "persistence_storage_increase_threshold_percent" {
+  description = "Dropping below this percent of free storage will trigger an automatic increase in storage size"
+  type        = number
+  default     = 20
+}
+
+variable "persistence_storage_increase_percent" {
+  description = "The percent to increase storage by if free space drops below the threshold"
+  type        = number
+  default     = 50
+}
+
 variable "replica_count" {
   description = "The number of redis replicas to deploy"
   type        = number

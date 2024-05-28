@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pvc-autoresizer-controller
+spec:
+  duration: 336h0m0s
+  renewBefore: 168h0m0s
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+    encoding: PKCS1
+
+

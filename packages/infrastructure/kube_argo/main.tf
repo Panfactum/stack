@@ -392,7 +392,7 @@ module "database" {
 
   eks_cluster_name            = var.eks_cluster_name
   pg_cluster_namespace        = local.namespace
-  pg_storage_gb               = 10
+  pg_storage_gb               = 2
   pg_memory_mb                = 1000
   pg_cpu_millicores           = 250
   pg_instances                = 2
@@ -402,6 +402,7 @@ module "database" {
   burstable_instances_enabled = true
   backups_enabled             = var.workflow_archive_backups_enabled
   backups_force_delete        = true
+  monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

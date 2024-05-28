@@ -46,7 +46,7 @@ Type: `string`
 
 ### <a name="input_pg_storage_gb" /> [pg\_storage\_gb](#input_pg_storage_gb)
 
-Description: The number of gigabytes of storage to provision for the postgres cluster
+Description: The initial number of gigabytes of storage to provision for the postgres cluster
 
 Type: `number`
 
@@ -137,6 +137,30 @@ Default: `1000`
 ### <a name="input_pg_shutdown_timeout" /> [pg\_shutdown\_timeout](#input_pg_shutdown_timeout)
 
 Description: The number of seconds to wait for open connections to close before shutting down postgres nodes
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pg_storage_increase_percent" /> [pg\_storage\_increase\_percent](#input_pg_storage_increase_percent)
+
+Description: The percent to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `100`
+
+### <a name="input_pg_storage_increase_threshold_percent" /> [pg\_storage\_increase\_threshold\_percent](#input_pg_storage_increase_threshold_percent)
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### <a name="input_pg_storage_limit_gb" /> [pg\_storage\_limit\_gb](#input_pg_storage_limit_gb)
+
+Description: The maximum number of gigabytes of storage to provision for the postgres cluster
 
 Type: `number`
 

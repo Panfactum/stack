@@ -362,6 +362,9 @@ resource "kubernetes_manifest" "postgres_cluster" {
         annotations = {
           "linkerd.io/inject"                    = "enabled"
           "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
+          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : 10 * var.pg_storage_gb}Gi"
+          "resize.topolvm.io/increase"           = "${var.pg_storage_increase_percent}%"
+          "resize.topolvm.io/threshold"          = "${var.pg_storage_increase_threshold_percent}%"
         }
       }
 

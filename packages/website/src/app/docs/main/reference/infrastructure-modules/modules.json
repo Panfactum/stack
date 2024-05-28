@@ -201,6 +201,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_pvc_autoresizer",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_rbac",
       "group": "kubernetes"
     },

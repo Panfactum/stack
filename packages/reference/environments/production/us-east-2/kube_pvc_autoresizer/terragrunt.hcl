@@ -7,21 +7,15 @@ terraform {
   source = include.panfactum.locals.pf_stack_source
 }
 
-dependency "cluster" {
-  config_path = "../aws_eks"
+dependency "monitoring" {
+  config_path  = "../kube_monitoring"
+  skip_outputs = true
 }
 
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-
   pull_through_cache_enabled = true
   vpa_enabled                = true
-  ingress_enabled            = true
-  vault_domain               = "vault.prod.panfactum.com"
 
   # Alpha: Do not use
   monitoring_enabled = true
-
-  # Backwards Compatibility: Do not use
-  vault_storage_size_gb = 20
 }

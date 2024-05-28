@@ -329,6 +329,7 @@ resource "kubernetes_storage_class" "standard" {
     name = "ebs-standard"
     annotations = {
       "storageclass.kubernetes.io/is-default-class" = "true"
+      "resize.topolvm.io/enabled"                   = "true"
     }
   }
   storage_provisioner    = "ebs.csi.aws.com"
@@ -346,6 +347,9 @@ resource "kubernetes_storage_class" "standard" {
 resource "kubernetes_storage_class" "standard_retained" {
   metadata {
     name = "ebs-standard-retained"
+    annotations = {
+      "resize.topolvm.io/enabled" = "true"
+    }
   }
   storage_provisioner    = "ebs.csi.aws.com"
   volume_binding_mode    = "WaitForFirstConsumer"

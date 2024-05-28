@@ -16,9 +16,27 @@ variable "eks_cluster_name" {
 }
 
 variable "vault_storage_size_gb" {
-  description = "The number of gb to allocate to vault storage."
+  description = "The number of gigabytes to allocate to vault storage."
   type        = number
   default     = 20
+}
+
+variable "vault_storage_limit_gb" {
+  description = "The maximum number of gigabytes of storage to provision for the postgres cluster"
+  type        = number
+  default     = null
+}
+
+variable "vault_storage_increase_threshold_percent" {
+  description = "Dropping below this percent of free storage will trigger an automatic increase in storage size"
+  type        = number
+  default     = 20
+}
+
+variable "vault_storage_increase_percent" {
+  description = "The percent to increase storage by if free space drops below the threshold"
+  type        = number
+  default     = 100
 }
 
 variable "vault_domain" {

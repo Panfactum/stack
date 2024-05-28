@@ -106,6 +106,30 @@ Type: `number`
 
 Default: `5`
 
+### <a name="input_persistence_storage_increase_percent" /> [persistence\_storage\_increase\_percent](#input_persistence_storage_increase_percent)
+
+Description: The percent to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `50`
+
+### <a name="input_persistence_storage_increase_threshold_percent" /> [persistence\_storage\_increase\_threshold\_percent](#input_persistence_storage_increase_threshold_percent)
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### <a name="input_persistence_storage_limit_gb" /> [persistence\_storage\_limit\_gb](#input_persistence_storage_limit_gb)
+
+Description: The maximum number of gigabytes of storage to provision for each redis node
+
+Type: `number`
+
+Default: `null`
+
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images

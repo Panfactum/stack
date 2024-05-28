@@ -235,6 +235,11 @@ resource "helm_release" "redis" {
             whenScaled  = "Delete"
             whenDeleted = "Delete"
           }
+          annotations = {
+            "resize.topolvm.io/storage_limit" = "${var.persistence_storage_limit_gb != null ? var.persistence_storage_limit_gb : var.persistence_size_gb * 10}Gi"
+            "resize.topolvm.io/increase"      = "${var.persistence_storage_increase_percent}%"
+            "resize.topolvm.io/threshold"     = "${var.persistence_storage_increase_threshold_percent}%"
+          }
         }
         resources = {
           requests = {

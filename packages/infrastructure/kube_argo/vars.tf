@@ -88,3 +88,9 @@ variable "event_bus_nats_server_config_reloader_version" {
   type        = string
   default     = "0.14.2"
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}

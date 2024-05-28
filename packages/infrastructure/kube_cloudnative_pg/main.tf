@@ -178,7 +178,7 @@ resource "helm_release" "cnpg" {
 
       config = {
         data = {
-          INHERITED_ANNOTATIONS = "linkerd.io/*, config.linkerd.io/*"
+          INHERITED_ANNOTATIONS = "linkerd.io/*, config.linkerd.io/*, resize.topolvm.io/*"
           INHERITED_LABELS      = "region, service, version_tag, module, app"
         }
       }

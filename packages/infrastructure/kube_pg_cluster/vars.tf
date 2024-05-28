@@ -26,8 +26,26 @@ variable "pg_instances" {
 }
 
 variable "pg_storage_gb" {
-  description = "The number of gigabytes of storage to provision for the postgres cluster"
+  description = "The initial number of gigabytes of storage to provision for the postgres cluster"
   type        = number
+}
+
+variable "pg_storage_limit_gb" {
+  description = "The maximum number of gigabytes of storage to provision for the postgres cluster"
+  type        = number
+  default     = null
+}
+
+variable "pg_storage_increase_threshold_percent" {
+  description = "Dropping below this percent of free storage will trigger an automatic increase in storage size"
+  type        = number
+  default     = 20
+}
+
+variable "pg_storage_increase_percent" {
+  description = "The percent to increase storage by if free space drops below the threshold"
+  type        = number
+  default     = 100
 }
 
 variable "pg_shutdown_timeout" {

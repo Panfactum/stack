@@ -1382,6 +1382,14 @@ resource "helm_release" "prometheus_stack" {
 
           storageSpec = {
             volumeClaimTemplate = {
+              metadata = {
+                annotations = {
+                  "velero.io/exclude-from-backup"   = "true"
+                  "resize.topolvm.io/storage_limit" = "${10 * var.prometheus_local_storage_initial_size_gb}Gi"
+                  "resize.topolvm.io/increase"      = "50%"
+                  "resize.topolvm.io/threshold"     = "20%"
+                }
+              }
               spec = {
                 storageClassName = var.prometheus_storage_class_name
                 resources = {
@@ -1452,15 +1460,20 @@ resource "helm_release" "prometheus_stack" {
 
           storage = {
             volumeClaimTemplate = {
+              metadata = {
+                annotations = {
+                  "velero.io/exclude-from-backup"   = "true"
+                  "resize.topolvm.io/storage_limit" = "${10 * var.alertmanager_local_storage_initial_size_gb}Gi"
+                  "resize.topolvm.io/increase"      = "50%"
+                  "resize.topolvm.io/threshold"     = "20%"
+                }
+              }
               spec = {
                 storageClassName = var.alertmanager_storage_class_name
                 resources = {
                   requests = {
                     storage = "${var.alertmanager_local_storage_initial_size_gb}Gi"
                   }
-                }
-                annotations = {
-                  "velero.io/exclude-from-backup" = "true"
                 }
               }
             }
@@ -1915,7 +1928,10 @@ resource "helm_release" "thanos" {
           size         = "${var.thanos_compactor_disk_storage_gb}Gi"
           storageClass = var.thanos_compactor_storage_class_name
           annotations = {
-            "velero.io/exclude-from-backup" = "true"
+            "velero.io/exclude-from-backup"   = "true"
+            "resize.topolvm.io/storage_limit" = "${10 * var.thanos_compactor_disk_storage_gb}Gi"
+            "resize.topolvm.io/increase"      = "50%"
+            "resize.topolvm.io/threshold"     = "20%"
           }
         }
         serviceAccount = {
@@ -1969,7 +1985,10 @@ resource "helm_release" "thanos" {
           enabled      = true
           storageClass = var.thanos_store_gateway_storage_class_name
           annotations = {
-            "velero.io/exclude-from-backup" = "true"
+            "velero.io/exclude-from-backup"   = "true"
+            "resize.topolvm.io/storage_limit" = "100Gi"
+            "resize.topolvm.io/increase"      = "50%"
+            "resize.topolvm.io/threshold"     = "20%"
           }
         }
         podLabels                 = module.kube_labels_thanos_store_gateway.kube_labels
@@ -2003,7 +2022,17 @@ resource "helm_release" "thanos" {
             }]
           }]
         })
-
+        persistence = {
+          enabled      = true
+          storageClass = var.thanos_ruler_storage_class_name
+          size         = "2Gi"
+          annotations = {
+            "velero.io/exclude-from-backup"   = "true"
+            "resize.topolvm.io/storage_limit" = "100Gi"
+            "resize.topolvm.io/increase"      = "50%"
+            "resize.topolvm.io/threshold"     = "20%"
+          }
+        }
         networkPolicy = {
           enabled = false
         }

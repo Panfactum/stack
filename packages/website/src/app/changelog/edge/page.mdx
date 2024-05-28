@@ -7,6 +7,25 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+- The default for `vault_storage_size_gb` in [kube_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault)
+has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
+you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
+
+- Additional annotations are added to the Vault StatefulSet deployed by
+[kube_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault) in order to support volume resizing.
+In order to apply them, you must first **delete** the Vault StatefulSet and then re-apply the module. This will
+cause a brief window of unavailability but will not cause any data loss.
+
+### Added
+
+- The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
+[kube_pvc_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order
+to automatically expand EBS volumes as they fill up.
+
 ## edge.24-05-23
 
 ### Breaking Changes
@@ -91,7 +110,7 @@ arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](h
 ### Changed
 
 * Added the standard [Restricted Reader](/docs/edge/reference/rbac) role to Vault instances (`rbac-restricted-reader`)
-  and updated \[vault\_auth\_oidc] to take `restricted_reader_groups`. Since cluster resources authenticate with SSO
+  and updated [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/vault/vault_auth_oidc) to take `restricted_reader_groups`. Since cluster resources authenticate with SSO
   via Vault, this allows restricted readers to access additional cluster resources such as Grafana and Argo Workflows
   (albeit, in a locked-down read-only mode).
 
