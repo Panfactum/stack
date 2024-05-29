@@ -285,7 +285,7 @@ locals {
           preferredDuringSchedulingIgnoredDuringExecution = length(local.node_preferences) == 0 ? null : local.node_preferences
           requiredDuringSchedulingIgnoredDuringExecution  = length(keys(var.node_requirements)) == 0 ? null : local.node_requirements
         }
-      }, var.pod_anti_affinity_type == "node" ? module.constants.pod_anti_affinity_helm : var.pod_anti_affinity_type == "instance_type" ? module.constants.pod_anti_affinity_instance_type_helm : {})
+      }, var.pod_anti_affinity_type == "node" ? module.constants.pod_anti_affinity_helm : var.pod_anti_affinity_type == "instance_type" ? module.constants.pod_anti_affinity_preferred_instance_type_helm : {})
       topologySpreadConstraints = module.constants.topology_spread_zone_preferred
       restartPolicy             = var.restart_policy
 

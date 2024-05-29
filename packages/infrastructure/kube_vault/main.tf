@@ -233,6 +233,7 @@ resource "helm_release" "vault" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
@@ -340,7 +341,7 @@ resource "helm_release" "vault" {
           storageClass = "ebs-standard-retained"
         }
         affinity = merge(
-          module.server_constants.pod_anti_affinity_instance_type_helm,
+          module.server_constants.pod_anti_affinity_preferred_instance_type_helm,
           module.server_constants.controller_node_affinity_helm
         )
         tolerations               = module.server_constants.burstable_node_toleration_helm

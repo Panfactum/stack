@@ -364,7 +364,7 @@ resource "helm_release" "cilium" {
 
         affinity = merge(
           module.constants.controller_node_affinity_helm,
-          module.constants.pod_anti_affinity_instance_type_helm
+          module.constants.pod_anti_affinity_preferred_instance_type_helm
         )
 
         resources = {
