@@ -48,25 +48,7 @@ locals {
     "panfactum.com/stack-version"
   ]
 
-  # Required for VPA to work
-  extra_pod_labels = [
-    "app.kubernetes.io/instance",
-    "app.kubernetes.io/name",
-    "app.kubernetes.io/managed-by",
-    "app.kubernetes.io/component",
-    "pod-template-id",
-    "k8s-app",
-    "id",
-    "linkerd.io/control-plane-component",
-    "linkerd.io/control-plane-ns",
-    "linkerd.io/proxy-deployment",
-    "app",
-    "release",
-    "name",
-    "io.cilium/app"
-  ]
-  labels_to_track     = tolist(toset(concat(local.default_tracked_labels, var.additional_tracked_resource_labels)))
-  pod_labels_to_track = tolist(toset(concat(local.extra_pod_labels, local.labels_to_track)))
+  labels_to_track = tolist(toset(concat(local.default_tracked_labels, var.additional_tracked_resource_labels)))
 
   default_tracked_resources = [
     "certificatesigningrequests",
@@ -727,7 +709,6 @@ module "constants_alertmanager" {
   extra_tags = merge(var.extra_tags, local.alertmanager_match)
 }
 
-
 /***************************************
 * Namespace
 ***************************************/
@@ -957,6 +938,7 @@ resource "helm_release" "prometheus_stack" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
@@ -964,7 +946,11 @@ resource "helm_release" "prometheus_stack" {
       cleanPrometheusOperatorObjectNames = true
       labels                             = module.kube_labels_prometheus.kube_labels
       commonLabels = {
-        customizationHash = md5(join("", [for filename in fileset(path.module, "prometheus_kustomize/*") : filesha256(filename)]))
+        customizationHash = md5(join("", sort([for filename in [
+          "prometheus_kustomize/admission-cert.yaml",
+          "prometheus_kustomize/kustomization.yaml",
+          "prometheus_kustomize/kustomize.sh"
+        ] : filesha256("${path.module}/${filename}")])))
       }
 
       crds = {
@@ -1116,7 +1102,7 @@ resource "helm_release" "prometheus_stack" {
         image        = local.default_k8s_image
         customLabels = module.kube_labels_kube_state_metrics.kube_labels
         extraArgs = [
-          "--metric-labels-allowlist=pods=[${join(",", local.pod_labels_to_track)}]"
+          "--metric-labels-allowlist=*=[${join(",", local.labels_to_track)}]"
         ]
         updateStrategy = "Recreate"
         tolerations    = module.constants_kube_state_metrics.burstable_node_toleration_helm
@@ -1382,14 +1368,6 @@ resource "helm_release" "prometheus_stack" {
 
           storageSpec = {
             volumeClaimTemplate = {
-              metadata = {
-                annotations = {
-                  "velero.io/exclude-from-backup"   = "true"
-                  "resize.topolvm.io/storage_limit" = "${10 * var.prometheus_local_storage_initial_size_gb}Gi"
-                  "resize.topolvm.io/increase"      = "50%"
-                  "resize.topolvm.io/threshold"     = "20%"
-                }
-              }
               spec = {
                 storageClassName = var.prometheus_storage_class_name
                 resources = {
@@ -1460,14 +1438,6 @@ resource "helm_release" "prometheus_stack" {
 
           storage = {
             volumeClaimTemplate = {
-              metadata = {
-                annotations = {
-                  "velero.io/exclude-from-backup"   = "true"
-                  "resize.topolvm.io/storage_limit" = "${10 * var.alertmanager_local_storage_initial_size_gb}Gi"
-                  "resize.topolvm.io/increase"      = "50%"
-                  "resize.topolvm.io/threshold"     = "20%"
-                }
-              }
               spec = {
                 storageClassName = var.alertmanager_storage_class_name
                 resources = {
@@ -1672,7 +1642,6 @@ resource "vault_identity_oidc_provider" "oidc" {
 * Thanos
 ***************************************/
 
-
 resource "kubernetes_service_account" "thanos_compactor" {
   metadata {
     name      = "thanos-compactor"
@@ -1797,6 +1766,7 @@ resource "helm_release" "thanos" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
@@ -1984,12 +1954,6 @@ resource "helm_release" "thanos" {
         persistence = {
           enabled      = true
           storageClass = var.thanos_store_gateway_storage_class_name
-          annotations = {
-            "velero.io/exclude-from-backup"   = "true"
-            "resize.topolvm.io/storage_limit" = "100Gi"
-            "resize.topolvm.io/increase"      = "50%"
-            "resize.topolvm.io/threshold"     = "20%"
-          }
         }
         podLabels                 = module.kube_labels_thanos_store_gateway.kube_labels
         replicaCount              = 2
@@ -2026,12 +1990,6 @@ resource "helm_release" "thanos" {
           enabled      = true
           storageClass = var.thanos_ruler_storage_class_name
           size         = "2Gi"
-          annotations = {
-            "velero.io/exclude-from-backup"   = "true"
-            "resize.topolvm.io/storage_limit" = "100Gi"
-            "resize.topolvm.io/increase"      = "50%"
-            "resize.topolvm.io/threshold"     = "20%"
-          }
         }
         networkPolicy = {
           enabled = false
@@ -2058,7 +2016,6 @@ resource "helm_release" "thanos" {
 
   depends_on = [helm_release.prometheus_stack, module.thanos_redis_cache]
 }
-
 
 /***************************************
 * PDBs
@@ -2277,6 +2234,83 @@ resource "kubernetes_manifest" "alertmanager" {
 /***************************************
 * Autoscaling
 ***************************************/
+
+resource "kubernetes_annotations" "prometheus_pvc" {
+  count       = 2
+  api_version = "v1"
+  kind        = "PersistentVolumeClaim"
+  metadata {
+    name      = "prometheus-monitoring-db-prometheus-monitoring-${count.index}"
+    namespace = local.namespace
+  }
+  annotations = {
+    "velero.io/exclude-from-backup"   = "true"
+    "resize.topolvm.io/storage_limit" = "100Gi"
+    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/threshold"     = "20%"
+  }
+  force = true
+
+  depends_on = [helm_release.prometheus_stack]
+}
+
+resource "kubernetes_annotations" "alertmanager_pvc" {
+  count       = 2
+  api_version = "v1"
+  kind        = "PersistentVolumeClaim"
+  metadata {
+    name      = "alertmanager-monitoring-db-alertmanager-monitoring-${count.index}"
+    namespace = local.namespace
+  }
+  annotations = {
+    "velero.io/exclude-from-backup"   = "true"
+    "resize.topolvm.io/storage_limit" = "100Gi"
+    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/threshold"     = "20%"
+  }
+  force = true
+
+  depends_on = [helm_release.prometheus_stack]
+}
+
+resource "kubernetes_annotations" "thanos_store_gateway_pvc" {
+  count       = 2
+  api_version = "v1"
+  kind        = "PersistentVolumeClaim"
+  metadata {
+    name      = "data-thanos-storegateway-${count.index}"
+    namespace = local.namespace
+  }
+  annotations = {
+    "velero.io/exclude-from-backup"   = "true"
+    "resize.topolvm.io/storage_limit" = "100Gi"
+    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/threshold"     = "20%"
+  }
+  force = true
+
+  depends_on = [helm_release.thanos]
+}
+
+resource "kubernetes_annotations" "thanos_ruler_pvc" {
+  count       = 1
+  api_version = "v1"
+  kind        = "PersistentVolumeClaim"
+  metadata {
+    name      = "data-thanos-ruler-${count.index}"
+    namespace = local.namespace
+  }
+  annotations = {
+    "velero.io/exclude-from-backup"   = "true"
+    "resize.topolvm.io/storage_limit" = "100Gi"
+    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/threshold"     = "20%"
+  }
+  force = true
+
+
+  depends_on = [helm_release.thanos]
+}
 
 resource "kubernetes_manifest" "vpa_prometheus_operator" {
   count = var.vpa_enabled ? 1 : 0
@@ -2601,10 +2635,6 @@ module "authenticating_proxy" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
-
-  depends_on = [
-    helm_release.prometheus_stack
-  ]
 }
 
 module "bucket_web_ingress" {
@@ -2636,10 +2666,6 @@ module "bucket_web_ingress" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
-
-  depends_on = [
-    helm_release.prometheus_stack,
-  ]
 }
 
 
@@ -2669,8 +2695,4 @@ module "ingress" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
-
-  depends_on = [
-    helm_release.prometheus_stack,
-  ]
 }

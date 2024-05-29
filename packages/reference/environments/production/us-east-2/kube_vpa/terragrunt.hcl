@@ -20,7 +20,6 @@ dependency "monitoring" {
 inputs = {
   pull_through_cache_enabled = true
   vpa_enabled                = true
-  log_verbosity              = 1
 
   # Alpha: Do not use
   prometheus_enabled        = false

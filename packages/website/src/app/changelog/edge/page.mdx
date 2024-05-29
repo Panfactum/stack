@@ -15,12 +15,12 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
 you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
 
-- Additional annotations are added to the Vault StatefulSet deployed by
-[kube_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault) in order to support volume resizing.
-In order to apply them, you must first **delete** the Vault StatefulSet and then re-apply the module. This will
-cause a brief window of unavailability but will not cause any data loss.
-
 ### Added
+
+- (Alpha) Added the [Loki](https://grafana.com/docs/loki/latest/)
+logging backend via [kube\_logging](/docs/edge/reference/infrastructure-modules/kubernetes/kube_logging)
+and the [Alloy](https://grafana.com/docs/alloy/latest/) log collector via [kube_alloy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_alloy).
+
 
 - The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
 [kube_pvc_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order

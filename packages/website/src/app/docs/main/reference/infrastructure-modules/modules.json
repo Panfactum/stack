@@ -77,6 +77,10 @@
       "group": "utility"
     },
     {
+      "module": "kube_alloy",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_argo",
       "group": "kubernetes"
     },
@@ -178,6 +182,10 @@
     },
     {
       "module": "kube_linkerd",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_logging",
       "group": "kubernetes"
     },
     {

@@ -1,0 +1,117 @@
+logging {
+  level = "${LOG_LEVEL}"
+  format = "json"
+}
+
+discovery.kubernetes "pods" {
+  role = "pod"
+  // limit to pods on this node to reduce the amount you need to filter
+  selectors {
+    role  = "pod"
+    field = "spec.nodeName=" + env("HOSTNAME")
+  }
+}
+
+discovery.relabel "pod_logs" {
+  targets = discovery.kubernetes.pods.targets
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+    separator     = "/"
+    target_label  = "job"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+    separator     = "/"
+    action        = "replace"
+    replacement   = "/var/log/pods/*$1/*.log"
+    target_label  = "__path__"
+  }
+}
+
+local.file_match "pod_logs" {
+  path_targets = discovery.relabel.pod_logs.output
+}
+
+loki.source.file "pod_logs" {
+  targets    = local.file_match.pod_logs.targets
+  forward_to = [loki.process.pod_logs.receiver]
+}
+
+// basic processing to parse the container format. You can add additional processing stages
+// to match your application logs.
+loki.process "pod_logs" {
+
+  // the cri processing stage extracts the following k/v pairs: log, stream, time, flags
+  stage.cri {}
+
+  // Loki will only accept logs that are less than 1 hour old
+  stage.drop {
+    older_than          = "1h"
+    drop_counter_reason = "too old"
+  }
+
+  // Cap log sizes so we don't allow any one system to accidentally nuke
+  // the log collector
+  stage.drop {
+      longer_than         = "8KB"
+      drop_counter_reason = "too long"
+  }
+
+  // the VPA recommender emits a lot of unnecessary logs due to this issue
+  // https://github.com/kubernetes/autoscaler/issues/6691
+  stage.drop {
+    source = "content"
+    expression = ".+Error adding metric sample for container.+linkerd-proxy.+"
+    drop_counter_reason = "vpa"
+  }
+
+
+  // Extract the level field from JSON logs
+  stage.json {
+    source = "content"
+    expressions = {
+      level = "",
+    }
+  }
+
+  // Convert all levels to lowercase
+  stage.template {
+      source   = "level"
+      template = "{{ ToLower .Value }}"
+  }
+
+  // Convert level=warning to level=warn
+  stage.template {
+      source   = "level"
+      template = "{{ Replace .Value \"warning\" \"warn\" 1 }}"
+  }
+
+  // Add labels to logs
+  stage.labels {
+    values = {
+      flags   = "",
+      stream  = "",
+      level = "",
+    }
+  }
+
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki-write.logging.svc.cluster.local:3100/loki/api/v1/push"
+  }
+}

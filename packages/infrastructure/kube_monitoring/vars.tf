@@ -10,6 +10,12 @@ variable "thanos_chart_version" {
   default     = "15.4.7"
 }
 
+variable "loki_chart_version" {
+  description = "The version of the grafana/loki helm chart to deploy"
+  type        = string
+  default     = "6.6.2"
+}
+
 variable "thanos_image_version" {
   description = "The version of thanos images to use"
   type        = string
@@ -219,3 +225,11 @@ variable "monitoring_enabled" {
   type        = bool
   default     = false
 }
+
+variable "loki_storage_class_name" {
+  description = "The storage class to use for local loki storage"
+  type        = string
+  default     = "ebs-standard"
+}
+
+

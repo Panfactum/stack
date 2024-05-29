@@ -296,18 +296,16 @@ resource "helm_release" "linkerd" {
         }
         nativeSidecar = true
         logFormat     = "json"
-        logLevel      = var.log_level
+        logLevel      = "${var.log_level},linkerd=${var.log_level},linkerd2_proxy=${var.log_level}"
         resources = {
 
-          // We provide both a request and a limit
-          // to ensure that the VPA gives slightly more headroom
-          // to the proxy (2x vs 1x) as its typically a low memory
-          // component but can experience some spikes on high network traffic
-          // Since this applies to ALL pods in the cluster, this ends up
-          // being fairly important
+          // Native sidecars are not autoscaled due to this issue
+          // https://github.com/kubernetes/autoscaler/issues/6691
+          // so we set the request low and the limit high as
+          // the majority of proxies are low resource consumption
           memory = {
-            request = "40Mi"
-            limit   = "80Mi"
+            request = "20Mi"
+            limit   = "200Mi"
           }
         }
       }

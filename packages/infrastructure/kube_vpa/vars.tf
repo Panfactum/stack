@@ -1,7 +1,7 @@
 variable "vertical_autoscaler_helm_version" {
   description = "The version of VPA helm chart to deploy"
   type        = string
-  default     = "4.4.5"
+  default     = "4.4.6"
 }
 
 variable "vertical_autoscaler_image_version" {

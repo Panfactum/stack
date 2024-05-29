@@ -1,14 +1,5 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_THANOS",
-      "label": "thanos",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
+  "__inputs": [],
   "__elements": {},
   "__requires": [
     {
@@ -48,7 +39,7 @@
         "builtIn": 1,
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS}"
+          "uid": "$datasource"
         },
         "enable": true,
         "hide": true,
@@ -69,7 +60,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -132,7 +123,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "up{job=\"vault-active\"}",
@@ -149,7 +140,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -220,7 +211,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_secret_kv_count)",
           "format": "table",
@@ -263,7 +254,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -308,7 +299,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_identity_num_entities)",
           "interval": "",
@@ -328,7 +319,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fontSize": "80%",
       "format": "short",
@@ -355,7 +346,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_identity_entity_alias_count)",
           "format": "time_series",
@@ -371,7 +362,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -437,7 +428,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "max(1 + vault_core_unsealed{})",
           "format": "time_series",
@@ -452,7 +443,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -509,7 +500,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_expire_num_leases)",
           "interval": "",
@@ -541,7 +532,7 @@
           "dashes": false,
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "decimals": 0,
           "fieldConfig": {
@@ -592,7 +583,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(increase(vault_route_create_${mountpoint}__count[5m]))",
               "format": "time_series",
@@ -604,7 +595,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(increase(vault_route_delete_${mountpoint}__count[5m]))",
               "hide": false,
@@ -615,7 +606,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(increase(vault_route_read_${mountpoint}__count[5m]))",
               "format": "time_series",
@@ -629,7 +620,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(increase(vault_route_list_${mountpoint}__count[5m]))",
               "format": "time_series",
@@ -641,7 +632,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(increase(vault_route_rollback_${mountpoint}__count[5m]))",
               "hide": true,
@@ -691,7 +682,7 @@
           "dashes": false,
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "decimals": 0,
           "fieldConfig": {
@@ -742,7 +733,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(rate(vault_route_create_${mountpoint}__sum[1m]) / rate(vault_route_create_${mountpoint}__count[1m]) * 1000)",
               "format": "time_series",
@@ -754,7 +745,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(rate(vault_route_delete_${mountpoint}__sum[1m]) / rate(vault_route_delete_${mountpoint}__count[1m]) * 1000)",
               "interval": "",
@@ -764,7 +755,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(rate(vault_route_read_${mountpoint}__sum[1m]) / rate(vault_route_read_${mountpoint}__count[1m]) * 1000)",
               "hide": false,
@@ -775,7 +766,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(rate(vault_route_list_${mountpoint}__sum[1m]) / rate(vault_route_list_${mountpoint}__count[1m]) * 1000)",
               "hide": false,
@@ -786,7 +777,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_THANOS}"
+                "uid": "$datasource"
               },
               "expr": "avg(rate(vault_route_rollback_${mountpoint}__sum[1m]) / rate(vault_route_rollback_${mountpoint}__count[1m]) * 1000)",
               "hide": true,
@@ -873,7 +864,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "description": "",
       "fieldConfig": {
@@ -924,7 +915,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_runtime_heap_objects{} / vault_runtime_malloc_count{})",
           "interval": "",
@@ -939,7 +930,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -997,7 +988,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_runtime_num_goroutines{})",
           "interval": "",
@@ -1015,7 +1006,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 3,
       "fieldConfig": {
@@ -1066,7 +1057,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_runtime_alloc_bytes{})",
           "interval": "",
@@ -1136,7 +1127,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1182,7 +1173,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_token_count)",
           "interval": "",
@@ -1200,7 +1191,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 0,
       "fieldConfig": {
@@ -1249,7 +1240,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_token_count_by_policy)",
           "interval": "",
@@ -1294,7 +1285,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1355,7 +1346,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(vault_token_create_count - vault_token_store_count)",
           "format": "time_series",
@@ -1375,7 +1366,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 0,
       "fieldConfig": {
@@ -1424,7 +1415,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_token_count_by_ttl)",
           "format": "time_series",
@@ -1474,7 +1465,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 0,
       "fieldConfig": {
@@ -1523,7 +1514,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_token_count_by_auth)",
           "interval": "",
@@ -1572,7 +1563,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 0,
       "fieldConfig": {
@@ -1622,7 +1613,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg by(auth_method, creation_ttl) (vault_token_creation)",
           "format": "time_series",
@@ -1676,7 +1667,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 0,
       "fieldConfig": {
@@ -1723,7 +1714,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_token_create_count)",
           "format": "time_series",
@@ -1736,7 +1727,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg without(instance) (vault_token_store_count)",
           "format": "time_series",
@@ -1790,7 +1781,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 3,
       "fieldConfig": {
@@ -1840,7 +1831,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_token_lookup_count[1m]))",
           "hide": false,
@@ -1913,7 +1904,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "description": "",
       "fieldConfig": {
@@ -1964,7 +1955,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "max(idelta(vault_audit_log_request_failure[1m]))",
           "format": "time_series",
@@ -1983,7 +1974,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "decimals": 3,
       "fieldConfig": {
@@ -2034,7 +2025,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_audit_log_request_count[1m]))",
           "format": "time_series",
@@ -2047,7 +2038,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_audit_log_response_count[1m]))",
           "format": "time_series",
@@ -2061,7 +2052,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_core_handle_request_count[1m]))",
           "format": "time_series",
@@ -2114,7 +2105,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -2161,7 +2152,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_consul_get_count[1m]))",
           "interval": "",
@@ -2172,7 +2163,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_consul_put_count[1m]))",
           "interval": "",
@@ -2182,7 +2173,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_consul_delete_count[1m]))",
           "interval": "",
@@ -2192,7 +2183,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "irate(vault_consul_list_count{instance=\"$node:$port\"}[1m])",
           "interval": "",
@@ -2236,7 +2227,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "description": "",
       "fieldConfig": {
@@ -2287,7 +2278,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "max(idelta(vault_audit_log_response_failure[1m]))",
           "format": "time_series",
@@ -2334,7 +2325,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -2381,7 +2372,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_policy_set_policy_count[1m]))",
           "format": "time_series",
@@ -2433,7 +2424,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_THANOS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -2479,7 +2470,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_THANOS}"
+            "uid": "$datasource"
           },
           "expr": "avg(irate(vault_policy_get_policy_count[1m]))",
           "format": "time_series",
@@ -2532,10 +2523,28 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "selected": false,
+          "text": "default",
+          "value": "default"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS}"
+          "uid": "$datasource"
         },
         "definition": "label_values(up{job=\"vault\"}, instance)",
         "hide": 2,
@@ -2558,7 +2567,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS}"
+          "uid": "$datasource"
         },
         "definition": "label_values(up{job=\"vault\",instance=~\"$node:(.*)\"}, instance)",
         "hide": 2,
@@ -2581,7 +2590,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_THANOS}"
+          "uid": "$datasource"
         },
         "definition": "label_values(vault_secret_kv_count, mount_point)",
         "hide": 0,

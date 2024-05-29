@@ -235,6 +235,11 @@ resource "helm_release" "cilium" {
         algorithm       = "maglev"
       }
 
+      logOptions = {
+        format = "json"
+        level  = var.log_level
+      }
+
       // Used to facilitate the proper scaling in the cluster autoscaler
       agentNotReadyTaintKey = module.constants.cilium_taint.key
 

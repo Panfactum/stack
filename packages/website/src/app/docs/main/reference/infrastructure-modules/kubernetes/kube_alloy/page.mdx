@@ -2,11 +2,12 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Cilium CNI
+# Alloy
 
-<ModuleHeader name="kube_cilium" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_cilium" status="stable" type="live" />
+<ModuleHeader name="kube_alloy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_alloy" status="alpha" type="live" />
 
-This module deploys the [Cilium CNI](https://docs.cilium.io/en/stable/installation/k8s-install-helm/) to manage the network stack.
+This module deploys [Grafana Alloy](https://grafana.com/docs/alloy/latest/)
+for collecting logs and traces from various ecosystem components
 
 ## Providers
 
@@ -20,53 +21,27 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
-
-Description: The name of the EKS cluster.
-
-Type: `string`
-
-### <a name="input_eks_cluster_url" /> [eks\_cluster\_url](#input_eks_cluster_url)
-
-Description: The url of the EKS cluster api server
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### <a name="input_alloy_chart_version" /> [alloy\_chart\_version](#input_alloy_chart_version)
 
-Description: A list of IPs that can use the service account token to authenticate with AWS API
-
-Type: `list(string)`
-
-Default: `[]`
-
-### <a name="input_cilium_helm_version" /> [cilium\_helm\_version](#input_cilium_helm_version)
-
-Description: The version of the metrics-server helm chart to deploy
+Description: The version of the grafana/alloy helm chart to deploy
 
 Type: `string`
 
-Default: `"1.15.2"`
-
-### <a name="input_hubble_enabled" /> [hubble\_enabled](#input_hubble_enabled)
-
-Description: Whether to enable hubble for network debugging
-
-Type: `bool`
-
-Default: `false`
+Default: `"0.3.1"`
 
 ### <a name="input_log_level" /> [log\_level](#input_log_level)
 
-Description: The log level for the Cilium pods
+Description: The log level for the Alloy pods
 
 Type: `string`
 
@@ -98,7 +73,11 @@ Default: `false`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
 
 ## Usage
 

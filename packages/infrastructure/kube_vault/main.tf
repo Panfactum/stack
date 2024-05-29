@@ -338,11 +338,6 @@ resource "helm_release" "vault" {
           size         = "${var.vault_storage_size_gb}Gi"
           mountPath    = "/vault/data"
           storageClass = "ebs-standard-retained"
-          annotations = {
-            "resize.topolvm.io/storage_limit" = "${var.vault_storage_limit_gb != null ? var.vault_storage_limit_gb : 10 * var.vault_storage_size_gb}Gi"
-            "resize.topolvm.io/increase"      = "${var.vault_storage_increase_percent}%"
-            "resize.topolvm.io/threshold"     = "${var.vault_storage_increase_threshold_percent}%"
-          }
         }
         affinity = merge(
           module.server_constants.pod_anti_affinity_instance_type_helm,
@@ -390,6 +385,24 @@ resource "kubernetes_config_map" "dashboard" {
 /***************************************
 * Vault Autoscaling
 ***************************************/
+
+resource "kubernetes_annotations" "vault_pvc" {
+  count       = 3
+  api_version = "v1"
+  kind        = "PersistentVolumeClaim"
+  metadata {
+    name      = "data-vault-${count.index}"
+    namespace = local.namespace
+  }
+  annotations = {
+    "resize.topolvm.io/storage_limit" = "${var.vault_storage_limit_gb != null ? var.vault_storage_limit_gb : 10 * var.vault_storage_size_gb}Gi"
+    "resize.topolvm.io/increase"      = "${var.vault_storage_increase_percent}%"
+    "resize.topolvm.io/threshold"     = "${var.vault_storage_increase_threshold_percent}%"
+  }
+  force = true
+
+  depends_on = [helm_release.vault]
+}
 
 resource "kubernetes_manifest" "vpa_csi" {
   count = var.vpa_enabled ? 1 : 0

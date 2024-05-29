@@ -14,6 +14,16 @@ variable "eks_cluster_url" {
   type        = string
 }
 
+variable "log_level" {
+  description = "The log level for the Cilium pods"
+  type        = string
+  default     = "warn"
+  validation {
+    condition     = contains(["info", "error", "debug", "warn"], var.log_level)
+    error_message = "Invalid log_level provided."
+  }
+}
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
