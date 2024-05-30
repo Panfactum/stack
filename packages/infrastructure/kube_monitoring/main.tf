@@ -1493,6 +1493,83 @@ resource "helm_release" "prometheus_stack" {
         sidecar = {
           image     = local.default_image
           resources = local.default_image
+          datasources = {
+            enabled = false // this sidecar does not work properly :(
+          }
+        }
+        datasources = {
+          "datasources.yaml" = {
+            apiVersion = 1
+            deleteDatasources = [
+              { name = "Prometheus" },
+              { name = "Prometheus2" },
+              { name = "Alertmanager" },
+              { name = "Thanos" },
+              { name = "Loki" }
+            ]
+            datasources = [
+              {
+                name   = "Prometheus"
+                uid    = "prometheus"
+                type   = "prometheus"
+                url    = "http://monitoring-prometheus.monitoring:9090/"
+                access = "proxy"
+                jsonData = {
+                  httpMethod   = "POST"
+                  timeInterval = "60s"
+                }
+                editable = false
+                orgId    = 1
+                version  = 2
+              },
+              {
+                name      = "Thanos"
+                uid       = "thanos"
+                type      = "prometheus"
+                url       = "http://thanos-query-frontend.monitoring:9090/"
+                access    = "proxy"
+                isDefault = true
+                jsonData = {
+                  httpMethod   = "POST"
+                  timeInterval = "60s"
+                  timeout      = 55
+                }
+                editable = false
+                orgId    = 1
+                version  = 2
+              },
+              {
+                name   = "Alertmanager"
+                type   = "alertmanager"
+                uid    = "alertmanager"
+                url    = "http://monitoring-alertmanager.monitoring:9093/"
+                access = "proxy"
+                jsonData = {
+                  handleGrafanaManagedAlerts = false
+                  implementation             = "prometheus"
+                  timeout                    = 55
+                }
+                editable = false
+                orgId    = 1
+                version  = 2
+              },
+              {
+                name     = "Loki"
+                type     = "loki"
+                uid      = "loki"
+                url      = "http://loki-read.logging.svc.cluster.local:3100/"
+                access   = "proxy"
+                editable = false
+                jsonData = {
+                  manageAlerts    = true
+                  alertmanagerUid = "alertmanager"
+                  timeout         = 55
+                }
+                version = 2
+                orgId   = 1
+              }
+            ]
+          }
         }
         "grafana.ini" = {
           server = {
@@ -2407,6 +2484,14 @@ resource "kubernetes_manifest" "vpa_kube_state_metrics" {
       labels    = module.kube_labels_kube_state_metrics.kube_labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "kube-state-metrics"
+          minAllowed = {
+            memory = "120Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
