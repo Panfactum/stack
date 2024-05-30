@@ -58,6 +58,10 @@ locals {
   loki_backend_match = {
     id = random_id.loki_backend.hex
   }
+
+  loki_canary_match = {
+    id = random_id.loki_canary.hex
+  }
 }
 
 module "pull_through" {
@@ -78,6 +82,11 @@ resource "random_id" "loki_write" {
 resource "random_id" "loki_backend" {
   byte_length = 8
   prefix      = "loki-backend-"
+}
+
+resource "random_id" "loki_canary" {
+  byte_length = 8
+  prefix      = "loki-canary-"
 }
 
 module "kube_labels_loki_read" {
@@ -126,6 +135,22 @@ module "kube_labels_loki_backend" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, local.loki_backend_match)
+}
+
+module "kube_labels_loki_canary" {
+  source = "../kube_labels"
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.loki_canary_match)
 }
 
 module "constants_loki_read" {
@@ -180,6 +205,24 @@ module "constants_loki_backend" {
   # end-generate
 
   extra_tags = merge(var.extra_tags, local.loki_backend_match)
+}
+
+module "constants_loki_canary" {
+  source = "../constants"
+
+  matching_labels = local.loki_canary_match
+
+  # generate: common_vars_no_extra_tags.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  # end-generate
+
+  extra_tags = merge(var.extra_tags, local.loki_canary_match)
 }
 
 /***************************************
@@ -409,7 +452,7 @@ resource "helm_release" "loki" {
 
           frontend = {
             scheduler_address         = "loki-backend.${local.namespace}.svc.cluster.local:9095"
-            tail_proxy_url            = "http://loki-read.${local.namespace}.svc.cluster.local:3100"
+            tail_proxy_url            = "http://loki-backend.${local.namespace}.svc.cluster.local:3100"
             graceful_shutdown_timeout = "90s"
             compress_responses        = true
             log_queries_longer_than   = "5s"
@@ -750,10 +793,70 @@ resource "helm_release" "loki" {
           }
         }
       }
+
+      lokiCanary = {
+        enabled = var.monitoring_enabled
+
+        // We rely on alloy to collect the logs rather than push to Loki directly.
+        // This is so the canary test accurately reflects the normal log collection pipeline.
+        // As a result, this should not be deployed until Alloy is deployed.
+        push = false
+
+        service = {
+          labels = module.kube_labels_loki_canary.kube_labels
+        }
+        podLabels = module.kube_labels_loki_canary.kube_labels
+        annotations = {
+          // This has a fixed amount of network activity so the memory request can be optimized
+          "config.linkerd.io/proxy-memory-request" = "5Mi"
+        }
+        tolerations = module.constants_loki_canary.burstable_node_toleration_helm
+        resources   = local.default_resources
+        extraArgs = [
+          "-addr=loki-read.${local.namespace}.svc.cluster.local:3100",
+          "-interval=15s" // Adjust from the default of 1s to reduce log volume; since we only scrape metrics every 60s, this doesn't need to be very quick
+        ]
+        updateStrategy = {
+          type = "RollingUpdate"
+          rollingUpdate = {
+            maxUnavailable = "50%"
+          }
+        }
+      }
     })
   ]
 
   depends_on = [module.redis_cache]
+}
+
+resource "kubernetes_manifest" "service_monitor" {
+  count = var.monitoring_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "loki-canary"
+      namespace = local.namespace
+      labels    = module.kube_labels_loki_canary.kube_labels
+    }
+    spec = {
+      endpoints = [{
+        honorLabels = true
+        interval    = "60s"
+        port        = "http-metrics"
+        path        = "/metrics"
+        scheme      = "http"
+      }]
+      jobLabel = "loki-canary"
+      namespaceSelector = {
+        matchNames = [local.namespace]
+      }
+      selector = {
+        matchLabels = local.loki_canary_match
+      }
+    }
+  }
+  depends_on = [helm_release.loki]
 }
 
 resource "kubernetes_config_map" "dashboard" {
@@ -763,7 +866,8 @@ resource "kubernetes_config_map" "dashboard" {
     labels = merge(module.kube_labels_loki_backend.kube_labels, { "grafana_dashboard" = "1" })
   }
   data = {
-    "loki-metrics.json" = file("${path.module}/dashboards/loki_metrics.json")
+    "loki-metrics.json" = file("${path.module}/dashboards/loki_metrics.json"),
+    "loki-canary.json"  = file("${path.module}/dashboards/loki_canary.json")
   }
 }
 
@@ -864,6 +968,27 @@ resource "kubernetes_manifest" "vpa_loki_read" {
         apiVersion = "apps/v1"
         kind       = "Deployment"
         name       = "loki-read"
+      }
+    }
+  }
+  depends_on = [helm_release.loki]
+}
+
+resource "kubernetes_manifest" "vpa_loki_canary" {
+  count = var.vpa_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "loki-canary"
+      namespace = local.namespace
+      labels    = module.kube_labels_loki_canary.kube_labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "DaemonSet"
+        name       = "loki-canary"
       }
     }
   }
