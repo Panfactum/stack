@@ -94,6 +94,11 @@ variable "pg_memory_mb" {
   description = "The amount of memory to allocate to the postgres pods (in Mi)"
   type        = number
   default     = 1000
+
+  validation {
+    condition     = var.pg_memory_mb >= 250
+    error_message = "Must provide at least 250MB of memory"
+  }
 }
 
 variable "pg_cpu_millicores" {

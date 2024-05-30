@@ -19,4 +19,5 @@ inputs = {
 
   # Alpha: Do not use
   monitoring_enabled = true
+  canary_enabled     = true
 }

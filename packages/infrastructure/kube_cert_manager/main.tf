@@ -448,6 +448,10 @@ resource "kubernetes_config_map" "dashboard" {
   }
 }
 
+/***************************************
+* Autoscaling
+***************************************/
+
 resource "kubernetes_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
   manifest = {
@@ -564,6 +568,38 @@ resource "kubernetes_manifest" "pdb_ca_injector" {
       }
       maxUnavailable = 1
     }
+  }
+  depends_on = [helm_release.cert_manager]
+}
+
+/***************************************
+* Canary Checks
+***************************************/
+
+resource "kubernetes_manifest" "canary" {
+  count = var.canary_enabled ? 1 : 0
+  manifest = {
+    apiVersion = "canaries.flanksource.com/v1"
+    kind       = "Canary"
+    metadata = {
+      name      = "cert-manager"
+      namespace = local.namespace
+      labels    = module.controller_labels.kube_labels
+    }
+    spec = {
+      schedule   = "@every 30s"
+      http       = []
+      kubernetes = []
+      tcp = [
+        {
+          name     = "webhook service available"
+          endpoint = "cert-manager-webhook.cert-manager:443"
+        }
+      ]
+    }
+  }
+  field_manager {
+    force_conflicts = true
   }
   depends_on = [helm_release.cert_manager]
 }

@@ -149,7 +149,8 @@ words: [
   "alertmanager",
   "mschnee",
   "jlevydev",
-  "autoresizer"
+  "autoresizer",
+  "flanksource"
 ]
 languageSettings:
   - languageId: markdown,mdx

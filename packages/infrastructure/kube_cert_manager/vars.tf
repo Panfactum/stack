@@ -33,3 +33,9 @@ variable "monitoring_enabled" {
   type        = bool
   default     = false
 }
+
+variable "canary_enabled" {
+  description = "Whether to add canary checks to the deployed systems"
+  type        = bool
+  default     = false
+}

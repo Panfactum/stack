@@ -109,6 +109,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_canary",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_cert_issuers",
       "group": "kubernetes"
     },

@@ -1471,6 +1471,10 @@ resource "helm_release" "prometheus_stack" {
           "reloader.stakater.com/auto" = "true"
         }
 
+        plugins = [
+          "marcusolsson-hexmap-panel"
+        ]
+
         admin = {
           existingSecret = kubernetes_secret.grafana_creds.metadata[0].name
           userKey        = "admin-user"
