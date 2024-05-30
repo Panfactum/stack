@@ -110,6 +110,7 @@ data "aws_vpc" "vpc" {
 
 data "aws_subnet" "nlb_subnets" {
   for_each = var.subnets
+  vpc_id = var.vpc_id
   filter {
     name   = "tag:Name"
     values = [each.value]
