@@ -5,7 +5,7 @@ terraform {
 locals {
   sanitized_labels = {
     for k, v in var.extra_tags :
-    replace(replace(replace(k, "/[^a-zA-Z0-9-_.//]/", "."), "/^[^a-zA-Z0-9]+/", ""), "/[^a-zA-Z0-9]+$/", "") => v
+    replace(replace(replace(k, "/[^a-zA-Z0-9-_.//]/", "."), "/^[^a-zA-Z0-9]+/", ""), "/[^a-zA-Z0-9]+$/", "") => v if v != "__omit__"
   }
 
   kube_labels = merge(local.sanitized_labels, {
