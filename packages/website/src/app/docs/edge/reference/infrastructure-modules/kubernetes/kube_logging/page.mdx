@@ -2,11 +2,11 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Cilium CNI
+# Logging
 
-<ModuleHeader name="kube_cilium" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_cilium" status="stable" type="live" />
+<ModuleHeader name="kube_logging" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_logging" status="alpha" type="live" />
 
-This module deploys the [Cilium CNI](https://docs.cilium.io/en/stable/installation/k8s-install-helm/) to manage the network stack.
+This module deploys Loki for collecting and querying log data
 
 ## Providers
 
@@ -20,6 +20,12 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
 ## Required Inputs
 
 The following input variables are required:
@@ -27,12 +33,6 @@ The following input variables are required:
 ### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
 
 Description: The name of the EKS cluster.
-
-Type: `string`
-
-### <a name="input_eks_cluster_url" /> [eks\_cluster\_url](#input_eks_cluster_url)
-
-Description: The url of the EKS cluster api server
 
 Type: `string`
 
@@ -48,29 +48,37 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_cilium_helm_version" /> [cilium\_helm\_version](#input_cilium_helm_version)
-
-Description: The version of the metrics-server helm chart to deploy
-
-Type: `string`
-
-Default: `"1.15.2"`
-
-### <a name="input_hubble_enabled" /> [hubble\_enabled](#input_hubble_enabled)
-
-Description: Whether to enable hubble for network debugging
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_log_level" /> [log\_level](#input_log_level)
 
-Description: The log level for the Cilium pods
+Description: The log level for the Loki pods
 
 Type: `string`
 
 Default: `"warn"`
+
+### <a name="input_log_retention_period_hours" /> [log\_retention\_period\_hours](#input_log_retention_period_hours)
+
+Description: Number of hours that logs should be retained
+
+Type: `number`
+
+Default: `336`
+
+### <a name="input_loki_chart_version" /> [loki\_chart\_version](#input_loki_chart_version)
+
+Description: The version of the grafana/loki helm chart to deploy
+
+Type: `string`
+
+Default: `"6.6.2"`
+
+### <a name="input_loki_storage_class_name" /> [loki\_storage\_class\_name](#input_loki_storage_class_name)
+
+Description: The storage class to use for local loki storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
 
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
@@ -98,7 +106,11 @@ Default: `false`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
 
 ## Usage
 

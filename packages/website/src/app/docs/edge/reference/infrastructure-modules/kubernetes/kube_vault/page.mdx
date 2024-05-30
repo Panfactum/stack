@@ -122,9 +122,33 @@ Type: `string`
 
 Default: `"1.14.7"`
 
+### <a name="input_vault_storage_increase_percent" /> [vault\_storage\_increase\_percent](#input_vault_storage_increase_percent)
+
+Description: The percent to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `100`
+
+### <a name="input_vault_storage_increase_threshold_percent" /> [vault\_storage\_increase\_threshold\_percent](#input_vault_storage_increase_threshold_percent)
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### <a name="input_vault_storage_limit_gb" /> [vault\_storage\_limit\_gb](#input_vault_storage_limit_gb)
+
+Description: The maximum number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+Default: `null`
+
 ### <a name="input_vault_storage_size_gb" /> [vault\_storage\_size\_gb](#input_vault_storage_size_gb)
 
-Description: The number of gb to allocate to vault storage.
+Description: The number of gigabytes to allocate to vault storage.
 
 Type: `number`
 

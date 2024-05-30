@@ -77,6 +77,10 @@
       "group": "utility"
     },
     {
+      "module": "kube_alloy",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_argo",
       "group": "kubernetes"
     },
@@ -181,6 +185,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_logging",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_metrics_server",
       "group": "kubernetes"
     },
@@ -198,6 +206,10 @@
     },
     {
       "module": "kube_priority_classes",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pvc_autoresizer",
       "group": "kubernetes"
     },
     {

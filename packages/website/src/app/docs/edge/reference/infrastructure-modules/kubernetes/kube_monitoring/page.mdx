@@ -138,6 +138,22 @@ Type: `string`
 
 Default: `"58.5.3"`
 
+### <a name="input_loki_chart_version" /> [loki\_chart\_version](#input_loki_chart_version)
+
+Description: The version of the grafana/loki helm chart to deploy
+
+Type: `string`
+
+Default: `"6.6.2"`
+
+### <a name="input_loki_storage_class_name" /> [loki\_storage\_class\_name](#input_loki_storage_class_name)
+
+Description: The storage class to use for local loki storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
+
 ### <a name="input_metrics_retention_resolution_1h" /> [metrics\_retention\_resolution\_1h](#input_metrics_retention_resolution_1h)
 
 Description: Number of days 1h metrics resolution should be kept
@@ -281,6 +297,14 @@ Description: The log level for the thanos pods
 Type: `string`
 
 Default: `"warn"`
+
+### <a name="input_thanos_ruler_storage_class_name" /> [thanos\_ruler\_storage\_class\_name](#input_thanos_ruler_storage_class_name)
+
+Description: The storage class to use for the thanos ruler local storage
+
+Type: `string`
+
+Default: `"ebs-standard"`
 
 ### <a name="input_thanos_store_gateway_storage_class_name" /> [thanos\_store\_gateway\_storage\_class\_name](#input_thanos_store_gateway_storage_class_name)
 

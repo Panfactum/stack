@@ -267,9 +267,9 @@ recognizes that additional nodes need to be schedule.
 
 1. In K9s, navigate to `:deployments`.
 
-2. Highlight the `jetstack-cert-manager` deployment and press `s` to trigger the scale dialogue.
+2. Highlight the `cert-manager-webhook` deployment and press `s` to trigger the scale dialogue.
 
-3. Increase this to a substantial number such as `25`.
+3. Increase this to `10`.
 
 4. Immediately, Karpenter should recognize that new nodes are required to run these pods and begin to provision them.
    After 30-60 seconds, the nodes will be registered with Kubernetes and you should see them under `:nodes`.
@@ -278,7 +278,7 @@ recognizes that additional nodes need to be schedule.
 
    <MarkdownImage src={spotNodeLabelImg} alt="Labels indicating that Karpenter spun up spot instances" />
 
-6. Scale `jetstack-cert-manager` back down to `2`. Karpenter will automatically take care of the node
+6. Scale `cert-manager-webhook` back down to `2`. Karpenter will automatically take care of the node
    cleanup and de-provisioning. This will happen slower than the scale-up as scaling down happens in batches
    to avoid cluster thrash or service disruption. However, this should complete within 15 minutes.
 

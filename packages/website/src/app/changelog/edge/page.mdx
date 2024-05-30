@@ -7,7 +7,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
-## Unreleased
+## edge.24-05-30
 
 ### Breaking Changes
 
@@ -142,7 +142,7 @@ arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](h
 * [kube\_vpa](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vpa) has a new `history_length_hours` (default `24`)
   that will control how far back it will analyze metrics for computing its recommendations.
 
-### Fixes
+### Fixed
 
 * PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has no functional impact,
   but confused monitoring systems. This has been fixed, but the fix will not retroactively adjust existing PVCs as they are immutable.
