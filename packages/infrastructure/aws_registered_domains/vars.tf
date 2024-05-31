@@ -52,6 +52,10 @@ variable "admin_phone_number" {
   description = "The phone number of the domain contact"
   type        = string
   sensitive   = true
+  validation {
+    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.admin_phone_number)) && length(var.admin_phone_number) <= 30
+    error_message = "The phone number must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890, with a maximum length of 30 characters."
+  }
 }
 
 variable "admin_address_line_1" {
@@ -114,6 +118,10 @@ variable "registrant_phone_number" {
   description = "The phone number of the domain contact"
   type        = string
   sensitive   = true
+  validation {
+    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.registrant_phone_number)) && length(var.registrant_phone_number) <= 30
+    error_message = "The phone number must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890, with a maximum length of 30 characters."
+  }
 }
 
 variable "registrant_address_line_1" {
@@ -176,6 +184,10 @@ variable "tech_phone_number" {
   description = "The phone number of the domain contact"
   type        = string
   sensitive   = true
+  validation {
+    condition     = can(regex("^\\+\\d{1,3}\\.\\d{1,26}$", var.tech_phone_number)) && length(var.tech_phone_number) <= 30
+    error_message = "The phone number must be in the format +[country dialing code].[number including any area code], e.g., +1.1234567890, with a maximum length of 30 characters."
+  }
 }
 
 variable "tech_address_line_1" {
