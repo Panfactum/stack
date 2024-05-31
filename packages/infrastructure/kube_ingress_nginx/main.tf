@@ -32,10 +32,8 @@ locals {
 
   plugin_name = "panfactum-plugin-lua"
 
-  nginx_selector = {
-    "app.kubernetes.io/component" = "controller"
-    "app.kubernetes.io/instance"  = "ingress-nginx"
-    "app.kubernetes.io/name"      = "ingress-nginx"
+  nginx_match = {
+    id = random_id.controller_id.hex
   }
 
   // This has to be THIS name in order for it to
@@ -67,6 +65,11 @@ locals {
   termination_grace_period = local.deregistration_delay + 10
 }
 
+resource "random_id" "controller_id" {
+  prefix      = "nginx-"
+  byte_length = 8
+}
+
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
@@ -75,7 +78,7 @@ module "pull_through" {
 module "labels" {
   source = "../kube_labels"
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -83,16 +86,17 @@ module "labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.nginx_match)
 }
 
 module "constants" {
   source = "../constants"
 
-  matching_labels = local.nginx_selector
+  matching_labels = local.nginx_match
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -100,8 +104,9 @@ module "constants" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.nginx_match)
 }
 
 module "namespace" {
@@ -466,7 +471,7 @@ resource "kubernetes_service" "nginx_healthcheck" {
       target_port = "metrics"
       protocol    = "TCP"
     }
-    selector = local.nginx_selector
+    selector = local.nginx_match
   }
   depends_on = [helm_release.nginx_ingress]
 }
@@ -484,7 +489,7 @@ resource "kubernetes_service" "nginx_status" {
       target_port = 18080
       protocol    = "TCP"
     }
-    selector = local.nginx_selector
+    selector = local.nginx_match
   }
   depends_on = [helm_release.nginx_ingress]
 }

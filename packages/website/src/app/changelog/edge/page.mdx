@@ -7,27 +7,41 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Fixed
+
+* Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced with `.`
+  for *both* keys *and* values for *both* Kubernetes labels and AWS tags.
+
+* Fixed some core components that were using *all* Kubernetes labels for `labelSelector` matching rules which prevented
+  Karpenter from autoscaling when `extra_tags` was provided. This previously
+  manifested as the error `spec.requirements: Too many: #: must have at most 30 items`.
+
+* Added extra constraints to [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_external_dns)
+  to prevent it from attempting to query zones that it isn't managing.
+
 ## edge.24-05-30
 
 ### Breaking Changes
 
-- The default for `vault_storage_size_gb` in [kube_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault)
-has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
-you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
+* The default for `vault_storage_size_gb` in [kube\_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault)
+  has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
+  you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
 
 ### Added
 
-- (Alpha) Added the [Loki](https://grafana.com/docs/loki/latest/)
-logging backend via [kube\_logging](/docs/edge/reference/infrastructure-modules/kubernetes/kube_logging)
-and the [Alloy](https://grafana.com/docs/alloy/latest/) log collector via [kube_alloy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_alloy).
+* (Alpha) Added the [Loki](https://grafana.com/docs/loki/latest/)
+  logging backend via [kube\_logging](/docs/edge/reference/infrastructure-modules/kubernetes/kube_logging)
+  and the [Alloy](https://grafana.com/docs/alloy/latest/) log collector via [kube\_alloy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_alloy).
 
-- The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
-[kube_pvc_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order
-to automatically expand EBS volumes as they fill up.
+* The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
+  [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order
+  to automatically expand EBS volumes as they fill up.
 
 ### Fixed
 
-- Resolved issue where scheduling constraints could not be resolved for components deployed before Karpenter ([#41](https://github.com/Panfactum/stack/issues/41))
+* Resolved issue where scheduling constraints could not be resolved for components deployed before Karpenter ([#41](https://github.com/Panfactum/stack/issues/41))
 
 ## edge.24-05-23
 
@@ -89,9 +103,9 @@ to automatically expand EBS volumes as they fill up.
   raw HTTP requests sent in realtime.
 
 * (Alpha) We've added the [Argo Workflow](https://argoproj.github.io/workflows/) engine to the stack
-via the [kube_argo](/docs/edge/reference/infrastructure-modules/kubernetes/kube_argo) module. This will
-serve as the basis for the future, integrated CI / CD systems and can also be used to process
-arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](https://github.com/jlevydev))
+  via the [kube\_argo](/docs/edge/reference/infrastructure-modules/kubernetes/kube_argo) module. This will
+  serve as the basis for the future, integrated CI / CD systems and can also be used to process
+  arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](https://github.com/jlevydev))
 
 - A new module, [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault_proxy), that
   can be used to add SSO to web assets that do not have integrated SSO. The module SSO is configured out-of-the-box

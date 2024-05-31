@@ -1,6 +1,14 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
+provider "registry.opentofu.org/alekc/kubectl" {
+  version     = "2.0.4"
+  constraints = "2.0.4"
+  hashes = [
+    "h1:6xRO3WlBsOTbeJ90QFjxGbc4BjnoGdEaeSCdWI/B1jU=",
+  ]
+}
+
 provider "registry.opentofu.org/hashicorp/aws" {
   version     = "5.39.1"
   constraints = "5.39.1"

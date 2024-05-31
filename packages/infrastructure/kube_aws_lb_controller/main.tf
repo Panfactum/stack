@@ -18,15 +18,24 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
 locals {
   name      = "alb-controller"
   namespace = module.namespace.namespace
-  selector = {
-    "app.kubernetes.io/name" = "aws-load-balancer-controller"
+  controller_match = {
+    id = random_id.controller_id.hex
   }
+}
+
+resource "random_id" "controller_id" {
+  prefix      = "alb-controller-"
+  byte_length = 8
 }
 
 module "pull_through" {
@@ -37,7 +46,7 @@ module "pull_through" {
 module "labels" {
   source = "../kube_labels"
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -45,8 +54,9 @@ module "labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "tags" {
@@ -67,9 +77,9 @@ module "tags" {
 module "constants" {
   source = "../constants"
 
-  matching_labels = local.selector
+  matching_labels = local.controller_match
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -77,8 +87,9 @@ module "constants" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "namespace" {
@@ -110,7 +121,7 @@ data "aws_vpc" "vpc" {
 
 data "aws_subnet" "nlb_subnets" {
   for_each = var.subnets
-  vpc_id = var.vpc_id
+  vpc_id   = var.vpc_id
   filter {
     name   = "tag:Name"
     values = [each.value]
@@ -481,7 +492,7 @@ resource "kubernetes_service" "alb_controller_healthcheck" {
       target_port = 61779 // healthcheck port
       protocol    = "TCP"
     }
-    selector = local.selector
+    selector = local.controller_match
   }
   depends_on = [helm_release.alb_controller]
 }

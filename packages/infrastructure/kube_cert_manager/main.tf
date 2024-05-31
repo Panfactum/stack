@@ -31,31 +31,38 @@ locals {
   webhook_name   = "cert-manger-webhook"
   namespace      = module.namespace.namespace
   webhook_secret = "cert-manager-webhook-certs"
-}
 
-module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
-}
+  controller_match = {
+    id = random_id.controller_id.hex
+  }
 
-module "base_labels" {
-  source = "../kube_labels"
+  webhook_match = {
+    id = random_id.webhook.hex
+  }
 
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  ca_injector_match = {
+    id = random_id.ca_injector.hex
+  }
 }
 
 resource "random_id" "controller_id" {
   prefix      = "${local.name}-"
   byte_length = 8
+}
+
+resource "random_id" "webhook" {
+  prefix      = "${local.name}-webhook-"
+  byte_length = 8
+}
+
+resource "random_id" "ca_injector" {
+  prefix      = "${local.name}-ca-injector-"
+  byte_length = 8
+}
+
+module "pull_through" {
+  count  = var.pull_through_cache_enabled ? 1 : 0
+  source = "../aws_ecr_pull_through_cache_addresses"
 }
 
 module "controller_labels" {
@@ -71,12 +78,7 @@ module "controller_labels" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { id = random_id.controller_id.hex })
-}
-
-resource "random_id" "webhook" {
-  prefix      = "${local.name}-webhook-"
-  byte_length = 8
+  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "webhook_labels" {
@@ -92,12 +94,7 @@ module "webhook_labels" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { id = random_id.webhook.hex })
-}
-
-resource "random_id" "ca_injector" {
-  prefix      = "${local.name}-ca-injector-"
-  byte_length = 8
+  extra_tags = merge(var.extra_tags, local.webhook_match)
 }
 
 module "ca_injector_labels" {
@@ -113,13 +110,13 @@ module "ca_injector_labels" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { id = random_id.ca_injector.hex })
+  extra_tags = merge(var.extra_tags, local.ca_injector_match)
 }
 
 module "constants_controller" {
   source = "../constants"
 
-  matching_labels = { id = random_id.controller_id.hex }
+  matching_labels = local.controller_match
 
   # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -131,13 +128,13 @@ module "constants_controller" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { id = random_id.controller_id.hex })
+  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "constants_webhook" {
   source = "../constants"
 
-  matching_labels = { id = random_id.webhook.hex }
+  matching_labels = local.webhook_match
 
   # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -149,13 +146,13 @@ module "constants_webhook" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { id = random_id.webhook.hex })
+  extra_tags = merge(var.extra_tags, local.webhook_match)
 }
 
 module "constants_ca_injector" {
   source = "../constants"
 
-  matching_labels = { id = random_id.ca_injector.hex }
+  matching_labels = local.ca_injector_match
 
   # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -167,7 +164,7 @@ module "constants_ca_injector" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { id = random_id.ca_injector.hex })
+  extra_tags = merge(var.extra_tags, local.ca_injector_match)
 }
 
 /***************************************
@@ -289,7 +286,7 @@ resource "helm_release" "cert_manager" {
 
       installCRDs = true
       global = {
-        commonLabels = module.base_labels.kube_labels
+        commonLabels = module.controller_labels.kube_labels
 
         // While the certificates are "critical" to the cluster, the provisioning infrastructure
         // can go down temporarily without taking down the cluster so this does not need to be "system-cluster-critical"
@@ -303,10 +300,7 @@ resource "helm_release" "cert_manager" {
         type = "Recreate"
       }
       podLabels = module.controller_labels.kube_labels
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
-      affinity = module.constants_controller.controller_node_with_burstable_affinity_helm
+      affinity  = module.constants_controller.controller_node_with_burstable_affinity_helm
 
       // This _can_ be run on a spot node if necessary as a short temporary disruption
       // will not cause cascading failures
@@ -335,18 +329,12 @@ resource "helm_release" "cert_manager" {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-webhook"
         }
         replicaCount = 2
-        strategy = {
-          type = "Recreate"
-        }
-        extraArgs = ["--v=${var.log_verbosity}"]
+        extraArgs    = ["--v=${var.log_verbosity}"]
         serviceAccount = {
           create = false
           name   = kubernetes_service_account.webhook.metadata[0].name
         }
-        podLabels = module.webhook_labels.kube_labels
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
+        podLabels   = module.webhook_labels.kube_labels
         tolerations = module.constants_controller.burstable_node_toleration_helm
         affinity = merge(
           module.constants_webhook.controller_node_affinity_helm,
@@ -405,10 +393,7 @@ resource "helm_release" "cert_manager" {
         }
         extraArgs = ["--v=${var.log_verbosity}"]
         podLabels = module.ca_injector_labels.kube_labels
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
-        affinity = module.constants_ca_injector.controller_node_with_burstable_affinity_helm
+        affinity  = module.constants_ca_injector.controller_node_with_burstable_affinity_helm
 
         // This _can_ be run on a spot node if necessary as a short temporary disruption
         // will not cause cascading failures

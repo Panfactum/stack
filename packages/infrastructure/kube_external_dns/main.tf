@@ -30,11 +30,18 @@ locals {
 
   all_roles = toset([for domain, config in var.route53_zones : config.record_manager_role_arn])
   config = { for role in local.all_roles : role => {
-    labels           = merge(module.kube_labels.kube_labels, { role : sha1(role) })
+    labels           = { role : sha1(role) }
+    zone_ids         = [for domain, config in var.route53_zones : config.zone_id if config.record_manager_role_arn == role]
     included_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn == role]
     excluded_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn != role && length(regexall(".+\\..+\\..+", domain)) > 0] // never exclude apex domains
   } }
 
+}
+
+resource "random_id" "ids" {
+  for_each    = local.config
+  prefix      = "${local.name}-"
+  byte_length = 8
 }
 
 module "pull_through" {
@@ -43,9 +50,10 @@ module "pull_through" {
 }
 
 module "kube_labels" {
-  source = "../kube_labels"
+  for_each = local.config
+  source   = "../kube_labels"
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -53,17 +61,18 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.ids[each.key].hex }, each.value.labels)
 }
 
 module "constants" {
   for_each = local.config
   source   = "../constants"
 
-  matching_labels = each.value.labels
+  matching_labels = { id = random_id.ids[each.key].hex }
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -71,8 +80,9 @@ module "constants" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, { id = random_id.ids[each.key].hex })
 }
 
 /***************************************
@@ -90,18 +100,12 @@ data "aws_iam_policy_document" "permissions" {
   }
 }
 
-resource "random_id" "ids" {
-  for_each    = local.config
-  prefix      = "${local.name}-"
-  byte_length = 8
-}
-
 resource "kubernetes_service_account" "external_dns" {
   for_each = local.config
   metadata {
     name      = random_id.ids[each.key].hex
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.kube_labels[each.key].kube_labels
   }
 }
 
@@ -162,11 +166,8 @@ resource "helm_release" "external_dns" {
   values = [
     yamlencode({
       nameOverride = random_id.ids[each.key].hex
-      commonLabels = each.value.labels
-      podLabels    = each.value.labels
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
+      commonLabels = module.kube_labels[each.key].kube_labels
+      podLabels    = module.kube_labels[each.key].kube_labels
       deploymentAnnotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -180,10 +181,6 @@ resource "helm_release" "external_dns" {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/external-dns/external-dns"
       }
 
-      affinity = merge(
-        module.constants[each.key].controller_node_with_burstable_affinity_helm,
-        module.constants[each.key].pod_anti_affinity_helm
-      )
       tolerations       = module.constants[each.key].burstable_node_toleration_helm
       priorityClassName = module.constants[each.key].cluster_important_priority_class_name
 
@@ -208,7 +205,7 @@ resource "helm_release" "external_dns" {
       serviceMonitor = {
         enabled          = var.monitoring_enabled
         namespace        = local.namespace
-        additionalLabels = module.kube_labels.kube_labels
+        additionalLabels = module.kube_labels[each.key].kube_labels
         interval         = "60s"
       }
 
@@ -221,7 +218,8 @@ resource "helm_release" "external_dns" {
           "--aws-assume-role=${each.key}"
         ],
         [for domain in each.value.included_domains : "--domain-filter=${domain}"],
-        [for domain in each.value.excluded_domains : "--exclude-domains=${domain}"]
+        [for domain in each.value.excluded_domains : "--exclude-domains=${domain}"],
+        [for zone_id in each.value.zone_ids : "--zone-id-filter=${zone_id}"]
       )
       env = [
         { name = "AWS_REGION", value = data.aws_region.main.name }
@@ -239,7 +237,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "external-dns-dashboard"
-    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = { "grafana_dashboard" = "1" }
   }
   data = {
     "external-dns.json" = file("${path.module}/dashboard.json")
@@ -254,7 +252,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = random_id.ids[each.key].hex
       namespace = local.namespace
-      labels    = each.value.labels
+      labels    = module.kube_labels[each.key].kube_labels
     }
     spec = {
       resourcePolicy = {
@@ -280,13 +278,13 @@ resource "kubernetes_manifest" "pdb" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = "${local.name}-pdb-${each.value.labels.role}"
+      name      = "${local.name}-${random_id.ids[each.key].hex}"
       namespace = local.namespace
-      labels    = each.value.labels
+      labels    = module.kube_labels[each.key].kube_labels
     }
     spec = {
       selector = {
-        matchLabels = each.value.labels
+        matchLabels = { id = random_id.ids[each.key].hex }
       }
       maxUnavailable = 1
     }

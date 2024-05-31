@@ -18,6 +18,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
@@ -27,6 +31,14 @@ data "aws_caller_identity" "main" {}
 locals {
   name      = "karpenter"
   namespace = module.namespace.namespace
+  controller_match = {
+    id = random_id.controller_id.hex
+  }
+}
+
+resource "random_id" "controller_id" {
+  prefix      = "karpenter-"
+  byte_length = 8
 }
 
 module "pull_through" {
@@ -37,7 +49,7 @@ module "pull_through" {
 module "kube_labels" {
   source = "../kube_labels"
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -45,16 +57,17 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "constants" {
   source = "../constants"
 
-  matching_labels = module.kube_labels.kube_labels
+  matching_labels = local.controller_match
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -62,8 +75,9 @@ module "constants" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "tags" {
@@ -588,9 +602,6 @@ resource "helm_release" "karpenter" {
       nameOverride     = local.name
       fullnameOverride = local.name
       podLabels        = module.kube_labels.kube_labels
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.karpenter.metadata[0].name

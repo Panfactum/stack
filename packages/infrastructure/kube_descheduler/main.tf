@@ -18,12 +18,20 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
 locals {
   name      = "descheduler"
   namespace = module.namespace.namespace
+
+  descheduler_match = {
+    id = random_id.descheduler_id.hex
+  }
 
   default_evictor_config = {
     name = "DefaultEvictor"
@@ -36,6 +44,11 @@ locals {
   }
 }
 
+resource "random_id" "descheduler_id" {
+  prefix      = "descheduler-"
+  byte_length = 8
+}
+
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
@@ -44,7 +57,7 @@ module "pull_through" {
 module "kube_labels" {
   source = "../kube_labels"
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -52,16 +65,17 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.descheduler_match)
 }
 
 module "constants" {
   source = "../constants"
 
-  matching_labels = module.kube_labels.kube_labels
+  matching_labels = local.descheduler_match
 
-  # generate: common_vars.snippet.txt
+  # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -69,8 +83,9 @@ module "constants" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, local.descheduler_match)
 }
 
 module "namespace" {
@@ -318,7 +333,7 @@ resource "kubernetes_manifest" "pdb" {
     }
     spec = {
       selector = {
-        matchLabels = module.kube_labels.kube_labels
+        matchLabels = local.descheduler_match
       }
       maxUnavailable = 1
     }

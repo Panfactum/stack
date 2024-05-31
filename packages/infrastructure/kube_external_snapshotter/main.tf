@@ -217,13 +217,10 @@ resource "helm_release" "external_snapshotter" {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
 
-        replicaCount      = 2
-        priorityClassName = module.constants_webhook.cluster_important_priority_class_name
-        tolerations       = module.constants_webhook.burstable_node_toleration_helm
-        affinity = merge(
-          module.constants_webhook.controller_node_with_burstable_affinity_helm,
-          module.constants_webhook.pod_anti_affinity_helm
-        )
+        replicaCount              = 2
+        priorityClassName         = module.constants_webhook.cluster_important_priority_class_name
+        tolerations               = module.constants_webhook.burstable_node_toleration_helm
+        affinity                  = module.constants_webhook.pod_anti_affinity_preferred_instance_type_helm
         topologySpreadConstraints = module.constants_webhook.topology_spread_zone_preferred
 
 

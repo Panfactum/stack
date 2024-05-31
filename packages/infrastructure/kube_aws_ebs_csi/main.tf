@@ -44,7 +44,6 @@ resource "random_id" "controller_id" {
   byte_length = 8
 }
 
-
 module "kube_labels" {
   source = "../kube_labels"
 
@@ -58,7 +57,7 @@ module "kube_labels" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { service = local.service })
+  extra_tags = merge(var.extra_tags, local.controller_match_labels)
 }
 
 module "constants" {
@@ -76,7 +75,7 @@ module "constants" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = merge(var.extra_tags, { service = local.service })
+  extra_tags = merge(var.extra_tags, local.controller_match_labels)
 }
 
 /***************************************
@@ -189,7 +188,7 @@ resource "helm_release" "ebs_csi_driver" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels = merge(module.kube_labels.kube_labels, local.controller_match_labels)
+        podLabels = module.kube_labels.kube_labels
         resources = {
           requests = {
             memory = "100Mi"
