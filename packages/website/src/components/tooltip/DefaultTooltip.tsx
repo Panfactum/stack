@@ -14,11 +14,11 @@ export default memo(function DefaultTooltip (props: DefaultTooltipProps) {
       leaveTouchDelay={10000}
       leaveDelay={250}
       title={(
-        <div className={`text-base lg:text-lg py-1 px-1 ${limitWidth ? '' : '!w-fit !max-w-none'}`}>
+        <div className={`text-base lg:text-lg py-1 px-1 ${limitWidth ? '' : '!w-fit !max-w-[80vw]'}`}>
           {title}
         </div>
       )}
-      classes={{ tooltip: `bg-accent ${limitWidth ? '' : '!w-fit !max-w-none'}` }}
+      classes={{ tooltip: `bg-accent ${limitWidth ? '' : '!w-fit !max-w-[80vw]'}` }}
     />
   )
 })
