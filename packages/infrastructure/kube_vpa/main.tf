@@ -326,7 +326,7 @@ resource "helm_release" "vpa" {
         replicaCount = 2
         affinity = merge(
           module.constants_admission_controller.controller_node_with_burstable_affinity_helm,
-          module.constants_admission_controller.pod_anti_affinity_instance_type_helm
+          module.constants_admission_controller.pod_anti_affinity_preferred_instance_type_helm
         )
         tolerations = module.constants_admission_controller.burstable_node_toleration_helm
 
