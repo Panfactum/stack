@@ -614,6 +614,14 @@ resource "kubernetes_manifest" "vpa_server" {
       labels    = module.labels_server.kube_labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "server"
+          minAllowed = {
+            memory = "550Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -639,7 +647,7 @@ resource "kubernetes_manifest" "vpa_worker" {
         containerPolicies = [{
           containerName = "worker"
           minAllowed = {
-            memory = "256Mi"
+            memory = "450Mi"
           }
         }]
       }
