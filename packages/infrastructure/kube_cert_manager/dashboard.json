@@ -568,8 +568,8 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(certmanager_http_acme_client_request_count[2m])) BY (status, path)",
-          "legendFormat": "{{status}}",
+          "expr": "sum(rate(certmanager_http_acme_client_request_count[2m])) BY (status, path) * 120",
+          "legendFormat": "{{path}} / {{status}}",
           "range": true,
           "refId": "A"
         }

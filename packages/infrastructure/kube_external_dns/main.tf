@@ -33,7 +33,7 @@ locals {
     labels           = { role : sha1(role) }
     zone_ids         = [for domain, config in var.route53_zones : config.zone_id if config.record_manager_role_arn == role]
     included_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn == role]
-    excluded_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn != role && length(regexall(".+\\..+\\..+", domain)) > 0] // never exclude apex domains
+    excluded_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn != role && alltrue([for includedDomain, config in var.route53_zones : !endswith(includedDomain, domain) if config.record_manager_role_arn == role])] // never exclude an ancestor of an included domain
   } }
 
 }
