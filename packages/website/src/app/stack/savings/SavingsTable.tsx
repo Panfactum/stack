@@ -1,11 +1,14 @@
+import Modal from '@mui/material/Modal'
 import Link from 'next/link'
 import type { ReactElement } from 'react'
+import { useCallback, useState } from 'react'
 
 import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
 
 const CURRENCY_FORMAT = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const CURRENCY_FORMAT_PRECISE = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })
 const CURRENCY_FORMAT_VERY_PRECISE = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 })
+const NUMBER_FORMAT = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
 
 // These are rough estimates taken by building a regression
 // across various instance types in the M6A, C6A, and R6A instance classes
@@ -52,6 +55,7 @@ const STACK_LOGS_COST_PER_GB = S3_PRICE_GB / 2 + EBS_PRICE_GB / 30 + DATADOG_LOG
 const DATADOG_SPANS_INDEX_COST_PER_GB = 2.55
 const DATADOG_SPANS_INGEST_COST_PER_GB = 0.1
 const STACK_SPANS_COST_PER_GB = S3_PRICE_GB / 2 + EBS_PRICE_GB / 30 + DATADOG_LOGS_INGEST_COST_PER_GB // we assume our ingest costs are the same as datadog
+const STACK_OBSERVABILITY_FIXED_COST_PER_CLUSTER = 40
 
 // Identity Provider costs
 const OKTA_PRICING_PER_EMPLOYEE = 2 + 3 + 2 + 4 + 2 + 4 + 3 + 9 // Standard web ui access
@@ -62,10 +66,15 @@ const STACK_IDP_BASE_COST = 30
 // Kubernetes costs
 const EKS_PRICE = 75
 const LB_COST = 25
-const EXTRA_STACK_COST = 100
+const EXTRA_STACK_COST = 75
 
 // CICD costs
 const GHA_CICD_COST_PER_CPU_MINUTE = 0.008 / 2
+
+// Labor costs
+const HOURS_TO_BUILD_STACK_EQUIVALENT_PER_CLUSTER = 500
+const HOURS_TO_MAINTAIN_STACK_EQUIVALENT_PER_CLUSTER = 25
+const STACK_PRODUCTIVITY_BOOST = 0.11
 
 interface CalcuateSavingsInput {
   workloadCores: number
@@ -86,6 +95,7 @@ interface CalcuateSavingsInput {
   employeeCount: number
   developerCount: number
   cicdMinutes: number
+  laborCostHourly: number
 }
 function calculateSavings (input :CalcuateSavingsInput) {
   const {
@@ -106,7 +116,8 @@ function calculateSavings (input :CalcuateSavingsInput) {
     metrics,
     employeeCount,
     developerCount,
-    cicdMinutes
+    cicdMinutes,
+    laborCostHourly
   } = input
 
   const workloadStackCost = (((workloadCores * STACK_WORKLOAD_CPU_PRICE) + (workloadMemory * STACK_WORKLOAD_MEM_PRICE)) / (STACK_UTILIZATION_RATE / 100))
@@ -117,7 +128,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
   const kvBaseCost = (2 * ((kvCores * BASE_KV_CPU_PRICE) + (kvMemory * BASE_KV_MEM_PRICE) + (kvStorage * BASE_KV_BACKUP_STORAGE_PRICE_GB))) / (utilization / 100)
   const networkStackCost = (3 * STACK_NAT_COST * vpcCount) + (OUTBOUND_COST_GB * egressTraffic) + (INTER_AZ_COST_GB * interAZTraffic * 0.5)
   const networkBaseCost = (3 * BASE_NAT_COST * vpcCount) + ((OUTBOUND_COST_GB + BASE_NAT_COST_GB) * egressTraffic) + (INTER_AZ_COST_GB * interAZTraffic)
-  const observabilityStackCost = (spans * STACK_SPANS_COST_PER_GB) + (logs * STACK_LOGS_COST_PER_GB) + (metrics * STACK_METRICS_COST_PER_1000)
+  const observabilityStackCost = (spans * STACK_SPANS_COST_PER_GB) + (logs * STACK_LOGS_COST_PER_GB) + (metrics * STACK_METRICS_COST_PER_1000) + (STACK_OBSERVABILITY_FIXED_COST_PER_CLUSTER * vpcCount)
   const observabilityBaseCost = (spans * (DATADOG_SPANS_INDEX_COST_PER_GB + DATADOG_SPANS_INGEST_COST_PER_GB)) + (logs * (DATADOG_LOGS_INGEST_COST_PER_GB + DATADOG_LOGS_INDEX_COST_PER_GB + DATADOG_LOG_ARCHIVE_PER_GB)) + (metrics * DATADOG_METRICS_COST_PER_1000)
   const accessControlStackCost = STACK_IDP_BASE_COST + (employeeCount * STACK_AC_PRICING_PER_EMPLOYEE)
   const accessControlBaseCost = (employeeCount * OKTA_PRICING_PER_EMPLOYEE) + (developerCount * OKTA_PRICING_PER_DEVELOPER)
@@ -125,14 +136,100 @@ function calculateSavings (input :CalcuateSavingsInput) {
   const kubernetesBaseCost = vpcCount * (EKS_PRICE + LB_COST)
   const cicdStackCost = cicdMinutes * ((STACK_WORKLOAD_CPU_PRICE + (2 * STACK_WORKLOAD_MEM_PRICE)) / 30 / 24 / 60)
   const cicdBaseCost = cicdMinutes * GHA_CICD_COST_PER_CPU_MINUTE
+  const setupCostSavings = HOURS_TO_BUILD_STACK_EQUIVALENT_PER_CLUSTER * vpcCount * laborCostHourly
+  const monthlyMaintenanceSavings = HOURS_TO_MAINTAIN_STACK_EQUIVALENT_PER_CLUSTER * vpcCount * laborCostHourly
+  const developerProductivityBoost = STACK_PRODUCTIVITY_BOOST * developerCount * 2000 / 12 * laborCostHourly
 
   return {
+    setup: {
+      savings: setupCostSavings,
+      savingsDescription: (
+        <div className="flex flex-col w-fit">
+          <div>
+            {CURRENCY_FORMAT.format(laborCostHourly)}
+            {' '}
+            hourly rate
+            {' '}
+            x
+            {' '}
+            {NUMBER_FORMAT.format(HOURS_TO_BUILD_STACK_EQUIVALENT_PER_CLUSTER)}
+            {' '}
+            hours x
+            {' '}
+            {vpcCount}
+            {' '}
+            Clusters
+          </div>
+          <div className="italic">
+            {NUMBER_FORMAT.format(HOURS_TO_BUILD_STACK_EQUIVALENT_PER_CLUSTER)}
+            {' '}
+            saved hours / cluster based on aggregated customer-reported data
+          </div>
+        </div>
+      )
+    },
+    monthlyMaintenance: {
+      savings: monthlyMaintenanceSavings,
+      savingsDescription: (
+        <div className="flex flex-col w-fit">
+          <div>
+            {CURRENCY_FORMAT.format(laborCostHourly)}
+            {' '}
+            hourly rate
+            {' '}
+            x
+            {' '}
+            {NUMBER_FORMAT.format(HOURS_TO_MAINTAIN_STACK_EQUIVALENT_PER_CLUSTER)}
+            {' '}
+            hours x
+            {' '}
+            {vpcCount}
+            {' '}
+            Clusters
+          </div>
+          <div className="italic">
+            {NUMBER_FORMAT.format(HOURS_TO_MAINTAIN_STACK_EQUIVALENT_PER_CLUSTER)}
+            {' '}
+            saved hours / cluster based on aggregated customer-reported data
+          </div>
+        </div>
+      )
+    },
+    productivityBoost: {
+      savings: developerProductivityBoost,
+      savingsDescription: (
+        <div className="flex flex-col w-fit">
+          <div>
+            {CURRENCY_FORMAT.format(laborCostHourly)}
+            {' '}
+            hourly rate
+            {' '}
+            x
+            {' '}
+            {NUMBER_FORMAT.format(2000 / 12)}
+            {' '}
+            hours / month x
+            {' '}
+            {NUMBER_FORMAT.format(developerCount)}
+            {' '}
+            developers x
+            {' '}
+            {STACK_PRODUCTIVITY_BOOST * 100}
+            % productivity improvement
+          </div>
+          <div className="italic">
+            {STACK_PRODUCTIVITY_BOOST * 100}
+            % productivity improvement based on aggregated customer-reported data
+          </div>
+        </div>
+      )
+    },
     cicd: {
       stackCost: cicdStackCost,
       stackCostDescription: (
         <div className="flex flex-col w-fit">
           <div>
-            &nbsp;&nbsp;
+          &nbsp;&nbsp;
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(cicdMinutes * ((STACK_WORKLOAD_CPU_PRICE + (2 * STACK_WORKLOAD_MEM_PRICE)) / 30 / 24 / 60))}
             {' '}
@@ -140,6 +237,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {cicdMinutes / 60}
             {' '}
             CPU-Hours
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_VERY_PRECISE.format((STACK_WORKLOAD_CPU_PRICE + (2 * STACK_WORKLOAD_MEM_PRICE)) / 30 / 24)}
@@ -171,6 +269,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {cicdMinutes / 60}
             {' '}
             CPU-Hours
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_VERY_PRECISE.format(GHA_CICD_COST_PER_CPU_MINUTE * 60)}
@@ -201,6 +300,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             Clusters
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(EKS_PRICE)}
@@ -216,6 +316,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             Clusters
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(LB_COST)}
@@ -231,6 +332,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             Clusters
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(EXTRA_STACK_COST)}
@@ -259,6 +361,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             Clusters
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(EKS_PRICE)}
@@ -274,6 +377,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             Clusters
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(LB_COST)}
@@ -311,6 +415,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {employeeCount}
             {' '}
             employees
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_AC_PRICING_PER_EMPLOYEE)}
@@ -342,6 +447,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {employeeCount}
             {' '}
             employees
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(OKTA_PRICING_PER_EMPLOYEE)}
@@ -357,6 +463,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {developerCount}
             {' '}
             developers
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(OKTA_PRICING_PER_DEVELOPER)}
@@ -387,6 +494,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {logs}
             {' '}
             GB Logs
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_LOGS_COST_PER_GB)}
@@ -401,6 +509,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             (
             {metrics}
             K Metrics
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_METRICS_COST_PER_1000)}
@@ -415,11 +524,28 @@ function calculateSavings (input :CalcuateSavingsInput) {
             (
             {spans}
             M Spans
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_SPANS_COST_PER_GB)}
             {' '}
             Amortized Cost per 1M Metrics)
+          </div>
+          <div>
+            +
+            {' '}
+            {CURRENCY_FORMAT_PRECISE.format(vpcCount * STACK_OBSERVABILITY_FIXED_COST_PER_CLUSTER)}
+            {' '}
+            (
+            {vpcCount}
+            {' '}
+            Clusters
+            {' '}
+            x
+            {' '}
+            {CURRENCY_FORMAT_PRECISE.format(STACK_OBSERVABILITY_FIXED_COST_PER_CLUSTER)}
+            {' '}
+            Fixed Cost per Cluster)
           </div>
           <hr className="bg-white h-0.5 w-full"/>
           <div>
@@ -447,15 +573,18 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {' '}
             GB
             Logs
+            {' '}
             x (
             {CURRENCY_FORMAT_PRECISE.format(DATADOG_LOGS_INGEST_COST_PER_GB)}
             {' '}
             per GB Ingested
+            {' '}
             +
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(DATADOG_LOGS_INDEX_COST_PER_GB)}
             {' '}
             per GB Indexed
+            {' '}
             +
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(DATADOG_LOG_ARCHIVE_PER_GB)}
@@ -470,6 +599,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             (
             {metrics}
             K Metrics
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(DATADOG_METRICS_COST_PER_1000)}
@@ -484,6 +614,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             (
             {spans}
             M Spans
+            {' '}
             x (
             {CURRENCY_FORMAT_PRECISE.format(DATADOG_SPANS_INGEST_COST_PER_GB)}
             {' '}
@@ -518,6 +649,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             VPCs
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_NAT_COST)}
@@ -533,6 +665,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {egressTraffic}
             {' '}
             GB Outbound Traffic
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(OUTBOUND_COST_GB)}
@@ -548,7 +681,9 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {interAZTraffic}
             {' '}
             GB Inter-AZ
+            {' '}
             Traffic
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(INTER_AZ_COST_GB)}
@@ -578,6 +713,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {vpcCount}
             {' '}
             VPCs
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_NAT_COST)}
@@ -593,6 +729,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {egressTraffic}
             {' '}
             GB Outbound Traffic
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(OUTBOUND_COST_GB + BASE_NAT_COST_GB)}
@@ -608,7 +745,9 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {interAZTraffic}
             {' '}
             GB Inter-AZ
+            {' '}
             Traffic
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(INTER_AZ_COST_GB)}
@@ -639,7 +778,8 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {workloadCores}
             {' '}
             CPU
-            *
+            {' '}
+            x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_WORKLOAD_CPU_PRICE)}
             {' '}
@@ -654,7 +794,8 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {workloadMemory}
             {' '}
             GB Memory
-            *
+            {' '}
+            x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_WORKLOAD_MEM_PRICE)}
             {' '}
@@ -667,6 +808,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {CURRENCY_FORMAT_PRECISE.format((workloadCores * STACK_WORKLOAD_CPU_PRICE) + (workloadMemory * STACK_WORKLOAD_MEM_PRICE))}
             {' '}
             Raw
+            {' '}
             Price
           </div>
           <div>
@@ -697,7 +839,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             (
             {workloadCores}
             {' '}
-            CPU *
+            CPU x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_WORKLOAD_CPU_PRICE)}
             {' '}
@@ -711,7 +853,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             (
             {workloadMemory}
             {' '}
-            GB Memory *
+            GB Memory x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_WORKLOAD_MEM_PRICE)}
             {' '}
@@ -756,6 +898,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {pgCores}
             {' '}
             CPU
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_WORKLOAD_CPU_PRICE)}
@@ -771,6 +914,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {pgMemory}
             {' '}
             GB Memory
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_WORKLOAD_MEM_PRICE)}
@@ -786,6 +930,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {pgStorage}
             {' '}
             GB Disk
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(EBS_PRICE_GB + EBS_SNAPSHOT_PRICE_GB)}
@@ -850,6 +995,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {pgCores}
             {' '}
             CPU
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_RDS_CPU_PRICE)}
@@ -865,6 +1011,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {pgMemory}
             {' '}
             GB Memory
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_RDS_MEM_PRICE)}
@@ -880,6 +1027,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {pgStorage}
             {' '}
             GB Disk
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_RDS_STORAGE_PRICE_GB + BASE_RDS_BACKUP_STORAGE_PRICE_GB)}
@@ -930,6 +1078,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {kvCores}
             {' '}
             CPU
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_WORKLOAD_CPU_PRICE)}
@@ -945,6 +1094,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {kvMemory}
             {' '}
             GB Memory
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(STACK_WORKLOAD_MEM_PRICE)}
@@ -960,11 +1110,13 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {kvStorage}
             {' '}
             GB Disk
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(EBS_PRICE_GB + EBS_SNAPSHOT_PRICE_GB)}
             {' '}
             GP3 EBS Storage w/ Live Snapshot
+            {' '}
             Price)
           </div>
           <hr className="bg-white h-0.5 w-full"/>
@@ -974,6 +1126,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {CURRENCY_FORMAT_PRECISE.format(((kvCores * STACK_WORKLOAD_CPU_PRICE) + (kvMemory * STACK_WORKLOAD_MEM_PRICE) + (kvStorage * (EBS_PRICE_GB + EBS_SNAPSHOT_PRICE_GB))))}
             {' '}
             Raw
+            {' '}
             Price
           </div>
           <div>
@@ -1008,6 +1161,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {kvCores}
             {' '}
             CPU
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_KV_CPU_PRICE)}
@@ -1023,6 +1177,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {kvMemory}
             {' '}
             GB Memory
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_KV_MEM_PRICE)}
@@ -1038,11 +1193,13 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {kvStorage}
             {' '}
             GB Disk
+            {' '}
             x
             {' '}
             {CURRENCY_FORMAT_PRECISE.format(BASE_KV_BACKUP_STORAGE_PRICE_GB)}
             {' '}
             Backup Price per GB
+            {' '}
             Price)
           </div>
           <hr className="bg-white h-0.5 w-full"/>
@@ -1052,6 +1209,7 @@ function calculateSavings (input :CalcuateSavingsInput) {
             {CURRENCY_FORMAT_PRECISE.format(((kvCores * BASE_KV_CPU_PRICE) + (kvMemory * BASE_KV_MEM_PRICE) + (kvStorage * BASE_KV_BACKUP_STORAGE_PRICE_GB)))}
             {' '}
             Raw
+            {' '}
             Price
           </div>
           <div>
@@ -1082,18 +1240,18 @@ function calculateSavings (input :CalcuateSavingsInput) {
   }
 }
 
-function SavingsTableColHeader ({ children }: { children: ReactElement | string}) {
+function SavingsTableColHeader ({ children, width = 150 }: { children: ReactElement | string, width?: number}) {
   return (
-    <th className="bg-primary text-white py-2 sm:py-3 tracking-wide min-w-[150px] w-[150px] font-medium">
+    <th className={`bg-primary text-white py-2 sm:py-3 tracking-wide min-w-[${width}px] w-[${width}px] font-medium px-6`}>
       {children}
     </th>
   )
 }
 
-function SavingsTableElementContainer ({ children }: {children: ReactElement | string}) {
+function SavingsTableElementContainer ({ children, bold }: {children: ReactElement | string, bold?: boolean}) {
   return (
     <td className="py-2 sm:py-3">
-      <div className="flex items-center justify-center whitespace-nowrap">
+      <div className={`flex items-center justify-center whitespace-nowrap ${bold ? 'font-semibold' : ''}`}>
         {children}
       </div>
     </td>
@@ -1127,7 +1285,7 @@ function CalculatedSavingsTableElement ({ baseCost, stackCost, description }: {b
 
   const rendered = `${CURRENCY_FORMAT.format(Math.floor(savingsDollar + 0.5))} (${Math.floor(savingsPercent + 0.5)}%)`
   return (
-    <SavingsTableElementContainer>
+    <SavingsTableElementContainer bold={true}>
       {description === undefined
         ? rendered
         : (
@@ -1145,7 +1303,7 @@ function CalculatedSavingsTableElement ({ baseCost, stackCost, description }: {b
   )
 }
 
-interface SavingsTableRowProps {
+interface InfrastructureSavingsTableRowProps {
   bold?: boolean;
   header: string;
   headerDescription?: string | ReactElement;
@@ -1154,7 +1312,7 @@ interface SavingsTableRowProps {
   baseCost: number
   baseCostDescription?: string | ReactElement;
 }
-function PriceTableRow (props: SavingsTableRowProps) {
+function InfrastructureSavingsTableRow (props: InfrastructureSavingsTableRowProps) {
   const {
     header,
     headerDescription,
@@ -1194,9 +1352,48 @@ function PriceTableRow (props: SavingsTableRowProps) {
   )
 }
 
+interface LaborSavingsTableRowProps {
+  bold?: boolean;
+  header: string;
+  headerDescription?: string | ReactElement;
+  savings: number;
+  savingsDescription?: string | ReactElement;
+}
+function LaborSavingsTableRow (props: LaborSavingsTableRowProps) {
+  const {
+    header,
+    headerDescription,
+    savings, savingsDescription,
+    bold = false
+  } = props
+
+  return (
+    <tr className={`m-0 bg-neutral border-b-[1px] border-r-[1px] border-solid border-secondary ${bold ? 'font-semibold' : ''}`}>
+      <th className="bg-primary text-white tracking-wide text-left px-4 leading-7 py-2 font-medium">
+        {headerDescription === undefined
+          ? header
+          : (
+            <DefaultTooltipLazy title={headerDescription}>
+              <span className="underline decoration-dotted decoration-white decoration-2 underline-offset-4">
+                {header}
+              </span>
+            </DefaultTooltipLazy>
+          )}
+      </th>
+      <SavingsTableElement
+        cost={savings}
+        description={savingsDescription}
+      />
+    </tr>
+  )
+}
+
 export default function SavingsTable (props: CalcuateSavingsInput & {copyLinkToClipboard: () => void}) {
   const { copyLinkToClipboard } = props
-
+  const [modalOpen, setModalOpen] = useState(false)
+  const toggleModal = useCallback(() => {
+    setModalOpen(val => !val)
+  }, [setModalOpen])
   const savings = calculateSavings(props)
 
   return (
@@ -1248,70 +1445,84 @@ export default function SavingsTable (props: CalcuateSavingsInput & {copyLinkToC
           <thead>
             <tr>
               <th className="invisible w-[75px]">Savings</th>
-              <SavingsTableColHeader>Base Cost</SavingsTableColHeader>
-              <SavingsTableColHeader>Stack Cost</SavingsTableColHeader>
+              <SavingsTableColHeader>
+                <span>
+                  Managed
+                  <br/>
+                  {' '}
+                  Service Cost
+                </span>
+              </SavingsTableColHeader>
+              <SavingsTableColHeader>
+                <span>
+                  Panfactum
+                  <br/>
+                  {' '}
+                  Stack Cost
+                </span>
+              </SavingsTableColHeader>
               <SavingsTableColHeader>Monthly Savings</SavingsTableColHeader>
             </tr>
 
           </thead>
           <tbody>
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'Access Control'}
               stackCost={savings.accessControl.stackCost}
               stackCostDescription={savings.accessControl.stackCostDescription}
               baseCost={savings.accessControl.baseCost}
               baseCostDescription={savings.accessControl.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'Networking'}
               stackCost={savings.network.stackCost}
               stackCostDescription={savings.network.stackCostDescription}
               baseCost={savings.network.baseCost}
               baseCostDescription={savings.network.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'Kubernetes Clusters'}
               stackCost={savings.kubernetes.stackCost}
               stackCostDescription={savings.kubernetes.stackCostDescription}
               baseCost={savings.kubernetes.baseCost}
               baseCostDescription={savings.kubernetes.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'Stateless Workloads'}
               stackCost={savings.workload.stackCost}
               stackCostDescription={savings.workload.stackCostDescription}
               baseCost={savings.workload.baseCost}
               baseCostDescription={savings.workload.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'Relational Databases'}
               stackCost={savings.relationalDB.stackCost}
               stackCostDescription={savings.relationalDB.stackCostDescription}
               baseCost={savings.relationalDB.baseCost}
               baseCostDescription={savings.relationalDB.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'KV Databases'}
               stackCost={savings.kv.stackCost}
               stackCostDescription={savings.kv.stackCostDescription}
               baseCost={savings.kv.baseCost}
               baseCostDescription={savings.kv.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'Observability'}
               stackCost={savings.observability.stackCost}
               stackCostDescription={savings.observability.stackCostDescription}
               baseCost={savings.observability.baseCost}
               baseCostDescription={savings.observability.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               header={'CICD'}
               stackCost={savings.cicd.stackCost}
               stackCostDescription={savings.cicd.stackCostDescription}
               baseCost={savings.cicd.baseCost}
               baseCostDescription={savings.cicd.baseCostDescription}
             />
-            <PriceTableRow
+            <InfrastructureSavingsTableRow
               bold={true}
               header={'Total'}
               stackCost={savings.total.stackCost}
@@ -1321,62 +1532,170 @@ export default function SavingsTable (props: CalcuateSavingsInput & {copyLinkToC
         </table>
       </div>
       <p
-        className="text-sm lg:text-base italic"
+        className="text-sm lg:text-base italic -mt-4"
       >
-        We make the following assumptions during our calculations:
+        Click
+        {' '}
+        <span
+          onClick={toggleModal}
+          className="text-primary underline hover:cursor-pointer"
+        >
+          here
+        </span>
+        {' '}
+        for
+        additional assumptions.
       </p>
-      <ul
-        className="text-sm lg:text-base italic my-0 -mt-6"
+      <Modal
+        open={modalOpen}
+        onClose={toggleModal}
+        aria-labelledby="savings-calculator-assumptions"
+        aria-describedby="Show assumptions used in calculating the savings"
       >
-        <li>
-          Prices were last updated in Q2 2024.
-        </li>
-        <li>
-          Every provisioned VPC will have an EKS cluster.
-        </li>
-        <li>
-          The resource inputs should reflect &quot;actual&quot; usage, not provisioned resources. Additionally, they are a total
-          across all environments / regions / clusters, not for an individual VPC.
-        </li>
-        <li>
-          AWS base-case pricing uses
-          <Link
-            className="text-primary underline hover:cursor-pointer"
-            href={'https://aws.amazon.com/ec2/pricing/on-demand/'}
+        <div
+          className="bg-gray-dark rounded px-4 py-6 w-[80vw] max-h-[80vh] lg:w-[50vw] h-fit absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%]"
+        >
+          <ul
+            className="text-sm lg:text-base italic my-0 pl-4 flex flex-col gap-2"
           >
-            On-Demand
-          </Link>
-          {' '}
-          rates for x86 instances.
-        </li>
-        <li>
-          Per-CPU / Per-GB Memory Costs are derived from a regression analysis on AWS instance prices.
-        </li>
-        <li>
-          Datadog prices are found on their
-          {' '}
-          <Link
-            className="text-primary underline hover:cursor-pointer"
-            href={'https://www.datadoghq.com/pricing/list/'}
-          >
-            price list.
-          </Link>
-        </li>
+            <li>
+              Prices were last updated in Q2 2024.
+            </li>
+            <li>
+              Every provisioned VPC will have an EKS cluster.
+            </li>
+            <li>
+              The resource inputs should reflect &quot;actual&quot; usage, not provisioned resources. Additionally, they
+              are a total
+              across all environments / regions / clusters, not for an individual VPC.
+            </li>
+            <li>
+              AWS base-case pricing uses
+              {' '}
+              <Link
+                className="text-primary underline hover:cursor-pointer"
+                href={'https://aws.amazon.com/ec2/pricing/on-demand/'}
+              >
+                On-Demand
+              </Link>
+              {' '}
+              rates for x86 instances.
+            </li>
+            <li>
+              Per-CPU / Per-GB Memory Costs are derived from a regression analysis on AWS instance prices.
+            </li>
+            <li>
+              Datadog prices are found on their
+              {' '}
+              <Link
+                className="text-primary underline hover:cursor-pointer"
+                href={'https://www.datadoghq.com/pricing/list/'}
+              >
+                price list.
+              </Link>
+            </li>
 
-        <li>
-          The Okta pricing is based on stack-equivalent features purchased. For &quot;Privileged Access&quot; and &quot;Advanced Server
-          Access,&quot;
-          we conservatively estimate one server per developer. See their
-          {' '}
-          <Link
-            className="text-primary underline hover:cursor-pointer"
-            href={'https://www.okta.com/pricing/'}
-          >
-            price list.
-          </Link>
-        </li>
+            <li>
+              The Okta pricing is based on stack-equivalent features purchased. For &quot;Privileged
+              Access&quot; and &quot;Advanced Server
+              Access,&quot;
+              we conservatively estimate one server per developer. See their
+              {' '}
+              <Link
+                className="text-primary underline hover:cursor-pointer"
+                href={'https://www.okta.com/pricing/'}
+              >
+                price list.
+              </Link>
+            </li>
 
-      </ul>
+          </ul>
+        </div>
+      </Modal>
+      <h3
+        className="text-2xl lg:text-3xl text-center pt-4"
+      >
+        Labor Efficiency Gains
+      </h3>
+      <div className="flex justify-center gap-4">
+        <div
+          className="bg-gray-dark text-black font-medium rounded px-4 py-2 text-xl lg:text-2xl"
+        >
+          {CURRENCY_FORMAT.format(savings.monthlyMaintenance.savings + savings.productivityBoost.savings)}
+          {' '}
+          / month
+        </div>
+        <div
+          className="bg-gray-dark text-black font-medium rounded px-4 py-2 text-xl lg:text-2xl"
+        >
+          {CURRENCY_FORMAT.format(savings.setup.savings)}
+          {' '}
+          / one-time
+        </div>
+        <button
+          className="bg-primary text-white font-medium rounded px-4 py-2 text-lg lg:text-xl"
+          onClick={copyLinkToClipboard}
+        >
+          Share
+        </button>
+      </div>
+      <p
+        className="text-base lg:text-lg"
+      >
+        The Panfactum stack also significantly boosts your DevOps and developer productivity:
+      </p>
+      <div className="flex lg:justify-center overflow-x-auto py-2">
+        <table className="border-collapse text-base lg:text-lg table-fixed min-w-full lg:min-w-[990px]">
+          <thead>
+            <tr>
+              <th className="invisible w-[300px]">Labor Savings</th>
+              <SavingsTableColHeader width={300}>Savings</SavingsTableColHeader>
+            </tr>
+
+          </thead>
+          <tbody>
+            <LaborSavingsTableRow
+              header={'Infrastructure Setup Savings (One-time)'}
+              headerDescription={'Estimated labor costs for building Panfactum-equivalent infrastructure from scratch'}
+              savings={savings.setup.savings}
+              savingsDescription={savings.setup.savingsDescription}
+            />
+            <LaborSavingsTableRow
+              header={'Infrastructure Maintenance Savings (Monthly)'}
+              headerDescription={'Labor costs saved by offloading maintenance and upgrades to Panfactum infrastructure modules'}
+              savings={savings.monthlyMaintenance.savings}
+              savingsDescription={savings.monthlyMaintenance.savingsDescription}
+            />
+            <LaborSavingsTableRow
+              header={'Developer Productivity Boost (Monthly)'}
+              headerDescription={'Improvements to developer productivity attributable to enhancements provided by the Panfactum Stack'}
+              savings={savings.productivityBoost.savings}
+              savingsDescription={savings.productivityBoost.savingsDescription}
+            />
+          </tbody>
+        </table>
+      </div>
+      <p
+        className="text-sm lg:text-base italic -mt-4"
+      >
+        To learn more about how the Panfactum Stack improves developer productivity, see our
+        {' '}
+        <Link
+          href="/stack/features"
+          className="text-primary underline hover:cursor-pointer"
+        >
+          features
+        </Link>
+        {' '}
+        and our
+        {' '}
+        <Link
+          href="/docs/framework/framework/overview"
+          className="text-primary underline hover:cursor-pointer"
+        >
+          platform engineering framework.
+        </Link>
+      </p>
     </>
   )
 }

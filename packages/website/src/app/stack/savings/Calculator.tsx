@@ -101,7 +101,28 @@ export default function Calculator () {
   const [employeeCount, setEmployees, onEmployeesChange] = useIntegerInput('employees', 10)
   const [developerCount, setDevelopers, onDevelopersChange] = useIntegerInput('developers', 10)
   const [cicdMinutes, setCICDMinutes, onCICDMinutesChange] = useIntegerInput('cicd-minutes', 60 * 24 * 30)
-  const { setSmallPreset, setMediumPreset, setLargePreset } = useMemo(() => ({
+  const [lablorCostHourly, __, onLaborCostHourlyChange] = useIntegerInput('labor-cost', 100)
+
+  const { setSmallPreset, setMediumPreset, setLargePreset, setSoloPreset } = useMemo(() => ({
+    setSoloPreset: () => {
+      void setEmployees(1)
+      void setDevelopers(1)
+      void setVPCCount(1)
+      void setEgressTraffic(10)
+      void setInterAZTraffic(100)
+      void setWorkloadCores(1)
+      void setWorkloadMemory(2)
+      void setPGCores(1)
+      void setPGMemory(1)
+      void setPGStorage(10)
+      void setKVCores(0)
+      void setKVMemory(0)
+      void setKVStorage(0)
+      void setMetrics(0)
+      void setLogs(10)
+      void setSpans(0)
+      void setCICDMinutes(60 * 24 * 10)
+    },
     setSmallPreset: () => {
       void setEmployees(5)
       void setDevelopers(2)
@@ -205,7 +226,8 @@ export default function Calculator () {
       ['spans', JSON.stringify(spans)],
       ['employees', JSON.stringify(employeeCount)],
       ['developers', JSON.stringify(developerCount)],
-      ['cicd-minutes', JSON.stringify(cicdMinutes)]
+      ['cicd-minutes', JSON.stringify(cicdMinutes)],
+      ['labor-cost', JSON.stringify(lablorCostHourly)]
     ])).toString()
     void navigator.clipboard.writeText(`https://panfactum.com${path}?${qs}`)
     setSnackbarOpen(true)
@@ -229,7 +251,8 @@ export default function Calculator () {
     developerCount,
     cicdMinutes,
     path,
-    setSnackbarOpen
+    setSnackbarOpen,
+    lablorCostHourly
   ])
 
   return (
@@ -241,28 +264,35 @@ export default function Calculator () {
           Savings Calculator
         </h1>
         <div className="flex flex-col items-center max-w-7xl mx-auto gap-6">
-          <InputRow title={'Size Presets'}>
-            <>
-              <button
-                className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
-                onClick={setSmallPreset}
-              >
-                Small
-              </button>
-              <button
-                className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
-                onClick={setMediumPreset}
-              >
-                Medium
-              </button>
-              <button
-                className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
-                onClick={setLargePreset}
-              >
-                Large
-              </button>
-            </>
-          </InputRow>
+          <div className="w-full flex flex-row gap-x-2 lg:gap-x-6 gap-y-6 items-center flex-wrap justify-center lg:justify-start">
+            <div className="w-full lg:w-48 text-center lg:text-left text-lg font-medium">
+              Size Presets
+            </div>
+            <button
+              className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
+              onClick={setSoloPreset}
+            >
+              Solo
+            </button>
+            <button
+              className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
+              onClick={setSmallPreset}
+            >
+              Small
+            </button>
+            <button
+              className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
+              onClick={setMediumPreset}
+            >
+              Medium
+            </button>
+            <button
+              className="bg-primary text-white py-2 px-4 lg:px-8 rounded font-semibold sm:text-base"
+              onClick={setLargePreset}
+            >
+              Large
+            </button>
+          </div>
           <InputRow title={'Organization'}>
             <>
               <IntegerInput
@@ -276,6 +306,12 @@ export default function Calculator () {
                 label="Number of Developers"
                 value={developerCount}
                 onChange={onDevelopersChange}
+              />
+              <IntegerInput
+                id="labor-cost"
+                label="Developer Cost (Hourly USD)"
+                value={lablorCostHourly}
+                onChange={onLaborCostHourlyChange}
               />
             </>
           </InputRow>
@@ -429,7 +465,9 @@ export default function Calculator () {
           </InputRow>
           <InputRow
             title={(
-              <DefaultTooltipLazy title={'CPU-minutes are the number of minutes a CI/CD pipeline is running multiplied by the number of provisioned vCPUs. For example, in standard GHA this would be 2 / minute.'}>
+              <DefaultTooltipLazy
+                title={'CPU-minutes are the number of minutes a CI/CD pipeline is running multiplied by the number of provisioned vCPUs. For example, in standard GHA this would be 2 / minute.'}
+              >
                 <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
                   CI / CD
                 </span>
@@ -463,6 +501,7 @@ export default function Calculator () {
           employeeCount={employeeCount}
           developerCount={developerCount}
           cicdMinutes={cicdMinutes}
+          laborCostHourly={lablorCostHourly}
           copyLinkToClipboard={copyLinkToClipboard}
         />
         <Snackbar

@@ -212,14 +212,14 @@ export default function Page () {
         <FeatureList
           title="Observability"
           features={[
-            { title: 'Log Collection', description: 'Provided by Loki', status: 'coming-soon' },
-            { title: 'Metric Collection', description: 'Provided by Prometheus', status: 'coming-soon' },
+            { title: 'Log Collection', description: 'Provided by Loki', status: 'alpha' },
+            { title: 'Metric Collection', description: 'Provided by Prometheus', status: 'alpha' },
             { title: 'Tracing', description: 'Provided by OTEL', status: 'coming-soon' },
             { title: 'Real User Monitoring (RUM)', description: 'Provided by Grafana Faro', status: 'coming-soon' },
-            { title: 'Dashboards & Query Engine', description: 'Provided by Grafana', status: 'coming-soon' },
-            { title: 'Monitoring and Alerts', description: 'Provided by Alert Manager', status: 'coming-soon' },
+            { title: 'Dashboards & Query Engine', description: 'Provided by Grafana', status: 'alpha' },
+            { title: 'Monitoring and Alerts', description: 'Provided by Alert Manager', status: 'alpha' },
             { title: 'On-call Management', description: 'Provided by Grafana OnCall OSS', status: 'coming-soon' },
-            { title: '100+ Out-of-the-Box Monitors', status: 'coming-soon' }
+            { title: '100+ Out-of-the-Box Dashboards and Monitors', status: 'alpha' }
           ]}
         />
         <FeatureList
@@ -261,7 +261,7 @@ export default function Page () {
               description: 'Start running GHA directly on your infrastructure',
               status: 'beta'
             },
-            { title: 'Argo Workflows', description: 'Use Argo for workflows too complex for GHA', status: 'coming-soon' },
+            { title: 'Argo Workflows', description: 'Use Argo for workflows too complex for GHA', status: 'alpha' },
             { title: 'Automated Dependency Updates', description: 'Provided by Renovate', status: 'coming-soon' },
             {
               title: 'Out-of-the-Box Pipelines',
@@ -283,9 +283,9 @@ export default function Page () {
         <FeatureList
           title="Workflow Engine"
           features={[
-            { title: 'Build Arbitrary Pipelines', description: 'Using Argo Workflows', status: 'coming-soon' },
-            { title: 'Trigger from Arbitrary Events', description: 'Using Argo Events', status: 'coming-soon' },
-            { title: 'Web UI', status: 'coming-soon' },
+            { title: 'Build Arbitrary Pipelines', description: 'Using Argo Workflows', status: 'alpha' },
+            { title: 'Trigger from Arbitrary Events', description: 'Using Argo Events', status: 'alpha' },
+            { title: 'Web UI', status: 'alpha' },
             { title: 'Durable Execution', description: 'Provided by Temporal', status: 'coming-soon' }
           ]}
         />
@@ -345,7 +345,7 @@ export default function Page () {
           ]}
         />
       </div>
-      <div className="inline-grid grid-cols-[min-content_auto] auto-cols-auto w-full max-w-3xl mx-auto pt-8 gap-y-8">
+      <div className="grid-cols-[min-content_auto] auto-cols-auto w-full max-w-3xl mx-auto pt-8 gap-y-8 hidden lg:inline-grid">
         <StatusChip status={'stable'}/>
         <p className="text-lg font-medium px-4">
           <Balancer>Ready for production use</Balancer>
