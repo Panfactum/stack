@@ -14,16 +14,21 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * Updated [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel) to automatically
   limit client buffer size to prevent OOM issues when processing very bursty traffic.
 
+- Added `pf-update` command that runs all the repository scaffolding commands at once.
+
 ### Fixed
 
 * Addressed an issue that caused updates to the local devenv to take
   at least 10 minutes rebuild on macOS. Rebuilds should now be 10-15x faster, but they will still
-  take about 45 seconds at minimum. Note that this *only* impacts rebuilds and *not* normal direnv load times.
+  take about 45 seconds at minimum. Note that this *only* impacts rebuilds and *not* normal direnv load times which should
+  still be instant.
 
   This is a known limitation of upstream nix's derivation evaluation
   caching when using flakes. We expect this to be addressed when flakes reach stability.
 
 * Added missing defaults for `PF_ENVIRONMENTS_DIR` and `PF_IAC_DIR`.
+
+* Resolves an issues where devenv warnings could not be resolved during the initial bootstrapping guide.
 
 * Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced with `.`
   for *both* keys *and* values for *both* Kubernetes labels and AWS tags.

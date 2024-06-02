@@ -72,10 +72,9 @@ The following steps will integrate the Panfactum tooling into your repository:
            # https://search.nixos.org/packages (updated every 6 mo)
            pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
 
-           # Change 'main' to be the release version that you desire
-           # (or keep 'main' if you want to use the rolling release)
+           # Change '__PANFACTUM_VERSION_MAIN__' to be the release version that you desire
            # Ensure that this matches the version you use for your infrastructure modules
-           panfactum.url = "github:Panfactum/stack/main";
+           panfactum.url = "github:Panfactum/stack/__PANFACTUM_VERSION_MAIN__";
        };
 
        outputs = { self, panfactum, pkgs, ... } @ inputs: {
@@ -99,20 +98,6 @@ The following steps will integrate the Panfactum tooling into your repository:
     On the first install, this can take a very long time to build the entire local development environment as it contains
     over 10GB of tools. This is especially slow on macOS and can take up to 30 minutes to complete.
 </MarkdownAlert>
-
-## Integrate direnv
-
-[direnv](https://direnv.net/) provides a set of shell hooks that will automatically activate your devenv
-when you navigate to the repo in your terminal. Additionally, it will automatically reload if there are any changes to the devenv
-definition and unload when you leave the repo directory.
-
-This is controlled via a `.envrc` file that should exist in the root of your repository. When you instantiated
-the developer environment in the previous step, you should have seen a warning about this file.
-
-Run `pf-update-envrc` to create / update the file.
-
-You should now see a warning saying that the file is blocked. Run `direnv allow` to allow the developer environment
-to automatically instantiate.
 
 ## Setting Global Environment Variables
 
@@ -153,25 +138,34 @@ For the full list of available values, please refer to [these reference docs](/d
 This file should NOT be committed as the contents are specific to each user. However, you might want to include an example
 file in the repo called `.env.example` to aid your users.
 
+## Integrate direnv
+
+[direnv](https://direnv.net/) provides a set of shell hooks that will automatically activate your devenv
+when you navigate to the repo in your terminal. Additionally, it will automatically reload if there are any changes to the devenv
+definition and unload when you leave the repo directory.
+
+This is controlled via a `.envrc` file that should exist in the root of your repository. When you instantiated
+the developer environment in the previous step, you should have seen a warning about this file.
+
+Run `pf-update-envrc` to create / update the file.
+
+You should now see a warning saying that the file is blocked. Run `direnv allow` to allow the developer environment
+to automatically instantiate.
+
 ## Scaffold Standard Files
 
 You now have the local development environment configured and are ready to begin deploying the live infrastructure
 that powers the Panfactum stack.
 
-Notice that you still like have a few shell warnings that look like the following:
+Notice that you still have a shell warning that look like the following:
 
-`Terragrunt files are out of date. Run pf-update-terragrunt to update.`
+```shell-session
+Your repository files are out-of-date with the current version of the Panfactum stack.
 
-In later guides, we will cover how to configure these various utilities to deploy and connect to your infrastructure.
+Run 'pf-update' to updates your files and resolve this warning.
+```
 
-For now, you will want to run the following commands to set up the basic scaffolding and remove the warnings:
-
-* `pf-update-envrc`: Updates the `.envrc` file with the latest Panfactum values
-* `pf-update-terragrunt`: Creates the environments folder with some starter `terragrunt` boilerplate
-* `pf-update-aws`: Creates the AWS config folder with some starter boilerplate. Your AWS settings will eventually live here.
-* `pf-update-kube`: Creates the Kubernetes config folder with some starter boilerplate. Your Kubernetes settings will eventually live here.
-* `pf-update-ssh`: Create the SSH config folder with some starter boilerplate. Your SSH settings will eventually live here.
-* `pf-update-gitignore`: Augments the top-level `.gitignore` file to prevent certain Panfactum files / directories are not accidentally committed
+Run `pf-update` to complete the scaffolding and resolve this warning.
 
 ## Next Steps
 

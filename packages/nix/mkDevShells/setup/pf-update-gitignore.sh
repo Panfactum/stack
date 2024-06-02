@@ -38,6 +38,8 @@ addIgnoreIfNeeded .terraform
 addIgnoreIfNeeded .devenv
 addIgnoreIfNeeded .direnv
 
-echo ".gitignore updated" 1>&2
+echo -e ".gitignore updated\n" 1>&2
 
-pf-check-repo-setup
+if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
+  pf-check-repo-setup
+fi

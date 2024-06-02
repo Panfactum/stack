@@ -17,6 +17,8 @@ mkdir -p "$environments_dir"
 
 rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source_dir"/ "$environments_dir"/
 
-echo "Terragrunt files in $PF_ENVIRONMENTS_DIR are updated." 1>&2
+echo -e "Terragrunt files in $PF_ENVIRONMENTS_DIR are updated.\n" 1>&2
 
-pf-check-repo-setup
+if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
+  pf-check-repo-setup
+fi

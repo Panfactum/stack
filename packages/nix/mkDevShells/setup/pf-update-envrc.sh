@@ -9,6 +9,8 @@ source_file=$(dirname "$(dirname "$(realpath "$0")")")/files/direnv/envrc
 
 rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source_file" "$destination_file"
 
-echo ".envrc files in $DEVENV_ROOT is updated." 1>&2
+echo -e ".envrc files in $DEVENV_ROOT is updated.\n" 1>&2
 
-pf-check-repo-setup
+if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
+  pf-check-repo-setup
+fi

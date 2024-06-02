@@ -11,6 +11,9 @@ pkgs.stdenv.mkDerivation rec {
   installPhase = ''
     mkdir -p $out/bin
 
+    cp ${src}/pf-update.sh $out/bin/pf-update
+    chmod +x $out/bin/pf-update
+
     cp ${src}/pf-update-terragrunt.sh $out/bin/pf-update-terragrunt
     chmod +x $out/bin/pf-update-terragrunt
 

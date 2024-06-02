@@ -147,6 +147,8 @@ fi
 # Save the state hash
 pf-get-aws-state-hash >"$DEVENV_ROOT/$PF_AWS_DIR/state.lock"
 
-echo "AWS config files in $PF_AWS_DIR were updated." 1>&2
+echo -e "AWS config files in $PF_AWS_DIR were updated.\n" 1>&2
 
-pf-check-repo-setup
+if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
+  pf-check-repo-setup
+fi

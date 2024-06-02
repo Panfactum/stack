@@ -89,9 +89,6 @@ if [[ $BUILD_CONFIG -eq 1 ]]; then
       echo -e "Done!\n" >&2
     done
 
-    # Save the state hash
-    pf-get-kube-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.lock"
-
     echo -e "cluster_info updated!\n" >&2
     echo -e "-----------------------------------------------------------" >&2
   else
@@ -100,16 +97,17 @@ if [[ $BUILD_CONFIG -eq 1 ]]; then
   fi
 fi
 
+# Save the state hash
+pf-get-kube-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.lock"
+
 ############################################################
 ## Step 3: Dynamically configure user-specific kubeconfig
 ############################################################
 
 USER_CONFIG_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/config.user.yaml"
 
-if [[ -f $CLUSTER_INFO_FILE ]]; then
-
-  if [[ -f $USER_CONFIG_FILE ]]; then
-
+if [[ -f $USER_CONFIG_FILE ]]; then
+  if [[ -f $CLUSTER_INFO_FILE ]]; then
     echo -e "\nBuilding kubeconfig file at $PF_KUBE_DIR/config...\n" >&2
 
     # Count the number of clusters
@@ -180,10 +178,8 @@ if [[ -f $CLUSTER_INFO_FILE ]]; then
 
     echo -e "All clusters configured!\n" >&2
   else
-    echo -e "\nWarning: No configuration file exists at $USER_CONFIG_FILE. Skipping kubeconfig setup!\n" >&2
+    echo -e "\nWarning: No cluster_info file exists at $CLUSTER_INFO_FILE. A superuser must run 'pf-update-kube --build' to generate this file. Skipping kubeconfig setup!\n" >&2
   fi
-else
-  echo -e "\nWarning: No cluster_info file exists at $CLUSTER_INFO_FILE. A superuser must run 'pf-update-kube --build' to generate this file. Skipping kubeconfig setup!\n" >&2
 fi
 
 # Save the state hash
@@ -191,6 +187,8 @@ pf-get-kube-user-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.user.lock"
 
 echo -e "-----------------------------------------------------------" >&2
 
-echo -e "\nKubernetes config files in $PF_KUBE_DIR were updated." 1>&2
+echo -e "\nKubernetes config files in $PF_KUBE_DIR were updated.\n" 1>&2
 
-pf-check-repo-setup
+if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
+  pf-check-repo-setup
+fi
