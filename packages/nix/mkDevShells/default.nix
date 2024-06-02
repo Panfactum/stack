@@ -339,7 +339,7 @@
             ####################################
             # Container Management
             ####################################
-            podman # container management CLI
+            src8.podman # container management CLI
             tilt # local CI tool for building and deploying containers
           ] else
             [ ]);
