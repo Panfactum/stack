@@ -23,6 +23,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   This is a known limitation of upstream nix's derivation evaluation
   caching when using flakes. We expect this to be addressed when flakes reach stability.
 
+* Added missing defaults for `PF_ENVIRONMENTS_DIR` and `PF_IAC_DIR`.
+
 * Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced with `.`
   for *both* keys *and* values for *both* Kubernetes labels and AWS tags.
 
