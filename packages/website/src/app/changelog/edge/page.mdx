@@ -9,7 +9,19 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Added
+
+* Updated [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel) to automatically
+  limit client buffer size to prevent OOM issues when processing very bursty traffic.
+
 ### Fixed
+
+* Addressed an issue that caused updates to the local devenv to take
+  at least 10 minutes rebuild on macOS. Rebuilds should now be 10-15x faster, but they will still
+  take about 45 seconds at minimum. Note that this *only* impacts rebuilds and *not* normal direnv load times.
+
+  This is a known limitation of upstream nix's derivation evaluation
+  caching when using flakes. We expect this to be addressed when flakes reach stability.
 
 * Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced with `.`
   for *both* keys *and* values for *both* Kubernetes labels and AWS tags.
@@ -20,6 +32,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * Added extra constraints to [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_external_dns)
   to prevent it from attempting to query zones that it isn't managing.
+
+* Prevented [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_external_dns) from
+  excluding parent domains of included domains.
 
 ## edge.24-05-30
 

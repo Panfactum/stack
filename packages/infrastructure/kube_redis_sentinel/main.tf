@@ -179,7 +179,16 @@ resource "helm_release" "redis" {
 
         extraFlags = concat(
           var.persistence_enabled ? [] : ["--appendonly", "no"],
-          var.lfu_cache_enabled ? ["--maxmemory", "$MEMORY_REQUEST", "--maxmemory-policy", "allkeys-lfu", "--activedefrag", "yes"] : [],
+          var.lfu_cache_enabled ? [
+            "--maxmemory", "$MEMORY_REQUEST",
+            "--maxmemory-policy", "allkeys-lfu",
+            "--activedefrag", "yes"
+          ] : [],
+          [
+            // This ensures that client buffers don't crash redis when payloads are very large and
+            // fill the buffers
+            "--maxmemory-clients", "$(( MEMORY_REQUEST * 15 / 100))"
+          ],
           var.redis_flags
         )
 

@@ -150,7 +150,8 @@ words: [
   "mschnee",
   "jlevydev",
   "autoresizer",
-  "flanksource"
+  "flanksource",
+  "bursty"
 ]
 languageSettings:
   - languageId: markdown,mdx

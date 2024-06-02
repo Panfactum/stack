@@ -1,3 +1,4 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
 
 # Install Tooling
@@ -22,6 +23,15 @@ Please install these tools:
 | `git-lfs` | `~> 3.4`  | Git extension for working with large binary blobs               | [Docs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) |
 | `nix`     | `~> 2.18` | Package management tool used to install all other dependencies  | [Docs](https://github.com/DeterminateSystems/nix-installer)                                                               |
 | `direnv`  | `~> 2.32` | Automatically loads tooling when entering the project directory | [Docs](https://direnv.net/docs/installation.html)                                                                         |
+
+<MarkdownAlert severity="warning">
+    Note that you should install nix using the [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer). This
+    is NOT the [installer found on the NixOS website](https://nixos.org/download/).
+
+    If you choose **not** use this installer,
+    you will need to ensure that you complete these [extra setup steps manually](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#installation-differences)
+    in order to enable functionality such as Nix flakes.
+</MarkdownAlert>
 
 ### Installation Notes
 

@@ -175,7 +175,7 @@ locals {
       password = "$(REDIS_PASSWORD)"
       # Sentinel cannot be used due to this issue: https://github.com/thanos-io/thanos/issues/6246
       # master_name = module.thanos_redis_cache.master_set
-      cache_size = "256MB"
+      cache_size = "$(MEMORY_REQUEST)MB"
       db         = 1
     }
   }
@@ -188,7 +188,7 @@ locals {
       password = "$(REDIS_PASSWORD)"
       # Sentinel cannot be used due to this issue: https://github.com/thanos-io/thanos/issues/6246
       # master_name = module.thanos_redis_cache.master_set
-      cache_size = "256MB"
+      cache_size = "$(MEMORY_REQUEST)MB"
       db         = 2
     }
   }
@@ -1903,6 +1903,16 @@ resource "helm_release" "thanos" {
                 key  = "password"
               }
             }
+          },
+          {
+            name = "MEMORY_REQUEST"
+            valueFrom = {
+              resourceFieldRef = {
+                containerName = "query-frontend"
+                resource      = "requests.memory"
+                divisor       = "1M"
+              }
+            }
           }
         ]
 
@@ -2016,6 +2026,16 @@ resource "helm_release" "thanos" {
               secretKeyRef = {
                 name = kubernetes_secret.redis_creds.metadata[0].name
                 key  = "password"
+              }
+            }
+          },
+          {
+            name = "MEMORY_REQUEST"
+            valueFrom = {
+              resourceFieldRef = {
+                containerName = "storegateway"
+                resource      = "requests.memory"
+                divisor       = "1M"
               }
             }
           }
