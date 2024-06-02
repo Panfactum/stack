@@ -95,6 +95,11 @@ The following steps will integrate the Panfactum tooling into your repository:
 5. Test that you are able to instantiate the development environment via `nix develop --impure`. If everything is working,
    you should see multiple environment variables when you run `printenv | grep DEVENV`. You may see several warnings which we will resolve in subsequent setup steps.
 
+<MarkdownAlert severity="warning">
+    On the first install, this can take a very long time to build the entire local development environment as it contains
+    over 10GB of tools. This is especially slow on macOS and can take up to 30 minutes to complete.
+</MarkdownAlert>
+
 ## Integrate direnv
 
 [direnv](https://direnv.net/) provides a set of shell hooks that will automatically activate your devenv
@@ -129,6 +134,14 @@ We expect you to provide some variables in your `devenv.nix` file. You configure
 For the full list of values you must set, please refer to [these reference docs](/docs/main/reference/configuration/repo-variables).
 
 These changes should be committed into version control as they will be shared by all users of the repository.
+
+<MarkdownAlert severity="warning">
+    Changes to `.nix` files will causes the entire devenv to be re-evaluated. While this won't rebuild cached packages,
+    the evaluation can still take up to 1 minute even for relatively minor changes such as environment variables.
+
+    Fortunately, your `.nix` files should not need to be updated very frequently. Most users only update
+    them 1 - 2 times / year during version updates.
+</MarkdownAlert>
 
 ### Local
 
