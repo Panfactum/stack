@@ -1,8 +1,27 @@
+{ system }:
 { config, pkgs, ... }:
 let
   customNixModule = module: import ./${module}.nix { inherit pkgs; };
   customShellScript = name:
     (pkgs.writeShellScriptBin name (builtins.readFile ./${name}.sh));
+  src3 = import (pkgs.fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "a343533bccc62400e8a9560423486a3b6c11a23b";
+    sha256 = "TofHtnlrOBCxtSZ9nnlsTybDnQXUmQrlIleXF1RQAwQ=";
+  }) { inherit system; };
+  src7 = import (pkgs.fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "a3ed7406349a9335cb4c2a71369b697cecd9d351";
+    sha256 = "PDwAcHahc6hEimyrgGmFdft75gmLrJOZ0txX7lFqq+I=";
+  }) { inherit system; };
+  src5 = import (pkgs.fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "9a9dae8f6319600fa9aebde37f340975cab4b8c0";
+    sha256 = "hL7N/ut2Xu0NaDxDMsw2HagAjgDskToGiyZOWriiLYM=";
+  }) { inherit system; };
 in {
   env = {
     TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/packages/infrastructure";
@@ -32,9 +51,9 @@ in {
     #########################################
     # IaC Tools
     #########################################
-    (import ../mkDevShells/common/opentofu.nix)
-    (import ../mkDevShells/common/terragrunt.nix)
-    (import ../mkDevShells/common/kubectl.nix)
+    src3.opentofu
+    src7.terragrunt
+    src5.kubectl
     terraform-docs
     (customShellScript "generate-tf-docs")
     (customShellScript "generate-tf-common")

@@ -32,7 +32,7 @@ echo >&2 "Finished Terraform linting!"
 #######################################
 echo >&2 "Starting Terragrunt linting..."
 (
-  cd "$DEVENV_ROOT/packages/nix/mkDevShells/common/setup/files/terragrunt"
+  cd "$DEVENV_ROOT/packages/nix/mkDevShells/setup/files/terragrunt"
   terragrunt hclfmt
 )
 (

@@ -1,4 +1,4 @@
-{ panfactumPkgs, devenv, forEachSystem, inputs, }:
+{ panfactumPkgs, devenv, forEachSystem, inputs }:
 { modules, pkgs }:
 (forEachSystem (system:
   let
@@ -9,7 +9,7 @@
     userResolvedPkgs = pkgs.legacyPackages.${system};
 
     # Utitily functions
-    util = dir: {
+    utilBuilder = dir: {
       customNixModule = module:
         import ./${dir}/${module}.nix { pkgs = panfactumResolvedPkgs; };
       customShellScript = name:
@@ -20,24 +20,332 @@
                patchShebangs $out'';
           });
     };
+    util = utilBuilder ".";
+
+    # Pinned Package Sources
+    src1 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "c726225724e681b3626acc941c6f95d2b0602087";
+      sha256 = "2xu0jVSjuKhN97dqc4bVtvEH52Rwh6+uyI1XCnzoUyI=";
+    }) { inherit system; };
+    src2 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "20bc93ca7b2158ebc99b8cef987a2173a81cde35";
+      sha256 = "dkJmk/ET/tRV4007O6kU101UEg1svUwiyk/zEEX9Tdg=";
+    }) { inherit system; };
+    src3 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "a343533bccc62400e8a9560423486a3b6c11a23b";
+      sha256 = "TofHtnlrOBCxtSZ9nnlsTybDnQXUmQrlIleXF1RQAwQ=";
+    }) { inherit system; };
+    src4 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "5710127d9693421e78cca4f74fac2db6d67162b1";
+      sha256 = "/KY8hffTh9SN/tTcDn/FrEiYwTXnU8NKnr4D7/stmmA=";
+    }) { inherit system; };
+    src5 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "9a9dae8f6319600fa9aebde37f340975cab4b8c0";
+      sha256 = "hL7N/ut2Xu0NaDxDMsw2HagAjgDskToGiyZOWriiLYM=";
+    }) { inherit system; };
+    src6 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "807c549feabce7eddbf259dbdcec9e0600a0660d";
+      sha256 = "9slQ609YqT9bT/MNX9+5k5jltL9zgpn36DpFB7TkttM=";
+    }) { inherit system; };
+    src7 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "a3ed7406349a9335cb4c2a71369b697cecd9d351";
+      sha256 = "PDwAcHahc6hEimyrgGmFdft75gmLrJOZ0txX7lFqq+I=";
+    }) { inherit system; };
+    src8 = import (panfactumResolvedPkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "325eb628b89b9a8183256f62d017bfb499b19bd9";
+      sha256 = "9mZL4N+G/iAADDdR6vKDFwiweYLO8hAmjnDHvfVhYCY=";
+    }) { inherit system; };
+
+    # Custom Packages
+    terragrunt = panfactumResolvedPkgs.writeShellScriptBin "terragrunt" ''
+      #!/bin/env bash
+
+      export GIT_LFS_SKIP_SMUDGE=1
+      for arg in "$@"
+      do
+          if [[ "$arg" == "run-all" ]]; then
+              export TERRAGRUNT_PROVIDER_CACHE=1
+              export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
+              ${src7.terragrunt}/bin/terragrunt "$@"
+              exit 0
+          fi
+      done
+      ${src7.terragrunt}/bin/terragrunt "$@"
+    '';
+    cilium = panfactumResolvedPkgs.symlinkJoin {
+      name = "cilium-cli";
+      paths = [ src3.cilium-cli ];
+      buildInputs = [ src3.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/cilium \
+          --add-flags "-n cilium"
+      '';
+    };
+    linkerdVersion = "24.5.1";
+    linkerd = panfactumResolvedPkgs.buildGo122Module rec {
+      pname = "linkerd-edge";
+      vendorHash = "sha256-sLLgTZN7Zvxkf9J1omh/YGMBUgAtvQD+nbhSuR7/PZg=";
+      version = linkerdVersion;
+
+      src = panfactumResolvedPkgs.fetchFromGitHub {
+        owner = "linkerd";
+        repo = "linkerd2";
+        rev = "edge-${linkerdVersion}";
+        sha256 = "sha256-Q+EvW45pClmyCifO72nl2XwqByMfZcVW9PLCHetDZdA=";
+      };
+
+      subPackages = [ "cli" ];
+
+      preBuild = ''
+        env GOFLAGS="" go generate ./pkg/charts/static
+        env GOFLAGS="" go generate ./jaeger/static
+        env GOFLAGS="" go generate ./multicluster/static
+        env GOFLAGS="" go generate ./viz/static
+
+        # Necessary for building Musl
+        if [[ $NIX_HARDENING_ENABLE =~ "pie" ]]; then
+            export GOFLAGS="-buildmode=pie $GOFLAGS"
+        fi
+      '';
+
+      tags = [ "prod" ];
+
+      ldflags = [
+        "-s"
+        "-w"
+        "-X github.com/linkerd/linkerd2/pkg/version.Version=${src.rev}"
+      ];
+
+      nativeBuildInputs = [ panfactumResolvedPkgs.installShellFiles ];
+
+      postInstall = ''
+        mv $out/bin/cli $out/bin/linkerd
+        installShellCompletion --cmd linkerd \
+          --bash <($out/bin/linkerd completion bash) \
+          --zsh <($out/bin/linkerd completion zsh) \
+          --fish <($out/bin/linkerd completion fish)
+      '';
+
+      doInstallCheck = true;
+      installCheckPhase = ''
+        $out/bin/linkerd version --client | grep ${src.rev} > /dev/null
+      '';
+
+      passthru.updateScript = (./. + "/update-edge.sh");
+
+      meta = with panfactumResolvedPkgs.lib; {
+        description =
+          "A simple Kubernetes service mesh that improves security, observability and reliability";
+        mainProgram = "linkerd";
+        downloadPage = "https://github.com/linkerd/linkerd2/";
+        homepage = "https://linkerd.io/";
+        license = licenses.asl20;
+      };
+    };
+    pgadmin = src3.pgadmin4-desktopmode.overrideAttrs
+      (finalAttrs: previousAttrs: {
+        postPatch = previousAttrs.postPatch + ''
+          substituteInPlace web/config.py --replace "MASTER_PASSWORD_REQUIRED = True" "MASTER_PASSWORD_REQUIRED = False"
+        '';
+
+        # These install checks take way too long on first install
+        # and are very brittle (don't work on aaarch64)
+        doCheck = false;
+        doInstallCheck = false;
+      });
 
     # Devenv
-    common = import ./common {
-      pkgs = panfactumResolvedPkgs;
-      util = util "./common";
-    };
-    local = import ./local {
-      pkgs = panfactumResolvedPkgs;
-      util = util "./local";
-    };
-    ci = import ./ci {
-      pkgs = panfactumResolvedPkgs;
-      util = util "./ci";
-    };
+    base = { config, ... }:
+      let
+        local = config.env.CI != "true";
+        mkIf = panfactumResolvedPkgs.lib.mkIf;
+      in {
+        env = with panfactumResolvedPkgs.lib; {
+          CI = mkOverride 1001 "false"; # true iff running in a CI environment
+          VAULT_ADDR = mkOverride 1001 "@INVALID@"; # the vault address
+          PF_AWS_DIR = mkOverride 1001 ".aws";
+          PF_SSH_DIR = mkOverride 1001 ".ssh";
+          PF_KUBE_DIR = mkOverride 1001 ".kube";
+          LOCAL_DEV_NAMESPACE = mkOverride 1001 "@INVALID@";
+        };
+
+        dotenv = with panfactumResolvedPkgs.lib; {
+          enable = mkOverride 1001 true;
+          disableHint = mkOverride 1001 true;
+        };
+
+        enterShell = mkIf local ''
+          source enter-shell-local
+        '';
+
+        scripts = {
+          terraform.exec =
+            "tofu $@"; # Alias terraform with tofu to prevent confusion
+        };
+
+        packages = with panfactumResolvedPkgs;
+          [
+            ####################################
+            # System Setup
+            ####################################
+            (import ./setup { pkgs = panfactumResolvedPkgs; })
+
+            ####################################
+            # Kubernetes
+            ####################################
+            src5.kubectl # kubernetes CLI
+            src5.kubectx # switching between namespaces and contexts
+            src5.kustomize # tool for editing manifests programatically
+            src5.kubernetes-helm # for working with Helm charts
+            (util.customShellScript
+              "pf-get-kube-token") # used for authentication within kube_config
+            src5.kube-capacity # for visualizing resource utilization in the cluster
+            src5.kubectl-cnpg # for managing the cnpg postgres databases
+            linkerd # utility for working with the service mesh
+            cilium # for managing the cilium CNI
+            src4.cmctl # for working with cert-manager
+            src4.stern # log aggregator for quick cli log inspection
+            src3.velero # backups of cluster state
+            (util.customShellScript
+              "pf-tunnel") # for connecting to private network resources through ssh bastion
+            src3.k9s # kubernetes tui
+
+            ####################################
+            # Hashicorp Vault
+            ####################################
+            src8.vault # provides the vault cli for interacting with vault
+            (util.customShellScript
+              "pf-get-vault-token") # our helper tool for getting vault tokens during tf runs
+
+            ####################################
+            # Infrastructure-as-Code
+            ####################################
+            src3.opentofu # declarative iac tool (open alternative to terraform)
+            terragrunt # opentofu-runner
+            (util.customShellScript
+              "get-version-hash") # helper for the IaC tagging
+            (util.customShellScript
+              "wait-on-image") # helper for waiting on image availability
+
+            ####################################
+            # Editors
+            ####################################
+            micro # a nano alternative with better keybindings
+            less # better pager
+
+            ####################################
+            # Bash Scripting Utilities
+            ####################################
+            bash # shell
+            parallel # run bash commands in parallel
+            ripgrep # better alternative to grep
+            rsync # file synchronization
+            unzip # extraction utility for zip format
+            zx # General purpose data compression utility
+            entr # Re-running scripts when files change
+            bc # bash calculator
+            jq # json
+            yq # yaml
+            fzf # fuzzy selector
+            getopt # for parsing command-line arguments
+
+            ####################################
+            # AWS Utilities
+            ####################################
+            src1.awscli2 # aws CLI
+            src7.ssm-session-manager-plugin # for connecting to hardened ec2 nodes
+            aws-nuke # nukes resources in aws accounts
+
+            ####################################
+            # Secrets Management
+            ####################################
+            croc # P2P secret sharing
+            sops # terminal editor for secrets stored on disk; integrates with tf ecosystem for config-as-code
+
+            ####################################
+            # Version Control
+            ####################################
+            git # vcs CLI
+            git-lfs # stores binary files in git host
+
+            ####################################
+            # CI / CD
+            ####################################
+            gh # github cli
+            actionlint # gha linter
+            (util.customShellScript
+              "get-buildkit-address") # Helper used to get the buildkit address to use for building images
+            (util.customShellScript
+              "scale-buildkit") # Helper used for autoscaling buildkit
+
+            ####################################
+            # Container Utilities
+            ####################################
+            #(customShellScript "docker-credential-aws")  # our package for ecr authentication
+            buildkit # used for building containers using moby/buildkit
+            skopeo # used for moving images around
+
+            ####################################
+            # Network Utilities
+            ####################################
+            dig # dns lookup
+            mtr # better traceroute alternative
+            openssh # ssh client and server
+            autossh # automatically restart tunnels
+            step-cli # working with certificates
+            curl # submit network requests from the CLI
+
+            ####################################
+            # Database Tools
+            ####################################
+            (util.customShellScript
+              "cnpg-pdb-patch") # patches all pdbs created by the cnpg operator
+            src7.redis # redis-cli
+            src6.postgresql_16 # psql, cli for working with postgres
+            src2.barman # barman cli for backups and restore with postgres
+            (util.customShellScript
+              "pf-db-tunnel") # for connecting to private databases through ssh bastion
+            (util.customShellScript
+              "pf-get-db-creds") # gets database credentials from vault
+          ] ++ (if local then [
+            ####################################
+            # Devenv Setup
+            ####################################
+            (util.customShellScript "enter-shell-local")
+
+            ####################################
+            # Postgres Management
+            ####################################
+            pgadmin
+
+            ####################################
+            # Container Management
+            ####################################
+            podman # container management CLI
+            tilt # local CI tool for building and deploying containers
+          ] else
+            [ ]);
+      };
   in {
     default = devenv.lib.mkShell {
       inherit inputs;
       pkgs = userResolvedPkgs;
-      modules = [ common local ci ] ++ modules;
+      modules = [ base ] ++ modules;
     };
   }))

@@ -4,9 +4,11 @@
 
   inputs = {
     nixpkgs.url =
-      "github:NixOS/nixpkgs/4471857c0a4a8a0ffc7bdbeaf1b998746ce12a82";
+      "github:NixOS/nixpkgs/599b4a1abd630f6a280cb9fe5ad8aae94ffe5655";
     systems.url = "github:nix-systems/default";
-    devenv.url = "github:cachix/devenv/python-rewrite";
+    devenv.url =
+      "github:cachix/devenv/34e6461fd76b5f51ad5f8214f5cf22c4cd7a196e"; # v1.0.5
+    devenv.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, devenv, systems, ... }@inputs:
@@ -28,9 +30,10 @@
 
       devShells = forEachSystem (system: {
         default = devenv.lib.mkShell {
+
           inherit inputs;
           pkgs = nixpkgs.legacyPackages.${system};
-          modules = [ (import ./packages/nix/devenv) ];
+          modules = [ (import ./packages/nix/devenv { inherit system; }) ];
         };
       });
     };
