@@ -1,5 +1,6 @@
 httproutes gateway.networking.k8s.io/v1beta1
 priorityclasses scheduling.k8s.io/v1
+canaries,components,topologies canaries.flanksource.com/v1
 serviceprofiles linkerd.io/v1alpha2
 horizontalpodautoscalers autoscaling/v2
 securitygrouppolicies vpcresources.k8s.aws/v1beta1
@@ -8,6 +9,7 @@ ciliumclusterwidenetworkpolicies,ciliumendpoints,ciliumexternalworkloads,ciliumi
 controllerrevisions,daemonsets,deployments,replicasets,statefulsets apps/v1
 flowschemas,prioritylevelconfigurations flowcontrol.apiserver.k8s.io/v1
 authorizationpolicies,meshtlsauthentications,networkauthentications policy.linkerd.io/v1alpha1
+cronjobs,daemonsets,deployments,jobs,namespaces,pods,replicasets,replicationcontrollers,services,statefulsets tap.linkerd.io/v1alpha1
 volumegroupsnapshotclasses groupsnapshot.storage.k8s.io/v1alpha1
 poddisruptionbudgets policy/v1
 apiservices apiregistration.k8s.io/v1
@@ -18,7 +20,9 @@ serverauthorizations policy.linkerd.io/v1beta1
 servers policy.linkerd.io/v1beta2
 httproutes policy.linkerd.io/v1beta3
 ec2nodeclasses karpenter.k8s.aws/v1beta1
+podlogs monitoring.grafana.com/v1alpha2
 backuprepositories,backups,backupstoragelocations,deletebackuprequests,downloadrequests,podvolumebackups,podvolumerestores,restores,schedules,serverstatusrequests,volumesnapshotlocations velero.io/v1
+clusterworkflowtemplates,cronworkflows,eventbus,eventsources,sensors,workflowartifactgctasks,workfloweventbindings,workflows,workflowtaskresults,workflowtasksets,workflowtemplates argoproj.io/v1alpha1
 bundles trust.cert-manager.io/v1alpha1
 policyendpoints networking.k8s.aws/v1alpha1
 volumesnapshotclasses,volumesnapshotcontents,volumesnapshots snapshot.storage.k8s.io/v1
@@ -36,6 +40,7 @@ secretproviderclasses,secretproviderclasspodstatuses secrets-store.csi.x-k8s.io/
 bindings,componentstatuses,configmaps,endpoints,events,limitranges,namespaces,nodes,persistentvolumeclaims,persistentvolumes,pods,podtemplates,replicationcontrollers,resourcequotas,secrets,serviceaccounts,services v1
 selfsubjectreviews,tokenreviews authentication.k8s.io/v1
 customresourcedefinitions apiextensions.k8s.io/v1
+alertmanagers,podmonitors,probes,prometheuses,prometheusrules,servicemonitors,thanosrulers monitoring.coreos.com/v1
 cninodes vpcresources.k8s.aws/v1alpha1
 nodes,pods metrics.k8s.io/v1beta1
 ingressclassparams,targetgroupbindings elbv2.k8s.aws/v1beta1
@@ -43,5 +48,6 @@ ingressclasses,ingresses,networkpolicies networking.k8s.io/v1
 certificaterequests,certificates,clusterissuers,issuers cert-manager.io/v1
 events events.k8s.io/v1
 verticalpodautoscalercheckpoints,verticalpodautoscalers autoscaling.k8s.io/v1
-ciliumcidrgroups,ciliuml2announcementpolicies,ciliumloadbalancerippools,ciliumnodeconfigs,ciliumpodippools cilium.io/v2alpha1
 backups,clusterimagecatalogs,clusters,imagecatalogs,poolers,scheduledbackups postgresql.cnpg.io/v1
+ciliumcidrgroups,ciliuml2announcementpolicies,ciliumloadbalancerippools,ciliumnodeconfigs,ciliumpodippools cilium.io/v2alpha1
+alertmanagerconfigs,prometheusagents,scrapeconfigs monitoring.coreos.com/v1alpha1
