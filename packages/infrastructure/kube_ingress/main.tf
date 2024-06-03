@@ -169,8 +169,9 @@ locals {
   rewrite_configs = flatten([for config in var.ingress_configs : [for rewrite_rule in config.rewrite_rules : merge(config, rewrite_rule)]])
 }
 
-module "labels" {
-  source = "../kube_labels"
+module "util" {
+  source        = "../kube_workload_utility"
+  workload_name = var.name
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -201,7 +202,7 @@ resource "kubernetes_manifest" "ingress_cert" {
     metadata = {
       name      = var.name
       namespace = var.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       secretName = "${var.name}-tls"
@@ -240,7 +241,7 @@ resource "kubernetes_manifest" "ingress" {
     metadata = {
       name      = random_id.ingress_id[count.index].hex
       namespace = var.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.util.labels
       annotations = merge(
         local.common_annotations,
         {
@@ -303,7 +304,7 @@ resource "kubernetes_manifest" "ingress_rewrites" {
     metadata = {
       name      = random_id.rewrite_id[count.index].hex
       namespace = var.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.util.labels
       annotations = merge(
         local.common_annotations,
         {

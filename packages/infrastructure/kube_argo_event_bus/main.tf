@@ -15,23 +15,28 @@ terraform {
   }
 }
 
-data "aws_region" "current" {}
-
 locals {
-  event_bus_match = {
-    id = random_id.event_bus_id.hex
+  default_resources = {
+    requests = {
+      memory = "100Mi"
+      cpu    = "100m"
+    }
+    limits = {
+      memory = "130Mi"
+    }
   }
 }
 
-resource "random_id" "event_bus_id" {
-  byte_length = 8
-  prefix      = "argo-event-bus-"
-}
+data "aws_region" "current" {}
 
-module "event_bus_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-event-bus"
+  instance_type_anti_affinity_required = true
+  zone_anti_affinity_required          = true
+  burstable_nodes_enabled              = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -39,27 +44,12 @@ module "event_bus_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.event_bus_match)
 }
 
-module "event_bus_constants" {
-  source = "../constants"
-
-  matching_labels = local.event_bus_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.event_bus_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 
@@ -74,7 +64,7 @@ resource "kubernetes_manifest" "event_bus" {
     metadata = {
       name      = "default"
       namespace = var.namespace
-      labels    = module.event_bus_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       jetstream = {
@@ -85,7 +75,7 @@ resource "kubernetes_manifest" "event_bus" {
             "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
             "config.linkerd.io/opaque-ports"                      = "4222,6222"
           }
-          labels = module.event_bus_labels.kube_labels
+          labels = module.util.labels
         }
         # This cannot be used due to this issue: https://github.com/argoproj/argo-events/issues/3134
         #startArgs = ["--tls=false"] # We don't need TLS as we have the service mesh
@@ -94,28 +84,9 @@ resource "kubernetes_manifest" "event_bus" {
           volumeSize       = var.event_bus_initial_volume_size
         }
 
-        priorityClassName = module.event_bus_constants.cluster_important_priority_class_name
-        tolerations       = module.event_bus_constants.burstable_node_toleration_helm
-        # We must use this custom anti-affinity because this resource
-        # does not support topologySpreadConstraints
-        affinity = {
-          podAntiAffinity = {
-            requiredDuringSchedulingIgnoredDuringExecution = [
-              {
-                topologyKey = "topology.kubernetes.io/zone"
-                labelSelector = {
-                  matchLabels = local.event_bus_match
-                }
-              },
-              {
-                topologyKey = "node.kubernetes.io/instance-type"
-                labelSelector = {
-                  matchLabels = local.event_bus_match
-                }
-              }
-            ]
-          }
-        }
+        priorityClassName = module.constants.cluster_important_priority_class_name
+        tolerations       = module.util.tolerations
+        affinity          = module.util.affinity
         securityContext = {
           runAsUser  = 1001
           runAsGroup = 1001
@@ -130,15 +101,7 @@ resource "kubernetes_manifest" "event_bus" {
             readOnlyRootFilesystem = true
             runAsNonRoot           = true
           }
-          resources = {
-            requests = {
-              memory = "100Mi"
-              cpu    = "100m"
-            }
-            limits = {
-              memory = "130Mi"
-            }
-          }
+          resources = local.default_resources
         }
         reloaderContainerTemplate = {
           securityContext = {
@@ -150,15 +113,7 @@ resource "kubernetes_manifest" "event_bus" {
             readOnlyRootFilesystem = true
             runAsNonRoot           = true
           }
-          resources = {
-            requests = {
-              memory = "100Mi"
-              cpu    = "100m"
-            }
-            limits = {
-              memory = "130Mi"
-            }
-          }
+          resources = local.default_resources
         }
         metricsContainerTemplate = {
           securityContext = {
@@ -169,15 +124,7 @@ resource "kubernetes_manifest" "event_bus" {
             readOnlyRootFilesystem = true
             runAsNonRoot           = true
           }
-          resources = {
-            requests = {
-              memory = "100Mi"
-              cpu    = "100m"
-            }
-            limits = {
-              memory = "130Mi"
-            }
-          }
+          resources = local.default_resources
         }
       }
     }
@@ -203,7 +150,7 @@ resource "kubernetes_manifest" "vpa_event_bus" {
     metadata = {
       name      = "eventbus-default-js"
       namespace = var.namespace
-      labels    = module.event_bus_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {
@@ -223,11 +170,11 @@ resource "kubernetes_manifest" "pdb_event_bus" {
     metadata = {
       name      = "eventbus-default-js"
       namespace = var.namespace
-      labels    = module.event_bus_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       selector = {
-        matchLabels = local.event_bus_match
+        matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }

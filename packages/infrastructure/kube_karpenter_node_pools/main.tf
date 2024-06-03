@@ -113,8 +113,8 @@ locals {
   }
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source = "../kube_workload_utility"
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -129,18 +129,7 @@ module "kube_labels" {
 }
 
 module "constants" {
-  source = "../constants"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 module "node_settings_burstable" {
@@ -217,7 +206,7 @@ resource "kubernetes_manifest" "default_node_class" {
     kind       = "EC2NodeClass"
     metadata = {
       name   = "default"
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = local.node_class_template
   }
@@ -229,7 +218,7 @@ resource "kubernetes_manifest" "spot_node_class" {
     kind       = "EC2NodeClass"
     metadata = {
       name   = "spot"
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = merge(
       local.node_class_template,
@@ -247,7 +236,7 @@ resource "kubernetes_manifest" "burstable_node_class" {
     kind       = "EC2NodeClass"
     metadata = {
       name   = "burstable"
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = merge(
       local.node_class_template,
@@ -269,12 +258,12 @@ resource "kubernetes_manifest" "burstable_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = "burstable"
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = {
       template = {
         metadata = {
-          labels = merge(module.kube_labels.kube_labels, {
+          labels = merge(module.util.labels, {
             "panfactum.com/class" = "burstable"
           })
         }
@@ -328,12 +317,12 @@ resource "kubernetes_manifest" "spot_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = "spot"
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = {
       template = {
         metadata = {
-          labels = merge(module.kube_labels.kube_labels, {
+          labels = merge(module.util.labels, {
             "panfactum.com/class" = "spot"
           })
         }
@@ -382,12 +371,12 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = "on-demand"
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = {
       template = {
         metadata = {
-          labels = merge(module.kube_labels.kube_labels, {
+          labels = merge(module.util.labels, {
             "panfactum.com/class" = "worker"
           })
         }

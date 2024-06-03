@@ -8,41 +8,14 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
 }
 
 locals {
-
-  /************************************************
-  * Label Creation
-  ************************************************/
-  match_labels = {
-    pod-template-id = random_id.pod_template_id.hex
-  }
-
-  /************************************************
-  * Node Scheduling
-  ************************************************/
-
-  input_node_preferences = [for pref, config in var.node_preferences : {
-    weight = config.weight
-    preference = {
-      matchExpressions = [{
-        key      = pref
-        operator = config.operator
-        values   = config.values
-      }]
-    }
-  }]
-  node_preferences = concat(
-    local.input_node_preferences,
-    var.spot_instances_enabled ? module.constants.spot_node_affinity_helm.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution : []
-  )
-  node_requirements = {
-    nodeSelectorTerms = [{
-      matchExpressions = [for key, values in var.node_requirements : { key = key, operator = "In", values = values }]
-    }]
-  }
 
   /************************************************
   * Container Segmentation
@@ -214,11 +187,7 @@ locals {
   /************************************************
   * Tolerations
   ************************************************/
-  tolerations = concat(
-    var.tolerations,
-    var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : [],
-    var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : []
-  )
+  tolerations = module.util.tolerations
 
   /************************************************
   * Resource Calculations
@@ -262,7 +231,7 @@ locals {
 
   pod = {
     metadata = {
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
       annotations = merge({
         "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
       }, var.pod_annotations)
@@ -278,15 +247,9 @@ locals {
       ///////////////////////////
       // Scheduling
       ///////////////////////////
-      tolerations = length(local.tolerations) == 0 ? null : local.tolerations
-
-      affinity = merge({
-        nodeAffinity = {
-          preferredDuringSchedulingIgnoredDuringExecution = length(local.node_preferences) == 0 ? null : local.node_preferences
-          requiredDuringSchedulingIgnoredDuringExecution  = length(keys(var.node_requirements)) == 0 ? null : local.node_requirements
-        }
-      }, var.pod_anti_affinity_type == "node" ? module.constants.pod_anti_affinity_helm : var.pod_anti_affinity_type == "instance_type" ? module.constants.pod_anti_affinity_preferred_instance_type_helm : {})
-      topologySpreadConstraints = module.constants.topology_spread_zone_preferred
+      tolerations               = module.util.tolerations
+      affinity                  = module.util.affinity
+      topologySpreadConstraints = module.util.topology_spread_constraints
       restartPolicy             = var.restart_policy
 
       ///////////////////////////
@@ -384,10 +347,22 @@ locals {
   }
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = var.workload_name
+  match_labels                          = var.match_labels
+  burstable_nodes_enabled               = var.burstable_nodes_enabled
+  spot_nodes_enabled                    = var.spot_nodes_enabled
+  instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
+  instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
+  zone_anti_affinity_required           = var.zone_anti_affinity_required
+  host_anti_affinity_required           = var.host_anti_affinity_required
+  extra_tolerations                     = var.extra_tolerations
+  controller_node_required              = var.controller_node_required
+  prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
+  prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -395,43 +370,19 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, var.extra_pod_labels, {
-    pod-template-id = random_id.pod_template_id.hex
-  })
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, var.extra_pod_labels, {
-    pod-template-id = random_id.pod_template_id.hex
-  })
-}
-
-resource "random_id" "pod_template_id" {
-  prefix      = "pod-"
-  byte_length = 8
+  source = "../kube_constants"
 }
 
 resource "kubernetes_secret" "secrets" {
   metadata {
     namespace = var.namespace
-    name      = replace(random_id.pod_template_id.hex, "_", "-")
-    labels    = module.kube_labels.kube_labels
+    name      = var.workload_name
+    labels    = module.util.labels
   }
   data = var.secrets
 }

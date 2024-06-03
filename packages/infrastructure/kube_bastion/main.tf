@@ -45,34 +45,8 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
 module "constants" {
-  source = "../constants"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -165,7 +139,7 @@ resource "kubernetes_service_account" "bastion" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.bastion.labels
   }
 }
 
@@ -173,7 +147,7 @@ resource "kubernetes_secret" "bastion_ca" {
   metadata {
     name      = "${local.name}-ca"
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.bastion.labels
   }
   data = {
     "trusted-user-ca-keys.pem" = vault_ssh_secret_backend_ca.ssh.public_key
@@ -190,7 +164,7 @@ resource "kubernetes_secret" "bastion_host" {
   metadata {
     name      = "${local.name}-host"
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.bastion.labels
   }
   data = {
     id_rsa       = tls_private_key.host.private_key_openssh
@@ -204,13 +178,12 @@ module "bastion" {
   name            = local.name
   service_account = kubernetes_service_account.bastion.metadata[0].name
 
-  min_replicas        = 2
-  max_replicas        = 2
-  tolerations         = module.constants.burstable_node_toleration_helm
-  priority_class_name = module.constants.cluster_important_priority_class_name
-  pod_annotations = {
-    "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-  }
+  min_replicas                          = 2
+  max_replicas                          = 2
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+  topology_spread_strict                = true
+  priority_class_name                   = module.constants.cluster_important_priority_class_name
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access
   // SSHD requires root to run unfortunately. However, we drop all capability except
@@ -292,7 +265,7 @@ resource "kubernetes_service" "bastion" {
   metadata {
     name      = "${local.name}-ingress"
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.bastion.labels
     annotations = merge(module.nlb_common.annotations, {
       "external-dns.alpha.kubernetes.io/hostname" = join(",", var.bastion_domains)
     })

@@ -46,22 +46,6 @@ locals {
       memory = "130Mi"
     }
   }
-
-  loki_read_match = {
-    id = random_id.loki_read.hex
-  }
-
-  loki_write_match = {
-    id = random_id.loki_write.hex
-  }
-
-  loki_backend_match = {
-    id = random_id.loki_backend.hex
-  }
-
-  loki_canary_match = {
-    id = random_id.loki_canary.hex
-  }
 }
 
 module "pull_through" {
@@ -69,30 +53,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "loki_read" {
-  byte_length = 8
-  prefix      = "loki-read-"
-}
+module "util_read" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "loki-read"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
 
-resource "random_id" "loki_write" {
-  byte_length = 8
-  prefix      = "loki-write-"
-}
-
-resource "random_id" "loki_backend" {
-  byte_length = 8
-  prefix      = "loki-backend-"
-}
-
-resource "random_id" "loki_canary" {
-  byte_length = 8
-  prefix      = "loki-canary-"
-}
-
-module "kube_labels_loki_read" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -100,15 +67,17 @@ module "kube_labels_loki_read" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_read_match)
 }
 
-module "kube_labels_loki_write" {
-  source = "../kube_labels"
+module "util_write" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "loki-write"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -116,15 +85,17 @@ module "kube_labels_loki_write" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_write_match)
 }
 
-module "kube_labels_loki_backend" {
-  source = "../kube_labels"
+module "util_backend" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "loki-backend"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -132,15 +103,17 @@ module "kube_labels_loki_backend" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_backend_match)
 }
 
-module "kube_labels_loki_canary" {
-  source = "../kube_labels"
+module "util_canary" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "loki-canary"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -148,81 +121,12 @@ module "kube_labels_loki_canary" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_canary_match)
 }
 
-module "constants_loki_read" {
-  source = "../constants"
-
-  matching_labels = local.loki_read_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_read_match)
-}
-
-module "constants_loki_write" {
-  source = "../constants"
-
-  matching_labels = local.loki_write_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_write_match)
-}
-
-module "constants_loki_backend" {
-  source = "../constants"
-
-  matching_labels = local.loki_backend_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_backend_match)
-}
-
-module "constants_loki_canary" {
-  source = "../constants"
-
-  matching_labels = local.loki_canary_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.loki_canary_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -372,7 +276,7 @@ resource "kubernetes_service_account" "loki" {
   metadata {
     name      = "loki"
     namespace = local.namespace
-    labels    = module.kube_labels_loki_backend.kube_labels
+    labels    = module.util_backend.labels
   }
 }
 
@@ -670,8 +574,8 @@ resource "helm_release" "loki" {
 
       backend = {
         replicas      = 3
-        podLabels     = module.kube_labels_loki_backend.kube_labels
-        serviceLabels = module.kube_labels_loki_backend.kube_labels
+        podLabels     = module.util_backend.labels
+        serviceLabels = module.util_backend.labels
         extraArgs = [
           "-config.expand-env=true",
           "--log.level=${var.log_level}",
@@ -688,10 +592,10 @@ resource "helm_release" "loki" {
             }
           }
         ]
-        priorityClassName             = module.constants_loki_backend.cluster_important_priority_class_name
-        topologySpreadConstraints     = module.constants_loki_backend.topology_spread_zone_preferred
-        affinity                      = module.constants_loki_backend.pod_anti_affinity_instance_type_helm
-        tolerations                   = module.constants_loki_backend.burstable_node_toleration_helm
+        priorityClassName             = module.constants.cluster_important_priority_class_name
+        topologySpreadConstraints     = module.util_backend.topology_spread_constraints
+        affinity                      = module.util_backend.affinity
+        tolerations                   = module.util_backend.tolerations
         terminationGracePeriodSeconds = 60
         resources                     = local.default_resources
         persistence = {
@@ -704,8 +608,8 @@ resource "helm_release" "loki" {
 
       read = {
         replicas      = 3
-        podLabels     = module.kube_labels_loki_read.kube_labels
-        serviceLabels = module.kube_labels_loki_read.kube_labels
+        podLabels     = module.util_read.labels
+        serviceLabels = module.util_read.labels
         extraArgs = [
           "-config.expand-env=true",
           "--log.level=${var.log_level}",
@@ -722,18 +626,18 @@ resource "helm_release" "loki" {
             }
           }
         ]
-        priorityClassName             = module.constants_loki_read.cluster_important_priority_class_name
-        topologySpreadConstraints     = module.constants_loki_read.topology_spread_zone_preferred
-        affinity                      = module.constants_loki_read.pod_anti_affinity_instance_type_helm
-        tolerations                   = module.constants_loki_read.burstable_node_toleration_helm
+        priorityClassName             = module.constants.cluster_important_priority_class_name
+        topologySpreadConstraints     = module.util_read.topology_spread_constraints
+        affinity                      = module.util_read.affinity
+        tolerations                   = module.util_read.tolerations
         terminationGracePeriodSeconds = 60
         resources                     = local.default_resources
       }
 
       write = {
         replicas      = 3
-        podLabels     = module.kube_labels_loki_write.kube_labels
-        serviceLabels = module.kube_labels_loki_write.kube_labels
+        podLabels     = module.util_write.labels
+        serviceLabels = module.util_write.labels
         extraArgs = [
           "-config.expand-env=true",
           "--log.level=${var.log_level}",
@@ -750,10 +654,10 @@ resource "helm_release" "loki" {
             }
           }
         ]
-        priorityClassName             = module.constants_loki_write.cluster_important_priority_class_name
-        topologySpreadConstraints     = module.constants_loki_write.topology_spread_zone_strict
-        affinity                      = module.constants_loki_write.pod_anti_affinity_instance_type_helm
-        tolerations                   = module.constants_loki_write.burstable_node_toleration_helm
+        priorityClassName             = module.constants.cluster_important_priority_class_name
+        topologySpreadConstraints     = module.util_write.topology_spread_constraints
+        affinity                      = module.util_write.affinity
+        tolerations                   = module.util_write.tolerations
         terminationGracePeriodSeconds = 60
         resources                     = local.default_resources
         persistence = {
@@ -803,14 +707,14 @@ resource "helm_release" "loki" {
         push = false
 
         service = {
-          labels = module.kube_labels_loki_canary.kube_labels
+          labels = module.util_canary.labels
         }
-        podLabels = module.kube_labels_loki_canary.kube_labels
+        podLabels = module.util_canary.labels
         annotations = {
           // This has a fixed amount of network activity so the memory request can be optimized
           "config.linkerd.io/proxy-memory-request" = "5Mi"
         }
-        tolerations = module.constants_loki_canary.burstable_node_toleration_helm
+        tolerations = module.util_canary.tolerations
         resources   = local.default_resources
         extraArgs = [
           "-addr=loki-read.${local.namespace}.svc.cluster.local:3100",
@@ -837,7 +741,7 @@ resource "kubernetes_manifest" "service_monitor" {
     metadata = {
       name      = "loki-canary"
       namespace = local.namespace
-      labels    = module.kube_labels_loki_canary.kube_labels
+      labels    = module.util_canary.labels
     }
     spec = {
       endpoints = [{
@@ -852,7 +756,7 @@ resource "kubernetes_manifest" "service_monitor" {
         matchNames = [local.namespace]
       }
       selector = {
-        matchLabels = local.loki_canary_match
+        matchLabels = module.util_canary.match_labels
       }
     }
   }
@@ -863,7 +767,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "loki-dashboard"
-    labels = merge(module.kube_labels_loki_backend.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util_backend.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "loki-metrics.json" = file("${path.module}/dashboards/loki_metrics.json"),
@@ -919,7 +823,7 @@ resource "kubernetes_manifest" "vpa_loki_write" {
     metadata = {
       name      = "loki-write"
       namespace = local.namespace
-      labels    = module.kube_labels_loki_write.kube_labels
+      labels    = module.util_write.labels
     }
     spec = {
       targetRef = {
@@ -940,7 +844,7 @@ resource "kubernetes_manifest" "vpa_loki_backend" {
     metadata = {
       name      = "loki-backend"
       namespace = local.namespace
-      labels    = module.kube_labels_loki_backend.kube_labels
+      labels    = module.util_backend.labels
     }
     spec = {
       targetRef = {
@@ -961,7 +865,7 @@ resource "kubernetes_manifest" "vpa_loki_read" {
     metadata = {
       name      = "loki-read"
       namespace = local.namespace
-      labels    = module.kube_labels_loki_read.kube_labels
+      labels    = module.util_read.labels
     }
     spec = {
       targetRef = {
@@ -982,7 +886,7 @@ resource "kubernetes_manifest" "vpa_loki_canary" {
     metadata = {
       name      = "loki-canary"
       namespace = local.namespace
-      labels    = module.kube_labels_loki_canary.kube_labels
+      labels    = module.util_canary.labels
     }
     spec = {
       targetRef = {

@@ -29,10 +29,6 @@ locals {
   name      = "descheduler"
   namespace = module.namespace.namespace
 
-  descheduler_match = {
-    id = random_id.descheduler_id.hex
-  }
-
   default_evictor_config = {
     name = "DefaultEvictor"
     args = {
@@ -44,20 +40,18 @@ locals {
   }
 }
 
-resource "random_id" "descheduler_id" {
-  prefix      = "descheduler-"
-  byte_length = 8
-}
-
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "descheduler"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -65,27 +59,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.descheduler_match)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.descheduler_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.descheduler_match)
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -129,15 +108,12 @@ resource "helm_release" "descheduler" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/descheduler/descheduler"
       }
-      commonLabels = module.kube_labels.kube_labels
-      podLabels    = module.kube_labels.kube_labels
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
+      commonLabels         = module.util_controller.labels
+      podLabels            = module.util_controller.labels
       deschedulingInterval = "5m"
 
       replicas    = 1
-      tolerations = module.constants.burstable_node_toleration_helm
+      tolerations = module.util_controller.tolerations
 
       resources = {
         requests = {
@@ -155,7 +131,7 @@ resource "helm_release" "descheduler" {
       serviceMonitor = {
         enabled          = var.monitoring_enabled
         namespace        = local.namespace
-        additionalLabels = module.kube_labels.kube_labels
+        additionalLabels = module.util_controller.labels
         interval         = "60s"
       }
 
@@ -309,7 +285,7 @@ resource "kubernetes_manifest" "vpa_descheduler" {
     metadata = {
       name      = "descheduler"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -329,11 +305,11 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "descheduler"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       selector = {
-        matchLabels = local.descheduler_match
+        matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }

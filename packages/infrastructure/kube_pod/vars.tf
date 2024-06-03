@@ -3,6 +3,18 @@ variable "namespace" {
   type        = string
 }
 
+variable "workload_name" {
+  description = "The name of the workload. Used by observability platform for grouping pods."
+  type        = string
+  default     = null
+}
+
+variable "match_labels" {
+  description = "kubernetes labels to use in selectors to match the workload"
+  type        = map(string)
+  default     = null
+}
+
 variable "containers" {
   description = "A list of container configurations for the pod"
   type = list(object({
@@ -116,13 +128,13 @@ variable "secrets" {
   default     = {}
 }
 
-variable "tolerations" {
-  description = "A list of tolerations for the pods"
+variable "extra_tolerations" {
+  description = "Extra tolerations to add to the pods"
   type = list(object({
-    key      = string
+    key      = optional(string)
     operator = string
-    value    = string
-    effect   = string
+    value    = optional(string)
+    effect   = optional(string)
   }))
   default = []
 }
@@ -139,24 +151,63 @@ variable "dns_policy" {
   default     = "ClusterFirst"
 }
 
-variable "spot_instances_enabled" {
-  description = "Whether the pods can be scheduled on spot instances"
+variable "controller_node_required" {
+  description = "Whether the pods must be scheduled on a controller node"
   type        = bool
   default     = false
 }
 
-variable "burstable_instances_enabled" {
-  description = "Whether the pods can be scheduled on burstable instances"
+variable "prefer_spot_nodes_enabled" {
+  description = "Whether to pods will prefer scheduling on spot nodes (default true if spot nodes allowed)"
+  type        = bool
+  default     = null
+}
+
+variable "prefer_burstable_nodes_enabled" {
+  description = "Whether to pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)"
+  type        = bool
+  default     = null
+}
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
   type        = bool
   default     = false
 }
 
-variable "pod_anti_affinity_type" {
-  description = "The podAntiAffinity to use for the pods. 'none' for no anti-affinity. `instance_type` for only one of each pod per instance type. 'node' for only one of each pod per node."
-  type        = string
-  default     = "none"
-  validation {
-    condition     = contains(["none", "instance_type", "node"], var.pod_anti_affinity_type)
-    error_message = "Invalid pod_anti_affinity_type"
-  }
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = false
 }
+
+variable "topology_spread_strict" {
+  description = "Whether the topology spread constraint should be set to DoNotSchedule"
+  type        = bool
+  default     = false
+}
+
+variable "instance_type_anti_affinity_required" {
+  description = "Whether to prevent pods from being scheduled on the same instance types"
+  type        = bool
+  default     = false
+}
+
+variable "zone_anti_affinity_required" {
+  description = "Whether to prevent pods from being scheduled on the same zone"
+  type        = bool
+  default     = false
+}
+
+variable "instance_type_anti_affinity_preferred" {
+  description = "Whether to prefer preventing pods from being scheduled on the same instance types"
+  type        = bool
+  default     = false
+}
+
+variable "host_anti_affinity_required" {
+  description = "Whether to prefer preventing pods from being scheduled on the same host"
+  type        = bool
+  default     = true
+}
+

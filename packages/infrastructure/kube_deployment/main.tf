@@ -10,25 +10,17 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, {
-    service = var.name
-  })
+// This is needed b/c this can never
+// change without destroying the deployment first
+resource "random_id" "deployment_id" {
+  byte_length = 8
 }
 
 module "pod_template" {
@@ -51,15 +43,20 @@ module "pod_template" {
   tmp_directories = var.tmp_directories
   mount_owner     = var.mount_owner
 
-  node_preferences            = var.node_preferences
-  node_requirements           = var.node_requirements
-  spot_instances_enabled      = var.spot_instances_enabled
-  burstable_instances_enabled = var.burstable_instances_enabled
-  pod_anti_affinity_type      = var.pod_anti_affinity_type != null ? var.pod_anti_affinity_type : (var.spot_instances_enabled || var.burstable_instances_enabled) ? "instance_type" : "node"
-  tolerations                 = var.tolerations
-  restart_policy              = var.restart_policy
+  workload_name                         = var.namespace
+  match_labels                          = { id = random_id.deployment_id.hex }
+  burstable_nodes_enabled               = var.burstable_nodes_enabled
+  spot_nodes_enabled                    = var.spot_nodes_enabled
+  instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
+  instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
+  zone_anti_affinity_required           = var.zone_anti_affinity_required
+  host_anti_affinity_required           = var.host_anti_affinity_required
+  extra_tolerations                     = var.extra_tolerations
+  controller_node_required              = var.controller_node_required
+  prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
+  prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -67,11 +64,8 @@ module "pod_template" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, {
-    service = var.name
-  })
 }
 
 resource "kubectl_manifest" "deployment" {
@@ -81,7 +75,7 @@ resource "kubectl_manifest" "deployment" {
     metadata = {
       namespace = var.namespace
       name      = var.name
-      labels    = module.kube_labels.kube_labels
+      labels    = module.pod_template.labels
       annotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -110,7 +104,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = var.name
       namespace = var.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.pod_template.labels
     }
     spec = {
       targetRef = {
@@ -205,7 +199,7 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "${var.name}-pdb"
       namespace = var.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.pod_template.labels
     }
     spec = {
       selector = {

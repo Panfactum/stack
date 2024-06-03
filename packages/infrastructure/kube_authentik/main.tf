@@ -32,53 +32,26 @@ terraform {
 locals {
   name      = "authentik"
   namespace = module.namespace.namespace
-  server_matching_labels = {
-    id = random_id.server_id.hex
-  }
-  worker_matching_labels = {
-    id = random_id.worker_id.hex
-  }
 }
 
 data "aws_region" "current" {}
-
-resource "random_id" "server_id" {
-  prefix      = "authentik-server-"
-  byte_length = 8
-}
-
-resource "random_id" "worker_id" {
-  prefix      = "authentik-worker-"
-  byte_length = 8
-}
 
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "labels_server" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.server_matching_labels)
+module "constants" {
+  source = "../kube_constants"
 }
 
-module "constants_server" {
-  source = "../constants"
+module "util_server" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "authentik-server"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-  matching_labels = local.server_matching_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -86,15 +59,16 @@ module "constants_server" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.server_matching_labels)
 }
 
-module "labels_worker" {
-  source = "../kube_labels"
+module "util_worker" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "authentik-worker"
+  burstable_nodes_enabled = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -102,27 +76,8 @@ module "labels_worker" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.worker_matching_labels)
-}
-
-module "constants_worker" {
-  source = "../constants"
-
-  matching_labels = local.worker_matching_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.worker_matching_labels)
 }
 
 module "namespace" {
@@ -207,7 +162,7 @@ resource "kubernetes_config_map" "email_templates" {
   metadata {
     name      = "email-templates"
     namespace = local.namespace
-    labels    = module.labels_server.kube_labels
+    labels    = module.util_server.labels
   }
   lifecycle {
     ignore_changes = [data]
@@ -222,7 +177,7 @@ resource "kubernetes_config_map" "media" {
   metadata {
     name      = "media"
     namespace = local.namespace
-    labels    = module.labels_server.kube_labels
+    labels    = module.util_server.labels
   }
   lifecycle {
     ignore_changes = [data]
@@ -257,7 +212,7 @@ resource "kubernetes_secret" "bootstrap_creds" {
   metadata {
     name      = "bootstrap-creds"
     namespace = local.namespace
-    labels    = module.labels_server.kube_labels
+    labels    = module.util_server.labels
   }
   data = {
     password = random_password.bootstrap_password.result
@@ -377,7 +332,7 @@ resource "helm_release" "authentik" {
       }
 
       server = {
-        podLabels = module.labels_server.kube_labels
+        podLabels = module.util_server.labels
         ingress = {
           enabled = false // We use our own ingress module
         }
@@ -386,27 +341,24 @@ resource "helm_release" "authentik" {
         deploymentStrategy = {
           type = "Recreate"
         }
-        priorityClassName = module.constants_server.database_priority_class_name
-        affinity = merge(
-          module.constants_server.controller_node_with_burstable_affinity_helm,
-          module.constants_server.pod_anti_affinity_helm
-        )
-        tolerations               = module.constants_server.burstable_node_toleration_helm
-        topologySpreadConstraints = module.constants_server.topology_spread_zone_preferred
+        priorityClassName         = module.constants.database_priority_class_name
+        affinity                  = module.util_server.affinity
+        tolerations               = module.util_server.tolerations
+        topologySpreadConstraints = module.util_server.topology_spread_constraints
 
         service = {
-          labels = module.labels_server.kube_labels
+          labels = module.util_server.labels
         }
 
         metrics = {
           enabled = var.monitoring_enabled
           service = {
-            labels = module.labels_server.kube_labels
+            labels = module.util_server.labels
           }
           serviceMonitor = {
             enabled  = var.monitoring_enabled
             interval = "60s"
-            labels   = module.labels_server.kube_labels
+            labels   = module.util_server.labels
           }
         }
 
@@ -468,16 +420,13 @@ resource "helm_release" "authentik" {
       }
 
       worker = {
-        podLabels = module.labels_worker.kube_labels
+        podLabels = module.util_worker.labels
 
-        replicas          = 1 // We only need one worker as it only processes background jobs
-        priorityClassName = module.constants_worker.database_priority_class_name
-        affinity = merge(
-          module.constants_worker.controller_node_with_burstable_affinity_helm,
-          module.constants_worker.pod_anti_affinity_helm
-        )
-        tolerations               = module.constants_worker.burstable_node_toleration_helm
-        topologySpreadConstraints = module.constants_server.topology_spread_zone_preferred
+        replicas                  = 1 // We only need one worker as it only processes background jobs
+        priorityClassName         = module.constants.database_priority_class_name
+        affinity                  = module.util_server.affinity
+        tolerations               = module.util_server.tolerations
+        topologySpreadConstraints = module.util_server.topology_spread_constraints
 
 
         volumes = [
@@ -558,7 +507,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "authentik-dashboard"
-    labels = merge(module.labels_server.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util_server.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "authentik.json" = file("${path.module}/dashboard.json")
@@ -572,11 +521,11 @@ resource "kubernetes_manifest" "pdb_server" {
     metadata = {
       name      = "authentik-server"
       namespace = local.namespace
-      labels    = module.labels_server.kube_labels
+      labels    = module.util_server.labels
     }
     spec = {
       selector = {
-        matchLabels = local.server_matching_labels
+        matchLabels = module.util_server.match_labels
       }
       maxUnavailable = 1
     }
@@ -591,11 +540,11 @@ resource "kubernetes_manifest" "pdb_worker" {
     metadata = {
       name      = "authentik-worker"
       namespace = local.namespace
-      labels    = module.labels_worker.kube_labels
+      labels    = module.util_worker.labels
     }
     spec = {
       selector = {
-        matchLabels = local.worker_matching_labels
+        matchLabels = module.util_worker.match_labels
       }
       maxUnavailable = 1
     }
@@ -611,7 +560,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = "authentik-server"
       namespace = local.namespace
-      labels    = module.labels_server.kube_labels
+      labels    = module.util_server.labels
     }
     spec = {
       resourcePolicy = {
@@ -640,7 +589,7 @@ resource "kubernetes_manifest" "vpa_worker" {
     metadata = {
       name      = "authentik-worker"
       namespace = local.namespace
-      labels    = module.labels_worker.kube_labels
+      labels    = module.util_worker.labels
     }
     spec = {
       resourcePolicy = {

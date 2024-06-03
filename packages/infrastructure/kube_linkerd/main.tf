@@ -39,8 +39,44 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util_controller" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "linkerd-controller"
+  burstable_nodes_enabled = true
+
+  # generate: common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+module "util_proxy" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "linkerd-proxy"
+  burstable_nodes_enabled = true
+
+  # generate: common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+module "util_viz" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "linkerd-viz"
+  burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -55,18 +91,7 @@ module "kube_labels" {
 }
 
 module "constants" {
-  source = "../constants"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -325,13 +350,13 @@ resource "helm_release" "linkerd" {
         }
       }
 
-      podLabels = module.kube_labels.kube_labels
+      podLabels = module.util_controller.labels
 
       // These pods must be running in order to prevent cascading cluster failures
       priorityClassName = "system-cluster-critical"
 
-      nodeAffinity = module.constants.controller_node_affinity_helm.nodeAffinity
-      tolerations  = module.constants.burstable_node_toleration_helm
+      nodeAffinity = module.util_controller.affinity.nodeAffinity
+      tolerations  = module.util_controller.tolerations
 
       policyValidator = {
         externalSecret = true
@@ -472,10 +497,10 @@ resource "helm_release" "viz" {
       defaultRegistry       = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd"
       defaultLogFormat      = "json"
       defaultLogLevel       = var.log_level
-      tolerations           = module.constants.burstable_node_toleration_helm
+      tolerations           = module.util_viz.tolerations
       enablePodAntiAffinity = true
-      podLabels             = module.kube_labels.kube_labels
-      commonLabels          = module.kube_labels.kube_labels
+      podLabels             = module.util_viz.labels
+      commonLabels          = module.util_viz.labels
 
       prometheusUrl = "http://thanos-query-frontend.monitoring.svc.cluster.local:9090"
       prometheus = {
@@ -524,7 +549,7 @@ resource "kubernetes_manifest" "vpa_identity" {
     metadata = {
       name      = "linkerd-identity"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -545,7 +570,7 @@ resource "kubernetes_manifest" "vpa_destination" {
     metadata = {
       name      = "linkerd-destination"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -566,7 +591,7 @@ resource "kubernetes_manifest" "vpa_proxy_injectory" {
     metadata = {
       name      = "linkerd-proxy-injector"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -587,7 +612,7 @@ resource "kubernetes_manifest" "vpa_metrics_api" {
     metadata = {
       name      = "linkerd-metrics-api"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       targetRef = {
@@ -607,7 +632,7 @@ resource "kubernetes_manifest" "pdb_metrics_api" {
     metadata = {
       name      = "linkerd-metrics-api"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       selector = {
@@ -630,7 +655,7 @@ resource "kubernetes_manifest" "vpa_tap_injector" {
     metadata = {
       name      = "linkerd-tap-injector"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       targetRef = {
@@ -650,7 +675,7 @@ resource "kubernetes_manifest" "pdb_tap_injector" {
     metadata = {
       name      = "linkerd-tap-injector"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       selector = {
@@ -673,7 +698,7 @@ resource "kubernetes_manifest" "vpa_web" {
     metadata = {
       name      = "linkerd-web"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       targetRef = {
@@ -694,7 +719,7 @@ resource "kubernetes_manifest" "pdb_web" {
     metadata = {
       name      = "linkerd-web"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       selector = {
@@ -718,7 +743,7 @@ resource "kubernetes_manifest" "vpa_tap" {
     metadata = {
       name      = "linkerd-tap"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       targetRef = {
@@ -738,7 +763,7 @@ resource "kubernetes_manifest" "pdb_tap" {
     metadata = {
       name      = "linkerd-tap"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_viz.labels
     }
     spec = {
       selector = {

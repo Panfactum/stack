@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -31,33 +29,6 @@ locals {
   webhook_name   = "cert-manger-webhook"
   namespace      = module.namespace.namespace
   webhook_secret = "cert-manager-webhook-certs"
-
-  controller_match = {
-    id = random_id.controller_id.hex
-  }
-
-  webhook_match = {
-    id = random_id.webhook.hex
-  }
-
-  ca_injector_match = {
-    id = random_id.ca_injector.hex
-  }
-}
-
-resource "random_id" "controller_id" {
-  prefix      = "${local.name}-"
-  byte_length = 8
-}
-
-resource "random_id" "webhook" {
-  prefix      = "${local.name}-webhook-"
-  byte_length = 8
-}
-
-resource "random_id" "ca_injector" {
-  prefix      = "${local.name}-ca-injector-"
-  byte_length = 8
 }
 
 module "pull_through" {
@@ -65,10 +36,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "controller_labels" {
-  source = "../kube_labels"
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "cert-manager"
+  instance_type_anti_affinity_preferred = true
+  burstable_nodes_enabled               = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -76,15 +50,17 @@ module "controller_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
-module "webhook_labels" {
-  source = "../kube_labels"
+module "util_webhook" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "cert-manager-webhook"
+  instance_type_anti_affinity_preferred = true
+  burstable_nodes_enabled               = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -92,15 +68,20 @@ module "webhook_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match)
 }
 
-module "ca_injector_labels" {
-  source = "../kube_labels"
+module "util_ca_injector" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "cert-manager-ca-injector"
+  instance_type_anti_affinity_preferred = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  // This _can_ be run on a spot node if necessary as a short temporary disruption
+  // will not cause cascading failures
+  burstable_nodes_enabled = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -108,63 +89,12 @@ module "ca_injector_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.ca_injector_match)
 }
 
-module "constants_controller" {
-  source = "../constants"
-
-  matching_labels = local.controller_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
-}
-
-module "constants_webhook" {
-  source = "../constants"
-
-  matching_labels = local.webhook_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match)
-}
-
-module "constants_ca_injector" {
-  source = "../constants"
-
-  matching_labels = local.ca_injector_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.ca_injector_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -195,7 +125,7 @@ resource "kubernetes_service_account" "cert_manager" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.controller_labels.kube_labels
+    labels    = module.util_controller.labels
   }
 }
 
@@ -203,7 +133,7 @@ resource "kubernetes_service_account" "webhook" {
   metadata {
     name      = local.webhook_name
     namespace = local.namespace
-    labels    = module.webhook_labels.kube_labels
+    labels    = module.util_webhook.labels
   }
 }
 
@@ -225,14 +155,14 @@ module "webhook_cert" {
   is_local         = var.is_local
   # end-generate
 
-  extra_tags = module.webhook_labels.kube_labels
+  extra_tags = module.util_webhook.labels
 }
 
 
 resource "kubernetes_role" "webhook" {
   metadata {
     name      = local.webhook_name
-    labels    = module.webhook_labels.kube_labels
+    labels    = module.util_webhook.labels
     namespace = local.namespace
   }
   rule {
@@ -253,7 +183,7 @@ resource "kubernetes_role" "webhook" {
 
 resource "kubernetes_role_binding" "extra_permissions" {
   metadata {
-    labels    = module.webhook_labels.kube_labels
+    labels    = module.util_webhook.labels
     name      = local.webhook_name
     namespace = local.namespace
   }
@@ -286,11 +216,11 @@ resource "helm_release" "cert_manager" {
 
       installCRDs = true
       global = {
-        commonLabels = module.controller_labels.kube_labels
+        commonLabels = module.util_controller.labels
 
         // While the certificates are "critical" to the cluster, the provisioning infrastructure
         // can go down temporarily without taking down the cluster so this does not need to be "system-cluster-critical"
-        priorityClassName = module.constants_controller.cluster_important_priority_class_name
+        priorityClassName = module.constants.cluster_important_priority_class_name
       }
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-controller"
@@ -299,12 +229,12 @@ resource "helm_release" "cert_manager" {
       strategy = {
         type = "Recreate"
       }
-      podLabels = module.controller_labels.kube_labels
-      affinity  = module.constants_controller.controller_node_with_burstable_affinity_helm
+      podLabels = module.util_controller.labels
+      affinity  = module.util_controller.affinity
 
       // This _can_ be run on a spot node if necessary as a short temporary disruption
       // will not cause cascading failures
-      tolerations = module.constants_controller.burstable_node_toleration_helm
+      tolerations = module.util_controller.tolerations
       resources = {
         requests = {
           memory = "100Mi"
@@ -334,12 +264,9 @@ resource "helm_release" "cert_manager" {
           create = false
           name   = kubernetes_service_account.webhook.metadata[0].name
         }
-        podLabels   = module.webhook_labels.kube_labels
-        tolerations = module.constants_controller.burstable_node_toleration_helm
-        affinity = merge(
-          module.constants_webhook.controller_node_affinity_helm,
-          module.constants_webhook.pod_anti_affinity_preferred_instance_type_helm
-        )
+        podLabels   = module.util_webhook.labels
+        tolerations = module.util_webhook.tolerations
+        affinity    = module.util_webhook.affinity
         resources = {
           requests = {
             memory = "100Mi"
@@ -392,12 +319,10 @@ resource "helm_release" "cert_manager" {
           type = "Recreate"
         }
         extraArgs = ["--v=${var.log_verbosity}"]
-        podLabels = module.ca_injector_labels.kube_labels
-        affinity  = module.constants_ca_injector.controller_node_with_burstable_affinity_helm
+        podLabels = module.util_ca_injector.labels
+        affinity  = module.util_ca_injector.affinity
 
-        // This _can_ be run on a spot node if necessary as a short temporary disruption
-        // will not cause cascading failures
-        tolerations = module.constants_controller.burstable_node_toleration_helm
+        tolerations = module.util_ca_injector.tolerations
         resources = {
           requests = {
             memory = "100Mi"
@@ -413,7 +338,7 @@ resource "helm_release" "cert_manager" {
         servicemonitor = {
           enabled  = var.monitoring_enabled
           interval = "60s"
-          labels   = module.controller_labels.kube_labels
+          labels   = module.util_controller.labels
         }
       }
     })
@@ -426,7 +351,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "cert-manager-dashboard"
-    labels = merge(module.controller_labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util_controller.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "cert-manager.json" = file("${path.module}/dashboard.json")
@@ -445,7 +370,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     metadata = {
       name      = "cert-manager"
       namespace = local.namespace
-      labels    = module.controller_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -466,7 +391,7 @@ resource "kubernetes_manifest" "vpa_cainjector" {
     metadata = {
       name      = "cert-manager-cainjector"
       namespace = local.namespace
-      labels    = module.ca_injector_labels.kube_labels
+      labels    = module.util_ca_injector.labels
     }
     spec = {
       targetRef = {
@@ -487,7 +412,7 @@ resource "kubernetes_manifest" "vpa_webhook" {
     metadata = {
       name      = "cert-manager-webhook"
       namespace = local.namespace
-      labels    = module.webhook_labels.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       targetRef = {
@@ -507,11 +432,11 @@ resource "kubernetes_manifest" "pdb_controller" {
     metadata = {
       name      = "cert-manager"
       namespace = local.namespace
-      labels    = module.controller_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       selector = {
-        matchLabels = module.controller_labels.kube_labels
+        matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
@@ -526,11 +451,11 @@ resource "kubernetes_manifest" "pdb_webhook" {
     metadata = {
       name      = "cert-manager-webhook"
       namespace = local.namespace
-      labels    = module.webhook_labels.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       selector = {
-        matchLabels = module.webhook_labels.kube_labels
+        matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }
@@ -545,11 +470,11 @@ resource "kubernetes_manifest" "pdb_ca_injector" {
     metadata = {
       name      = "cert-manager-ca-injector"
       namespace = local.namespace
-      labels    = module.ca_injector_labels.kube_labels
+      labels    = module.util_ca_injector.labels
     }
     spec = {
       selector = {
-        matchLabels = module.ca_injector_labels.kube_labels
+        matchLabels = module.util_ca_injector.match_labels
       }
       maxUnavailable = 1
     }
@@ -569,7 +494,7 @@ resource "kubernetes_manifest" "canary" {
     metadata = {
       name      = "cert-manager"
       namespace = local.namespace
-      labels    = module.controller_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       schedule   = "@every 30s"

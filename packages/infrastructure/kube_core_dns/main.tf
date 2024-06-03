@@ -30,7 +30,6 @@ terraform {
 }
 
 locals {
-
   name      = "core-dns"
   namespace = module.namespace.namespace
 }
@@ -40,34 +39,8 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
 module "constants" {
-  source = "../constants"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -94,14 +67,14 @@ resource "kubernetes_service_account" "core_dns" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.core_dns.labels
   }
 }
 
 resource "kubernetes_cluster_role" "core_dns" {
   metadata {
     name   = local.name
-    labels = module.labels.kube_labels
+    labels = module.core_dns.labels
   }
 
   # Required for CoreDNS
@@ -127,7 +100,7 @@ resource "kubernetes_cluster_role" "core_dns" {
 resource "kubernetes_cluster_role_binding" "core_dns" {
   metadata {
     name   = local.name
-    labels = module.labels.kube_labels
+    labels = module.core_dns.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -148,7 +121,7 @@ resource "kubernetes_config_map" "config" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.core_dns.labels
   }
   data = {
     Corefile = file("${path.module}/Corefile")
@@ -183,11 +156,13 @@ module "core_dns" {
     "linkerd.io/inject" = "disabled"
   }
 
-  min_replicas                = 2
-  max_replicas                = 2
-  burstable_instances_enabled = true
-  priority_class_name         = "system-cluster-critical"
-  dns_policy                  = "Default"
+  min_replicas                          = 2
+  max_replicas                          = 2
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+  topology_spread_strict                = true
+  priority_class_name                   = "system-cluster-critical"
+  dns_policy                            = "Default"
   containers = concat(
     [
       {
@@ -261,7 +236,7 @@ resource "kubernetes_service" "core_dns" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = merge(module.labels.kube_labels, module.core_dns.match_labels)
+    labels    = module.core_dns.labels
   }
   spec {
     cluster_ip              = var.service_ip
@@ -301,7 +276,7 @@ resource "kubernetes_manifest" "service_monitor" {
     metadata = {
       name      = "core-dns"
       namespace = local.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.core_dns.labels
     }
     spec = {
       endpoints = [{
@@ -340,7 +315,7 @@ resource "kubernetes_manifest" "monitoring_rules" {
     metadata = {
       name      = "core-dns"
       namespace = local.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.core_dns.labels
     }
     spec = yamldecode(file("${path.module}/rules.yaml"))
   }
@@ -351,7 +326,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "core-dns-dashboard"
-    labels = merge(module.labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.core_dns.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "coredns.json" = file("${path.module}/dashboard.json")

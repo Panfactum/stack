@@ -32,18 +32,6 @@ locals {
 
   cluster_name = random_id.cluster_id.hex
 
-  cluster_match_labels = {
-    id = random_id.cluster_id.hex
-  }
-
-  pooler_rw_match_labels = {
-    id = random_id.pooler_rw_id.hex
-  }
-
-  pooler_r_match_labels = {
-    id = random_id.pooler_r_id.hex
-  }
-
   stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
 
   poolers_to_enable = toset(concat(
@@ -72,10 +60,17 @@ resource "random_id" "pooler_r_id" {
   prefix      = "pg-pooler-r-"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util_cluster" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "pg-${random_id.cluster_id.hex}"
+  burstable_nodes_enabled              = var.burstable_instances_enabled
+  spot_nodes_enabled                   = var.spot_instances_enabled
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+  lifetime_evictions_enabled           = false
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -83,16 +78,22 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.cluster_match_labels)
 }
 
-module "kube_labels_pooler" {
+module "util_pooler" {
   for_each = toset(["r", "rw"])
-  source   = "../kube_labels"
+  source   = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+  pod_affinity_match_labels            = module.util_cluster.match_labels
+  lifetime_evictions_enabled           = false
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -100,44 +101,12 @@ module "kube_labels_pooler" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.cluster_match_labels
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
-module "constants_pooler" {
-  for_each = toset(["r", "rw"])
-  source   = "../constants"
-
-  matching_labels = each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -316,7 +285,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
     metadata = {
       name      = local.cluster_name
       namespace = var.pg_cluster_namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_cluster.labels
       annotations = {
         "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
 
@@ -353,8 +322,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       inheritedMetadata = {
         labels = merge(
-          module.kube_labels.kube_labels,
-          module.constants.disable_lifetime_eviction_label,
+          module.util_cluster.labels,
           {
             pg-cluster = local.cluster-label
           }
@@ -425,7 +393,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       priorityClassName = module.constants.database_priority_class_name
 
       // Try to spread the instances evenly across the availability zones
-      topologySpreadConstraints = module.constants.topology_spread_zone_strict
+      topologySpreadConstraints = module.util_cluster.topology_spread_constraints
 
       affinity = {
         // Ensures that the postgres cluster instances are never scheduled on the same node
@@ -434,7 +402,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         podAntiAffinityType   = "required"
 
         // Allow the clusters to be scheduled on particular node types
-        tolerations = var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : null
+        tolerations = module.util_cluster.tolerations
       }
 
       resources = {
@@ -552,11 +520,11 @@ resource "kubernetes_manifest" "pdb" {
       // as we have disabled the operator pdb functionality
       name      = "${local.cluster_name}-pf-pdb"
       namespace = var.pg_cluster_namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_cluster.labels
     }
     spec = {
       selector = {
-        matchLabels = local.cluster_match_labels
+        matchLabels = module.util_cluster.match_labels
       }
       maxUnavailable = 1
     }
@@ -737,7 +705,7 @@ resource "kubernetes_manifest" "connection_pooler" {
     metadata = {
       name      = "${local.cluster_name}-pooler-${each.key}"
       namespace = var.pg_cluster_namespace
-      labels    = module.kube_labels_pooler[each.key].kube_labels
+      labels    = module.util_pooler[each.key].labels
     }
     spec = {
       cluster = {
@@ -761,10 +729,7 @@ resource "kubernetes_manifest" "connection_pooler" {
       }
       template = {
         metadata = {
-          labels = merge(
-            module.kube_labels_pooler[each.key].kube_labels,
-            module.constants_pooler[each.key].disable_lifetime_eviction_label
-          )
+          labels = module.util_pooler[each.key].labels
           annotations = {
             "linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
           }
@@ -798,33 +763,9 @@ resource "kubernetes_manifest" "connection_pooler" {
           ]
 
           priorityClassName         = module.constants.database_priority_class_name
-          topologySpreadConstraints = module.constants_pooler[each.key].topology_spread_zone_preferred
-          tolerations               = module.constants_pooler[each.key].burstable_node_toleration_helm
-          affinity = merge(
-            module.constants_pooler[each.key].pod_anti_affinity_instance_type_helm,
-            {
-              podAffinity = {
-                // Try to schedule poolers on the same nodes as db instances to reduce network latency
-                preferredDuringSchedulingIgnoredDuringExecution = [
-                  {
-                    weight = 100
-                    podAffinityTerm = {
-                      labelSelector = {
-                        matchExpressions = [
-                          {
-                            key      = "id"
-                            operator = "In"
-                            values   = [random_id.cluster_id.hex]
-                          }
-                        ]
-                      }
-                      topologyKey = "kubernetes.io/hostname"
-                    }
-                  }
-                ]
-              },
-            }
-          )
+          topologySpreadConstraints = module.util_pooler[each.key].topology_spread_constraints
+          tolerations               = module.util_pooler[each.key].tolerations
+          affinity                  = module.util_pooler[each.key].affinity
         }
       }
     }
@@ -866,11 +807,11 @@ resource "kubernetes_manifest" "pdb_pooler" {
     metadata = {
       name      = "${local.cluster_name}-pooler-${each.key}"
       namespace = var.pg_cluster_namespace
-      labels    = module.kube_labels_pooler[each.key].kube_labels
+      labels    = module.util_pooler[each.key].labels
     }
     spec = {
       selector = {
-        matchLabels = each.key == "r" ? local.pooler_r_match_labels : local.pooler_rw_match_labels
+        matchLabels = module.util_pooler[each.key].match_labels
       }
       maxUnavailable = 1
     }

@@ -31,14 +31,6 @@ data "aws_caller_identity" "main" {}
 locals {
   name      = "karpenter"
   namespace = module.namespace.namespace
-  controller_match = {
-    id = random_id.controller_id.hex
-  }
-}
-
-resource "random_id" "controller_id" {
-  prefix      = "karpenter-"
-  byte_length = 8
 }
 
 module "pull_through" {
@@ -46,10 +38,12 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                   = "../kube_workload_utility"
+  workload_name            = "karpenter"
+  controller_node_required = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -57,27 +51,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.controller_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
+  source = "../kube_constants"
 }
 
 module "tags" {
@@ -562,7 +541,7 @@ resource "kubernetes_service_account" "karpenter" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
 }
 
@@ -601,7 +580,7 @@ resource "helm_release" "karpenter" {
     yamlencode({
       nameOverride     = local.name
       fullnameOverride = local.name
-      podLabels        = module.kube_labels.kube_labels
+      podLabels        = module.util.labels
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.karpenter.metadata[0].name
@@ -623,7 +602,7 @@ resource "helm_release" "karpenter" {
 
       serviceMonitor = {
         enabled          = var.monitoring_enabled
-        additionalLabels = module.kube_labels.kube_labels
+        additionalLabels = module.util.labels
         endpointConfig = {
           scrapeInterval = "60s"
         }
@@ -676,7 +655,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "karpenter-dashboard"
-    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "karpenter.json" = file("${path.module}/dashboard.json")
@@ -691,7 +670,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

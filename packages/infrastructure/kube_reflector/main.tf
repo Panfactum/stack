@@ -25,9 +25,6 @@ terraform {
 
 locals {
   namespace = module.namespace.namespace
-  matching_labels = {
-    id = random_id.controller_id.hex
-  }
 }
 
 module "pull_through" {
@@ -35,15 +32,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "controller_id" {
-  prefix      = "reflector-"
-  byte_length = 8
-}
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "reflector"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -51,27 +46,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.matching_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.matching_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.matching_labels)
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -116,13 +96,10 @@ resource "helm_release" "reflector" {
           minimumLevel = var.log_level
         }
       }
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
-      podLabels = module.kube_labels.kube_labels
+      podLabels = module.util_controller.labels
 
       replicaCount      = 1
-      tolerations       = module.constants.burstable_node_toleration_helm
+      tolerations       = module.util_controller.tolerations
       priorityClassName = module.constants.cluster_important_priority_class_name
       resources = {
         requests = {
@@ -144,7 +121,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "reflector"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -164,11 +141,11 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "reflector"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       selector = {
-        matchLabels = local.matching_labels
+        matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }

@@ -25,9 +25,6 @@ terraform {
 
 locals {
   namespace = module.namespace.namespace
-  matching_labels = {
-    id = random_id.controller_id.hex
-  }
 }
 
 data "aws_region" "current" {}
@@ -37,15 +34,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "controller_id" {
-  prefix      = "velero-"
-  byte_length = 8
-}
+module "util" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "velero"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -53,25 +48,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.matching_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.matching_labels)
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -162,7 +144,7 @@ resource "kubernetes_service_account" "velero" {
   metadata {
     name      = "velero"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
 }
 
@@ -198,7 +180,7 @@ resource "kubernetes_manifest" "snapshot_class" {
     metadata = {
       name = "default"
       labels = merge(
-        module.kube_labels.kube_labels,
+        module.util.labels,
         {
           "velero.io/csi-volumesnapshot-class" = "true"
         }
@@ -235,8 +217,8 @@ resource "helm_release" "velero" {
   values = [
     yamlencode({
       fullnameOverride = "velero"
-      labels           = module.kube_labels.kube_labels
-      podLabels        = module.kube_labels.kube_labels
+      labels           = module.util.labels
+      podLabels        = module.util.labels
       podAnnotations = {
         "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
       }
@@ -350,7 +332,7 @@ resource "helm_release" "velero" {
       schedules = {
         hourly = {
           disabled = false
-          labels   = module.kube_labels.kube_labels
+          labels   = module.util.labels
           schedule = "0 * * * *"
           template = {
             snapshotVolumes = true // Only store snapshots for the last hour due to high costs
@@ -360,7 +342,7 @@ resource "helm_release" "velero" {
         }
         daily = {
           disabled = false
-          labels   = module.kube_labels.kube_labels
+          labels   = module.util.labels
           schedule = "0 0 * * *"
           template = {
             snapshotVolumes = false
@@ -379,7 +361,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "velero-dashboard"
-    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "velero.json" = file("${path.module}/dashboard.json")
@@ -395,7 +377,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "velero"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       resourcePolicy = {
@@ -423,11 +405,11 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "velero"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       selector = {
-        matchLabels = local.matching_labels
+        matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }

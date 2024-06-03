@@ -24,10 +24,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "trust_manager_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "trust-manager"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -35,31 +38,12 @@ module "trust_manager_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, {
-    service = "${var.namespace}-trust-manager" //TODO: Make this a random ID
-  })
 }
 
-module "trust_manager_constants" {
-  source = "../constants"
-
-  matching_labels = module.trust_manager_labels.kube_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, {
-    service = "${var.namespace}-trust-manager" //TODO: Make this a random ID
-  })
+module "constants" {
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -83,7 +67,7 @@ resource "helm_release" "trust_manager" {
         enabled = true
       }
 
-      commonLabels = module.trust_manager_labels.kube_labels
+      commonLabels = module.util.labels
 
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/trust-manager"
@@ -107,9 +91,9 @@ resource "helm_release" "trust_manager" {
 
       // Does not need to be highly available
       replicaCount      = 1
-      tolerations       = module.trust_manager_constants.burstable_node_toleration_helm
-      affinity          = module.trust_manager_constants.controller_node_with_burstable_affinity_helm
-      priorityClassName = module.trust_manager_constants.cluster_important_priority_class_name
+      tolerations       = module.util.tolerations
+      affinity          = module.util.affinity
+      priorityClassName = module.constants.cluster_important_priority_class_name
 
       resources = {
         limits = {
@@ -134,7 +118,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "trust-manager"
       namespace = var.namespace
-      labels    = module.trust_manager_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

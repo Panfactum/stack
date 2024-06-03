@@ -15,8 +15,8 @@ locals {
   localhost_sans = var.include_localhost ? ["localhost"] : []
 }
 
-module "labels" {
-  source = "../kube_labels"
+module "util" {
+  source = "../kube_workload_utility"
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -37,7 +37,7 @@ resource "kubernetes_manifest" "cert" {
     metadata = {
       name      = var.secret_name
       namespace = var.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       secretName = var.secret_name
@@ -46,7 +46,7 @@ resource "kubernetes_manifest" "cert" {
           // This allows for the secret to have its ca data directly injected into webhooks
           "cert-manager.io/allow-direct-injection" = "true"
         }
-        labels = module.labels.kube_labels
+        labels = module.util.labels
       }
       commonName = var.common_name == null ? (length(var.service_names) == 0 ? "default" : "${var.service_names[0]}.${var.namespace}.svc") : var.common_name
       dnsNames = length(var.service_names) == 0 ? concat(["default"], local.localhost_sans) : concat(

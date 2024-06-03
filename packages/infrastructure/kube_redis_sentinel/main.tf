@@ -23,12 +23,6 @@ terraform {
   }
 }
 
-locals {
-  match_labels = {
-    id = random_id.id.hex
-  }
-}
-
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
@@ -39,10 +33,16 @@ resource "random_id" "id" {
   prefix      = "redis-"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = random_id.id.hex
+  burstable_nodes_enabled              = var.burstable_instances_enabled
+  spot_nodes_enabled                   = var.spot_instances_enabled
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+  lifetime_evictions_enabled           = false
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -50,27 +50,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.match_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.match_labels)
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -95,7 +80,7 @@ resource "kubernetes_secret" "superuser" {
   metadata {
     name      = nonsensitive("redis-superuser-${sha256(random_password.superuser_password.result)}")
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   data = {
     password = random_password.superuser_password.result
@@ -121,7 +106,7 @@ resource "helm_release" "redis" {
   values = [
     yamlencode({
       fullnameOverride = random_id.id.hex
-      commonLabels     = module.kube_labels.kube_labels
+      commonLabels     = module.util.labels
 
       commonAnnotations = {
         "panfactum.com/db"             = "true"
@@ -204,10 +189,7 @@ resource "helm_release" "redis" {
           }
         ]
 
-        podLabels = merge(
-          module.kube_labels.kube_labels,
-          module.constants.disable_lifetime_eviction_label
-        )
+        podLabels = module.util.labels
         podAnnotations = {
           "config.linkerd.io/opaque-ports"                      = "6379,26379"
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
@@ -221,9 +203,9 @@ resource "helm_release" "redis" {
         }
 
         priorityClassName         = module.constants.database_priority_class_name
-        affinity                  = (var.burstable_instances_enabled || var.spot_instances_enabled) ? module.constants.pod_anti_affinity_instance_type_helm : module.constants.pod_anti_affinity_helm
-        tolerations               = var.burstable_instances_enabled ? module.constants.burstable_node_toleration_helm : var.spot_instances_enabled ? module.constants.spot_node_toleration_helm : null
-        topologySpreadConstraints = module.constants.topology_spread_zone_strict
+        affinity                  = module.util.affinity
+        tolerations               = module.util.tolerations
+        topologySpreadConstraints = module.util.topology_spread_constraints
 
         // Recommended by the helm chart docs
         podSecurityContext = {
@@ -329,11 +311,11 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = random_id.id.hex
       namespace = var.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       selector = {
-        matchLabels = module.kube_labels.kube_labels
+        matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }
@@ -349,7 +331,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = random_id.id.hex
       namespace = var.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

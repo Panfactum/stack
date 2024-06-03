@@ -28,14 +28,6 @@ terraform {
 locals {
   name      = "alb-controller"
   namespace = module.namespace.namespace
-  controller_match = {
-    id = random_id.controller_id.hex
-  }
-}
-
-resource "random_id" "controller_id" {
-  prefix      = "alb-controller-"
-  byte_length = 8
 }
 
 module "pull_through" {
@@ -43,10 +35,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "labels" {
-  source = "../kube_labels"
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "alb-controller"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -54,9 +49,8 @@ module "labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
 module "tags" {
@@ -75,21 +69,7 @@ module "tags" {
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.controller_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -339,7 +319,7 @@ resource "kubernetes_service_account" "alb_controller" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.util_controller.labels
   }
 }
 
@@ -399,7 +379,7 @@ resource "helm_release" "alb_controller" {
         "linkerd.io/inject"                                   = "enabled"
         "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
       }
-      additionalLabels = merge(module.labels.kube_labels, {
+      additionalLabels = merge(module.util_controller.labels, {
         customizationHash = md5(join("", [for filename in sort(fileset(path.module, "alb_kustomize/*")) : filesha256(filename)]))
       })
       resources = {
@@ -414,15 +394,12 @@ resource "helm_release" "alb_controller" {
       // DOES need to be highly available to avoid ingress disruptions
       replicaCount      = 2
       priorityClassName = module.constants.cluster_important_priority_class_name
-      affinity = merge(
-        module.constants.controller_node_with_burstable_affinity_helm,
-        module.constants.pod_anti_affinity_instance_type_helm
-      )
+      affinity          = module.util_controller.affinity
       updateStrategy = {
         type = "Recreate"
       }
-      tolerations               = module.constants.burstable_node_toleration_helm
-      topologySpreadConstraints = module.constants.topology_spread_zone_strict
+      tolerations               = module.util_controller.tolerations
+      topologySpreadConstraints = module.util_controller.topology_spread_constraints
       podDisruptionBudget = {
         maxUnavailable = 1
       }
@@ -483,7 +460,7 @@ resource "kubernetes_service" "alb_controller_healthcheck" {
   metadata {
     name      = "alb-controller-healthcheck"
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.util_controller.labels
   }
   spec {
     type = "ClusterIP"
@@ -492,7 +469,7 @@ resource "kubernetes_service" "alb_controller_healthcheck" {
       target_port = 61779 // healthcheck port
       protocol    = "TCP"
     }
-    selector = local.controller_match
+    selector = module.util_controller.match_labels
   }
   depends_on = [helm_release.alb_controller]
 }
@@ -505,7 +482,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "alb-controller"
       namespace = local.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {

@@ -43,10 +43,6 @@ locals {
       memory = "130Mi"
     }
   }
-
-  canary_match = {
-    id = random_id.canary.hex
-  }
 }
 
 module "pull_through" {
@@ -54,15 +50,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "canary" {
-  byte_length = 8
-  prefix      = "canary-"
-}
+module "util" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "canary-checker"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -70,29 +64,13 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.canary_match)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.canary_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.canary_match)
+  source = "../kube_constants"
 }
-
 
 /***************************************
 * Namespace
@@ -153,7 +131,7 @@ resource "kubernetes_secret" "db_creds" {
   metadata {
     name      = "db-creds"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   data = {
     DB_URL = "postgresql://${module.database.superuser_username}:${module.database.superuser_password}@${module.database.pooler_rw_service_name}:${module.database.rw_service_port}/app"
@@ -174,6 +152,7 @@ resource "helm_release" "canary" {
 
   values = [
     yamlencode({
+      #TODO: Need to add pod labels
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/flanksource/canary-checker"
       }
@@ -194,7 +173,7 @@ resource "helm_release" "canary" {
       }
       resources = local.default_resources
       extra = {
-        tolerations = module.constants.burstable_node_toleration_helm
+        tolerations = module.util.tolerations
       }
       serviceMonitor    = true
       grafanaDashboards = true
@@ -216,11 +195,10 @@ resource "kubernetes_manifest" "pdb_canary" {
     metadata = {
       name      = "canary-checker"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
-    }
+    labels = module.util.labels }
     spec = {
       selector = {
-        matchLabels = local.canary_match
+        matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }
@@ -236,7 +214,7 @@ resource "kubernetes_manifest" "vpa_alloy" {
     metadata = {
       name      = "canary-checker"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

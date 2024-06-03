@@ -23,41 +23,14 @@ locals {
   healthcheck_route = "/"
 }
 
-module "labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
 module "constants" {
-  source = "../constants"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 module "namespace" {
   source = "../kube_namespace"
 
-  namespace            = local.name
-  loadbalancer_enabled = true
+  namespace = local.name
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -79,9 +52,10 @@ module "website_deployment" {
   namespace = module.namespace.namespace
   name      = local.name
 
-  min_replicas = 2
-  max_replicas = 2
-  tolerations  = module.constants.burstable_node_toleration_helm
+  min_replicas                         = 2
+  max_replicas                         = 2
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
 
 
   common_env = {
@@ -122,7 +96,7 @@ resource "kubernetes_service" "service" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.website_deployment.labels
   }
   spec {
     internal_traffic_policy = "Cluster"

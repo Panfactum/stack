@@ -7,6 +7,23 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+- The reloader deployment must be deleted before the next apply of [kube_reloader](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reloader). No
+inputs have changed.
+
+- The alpha module `kube_labels` has been removed in favor of the labels provided by [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility).
+
+### Added
+
+- Added [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened
+Pod specs that take advantage of all capabilities included in the Panfactum stack.
+
+- Added [kube_constants](/docs/edge/reference/infrastructure-modules/kubernetes/kube_constants) that export static configuration values that can be useful
+when creating resources that run on clusters in the Panfactum stack.
+
 ## edge.24-06-02
 
 ### Added

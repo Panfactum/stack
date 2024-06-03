@@ -3,7 +3,11 @@ output "pod_template" {
 }
 
 output "match_labels" {
-  value = local.match_labels
+  value = module.util.match_labels
+}
+
+output "labels" {
+  value = module.util.labels
 }
 
 output "containers" {

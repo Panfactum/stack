@@ -29,25 +29,12 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
-module "constants_admission_controller" {
-  source = "../constants"
-
-  matching_labels = {
+module "util_admission_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "vpa-admission-controller"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+  match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "admission-controller"
   }
@@ -64,10 +51,33 @@ module "constants_admission_controller" {
   # end-generate
 }
 
-module "constants_updater" {
-  source = "../constants"
+module "util_recommender" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "vpa-recommender"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+  match_labels = {
+    "app.kubernetes.io/name"      = "vpa"
+    "app.kubernetes.io/component" = "recommender"
+  }
+  # generate: common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
 
-  matching_labels = {
+module "util_updater" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "vpa-updater"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+  match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "updater"
   }
@@ -84,24 +94,8 @@ module "constants_updater" {
   # end-generate
 }
 
-module "constants_recommender" {
-  source = "../constants"
-
-  matching_labels = {
-    "app.kubernetes.io/name"      = "vpa"
-    "app.kubernetes.io/component" = "recommender"
-  }
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+module "constants" {
+  source = "../kube_constants"
 }
 
 # ################################################################################
@@ -161,7 +155,7 @@ resource "helm_release" "vpa" {
     yamlencode({
       fullnameOverride = "vpa"
 
-      podLabels = merge(module.kube_labels.kube_labels, {
+      podLabels = merge(module.util_recommender.labels, {
         customizationHash = md5(join("", [for filename in fileset(path.module, "vpa_kustomize/*") : filesha256(filename)]))
       })
 
@@ -184,8 +178,8 @@ resource "helm_release" "vpa" {
         // OOMs, then it won't be recorded and then bumped up. As a result, we have to tune this
         // pods memory floor carefully and give it plenty of headroom.
         replicaCount = 1
-        affinity     = module.constants_recommender.controller_node_with_burstable_affinity_helm
-        tolerations  = module.constants_recommender.burstable_node_toleration_helm
+        affinity     = module.util_recommender.affinity
+        tolerations  = module.util_recommender.tolerations
 
         metrics = {
           serviceMonitor = {
@@ -278,8 +272,8 @@ resource "helm_release" "vpa" {
         // ONLY 1 of these should be running at a time
         // b/c there is no leader-election: https://github.com/kubernetes/autoscaler/issues/5481
         replicaCount = 1
-        affinity     = module.constants_updater.controller_node_with_burstable_affinity_helm
-        tolerations  = module.constants_updater.burstable_node_toleration_helm
+        affinity     = module.util_updater.affinity
+        tolerations  = module.util_updater.tolerations
 
         metrics = {
           serviceMonitor = {
@@ -324,11 +318,8 @@ resource "helm_release" "vpa" {
         // resource requirements when it comes back up and then the
         // updater will take it down again
         replicaCount = 2
-        affinity = merge(
-          module.constants_admission_controller.controller_node_with_burstable_affinity_helm,
-          module.constants_admission_controller.pod_anti_affinity_preferred_instance_type_helm
-        )
-        tolerations = module.constants_admission_controller.burstable_node_toleration_helm
+        affinity     = module.util_admission_controller.affinity
+        tolerations  = module.util_admission_controller.tolerations
 
         metrics = {
           serviceMonitor = {
@@ -375,7 +366,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "vpa-dashboard"
-    labels = merge(module.kube_labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util_recommender.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "vpa.json" = file("${path.module}/dashboard.json")
@@ -394,7 +385,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     metadata = {
       name      = "vpa-admission-controller"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_admission_controller.labels
     }
     spec = {
       targetRef = {
@@ -414,7 +405,7 @@ resource "kubernetes_manifest" "vpa_recommender" {
     metadata = {
       name      = "vpa-recommender"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_recommender.labels
     }
     spec = {
       resourcePolicy = {
@@ -442,7 +433,7 @@ resource "kubernetes_manifest" "vpa_updater" {
     metadata = {
       name      = "vpa-updater"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_updater.labels
     }
     spec = {
       targetRef = {

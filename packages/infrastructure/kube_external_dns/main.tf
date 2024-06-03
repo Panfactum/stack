@@ -49,11 +49,16 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
+module "util" {
   for_each = local.config
-  source   = "../kube_labels"
+  source   = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                         = "external-dns"
+  match_labels                          = { id = random_id.ids[each.key].hex }
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -61,28 +66,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, { id = random_id.ids[each.key].hex }, each.value.labels)
 }
 
 module "constants" {
-  for_each = local.config
-  source   = "../constants"
-
-  matching_labels = { id = random_id.ids[each.key].hex }
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, { id = random_id.ids[each.key].hex })
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -105,7 +94,7 @@ resource "kubernetes_service_account" "external_dns" {
   metadata {
     name      = random_id.ids[each.key].hex
     namespace = local.namespace
-    labels    = module.kube_labels[each.key].kube_labels
+    labels    = module.util[each.key].labels
   }
 }
 
@@ -166,8 +155,8 @@ resource "helm_release" "external_dns" {
   values = [
     yamlencode({
       nameOverride = random_id.ids[each.key].hex
-      commonLabels = module.kube_labels[each.key].kube_labels
-      podLabels    = module.kube_labels[each.key].kube_labels
+      commonLabels = module.util[each.key].labels
+      podLabels    = module.util[each.key].labels
       deploymentAnnotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -181,8 +170,8 @@ resource "helm_release" "external_dns" {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/external-dns/external-dns"
       }
 
-      tolerations       = module.constants[each.key].burstable_node_toleration_helm
-      priorityClassName = module.constants[each.key].cluster_important_priority_class_name
+      tolerations       = module.util[each.key].tolerations
+      priorityClassName = module.constants.cluster_important_priority_class_name
 
       resources = {
         requests = {
@@ -205,7 +194,7 @@ resource "helm_release" "external_dns" {
       serviceMonitor = {
         enabled          = var.monitoring_enabled
         namespace        = local.namespace
-        additionalLabels = module.kube_labels[each.key].kube_labels
+        additionalLabels = module.util[each.key].labels
         interval         = "60s"
       }
 
@@ -252,7 +241,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = random_id.ids[each.key].hex
       namespace = local.namespace
-      labels    = module.kube_labels[each.key].kube_labels
+      labels    = module.util[each.key].labels
     }
     spec = {
       resourcePolicy = {
@@ -280,7 +269,7 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = "${local.name}-${random_id.ids[each.key].hex}"
       namespace = local.namespace
-      labels    = module.kube_labels[each.key].kube_labels
+      labels    = module.util[each.key].labels
     }
     spec = {
       selector = {

@@ -15,23 +15,8 @@ locals {
   namespace = kubernetes_namespace.main.metadata[0].name // shorthand for forcing the dependency graph
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
-module "namespace_labels" {
-  source = "../kube_labels"
+module "util" {
+  source = "../kube_workload_utility"
 
   # generate: common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -57,7 +42,7 @@ module "namespace_labels" {
 resource "kubernetes_namespace" "main" {
   metadata {
     name   = var.namespace
-    labels = module.namespace_labels.kube_labels
+    labels = module.util.labels
     annotations = merge({},
       var.linkerd_inject ? { "linkerd.io/inject" = "enabled" } : {}
     )
@@ -75,7 +60,7 @@ resource "kubernetes_role" "admins" {
   metadata {
     name      = "namespace:admin"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   rule {
     api_groups = ["", "*"]
@@ -90,7 +75,7 @@ resource "kubernetes_role_binding" "admins" {
   metadata {
     name      = "namespace:admins"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -113,7 +98,7 @@ resource "kubernetes_role" "readers" {
   metadata {
     name      = "namespace:reader"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
 
   rule {
@@ -220,7 +205,7 @@ resource "kubernetes_role_binding" "readers" {
   metadata {
     name      = "namespace:readers"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -243,7 +228,7 @@ resource "kubernetes_role" "bot_readers" {
   metadata {
     name      = "namespace:bot-reader"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   rule {
     api_groups = [""]
@@ -258,7 +243,7 @@ resource "kubernetes_role_binding" "bot_readers" {
   metadata {
     name      = "namespace:bot-readers"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -280,7 +265,7 @@ resource "kubernetes_role_binding" "bot_readers_extra" {
   metadata {
     name      = "namespace:bot-readers-extra"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"

@@ -27,8 +27,8 @@ locals {
   ci_internal_ca_name = "internal-ca"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source = "../kube_workload_utility"
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -82,7 +82,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.ci_public_name
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = {
       acme = {
@@ -152,7 +152,7 @@ resource "kubernetes_service_account" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
 }
 
@@ -160,7 +160,7 @@ resource "kubernetes_role" "vault_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   rule {
     verbs          = ["create"]
@@ -174,7 +174,7 @@ resource "kubernetes_role_binding" "vault_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -233,7 +233,7 @@ resource "kubernetes_manifest" "internal_ci" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.ci_internal_name
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = {
       vault = {
@@ -257,7 +257,7 @@ resource "kubernetes_manifest" "internal_ci" {
 resource "kubernetes_config_map" "ca_bundle" {
   metadata {
     name      = "internal-ca"
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
     namespace = var.namespace
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
@@ -277,7 +277,7 @@ resource "kubernetes_service_account" "vault_ca_issuer" {
   metadata {
     name      = "vault-ca-issuer"
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
 }
 
@@ -285,7 +285,7 @@ resource "kubernetes_role" "vault_ca_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   rule {
     verbs          = ["create"]
@@ -299,7 +299,7 @@ resource "kubernetes_role_binding" "vault_ca_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -358,7 +358,7 @@ resource "kubernetes_manifest" "internal_ca_ci" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.ci_internal_ca_name
-      labels = module.kube_labels.kube_labels
+      labels = module.util.labels
     }
     spec = {
       vault = {

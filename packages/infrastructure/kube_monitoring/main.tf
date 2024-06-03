@@ -101,58 +101,6 @@ locals {
     registry = var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"
   }
 
-  operator_webhook_match = {
-    id = random_id.operator_webhook.hex
-  }
-
-  operator_match = {
-    id = random_id.operator.hex
-  }
-
-  grafana_match = {
-    id = random_id.grafana.hex
-  }
-
-  node_exporter_match = {
-    id = random_id.node_exporter.hex
-  }
-
-  kube_state_metrics_match = {
-    id = random_id.kube_state_metrics.hex
-  }
-
-  prometheus_match = {
-    id = random_id.prometheus.hex
-  }
-
-  thanos_compactor_match = {
-    id = random_id.thanos_compactor.hex
-  }
-
-  thanos_store_gateway_match = {
-    id = random_id.thanos_store_gateway.hex
-  }
-
-  thanos_query_match = {
-    id = random_id.thanos_query.hex
-  }
-
-  thanos_ruler_match = {
-    id = random_id.thanos_ruler.hex
-  }
-
-  thanos_bucket_web_match = {
-    id = random_id.thanos_bucket_web.hex
-  }
-
-  thanos_query_frontend_match = {
-    id = random_id.thanos_query_frontend.hex
-  }
-
-  alertmanager_match = {
-    id = random_id.alertmanager.hex
-  }
-
   thanos_store_gateway_index_config = {
     type = "REDIS"
     config = {
@@ -202,75 +150,15 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "operator_webhook" {
-  byte_length = 8
-  prefix      = "prometheus-operator-webhook-"
-}
+module "util_webhook" {
+  source = "../kube_workload_utility"
 
-resource "random_id" "operator" {
-  byte_length = 8
-  prefix      = "prometheus-operator-"
-}
+  workload_name                        = "prometheus-operator-webhook"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
-resource "random_id" "grafana" {
-  byte_length = 8
-  prefix      = "grafana-"
-}
-
-resource "random_id" "node_exporter" {
-  byte_length = 8
-  prefix      = "node-exporter-"
-}
-
-resource "random_id" "kube_state_metrics" {
-  byte_length = 8
-  prefix      = "kube-state-metrics-"
-}
-
-resource "random_id" "prometheus" {
-  byte_length = 8
-  prefix      = "prometheus-"
-}
-
-resource "random_id" "thanos_compactor" {
-  byte_length = 8
-  prefix      = "thanos-compactor-"
-}
-
-resource "random_id" "thanos_store_gateway" {
-  byte_length = 8
-  prefix      = "thanos-store-gateway-"
-}
-
-resource "random_id" "thanos_ruler" {
-  byte_length = 8
-  prefix      = "thanos-ruler-"
-}
-
-resource "random_id" "thanos_query" {
-  byte_length = 8
-  prefix      = "thanos-query-"
-}
-
-resource "random_id" "thanos_query_frontend" {
-  byte_length = 8
-  prefix      = "thanos-query-frontend-"
-}
-
-resource "random_id" "thanos_bucket_web" {
-  byte_length = 8
-  prefix      = "thanos-bucket-web-"
-}
-
-resource "random_id" "alertmanager" {
-  byte_length = 8
-  prefix      = "alertmanager-"
-}
-
-module "kube_labels_operator" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -278,15 +166,17 @@ module "kube_labels_operator" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.operator_match)
 }
 
-module "kube_labels_operator_webhook" {
-  source = "../kube_labels"
+module "util_operator" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name           = "prometheus-operator"
+  burstable_nodes_enabled = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -294,15 +184,19 @@ module "kube_labels_operator_webhook" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.operator_webhook_match)
 }
 
-module "kube_labels_grafana" {
-  source = "../kube_labels"
+module "util_grafana" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "grafana"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -310,15 +204,19 @@ module "kube_labels_grafana" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.grafana_match)
 }
 
-module "kube_labels_node_exporter" {
-  source = "../kube_labels"
+module "util_prometheus" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "prometheus"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -326,15 +224,17 @@ module "kube_labels_node_exporter" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.node_exporter_match)
 }
 
-module "kube_labels_kube_state_metrics" {
-  source = "../kube_labels"
+module "util_node_exporter" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name           = "node-exporter"
+  burstable_nodes_enabled = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -342,15 +242,19 @@ module "kube_labels_kube_state_metrics" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.kube_state_metrics_match)
 }
 
-module "kube_labels_prometheus" {
-  source = "../kube_labels"
+module "util_ksm" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "kube-state-metrics"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -358,15 +262,17 @@ module "kube_labels_prometheus" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.prometheus_match)
 }
 
-module "kube_labels_thanos_compactor" {
-  source = "../kube_labels"
+module "util_thanos_compactor" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name           = "thanos-compactor"
+  burstable_nodes_enabled = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -374,15 +280,18 @@ module "kube_labels_thanos_compactor" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_compactor_match)
 }
 
-module "kube_labels_thanos_store_gateway" {
-  source = "../kube_labels"
+module "util_thanos_store_gateway" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "thanos-store-gateway"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -390,15 +299,18 @@ module "kube_labels_thanos_store_gateway" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_store_gateway_match)
 }
 
-module "kube_labels_thanos_query" {
-  source = "../kube_labels"
+module "util_thanos_ruler" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "thanos-ruler"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -406,15 +318,20 @@ module "kube_labels_thanos_query" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_query_match)
 }
 
-module "kube_labels_thanos_ruler" {
-  source = "../kube_labels"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+module "util_thanos_query" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "thanos-query"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -422,15 +339,19 @@ module "kube_labels_thanos_ruler" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_ruler_match)
 }
 
-module "kube_labels_thanos_bucket_web" {
-  source = "../kube_labels"
+module "util_thanos_frontend" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "thanos-frontend"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -438,15 +359,19 @@ module "kube_labels_thanos_bucket_web" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_bucket_web_match)
 }
 
-module "kube_labels_thanos_query_frontend" {
-  source = "../kube_labels"
+module "util_thanos_bucket_web" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "thanos-bucket-web"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -454,15 +379,19 @@ module "kube_labels_thanos_query_frontend" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_query_frontend_match)
 }
 
-module "kube_labels_alertmanager" {
-  source = "../kube_labels"
+module "util_alertmanager" {
+  source = "../kube_workload_utility"
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  workload_name                        = "alertmanager"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -470,243 +399,12 @@ module "kube_labels_alertmanager" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.alertmanager_match)
 }
 
-module "constants_operator" {
-  source = "../constants"
-
-  matching_labels = local.operator_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.operator_match)
-}
-
-module "constants_operator_webhook" {
-  source = "../constants"
-
-  matching_labels = local.operator_webhook_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.operator_webhook_match)
-}
-
-module "constants_grafana" {
-  source = "../constants"
-
-  matching_labels = local.grafana_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.grafana_match)
-}
-
-module "constants_node_exporter" {
-  source = "../constants"
-
-  matching_labels = local.node_exporter_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.node_exporter_match)
-}
-
-module "constants_kube_state_metrics" {
-  source = "../constants"
-
-  matching_labels = local.kube_state_metrics_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.kube_state_metrics_match)
-}
-
-module "constants_prometheus" {
-  source = "../constants"
-
-  matching_labels = local.prometheus_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.prometheus_match)
-}
-
-module "constants_thanos_compactor" {
-  source = "../constants"
-
-  matching_labels = local.thanos_compactor_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_compactor_match)
-}
-
-module "constants_thanos_store_gateway" {
-  source = "../constants"
-
-  matching_labels = local.thanos_store_gateway_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_store_gateway_match)
-}
-
-module "constants_thanos_query" {
-  source = "../constants"
-
-  matching_labels = local.thanos_query_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_query_match)
-}
-
-module "constants_thanos_ruler" {
-  source = "../constants"
-
-  matching_labels = local.thanos_ruler_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_ruler_match)
-}
-
-module "constants_thanos_bucket_web" {
-  source = "../constants"
-
-  matching_labels = local.thanos_ruler_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_bucket_web_match)
-}
-
-module "constants_thanos_query_frontend" {
-  source = "../constants"
-
-  matching_labels = local.thanos_query_frontend_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.thanos_query_frontend_match)
-}
-
-module "constants_alertmanager" {
-  source = "../constants"
-
-  matching_labels = local.alertmanager_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.alertmanager_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -872,7 +570,7 @@ resource "kubernetes_service_account" "prometheus" {
   metadata {
     name      = "prometheus"
     namespace = local.namespace
-    labels    = module.kube_labels_prometheus.kube_labels
+    labels    = module.util_prometheus.labels
   }
 }
 
@@ -944,7 +642,7 @@ resource "helm_release" "prometheus_stack" {
     yamlencode({
       fullnameOverride                   = "monitoring"
       cleanPrometheusOperatorObjectNames = true
-      labels                             = module.kube_labels_prometheus.kube_labels
+      labels                             = module.util_prometheus.labels
       commonLabels = {
         customizationHash = md5(join("", sort([for filename in [
           "prometheus_kustomize/admission-cert.yaml",
@@ -975,8 +673,8 @@ resource "helm_release" "prometheus_stack" {
       prometheusOperator = {
         enabled          = true
         fullnameOverride = "prometheus-operator"
-        labels           = module.kube_labels_operator.kube_labels
-        podLabels        = module.kube_labels_operator.kube_labels
+        labels           = module.util_operator.labels
+        podLabels        = module.util_operator.labels
         image            = local.default_image
         strategy = {
           type          = "Recreate"
@@ -986,23 +684,23 @@ resource "helm_release" "prometheus_stack" {
         logFormat = "json"
         logLevel  = var.prometheus_operator_log_level
 
-        priorityClassName = module.constants_operator.cluster_important_priority_class_name
-        tolerations       = module.constants_operator.burstable_node_toleration_helm
+        priorityClassName = module.constants.cluster_important_priority_class_name
+        tolerations       = module.util_operator.tolerations
         service = {
-          labels = module.kube_labels_operator.kube_labels
+          labels = module.util_operator.labels
         }
         resources = local.default_resources
         admissionWebhooks = {
           deployment = {
             enabled     = true
             image       = local.default_image
-            labels      = module.kube_labels_operator_webhook.kube_labels
-            podLabels   = module.kube_labels_operator_webhook.kube_labels
+            labels      = module.util_webhook.labels
+            podLabels   = module.util_webhook.labels
             replicas    = 2
-            tolerations = module.constants_operator_webhook.burstable_node_toleration_helm
-            affinity    = module.constants_operator_webhook.pod_anti_affinity_instance_type_helm
+            tolerations = module.util_webhook.tolerations
+            affinity    = module.util_webhook.affinity
             service = {
-              labels = module.kube_labels_operator_webhook.kube_labels
+              labels = module.util_webhook.labels
             }
             resources = local.default_resources
           }
@@ -1034,7 +732,7 @@ resource "helm_release" "prometheus_stack" {
       prometheus-node-exporter = {
         fullnameOverride  = "node-exporter"
         priorityClassName = "system-node-critical"
-        podLabels         = module.kube_labels_node_exporter.kube_labels
+        podLabels         = module.util_node_exporter.labels
         image             = local.default_image
 
         # This is required because linkerd cannot proxy containers that have access to the host network
@@ -1090,7 +788,7 @@ resource "helm_release" "prometheus_stack" {
               effect   = "NoSchedule"
             }
           ],
-          module.constants_node_exporter.burstable_node_toleration_helm
+          module.util_node_exporter.tolerations
         )
         resources = local.default_resources
       }
@@ -1100,12 +798,12 @@ resource "helm_release" "prometheus_stack" {
       //////////////////////////////////////////////////////////
       kube-state-metrics = {
         image        = local.default_k8s_image
-        customLabels = module.kube_labels_kube_state_metrics.kube_labels
+        customLabels = module.util_ksm.labels
         extraArgs = [
           "--metric-labels-allowlist=*=[${join(",", local.labels_to_track)}]"
         ]
         updateStrategy = "Recreate"
-        tolerations    = module.constants_kube_state_metrics.burstable_node_toleration_helm
+        tolerations    = module.util_ksm.tolerations
         resources = {
           requests = {
             memory = "200Mi"
@@ -1311,21 +1009,22 @@ resource "helm_release" "prometheus_stack" {
         }
         thanosService = {
           enabled = true
-          labels  = module.kube_labels_prometheus.kube_labels
+          labels  = module.util_prometheus.labels
         }
         thanosServiceMonitor = {
           enabled          = true
-          additionalLabels = module.kube_labels_prometheus.kube_labels
+          additionalLabels = module.util_prometheus.labels
         }
         prometheusSpec = {
           podMetadata = {
-            labels = module.kube_labels_prometheus.kube_labels
+            labels = module.util_prometheus.labels
           }
           image                     = local.default_image
           replicas                  = 2
-          tolerations               = module.constants_prometheus.burstable_node_toleration_helm
-          affinity                  = module.constants_prometheus.pod_anti_affinity_instance_type_helm
-          topologySpreadConstraints = module.constants_prometheus.topology_spread_zone_strict
+          tolerations               = module.util_prometheus.tolerations
+          affinity                  = module.util_prometheus.affinity
+          topologySpreadConstraints = module.util_prometheus.topology_spread_constraints
+          priorityClassName         = module.constants.cluster_important_priority_class_name
           resources = {
             requests = {
               memory = "1000Mi"
@@ -1426,11 +1125,11 @@ resource "helm_release" "prometheus_stack" {
       alertmanager = {
         enabled = true
         service = {
-          labels = module.kube_labels_alertmanager.kube_labels
+          labels = module.util_alertmanager.labels
         }
         alertmanagerSpec = {
           podMetadata = {
-            labels = module.kube_labels_alertmanager.kube_labels
+            labels = module.util_alertmanager.labels
           }
           image     = local.default_image
           logLevel  = var.alertmanager_log_level
@@ -1451,10 +1150,10 @@ resource "helm_release" "prometheus_stack" {
 
           replicas                  = 2
           resources                 = local.default_resources
-          affinity                  = module.constants_alertmanager.pod_anti_affinity_instance_type_helm
-          tolerations               = module.constants_alertmanager.burstable_node_toleration_helm
-          topologySpreadConstraints = module.constants_alertmanager.topology_spread_zone_strict
-          priorityClassName         = module.constants_alertmanager.cluster_important_priority_class_name
+          affinity                  = module.util_alertmanager.affinity
+          tolerations               = module.util_alertmanager.tolerations
+          topologySpreadConstraints = module.util_alertmanager.topology_spread_constraints
+          priorityClassName         = module.constants.cluster_important_priority_class_name
         }
       }
 
@@ -1465,8 +1164,8 @@ resource "helm_release" "prometheus_stack" {
         enabled                  = true
         defaultDashboardsEnabled = false // We load custom ones
         image                    = local.default_docker_image
-        extraLabels              = module.kube_labels_grafana.kube_labels
-        podLabels                = module.kube_labels_grafana.kube_labels
+        extraLabels              = module.util_grafana.labels
+        podLabels                = module.util_grafana.labels
         annotations = {
           "reloader.stakater.com/auto" = "true"
         }
@@ -1649,9 +1348,9 @@ resource "helm_release" "prometheus_stack" {
           type          = "Recreate"
           rollingUpdate = null
         }
-        tolerations               = module.constants_grafana.burstable_node_toleration_helm
-        affinity                  = module.constants_grafana.pod_anti_affinity_instance_type_helm
-        topologySpreadConstraints = module.constants_grafana.topology_spread_zone_preferred
+        tolerations               = module.util_grafana.tolerations
+        affinity                  = module.util_grafana.affinity
+        topologySpreadConstraints = module.util_grafana.topology_spread_constraints
 
         resources = local.default_resources
 
@@ -1727,7 +1426,7 @@ resource "kubernetes_service_account" "thanos_compactor" {
   metadata {
     name      = "thanos-compactor"
     namespace = local.namespace
-    labels    = module.kube_labels_thanos_compactor.kube_labels
+    labels    = module.util_thanos_compactor.labels
   }
 }
 
@@ -1755,7 +1454,7 @@ resource "kubernetes_service_account" "thanos_store_gateway" {
   metadata {
     name      = "thanos-store-gateway"
     namespace = local.namespace
-    labels    = module.kube_labels_thanos_store_gateway.kube_labels
+    labels    = module.util_thanos_store_gateway.labels
   }
 }
 
@@ -1783,7 +1482,7 @@ resource "kubernetes_service_account" "thanos_ruler" {
   metadata {
     name      = "thanos-ruler"
     namespace = local.namespace
-    labels    = module.kube_labels_thanos_ruler.kube_labels
+    labels    = module.util_thanos_ruler.labels
   }
 }
 
@@ -1811,7 +1510,7 @@ resource "kubernetes_service_account" "thanos_bucket_web" {
   metadata {
     name      = "thanos-bucket-web"
     namespace = local.namespace
-    labels    = module.kube_labels_thanos_bucket_web.kube_labels
+    labels    = module.util_thanos_bucket_web.labels
   }
 }
 
@@ -1869,15 +1568,15 @@ resource "helm_release" "thanos" {
           "--enable-auto-gomemlimit"
         ]
 
-        podLabels = module.kube_labels_thanos_query.kube_labels
+        podLabels = module.util_thanos_query.labels
         service = {
-          labels = module.kube_labels_thanos_query.kube_labels
+          labels = module.util_thanos_query.labels
         }
         replicaCount              = 2
-        priorityClassName         = module.constants_thanos_query.cluster_important_priority_class_name
-        topologySpreadConstraints = module.constants_thanos_query.topology_spread_zone_strict
-        affinity                  = module.constants_thanos_query.pod_anti_affinity_instance_type_helm
-        tolerations               = module.constants_thanos_query.burstable_node_toleration_helm
+        priorityClassName         = module.constants.cluster_important_priority_class_name
+        topologySpreadConstraints = module.util_thanos_query.topology_spread_constraints
+        affinity                  = module.util_thanos_query.affinity
+        tolerations               = module.util_thanos_query.tolerations
         resources                 = local.default_resources
 
         networkPolicy = {
@@ -1916,15 +1615,15 @@ resource "helm_release" "thanos" {
           }
         ]
 
-        podLabels = module.kube_labels_thanos_query_frontend.kube_labels
+        podLabels = module.util_thanos_frontend.labels
         service = {
-          labels = module.kube_labels_thanos_query_frontend.kube_labels
+          labels = module.util_thanos_frontend.labels
         }
         replicaCount              = 2
-        priorityClassName         = module.constants_thanos_query_frontend.cluster_important_priority_class_name
-        topologySpreadConstraints = module.constants_thanos_query_frontend.topology_spread_zone_strict
-        affinity                  = module.constants_thanos_query_frontend.pod_anti_affinity_instance_type_helm
-        tolerations               = module.constants_thanos_query_frontend.burstable_node_toleration_helm
+        priorityClassName         = module.constants.cluster_important_priority_class_name
+        topologySpreadConstraints = module.util_thanos_frontend.topology_spread_constraints
+        affinity                  = module.util_thanos_frontend.affinity
+        tolerations               = module.util_thanos_frontend.tolerations
         resources                 = local.default_resources
 
         networkPolicy = {
@@ -1943,13 +1642,13 @@ resource "helm_release" "thanos" {
           name   = kubernetes_service_account.thanos_bucket_web.metadata[0].name
         }
         service = {
-          labels = module.kube_labels_thanos_bucket_web.kube_labels
+          labels = module.util_thanos_bucket_web.labels
         }
         updateStrategy = {
           type = "Recreate"
         }
-        podLabels   = module.kube_labels_thanos_bucket_web.kube_labels
-        tolerations = module.constants_thanos_bucket_web.burstable_node_toleration_helm
+        podLabels   = module.util_thanos_bucket_web.labels
+        tolerations = module.util_thanos_bucket_web.tolerations
         resources   = local.default_resources
 
         networkPolicy = {
@@ -1976,7 +1675,7 @@ resource "helm_release" "thanos" {
           "--enable-auto-gomemlimit"
         ]
 
-        podLabels = module.kube_labels_thanos_compactor.kube_labels
+        podLabels = module.util_thanos_compactor.labels
         cronJob = {
           enabled                    = true
           ttlSecondsAfterFinished    = 60 * 3
@@ -1999,8 +1698,8 @@ resource "helm_release" "thanos" {
           create = false
           name   = kubernetes_service_account.thanos_compactor.metadata[0].name
         }
-        tolerations       = module.constants_thanos_compactor.burstable_node_toleration_helm
-        priorityClassName = module.constants_thanos_store_gateway.cluster_important_priority_class_name
+        tolerations       = module.util_thanos_compactor.tolerations
+        priorityClassName = module.constants.cluster_important_priority_class_name
         resources = {
           requests = {
             cpu    = "200m"
@@ -2050,18 +1749,18 @@ resource "helm_release" "thanos" {
           name   = kubernetes_service_account.thanos_store_gateway.metadata[0].name
         }
         service = {
-          labels = module.kube_labels_thanos_store_gateway.kube_labels
+          labels = module.util_thanos_store_gateway.labels
         }
         persistence = {
           enabled      = true
           storageClass = var.thanos_store_gateway_storage_class_name
         }
-        podLabels                 = module.kube_labels_thanos_store_gateway.kube_labels
+        podLabels                 = module.util_thanos_store_gateway.labels
         replicaCount              = 2
-        priorityClassName         = module.constants_thanos_store_gateway.cluster_important_priority_class_name
-        topologySpreadConstraints = module.constants_thanos_store_gateway.topology_spread_zone_strict
-        affinity                  = module.constants_thanos_store_gateway.pod_anti_affinity_instance_type_helm
-        tolerations               = module.constants_thanos_store_gateway.burstable_node_toleration_helm
+        priorityClassName         = module.constants.cluster_important_priority_class_name
+        topologySpreadConstraints = module.util_thanos_store_gateway.topology_spread_constraints
+        affinity                  = module.util_thanos_store_gateway.affinity
+        tolerations               = module.util_thanos_store_gateway.tolerations
         resources                 = local.default_resources
 
         networkPolicy = {
@@ -2074,7 +1773,7 @@ resource "helm_release" "thanos" {
           create = false
           name   = kubernetes_service_account.thanos_store_gateway.metadata[0].name
         }
-        tolerations = module.constants_thanos_ruler.burstable_node_toleration_helm
+        tolerations = module.util_thanos_ruler.tolerations
         alertmanagers = [
           "http://monitoring-alertmanager.${local.namespace}.svc.cluster.local:9093"
         ]
@@ -2129,11 +1828,11 @@ resource "kubernetes_manifest" "pdb_prometheus_operator" {
     metadata = {
       name      = "prometheus-operator"
       namespace = local.namespace
-      labels    = module.kube_labels_operator.kube_labels
+      labels    = module.util_operator.labels
     }
     spec = {
       selector = {
-        matchLabels = local.operator_match
+        matchLabels = module.util_operator.match_labels
       }
       maxUnavailable = 1
     }
@@ -2148,11 +1847,11 @@ resource "kubernetes_manifest" "pdb_prometheus_operator_webhook" {
     metadata = {
       name      = "prometheus-operator-webhook"
       namespace = local.namespace
-      labels    = module.kube_labels_operator_webhook.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       selector = {
-        matchLabels = local.operator_webhook_match
+        matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }
@@ -2167,11 +1866,11 @@ resource "kubernetes_manifest" "pdb_grafana" {
     metadata = {
       name      = "prometheus-grafana"
       namespace = local.namespace
-      labels    = module.kube_labels_grafana.kube_labels
+      labels    = module.util_grafana.labels
     }
     spec = {
       selector = {
-        matchLabels = local.grafana_match
+        matchLabels = module.util_grafana.match_labels
       }
       maxUnavailable = 1
     }
@@ -2186,11 +1885,11 @@ resource "kubernetes_manifest" "pdb_kube_state_metrics" {
     metadata = {
       name      = "prometheus-kube-state-metrics"
       namespace = local.namespace
-      labels    = module.kube_labels_kube_state_metrics.kube_labels
+      labels    = module.util_ksm.labels
     }
     spec = {
       selector = {
-        matchLabels = local.kube_state_metrics_match
+        matchLabels = module.util_ksm.match_labels
       }
       maxUnavailable = 1
     }
@@ -2205,11 +1904,11 @@ resource "kubernetes_manifest" "pdb_prometheus" {
     metadata = {
       name      = "prometheus"
       namespace = local.namespace
-      labels    = module.kube_labels_prometheus.kube_labels
+      labels    = module.util_prometheus.labels
     }
     spec = {
       selector = {
-        matchLabels = local.prometheus_match
+        matchLabels = module.util_prometheus.match_labels
       }
       maxUnavailable = 1
     }
@@ -2224,11 +1923,11 @@ resource "kubernetes_manifest" "pdb_thanos_compactor" {
     metadata = {
       name      = "thanos-compactor"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_compactor.kube_labels
+      labels    = module.util_thanos_compactor.labels
     }
     spec = {
       selector = {
-        matchLabels = local.thanos_compactor_match
+        matchLabels = module.util_thanos_compactor.match_labels
       }
       maxUnavailable = 1
     }
@@ -2244,11 +1943,11 @@ resource "kubernetes_manifest" "pdb_thanos_bucket_web" {
     metadata = {
       name      = "thanos-bucket-web"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_bucket_web.kube_labels
+      labels    = module.util_thanos_bucket_web.labels
     }
     spec = {
       selector = {
-        matchLabels = local.thanos_bucket_web_match
+        matchLabels = module.util_thanos_bucket_web.match_labels
       }
       maxUnavailable = 1
     }
@@ -2263,11 +1962,11 @@ resource "kubernetes_manifest" "pdb_thanos_store_gateway" {
     metadata = {
       name      = "thanos-store-gateway"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_store_gateway.kube_labels
+      labels    = module.util_thanos_store_gateway.labels
     }
     spec = {
       selector = {
-        matchLabels = local.thanos_store_gateway_match
+        matchLabels = module.util_thanos_store_gateway.match_labels
       }
       maxUnavailable = 1
     }
@@ -2282,11 +1981,11 @@ resource "kubernetes_manifest" "pdb_thanos_query_frontend" {
     metadata = {
       name      = "thanos-query-frontend"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_query_frontend.kube_labels
+      labels    = module.util_thanos_frontend.labels
     }
     spec = {
       selector = {
-        matchLabels = local.thanos_query_frontend_match
+        matchLabels = module.util_thanos_frontend.match_labels
       }
       maxUnavailable = 1
     }
@@ -2301,11 +2000,11 @@ resource "kubernetes_manifest" "pdb_thanos_query" {
     metadata = {
       name      = "thanos-query"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_query.kube_labels
+      labels    = module.util_thanos_query.labels
     }
     spec = {
       selector = {
-        matchLabels = local.thanos_query_match
+        matchLabels = module.util_thanos_query.match_labels
       }
       maxUnavailable = 1
     }
@@ -2320,11 +2019,11 @@ resource "kubernetes_manifest" "alertmanager" {
     metadata = {
       name      = "alertmanager"
       namespace = local.namespace
-      labels    = module.kube_labels_alertmanager.kube_labels
+      labels    = module.util_alertmanager.labels
     }
     spec = {
       selector = {
-        matchLabels = local.alertmanager_match
+        matchLabels = module.util_alertmanager.match_labels
       }
       maxUnavailable = 1
     }
@@ -2421,7 +2120,7 @@ resource "kubernetes_manifest" "vpa_prometheus_operator" {
     metadata = {
       name      = "prometheus-operator"
       namespace = local.namespace
-      labels    = module.kube_labels_operator.kube_labels
+      labels    = module.util_operator.labels
     }
     spec = {
       targetRef = {
@@ -2442,7 +2141,7 @@ resource "kubernetes_manifest" "vpa_prometheus_operator_webhook" {
     metadata = {
       name      = "prometheus-operator-webhook"
       namespace = local.namespace
-      labels    = module.kube_labels_operator_webhook.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       targetRef = {
@@ -2463,7 +2162,7 @@ resource "kubernetes_manifest" "vpa_grafana" {
     metadata = {
       name      = "prometheus-grafana"
       namespace = local.namespace
-      labels    = module.kube_labels_grafana.kube_labels
+      labels    = module.util_grafana.labels
     }
     spec = {
       targetRef = {
@@ -2484,7 +2183,7 @@ resource "kubernetes_manifest" "vpa_node_exporter" {
     metadata = {
       name      = "prometheus-node-exporter"
       namespace = local.namespace
-      labels    = module.kube_labels_node_exporter.kube_labels
+      labels    = module.util_node_exporter.labels
     }
     spec = {
       targetRef = {
@@ -2505,7 +2204,7 @@ resource "kubernetes_manifest" "vpa_kube_state_metrics" {
     metadata = {
       name      = "prometheus-kube-state-metrics"
       namespace = local.namespace
-      labels    = module.kube_labels_kube_state_metrics.kube_labels
+      labels    = module.util_ksm.labels
     }
     spec = {
       resourcePolicy = {
@@ -2534,7 +2233,7 @@ resource "kubernetes_manifest" "vpa_prometheus" {
     metadata = {
       name      = "prometheus"
       namespace = local.namespace
-      labels    = module.kube_labels_prometheus.kube_labels
+      labels    = module.util_prometheus.labels
     }
     spec = {
       resourcePolicy = {
@@ -2563,7 +2262,7 @@ resource "kubernetes_manifest" "vpa_thanos_compactor" {
     metadata = {
       name      = "thanos-compactor"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_compactor.kube_labels
+      labels    = module.util_thanos_compactor.labels
     }
     spec = {
       resourcePolicy = {
@@ -2593,7 +2292,7 @@ resource "kubernetes_manifest" "vpa_thanos_bucket_web" {
     metadata = {
       name      = "thanos-bucket-web"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_bucket_web.kube_labels
+      labels    = module.util_thanos_bucket_web.labels
     }
     spec = {
       targetRef = {
@@ -2614,7 +2313,7 @@ resource "kubernetes_manifest" "vpa_thanos_store_gateway" {
     metadata = {
       name      = "thanos-store-gateway"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_store_gateway.kube_labels
+      labels    = module.util_thanos_store_gateway.labels
     }
     spec = {
       resourcePolicy = {
@@ -2643,7 +2342,7 @@ resource "kubernetes_manifest" "vpa_thanos_query_frontend" {
     metadata = {
       name      = "thanos-query-frontend"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_query_frontend.kube_labels
+      labels    = module.util_thanos_store_gateway.labels
     }
     spec = {
       targetRef = {
@@ -2664,7 +2363,7 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
     metadata = {
       name      = "thanos-query"
       namespace = local.namespace
-      labels    = module.kube_labels_thanos_query.kube_labels
+      labels    = module.util_thanos_query.labels
     }
     spec = {
       resourcePolicy = {
@@ -2696,7 +2395,7 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
 #    metadata = {
 #      name      = "alertmanager"
 #      namespace = local.namespace
-#      labels    = module.kube_labels_alertmanager.kube_labels
+#      labels    = module.labels_alertmanager.labels
 #    }
 #    spec = {
 #      targetRef = {
@@ -2716,7 +2415,7 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
 resource "kubernetes_config_map" "dashboard" {
   metadata {
     name   = "panfactum-dashboards"
-    labels = merge(module.kube_labels_grafana.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util_grafana.labels, { "grafana_dashboard" = "1" })
   }
   data = { for name in fileset("${path.module}/dashboards", "*.json") : name => file("${path.module}/dashboards/${name}") }
 }

@@ -25,14 +25,6 @@ terraform {
 
 locals {
   namespace = module.namespace.namespace
-
-  controller_match_labels = {
-    id = random_id.controller_id.hex
-  }
-
-  webhook_match_labels = {
-    id = random_id.webhook_id.hex
-  }
 }
 
 module "pull_through" {
@@ -40,20 +32,14 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "controller_id" {
-  prefix      = "pvc-autoresizer-"
-  byte_length = 8
-}
+module "util_controller" {
+  source = "../kube_workload_utility"
 
-resource "random_id" "webhook_id" {
-  prefix      = "pvc-autorsizer-webhook-"
-  byte_length = 8
-}
+  workload_name                         = "pvc-autoresizer"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-module "kube_labels_controller" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -61,61 +47,12 @@ module "kube_labels_controller" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match_labels)
 }
 
-module "constants_controller" {
-  source = "../constants"
-
-  matching_labels = local.controller_match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match_labels)
-}
-
-module "kube_labels_webhook" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match_labels)
-}
-
-module "constants_webhook" {
-  source = "../constants"
-
-  matching_labels = local.webhook_match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match_labels)
+module "constants" {
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -176,11 +113,11 @@ resource "helm_release" "pvc_autoresizer" {
         args = {
           prometheusURL = "http://thanos-query-frontend.monitoring.svc.cluster.local:9090"
         }
-        podLabels = module.kube_labels_controller.kube_labels
+        podLabels = module.util_controller.labels
 
         replicaCount      = 1
-        priorityClassName = module.constants_controller.cluster_important_priority_class_name
-        tolerations       = module.constants_controller.burstable_node_toleration_helm
+        priorityClassName = module.constants.cluster_important_priority_class_name
+        tolerations       = module.util_controller.tolerations
 
         resources = {
           requests = {
@@ -226,7 +163,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     metadata = {
       name      = "pvc-autoresizer"
       namespace = local.namespace
-      labels    = module.kube_labels_controller.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -267,11 +204,11 @@ resource "kubernetes_manifest" "pdb_controller" {
     metadata = {
       name      = "pvc-autoresizer"
       namespace = local.namespace
-      labels    = module.kube_labels_controller.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       selector = {
-        matchLabels = local.controller_match_labels
+        matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }

@@ -32,25 +32,8 @@ terraform {
 data "aws_region" "current" {}
 
 locals {
-
   name      = "argo"
   namespace = module.namespace.namespace
-
-  controller_match = {
-    id = random_id.controller_id.hex
-  }
-
-  server_match = {
-    id = random_id.server_id.hex
-  }
-
-  events_controller_match = {
-    id = random_id.events_controller_id.hex
-  }
-
-  webhook_match = {
-    id = random_id.webhook_id.hex
-  }
 
   configmap_name = "argo-controller"
 }
@@ -60,30 +43,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "controller_id" {
-  byte_length = 8
-  prefix      = "argo-controller-"
-}
+module "util_controller" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-controller"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-resource "random_id" "server_id" {
-  byte_length = 8
-  prefix      = "argo-"
-}
-
-resource "random_id" "events_controller_id" {
-  byte_length = 8
-  prefix      = "argo-events-controller-"
-}
-
-resource "random_id" "webhook_id" {
-  byte_length = 8
-  prefix      = "argo-webhook-"
-}
-
-module "controller_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -91,15 +57,17 @@ module "controller_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
 }
 
-module "server_labels" {
-  source = "../kube_labels"
+module "util_server" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-server"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -107,15 +75,17 @@ module "server_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.server_match)
 }
 
-module "events_controller_labels" {
-  source = "../kube_labels"
+module "util_events_controller" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-events-controller"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -123,15 +93,17 @@ module "events_controller_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.events_controller_match)
 }
 
-module "webhook_labels" {
-  source = "../kube_labels"
+module "util_webhook" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-webhook"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -139,81 +111,12 @@ module "webhook_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match)
 }
 
-module "controller_constants" {
-  source = "../constants"
-
-  matching_labels = local.controller_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match)
-}
-
-module "server_constants" {
-  source = "../constants"
-
-  matching_labels = local.server_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.server_match)
-}
-
-module "events_controller_constants" {
-  source = "../constants"
-
-  matching_labels = local.events_controller_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.events_controller_match)
-}
-
-module "webhook_constants" {
-  source = "../constants"
-
-  matching_labels = local.webhook_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -365,7 +268,7 @@ resource "kubernetes_config_map" "artifacts" {
   metadata {
     name      = "artifact-repositories" # Must be named this
     namespace = local.namespace
-    labels    = module.controller_labels.kube_labels
+    labels    = module.util_controller.labels
     annotations = {
       "workflows.argoproj.io/default-artifact-repository"       = "s3"
       "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
@@ -423,7 +326,7 @@ resource "kubernetes_service_account" "argo_controller" {
   metadata {
     name      = "${local.name}-controller"
     namespace = local.namespace
-    labels    = module.controller_labels.kube_labels
+    labels    = module.util_controller.labels
   }
 }
 
@@ -431,7 +334,7 @@ resource "kubernetes_service_account" "argo_server" {
   metadata {
     name      = "${local.name}-server"
     namespace = local.namespace
-    labels    = module.controller_labels.kube_labels
+    labels    = module.util_controller.labels
   }
 }
 
@@ -439,7 +342,7 @@ resource "kubernetes_secret" "sso_info" {
   metadata {
     name      = "argo-server-sso"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
   }
   data = {
     client-id     = vault_identity_oidc_client.argo.client_id
@@ -451,7 +354,7 @@ resource "kubernetes_secret" "postgres_creds" {
   metadata {
     name      = "argo-postgres-creds"
     namespace = local.namespace
-    labels    = module.controller_labels.kube_labels
+    labels    = module.util_controller.labels
   }
   data = {
     username = module.database.superuser_username
@@ -542,10 +445,10 @@ resource "helm_release" "argo" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels         = module.controller_labels.kube_labels
-        priorityClassName = module.controller_constants.cluster_important_priority_class_name
+        podLabels         = module.util_controller.labels
+        priorityClassName = module.constants.cluster_important_priority_class_name
         replicas          = 1
-        tolerations       = module.controller_constants.burstable_node_toleration_helm
+        tolerations       = module.util_controller.tolerations
         pdb = {
           enabled        = true
           maxUnavailable = 1
@@ -615,13 +518,13 @@ resource "helm_release" "argo" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels = module.server_labels.kube_labels
+        podLabels = module.util_server.labels
 
         replicas                  = 2
-        priorityClassName         = module.server_constants.cluster_important_priority_class_name
-        tolerations               = module.server_constants.burstable_node_toleration_helm
-        affinity                  = module.server_constants.pod_anti_affinity_helm
-        topologySpreadConstraints = module.server_constants.topology_spread_zone_preferred
+        priorityClassName         = module.constants.cluster_important_priority_class_name
+        tolerations               = module.util_server.tolerations
+        affinity                  = module.util_server.affinity
+        topologySpreadConstraints = module.util_server.topology_spread_constraints
         pdb = {
           enabled        = true
           maxUnavailable = 1
@@ -681,7 +584,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     metadata = {
       name      = "argo-controller"
       namespace = local.namespace
-      labels    = module.controller_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -702,7 +605,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = "argo-server"
       namespace = local.namespace
-      labels    = module.server_labels.kube_labels
+      labels    = module.util_server.labels
     }
     spec = {
       targetRef = {
@@ -757,14 +660,14 @@ resource "helm_release" "argo_events" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels         = module.events_controller_labels.kube_labels
-        priorityClassName = module.events_controller_constants.cluster_important_priority_class_name
+        podLabels         = module.util_events_controller.labels
+        priorityClassName = module.constants.cluster_important_priority_class_name
         replicas          = 1
-        tolerations       = module.events_controller_constants.burstable_node_toleration_helm
+        tolerations       = module.util_events_controller.tolerations
         pdb = {
           enabled        = true
           maxUnavailable = 1
-          labels         = module.events_controller_labels.kube_labels
+          labels         = module.util_events_controller.labels
         }
         resources = {
           requests = {
@@ -782,16 +685,16 @@ resource "helm_release" "argo_events" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels                 = module.webhook_labels.kube_labels
-        priorityClassName         = module.webhook_constants.cluster_important_priority_class_name
+        podLabels                 = module.util_webhook.labels
+        priorityClassName         = module.constants.cluster_important_priority_class_name
         replicas                  = 2
-        tolerations               = module.webhook_constants.burstable_node_toleration_helm
-        affinity                  = module.webhook_constants.pod_anti_affinity_helm
-        topologySpreadConstraints = module.webhook_constants.topology_spread_zone_preferred
+        tolerations               = module.util_webhook.tolerations
+        affinity                  = module.util_webhook.affinity
+        topologySpreadConstraints = module.util_webhook.topology_spread_constraints
         pdb = {
           enabled        = true
           maxUnavailable = 1
-          labels         = module.webhook_labels.kube_labels
+          labels         = module.util_webhook.labels
         }
         resources = {
           requests = {
@@ -815,7 +718,7 @@ resource "kubernetes_manifest" "vpa_events_controller" {
     metadata = {
       name      = "argo-events-controller-manager"
       namespace = local.namespace
-      labels    = module.events_controller_labels.kube_labels
+      labels    = module.util_events_controller.labels
     }
     spec = {
       targetRef = {
@@ -836,7 +739,7 @@ resource "kubernetes_manifest" "vpa_webhook" {
     metadata = {
       name      = "events-webhook"
       namespace = local.namespace
-      labels    = module.server_labels.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       targetRef = {
@@ -861,7 +764,7 @@ resource "kubernetes_service_account" "superuser" {
   metadata {
     name      = "argo-superuser"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-superusers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "100"
@@ -873,7 +776,7 @@ resource "kubernetes_service_account" "superuser" {
 resource "kubernetes_cluster_role_binding" "superuser_binding" {
   metadata {
     name   = "argo-superuser"
-    labels = module.server_labels.kube_labels
+    labels = module.util_server.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -891,7 +794,7 @@ resource "kubernetes_cluster_role_binding" "superuser_binding" {
 resource "kubernetes_cluster_role_binding" "superuser_events_binding" {
   metadata {
     name   = "argo-events-superuser"
-    labels = module.server_labels.kube_labels
+    labels = module.util_server.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -910,7 +813,7 @@ resource "kubernetes_secret" "superuser_token" {
   metadata {
     name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
     annotations = {
       "kubernetes.io/service-account.name" = kubernetes_service_account.superuser.metadata[0].name
     }
@@ -922,7 +825,7 @@ resource "kubernetes_service_account" "admin" {
   metadata {
     name      = "argo-admin"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-admins' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "99"
@@ -934,7 +837,7 @@ resource "kubernetes_service_account" "admin" {
 resource "kubernetes_cluster_role_binding" "admin_binding" {
   metadata {
     name   = "argo-admin"
-    labels = module.server_labels.kube_labels
+    labels = module.util_server.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -952,7 +855,7 @@ resource "kubernetes_cluster_role_binding" "admin_binding" {
 resource "kubernetes_cluster_role_binding" "admin_events_binding" {
   metadata {
     name   = "argo-events-admin"
-    labels = module.server_labels.kube_labels
+    labels = module.util_server.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -971,7 +874,7 @@ resource "kubernetes_secret" "admin_token" {
   metadata {
     name      = "argo-admin-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
     annotations = {
       "kubernetes.io/service-account.name" = kubernetes_service_account.admin.metadata[0].name
     }
@@ -983,7 +886,7 @@ resource "kubernetes_service_account" "reader" {
   metadata {
     name      = "argo-reader"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
     annotations = {
       "workflows.argoproj.io/rbac-rule"                  = "'rbac-readers' in groups or 'rbac-restricted-readers' in groups"
       "workflows.argoproj.io/rbac-rule-precedence"       = "98"
@@ -995,7 +898,7 @@ resource "kubernetes_service_account" "reader" {
 resource "kubernetes_cluster_role_binding" "reader_binding" {
   metadata {
     name   = "argo-reader"
-    labels = module.server_labels.kube_labels
+    labels = module.util_server.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -1013,7 +916,7 @@ resource "kubernetes_cluster_role_binding" "reader_binding" {
 resource "kubernetes_cluster_role_binding" "reader_events_binding" {
   metadata {
     name   = "argo-events-reader"
-    labels = module.server_labels.kube_labels
+    labels = module.util_server.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -1032,7 +935,7 @@ resource "kubernetes_secret" "reader_token" {
   metadata {
     name      = "argo-reader-${md5(time_rotating.token_rotation.id)}"
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
     annotations = {
       "kubernetes.io/service-account.name" = kubernetes_service_account.reader.metadata[0].name
     }

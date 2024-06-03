@@ -28,10 +28,6 @@ terraform {
 locals {
   service   = "aws-ebs-csi-driver"
   namespace = module.namespace.namespace
-
-  controller_match_labels = {
-    id = random_id.controller_id.hex
-  }
 }
 
 module "pull_through" {
@@ -39,15 +35,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "controller_id" {
-  prefix      = "ebs-controller-"
-  byte_length = 8
-}
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "ebs-csi-controller"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -55,27 +49,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.controller_match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match_labels)
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -107,7 +86,7 @@ resource "kubernetes_service_account" "ebs_csi" {
   metadata {
     name      = local.service
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util_controller.labels
   }
 }
 
@@ -169,17 +148,14 @@ resource "helm_release" "ebs_csi_driver" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/aws-ebs-csi-driver"
       }
-      labels = module.kube_labels.kube_labels
+      labels = module.util_controller.labels
 
       controller = {
 
-        replicaCount = 2
-        tolerations  = module.constants.burstable_node_toleration_helm
-        affinity = merge(
-          module.constants.controller_node_with_burstable_affinity_helm,
-          module.constants.pod_anti_affinity_helm
-        )
-        topologySpreadConstraints = module.constants.topology_spread_zone_preferred
+        replicaCount              = 2
+        tolerations               = module.util_controller.tolerations
+        affinity                  = module.util_controller.affinity
+        topologySpreadConstraints = module.util_controller.topology_spread_constraints
         serviceAccount = {
           create                       = false
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
@@ -188,7 +164,7 @@ resource "helm_release" "ebs_csi_driver" {
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels = module.kube_labels.kube_labels
+        podLabels = module.util_controller.labels
         resources = {
           requests = {
             memory = "100Mi"
@@ -199,7 +175,7 @@ resource "helm_release" "ebs_csi_driver" {
         }
         enableMetrics = var.monitoring_enabled
         serviceMonitor = {
-          labels   = module.kube_labels.kube_labels
+          labels   = module.util_controller.labels
           interval = "60s"
         }
       }
@@ -373,7 +349,7 @@ resource "kubernetes_manifest" "vpa_deployment" {
     metadata = {
       name      = "ebs-csi-driver-deployment"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -393,7 +369,7 @@ resource "kubernetes_manifest" "vpa_daemonset" {
     metadata = {
       name      = "ebs-csi-driver-daemonset"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {

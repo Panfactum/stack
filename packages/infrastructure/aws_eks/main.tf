@@ -37,7 +37,7 @@ module "tags" {
 }
 
 module "constants" {
-  source = "../constants"
+  source = "../kube_constants"
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

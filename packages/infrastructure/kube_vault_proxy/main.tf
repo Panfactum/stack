@@ -27,54 +27,36 @@ terraform {
   }
 }
 
-locals {
-  oauth2_proxy_match = {
-    id = random_id.oauth2_proxy.hex
-  }
-}
-
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.oauth2_proxy_match)
-}
-
-module "constants" {
-  source = "../constants"
-
-  matching_labels = local.oauth2_proxy_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.oauth2_proxy_match)
-}
-
 resource "random_id" "oauth2_proxy" {
   byte_length = 8
   prefix      = "oauth2-proxy-"
+}
+
+module "util" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = random_id.oauth2_proxy.hex
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+
+  # generate: common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+module "constants" {
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -136,7 +118,7 @@ resource "kubernetes_secret" "oauth2_proxy" {
   metadata {
     name      = "oauth2-proxy"
     namespace = var.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
   data = {
     cookie-secret = random_password.cookie_secret.result
@@ -179,8 +161,8 @@ resource "helm_release" "oauth2_proxy" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/oauth2-proxy/oauth2-proxy"
       }
-      customLabels = module.kube_labels.kube_labels
-      podLabels    = module.kube_labels.kube_labels
+      labels = module.util.labels
+      labels = module.util.labels
       podAnnotations = {
         "config.linkerd.io/proxy-memory-request" = "5Mi" # We can use lower requests / limits here b/c this will never receive much traffic
         "config.linkerd.io/proxy-memory-limit"   = "20Mi"
@@ -190,9 +172,9 @@ resource "helm_release" "oauth2_proxy" {
         type          = "Recreate"
         rollingUpdate = null
       }
-      tolerations               = module.constants.burstable_node_toleration_helm
-      affinity                  = module.constants.pod_anti_affinity_instance_type_helm
-      topologySpreadConstraints = module.constants.topology_spread_zone_preferred
+      tolerations               = module.util.tolerations
+      affinity                  = module.util.affinity
+      topologySpreadConstraints = module.util.topology_spread_constraints
       resources = {
         requests = {
           memory = "100Mi"
@@ -214,7 +196,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = random_id.oauth2_proxy.hex
       namespace = var.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

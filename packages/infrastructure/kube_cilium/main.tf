@@ -33,8 +33,11 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "base_labels" {
-  source = "../kube_labels"
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "cilium-operator"
+  instance_type_anti_affinity_preferred = true
+  burstable_nodes_enabled               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -48,10 +51,12 @@ module "base_labels" {
   # end-generate
 }
 
-module "operator_labels" {
-  source = "../kube_labels"
+module "util_agent" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "cilium-agent"
+  burstable_nodes_enabled = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -59,43 +64,12 @@ module "operator_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(module.base_labels.kube_labels, { service = "operator" })
-}
-
-module "agent_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(module.base_labels.kube_labels, { service = "agent" })
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = module.operator_labels.kube_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(module.base_labels.kube_labels, { service = "operator" })
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -218,7 +192,7 @@ resource "helm_release" "cilium" {
       egressMasqueradeInterfaces = "eth0"
       routingMode                = "native"
 
-      podLabels = module.base_labels.kube_labels
+      podLabels = module.util_agent.labels
 
       policyEnforcementMode = "default"
 
@@ -291,7 +265,7 @@ resource "helm_release" "cilium" {
             effect   = "NoSchedule"
           }
         ],
-        module.constants.burstable_node_toleration_helm
+        module.util_agent.tolerations
       )
 
       prometheus = {
@@ -299,7 +273,7 @@ resource "helm_release" "cilium" {
         serviceMonitor = {
           enabled  = var.monitoring_enabled
           jobLabel = "cilium-agent"
-          labels   = module.agent_labels.kube_labels
+          labels   = module.util_agent.labels
           interval = "60s"
         }
       }
@@ -358,15 +332,12 @@ resource "helm_release" "cilium" {
             effect   = module.constants.cilium_taint.effect
           }
           ],
-          module.constants.burstable_node_toleration_helm
+          module.util_controller.tolerations
         )
 
-        podLabels = module.operator_labels.kube_labels
+        podLabels = module.util_controller.labels
 
-        affinity = merge(
-          module.constants.controller_node_affinity_helm,
-          module.constants.pod_anti_affinity_preferred_instance_type_helm
-        )
+        affinity = module.util_controller.affinity
 
         resources = {
           requests = {
@@ -394,7 +365,7 @@ resource "helm_release" "cilium" {
             enabled  = var.monitoring_enabled
             interval = "60s"
             jobLabel = "cilium-operator"
-            labels   = module.operator_labels.kube_labels
+            labels   = module.util_controller.labels
           }
         }
       }
@@ -410,7 +381,7 @@ resource "kubernetes_manifest" "vpa_operator" {
     metadata = {
       name      = "cilium-operator"
       namespace = local.namespace
-      labels    = module.operator_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -431,7 +402,7 @@ resource "kubernetes_manifest" "vpa_node" {
     metadata = {
       name      = "cilium-nodes"
       namespace = local.namespace
-      labels    = module.agent_labels.kube_labels
+      labels    = module.util_agent.labels
     }
     spec = {
       targetRef = {
@@ -451,11 +422,11 @@ resource "kubernetes_manifest" "pdb_operator" {
     metadata = {
       name      = "${local.name}-pdb-operator"
       namespace = local.namespace
-      labels    = module.operator_labels.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       selector = {
-        matchLabels = module.operator_labels.kube_labels
+        matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }

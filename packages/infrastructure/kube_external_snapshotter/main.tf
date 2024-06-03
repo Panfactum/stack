@@ -25,14 +25,6 @@ terraform {
 
 locals {
   namespace = module.namespace.namespace
-
-  controller_match_labels = {
-    id = random_id.controller_id.hex
-  }
-
-  webhook_match_labels = {
-    id = random_id.webhook_id.hex
-  }
 }
 
 module "pull_through" {
@@ -40,20 +32,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "controller_id" {
-  prefix      = "external-snapshotter-controller-"
-  byte_length = 8
-}
+module "util_controller" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "external-snapshotter-controller"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-resource "random_id" "webhook_id" {
-  prefix      = "external-snapshotter-webhook-"
-  byte_length = 8
-}
-
-module "kube_labels_controller" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -61,17 +46,17 @@ module "kube_labels_controller" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match_labels)
 }
 
-module "constants_controller" {
-  source = "../constants"
+module "util_webhook" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "external-snapshotter-webhook"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-  matching_labels = local.controller_match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -79,43 +64,12 @@ module "constants_controller" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.controller_match_labels)
 }
 
-module "kube_labels_webhook" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match_labels)
-}
-
-module "constants_webhook" {
-  source = "../constants"
-
-  matching_labels = local.webhook_match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.webhook_match_labels)
+module "constants" {
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -179,14 +133,14 @@ resource "helm_release" "external_snapshotter" {
           v               = var.log_verbosity
           leader-election = true
         }
-        podLabels = module.kube_labels_controller.kube_labels
+        podLabels = module.util_controller.labels
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
 
         replicaCount      = 1
-        priorityClassName = module.constants_controller.cluster_important_priority_class_name
-        tolerations       = module.constants_controller.burstable_node_toleration_helm
+        priorityClassName = module.constants.cluster_important_priority_class_name
+        tolerations       = module.util_controller.tolerations
 
         resources = {
           requests = {
@@ -208,7 +162,7 @@ resource "helm_release" "external_snapshotter" {
           v = var.log_verbosity
         }
         podLabels = merge(
-          module.kube_labels_webhook.kube_labels,
+          module.util_webhook.labels,
           {
             customizationHash = md5(join("", [for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)]))
           }
@@ -218,10 +172,10 @@ resource "helm_release" "external_snapshotter" {
         }
 
         replicaCount              = 2
-        priorityClassName         = module.constants_webhook.cluster_important_priority_class_name
-        tolerations               = module.constants_webhook.burstable_node_toleration_helm
-        affinity                  = module.constants_webhook.pod_anti_affinity_preferred_instance_type_helm
-        topologySpreadConstraints = module.constants_webhook.topology_spread_zone_preferred
+        priorityClassName         = module.constants.cluster_important_priority_class_name
+        tolerations               = module.util_webhook.tolerations
+        affinity                  = module.util_webhook.affinity
+        topologySpreadConstraints = module.util_webhook.topology_spread_constraints
 
 
         tls = {
@@ -252,13 +206,13 @@ resource "kubernetes_service" "service" {
   metadata {
     name      = "external-snapshotter-controller"
     namespace = local.namespace
-    labels    = module.kube_labels_controller.kube_labels
+    labels    = module.util_controller.labels
   }
   spec {
     internal_traffic_policy = "Cluster"
     ip_families             = ["IPv4"]
     ip_family_policy        = "SingleStack"
-    selector                = local.controller_match_labels
+    selector                = module.util_controller.match_labels
     port {
       name        = "http"
       port        = 8080
@@ -278,7 +232,7 @@ resource "kubernetes_manifest" "service_monitor" {
     metadata = {
       name      = "external-snapshotter"
       namespace = local.namespace
-      labels    = module.kube_labels_controller.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       endpoints = [{
@@ -293,7 +247,7 @@ resource "kubernetes_manifest" "service_monitor" {
         matchNames = [local.namespace]
       }
       selector = {
-        matchLabels = local.controller_match_labels
+        matchLabels = module.util_controller.match_labels
       }
     }
   }
@@ -309,7 +263,7 @@ resource "kubernetes_manifest" "vpa_controller" {
     metadata = {
       name      = "external-snapshotter"
       namespace = local.namespace
-      labels    = module.kube_labels_controller.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       targetRef = {
@@ -330,7 +284,7 @@ resource "kubernetes_manifest" "vpa_webhook" {
     metadata = {
       name      = "external-snapshotter-webhook"
       namespace = local.namespace
-      labels    = module.kube_labels_webhook.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       targetRef = {
@@ -350,11 +304,11 @@ resource "kubernetes_manifest" "pdb_controller" {
     metadata = {
       name      = "external-snapshotter"
       namespace = local.namespace
-      labels    = module.kube_labels_controller.kube_labels
+      labels    = module.util_controller.labels
     }
     spec = {
       selector = {
-        matchLabels = local.controller_match_labels
+        matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
@@ -369,11 +323,11 @@ resource "kubernetes_manifest" "pdb_webhook" {
     metadata = {
       name      = "external-snapshotter-webhook"
       namespace = local.namespace
-      labels    = module.kube_labels_webhook.kube_labels
+      labels    = module.util_webhook.labels
     }
     spec = {
       selector = {
-        matchLabels = local.webhook_match_labels
+        matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }

@@ -25,19 +25,8 @@ terraform {
 }
 
 locals {
-
   name      = "vault"
   namespace = module.namespace.namespace
-
-  server_submodule = "server"
-  server_match = {
-    id = random_id.server_id.hex
-  }
-
-  csi_submodule = "csi"
-  csi_match = {
-    id = random_id.csi_id.hex
-  }
 }
 
 module "pull_through" {
@@ -45,20 +34,14 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-resource "random_id" "server_id" {
-  byte_length = 8
-  prefix      = "vault-"
-}
+module "util_server" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "vault"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
+  topology_spread_strict                = true
 
-resource "random_id" "csi_id" {
-  byte_length = 8
-  prefix      = "vault-csi-"
-}
-
-module "server_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -66,15 +49,17 @@ module "server_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.server_match)
 }
 
-module "csi_labels" {
-  source = "../kube_labels"
+module "util_csi" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "vault-csi"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -82,45 +67,12 @@ module "csi_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.csi_match)
 }
 
-module "server_constants" {
-  source = "../constants"
-
-  matching_labels = local.server_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.server_match)
-}
-
-module "csi_constants" {
-  source = "../constants"
-
-  matching_labels = local.csi_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.csi_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 data "aws_region" "region" {}
@@ -195,7 +147,7 @@ resource "kubernetes_service_account" "vault" {
   metadata {
     name      = local.name
     namespace = local.namespace
-    labels    = module.server_labels.kube_labels
+    labels    = module.util_server.labels
   }
 }
 
@@ -283,11 +235,8 @@ resource "helm_release" "vault" {
           }
         }
         pod = {
-          tolerations = module.csi_constants.burstable_node_toleration_helm
-          extraLabels = module.csi_labels.kube_labels
-          annotations = {
-            "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-          }
+          tolerations = module.util_csi.tolerations
+          extraLabels = module.util_csi.labels
         }
         priorityClassName = "system-node-critical"
       }
@@ -326,10 +275,7 @@ resource "helm_release" "vault" {
           }
         }
         updateStrategyType = "RollingUpdate"
-        extraLabels        = module.server_labels.kube_labels
-        annotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
+        extraLabels        = module.util_server.labels
         serviceAccount = {
           create = false,
           name   = kubernetes_service_account.vault.metadata[0].name
@@ -340,13 +286,10 @@ resource "helm_release" "vault" {
           mountPath    = "/vault/data"
           storageClass = "ebs-standard-retained"
         }
-        affinity = merge(
-          module.server_constants.pod_anti_affinity_preferred_instance_type_helm,
-          module.server_constants.controller_node_affinity_helm
-        )
-        tolerations               = module.server_constants.burstable_node_toleration_helm
-        topologySpreadConstraints = module.server_constants.topology_spread_zone_strict
-        priorityClassName         = module.server_constants.cluster_important_priority_class_name # Vault can go down temporarily without disrupting the cluster
+        affinity                  = module.util_server.affinity
+        tolerations               = module.util_server.tolerations
+        topologySpreadConstraints = module.util_server.topology_spread_constraints
+        priorityClassName         = module.constants.cluster_important_priority_class_name # Vault can go down temporarily without disrupting the cluster
 
         extraEnvironmentVars = {
           AWS_REGION   = data.aws_region.region.name
@@ -376,7 +319,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "vault-dashboard"
-    labels = merge(module.server_labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util_server.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "vault.json" = file("${path.module}/dashboard.json")
@@ -413,7 +356,7 @@ resource "kubernetes_manifest" "vpa_csi" {
     metadata = {
       name      = "vault-csi-provider"
       namespace = local.namespace
-      labels    = module.csi_labels.kube_labels
+      labels    = module.util_csi.labels
     }
     spec = {
       targetRef = {
@@ -434,7 +377,7 @@ resource "kubernetes_manifest" "vpa_server" {
     metadata = {
       name      = "vault"
       namespace = local.namespace
-      labels    = module.server_labels.kube_labels
+      labels    = module.util_server.labels
     }
     spec = {
       targetRef = {

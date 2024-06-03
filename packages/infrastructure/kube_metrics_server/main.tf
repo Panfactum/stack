@@ -29,8 +29,11 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "metrics-server"
+  burstable_nodes_enabled               = true
+  instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -45,22 +48,7 @@ module "kube_labels" {
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = {
-    "app.kubernetes.io/name" = "metrics-server"
-  }
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -115,11 +103,8 @@ resource "helm_release" "metrics_server" {
 
   values = [
     yamlencode({
-      commonLabels = module.kube_labels.kube_labels
-      podLabels    = module.kube_labels.kube_labels
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
+      commonLabels = module.util.labels
+      podLabels    = module.util.labels
       deploymentAnnotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -161,12 +146,9 @@ resource "helm_release" "metrics_server" {
       updateStrategy = {
         type = "Recreate"
       }
-      affinity = merge(
-        module.constants.controller_node_with_burstable_affinity_helm,
-        module.constants.pod_anti_affinity_helm
-      )
-      topologySpreadConstraints = module.constants.topology_spread_zone_strict
-      tolerations               = module.constants.burstable_node_toleration_helm
+      affinity                  = module.util.affinity
+      topologySpreadConstraints = module.util.topology_spread_constraints
+      tolerations               = module.util.tolerations
       podDisruptionBudget = {
         enabled      = true
         minAvailable = 1
@@ -220,7 +202,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

@@ -11,8 +11,8 @@ terraform {
   }
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source = "../kube_workload_utility"
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -27,7 +27,7 @@ module "kube_labels" {
 }
 
 module "constants" {
-  source = "../constants"
+  source = "../kube_constants"
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -44,7 +44,7 @@ module "constants" {
 resource "kubernetes_priority_class" "database" {
   metadata {
     name   = module.constants.database_priority_class_name
-    labels = module.kube_labels.kube_labels
+    labels = module.util.labels
   }
   description = "Used for running database containers"
   value       = 10000000
@@ -53,7 +53,7 @@ resource "kubernetes_priority_class" "database" {
 resource "kubernetes_priority_class" "default" {
   metadata {
     name   = module.constants.default_priority_class_name
-    labels = module.kube_labels.kube_labels
+    labels = module.util.labels
   }
   value          = 0
   global_default = true
@@ -62,7 +62,7 @@ resource "kubernetes_priority_class" "default" {
 resource "kubernetes_priority_class" "cluster_important" {
   metadata {
     name   = module.constants.cluster_important_priority_class_name
-    labels = module.kube_labels.kube_labels
+    labels = module.util.labels
   }
   description = "Used for important global cluster utilities that are not necessary for cluster bootstrapping"
   value       = 100000000

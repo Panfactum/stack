@@ -1,3 +1,0 @@
-# Kubernetes Labels
-
-**Type:** Internal

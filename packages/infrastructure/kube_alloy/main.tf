@@ -39,10 +39,6 @@ locals {
       memory = "130Mi"
     }
   }
-
-  alloy_match = {
-    id = random_id.alloy.hex
-  }
 }
 
 module "pull_through" {
@@ -55,10 +51,12 @@ resource "random_id" "alloy" {
   prefix      = "alloy-"
 }
 
-module "kube_labels_alloy" {
-  source = "../kube_labels"
+module "util" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "alloy"
+  burstable_nodes_enabled = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -66,27 +64,12 @@ module "kube_labels_alloy" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.alloy_match)
 }
 
-module "constants_alloy" {
-  source = "../constants"
-
-  matching_labels = local.alloy_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.alloy_match)
+module "constants" {
+  source = "../kube_constants"
 }
 
 
@@ -118,6 +101,7 @@ resource "kubernetes_config_map" "alloy" {
   metadata {
     name      = "alloy-config"
     namespace = local.namespace
+    labels    = module.util.labels
   }
   data = {
     "alloy.config" = templatefile("${path.module}/alloy.txt", {
@@ -163,8 +147,9 @@ resource "helm_release" "alloy" {
       }
       controller = {
         type              = "daemonset"
-        tolerations       = module.constants_alloy.burstable_node_toleration_helm
+        tolerations       = module.util.tolerations
         priorityClassName = "system-node-critical"
+        podLabels         = module.util.labels
       }
       configReloader = {
         image = {
@@ -194,7 +179,7 @@ resource "kubernetes_manifest" "vpa_alloy" {
     metadata = {
       name      = "alloy"
       namespace = local.namespace
-      labels    = module.kube_labels_alloy.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

@@ -32,10 +32,6 @@ locals {
 
   plugin_name = "panfactum-plugin-lua"
 
-  nginx_match = {
-    id = random_id.controller_id.hex
-  }
-
   // This has to be THIS name in order for it to
   // replace the self-generated cert secret from the helm chart
   webhook_secret = "nginx-admission"
@@ -75,10 +71,15 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "labels" {
-  source = "../kube_labels"
+module "util" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "nginx-ingress"
+  burstable_nodes_enabled              = true
+  instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
+  lifetime_evictions_enabled           = false
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -86,27 +87,12 @@ module "labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.nginx_match)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.nginx_match
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.nginx_match)
+  source = "../kube_constants"
 }
 
 module "namespace" {
@@ -153,7 +139,7 @@ resource "kubernetes_secret" "dhparam" {
     name      = "ingress-nginx-dhparam"
     namespace = local.namespace
     labels = merge(
-      module.labels.kube_labels,
+      module.util.labels,
       {
         "app.kubernetes.io/name"    = "ingress-nginx"
         "app.kubernetes.io/part-of" = "ingress-nginx"
@@ -214,10 +200,7 @@ resource "helm_release" "nginx_ingress" {
   values = [
     yamlencode({
       fullnameOverride = "nginx"
-      commonLabels = merge(
-        module.labels.kube_labels,
-        module.constants.disable_lifetime_eviction_label
-      )
+      commonLabels     = module.util.labels
 
       controller = {
         image = {
@@ -362,9 +345,9 @@ resource "helm_release" "nginx_ingress" {
         minReadySeconds = 10
         maxUnavailable  = 1
 
-        tolerations               = module.constants.burstable_node_toleration_helm
-        affinity                  = module.constants.pod_anti_affinity_instance_type_helm
-        topologySpreadConstraints = module.constants.topology_spread_zone_strict
+        tolerations               = module.util.tolerations
+        affinity                  = module.util.affinity
+        topologySpreadConstraints = module.util.topology_spread_constraints
 
         // We need to change these from the defaults
         // so that they are more responsive;
@@ -451,7 +434,7 @@ resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
     name   = "nginx-dashboard"
-    labels = merge(module.labels.kube_labels, { "grafana_dashboard" = "1" })
+    labels = merge(module.util.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "nginx-ingress.json" = file("${path.module}/dashboard.json")
@@ -462,7 +445,7 @@ resource "kubernetes_service" "nginx_healthcheck" {
   metadata {
     name      = "nginx-healthcheck"
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.util.labels
   }
   spec {
     type = "ClusterIP"
@@ -471,7 +454,7 @@ resource "kubernetes_service" "nginx_healthcheck" {
       target_port = "metrics"
       protocol    = "TCP"
     }
-    selector = local.nginx_match
+    selector = module.util.match_labels
   }
   depends_on = [helm_release.nginx_ingress]
 }
@@ -480,7 +463,7 @@ resource "kubernetes_service" "nginx_status" {
   metadata {
     name      = "nginx-status"
     namespace = local.namespace
-    labels    = module.labels.kube_labels
+    labels    = module.util.labels
   }
   spec {
     type = "ClusterIP"
@@ -489,7 +472,7 @@ resource "kubernetes_service" "nginx_status" {
       target_port = 18080
       protocol    = "TCP"
     }
-    selector = local.nginx_match
+    selector = module.util.match_labels
   }
   depends_on = [helm_release.nginx_ingress]
 }
@@ -502,7 +485,7 @@ resource "kubernetes_manifest" "vpa_nginx" {
     metadata = {
       name      = "nginx-controller"
       namespace = local.namespace
-      labels    = module.labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {

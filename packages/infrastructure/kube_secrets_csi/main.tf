@@ -26,26 +26,18 @@ terraform {
 locals {
   service   = "secrets-csi"
   namespace = module.namespace.namespace
-
-  match_labels = {
-    id = random_id.id.hex
-  }
 }
 
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
 }
+module "util" {
+  source                  = "../kube_workload_utility"
+  workload_name           = "secrets-csi"
+  burstable_nodes_enabled = true
 
-resource "random_id" "id" {
-  prefix      = "secrets-csi-"
-  byte_length = 8
-}
-
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -53,27 +45,12 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.match_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.match_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.match_labels)
+  source = "../kube_constants"
 }
 
 /***************************************
@@ -192,7 +169,7 @@ resource "helm_release" "secrets_csi_driver" {
               effect   = "NoSchedule"
             }
           ],
-          module.constants.burstable_node_toleration_helm
+          module.util.tolerations
         )
 
         daemonsetAnnotations = {
@@ -202,7 +179,7 @@ resource "helm_release" "secrets_csi_driver" {
           "linkerd.io/inject"                                   = "enabled"
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
-        podLabels         = module.kube_labels.kube_labels
+        podLabels         = module.util.labels
         priorityClassName = "system-node-critical"
       }
       logVerbosity         = 2
@@ -224,7 +201,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = "secrets-csi"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {
@@ -245,7 +222,7 @@ resource "kubernetes_manifest" "pod_monitor" {
     metadata = {
       name      = "secrets-csi"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       podMetricsEndpoints = [{
@@ -259,7 +236,7 @@ resource "kubernetes_manifest" "pod_monitor" {
         matchNames = [local.namespace]
       }
       selector = {
-        matchLabels = local.match_labels
+        matchLabels = module.util.match_labels
       }
     }
   }

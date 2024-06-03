@@ -28,14 +28,6 @@ terraform {
 locals {
   name      = "cloudnative-pg"
   namespace = module.namespace.namespace
-  matching_labels = {
-    id = random_id.controller_id.hex
-  }
-}
-
-resource "random_id" "controller_id" {
-  prefix      = "cnpg-"
-  byte_length = 8
 }
 
 module "pull_through" {
@@ -43,10 +35,13 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                               = "../kube_workload_utility"
+  workload_name                        = "cnpg-operator"
+  instance_type_anti_affinity_required = true
+  burstable_nodes_enabled              = true
 
-  # generate: common_vars_no_extra_tags.snippet.txt
+  # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -54,30 +49,13 @@ module "kube_labels" {
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
   is_local         = var.is_local
+  extra_tags       = var.extra_tags
   # end-generate
-
-  extra_tags = merge(var.extra_tags, local.matching_labels)
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = local.matching_labels
-
-  # generate: common_vars_no_extra_tags.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, local.matching_labels)
+  source = "../kube_constants"
 }
-
-
 
 module "namespace" {
   source = "../kube_namespace"
@@ -148,26 +126,21 @@ resource "helm_release" "cnpg" {
 
       monitoring = {
         podMonitorEnabled          = var.monitoring_enabled
-        podMonitorAdditionalLabels = module.kube_labels.kube_labels
+        podMonitorAdditionalLabels = module.util.labels
         grafanaDashboard = {
           create = var.monitoring_enabled
-          labels = merge(
-            module.kube_labels.kube_labels
-          )
+          labels = module.util.labels
         }
       }
 
-      priorityClassName = module.constants.cluster_important_priority_class_name
-      replicaCount      = 2
-      affinity = merge(
-        module.constants.controller_node_affinity_helm,
-        module.constants.pod_anti_affinity_helm
-      )
-      tolerations               = module.constants.burstable_node_toleration_helm
-      topologySpreadConstraints = module.constants.topology_spread_zone_preferred
+      priorityClassName         = module.constants.cluster_important_priority_class_name
+      replicaCount              = 2
+      affinity                  = module.util.affinity
+      tolerations               = module.util.tolerations
+      topologySpreadConstraints = module.util.topology_spread_constraints
 
       podLabels = merge(
-        module.kube_labels.kube_labels,
+        module.util.labels,
         {
           customizationHash = md5(join("", [for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)]))
         }
@@ -208,7 +181,7 @@ resource "kubernetes_manifest" "vpa" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {
@@ -228,11 +201,11 @@ resource "kubernetes_manifest" "pdb" {
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       selector = {
-        matchLabels = local.matching_labels
+        matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }
