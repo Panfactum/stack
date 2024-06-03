@@ -2,14 +2,14 @@
 
 The purpose of this guide is to show how to pin your organization to a particular version of the Panfactum stack.
 
-This guide assumes you are trying to pin to version `24-01.4`, and you should substitute this with whatever
+This guide assumes you are trying to pin to version `__PANFACTUM_VERSION_EDGE__`, and you should substitute this with whatever
 version you want to use.
 
 **You should ensure that the versions match in all locations.**
 
 ## Nix Flake
 
-Set `inputs.panfactum.url` to `"github:Panfactum/stack/24-01.4"`.
+Set `inputs.panfactum.url` to `"github:Panfactum/stack/__PANFACTUM_VERSION_EDGE__"`.
 
 ## Terragrunt Deployments
 
@@ -22,7 +22,7 @@ to the correct `ref` to match the desired version. For example:
 
 ```hcl
 module "pod_template" {
-  source       = "github.com/Panfactum/stack.git/packages/terraform//kube_pod?ref=24-01.4"
+  source       = "github.com/Panfactum/stack.git/packages/terraform//kube_pod?ref=__PANFACTUM_VERSION_EDGE__"
 }
 ```
 
