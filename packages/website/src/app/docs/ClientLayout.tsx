@@ -32,7 +32,6 @@ export default function ClientLayout (
   return (
     <SecondaryWebLayout
       tabs={TABS}
-      id={'docs'}
     >
       {children}
     </SecondaryWebLayout>

@@ -27,7 +27,6 @@ export default function Layout (
   return (
     <SecondaryWebLayout
       tabs={TABS}
-      id={'stack'}
     >
       {children}
     </SecondaryWebLayout>

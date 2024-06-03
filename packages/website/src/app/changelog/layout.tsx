@@ -24,7 +24,6 @@ export default function Layout (
   return (
     <SecondaryWebLayout
       tabs={TABS}
-      id={'changelog'}
     >
       <ArticleLayout>
         {children}
