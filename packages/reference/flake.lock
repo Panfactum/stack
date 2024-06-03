@@ -351,14 +351,18 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-V8mULppk/cUX5pNk2yPdJJvgoYOfQFoSrLUH8q7yAWo=",
-        "path": "../..",
-        "type": "path"
+        "lastModified": 1717355544,
+        "narHash": "sha256-sM3kJJqj+qZhzlf0c1oAhp2qDa7I1cvT+p90Wvg2nsk=",
+        "owner": "panfactum",
+        "repo": "stack",
+        "rev": "430bd90862ce77610378af3f5b6800e3822b3d4a",
+        "type": "github"
       },
       "original": {
-        "path": "../..",
-        "type": "path"
+        "owner": "panfactum",
+        "ref": "main",
+        "repo": "stack",
+        "type": "github"
       }
     },
     "pkgs": {

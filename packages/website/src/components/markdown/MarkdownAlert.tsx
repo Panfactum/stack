@@ -9,6 +9,9 @@ export default memo(function MarkdownAlert (props: AlertProps) {
         {...props}
         variant="filled"
         className="text-xs sm:text-sm w-full py-0.5 flex items-center"
+        classes={{
+          message: 'w-full'
+        }}
       />
     </div>
   )

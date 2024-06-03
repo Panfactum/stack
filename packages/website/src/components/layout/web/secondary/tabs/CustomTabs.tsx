@@ -44,7 +44,7 @@ export default function CustomTabs (props: IWebTabNavigationProps) {
   useEffect(() => {
     let shouldUpdate = true
     const locationsToTest = Object.values(savedLocations).filter(location => !Object.prototype.hasOwnProperty.call(validatedLocations, location))
-    if (!isValidating) {
+    if (locationsToTest.length > 0 && !isValidating) {
       setIsValidating(true)
       void Promise.all(locationsToTest
         .map(location => fetch(location, { method: 'HEAD' })
@@ -82,6 +82,7 @@ export default function CustomTabs (props: IWebTabNavigationProps) {
   // depending on whether there is a saved and validated location for each tab
   const savedTabs = tabs.map(tab => {
     const savedLocation = savedLocations[tab.href]
+
     return {
       text: tab.text,
       href: savedLocation && validatedLocations[savedLocation] ? savedLocation : tab.href
