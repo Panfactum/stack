@@ -169,6 +169,7 @@ resource "helm_release" "cilium" {
   cleanup_on_fail = true
   wait            = false // Don't wait b/c this won't work on initial setup in EKS due to the existing CNIs on the nodes
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({

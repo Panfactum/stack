@@ -54,6 +54,9 @@ take effect.
 
 - [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) now respects `log_level` input.
 
+- Sets `max_history` to `5` for all Helm charts to prevent overloading the Kubernetes API server with an every-growing amount
+of historical Helm deployments.
+
 ## edge.24-06-02
 
 ### Breaking Changes

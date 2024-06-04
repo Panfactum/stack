@@ -311,7 +311,7 @@ resource "helm_release" "loki" {
   wait            = true
   wait_for_jobs   = true
   max_history     = 5
-  timeout         = 60 * 8
+  timeout         = 60 * 10
 
   values = [
     yamlencode({

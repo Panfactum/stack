@@ -116,10 +116,11 @@ resource "helm_release" "external_snapshotter" {
   repository      = "https://piraeus.io/helm-charts"
   chart           = "snapshot-controller"
   version         = var.external_snapshotter_helm_version
-  recreate_pods   = true
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({

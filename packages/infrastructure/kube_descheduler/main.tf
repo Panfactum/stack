@@ -93,10 +93,11 @@ resource "helm_release" "descheduler" {
   repository      = "https://kubernetes-sigs.github.io/descheduler/"
   chart           = "descheduler"
   version         = var.descheduler_helm_version
-  recreate_pods   = true
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({

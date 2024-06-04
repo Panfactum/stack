@@ -102,6 +102,7 @@ resource "helm_release" "redis" {
   wait            = true
   wait_for_jobs   = true
   timeout         = 60 * 15
+  max_history     = 5
 
   values = [
     yamlencode({

@@ -84,6 +84,7 @@ resource "helm_release" "reloader" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({

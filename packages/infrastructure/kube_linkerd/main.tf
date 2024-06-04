@@ -284,6 +284,7 @@ resource "helm_release" "linkerd" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
@@ -491,6 +492,7 @@ resource "helm_release" "viz" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({

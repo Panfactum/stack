@@ -84,10 +84,11 @@ resource "helm_release" "secrets_csi_driver" {
   repository      = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
   chart           = "secrets-store-csi-driver"
   version         = var.secrets_store_csi_helm_version
-  recreate_pods   = true
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
