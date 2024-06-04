@@ -16,6 +16,10 @@ inputs have changed.
 
 - The alpha module `kube_labels` has been removed in favor of the labels provided by [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility).
 
+- VPC flow logs in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) are now disabled by default as they
+can be fairly expensive and should only be used if you have a specific use-case in mind. They can be enabled
+by setting `vpc_flow_logs_enabled` to `true`.
+
 ### Added
 
 - Added [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened

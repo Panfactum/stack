@@ -420,7 +420,13 @@ module "log_bucket" {
   # end-generate
 }
 
+moved {
+  from = aws_flow_log.flow_logs
+  to   = aws_flow_log.flow_logs[0]
+}
+
 resource "aws_flow_log" "flow_logs" {
+  count = var.vpc_flow_logs_enabled ? 1 : 0
 
   destination_options {
     file_format        = "plain-text"

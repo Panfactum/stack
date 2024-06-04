@@ -50,3 +50,9 @@ variable "vpc_flow_logs_expire_after_days" {
     error_message = "Flow logs must be kept for at least 7 days"
   }
 }
+
+variable "vpc_flow_logs_enabled" {
+  description = "Whether to enable VPC flow logs"
+  type        = bool
+  default     = false
+}
