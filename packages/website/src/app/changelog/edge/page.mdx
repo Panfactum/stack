@@ -24,6 +24,13 @@ Pod specs that take advantage of all capabilities included in the Panfactum stac
 - Added [kube_constants](/docs/edge/reference/infrastructure-modules/kubernetes/kube_constants) that export static configuration values that can be useful
 when creating resources that run on clusters in the Panfactum stack.
 
+### Fixed
+
+- Temporarily adds `GIT_CLONE_PROTECTION_ACTIVE=false` to the shell environment in order to address
+[this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
+disables new bleeding edge security features which were accidentally shipped in a broken
+state.
+
 ## edge.24-06-02
 
 ### Added
@@ -77,6 +84,9 @@ when creating resources that run on clusters in the Panfactum stack.
 * The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
   [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order
   to automatically expand EBS volumes as they fill up.
+
+- Added validation for phone number format in
+[aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
 
 ### Fixed
 
@@ -185,6 +195,10 @@ when creating resources that run on clusters in the Panfactum stack.
 
 * Kubernetes labels applied via the `extra_tags` terragrunt input are now sanitized for valid characters automatically (invalid characters
   are replaced with `.`). ([@mschnee](https://github.com/mschnee))
+
+- Added scheduling constraints to prevent critical workloads from scheduling all pods on the same
+instance type in order to minimize the possibility of disruption on events that only affect one
+instance type (e.g., spot node preemption).
 
 - Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
   in order to reduce resource utilization in the Stack.

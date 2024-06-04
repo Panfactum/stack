@@ -38,6 +38,15 @@ export TF_PLUGIN_CACHE_DIR="$DEVENV_ROOT/.terraform"
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
 #############################################
+## Git LFS Fix
+## This should be removed when updating to git 2.45
+## as the new security features enables by this flag are
+## currently broken for LFS. This doesn't disable
+## any prior security features.
+#############################################
+export GIT_CLONE_PROTECTION_ACTIVE=false
+
+#############################################
 ## Run checks
 #############################################
 pf-check-repo-setup
