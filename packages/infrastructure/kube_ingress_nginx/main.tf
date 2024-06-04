@@ -383,10 +383,10 @@ resource "helm_release" "nginx_ingress" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "200Mi"
           }
           limits = {
-            memory = "130Mi"
+            memory = "260Mi"
           }
         }
         extraVolumeMounts = [

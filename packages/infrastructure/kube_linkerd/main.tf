@@ -329,7 +329,7 @@ resource "helm_release" "linkerd" {
           // so we set the request low and the limit high as
           // the majority of proxies are low resource consumption
           memory = {
-            request = "20Mi"
+            request = "10Mi"
             limit   = "200Mi"
           }
         }

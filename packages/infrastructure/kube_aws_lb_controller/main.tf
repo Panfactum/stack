@@ -376,18 +376,18 @@ resource "helm_release" "alb_controller" {
         "reloader.stakater.com/auto" = "true"
       }
       podAnnotations = {
-        "linkerd.io/inject"                                   = "enabled"
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+        "linkerd.io/inject"                      = "enabled"
+        "config.linkerd.io/proxy-memory-request" = "5Mi"
       }
       additionalLabels = merge(module.util_controller.labels, {
         customizationHash = md5(join("", [for filename in sort(fileset(path.module, "alb_kustomize/*")) : filesha256(filename)]))
       })
       resources = {
         requests = {
-          memory = "100Mi"
+          memory = "${ceiling(85 / 1.3)}Mi"
         }
         limits = {
-          memory = "130Mi"
+          memory = "85Mi"
         }
       }
 
@@ -485,6 +485,14 @@ resource "kubernetes_manifest" "vpa" {
       labels    = module.util_controller.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "aws-load-balancer-controller"
+          minAllowed = {
+            memory = "${floor(85 / 1.3)}Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

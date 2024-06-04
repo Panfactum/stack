@@ -592,10 +592,10 @@ resource "helm_release" "karpenter" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "400Mi"
           }
           limits = {
-            memory = "130Mi"
+            memory = "520Mi"
           }
         }
       }

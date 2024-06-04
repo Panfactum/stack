@@ -412,7 +412,7 @@ resource "kubernetes_manifest" "vpa_recommender" {
         containerPolicies = [{
           containerName = "vpa"
           minAllowed = {
-            memory = "100Mi"
+            memory = "125Mi"
           }
         }]
       }

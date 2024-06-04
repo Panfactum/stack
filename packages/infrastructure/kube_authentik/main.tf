@@ -411,10 +411,10 @@ resource "helm_release" "authentik" {
 
         resources = {
           requests = {
-            memory = "500Mi"
+            memory = "700Mi"
           }
           limits = {
-            memory = "650Mi"
+            memory = "${ceiling(700 * 1.3)}Mi"
           }
         }
       }
@@ -478,10 +478,10 @@ resource "helm_release" "authentik" {
 
         resources = {
           requests = {
-            memory = "1000Mi"
+            memory = "700Mi"
           }
           limits = {
-            memory = "1300Mi"
+            memory = "${ceiling(700 * 1.3)}Mi"
           }
         }
       }
@@ -567,7 +567,7 @@ resource "kubernetes_manifest" "vpa_server" {
         containerPolicies = [{
           containerName = "server"
           minAllowed = {
-            memory = "550Mi"
+            memory = "700Mi"
           }
         }]
       }
@@ -596,7 +596,7 @@ resource "kubernetes_manifest" "vpa_worker" {
         containerPolicies = [{
           containerName = "worker"
           minAllowed = {
-            memory = "450Mi"
+            memory = "700Mi"
           }
         }]
       }

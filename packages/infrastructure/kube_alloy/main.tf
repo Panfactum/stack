@@ -143,7 +143,15 @@ resource "helm_release" "alloy" {
         mounts = {
           varlog = true
         }
-        resources = local.default_resources
+        resources = {
+          requests = {
+            cpu    = "100m"
+            memory = "150Mi"
+          }
+          limits = {
+            memory = "${ceiling(150 * 1.3)}Mi"
+          }
+        }
       }
       controller = {
         type              = "daemonset"
@@ -155,7 +163,15 @@ resource "helm_release" "alloy" {
         image = {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"
         }
-        resources = local.default_resources
+        resources = {
+          requests = {
+            cpu    = "50m"
+            memory = "20Mi"
+          }
+          limits = {
+            memory = "${ceiling(20 * 1.3)}Mi"
+          }
+        }
       }
       serviceMonitor = {
         enabled  = var.monitoring_enabled
@@ -182,6 +198,14 @@ resource "kubernetes_manifest" "vpa_alloy" {
       labels    = module.util.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "alloy"
+          minAllowed = {
+            memory = "150Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "DaemonSet"

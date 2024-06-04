@@ -455,11 +455,11 @@ resource "helm_release" "argo" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "50Mi"
             cpu    = "100m"
           }
           limits = {
-            memory = "130Mi"
+            memory = "${ceiling(50 * 1.3)}Mi"
           }
         }
       }
@@ -514,10 +514,6 @@ resource "helm_release" "argo" {
           format = "json"
           level  = var.log_level
         }
-
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
         podLabels = module.util_server.labels
 
         replicas                  = 2
@@ -531,11 +527,11 @@ resource "helm_release" "argo" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "50Mi"
             cpu    = "100m"
           }
           limits = {
-            memory = "130Mi"
+            memory = "${ceiling(50 * 1.3)}Mi"
           }
         }
 
@@ -587,6 +583,14 @@ resource "kubernetes_manifest" "vpa_controller" {
       labels    = module.util_controller.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "controller"
+          minAllowed = {
+            memory = "50Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -608,6 +612,14 @@ resource "kubernetes_manifest" "vpa_server" {
       labels    = module.util_server.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "argo-server"
+          minAllowed = {
+            memory = "50Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -657,9 +669,6 @@ resource "helm_release" "argo_events" {
       }
 
       controller = {
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
         podLabels         = module.util_events_controller.labels
         priorityClassName = module.constants.cluster_important_priority_class_name
         replicas          = 1
@@ -671,20 +680,17 @@ resource "helm_release" "argo_events" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "50Mi"
             cpu    = "100m"
           }
           limits = {
-            memory = "130Mi"
+            memory = "80Mi"
           }
         }
       }
 
       webhook = {
-        enabled = true
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
+        enabled                   = true
         podLabels                 = module.util_webhook.labels
         priorityClassName         = module.constants.cluster_important_priority_class_name
         replicas                  = 2
@@ -698,11 +704,11 @@ resource "helm_release" "argo_events" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "50Mi"
             cpu    = "100m"
           }
           limits = {
-            memory = "130Mi"
+            memory = "80Mi"
           }
         }
       }

@@ -248,7 +248,7 @@ resource "kubernetes_manifest" "vpa" {
         containerPolicies = [{
           containerName = "external-dns"
           minAllowed = {
-            memory = "25Mi"
+            memory = "100Mi"
           }
         }]
       }

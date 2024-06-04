@@ -225,10 +225,10 @@ resource "helm_release" "cilium" {
 
       resources = {
         requests = {
-          memory = "300Mi" // Needs to be a bit higher before the VPA is enabled
+          memory = "400Mi" // Needs to be a bit higher before the VPA is enabled
         }
         limits = {
-          memory = "390Mi"
+          memory = "520Mi"
         }
       }
 

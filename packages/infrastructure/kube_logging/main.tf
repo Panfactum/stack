@@ -40,10 +40,10 @@ locals {
 
   default_resources = {
     requests = {
-      memory = "100Mi"
+      memory = "300Mi"
     }
     limits = {
-      memory = "130Mi"
+      memory = "390Mi"
     }
   }
 }

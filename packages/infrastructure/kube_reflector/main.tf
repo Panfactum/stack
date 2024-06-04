@@ -103,10 +103,10 @@ resource "helm_release" "reflector" {
       priorityClassName = module.constants.cluster_important_priority_class_name
       resources = {
         requests = {
-          memory = "100Mi"
+          memory = "150Mi"
         }
         limits = {
-          memory = "130Mi"
+          memory = "195Mi"
         }
       }
     })
@@ -124,6 +124,14 @@ resource "kubernetes_manifest" "vpa" {
       labels    = module.util_controller.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "reflector"
+          minAllowed = {
+            memory = "150Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

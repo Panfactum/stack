@@ -158,10 +158,10 @@ resource "helm_release" "cnpg" {
 
       resources = {
         requests = {
-          memory = "100Mi"
+          memory = "200Mi"
         }
         limits = {
-          memory = "130Mi"
+          memory = "260Mi"
         }
       }
     })

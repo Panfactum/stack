@@ -102,7 +102,7 @@ module "database" {
   eks_cluster_name            = var.eks_cluster_name
   pg_cluster_namespace        = local.namespace
   pg_storage_gb               = 1
-  pg_memory_mb                = 250
+  pg_memory_mb                = 300
   pg_cpu_millicores           = 200
   pg_instances                = 2
   pg_shutdown_timeout         = 30
@@ -217,6 +217,14 @@ resource "kubernetes_manifest" "vpa_alloy" {
       labels    = module.util.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "canary-checker"
+          minAllowed = {
+            memory = "200Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

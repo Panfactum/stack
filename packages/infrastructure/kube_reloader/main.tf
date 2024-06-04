@@ -136,6 +136,14 @@ resource "kubernetes_manifest" "vpa" {
       labels    = module.util_controller.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "reloader"
+          minAllowed = {
+            memory = "200Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

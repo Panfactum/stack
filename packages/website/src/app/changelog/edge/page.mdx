@@ -24,6 +24,8 @@ Pod specs that take advantage of all capabilities included in the Panfactum stac
 - Added [kube_constants](/docs/edge/reference/infrastructure-modules/kubernetes/kube_constants) that export static configuration values that can be useful
 when creating resources that run on clusters in the Panfactum stack.
 
+- [kube_cert_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cert_manager) will now automatically delete Certificate secrets if the Certificate is deleted.
+
 ### Fixed
 
 - `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
@@ -33,6 +35,9 @@ instead of full devenv re-evaluations.
 [this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
 disables new bleeding edge security features which were accidentally shipped in a broken
 state.
+
+- Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when bootstrapping before VPA
+take effect.
 
 ## edge.24-06-02
 

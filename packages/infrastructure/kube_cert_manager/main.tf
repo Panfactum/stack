@@ -246,7 +246,10 @@ resource "helm_release" "cert_manager" {
       livenessProbe = {
         enabled = true
       }
-      extraArgs = ["--v=${var.log_verbosity}"]
+      extraArgs = [
+        "--v=${var.log_verbosity}",
+        "--enable-certificate-owner-ref" // Deletes secrets when the certificate is deleted
+      ]
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.cert_manager.metadata[0].name
@@ -325,10 +328,10 @@ resource "helm_release" "cert_manager" {
         tolerations = module.util_ca_injector.tolerations
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "300Mi"
           }
           limits = {
-            memory = "130Mi"
+            memory = "390Mi"
           }
         }
       }

@@ -806,10 +806,10 @@ resource "helm_release" "prometheus_stack" {
         tolerations    = module.util_ksm.tolerations
         resources = {
           requests = {
-            memory = "200Mi"
+            memory = "300Mi"
           }
           limits = {
-            memory = "260Mi"
+            memory = "390Mi"
           }
         }
 
@@ -1703,10 +1703,10 @@ resource "helm_release" "thanos" {
         resources = {
           requests = {
             cpu    = "200m"
-            memory = "200Mi"
+            memory = "400Mi"
           }
           limits = {
-            memory = "260Mi"
+            memory = "520Mi"
           }
         }
 
@@ -2211,7 +2211,7 @@ resource "kubernetes_manifest" "vpa_kube_state_metrics" {
         containerPolicies = [{
           containerName = "kube-state-metrics"
           minAllowed = {
-            memory = "120Mi"
+            memory = "250Mi"
           }
         }]
       }

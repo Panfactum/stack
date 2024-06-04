@@ -262,10 +262,10 @@ resource "helm_release" "vault" {
         }
         resources = {
           requests = {
-            memory = "100Mi"
+            memory = "200Mi"
           }
           limits = {
-            memory = "130Mi"
+            memory = "260Mi"
           }
         }
         statefulSet = {
@@ -380,6 +380,14 @@ resource "kubernetes_manifest" "vpa_server" {
       labels    = module.util_server.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "vault"
+          minAllowed = {
+            memory = "200Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "StatefulSet"
