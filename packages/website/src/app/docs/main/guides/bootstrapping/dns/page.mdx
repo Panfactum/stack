@@ -33,6 +33,13 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
   immediately continue with this guide.
 </MarkdownAlert>
 
+<MarkdownAlert severity="warning">
+    If your AWS account if relatively new, purchasing a domain may fail with a vague "Failed" error.
+    AWS limits domain purchases for organizations that have not yet paid their first bill, but
+    you can [open a ticket](https://docs.aws.amazon.com/awssupport/latest/user/case-management.html) requesting
+    access and AWS support will unlock your account within 24 hours.
+</MarkdownAlert>
+
 1. Login to your `production` account in the AWS web console (or whichever account will host your client-facing infrastructure).
 
 2. Navigate to Route 53 > Registered domains.
