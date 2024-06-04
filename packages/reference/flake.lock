@@ -351,11 +351,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1717355544,
-        "narHash": "sha256-sM3kJJqj+qZhzlf0c1oAhp2qDa7I1cvT+p90Wvg2nsk=",
+        "lastModified": 1717517600,
+        "narHash": "sha256-giJcMKORrcKHxxY/KthuqOyd7sMS00NN/uMQ2jGwuZ0=",
         "owner": "panfactum",
         "repo": "stack",
-        "rev": "430bd90862ce77610378af3f5b6800e3822b3d4a",
+        "rev": "c4110ebe6fb804066d61f2c896b5b0f913aa1ff6",
         "type": "github"
       },
       "original": {
