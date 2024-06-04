@@ -127,11 +127,21 @@ data "aws_iam_policy_document" "send_email" {
     effect    = "Allow"
     actions   = ["ses:SendRawEmail"]
     resources = ["*"]
-    #    condition {
-    #      test     = "StringLike"
-    #      values   = ["*@${var.domain}"]
-    #      variable = "ses:FromAddress"
-    #    }
+    condition {
+      test     = "StringLike"
+      values   = ["*@${var.domain}"]
+      variable = "ses:FromAddress"
+    }
+
+    // Only allow access from allowlisted IPs
+    dynamic "condition" {
+      for_each = length(var.smtp_allowed_cidrs) > 0 ? ["create"] : []
+      content {
+        test     = "IpAddress"
+        values   = var.smtp_allowed_cidrs
+        variable = "aws:SourceIp"
+      }
+    }
   }
 }
 

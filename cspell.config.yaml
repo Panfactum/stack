@@ -152,7 +152,8 @@ words: [
   "autoresizer",
   "flanksource",
   "bursty",
-  "wesbragagt"
+  "wesbragagt",
+  "exfiltration"
 ]
 languageSettings:
   - languageId: markdown,mdx

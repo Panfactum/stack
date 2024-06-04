@@ -30,6 +30,10 @@ when creating resources that run on clusters in the Panfactum stack.
 
 - [kube_cert_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cert_manager) will now automatically delete Certificate secrets if the Certificate is deleted.
 
+- [aws_ses_domain](/docs/edge/reference/infrastructure-modules/aws/aws_ses_domain) now takes an optional input `smtp_allowed_cidrs`
+that restricts what IPs can use the generated SMTP credentials. This allows users to mitigate
+credential exfiltration attacks. We provide an example of how to use this [here.](https://github.com/Panfactum/stack/blob/main/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl)
+
 - The Vault login UI will now have the OIDC login as the default method.
 
 - Terragrunt will now automatically retry on some errors up to three times before exiting the process with a failure. This should

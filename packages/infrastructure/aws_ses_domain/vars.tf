@@ -9,3 +9,9 @@ variable "send_from_subdomain" {
   default     = "mail"
 }
 
+variable "smtp_allowed_cidrs" {
+  description = "CIDR blocks that can use the SMTP credentials"
+  type        = list(string)
+  default     = []
+}
+
