@@ -21,9 +21,10 @@ resource "vault_jwt_auth_backend" "oidc" {
   bound_issuer       = var.oidc_issuer
   default_role       = "default"
   tune {
-    max_lease_ttl     = "${var.token_lifetime_seconds}s"
-    default_lease_ttl = "${var.token_lifetime_seconds}s"
-    token_type        = "default-service"
+    max_lease_ttl      = "${var.token_lifetime_seconds}s"
+    default_lease_ttl  = "${var.token_lifetime_seconds}s"
+    token_type         = "default-service"
+    listing_visibility = "unauth"
   }
 }
 

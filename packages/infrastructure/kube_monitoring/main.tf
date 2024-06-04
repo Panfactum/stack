@@ -45,7 +45,8 @@ locals {
     "panfactum.com/region",
     "panfactum.com/root-module",
     "panfactum.com/stack-commit",
-    "panfactum.com/stack-version"
+    "panfactum.com/stack-version",
+    "panfactum.com/workload"
   ]
 
   labels_to_track = tolist(toset(concat(local.default_tracked_labels, var.additional_tracked_resource_labels)))
@@ -902,7 +903,8 @@ resource "helm_release" "prometheus_stack" {
                 "label_panfactum_com_stack_version",
                 "label_panfactum_com_stack_commit",
                 "label_panfactum_com_module",
-                "label_panfactum_com_root_module"
+                "label_panfactum_com_root_module",
+                "label_panfactum_com_workload"
                 ] : {
                 sourceLabels = ["__name__", label],
                 regex        = "(.*_labels);(.+)"
@@ -1330,7 +1332,7 @@ resource "helm_release" "prometheus_stack" {
             name                       = "Vault"
             client_id                  = vault_identity_oidc_client.oidc.client_id
             client_secret              = "replace-me" # Replaced by environment variable, but a default must be set
-            auth_url                   = "https://${var.vault_domain}/ui/vault/identity/oidc/provider/grafana/authorize"
+            auth_url                   = "https://${var.vault_domain}/ui/vault/identity/oidc/provider/grafana/authorize?with=oidc"
             api_url                    = "${vault_identity_oidc_provider.oidc.issuer}/userinfo"
             token_url                  = "${vault_identity_oidc_provider.oidc.issuer}/token"
             scopes                     = "openid profile"
