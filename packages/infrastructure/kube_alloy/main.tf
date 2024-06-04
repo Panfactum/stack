@@ -149,7 +149,7 @@ resource "helm_release" "alloy" {
             memory = "150Mi"
           }
           limits = {
-            memory = "${ceiling(150 * 1.3)}Mi"
+            memory = "${floor(150 * 1.3)}Mi"
           }
         }
       }
@@ -169,7 +169,7 @@ resource "helm_release" "alloy" {
             memory = "20Mi"
           }
           limits = {
-            memory = "${ceiling(20 * 1.3)}Mi"
+            memory = "${floor(20 * 1.3)}Mi"
           }
         }
       }

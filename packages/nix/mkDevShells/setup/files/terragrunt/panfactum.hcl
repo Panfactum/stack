@@ -252,7 +252,8 @@ retryable_errors = local.is_ci ? [".*"] : [
   "(?si).*Error creating SSM parameter: TooManyUpdates:.*",
   "(?si).*429 Too Many Requests.*",
   "(?si).*Client\\.Timeout exceeded while awaiting headers.*",
-  "(?si).*returned error: 429.*"
+  "(?si).*returned error: 429.*",
+  "(?si).*inheritedMetadata.*id.*"
 ]
 retry_max_attempts       = 3
 retry_sleep_interval_sec = 30

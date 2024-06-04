@@ -384,7 +384,7 @@ resource "helm_release" "alb_controller" {
       })
       resources = {
         requests = {
-          memory = "${ceiling(85 / 1.3)}Mi"
+          memory = "${floor(85 / 1.3)}Mi"
         }
         limits = {
           memory = "85Mi"

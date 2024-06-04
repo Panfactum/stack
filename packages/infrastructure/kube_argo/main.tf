@@ -459,7 +459,7 @@ resource "helm_release" "argo" {
             cpu    = "100m"
           }
           limits = {
-            memory = "${ceiling(50 * 1.3)}Mi"
+            memory = "${floor(50 * 1.3)}Mi"
           }
         }
       }
@@ -531,7 +531,7 @@ resource "helm_release" "argo" {
             cpu    = "100m"
           }
           limits = {
-            memory = "${ceiling(50 * 1.3)}Mi"
+            memory = "${floor(50 * 1.3)}Mi"
           }
         }
 

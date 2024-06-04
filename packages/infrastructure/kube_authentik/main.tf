@@ -230,6 +230,7 @@ resource "helm_release" "authentik" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
@@ -254,6 +255,10 @@ resource "helm_release" "authentik" {
           {
             name  = "AUTHENTIK_DISABLE_UPDATE_CHECK"
             value = "true"
+          },
+          {
+            name  = "AUTHENTIK_LOG_LEVEL",
+            value = var.log_level
           },
 
           // Redis Settings
@@ -304,6 +309,7 @@ resource "helm_release" "authentik" {
       }
 
       authentik = {
+        log_level  = var.log_level
         secret_key = random_password.secret_id.result
         error_reporting = {
           enabled = var.error_reporting_enabled
@@ -414,7 +420,7 @@ resource "helm_release" "authentik" {
             memory = "700Mi"
           }
           limits = {
-            memory = "${ceiling(700 * 1.3)}Mi"
+            memory = "${floor(700 * 1.3)}Mi"
           }
         }
       }
@@ -481,7 +487,7 @@ resource "helm_release" "authentik" {
             memory = "700Mi"
           }
           limits = {
-            memory = "${ceiling(700 * 1.3)}Mi"
+            memory = "${floor(700 * 1.3)}Mi"
           }
         }
       }
