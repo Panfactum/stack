@@ -241,8 +241,19 @@ terraform_version_constraint  = "~> 1.6"
 terragrunt_version_constraint = "~> 0.55"
 terraform_binary              = "tofu"
 
-// If running in the CI system, enable retries on all of the errors
-retryable_errors         = local.is_ci ? [".*"] : []
+retryable_errors = local.is_ci ? [".*"] : [
+  "(?si).*UnrecognizedClientException.*",
+  "(?si).*handshake timeout.*",
+  "(?si).*Authentication Failure.*",
+  "(?si).*connection reset.*",
+  "(?si).*connection closed.*",
+  "(?si).*tcp.*timeout.*",
+  "NoSuchBucket: The specified bucket does not exist",
+  "(?si).*Error creating SSM parameter: TooManyUpdates:.*",
+  "(?si).*429 Too Many Requests.*",
+  "(?si).*Client\\.Timeout exceeded while awaiting headers.*",
+  "(?si).*returned error: 429.*"
+]
 retry_max_attempts       = 3
 retry_sleep_interval_sec = 30
 

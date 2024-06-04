@@ -28,6 +28,9 @@ when creating resources that run on clusters in the Panfactum stack.
 
 - The Vault login UI will now have the OIDC login as the default method.
 
+- Terragrunt will now automatically retry on some errors up to three times before exiting the process with a failure. This should
+address intermittent issues such as network disruptions or race conditions.
+
 ### Fixed
 
 - `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
