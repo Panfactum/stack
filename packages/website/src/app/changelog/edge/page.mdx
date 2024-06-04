@@ -26,12 +26,20 @@ when creating resources that run on clusters in the Panfactum stack.
 
 ### Fixed
 
+- `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
+instead of full devenv re-evaluations.
+
 - Temporarily adds `GIT_CLONE_PROTECTION_ACTIVE=false` to the shell environment in order to address
 [this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
 disables new bleeding edge security features which were accidentally shipped in a broken
 state.
 
 ## edge.24-06-02
+
+### Breaking Changes
+
+- Upgraded to devenv 1.0. As a part of this upgrade, `.env` file values can no longer be referenced directly
+inside `.nix` files.
 
 ### Added
 

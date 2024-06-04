@@ -187,11 +187,6 @@
           LOCAL_DEV_NAMESPACE = mkOverride 1001 "@INVALID@";
         };
 
-        dotenv = with panfactumResolvedPkgs.lib; {
-          enable = mkOverride 1001 true;
-          disableHint = mkOverride 1001 true;
-        };
-
         enterShell = mkIf local ''
           source enter-shell-local
         '';
