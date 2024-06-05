@@ -1,9 +1,79 @@
 # Terragrunt Variables
 
+## Folder Setup
+
+Your environments folder at `$PF_ENVIRONMENTS_DIR` **must** have three levels of scoping for the [configuration-as-code](/docs/main/concepts/iac#configuration-as-code):
+
+* environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
+
+  * region: A separation of your deployments according to their physical location (e.g., `us-west-2`)
+
+    * module: A separation of your deployments based on the specific infrastructures module being deployed
+
+Accordingly, there are four levels of configuration for parameterizing the behavior of `panfactum.hcl`:
+
+* `global.yaml`: Found at the root of the directory
+
+* `environment.yaml`: Found at the root of each environment subdirectory
+
+* `region.yaml`: Found at the root of each region subdirectory
+
+* `module.yaml`: Found in each module subdirectory
+
+A few rules about these files:
+
+* These files are optional, but you will use them to configure your providers and other behavior (described in detail later).
+
+* They can each contain *any and every key* found below.
+
+* You should commit these files to version control.
+
+* Conflicts are resolved via specificity (e.g., conflicting `module.yaml` values will override `region.yaml` values which in turn will override `environment.yaml` values, etc.).
+
+* Each file has an optional, user-specific counterpart named `*.user.yaml` (e.g., `region.user.yaml`).
+
+  * Values in these files override the values in their counterparts for local development purposes (e.g., `region.user.yaml` overrides values in `region.yaml`).
+
+  * These files are not committed to version-control; each user will have their own set of values.
+
+**Ultimately your environments folder should look something like this:**
+
+```text
+- environments/
+    - global.yaml
+    - panfactum.hcl
+    - providers/
+      - aws.tftpl
+      - kubernetes.tftpl
+      ***
+    - [environment_1]/
+      - environment.yaml
+      - environment.user.yaml
+      - [region_1]/
+        - region.yaml
+        - region.user.yaml
+        - [module_1]/
+          - module.yaml
+        - [module_2]/
+          - module.yaml
+      - [region_2]/
+        ***
+    - [environment_2]/
+      - environment.yaml
+      - [region_1]/
+         ***
+      - [region_2]/
+        ***
+```
+
+For a complete example, see [our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
+
+## Variables
+
 These are variables that can be found in the `global.yaml`, `environment.yaml`, `region.yaml` or `module.yaml`
 files (or their `*.user.yaml` counterparts) inside the environments directory.
 
-## Metadata
+### Metadata
 
 Used for consistency across labels and tags.
 
@@ -13,20 +83,21 @@ Used for consistency across labels and tags.
 | `region`      | string      | The name of the region                                                       | `region.yaml`      |
 | `extra_tags`  | map(string) | An object containing extra tags to add to all resources in the current scope | Any                |
 
-## Module Source
+### Module Source
 
 Used to configure the `terraform.source` option when deploying a module.
 
 | Variable           | Type   | Description                                                                                                                                                                                                                                                | Recommended File   |
 | :----------------- | :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
-| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_IAC_DIR` you are using.  Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                              | `environment.yaml` |
-| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [commit ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                                      | `environment.yaml` |
+| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_IAC_DIR` you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                                 | `environment.yaml` |
+| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to the stack repo.                                         | `environment.yaml` |
 | `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_IAC_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory. | `module.yaml`      |
 
-## State Backend Setup
+### State Backend Setup
 
-The Panfactum setup stores OpenTofu (Terraform) state files in an S3 bucket in each environment's AWS account. To configure this
-behavior, the following variables must be set:
+Each environment will have its own, **independent** [OpenTofu backend](https://opentofu.org/docs/language/settings/backends/configuration/)
+for storing information about the tracked infrastructure resources. We utilize the [S3 backend](https://opentofu.org/docs/language/settings/backends/s3/)
+and store the state for each environment inside of that environment's AWS account.
 
 | Variable              | Type   | Description                                                   | Recommended File   |
 | :-------------------- | :----- | :------------------------------------------------------------ | :----------------- |
@@ -36,7 +107,7 @@ behavior, the following variables must be set:
 | `tf_state_bucket`     | string | The name of the state bucket                                  | `environment.yaml` |
 | `tf_state_lock_table` | string | The name of the DynamoDB table for the state locks            | `environment.yaml` |
 
-## Providers
+### Providers
 
 Providers must be enabled via a `providers` key which is an array of string values. Each value represents a provider
 to enable for the module. As a result, this key is typically found in the `module.yaml`.
@@ -55,7 +126,7 @@ The following provider strings are available:
 
 In addition, some providers have additional configuration values that must be set.
 
-### `aws` Provider
+#### `aws` Provider
 
 | Variable                   | Type   | Description                                                             | Recommended File   |
 | :------------------------- | :----- | :---------------------------------------------------------------------- | :----------------- |
@@ -69,20 +140,20 @@ In addition, some providers have additional configuration values that must be se
 *Note: The `aws` provider is actually a set of two different `aws` provider configurations: a primary and secondary.
 The secondary is used in some Panfactum modules to configure things like backups in a secondary region.*
 
-### `kubernetes` Provider
+#### `kubernetes` Provider
 
 | Variable              | Type   | Description                                                                      | Recommended File |
 | :-------------------- | :----- | :------------------------------------------------------------------------------- | :--------------- |
 | `kube_api_server`     | string | The `https` URL of the Kubernetes API server the provider should connect to      | `region.yaml`    |
 | `kube_config_context` | string | The name of the context the provider should use in your repo's `kubeconfig` file | `region.yaml`    |
 
-### `vault` Provider
+#### `vault` Provider
 
 | Variable     | Type   | Description                                                        | Recommended File |
 | :----------- | :----- | :----------------------------------------------------------------- | :--------------- |
 | `vault_addr` | string | The `https` URL of the Vault server the provider should connect to | `region.yaml`    |
 
-### `authentik` Provider
+#### `authentik` Provider
 
 | Variable        | Type   | Description                                                           | Recommended File |
 | :-------------- | :----- | :-------------------------------------------------------------------- | :--------------- |
