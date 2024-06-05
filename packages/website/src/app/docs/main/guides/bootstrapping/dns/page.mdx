@@ -131,6 +131,11 @@ To verify that everything is working as expected:
    The presence of `; fully validated` verifies that DNSSEC is working as intended. The `RRSIG` record is the digital
    signature for the record set.
 
+    <MarkdownAlert severity="warning">
+        It can take a few minutes for DNS records to become available from all locations. If the tests in
+        this section do not immediately work, try again in 15 minutes.
+    </MarkdownAlert>
+
 5. Remove the test record.
 
 [^3]: Note that `@1.1.1.1` instructs `delv` to use Cloudflare's DNS servers instead of your network's default.
