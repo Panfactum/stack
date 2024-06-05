@@ -7,11 +7,6 @@ terraform {
   source = include.panfactum.locals.pf_stack_source
 }
 
-dependency "linkerd" {
-  config_path  = "../kube_linkerd"
-  skip_outputs = true
-}
-
 inputs = {
   pull_through_cache_enabled = true
   vpa_enabled                = true

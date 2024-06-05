@@ -12,8 +12,8 @@ dependency "cert_manager" {
   skip_outputs = true
 }
 
-dependency "trust_manager" {
-  config_path  = "../kube_trust_manager"
+dependency "reflector" {
+  config_path  = "../kube_reflector"
   skip_outputs = true
 }
 

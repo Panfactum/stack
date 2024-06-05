@@ -7,6 +7,15 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+- [kube_trust_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
+[kube_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector). We are keeping the module
+in the repo to support backwards compatibility, but it will be removed in the future. You should apply this release
+and then run `terragrunt destroy` on the module to remove it.
+
 ## edge.24-06-04
 
 ### Breaking Changes
@@ -120,7 +129,8 @@ inside `.nix` files.
 
 * The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
   [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order
-  to automatically expand EBS volumes as they fill up.
+  to automatically expand EBS volumes as they fill up. We provide the guide for deploying it
+  [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
 
 - Added validation for phone number format in
 [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
