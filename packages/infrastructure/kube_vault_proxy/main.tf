@@ -157,6 +157,7 @@ resource "helm_release" "oauth2_proxy" {
           "--oidc-issuer-url", vault_identity_oidc_provider.oidc.issuer,
           "--cookie-secure", "true",
           "--cookie-domain", var.domain,
+          "--cookie-path", local.path_prefix,
           "--scope", "openid profile",
           "--silence-ping-logging"
         ],
