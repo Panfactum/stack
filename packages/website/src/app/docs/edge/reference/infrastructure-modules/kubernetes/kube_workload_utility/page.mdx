@@ -1,0 +1,187 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes Utility Module
+
+<ModuleHeader name="kube_workload_utility" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_workload_utility" status="beta" type="submodule" />
+
+This module is used to construct standard values for the following fields:
+
+* labels
+* [topologySpreadConstraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+* [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+* [pod affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+
+Description: Whether the pods must be scheduled on a controller node
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+
+Description: Extra tolerations to add to the pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_host_anti_affinity_required" /> [host\_anti\_affinity\_required](#input_host_anti_affinity_required)
+
+Description: Whether to prefer preventing pods from being scheduled on the same host
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
+
+Description: Whether to prefer preventing pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_instance_type_anti_affinity_required" /> [instance\_type\_anti\_affinity\_required](#input_instance_type_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_lifetime_evictions_enabled" /> [lifetime\_evictions\_enabled](#input_lifetime_evictions_enabled)
+
+Description: Whether to allow pods to be evicted after exceeding a certain age (configured by descheduler)
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_match_labels" /> [match\_labels](#input_match_labels)
+
+Description: kubernetes labels to use in selectors to match the workload
+
+Type: `map(string)`
+
+Default: `null`
+
+### <a name="input_pod_affinity_match_labels" /> [pod\_affinity\_match\_labels](#input_pod_affinity_match_labels)
+
+Description: Labels to match for pod affinity
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+
+Description: Whether to pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)
+
+Type: `bool`
+
+Default: `null`
+
+### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
+
+Description: Whether to pods will prefer scheduling on spot nodes (default true if spot nodes allowed)
+
+Type: `bool`
+
+Default: `null`
+
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_topology_spread_strict" /> [topology\_spread\_strict](#input_topology_spread_strict)
+
+Description: Whether the topology spread constraint should be set to DoNotSchedule
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_workload_name" /> [workload\_name](#input_workload_name)
+
+Description: The name of the workload. Used by observability platform for grouping pods.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same zone
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_affinity" /> [affinity](#output_affinity)
+
+Description: The affinity spec to add to each pod
+
+### <a name="output_labels" /> [labels](#output_labels)
+
+Description: The labels to add to each pod
+
+### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+
+Description: The label selector to use to match pods in this workload
+
+### <a name="output_tolerations" /> [tolerations](#output_tolerations)
+
+Description: The tolerations to add to each pod
+
+### <a name="output_topology_spread_constraints" /> [topology\_spread\_constraints](#output_topology_spread_constraints)
+
+Description: The topology spread constraints to add to each pod
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

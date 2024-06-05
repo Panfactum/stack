@@ -30,6 +30,8 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
 ## Required Inputs
 
 The following input variables are required:
@@ -83,9 +85,9 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
 
-Description: Whether the pods can be scheduled on burstable instances
+Description: Whether to allow pods to schedule on burstable nodes
 
 Type: `bool`
 
@@ -106,6 +108,14 @@ Description: A list ConfigMap names to their absolute mount paths in the contain
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+
+Description: Whether the pods must be scheduled on a controller node
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_deployment_update_type" /> [deployment\_update\_type](#input_deployment_update_type)
 
@@ -138,6 +148,47 @@ list(object({             // key is the secret provider class
 ```
 
 Default: `[]`
+
+### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+
+Description: Extra tolerations to add to the pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_host_anti_affinity_required" /> [host\_anti\_affinity\_required](#input_host_anti_affinity_required)
+
+Description: Whether to prefer preventing pods from being scheduled on the same host
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
+
+Description: Whether to prefer preventing pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_instance_type_anti_affinity_required" /> [instance\_type\_anti\_affinity\_required](#input_instance_type_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
 
@@ -187,14 +238,6 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_pod_anti_affinity_type" /> [pod\_anti\_affinity\_type](#input_pod_anti_affinity_type)
-
-Description: The podAntiAffinity to use for the pods. 'none' for no anti-affinity. `instance_type` for only one of each pod per instance type. 'node' for only one of each pod per node.
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_ports" /> [ports](#input_ports)
 
 Description: The port the application is listening on inside the container
@@ -209,6 +252,22 @@ map(object({
 ```
 
 Default: `{}`
+
+### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+
+Description: Whether to pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)
+
+Type: `bool`
+
+Default: `null`
+
+### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
+
+Description: Whether to pods will prefer scheduling on spot nodes (default true if spot nodes allowed)
+
+Type: `bool`
+
+Default: `null`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
@@ -250,9 +309,9 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
-Description: Whether the pods can be scheduled on spot instances
+Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 
@@ -272,22 +331,13 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_tolerations" /> [tolerations](#input_tolerations)
+### <a name="input_topology_spread_strict" /> [topology\_spread\_strict](#input_topology_spread_strict)
 
-Description: A list of tolerations for the pods
+Description: Whether the topology spread constraint should be set to DoNotSchedule
 
-Type:
+Type: `bool`
 
-```hcl
-list(object({
-    key      = string
-    operator = string
-    value    = string
-    effect   = string
-  }))
-```
-
-Default: `[]`
+Default: `false`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
@@ -305,9 +355,21 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same zone
+
+Type: `bool`
+
+Default: `false`
+
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_labels" /> [labels](#output_labels)
+
+Description: The labels assigned to all resources in this deployment
 
 ### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
 
