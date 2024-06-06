@@ -21,6 +21,11 @@ and then run `terragrunt destroy` on the module to remove it.
 - [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains) can now set the contact type
 for each contact
 
+### Fixed
+
+- Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) that caused a temporary, harmless error to crash
+the `terragrunt apply` on initial bootstrapping.
+
 ## edge.24-06-04
 
 ### Breaking Changes

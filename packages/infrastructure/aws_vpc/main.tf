@@ -275,6 +275,11 @@ resource "aws_autoscaling_group" "nats" {
     }
   }
   vpc_zone_identifier = [aws_subnet.subnets[each.key].id]
+
+  // There is necessary as there is a race condition in the AWS backend
+  // that can occasionally cause a temporary, harmless error
+  // that is resolved by simply continuing to wait instead of immediately exiting
+  ignore_failed_scaling_activities = true
 }
 
 ##########################################################################
