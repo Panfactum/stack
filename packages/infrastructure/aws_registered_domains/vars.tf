@@ -27,9 +27,21 @@ variable "enable_auto_renew" {
   default     = true
 }
 
+variable "admin_contact_type" {
+  description = "The type of the contact. Defaults to PERSON if admin_organization_name is not provided. Otherwise, defaults to COMPANY."
+  type        = string
+  default     = "DEFAULT"
+
+  validation {
+    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.admin_contact_type)
+    error_message = "admin_contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
+  }
+}
+
 variable "admin_organization_name" {
   description = "The name of the organization that the admin contact works for"
   type        = string
+  default     = null
 }
 
 variable "admin_first_name" {
@@ -93,9 +105,21 @@ variable "admin_country_code" {
   type        = string
 }
 
+variable "registrant_contact_type" {
+  description = "The type of the contact. Defaults to PERSON if registrant_organization_name is not provided. Otherwise, defaults to COMPANY."
+  type        = string
+  default     = "DEFAULT"
+
+  validation {
+    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.registrant_contact_type)
+    error_message = "registrant_contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
+  }
+}
+
 variable "registrant_organization_name" {
   description = "The name of the organization that the registrant contact works for"
   type        = string
+  default     = null
 }
 
 variable "registrant_first_name" {
@@ -162,6 +186,18 @@ variable "registrant_country_code" {
 variable "tech_organization_name" {
   description = "The name of the organization that the tech contact works for"
   type        = string
+  default     = null
+}
+
+variable "tech_contact_type" {
+  description = "The type of the contact. Defaults to PERSON if tech_organization_name is not provided. Otherwise, defaults to COMPANY."
+  type        = string
+  default     = "DEFAULT"
+
+  validation {
+    condition     = contains(["PERSON", "COMPANY", "ASSOCIATION", "PUBLIC_BODY", "RESELLER", "DEFAULT"], var.tech_contact_type)
+    error_message = "tech_contact_type has invalid value. Must be one of: PERSON, COMPANY, ASSOCIATION, PUBLIC_BODY, or RESELLER."
+  }
 }
 
 variable "tech_first_name" {

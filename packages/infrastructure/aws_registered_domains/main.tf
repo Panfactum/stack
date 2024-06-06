@@ -64,6 +64,7 @@ resource "aws_route53domains_registered_domain" "domain" {
   }
 
   admin_contact {
+    contact_type      = var.admin_contact_type == "DEFAULT" ? (var.admin_organization_name == null ? "PERSON" : "COMPANY") : var.admin_contact_type
     organization_name = var.admin_organization_name
     first_name        = var.admin_first_name
     last_name         = var.admin_last_name
@@ -78,6 +79,7 @@ resource "aws_route53domains_registered_domain" "domain" {
   }
 
   tech_contact {
+    contact_type      = var.tech_contact_type == "DEFAULT" ? (var.tech_organization_name == null ? "PERSON" : "COMPANY") : var.tech_contact_type
     organization_name = var.tech_organization_name
     first_name        = var.tech_first_name
     last_name         = var.tech_last_name
@@ -92,6 +94,7 @@ resource "aws_route53domains_registered_domain" "domain" {
   }
 
   registrant_contact {
+    contact_type      = var.registrant_contact_type == "DEFAULT" ? (var.registrant_organization_name == null ? "PERSON" : "COMPANY") : var.registrant_contact_type
     organization_name = var.registrant_organization_name
     first_name        = var.registrant_first_name
     last_name         = var.registrant_last_name
