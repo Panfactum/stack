@@ -21,6 +21,9 @@ and then run `terragrunt destroy` on the module to remove it.
 - [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains) can now set the contact type
 for each contact
 
+- Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
+[aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module.
+
 ### Fixed
 
 - Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) that caused a temporary, harmless error to crash
