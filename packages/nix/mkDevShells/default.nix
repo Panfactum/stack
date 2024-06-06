@@ -224,6 +224,8 @@
             (util.customShellScript
               "pf-tunnel") # for connecting to private network resources through ssh bastion
             src3.k9s # kubernetes tui
+            (util.customShellScript
+              "pf-eks-reset") # script for resetting cluster during bootstrapping
 
             ####################################
             # Hashicorp Vault

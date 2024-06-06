@@ -19,15 +19,21 @@ and then run `terragrunt destroy` on the module to remove it.
 ### Added
 
 - [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains) can now set the contact type
-for each contact
+for each contact.
 
 - Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
 [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module.
+
+- The manual steps needed to reset new EKS clusters to a clean slate during the bootstrapping guide have been consolidated
+into a single new command, `pf-eks-reset`.
 
 ### Fixed
 
 - Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) that caused a temporary, harmless error to crash
 the `terragrunt apply` on initial bootstrapping.
+
+- Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
+[kube_core_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns) module.
 
 ## edge.24-06-04
 

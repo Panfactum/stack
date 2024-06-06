@@ -3,6 +3,7 @@ import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import ciliumLaunchImg from './cilium-launch.jpg'
 import corednsImg from './coredns.jpg'
+import nodesReadyImg from './nodes-ready.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Internal Cluster Networking
@@ -20,6 +21,28 @@ cluster DNS resolution and [Cilium](https://docs.cilium.io) to handle all the L3
 In this guide, we won't go into detail about the underlying design decisions and network concepts, so
 we recommend reviewing the [concept documentation](/docs/main/concepts/networking/cluster-networking) for more
 information.
+
+## Deploy Cilium
+
+### Deploy the Cilium Module
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_cilium`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
+
+3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+
+5. Run `terragrunt apply`.
+
+6. If the deployment succeeds, you should see the various cilium pods running:
+
+   <MarkdownImage src={ciliumLaunchImg} alt="Cilium launched successfully" />
+
+   Additionally, all the nodes should now be in the `Ready` state:
+
+   <MarkdownImage src={nodesReadyImg} alt="Nodes are ready" />
 
 ## Deploy CoreDNS
 
@@ -46,43 +69,9 @@ Let's deploy it now.
 
 7. If the deployment succeeds, you should see a `core-dns` deployment with 2/2 pods running:
 
-<MarkdownImage src={corednsImg} alt="CoreDNS launched successfully" />
+   <MarkdownImage src={corednsImg} alt="CoreDNS launched successfully" />
 
-## Deploy Cilium
-
-### Deploy the Cilium Module
-
-1. Create a new directory adjacent to your `aws_eks` module called `kube_cilium`.
-
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
-
-3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
-
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
-
-5. Run `terragrunt apply`.
-
-6. If the deployment succeeds, you should see the various cilium pods running:
-
-   <MarkdownImage src={ciliumLaunchImg} alt="Cilium launched successfully" />
-
-### Remove the Old Networking Stack
-
-Unfortunately, EKS automatically installs a networking stack with no way to disable
-it via infrastructure-as-code. We need to remove those components as they will conflict with cilium's operations.
-
-1. Run `kubectl -n kube-system delete ds aws-node`. This remove the [AWS VPC CNI](https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html) (cilium
-   already contains similar functionality).
-
-2. Run `kubectl -n kube-system delete ds kube-proxy`. This removes [kube-proxy](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/)
-   (cilium contains a replacement).
-
-3. You must terminate **every** node in the cluster to ensure each node's networking configuration can be
-   rebuilt using only cilium. You can manually terminate all nodes simultaneously in the AWS web console. [^1]
-
-[^1]: It will take a few minutes for EKS to automatically relaunch the new nodes.
-
-### Run Network Tests
+## Run Network Tests
 
 <MarkdownAlert severity="warning">
   This test takes awhile to complete, but please run it before continuing. If something is broken,

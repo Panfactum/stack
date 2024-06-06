@@ -324,14 +324,18 @@ resource "helm_release" "cilium" {
           rollingUpdate = null
         }
         tolerations = concat([
-
-          // This is needed b/c the cilium agents on each node need the operator
+          // These are needed b/c the cilium agents on each node need the operator
           // to be running in order for them to remove this taint
           {
             key      = module.constants.cilium_taint.key
             operator = "Exists"
             effect   = module.constants.cilium_taint.effect
-          }
+          },
+          {
+            key      = "node.kubernetes.io/not-ready"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
           ],
           module.util_controller.tolerations
         )

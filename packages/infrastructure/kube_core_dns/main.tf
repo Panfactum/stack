@@ -31,7 +31,7 @@ terraform {
 
 locals {
   name      = "core-dns"
-  namespace = module.namespace.namespace
+  namespace = "kube-system" // This must be deployed in the kube-system namespace per convention
 }
 
 module "pull_through" {
@@ -41,22 +41,6 @@ module "pull_through" {
 
 module "constants" {
   source = "../kube_constants"
-}
-
-module "namespace" {
-  source = "../kube_namespace"
-
-  namespace = local.name
-
-  # generate: pass_common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***********************************************
@@ -149,7 +133,7 @@ module "metrics_cert" {
 
 module "core_dns" {
   source          = "../kube_deployment"
-  namespace       = module.namespace.namespace
+  namespace       = local.namespace
   name            = local.name
   service_account = kubernetes_service_account.core_dns.metadata[0].name
   pod_annotations = {
@@ -163,6 +147,7 @@ module "core_dns" {
   topology_spread_strict                = true
   priority_class_name                   = "system-cluster-critical"
   dns_policy                            = "Default"
+  extra_tolerations                     = [{ operator = "Exists" }]
   containers = concat(
     [
       {
@@ -221,20 +206,24 @@ module "core_dns" {
 
   vpa_enabled = var.vpa_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # generate: pass_common_vars_no_extra_tags.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
   is_local         = var.is_local
-  extra_tags       = var.extra_tags
   # end-generate
+
+  extra_tags = merge(var.extra_tags, {
+    "k8s-app" = "kube-dns"
+  })
 }
 
 resource "kubernetes_service" "core_dns" {
   metadata {
-    name      = local.name
+    // By convention, this must be available at kube-system/kube-dns
+    name      = "kube-dns"
     namespace = local.namespace
     labels    = module.core_dns.labels
   }

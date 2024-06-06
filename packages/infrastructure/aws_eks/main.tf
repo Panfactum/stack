@@ -142,9 +142,6 @@ resource "aws_security_group" "control_plane" {
     Name        = var.cluster_name
     description = "Security group for the ${var.cluster_name} EKS control plane."
   })
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 // This needs to be managed separately because they are included in the ignore_tags provider configuration
@@ -186,9 +183,6 @@ resource "aws_iam_role" "eks_cluster_role" {
     Name        = var.cluster_name
     description = "IAM role for the ${var.cluster_name} EKS control plane."
   })
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 data "aws_iam_policy_document" "eks_assume_role" {
@@ -240,6 +234,17 @@ resource "aws_eks_addon" "coredns" {
   resolve_conflicts_on_update = "OVERWRITE"
   resolve_conflicts_on_create = "OVERWRITE"
 }
+
+resource "aws_eks_addon" "kube_proxy" {
+  count                       = var.core_dns_addon_enabled ? 1 : 0
+  cluster_name                = aws_eks_cluster.cluster.name
+  addon_name                  = "coredns"
+  addon_version               = var.coredns_version
+  resolve_conflicts_on_update = "OVERWRITE"
+  resolve_conflicts_on_create = "OVERWRITE"
+}
+
+
 
 ////////////////////////////////////////////////////////////
 // Logging and Monitoring
@@ -407,10 +412,6 @@ resource "aws_security_group" "all_nodes" {
     Name        = "${var.cluster_name}-nodes"
     description = "Security group for all nodes in the ${var.cluster_name} EKS cluster"
   })
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 // These need to be managed separately because they are included in the ignore_tags provider configuration
