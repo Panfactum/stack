@@ -3,10 +3,9 @@ import MarkdownImage from "@/components/markdown/MarkdownImage";
 import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
 
 import eksDashboardImg from './eks-dashboard.jpg'
-import k9sReadyImg from './k9s-ready.jpg'
+import k9sNodesImg from './k9s-nodes.jpg'
 import k9sImg from './k9s.jpg'
 import pullThroughSVG from './pull-through-cache.svg'
-import terminateNodeImg from './terminate-node.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Kubernetes Cluster
@@ -297,6 +296,18 @@ Let's verify what pods are running in the cluster:
 k9s is an incredibly powerful tool, and it is our recommended way for operators to interact directly with their
 clusters. If you have never used this tool before, we recommend getting up to speed with [these tutorials](https://k9scli.io/topics/video/).
 
+## Reset EKS Cluster
+
+Unfortunately, AWS install various utilities to every new EKS cluster such as `coredns` and `kube-proxy` which
+will conflict with our resources in later guide steps.
+
+We need to reset the cluster to a clean state before we continue.
+
+We provide a convenience script `pf-eks-reset` to perform the reset. Run this script now.
+
+Note that this will temporarily prevent EC2 nodes from joining the cluster until
+the `kube_rbac` module is deployed (below).
+
 ## Deploy Kubernetes Modules
 
 In the Panfactum stack everything is deployed via OpenTofu (Terraform) modules, including Kubernetes manifests. [^10] By constraining ourselves
@@ -352,19 +363,14 @@ Let's deploy this module now:
 
 4. Run `terragrunt apply`.
 
-5. To verify that cluster authentication is still functional, we will need to terminate a node and make sure the replacement node
-   is able to rejoin the cluster. [^12] Select one of the nodes and terminate it as shown below:
-   <MarkdownImage src={terminateNodeImg} alt="Terminating a Kubernetes node to verify nodes' ability to join the cluster" />
+5. To verify that cluster authentication is functional, you should be able your cluster nodes within k9s (`:nodes`):
 
-6. The autoscaling group should notice the missing node within a few minutes and launch a new node to replace the terminated node.
-   If the node is able to reconnect, you should be able to see it as `Ready` within k9s (`:nodes`):
-   <MarkdownImage src={k9sReadyImg} alt="k9s showing node successfully joining the cluster" />
+   <MarkdownImage src={k9sNodesImg} alt="k9s showing node successfully joining the cluster" />
 
-7. If the node joins successfully, you have successfully set up your initial Kubernetes RBAC.
+   Note that the nodes are in a `NotReady` status as we have not yet installed the cluster networking utilities
+   which we will do in the next section.
 
-[^12]: EC2 VMs are assigned IAM roles, and we only allow certain IAM roles to assume the necessary permissions to join
-    the cluster as a Kubernetes node. This is defined in the `aws-auth` ConfigMap alongside the human user authentication
-    directives.
+6. If all nodes join successfully, you have successfully set up your initial Kubernetes RBAC.
 
 ### Priority Classes
 

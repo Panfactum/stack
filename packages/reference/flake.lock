@@ -351,14 +351,18 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-NFT+On6TPQ6duyk9C3GSdkWVOyf1UlTyL4gpfuWkJVI=",
-        "path": "../..",
-        "type": "path"
+        "lastModified": 1717701837,
+        "narHash": "sha256-RIvKyyy9zaPlmH6QyTIphK4C1Kjs9csccm3lFLWQAiA=",
+        "owner": "panfactum",
+        "repo": "stack",
+        "rev": "e8a36c9a036c8862ae8af0776537db2c8d29cce9",
+        "type": "github"
       },
       "original": {
-        "path": "../..",
-        "type": "path"
+        "owner": "panfactum",
+        "ref": "main",
+        "repo": "stack",
+        "type": "github"
       }
     },
     "pkgs": {
