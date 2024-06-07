@@ -114,9 +114,9 @@ module "namespace" {
 
   extra_tags = merge(
     var.extra_tags,
-    {
+    var.monitoring_enabled ? {
       "linkerd.io/extension" = "viz"
-    }
+    } : null
   )
 }
 
@@ -603,7 +603,7 @@ resource "kubernetes_manifest" "vpa_proxy_injectory" {
 }
 
 resource "kubernetes_manifest" "vpa_metrics_api" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -624,6 +624,7 @@ resource "kubernetes_manifest" "vpa_metrics_api" {
 }
 
 resource "kubernetes_manifest" "pdb_metrics_api" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -646,7 +647,7 @@ resource "kubernetes_manifest" "pdb_metrics_api" {
 }
 
 resource "kubernetes_manifest" "vpa_tap_injector" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -667,6 +668,7 @@ resource "kubernetes_manifest" "vpa_tap_injector" {
 }
 
 resource "kubernetes_manifest" "pdb_tap_injector" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -689,7 +691,7 @@ resource "kubernetes_manifest" "pdb_tap_injector" {
 }
 
 resource "kubernetes_manifest" "vpa_web" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -711,6 +713,7 @@ resource "kubernetes_manifest" "vpa_web" {
 
 
 resource "kubernetes_manifest" "pdb_web" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -734,7 +737,7 @@ resource "kubernetes_manifest" "pdb_web" {
 
 
 resource "kubernetes_manifest" "vpa_tap" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -755,6 +758,7 @@ resource "kubernetes_manifest" "vpa_tap" {
 }
 
 resource "kubernetes_manifest" "pdb_tap" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
