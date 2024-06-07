@@ -204,6 +204,8 @@
             (import ./setup { pkgs = panfactumResolvedPkgs; })
             (util.customShellScript
               "pf-env-scaffold") # helper for the bootstrapping guide
+            (util.customShellScript
+              "pf-env-bootstrap") # helper for the bootstrapping guide
 
             ####################################
             # Kubernetes

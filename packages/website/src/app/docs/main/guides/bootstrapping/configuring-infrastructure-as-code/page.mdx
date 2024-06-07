@@ -80,7 +80,7 @@ In order to begin deploying infrastructure modules, we must first configure Terr
 This is done by adding specific directories and files to your `PF_ENVIRONMENTS_DIR`. Specifically,
 `PF_ENVIRONMENTS_DIR` must be set up to follow [these conventions](/docs/main/reference/configuration/terragrunt-variables).
 
-We provide a convenience script for taking care of this bootstrapping: `pf-env-scaffold -e <env1,env2,...>`.
+We provide a convenience script to perform this setup: `pf-env-scaffold -e <env1,env2,...>`.
 
 Run it now, specifying each environment (AWS account) you created in the prior section (e.g., `pf-env-scaffold -e management,production,development`).
 
