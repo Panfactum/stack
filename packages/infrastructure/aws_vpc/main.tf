@@ -15,6 +15,7 @@ locals {
   peering_route_list = flatten([for subnet in keys(var.subnets) : [for label, config in var.vpc_peer_acceptances : merge({ subnet = subnet, vpc = label }, config)]])
   peering_routes     = { for peer_route in local.peering_route_list : "${peer_route.subnet}_${peer_route.vpc}" => peer_route }
   public_subnets     = { for name, subnet in var.subnets : name => subnet if subnet.public }
+  private_subnets    = { for name, subnet in var.subnets : name => subnet if contains(keys(var.nat_associations), name) }
 }
 
 data "aws_region" "region" {}
@@ -267,6 +268,138 @@ resource "aws_autoscaling_group" "nats" {
   launch_template {
     name    = aws_launch_template.nats[each.key].name
     version = aws_launch_template.nats[each.key].latest_version
+  }
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 0
+    }
+  }
+  vpc_zone_identifier = [aws_subnet.subnets[each.key].id]
+
+  // There is necessary as there is a race condition in the AWS backend
+  // that can occasionally cause a temporary, harmless error
+  // that is resolved by simply continuing to wait instead of immediately exiting
+  ignore_failed_scaling_activities = true
+}
+
+##########################################################################
+## ASG for Network Connectivity Tests
+##########################################################################
+
+data "aws_iam_policy_document" "test_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    principals {
+      identifiers = ["ec2.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_iam_role" "test" {
+  name_prefix        = "network-test-"
+  assume_role_policy = data.aws_iam_policy_document.test_assume_role_policy.json
+  description        = "Role for network test instances"
+  tags               = module.tags.tags
+}
+
+resource "aws_iam_role_policy_attachment" "node_group_ssm" {
+  role       = aws_iam_role.test.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "test" {
+  role = aws_iam_role.test.name
+  tags = module.tags.tags
+}
+
+resource "aws_security_group" "test" {
+  for_each = local.private_subnets
+
+  name_prefix = "network-test-"
+  vpc_id      = aws_vpc.main.id
+  ingress {
+    description = "Only allow inbound traffic from inside the VPC"
+    cidr_blocks = [var.vpc_cidr]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+  }
+  egress {
+    description = "Allow outbound traffic"
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+  }
+
+  tags = merge(module.tags.tags, {
+    description = "Security group for network test nodes in ${each.key}"
+  })
+}
+
+data "aws_ami" "test" {
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*"]
+  }
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+  owners      = ["amazon"]
+  most_recent = true
+}
+
+resource "aws_launch_template" "test" {
+  for_each      = local.private_subnets
+  name_prefix   = "network-test-"
+  image_id      = data.aws_ami.test.id
+  instance_type = "t4g.nano"
+  iam_instance_profile {
+    arn = aws_iam_instance_profile.test.arn
+  }
+  vpc_security_group_ids = [aws_security_group.test[each.key].id]
+  tag_specifications {
+    resource_type = "instance"
+    tags          = { for k, v in module.tags.tags : replace(k, "/", ":") => v } // For some reason, "/" is now disallowed here?
+  }
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      delete_on_termination = true
+      encrypted             = true
+      volume_size           = 30
+      volume_type           = "gp3"
+    }
+  }
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "enabled"
+  }
+
+  tags = merge(module.tags.tags, {
+    description = "Launch template for network test nodes in ${each.key}"
+  })
+
+  depends_on = [
+    aws_iam_role.test
+  ]
+}
+
+resource "aws_autoscaling_group" "test" {
+  for_each         = local.private_subnets
+  name_prefix      = "network-test-"
+  max_size         = 1
+  min_size         = 0
+  desired_capacity = 0
+  launch_template {
+    name    = aws_launch_template.test[each.key].name
+    version = aws_launch_template.test[each.key].latest_version
   }
   instance_refresh {
     strategy = "Rolling"

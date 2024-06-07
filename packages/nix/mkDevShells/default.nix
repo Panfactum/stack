@@ -272,6 +272,8 @@
             src1.awscli2 # aws CLI
             src7.ssm-session-manager-plugin # for connecting to hardened ec2 nodes
             aws-nuke # nukes resources in aws accounts
+            (util.customShellScript
+              "pf-vpc-network-test") # Test vpc connectivity
 
             ####################################
             # Secrets Management

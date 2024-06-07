@@ -162,7 +162,7 @@ declare -A AWS_ACCOUNT_IDS
 declare -A AWS_PROFILES
 
 # Extracts the available AWS profiles from the config file
-AVAILABLE_AWS_PROFILES=$(grep -oP '(?<=\[profile ).*?(?=\])' "$PF_AWS_DIR/config")
+AVAILABLE_AWS_PROFILES=$(grep -oP '(?<=\[profile ).*?(?=\])' "$DEVENV_ROOT/$PF_AWS_DIR/config")
 
 # Iterate over the environments and collect additional parameters
 for ENV in "${ENVIRONMENTS[@]}"; do
