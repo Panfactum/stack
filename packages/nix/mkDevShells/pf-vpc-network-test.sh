@@ -79,7 +79,9 @@ scale_asg() {
   local desired_capacity=$2
   aws --region "$AWS_REGION" \
     --profile "$AWS_PROFILE" \
-    autoscaling update-auto-scaling-group --auto-scaling-group-name "$asg_name" --desired-capacity "$desired_capacity"
+    autoscaling update-auto-scaling-group \
+    --auto-scaling-group-name "$asg_name" \
+    --desired-capacity "$desired_capacity"
 }
 
 # Get the instance ID of an instance in an autoscaling group
@@ -140,7 +142,15 @@ get_ssm_command_output() {
   local command_id=$2
   local status=""
   while true; do
-    status=$(aws --region "$AWS_REGION" --profile "$AWS_PROFILE" ssm get-command-invocation --instance-id "$instance_id" --command-id "$command_id" --query "Status" --output text)
+    status="$(
+      aws --region "$AWS_REGION" \
+        --profile "$AWS_PROFILE" \
+        ssm get-command-invocation \
+        --instance-id "$instance_id" \
+        --command-id "$command_id" \
+        --query "Status" \
+        --output text
+    )"
     if [[ $status == "Success" || $status == "Failed" ]]; then
       break
     fi
@@ -148,16 +158,26 @@ get_ssm_command_output() {
   done
 
   if [[ $status == "Failed" ]]; then
-    error=$(aws --region "$AWS_REGION" \
-      --profile "$AWS_PROFILE" \
-      ssm get-command-invocation --instance-id "$instance_id" --command-id "$command_id" --query "StandardErrorContent" --output text)
+    error="$(
+      aws --region "$AWS_REGION" \
+        --profile "$AWS_PROFILE" \
+        ssm get-command-invocation \
+        --instance-id "$instance_id" \
+        --command-id "$command_id" \
+        --query "StandardErrorContent" \
+        --output text
+    )"
     echo -e "\tTest failed: $error\n" >&2
     exit 1
   fi
 
   aws --region "$AWS_REGION" \
     --profile "$AWS_PROFILE" \
-    ssm get-command-invocation --instance-id "$instance_id" --command-id "$command_id" --query "StandardOutputContent" --output text
+    ssm get-command-invocation \
+    --instance-id "$instance_id" \
+    --command-id "$command_id" \
+    --query "StandardOutputContent" \
+    --output text
 }
 
 # Get the number of subnets to test
