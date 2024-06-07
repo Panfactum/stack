@@ -27,9 +27,13 @@ variable "domain" {
 }
 
 variable "path_prefix" {
-  description = "The domain the proxy is served from"
+  description = "Path prefix for the ingress resource"
   type        = string
   default     = "/"
+  validation {
+    condition = van(regex("^/", var.path_prefix))
+    error_message = "Path prefix must be a valid URI path, starting with \"/\"."
+  }
 }
 
 variable "vault_domain" {
