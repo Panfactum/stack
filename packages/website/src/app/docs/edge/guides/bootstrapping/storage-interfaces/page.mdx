@@ -49,7 +49,7 @@ Let's deploy it now:
 
 ### Storage Classes
 
-Note that there are now a few [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) resources
+Note that there are now a couple [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) resources
 in the cluster:
 
 <MarkdownImage src={storageClassesImg} alt="Storage classes in the cluster" />
@@ -60,11 +60,6 @@ The following classes were installed by the `kube_aws_ebs_csi` module:
   when the utilizing resource is deleted (default)
 * `ebs-standard-retained`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes but never deletes the underlying
   volumes (recommended for production databases)
-
-Notice that there is also one named `gp2`. Unfortunately, EKS installs this automatically, but it uses legacy storage
-technology that is both more expensive and less performant. Even more unfortunately, this is set as the default storage
-class. To avoid accidentally using it, you should manually delete it now with the following
-command: `kubectl delete storageclass gp2`.
 
 ## Deploy the Kubernetes Secrets Store CSI Driver
 
