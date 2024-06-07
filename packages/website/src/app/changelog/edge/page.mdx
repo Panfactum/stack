@@ -9,6 +9,42 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Added
+
+- Updates [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) to support new command `pf-vpc-network-test` that
+will verify network connectivity properties of the instantiated VPC. This allows us to simplify an
+otherwise [complex validation step in the bootstrapping guide](/docs/edge/guides/bootstrapping/aws-networking#test-connectivity).
+
+## edge.24-06-06
+
+### Breaking Changes
+
+- [kube_trust_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
+[kube_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector). We are keeping the module
+in the repo to support backwards compatibility, but it will be removed in the future. You should apply this release
+and then run `terragrunt destroy` on the module to remove it.
+
+### Added
+
+- [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains) can now set the contact type
+for each contact.
+
+- Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
+[aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module.
+
+- The manual steps needed to reset new EKS clusters to a clean slate during the bootstrapping guide have been consolidated
+into a single new command, `pf-eks-reset`.
+
+### Fixed
+
+- Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) that caused a temporary, harmless error to crash
+the `terragrunt apply` on initial bootstrapping.
+
+- Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
+[kube_core_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns) module.
+
+## edge.24-06-04
+
 ### Breaking Changes
 
 - The reloader deployment must be deleted before the next apply of [kube_reloader](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reloader). No
@@ -21,6 +57,9 @@ can be fairly expensive and should only be used if you have a specific use-case 
 by setting `vpc_flow_logs_enabled` to `true`.
 
 ### Added
+
+- Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
+[bootstrapping guide section for setting up terragrunt.](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
 
 - Added [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened
 Pod specs that take advantage of all capabilities included in the Panfactum stack.
@@ -117,7 +156,8 @@ inside `.nix` files.
 
 * The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
   [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pvc_autoresizer) module in order
-  to automatically expand EBS volumes as they fill up.
+  to automatically expand EBS volumes as they fill up. We provide the guide for deploying it
+  [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
 
 - Added validation for phone number format in
 [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))

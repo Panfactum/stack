@@ -33,6 +33,13 @@ for hosting individual [DNS records](https://en.wikipedia.org/wiki/List_of_DNS_r
   immediately continue with this guide.
 </MarkdownAlert>
 
+<MarkdownAlert severity="warning">
+  If your AWS account if relatively new, purchasing a domain may fail with a vague "Failed" error.
+  AWS limits domain purchases for organizations that have not yet paid their first bill, but
+  you can [open a ticket](https://docs.aws.amazon.com/awssupport/latest/user/case-management.html) requesting
+  access and AWS support will unlock your account within 24 hours.
+</MarkdownAlert>
+
 1. Login to your `production` account in the AWS web console (or whichever account will host your client-facing infrastructure).
 
 2. Navigate to Route 53 > Registered domains.
@@ -77,6 +84,10 @@ Let's deploy the module now:
 2. Add a new `aws_registered_domains` folder to your `production` environment in the `global` region.
 
 3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/global/aws_registered_domains/terragrunt.hcl).
+
+   Note that we use sops-encrypted values here as we did in the `aws_account` module. It is up to you what you
+   leave encrypted / unencrypted throughout this guide. However,
+   if you choose to use encrypted values, ensure that you create an encrypted `secrets.yaml`.
 
 4. Enable the `aws` and `time` providers in your `module.yaml`.
 
@@ -123,6 +134,11 @@ To verify that everything is working as expected:
 
    The presence of `; fully validated` verifies that DNSSEC is working as intended. The `RRSIG` record is the digital
    signature for the record set.
+
+   <MarkdownAlert severity="warning">
+     It can take a few minutes for DNS records to become available from all locations. If the tests in
+     this section do not immediately work, try again in 15 minutes.
+   </MarkdownAlert>
 
 5. Remove the test record.
 

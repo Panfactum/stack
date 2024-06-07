@@ -136,13 +136,14 @@ Let's deploy it now:
 
 6. Once the module has successfully deployed, return to all of the previously deployed kubernetes
    modules and set `vpa_enabled` to `true`:
+   * `kube_core_dns`
    * `kube_aws_ebs_csi`
    * `kube_cert_manager`
    * `kube_cilium`
    * `kube_linkerd`
    * `kube_metrics_server`
    * `kube_secrets_csi`
-   * `kube_trust_manager`
+   * `kube_reflector`
    * `kube_vault`
    * `kube_vpa`
 
@@ -189,15 +190,15 @@ Historically, cluster autoscaling has almost always been done by the [cluster-au
 addon. However, this controller had several limitations and required lots of configuration to provide the optimal
 setup for your organization.
 
-Fortunately, a new provide has emerged, [Karpenter](https://karpenter.sh/), which provides both more flexibility, better
+Fortunately, a new tool has emerged, [Karpenter](https://karpenter.sh/), which provides both more flexibility, better
 performance, and better cost optimization. Specifically:
 
 * You do not need to choose instance types in advance as it will query your cloud providers
-  API for the *entire* list of available instance types and prices and then spin up the exact right instance types
+  API for the *entire* list of available instance types and prices and then spin up the instance types
   that are the best fit for your workloads at the lowest cost
 
 * If you allow it, it will prioritize utilizing [spot
-  instances](https://aws.amazon.com/ec2/spot/) for up to a **90% discount** over list price. Moreover, it will periodically
+  instances](https://aws.amazon.com/ec2/spot/) for around a **70% discount** over list price. Moreover, it will periodically
   check if existing workloads can be migrated to cheaper instances as prices change over time.
 
 * It incorporates the functionality provided by the [aws-node-termination-handler](https://github.com/aws/aws-node-termination-handler)
@@ -226,26 +227,30 @@ Let's deploy it now:
 Karpenter requires some instructions about how to perform autoscaling such as what [AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
 to use for the underlying nodes. It looks for those instructions in [NodePool](https://karpenter.sh/docs/concepts/nodepools/) custom resources.
 
-The Panfactum stack comes with two default NodePools:
+The Panfactum stack comes with several classes of NodePools which are defined in
+the [kube\_karpenter\_node\_pools](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter_node_pools) module:
 
-* linux [spot nodes](https://aws.amazon.com/ec2/spot/)
+* `burstable`
+  * [burstable, T-family instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
+  - [spot nodes](https://aws.amazon.com/ec2/spot/)
+  * highest scheduling preference
+  - assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
+    * `{ key = "burstable", value = "true", effect = "NoSchedule" }`
+    * `{ key = "spot", value = "true", effect = "NoSchedule" }`
+* `spot`
+  * general purpose [spot nodes](https://aws.amazon.com/ec2/spot/)
+  - highest scheduling preference
+  * assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
+    * `{ key = "spot", value = "true", effect = "NoSchedule" }`
+* `worker`
+  * standard on-demand instance types
+  - base scheduling preference
 
-  * labeled with `panfactum.com/class` set to `spot`
-
-  * highest scheduling precedence
-
-  * assigned a [taint](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) to prevent workloads that cannot tolerate
-    arbitrary disruption from accidentally being scheduled on one: `{ key = "spot", value = "true", effect = "NoSchedule" }`
-
-* linux on-demand nodes
-
-  * labeled with `panfactum.com/class` set to `worker` [^1]
+All nodes are labeled with their class via `panfactum.com/class`. [^1]
 
 [^1]: The EKS-managed nodes created by `aws_eks` have a class of `controller`.
 
-Those are defined in the [kube\_karpenter\_node\_pools](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter_node_pools) module.
-
-Let's deploy it now:
+Let's deploy the NodePools now:
 
 1. Create a new directory adjacent to your `kube_karpenter` module called `kube_karpenter_node_pools`.
 
@@ -285,13 +290,13 @@ recognizes that additional nodes need to be schedule.
 ### Adjust EKS Node Pools
 
 Now that Karpenter is successfully running, we can dramatically decrease the nodes in the base EKS node
-pool in order to allow Karpenter to handle autoscaling more efficiently (approximately $100 / month cost
+pool in order to allow Karpenter to handle autoscaling more efficiently (approximately \$100 / month cost
 savings over the current settings).
 
 In your `aws_eks` modules, we recommend the following changes:
 
-- Set `controller_node_count` to `1`. [^4]
-- Set `controller_node_instance_types` to `["t3a.medium"]`.
+* Set `controller_node_count` to `1`. [^4]
+* Set `controller_node_instance_types` to `["t3a.medium"]`.
 
 [^4]: We must keep at least one node around as Karpenter must run on a node that it itself did **not** provision.
 

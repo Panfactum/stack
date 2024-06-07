@@ -42,7 +42,7 @@ Type:
 
 ```hcl
 map(object({
-    az         = string                    # Availability zone
+    az         = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
     cidr_block = string                    # Subnet IP block
     public     = bool                      # If subnet is routable to and from the public internet
     extra_tags = optional(map(string), {}) # Additional tags for the subnet
@@ -80,6 +80,14 @@ Description: Extra tags to add to the VPC resource.
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_vpc_flow_logs_enabled" /> [vpc\_flow\_logs\_enabled](#input_vpc_flow_logs_enabled)
+
+Description: Whether to enable VPC flow logs
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_vpc_flow_logs_expire_after_days" /> [vpc\_flow\_logs\_expire\_after\_days](#input_vpc_flow_logs_expire_after_days)
 

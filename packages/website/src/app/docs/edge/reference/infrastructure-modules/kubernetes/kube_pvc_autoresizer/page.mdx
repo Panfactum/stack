@@ -46,6 +46,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_prometheus_enabled" /> [prometheus\_enabled](#input_prometheus_enabled)
+
+Description: Whether to use prometheus to get volume stats
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
@@ -60,7 +68,7 @@ Description: The version of the pvc-autoresizer helm chart to deploy
 
 Type: `string`
 
-Default: `"0.11.2"`
+Default: `"0.11.3"`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

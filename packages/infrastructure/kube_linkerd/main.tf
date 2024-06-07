@@ -114,9 +114,9 @@ module "namespace" {
 
   extra_tags = merge(
     var.extra_tags,
-    {
+    var.monitoring_enabled ? {
       "linkerd.io/extension" = "viz"
-    }
+    } : null
   )
 }
 
@@ -166,23 +166,19 @@ module "linkerd_identity_issuer" {
 // certificates
 ///////////////////////////////////////////
 
-resource "kubernetes_manifest" "linkerd_bundle" {
-  manifest = {
-    apiVersion = "trust.cert-manager.io/v1alpha1"
-    kind       = "Bundle"
-    metadata = {
-      name = local.linkerd_root_ca_secret
+# Make sure this CA data is available in all namespaces for mTLS
+resource "kubernetes_config_map" "ca_bundle" {
+  metadata {
+    name      = local.linkerd_root_ca_secret
+    labels    = module.util_controller.labels
+    namespace = local.namespace
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
     }
-    spec = {
-      sources = [{
-        inLine = var.vault_ca_crt
-      }]
-      target = {
-        configMap = {
-          key = "ca-bundle.crt"
-        }
-      }
-    }
+  }
+  data = {
+    "ca-bundle.crt" = var.vault_ca_crt
   }
 }
 
@@ -469,7 +465,7 @@ resource "helm_release" "linkerd" {
 
   depends_on = [
     helm_release.linkerd_crds,
-    kubernetes_manifest.linkerd_bundle,
+    kubernetes_config_map.ca_bundle,
     module.linkerd_policy_validator,
     module.linkerd_proxy_injector,
     module.linkerd_identity_issuer,
@@ -530,7 +526,7 @@ resource "helm_release" "viz" {
 
   depends_on = [
     helm_release.linkerd_crds,
-    kubernetes_manifest.linkerd_bundle,
+    kubernetes_config_map.ca_bundle,
     module.linkerd_policy_validator,
     module.linkerd_proxy_injector,
     module.linkerd_identity_issuer,
@@ -607,7 +603,7 @@ resource "kubernetes_manifest" "vpa_proxy_injectory" {
 }
 
 resource "kubernetes_manifest" "vpa_metrics_api" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -628,6 +624,7 @@ resource "kubernetes_manifest" "vpa_metrics_api" {
 }
 
 resource "kubernetes_manifest" "pdb_metrics_api" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -650,7 +647,7 @@ resource "kubernetes_manifest" "pdb_metrics_api" {
 }
 
 resource "kubernetes_manifest" "vpa_tap_injector" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -671,6 +668,7 @@ resource "kubernetes_manifest" "vpa_tap_injector" {
 }
 
 resource "kubernetes_manifest" "pdb_tap_injector" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -693,7 +691,7 @@ resource "kubernetes_manifest" "pdb_tap_injector" {
 }
 
 resource "kubernetes_manifest" "vpa_web" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -715,6 +713,7 @@ resource "kubernetes_manifest" "vpa_web" {
 
 
 resource "kubernetes_manifest" "pdb_web" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
@@ -738,7 +737,7 @@ resource "kubernetes_manifest" "pdb_web" {
 
 
 resource "kubernetes_manifest" "vpa_tap" {
-  count = var.vpa_enabled ? 1 : 0
+  count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
@@ -759,6 +758,7 @@ resource "kubernetes_manifest" "vpa_tap" {
 }
 
 resource "kubernetes_manifest" "pdb_tap" {
+  count = var.monitoring_enabled ? 1 : 0
   manifest = {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"

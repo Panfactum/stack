@@ -73,10 +73,6 @@
       "group": "aws"
     },
     {
-      "module": "constants",
-      "group": "utility"
-    },
-    {
       "module": "kube_alloy",
       "group": "kubernetes"
     },
@@ -105,10 +101,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_buildkit",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_canary",
       "group": "kubernetes"
     },
@@ -129,11 +121,11 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_core_dns",
+      "module": "kube_constants",
       "group": "kubernetes"
     },
     {
-      "module": "kube_cronjob",
+      "module": "kube_core_dns",
       "group": "kubernetes"
     },
     {
@@ -150,14 +142,6 @@
     },
     {
       "module": "kube_external_snapshotter",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_gha_arc_runners",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_gha_arc_systems",
       "group": "kubernetes"
     },
     {
@@ -178,10 +162,6 @@
     },
     {
       "module": "kube_karpenter_node_pools",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_labels",
       "group": "kubernetes"
     },
     {
@@ -237,10 +217,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_sa_auth_pg",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_secrets_csi",
       "group": "kubernetes"
     },
@@ -262,6 +238,10 @@
     },
     {
       "module": "kube_vpa",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_workload_utility",
       "group": "kubernetes"
     },
     {

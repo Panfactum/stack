@@ -54,12 +54,6 @@ Description: The last name of the domain admin contact
 
 Type: `string`
 
-### <a name="input_admin_organization_name" /> [admin\_organization\_name](#input_admin_organization_name)
-
-Description: The name of the organization that the admin contact works for
-
-Type: `string`
-
 ### <a name="input_admin_phone_number" /> [admin\_phone\_number](#input_admin_phone_number)
 
 Description: The phone number of the domain contact
@@ -120,12 +114,6 @@ Description: The last name of the domain registrant contact
 
 Type: `string`
 
-### <a name="input_registrant_organization_name" /> [registrant\_organization\_name](#input_registrant_organization_name)
-
-Description: The name of the organization that the registrant contact works for
-
-Type: `string`
-
 ### <a name="input_registrant_phone_number" /> [registrant\_phone\_number](#input_registrant_phone_number)
 
 Description: The phone number of the domain contact
@@ -180,12 +168,6 @@ Description: The last name of the domain tech contact
 
 Type: `string`
 
-### <a name="input_tech_organization_name" /> [tech\_organization\_name](#input_tech_organization_name)
-
-Description: The name of the organization that the tech contact works for
-
-Type: `string`
-
 ### <a name="input_tech_phone_number" /> [tech\_phone\_number](#input_tech_phone_number)
 
 Description: The phone number of the domain contact
@@ -224,6 +206,22 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_admin_contact_type" /> [admin\_contact\_type](#input_admin_contact_type)
+
+Description: The type of the contact. Defaults to PERSON if admin\_organization\_name is not provided. Otherwise, defaults to COMPANY.
+
+Type: `string`
+
+Default: `"DEFAULT"`
+
+### <a name="input_admin_organization_name" /> [admin\_organization\_name](#input_admin_organization_name)
+
+Description: The name of the organization that the admin contact works for
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_enable_auto_renew" /> [enable\_auto\_renew](#input_enable_auto_renew)
 
 Description: Whether to enable automatic domain renewal
@@ -256,9 +254,41 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_registrant_contact_type" /> [registrant\_contact\_type](#input_registrant_contact_type)
+
+Description: The type of the contact. Defaults to PERSON if registrant\_organization\_name is not provided. Otherwise, defaults to COMPANY.
+
+Type: `string`
+
+Default: `"DEFAULT"`
+
+### <a name="input_registrant_organization_name" /> [registrant\_organization\_name](#input_registrant_organization_name)
+
+Description: The name of the organization that the registrant contact works for
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_tech_address_line_2" /> [tech\_address\_line\_2](#input_tech_address_line_2)
 
 Description: The street address (2) of the domain tech contact
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_tech_contact_type" /> [tech\_contact\_type](#input_tech_contact_type)
+
+Description: The type of the contact. Defaults to PERSON if tech\_organization\_name is not provided. Otherwise, defaults to COMPANY.
+
+Type: `string`
+
+Default: `"DEFAULT"`
+
+### <a name="input_tech_organization_name" /> [tech\_organization\_name](#input_tech_organization_name)
+
+Description: The name of the organization that the tech contact works for
 
 Type: `string`
 

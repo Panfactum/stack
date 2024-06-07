@@ -41,52 +41,30 @@ began a rolling upgrade.
 
 [^1]: Certificate data is stored as a Secret which the pods reference.
 
-## Reflector
+## PVC Autoresizer
 
-ConfigMaps and Secrets are namespaced resources. As a result, they can only be accessed by other resources deployed
-in the same namespace. This can pose a barrier when you want to share global configuration or secret values
-across the entire cluster.
+Many CSI drivers implement the [standard
+Volume expansion API](https://kubernetes-csi.github.io/docs/volume-expansion.html) including the AWS EBS CSI driver. However,
+those are passive APIs that will not actively resize when your [PVCs](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+run out of storage capacity.
 
-The [Reflector](https://github.com/emberstack/kubernetes-reflector) controller was developed to solve this problem.
-With this controller deployed in the cluster, you can provide annotations on ConfigMaps and Secrets that
-will cause them to be automatically synchronized across namespaces.
+Fortunately, the [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) project exists. The resizer will monitor
+your storage volumes and call the volume expansion API as they near maximum capacity. [^6]
 
-We provide a module to deploy this controller: [kube\_reflector](/docs/main/reference/infrastructure-modules/kubernetes/kube_reflector).
+[^6]: On AWS, volumes can only be expanded *once* every six hours, so you still must choose
+    initial storage capacities and growth rates that reflect your predicted workload usage. This isn't completely hands-off.
 
-Let's deploy the Reflector now:
+We provide a module to deploy it: [kube\_pvc\_autoresizer](/docs/main/reference/infrastructure-modules/kubernetes/kube_reflector).
 
-1. Create a new directory adjacent to your `aws_eks` module called `kube_reflector`.
+Let's deploy it now:
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_reflector/terragrunt.hcl).
+1. Create a new directory adjacent to your `aws_eks` module called `kube_pvc_autoresizer`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_pvc_autoresizer/terragrunt.hcl).
 
 3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
 
 4. Run `terragrunt apply`.
-
-Let's test that the Reflector is working:
-
-1. Create a new, reflected ConfigMap:
-
-   ```bash
-   kubectl apply -f - <<EOF
-   apiVersion: v1
-   kind: ConfigMap
-   metadata:
-     name: test-reflector
-     namespace: reflector
-     annotations:
-       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
-   data:
-     foo: bar
-   EOF
-   ```
-
-2. Run `kubectl get configmap -A | grep test-reflector` to verify the ConfigMap was created in all namespaces.
-
-3. Run `kubectl -n reflector delete configmap test-reflector` to delete the original ConfigMap.
-
-4. Re-run `kubectl get configmap -A | grep test-reflector` to verify all the reflected ConfigMaps were also deleted.
 
 ## Descheduler
 
@@ -243,14 +221,23 @@ Let's verify that backup functionality is working as expected by simulating an e
 
       If not addressed, your cluster will stop functioning within a few hours.
 
-6. Fortunately, we can easily restore from the backup: `velero create restore test --from-backup=test --wait`. [^5]
+6. Fortunately, we can easily restore from the backup: `velero create restore test --from-backup=test --wait`.
 
-7. Once this completes, notice that the `vault` namespace and its associated resources have been restored.
+   <MarkdownAlert severity="warning">
+     You may see a status of `PartiallyFailed`. In the current iteration of the Panfactum stack we use
+     functionality that Velero does not yet have full support for handling. The warnings
+     that Velero generates when this occurs are inconsequential and can be safely ignored assuming that the desired
+     functionality was restored as expected.
+   </MarkdownAlert>
+
+7. Once this completes, notice that the `vault` namespace and its associated resources have been restored. It may take
+   a few minutes for all systems to come back online.
 
 8. Let's verify that the data has been restored as well. Run `vault token lookup`. If this returns valid information
    about your token, that means that the Vault data was successfully restored from the backup:
 
    {/* spellchecker: disable */}
+
    ```shell-session
    Key                 Value
    ---                 -----
@@ -270,15 +257,11 @@ Let's verify that backup functionality is working as expected by simulating an e
    ttl                 0s
    type                service
    ```
+
    {/* spellchecker: enable */}
 
 9. Once you have verified that functionality is successfully restored, delete the backup:
    `velero delete backup test`.
-
-[^5]: You may see a status of `PartiallyFailed`. In the current iteration of the Panfactum stack we use
-    functionality that Velero does not yet have full support for handling. The warnings
-    that Velero generates when this occurs are inconsequential and can be safely ignored assuming that the desired
-    functionality was restored as expected.
 
 ## Next Steps
 

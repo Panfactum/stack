@@ -112,7 +112,8 @@ resource "helm_release" "pvc_autoresizer" {
       }
       controller = {
         args = {
-          prometheusURL = "http://thanos-query-frontend.monitoring.svc.cluster.local:9090"
+          prometheusURL    = var.prometheus_enabled ? "http://thanos-query-frontend.monitoring.svc.cluster.local:9090" : null
+          useK8sMetricsApi = !var.prometheus_enabled
         }
         podLabels = module.util_controller.labels
 

@@ -202,6 +202,8 @@
             # System Setup
             ####################################
             (import ./setup { pkgs = panfactumResolvedPkgs; })
+            (util.customShellScript
+              "pf-env-scaffold") # helper for the bootstrapping guide
 
             ####################################
             # Kubernetes
@@ -222,6 +224,8 @@
             (util.customShellScript
               "pf-tunnel") # for connecting to private network resources through ssh bastion
             src3.k9s # kubernetes tui
+            (util.customShellScript
+              "pf-eks-reset") # script for resetting cluster during bootstrapping
 
             ####################################
             # Hashicorp Vault
@@ -268,6 +272,8 @@
             src1.awscli2 # aws CLI
             src7.ssm-session-manager-plugin # for connecting to hardened ec2 nodes
             aws-nuke # nukes resources in aws accounts
+            (util.customShellScript
+              "pf-vpc-network-test") # Test vpc connectivity
 
             ####################################
             # Secrets Management

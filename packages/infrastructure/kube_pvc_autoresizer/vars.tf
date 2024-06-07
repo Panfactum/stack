@@ -3,7 +3,7 @@
 variable "pvc_autoresizer_helm_version" {
   description = "The version of the pvc-autoresizer helm chart to deploy"
   type        = string
-  default     = "0.11.2"
+  default     = "0.11.3"
 }
 
 variable "vpa_enabled" {
@@ -26,6 +26,12 @@ variable "log_verbosity" {
 
 variable "monitoring_enabled" {
   description = "Whether to add active monitoring to the deployed systems"
+  type        = bool
+  default     = false
+}
+
+variable "prometheus_enabled" {
+  description = "Whether to use prometheus to get volume stats"
   type        = bool
   default     = false
 }
