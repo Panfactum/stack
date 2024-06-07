@@ -18,9 +18,6 @@ dependency "monitoring" {
 }
 
 inputs = {
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-
   # Alpha: Do not use
   prometheus_enabled        = false
   thanos_query_frontend_url = dependency.monitoring.outputs.thanos_query_frontend_url

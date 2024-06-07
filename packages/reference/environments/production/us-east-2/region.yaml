@@ -11,3 +11,10 @@ kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.ama
 
 # Vault
 vault_addr: "https://vault.prod.panfactum.com"
+
+# Extra inputs
+extra_inputs:
+  pull_through_cache_enabled: true
+  vpa_enabled: true
+  monitoring_enabled: true # Alpha: Do not use
+  canary_enabled: true # Alpha: Do not use

@@ -35,15 +35,13 @@ Let's do this now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_vault/terragrunt.hcl).
 
-3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+3. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
 
-4. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, `random`, and `helm` providers.
 
-5. Add a `module.yaml` that enables the `aws`, `kubernetes`, `random`, and `helm` providers.
+5. Run `terragrunt apply`.
 
-6. Run `terragrunt apply`.
-
-7. Note that this deployment may or may not succeed, but you should see three vault instances which are in the unready state:
+6. Note that this deployment may or may not succeed, but you should see three vault instances which are in the unready state:
 
    <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
 

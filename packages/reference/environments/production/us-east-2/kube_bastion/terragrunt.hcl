@@ -23,9 +23,7 @@ inputs = {
     "bastion.production.panfactum.com",
     "bastion.prod.panfactum.com"
   ]
-  ssh_cert_lifetime_seconds  = 60 * 60 * 8
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
+  ssh_cert_lifetime_seconds = 60 * 60 * 8
 }
 
 
