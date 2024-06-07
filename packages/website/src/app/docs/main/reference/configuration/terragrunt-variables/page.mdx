@@ -83,6 +83,14 @@ Used for consistency across labels and tags.
 | `region`      | string      | The name of the region                                                       | `region.yaml`      |
 | `extra_tags`  | map(string) | An object containing extra tags to add to all resources in the current scope | Any                |
 
+### Inputs
+
+Used to pass extra inputs to all modules in the scope.
+
+| Variable       | Type     | Description                                                                   | Recommended File |
+| :------------- | :------- | :---------------------------------------------------------------------------- | :--------------- |
+| `extra_inputs` | map(any) | An object containing extra inputs to pass to all modules in the current scope | Any              |
+
 ### Module Source
 
 Used to configure the `terraform.source` [option](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#terraform) when deploying a module.

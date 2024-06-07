@@ -3,25 +3,29 @@
 #################################################################
 
 locals {
-  global_raw_vars   = try(yamldecode(file(find_in_parent_folders("global.yaml"))), null)
-  global_user_vars  = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), null)
-  global_vars       = merge({}, local.global_raw_vars, local.global_user_vars)
-  global_extra_tags = lookup(local.global_vars, "extra_tags", {})
+  global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), null)
+  global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), null)
+  global_vars         = merge({}, local.global_raw_vars, local.global_user_vars)
+  global_extra_tags   = lookup(local.global_vars, "extra_tags", {})
+  global_extra_inputs = lookup(local.global_vars, "extra_inputs", {})
 
-  environment_raw_vars   = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), null)
-  environment_user_vars  = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), null)
-  environment_vars       = merge({}, local.environment_raw_vars, local.environment_user_vars)
-  environment_extra_tags = lookup(local.environment_vars, "extra_tags", {})
+  environment_raw_vars     = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), null)
+  environment_user_vars    = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), null)
+  environment_vars         = merge({}, local.environment_raw_vars, local.environment_user_vars)
+  environment_extra_tags   = lookup(local.environment_vars, "extra_tags", {})
+  environment_extra_inputs = lookup(local.environment_vars, "extra_inputs", {})
 
-  region_raw_vars   = try(yamldecode(file(find_in_parent_folders("region.yaml"))), null)
-  region_user_vars  = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), null)
-  region_vars       = merge({}, local.region_raw_vars, local.region_user_vars)
-  region_extra_tags = lookup(local.region_vars, "extra_tags", {})
+  region_raw_vars     = try(yamldecode(file(find_in_parent_folders("region.yaml"))), null)
+  region_user_vars    = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), null)
+  region_vars         = merge({}, local.region_raw_vars, local.region_user_vars)
+  region_extra_tags   = lookup(local.region_vars, "extra_tags", {})
+  region_extra_inputs = lookup(local.region_vars, "extra_inputs", {})
 
-  module_raw_vars   = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), null)
-  module_user_vars  = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), null)
-  module_vars       = merge({}, local.module_raw_vars, local.module_user_vars)
-  module_extra_tags = lookup(local.module_vars, "extra_tags", {})
+  module_raw_vars     = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), null)
+  module_user_vars    = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), null)
+  module_vars         = merge({}, local.module_raw_vars, local.module_user_vars)
+  module_extra_tags   = lookup(local.module_vars, "extra_tags", {})
+  module_extra_inputs = lookup(local.module_vars, "extra_inputs", {})
 
   # Merge all of the vars with order of precedence
   vars = merge(
@@ -29,6 +33,18 @@ locals {
     local.environment_vars,
     local.region_vars,
     local.module_vars
+  )
+  extra_tags = merge(
+    local.global_extra_tags,
+    local.environment_extra_tags,
+    local.region_extra_tags,
+    local.module_extra_tags
+  )
+  extra_inputs = merge(
+    local.global_extra_inputs,
+    local.environment_extra_inputs,
+    local.region_extra_inputs,
+    local.module_extra_inputs
   )
 
   # Activated providers
@@ -261,11 +277,14 @@ retry_sleep_interval_sec = 30
 ################################################################
 ### Default Module Inputs
 ################################################################
-inputs = {
-  is_local         = local.is_local
-  environment      = local.vars.environment
-  region           = local.vars.region
-  pf_stack_version = local.pf_stack_version
-  pf_stack_commit  = local.pf_stack_version_commit_hash
-  extra_tags       = merge(local.global_extra_tags, local.environment_extra_tags, local.region_extra_tags, local.module_extra_tags)
-}
+inputs = merge(
+  local.extra_inputs,
+  {
+    is_local         = local.is_local
+    environment      = local.vars.environment
+    region           = local.vars.region
+    pf_stack_version = local.pf_stack_version
+    pf_stack_commit  = local.pf_stack_version_commit_hash
+    extra_tags       = local.extra_tags
+  }
+)
