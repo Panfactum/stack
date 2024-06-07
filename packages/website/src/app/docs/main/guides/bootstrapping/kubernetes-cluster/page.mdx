@@ -168,10 +168,15 @@ The subnets you choose should be **private** and should each be in a different A
 ### Choose Node Count and Size
 
 The nodes created by this module are used to run cluster-critical controllers, without which your cluster will not
-function properly. [^5] You should use at least three to facilitate the high-availability algorithms used by some of the
-controllers. The `t3a.large` is the minimum recommended instance size if using three nodes.
+function properly. [^5] You **must** use at least three nodes in order to properly launch and update
+all cluster components. The `t3a.large` is the minimum recommended instance size if using three nodes.
 
 [^5]: Additional "worker" nodes will be dynamically provisioned by [Karpenter](https://karpenter.sh/) in a future section of this guide.
+
+<MarkdownAlert severity="info">
+    Once you [deploy autoscaling](/docs/main/guides/bootstrapping/autoscaling), you can reduce
+    the size and count of the EKS nodes, but until then, using less can introduce issues in later guide sections.
+</MarkdownAlert>
 
 ### Deploy the Cluster
 
