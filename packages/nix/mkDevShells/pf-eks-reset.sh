@@ -116,6 +116,7 @@ kubectl_delete daemonset kube-proxy
 kubectl_delete configmap kube-proxy
 kubectl_delete configmap kube-proxy-config
 kubectl_delete configmap aws-auth
+kubectl --context "$CLUSTER" delete storageclass gp2 --ignore-not-found
 
 ####################################################################
 # Step 7: Terminate all nodes so old node-local configuration settings are wiped

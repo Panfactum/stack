@@ -298,15 +298,18 @@ clusters. If you have never used this tool before, we recommend getting up to sp
 
 ## Reset EKS Cluster
 
-Unfortunately, AWS install various utilities to every new EKS cluster such as `coredns` and `kube-proxy` which
-will conflict with our resources in later guide steps.
+Unfortunately, AWS installs various utilities such as `coredns` and `kube-proxy` to every new EKS cluster. We
+provide hardened alternatives to these defaults, and their presence will conflict with Panfactum resources in later guide steps.
 
-We need to reset the cluster to a clean state before we continue.
+As a result, we need to reset the cluster to a clean state before we continue.
 
-We provide a convenience script `pf-eks-reset` to perform the reset. Run this script now.
+We provide a convenience command `pf-eks-reset` to perform the reset. Run this command now.
 
 Note that this will temporarily prevent EC2 nodes from joining the cluster until
-the `kube_rbac` module is deployed (below).
+the `kube_rbac` module is deployed (below). [^12]
+
+[^12]: Just like human users, EC2 nodes use AWS IAM roles to authenticate with the EKS Kubernetes API server. These roles
+must be authorized which we do in the `kube_rbac` module.
 
 ## Deploy Kubernetes Modules
 
