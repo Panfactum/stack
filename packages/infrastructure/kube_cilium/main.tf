@@ -38,6 +38,7 @@ module "util_controller" {
   workload_name                         = "cilium-operator"
   instance_type_anti_affinity_preferred = true
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -55,6 +56,7 @@ module "util_agent" {
   source                  = "../kube_workload_utility"
   workload_name           = "cilium-agent"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -235,6 +237,7 @@ resource "helm_release" "cilium" {
 
       tolerations = concat(
         [
+          // These are required b/c the agent is what removes the taint
           {
             key      = module.constants.cilium_taint.key
             operator = "Exists"
@@ -245,6 +248,15 @@ resource "helm_release" "cilium" {
             operator = "Exists"
             effect   = "NoSchedule"
           },
+
+          // This is required b/c otherwise networking will break during node shutdown
+          {
+            key      = "karpenter.sh/disruption"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+
+          // These are required b/c networking should never be disabled, even under resource pressure
           {
             key      = "node.kubernetes.io/unreachable"
             operator = "Exists"

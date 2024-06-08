@@ -78,6 +78,12 @@ variable "spot_instances_enabled" {
   default     = false
 }
 
+variable "arm_instances_enabled" {
+  description = "Whether the database nodes can be scheduled on arm instances"
+  type        = bool
+  default     = false
+}
+
 variable "burstable_instances_enabled" {
   description = "Whether the database nodes can be scheduled on burstable instances"
   type        = bool

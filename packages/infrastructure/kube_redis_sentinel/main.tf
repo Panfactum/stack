@@ -38,6 +38,7 @@ module "util" {
   workload_name                        = random_id.id.hex
   burstable_nodes_enabled              = var.burstable_instances_enabled
   spot_nodes_enabled                   = var.spot_instances_enabled
+  arm_nodes_enabled                    = var.arm_instances_enabled
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   lifetime_evictions_enabled           = false

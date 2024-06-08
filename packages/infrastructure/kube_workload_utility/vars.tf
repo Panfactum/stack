@@ -52,6 +52,12 @@ variable "burstable_nodes_enabled" {
   default     = false
 }
 
+variable "arm_nodes_enabled" {
+  description = "Whether to allow pods to schedule on arm64 nodes"
+  type        = bool
+  default     = false
+}
+
 variable "extra_tolerations" {
   description = "Extra tolerations to add to the pods"
   type = list(object({

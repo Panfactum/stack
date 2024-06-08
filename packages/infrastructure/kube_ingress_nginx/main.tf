@@ -75,6 +75,7 @@ module "util" {
   source                               = "../kube_workload_utility"
   workload_name                        = "nginx-ingress"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   lifetime_evictions_enabled           = false

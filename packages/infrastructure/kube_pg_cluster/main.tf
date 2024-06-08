@@ -66,6 +66,7 @@ module "util_cluster" {
   workload_name                        = "pg-${random_id.cluster_id.hex}"
   burstable_nodes_enabled              = var.burstable_instances_enabled
   spot_nodes_enabled                   = var.spot_instances_enabled
+  arm_nodes_enabled                    = var.arm_instances_enabled
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   lifetime_evictions_enabled           = false
@@ -88,6 +89,7 @@ module "util_pooler" {
 
   workload_name                        = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   pod_affinity_match_labels            = module.util_cluster.match_labels

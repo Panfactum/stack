@@ -35,6 +35,7 @@ module "util" {
   instance_type_anti_affinity_required = true
   zone_anti_affinity_required          = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

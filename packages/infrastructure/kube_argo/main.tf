@@ -48,6 +48,7 @@ module "util_controller" {
   workload_name                        = "argo-controller"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -66,6 +67,7 @@ module "util_server" {
   workload_name                        = "argo-server"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -84,6 +86,7 @@ module "util_events_controller" {
   workload_name                        = "argo-events-controller"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -102,6 +105,7 @@ module "util_webhook" {
   workload_name                        = "argo-webhook"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -303,6 +307,7 @@ module "database" {
   aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   backups_enabled             = var.workflow_archive_backups_enabled
   backups_force_delete        = true
   monitoring_enabled          = var.monitoring_enabled

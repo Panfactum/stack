@@ -50,6 +50,7 @@ module "util_server" {
   workload_name                        = "authentik-server"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -67,6 +68,7 @@ module "util_worker" {
   source                  = "../kube_workload_utility"
   workload_name           = "authentik-worker"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -114,6 +116,7 @@ module "database" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   pgbouncer_pool_mode         = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
@@ -138,6 +141,7 @@ module "redis" {
   namespace                   = local.namespace
   replica_count               = 3
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled

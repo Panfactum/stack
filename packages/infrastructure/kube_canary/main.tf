@@ -109,6 +109,7 @@ module "database" {
   aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   monitoring_enabled          = true
   backups_enabled             = true
 

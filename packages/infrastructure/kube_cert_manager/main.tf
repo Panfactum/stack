@@ -41,6 +41,7 @@ module "util_controller" {
   workload_name                         = "cert-manager"
   instance_type_anti_affinity_preferred = true
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -59,6 +60,7 @@ module "util_webhook" {
   workload_name                         = "cert-manager-webhook"
   instance_type_anti_affinity_preferred = true
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -76,6 +78,7 @@ module "util_ca_injector" {
   source                                = "../kube_workload_utility"
   workload_name                         = "cert-manager-ca-injector"
   instance_type_anti_affinity_preferred = true
+  arm_nodes_enabled                     = true
 
   // This _can_ be run on a spot node if necessary as a short temporary disruption
   // will not cause cascading failures

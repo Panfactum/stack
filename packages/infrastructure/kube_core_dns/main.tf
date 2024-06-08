@@ -143,11 +143,11 @@ module "core_dns" {
   min_replicas                          = 2
   max_replicas                          = 2
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   topology_spread_strict                = true
   priority_class_name                   = "system-cluster-critical"
   dns_policy                            = "Default"
-  extra_tolerations                     = [{ operator = "Exists" }]
   containers = concat(
     [
       {

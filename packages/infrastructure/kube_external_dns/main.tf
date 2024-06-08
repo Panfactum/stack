@@ -56,6 +56,7 @@ module "util" {
   workload_name                         = "external-dns"
   match_labels                          = { id = random_id.ids[each.key].hex }
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt

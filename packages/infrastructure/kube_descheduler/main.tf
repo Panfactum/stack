@@ -50,6 +50,7 @@ module "util_controller" {
   workload_name                         = "descheduler"
   burstable_nodes_enabled               = true
   instance_type_anti_affinity_preferred = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

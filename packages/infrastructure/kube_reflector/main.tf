@@ -36,6 +36,7 @@ module "util_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "reflector"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt

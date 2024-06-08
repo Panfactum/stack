@@ -33,6 +33,7 @@ module "util_admission_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vpa-admission-controller"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
@@ -55,6 +56,7 @@ module "util_recommender" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vpa-recommender"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
@@ -76,6 +78,7 @@ module "util_updater" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vpa-updater"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"

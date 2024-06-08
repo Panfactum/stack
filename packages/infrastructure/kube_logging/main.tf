@@ -57,6 +57,7 @@ module "util_read" {
   source                               = "../kube_workload_utility"
   workload_name                        = "loki-read"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
 
   # generate: common_vars.snippet.txt
@@ -75,6 +76,7 @@ module "util_write" {
   source                               = "../kube_workload_utility"
   workload_name                        = "loki-write"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
 
   # generate: common_vars.snippet.txt
@@ -93,6 +95,7 @@ module "util_backend" {
   source                               = "../kube_workload_utility"
   workload_name                        = "loki-backend"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
 
   # generate: common_vars.snippet.txt
@@ -111,6 +114,7 @@ module "util_canary" {
   source                               = "../kube_workload_utility"
   workload_name                        = "loki-canary"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
 
   # generate: common_vars.snippet.txt
@@ -160,6 +164,7 @@ module "redis_cache" {
   replica_count               = 3
   lfu_cache_enabled           = true
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled

@@ -18,8 +18,17 @@ otherwise [complex validation step in the bootstrapping guide](/docs/edge/guides
 - Adds the `pf-env-bootstrap` command that automatically bootstraps the necessary resources to begin working with
 IaC in an environment. This replaces the manual steps that used to be a part of the [bootstrapping guide.](/docs/edge/guides/bootstrapping/infrastructure-as-code#set-up-state-management)
 
-- Adds new `extra_tags` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
+- Adds new `extra_inputs` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
 allows you to pass inputs to all modules in the current scope.
+
+- Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by $50 - 100 / month
+due to significantly better price / performance ratios for arm64 instances in AWS.
+
+### Fixed
+
+- Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during
+node shutdown. This resulted in EBS volumes not being detached and introduced an unnecessary 6min delay when moving
+EBS volumes between nodes.
 
 ## edge.24-06-06
 

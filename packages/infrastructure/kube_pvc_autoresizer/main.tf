@@ -37,6 +37,7 @@ module "util_controller" {
 
   workload_name                         = "pvc-autoresizer"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = false // Does not have an arm build
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt

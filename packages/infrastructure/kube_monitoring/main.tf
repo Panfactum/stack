@@ -156,6 +156,7 @@ module "util_webhook" {
 
   workload_name                        = "prometheus-operator-webhook"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -175,6 +176,7 @@ module "util_operator" {
   source = "../kube_workload_utility"
 
   workload_name           = "prometheus-operator"
+  arm_nodes_enabled       = true
   burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
@@ -194,6 +196,7 @@ module "util_grafana" {
 
   workload_name                        = "grafana"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -214,6 +217,7 @@ module "util_prometheus" {
 
   workload_name                        = "prometheus"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -233,6 +237,7 @@ module "util_node_exporter" {
   source = "../kube_workload_utility"
 
   workload_name           = "node-exporter"
+  arm_nodes_enabled       = true
   burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
@@ -252,6 +257,7 @@ module "util_ksm" {
 
   workload_name                        = "kube-state-metrics"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -271,6 +277,7 @@ module "util_thanos_compactor" {
   source = "../kube_workload_utility"
 
   workload_name           = "thanos-compactor"
+  arm_nodes_enabled       = true
   burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
@@ -289,6 +296,7 @@ module "util_thanos_store_gateway" {
   source                               = "../kube_workload_utility"
   workload_name                        = "thanos-store-gateway"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -308,6 +316,7 @@ module "util_thanos_ruler" {
   source                               = "../kube_workload_utility"
   workload_name                        = "thanos-ruler"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -329,6 +338,7 @@ module "util_thanos_query" {
 
   workload_name                        = "thanos-query"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -349,6 +359,7 @@ module "util_thanos_frontend" {
 
   workload_name                        = "thanos-frontend"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -369,6 +380,7 @@ module "util_thanos_bucket_web" {
 
   workload_name                        = "thanos-bucket-web"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -389,6 +401,7 @@ module "util_alertmanager" {
 
   workload_name                        = "alertmanager"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -472,6 +485,7 @@ module "thanos_redis_cache" {
   replica_count               = 3
   lfu_cache_enabled           = true
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled

@@ -43,6 +43,7 @@ module "util_controller" {
   source                  = "../kube_workload_utility"
   workload_name           = "linkerd-controller"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -60,6 +61,7 @@ module "util_proxy" {
   source                  = "../kube_workload_utility"
   workload_name           = "linkerd-proxy"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -77,6 +79,7 @@ module "util_viz" {
   source                  = "../kube_workload_utility"
   workload_name           = "linkerd-viz"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

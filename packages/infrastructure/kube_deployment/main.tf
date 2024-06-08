@@ -47,6 +47,7 @@ module "pod_template" {
   match_labels                          = { id = random_id.deployment_id.hex }
   burstable_nodes_enabled               = var.burstable_nodes_enabled
   spot_nodes_enabled                    = var.spot_nodes_enabled
+  arm_nodes_enabled                     = var.arm_nodes_enabled
   instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
   instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
   zone_anti_affinity_required           = var.zone_anti_affinity_required
