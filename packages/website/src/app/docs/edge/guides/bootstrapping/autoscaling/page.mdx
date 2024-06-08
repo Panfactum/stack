@@ -46,11 +46,9 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_metrics_server/terragrunt.hcl).
 
-3. Set `vpa_enabled` to `false`. We will enable it when we deploy the VPA.
+3. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
-
-5. Run `terragrunt apply`.
+4. Run `terragrunt apply`.
 
 Let's test to ensure it is working as intended:
 
@@ -128,35 +126,23 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_vpa/terragrunt.hcl).
 
-3. Set `vpa_enabled` to `false`. We will enable it in a moment.
+3. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+4. Run `terragrunt apply`.
 
-5. Run `terragrunt apply`.
+5. In your `region.yaml`, set `extra_inputs.vpa_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
+This will turn on the VPA for all modules in this cluster in the next apply.
 
-6. Once the module has successfully deployed, return to all of the previously deployed kubernetes
-   modules and set `vpa_enabled` to `true`:
-   * `kube_core_dns`
-   * `kube_aws_ebs_csi`
-   * `kube_cert_manager`
-   * `kube_cilium`
-   * `kube_linkerd`
-   * `kube_metrics_server`
-   * `kube_secrets_csi`
-   * `kube_reflector`
-   * `kube_vault`
-   * `kube_vpa`
-
-7. Navigate up to the directory containing all of these modules (this should be the parent of `kube_vpa`). Run
-   `terragrunt run-all apply` to apply all of the modules at once. Note that this might cause your Vault proxy
+6. Navigate up to the directory containing all your modules (this should be the parent of `kube_vpa`). Run
+   `terragrunt run-all apply` to re-apply all the modules at once. Note that this might cause your Vault proxy
    to disconnect as pods are restarted and thus result in an incomplete apply. Simply reconnect the proxy and try the command again.
 
-8. After all these modules are updated, you should now see many VPA resources in k9s (`:vpa`). After a minute or two, they
+7. After all these modules are updated, you should now see many VPA resources in k9s (`:vpa`). After a minute or two, they
    should begin to provide resource estimates:
 
    <MarkdownImage src={k9sVPAImg} alt="VPA resources in k9s" />
 
-9. Return to the pod view. Notice that all request columns are populated as well as the memory limit column:
+8. Return to the pod view. Notice that all request columns are populated as well as the memory limit column:
 
    <MarkdownImage src={k9sPodMetricsProvided} alt="Resource requests and limits are set" />
 
@@ -214,13 +200,11 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
 
-3. For the first time, you can leave `vpa_enabled` set to `true`.
+3. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for the `controller_node_subnets` unless you have a specific reason not to.
 
-4. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for the `controller_node_subnets` unless you have a specific reason not to.
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
-5. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
-
-6. Run `terragrunt apply`.
+5. Run `terragrunt apply`.
 
 ### Deploy NodePools
 

@@ -12,7 +12,7 @@ Your environments folder at `$PF_ENVIRONMENTS_DIR` **must** have three levels of
 
 Accordingly, there are four levels of configuration for parameterizing the behavior of `panfactum.hcl`:
 
-* `global.yaml`: Found at the root of the directory
+* `global.yaml`: Found at the root of `$PF_ENVIRONMENTS_DIR`
 
 * `environment.yaml`: Found at the root of each environment subdirectory
 
@@ -22,7 +22,7 @@ Accordingly, there are four levels of configuration for parameterizing the behav
 
 A few rules about these files:
 
-* These files are optional, but you will use them to configure your providers and other behavior (described in detail later).
+* These files are optional, but you will use them to configure your providers and other behavior.
 
 * They can each contain *any and every key* found below.
 
@@ -82,6 +82,14 @@ Used for consistency across labels and tags.
 | `environment` | string      | The name of the environment                                                  | `environment.yaml` |
 | `region`      | string      | The name of the region                                                       | `region.yaml`      |
 | `extra_tags`  | map(string) | An object containing extra tags to add to all resources in the current scope | Any                |
+
+### Inputs
+
+Used to pass extra inputs to all modules in the scope.
+
+| Variable       | Type     | Description                                                                   | Recommended File |
+| :------------- | :------- | :---------------------------------------------------------------------------- | :--------------- |
+| `extra_inputs` | map(any) | An object containing extra inputs to pass to all modules in the current scope | Any              |
 
 ### Module Source
 

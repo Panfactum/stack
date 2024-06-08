@@ -38,13 +38,11 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_aws_ebs_csi/terragrunt.hcl).
 
-3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+3. Add a `module.yaml` that enables the `aws`, `kubernetes`, `random`, and `helm` providers.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, `random`, and `helm` providers.
+4. Run `terragrunt apply`.
 
-5. Run `terragrunt apply`.
-
-6. Verify the pods deployed successfully:
+5. Verify the pods deployed successfully:
    <MarkdownImage src={ebsCSILaunchImg} alt="AWS EBS CSI launched successfully" />
 
 ### Storage Classes
@@ -74,13 +72,11 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_secrets_csi/terragrunt.hcl).
 
-3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+3. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+4. Run `terragrunt apply`.
 
-5. Run `terragrunt apply`.
-
-6. Verify the pods deployed successfully:
+5. Verify the pods deployed successfully:
    <MarkdownImage src={secretsCSILaunchImg} alt="Secrets CSI launched successfully" />
 
 ## Next Steps
