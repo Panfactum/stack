@@ -402,7 +402,8 @@ resource "helm_release" "alb_controller" {
       tolerations               = module.util_controller.tolerations
       topologySpreadConstraints = module.util_controller.topology_spread_constraints
       podDisruptionBudget = {
-        maxUnavailable = 1
+        maxUnavailable             = 1
+        unhealthyPodEvictionPolicy = "AlwaysAllow"
       }
       updateStrategy = {
         type = "RollingUpdate"
@@ -475,9 +476,9 @@ resource "kubernetes_service" "alb_controller_healthcheck" {
   depends_on = [helm_release.alb_controller]
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -500,5 +501,8 @@ resource "kubernetes_manifest" "vpa" {
         name       = "alb-controller"
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.alb_controller]
 }

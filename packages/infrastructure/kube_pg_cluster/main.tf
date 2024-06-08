@@ -465,11 +465,13 @@ resource "kubernetes_manifest" "postgres_cluster" {
   field_manager {
     force_conflicts = true
   }
+
+  depends_on = [module.client_certs, module.server_certs]
 }
 
-resource "kubernetes_manifest" "scheduled_backup" {
+resource "kubectl_manifest" "scheduled_backup" {
   count = var.backups_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "ScheduledBackup"
     metadata = {
@@ -483,8 +485,10 @@ resource "kubernetes_manifest" "scheduled_backup" {
         name = local.cluster_name
       }
     }
-  }
-  depends_on = [kubernetes_manifest.postgres_cluster]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster]
 }
 
 # TODO: Re-enable once https://github.com/cloudnative-pg/cloudnative-pg/issues/2574 is addressed
@@ -513,8 +517,8 @@ resource "kubernetes_manifest" "scheduled_backup" {
 #}
 
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -525,13 +529,16 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.util_cluster.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_cluster.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [kubernetes_manifest.postgres_cluster]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster]
 }
 
 /***************************************
@@ -699,9 +706,9 @@ module "pooler_certs" {
 }
 
 
-resource "kubernetes_manifest" "connection_pooler" {
+resource "kubectl_manifest" "connection_pooler" {
   for_each = local.poolers_to_enable
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Pooler"
     metadata = {
@@ -722,8 +729,8 @@ resource "kubernetes_manifest" "connection_pooler" {
         authQuery = "SELECT usename, passwd FROM user_search($1)"
         poolMode  = var.pgbouncer_pool_mode
         parameters = {
-          log_connections    = var.log_connections_enabled ? 1 : 0
-          log_disconnections = var.log_connections_enabled ? 1 : 0
+          log_connections    = tostring(var.log_connections_enabled ? 1 : 0)
+          log_disconnections = tostring(var.log_connections_enabled ? 1 : 0)
         }
       }
       monitoring = {
@@ -771,9 +778,10 @@ resource "kubernetes_manifest" "connection_pooler" {
         }
       }
     }
-  }
-
-  depends_on = [kubernetes_manifest.postgres_cluster]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster, module.pooler_certs]
 }
 
 
@@ -801,9 +809,9 @@ resource "kubernetes_manifest" "connection_pooler" {
 #  depends_on = [kubernetes_manifest.connection_pooler]
 #}
 
-resource "kubernetes_manifest" "pdb_pooler" {
+resource "kubectl_manifest" "pdb_pooler" {
   for_each = local.poolers_to_enable
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -817,6 +825,8 @@ resource "kubernetes_manifest" "pdb_pooler" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [kubernetes_manifest.connection_pooler]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.connection_pooler]
 }

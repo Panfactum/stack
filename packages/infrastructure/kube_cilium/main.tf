@@ -390,9 +390,9 @@ resource "helm_release" "cilium" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa_operator" {
+resource "kubectl_manifest" "vpa_operator" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -407,13 +407,15 @@ resource "kubernetes_manifest" "vpa_operator" {
         name       = "cilium-operator"
       }
     }
-  }
-  depends_on = [helm_release.cilium]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cilium]
 }
 
-resource "kubernetes_manifest" "vpa_node" {
+resource "kubectl_manifest" "vpa_node" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -428,12 +430,14 @@ resource "kubernetes_manifest" "vpa_node" {
         name       = "cilium"
       }
     }
-  }
-  depends_on = [helm_release.cilium]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cilium]
 }
 
-resource "kubernetes_manifest" "pdb_operator" {
-  manifest = {
+resource "kubectl_manifest" "pdb_operator" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -442,11 +446,14 @@ resource "kubernetes_manifest" "pdb_operator" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.cilium]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cilium]
 }

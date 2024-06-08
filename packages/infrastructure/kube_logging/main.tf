@@ -59,6 +59,7 @@ module "util_read" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -78,6 +79,7 @@ module "util_write" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -97,6 +99,7 @@ module "util_backend" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -116,6 +119,7 @@ module "util_canary" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -738,9 +742,9 @@ resource "helm_release" "loki" {
   depends_on = [module.redis_cache]
 }
 
-resource "kubernetes_manifest" "service_monitor" {
+resource "kubectl_manifest" "service_monitor" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "monitoring.coreos.com/v1"
     kind       = "ServiceMonitor"
     metadata = {
@@ -764,8 +768,10 @@ resource "kubernetes_manifest" "service_monitor" {
         matchLabels = module.util_canary.match_labels
       }
     }
-  }
-  depends_on = [helm_release.loki]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.loki]
 }
 
 resource "kubernetes_config_map" "dashboard" {
@@ -820,9 +826,9 @@ resource "kubernetes_annotations" "loki_backend" {
   depends_on = [helm_release.loki]
 }
 
-resource "kubernetes_manifest" "vpa_loki_write" {
+resource "kubectl_manifest" "vpa_loki_write" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -837,13 +843,15 @@ resource "kubernetes_manifest" "vpa_loki_write" {
         name       = "loki-write"
       }
     }
-  }
-  depends_on = [helm_release.loki]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.loki]
 }
 
-resource "kubernetes_manifest" "vpa_loki_backend" {
+resource "kubectl_manifest" "vpa_loki_backend" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -858,13 +866,15 @@ resource "kubernetes_manifest" "vpa_loki_backend" {
         name       = "loki-backend"
       }
     }
-  }
-  depends_on = [helm_release.loki]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.loki]
 }
 
-resource "kubernetes_manifest" "vpa_loki_read" {
+resource "kubectl_manifest" "vpa_loki_read" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -879,13 +889,15 @@ resource "kubernetes_manifest" "vpa_loki_read" {
         name       = "loki-read"
       }
     }
-  }
-  depends_on = [helm_release.loki]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.loki]
 }
 
-resource "kubernetes_manifest" "vpa_loki_canary" {
+resource "kubectl_manifest" "vpa_loki_canary" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -900,6 +912,8 @@ resource "kubernetes_manifest" "vpa_loki_canary" {
         name       = "loki-canary"
       }
     }
-  }
-  depends_on = [helm_release.loki]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.loki]
 }

@@ -163,16 +163,15 @@ resource "helm_release" "oauth2_proxy" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/oauth2-proxy/oauth2-proxy"
       }
-      labels = module.util.labels
-      labels = module.util.labels
+      labels    = module.util.labels
+      podLabels = module.util.labels
       podAnnotations = {
         "config.linkerd.io/proxy-memory-request" = "5Mi" # We can use lower requests / limits here b/c this will never receive much traffic
         "config.linkerd.io/proxy-memory-limit"   = "20Mi"
       }
       replicaCount = 2
-      strategy = {
-        type          = "Recreate"
-        rollingUpdate = null
+      podDisruptionBudget = {
+        enabled = false
       }
       tolerations               = module.util.tolerations
       affinity                  = module.util.affinity
@@ -190,9 +189,31 @@ resource "helm_release" "oauth2_proxy" {
   timeout = 60
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = random_id.oauth2_proxy.hex
+      namespace = var.namespace
+      labels    = module.util.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.oauth2_proxy]
+}
+
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -207,8 +228,10 @@ resource "kubernetes_manifest" "vpa" {
         name       = random_id.oauth2_proxy.hex
       }
     }
-  }
-  depends_on = [helm_release.oauth2_proxy]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.oauth2_proxy]
 }
 
 /***************************************

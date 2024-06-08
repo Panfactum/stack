@@ -155,7 +155,8 @@ resource "helm_release" "metrics_server" {
         enabled      = true
         minAvailable = 1
       }
-      priorityClassName = "system-cluster-critical"
+      priorityClassName   = "system-cluster-critical"
+      podDisruptionBudget = { enabled = false } # Created below
 
 
       ///////////////////////////////////////
@@ -196,9 +197,31 @@ resource "helm_release" "metrics_server" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = local.name
+      namespace = local.namespace
+      labels    = module.util.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.metrics_server]
+}
+
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -213,5 +236,8 @@ resource "kubernetes_manifest" "vpa" {
         name       = local.name
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.metrics_server]
 }

@@ -173,11 +173,13 @@ resource "helm_release" "cnpg" {
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
+
+  depends_on = [module.webhook_cert]
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -192,12 +194,14 @@ resource "kubernetes_manifest" "vpa" {
         name       = local.name
       }
     }
-  }
-  depends_on = [helm_release.cnpg]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cnpg]
 }
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -206,11 +210,14 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.util.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.cnpg]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cnpg]
 }

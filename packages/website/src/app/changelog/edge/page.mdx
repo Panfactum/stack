@@ -24,11 +24,17 @@ allows you to pass inputs to all modules in the current scope.
 - Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by $50 - 100 / month
 due to significantly better price / performance ratios for arm64 instances in AWS.
 
+- Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+This will allow the system to scale up quicker when running against resource pressure and pods become stuck in a temporary crash loop.
+
 ### Fixed
 
 - Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during
 node shutdown. This resulted in EBS volumes not being detached and introduced an unnecessary 6min delay when moving
 EBS volumes between nodes.
+
+- Replaces most usages of `kubernetes_manifest` with `kubectl_manifest` to avoid type manifest parsing issues that prevent
+dynamic values in manifests.
 
 ## edge.24-06-06
 

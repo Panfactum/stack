@@ -189,8 +189,8 @@ resource "helm_release" "canary" {
 * Autoscaling
 ***************************************/
 
-resource "kubernetes_manifest" "pdb_canary" {
-  manifest = {
+resource "kubectl_manifest" "pdb_canary" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -203,13 +203,15 @@ resource "kubernetes_manifest" "pdb_canary" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.canary]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.canary]
 }
 
-resource "kubernetes_manifest" "vpa_alloy" {
+resource "kubectl_manifest" "vpa_canary" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -232,6 +234,8 @@ resource "kubernetes_manifest" "vpa_alloy" {
         name       = "canary-checker"
       }
     }
-  }
-  depends_on = [helm_release.canary]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.canary]
 }

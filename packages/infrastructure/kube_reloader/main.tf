@@ -127,9 +127,9 @@ resource "helm_release" "reloader" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -152,12 +152,14 @@ resource "kubernetes_manifest" "vpa" {
         name       = "reloader"
       }
     }
-  }
-  depends_on = [helm_release.reloader]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.reloader]
 }
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -171,6 +173,8 @@ resource "kubernetes_manifest" "pdb" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.reloader]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.reloader]
 }

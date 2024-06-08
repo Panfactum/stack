@@ -328,9 +328,9 @@ resource "kubernetes_storage_class" "standard_retained" {
 * VPA
 ***************************************/
 
-resource "kubernetes_manifest" "vpa_deployment" {
+resource "kubectl_manifest" "vpa_deployment" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -345,12 +345,15 @@ resource "kubernetes_manifest" "vpa_deployment" {
         name       = "ebs-csi-controller"
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.ebs_csi_driver]
 }
 
-resource "kubernetes_manifest" "vpa_daemonset" {
+resource "kubectl_manifest" "vpa_daemonset" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -365,5 +368,8 @@ resource "kubernetes_manifest" "vpa_daemonset" {
         name       = "ebs-csi-node"
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.ebs_csi_driver]
 }

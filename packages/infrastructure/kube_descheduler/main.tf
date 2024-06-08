@@ -279,9 +279,9 @@ resource "helm_release" "descheduler" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa_descheduler" {
+resource "kubectl_manifest" "vpa_descheduler" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -296,12 +296,14 @@ resource "kubernetes_manifest" "vpa_descheduler" {
         name       = "descheduler"
       }
     }
-  }
-  depends_on = [helm_release.descheduler]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.descheduler]
 }
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -310,11 +312,14 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.descheduler]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.descheduler]
 }
