@@ -27,6 +27,8 @@ due to significantly better price / performance ratios for arm64 instances in AW
 - Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
 This will allow the system to scale up quicker when running against resource pressure and pods become stuck in a temporary crash loop.
 
+- Sets maximum node lifetime to 24h to force Karpenter to try to consolidate instances at least once per day.
+
 ### Fixed
 
 - Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during

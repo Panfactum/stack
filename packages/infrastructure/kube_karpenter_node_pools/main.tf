@@ -86,7 +86,7 @@ locals {
 
   disruption_policy = {
     consolidationPolicy = "WhenUnderutilized"
-    expireAfter         = "${24 * 7}h"
+    expireAfter         = "24h"
   }
 
   node_class_template = {
