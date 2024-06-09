@@ -181,6 +181,7 @@ module "bastion" {
   min_replicas                          = 2
   max_replicas                          = 2
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = false // TODO: Create an arm64 build
   instance_type_anti_affinity_preferred = true
   topology_spread_strict                = true
   priority_class_name                   = module.constants.cluster_important_priority_class_name

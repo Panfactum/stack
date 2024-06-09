@@ -13,11 +13,5 @@ dependency "cilium" {
 }
 
 inputs = {
-  pull_through_cache_enabled   = true
   self_generated_certs_enabled = false
-  vpa_enabled                  = true
-
-  # Alpha: Do not use
-  monitoring_enabled = true
-  canary_enabled     = true
 }

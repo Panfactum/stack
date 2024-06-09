@@ -38,6 +38,7 @@ module "util_server" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vault"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   topology_spread_strict                = true
 
@@ -57,6 +58,7 @@ module "util_csi" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vault-csi"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt
@@ -299,6 +301,9 @@ resource "helm_release" "vault" {
         ha = {
           enabled  = true
           replicas = 3
+          disruptionBudget = {
+            enabled = false
+          }
           raft = {
             enabled   = true
             setNodeId = true
@@ -348,9 +353,9 @@ resource "kubernetes_annotations" "vault_pvc" {
   depends_on = [helm_release.vault]
 }
 
-resource "kubernetes_manifest" "vpa_csi" {
+resource "kubectl_manifest" "vpa_csi" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -365,13 +370,37 @@ resource "kubernetes_manifest" "vpa_csi" {
         name       = "vault-csi-provider"
       }
     }
-  }
-  depends_on = [helm_release.vault]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.vault]
 }
 
-resource "kubernetes_manifest" "vpa_server" {
+resource "kubectl_manifest" "pdb_server" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "vault"
+      namespace = local.namespace
+      labels    = module.util_server.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_server.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.vault]
+}
+
+resource "kubectl_manifest" "vpa_server" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -394,8 +423,10 @@ resource "kubernetes_manifest" "vpa_server" {
         name       = "vault"
       }
     }
-  }
-  depends_on = [helm_release.vault]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.vault]
 }
 
 /***************************************

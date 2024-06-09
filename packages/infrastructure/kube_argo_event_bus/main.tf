@@ -35,6 +35,7 @@ module "util" {
   instance_type_anti_affinity_required = true
   zone_anti_affinity_required          = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -57,8 +58,8 @@ module "constants" {
 // will cause a full recreation cycle
 // due to this issue: https://github.com/argoproj/argo-events/issues/3133
 // As a result, we must be EXTREMELY careful in updating this
-resource "kubernetes_manifest" "event_bus" {
-  manifest = {
+resource "kubectl_manifest" "event_bus" {
+  yaml_body = yamlencode({
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "EventBus"
     metadata = {
@@ -128,23 +129,23 @@ resource "kubernetes_manifest" "event_bus" {
         }
       }
     }
-  }
-  computed_fields = [
-    "metadata.finalizers"
-  ]
+  })
+  force_conflicts   = true
+  server_side_apply = true
 
-  wait {
-    condition {
-      type   = "Deployed"
-      status = "True"
-    }
-  }
+  # TODO:
+  #  wait_for {
+  #    field {
+  #      key = "status.conditions.[0].status"
+  #      value = "True"
+  #    }
+  #  }
 }
 
 
-resource "kubernetes_manifest" "vpa_event_bus" {
+resource "kubectl_manifest" "vpa_event_bus" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -159,12 +160,14 @@ resource "kubernetes_manifest" "vpa_event_bus" {
         name       = "eventbus-default-js"
       }
     }
-  }
-  depends_on = [kubernetes_manifest.event_bus]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.event_bus]
 }
 
-resource "kubernetes_manifest" "pdb_event_bus" {
-  manifest = {
+resource "kubectl_manifest" "pdb_event_bus" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -173,12 +176,15 @@ resource "kubernetes_manifest" "pdb_event_bus" {
       labels    = module.util.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [kubernetes_manifest.event_bus]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.event_bus]
 }
 

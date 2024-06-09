@@ -30,12 +30,6 @@ inputs = {
   dhparam                 = local.secrets.dhparam
   ingress_timeout_seconds = 60
   tls_1_2_enabled         = false
-
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-
-  # Alpha: Do not use
-  monitoring_enabled = true
 }
 
 

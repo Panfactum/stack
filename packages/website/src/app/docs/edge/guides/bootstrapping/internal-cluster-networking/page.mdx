@@ -30,13 +30,11 @@ information.
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
 
-3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
+3. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
+4. Run `terragrunt apply`.
 
-5. Run `terragrunt apply`.
-
-6. If the deployment succeeds, you should see the various cilium pods running:
+5. If the deployment succeeds, you should see the various cilium pods running:
 
    <MarkdownImage src={ciliumLaunchImg} alt="Cilium launched successfully" />
 
@@ -58,16 +56,14 @@ Let's deploy it now.
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_core_dns/terragrunt.hcl).
 
-3. For now, set `vpa_enabled` to `false`. We will enable it when we install the autoscalers.
-
-4. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
+3. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
    you should use a `service_ip` of `172.20.0.10` as this is the well-known DNS IP in Kubernetes.
 
-5. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `random` providers.
+4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `random` providers.
 
-6. Run `terragrunt apply`.
+5. Run `terragrunt apply`.
 
-7. If the deployment succeeds, you should see a `core-dns` deployment with 2/2 pods running:
+6. If the deployment succeeds, you should see a `core-dns` deployment with 2/2 pods running:
 
    <MarkdownImage src={corednsImg} alt="CoreDNS launched successfully" />
 

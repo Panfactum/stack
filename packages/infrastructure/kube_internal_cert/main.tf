@@ -30,8 +30,8 @@ module "util" {
   # end-generate
 }
 
-resource "kubernetes_manifest" "cert" {
-  manifest = {
+resource "kubectl_manifest" "cert" {
+  yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
     kind       = "Certificate"
     metadata = {
@@ -94,12 +94,15 @@ resource "kubernetes_manifest" "cert" {
         group = "cert-manager.io"
       }
     }
-  }
+  })
 
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
+  force_conflicts   = true
+  server_side_apply = true
+
+  wait_for {
+    field {
+      key   = "status.conditions.[0].status"
+      value = "True"
     }
   }
 }

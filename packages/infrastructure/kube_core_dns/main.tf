@@ -143,11 +143,11 @@ module "core_dns" {
   min_replicas                          = 2
   max_replicas                          = 2
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   topology_spread_strict                = true
   priority_class_name                   = "system-cluster-critical"
   dns_policy                            = "Default"
-  extra_tolerations                     = [{ operator = "Exists" }]
   containers = concat(
     [
       {
@@ -218,6 +218,8 @@ module "core_dns" {
   extra_tags = merge(var.extra_tags, {
     "k8s-app" = "kube-dns"
   })
+
+  depends_on = [module.metrics_cert]
 }
 
 resource "kubernetes_service" "core_dns" {
@@ -257,9 +259,9 @@ resource "kubernetes_service" "core_dns" {
   depends_on = [module.core_dns]
 }
 
-resource "kubernetes_manifest" "service_monitor" {
+resource "kubectl_manifest" "service_monitor" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "monitoring.coreos.com/v1"
     kind       = "ServiceMonitor"
     metadata = {
@@ -292,13 +294,15 @@ resource "kubernetes_manifest" "service_monitor" {
         matchLabels = module.core_dns.match_labels
       }
     }
-  }
-  depends_on = [kubernetes_service.core_dns]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_service.core_dns]
 }
 
-resource "kubernetes_manifest" "monitoring_rules" {
+resource "kubectl_manifest" "monitoring_rules" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "monitoring.coreos.com/v1"
     kind       = "PrometheusRule"
     metadata = {
@@ -307,8 +311,10 @@ resource "kubernetes_manifest" "monitoring_rules" {
       labels    = module.core_dns.labels
     }
     spec = yamldecode(file("${path.module}/rules.yaml"))
-  }
-  depends_on = [kubernetes_manifest.service_monitor]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.service_monitor]
 }
 
 resource "kubernetes_config_map" "dashboard" {

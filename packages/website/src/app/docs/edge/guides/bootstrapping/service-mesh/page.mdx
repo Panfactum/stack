@@ -31,11 +31,9 @@ Let's deploy the module now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_linkerd/terragrunt.hcl).
 
-3. Set `vpa_enabled` to `false`. We will enable it when we deploy the autoscalers.
+3. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, and `helm` providers.
-
-5. Run `terragrunt apply`.
+4. Run `terragrunt apply`.
 
 You should see a variety of linkerd pods successfully running:
 

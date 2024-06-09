@@ -17,8 +17,4 @@ dependency "logging" {
   skip_outputs = true
 }
 
-inputs = {
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-  monitoring_enabled         = true
-}
+inputs = {}

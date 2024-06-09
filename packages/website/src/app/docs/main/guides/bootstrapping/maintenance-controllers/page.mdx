@@ -221,9 +221,17 @@ Let's verify that backup functionality is working as expected by simulating an e
 
       If not addressed, your cluster will stop functioning within a few hours.
 
-6. Fortunately, we can easily restore from the backup: `velero create restore test --from-backup=test --wait`. [^5]
+6. Fortunately, we can easily restore from the backup: `velero create restore test --from-backup=test --wait`.
 
-7. Once this completes, notice that the `vault` namespace and its associated resources have been restored.
+   <MarkdownAlert severity="warning">
+     You may see a status of `PartiallyFailed`. In the current iteration of the Panfactum stack we use
+     functionality that Velero does not yet have full support for handling. The warnings
+     that Velero generates when this occurs are inconsequential and can be safely ignored assuming that the desired
+     functionality was restored as expected.
+   </MarkdownAlert>
+
+7. Once this completes, notice that the `vault` namespace and its associated resources have been restored. It may take
+   a few minutes for all systems to come back online.
 
 8. Let's verify that the data has been restored as well. Run `vault token lookup`. If this returns valid information
    about your token, that means that the Vault data was successfully restored from the backup:
@@ -254,11 +262,6 @@ Let's verify that backup functionality is working as expected by simulating an e
 
 9. Once you have verified that functionality is successfully restored, delete the backup:
    `velero delete backup test`.
-
-[^5]: You may see a status of `PartiallyFailed`. In the current iteration of the Panfactum stack we use
-    functionality that Velero does not yet have full support for handling. The warnings
-    that Velero generates when this occurs are inconsequential and can be safely ignored assuming that the desired
-    functionality was restored as expected.
 
 ## Next Steps
 

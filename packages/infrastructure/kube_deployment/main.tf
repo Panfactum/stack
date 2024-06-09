@@ -47,6 +47,7 @@ module "pod_template" {
   match_labels                          = { id = random_id.deployment_id.hex }
   burstable_nodes_enabled               = var.burstable_nodes_enabled
   spot_nodes_enabled                    = var.spot_nodes_enabled
+  arm_nodes_enabled                     = var.arm_nodes_enabled
   instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
   instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
   zone_anti_affinity_required           = var.zone_anti_affinity_required
@@ -96,9 +97,9 @@ resource "kubectl_manifest" "deployment" {
   wait_for_rollout  = var.wait_for_rollout
 }
 
-resource "kubernetes_manifest" "vpa_server" {
+resource "kubectl_manifest" "vpa_server" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -125,7 +126,7 @@ resource "kubernetes_manifest" "vpa_server" {
         }]
       }
     }
-  }
+  })
   depends_on = [kubectl_manifest.deployment]
 }
 
@@ -192,8 +193,8 @@ resource "kubernetes_manifest" "vpa_server" {
 #  }
 #}
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -202,12 +203,16 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.pod_template.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.pod_template.match_labels
       }
       maxUnavailable             = 1
       unhealthyPodEvictionPolicy = "AlwaysAllow"
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.deployment]
 }
 

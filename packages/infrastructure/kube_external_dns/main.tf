@@ -56,6 +56,7 @@ module "util" {
   workload_name                         = "external-dns"
   match_labels                          = { id = random_id.ids[each.key].hex }
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt
@@ -234,9 +235,9 @@ resource "kubernetes_config_map" "dashboard" {
   }
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   for_each = var.vpa_enabled ? local.config : {}
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -259,12 +260,15 @@ resource "kubernetes_manifest" "vpa" {
         name       = random_id.ids[each.key].hex
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_dns]
 }
 
-resource "kubernetes_manifest" "pdb" {
+resource "kubectl_manifest" "pdb" {
   for_each = local.config
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -273,11 +277,14 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.util[each.key].labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = { id = random_id.ids[each.key].hex }
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.external_dns]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_dns]
 }

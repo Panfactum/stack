@@ -156,6 +156,7 @@ module "util_webhook" {
 
   workload_name                        = "prometheus-operator-webhook"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -175,6 +176,7 @@ module "util_operator" {
   source = "../kube_workload_utility"
 
   workload_name           = "prometheus-operator"
+  arm_nodes_enabled       = true
   burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
@@ -194,6 +196,7 @@ module "util_grafana" {
 
   workload_name                        = "grafana"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -214,6 +217,7 @@ module "util_prometheus" {
 
   workload_name                        = "prometheus"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -233,6 +237,7 @@ module "util_node_exporter" {
   source = "../kube_workload_utility"
 
   workload_name           = "node-exporter"
+  arm_nodes_enabled       = true
   burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
@@ -252,6 +257,7 @@ module "util_ksm" {
 
   workload_name                        = "kube-state-metrics"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -271,6 +277,7 @@ module "util_thanos_compactor" {
   source = "../kube_workload_utility"
 
   workload_name           = "thanos-compactor"
+  arm_nodes_enabled       = true
   burstable_nodes_enabled = true
 
   # generate: common_vars.snippet.txt
@@ -289,6 +296,7 @@ module "util_thanos_store_gateway" {
   source                               = "../kube_workload_utility"
   workload_name                        = "thanos-store-gateway"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -308,6 +316,7 @@ module "util_thanos_ruler" {
   source                               = "../kube_workload_utility"
   workload_name                        = "thanos-ruler"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -329,6 +338,7 @@ module "util_thanos_query" {
 
   workload_name                        = "thanos-query"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -349,6 +359,7 @@ module "util_thanos_frontend" {
 
   workload_name                        = "thanos-frontend"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -369,6 +380,7 @@ module "util_thanos_bucket_web" {
 
   workload_name                        = "thanos-bucket-web"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -389,6 +401,7 @@ module "util_alertmanager" {
 
   workload_name                        = "alertmanager"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
 
@@ -446,6 +459,7 @@ module "grafana_db" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   pgbouncer_pool_mode         = "session"
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   backups_enabled             = false
   backups_force_delete        = true
   monitoring_enabled          = var.monitoring_enabled
@@ -472,6 +486,7 @@ module "thanos_redis_cache" {
   replica_count               = 3
   lfu_cache_enabled           = true
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
@@ -1823,8 +1838,8 @@ resource "helm_release" "thanos" {
 * PDBs
 ***************************************/
 
-resource "kubernetes_manifest" "pdb_prometheus_operator" {
-  manifest = {
+resource "kubectl_manifest" "pdb_prometheus_operator" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1833,17 +1848,20 @@ resource "kubernetes_manifest" "pdb_prometheus_operator" {
       labels    = module.util_operator.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_operator.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "pdb_prometheus_operator_webhook" {
-  manifest = {
+resource "kubectl_manifest" "pdb_prometheus_operator_webhook" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1852,17 +1870,20 @@ resource "kubernetes_manifest" "pdb_prometheus_operator_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "pdb_grafana" {
-  manifest = {
+resource "kubectl_manifest" "pdb_grafana" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1871,17 +1892,20 @@ resource "kubernetes_manifest" "pdb_grafana" {
       labels    = module.util_grafana.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_grafana.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "pdb_kube_state_metrics" {
-  manifest = {
+resource "kubectl_manifest" "pdb_kube_state_metrics" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1890,17 +1914,20 @@ resource "kubernetes_manifest" "pdb_kube_state_metrics" {
       labels    = module.util_ksm.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_ksm.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "pdb_prometheus" {
-  manifest = {
+resource "kubectl_manifest" "pdb_prometheus" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1909,17 +1936,20 @@ resource "kubernetes_manifest" "pdb_prometheus" {
       labels    = module.util_prometheus.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_prometheus.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "pdb_thanos_compactor" {
-  manifest = {
+resource "kubectl_manifest" "pdb_thanos_compactor" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1928,18 +1958,21 @@ resource "kubernetes_manifest" "pdb_thanos_compactor" {
       labels    = module.util_thanos_compactor.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_thanos_compactor.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "pdb_thanos_bucket_web" {
+resource "kubectl_manifest" "pdb_thanos_bucket_web" {
   count = var.thanos_bucket_web_enable ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1948,17 +1981,20 @@ resource "kubernetes_manifest" "pdb_thanos_bucket_web" {
       labels    = module.util_thanos_bucket_web.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_thanos_bucket_web.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "pdb_thanos_store_gateway" {
-  manifest = {
+resource "kubectl_manifest" "pdb_thanos_store_gateway" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1967,17 +2003,20 @@ resource "kubernetes_manifest" "pdb_thanos_store_gateway" {
       labels    = module.util_thanos_store_gateway.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_thanos_store_gateway.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "pdb_thanos_query_frontend" {
-  manifest = {
+resource "kubectl_manifest" "pdb_thanos_query_frontend" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -1986,17 +2025,20 @@ resource "kubernetes_manifest" "pdb_thanos_query_frontend" {
       labels    = module.util_thanos_frontend.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_thanos_frontend.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "pdb_thanos_query" {
-  manifest = {
+resource "kubectl_manifest" "pdb_thanos_query" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -2005,17 +2047,20 @@ resource "kubernetes_manifest" "pdb_thanos_query" {
       labels    = module.util_thanos_query.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_thanos_query.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "alertmanager" {
-  manifest = {
+resource "kubectl_manifest" "alertmanager" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -2024,13 +2069,16 @@ resource "kubernetes_manifest" "alertmanager" {
       labels    = module.util_alertmanager.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_alertmanager.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
 /***************************************
@@ -2114,9 +2162,9 @@ resource "kubernetes_annotations" "thanos_ruler_pvc" {
   depends_on = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "vpa_prometheus_operator" {
+resource "kubectl_manifest" "vpa_prometheus_operator" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2131,13 +2179,15 @@ resource "kubernetes_manifest" "vpa_prometheus_operator" {
         name       = "prometheus-operator"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_prometheus_operator_webhook" {
+resource "kubectl_manifest" "vpa_prometheus_operator_webhook" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2152,13 +2202,15 @@ resource "kubernetes_manifest" "vpa_prometheus_operator_webhook" {
         name       = "prometheus-operator-webhook"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_grafana" {
+resource "kubectl_manifest" "vpa_grafana" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2173,13 +2225,15 @@ resource "kubernetes_manifest" "vpa_grafana" {
         name       = "prometheus-grafana"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_node_exporter" {
+resource "kubectl_manifest" "vpa_node_exporter" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2194,13 +2248,15 @@ resource "kubernetes_manifest" "vpa_node_exporter" {
         name       = "node-exporter"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_kube_state_metrics" {
+resource "kubectl_manifest" "vpa_kube_state_metrics" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2223,13 +2279,15 @@ resource "kubernetes_manifest" "vpa_kube_state_metrics" {
         name       = "prometheus-kube-state-metrics"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_prometheus" {
+resource "kubectl_manifest" "vpa_prometheus" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2252,13 +2310,15 @@ resource "kubernetes_manifest" "vpa_prometheus" {
         name       = "monitoring"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_thanos_compactor" {
+resource "kubectl_manifest" "vpa_thanos_compactor" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2282,13 +2342,15 @@ resource "kubernetes_manifest" "vpa_thanos_compactor" {
         name       = "thanos-compactor"
       }
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "vpa_thanos_bucket_web" {
+resource "kubectl_manifest" "vpa_thanos_bucket_web" {
   count = var.vpa_enabled && var.thanos_bucket_web_enable ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2303,13 +2365,15 @@ resource "kubernetes_manifest" "vpa_thanos_bucket_web" {
         name       = "thanos-bucketweb"
       }
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "vpa_thanos_store_gateway" {
+resource "kubectl_manifest" "vpa_thanos_store_gateway" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2332,13 +2396,15 @@ resource "kubernetes_manifest" "vpa_thanos_store_gateway" {
         name       = "thanos-storegateway"
       }
     }
-  }
-  depends_on = [helm_release.prometheus_stack]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.prometheus_stack]
 }
 
-resource "kubernetes_manifest" "vpa_thanos_query_frontend" {
+resource "kubectl_manifest" "vpa_thanos_query_frontend" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2353,13 +2419,15 @@ resource "kubernetes_manifest" "vpa_thanos_query_frontend" {
         name       = "thanos-query-frontend"
       }
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
-resource "kubernetes_manifest" "vpa_thanos_query" {
+resource "kubectl_manifest" "vpa_thanos_query" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -2383,8 +2451,10 @@ resource "kubernetes_manifest" "vpa_thanos_query" {
         name       = "thanos-query"
       }
     }
-  }
-  depends_on = [helm_release.thanos]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.thanos]
 }
 
 // This will not work until https://github.com/prometheus-operator/prometheus-operator/issues/6609

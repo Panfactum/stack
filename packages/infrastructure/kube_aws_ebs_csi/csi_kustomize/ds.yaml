@@ -1,0 +1,8 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ebs-csi-node
+spec:
+  template:
+    spec:
+      terminationGracePeriodSeconds: 110

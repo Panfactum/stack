@@ -37,6 +37,7 @@ module "util_controller" {
 
   workload_name                         = "pvc-autoresizer"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = false // Does not have an arm build
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt
@@ -157,9 +158,9 @@ resource "helm_release" "pvc_autoresizer" {
 }
 
 
-resource "kubernetes_manifest" "vpa_controller" {
+resource "kubectl_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -174,8 +175,10 @@ resource "kubernetes_manifest" "vpa_controller" {
         name       = "pvc-autoresizer-controller"
       }
     }
-  }
-  depends_on = [helm_release.pvc_autoresizer]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.pvc_autoresizer]
 }
 
 #resource "kubernetes_manifest" "vpa_webhook" {
@@ -199,8 +202,8 @@ resource "kubernetes_manifest" "vpa_controller" {
 #  depends_on = [helm_release.external_snapshotter]
 #}
 
-resource "kubernetes_manifest" "pdb_controller" {
-  manifest = {
+resource "kubectl_manifest" "pdb_controller" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -209,13 +212,16 @@ resource "kubernetes_manifest" "pdb_controller" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.pvc_autoresizer]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.pvc_autoresizer]
 }
 #
 #resource "kubernetes_manifest" "pdb_webhook" {

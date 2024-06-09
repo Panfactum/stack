@@ -36,6 +36,7 @@ module "util" {
   source                  = "../kube_workload_utility"
   workload_name           = "secrets-csi"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -194,9 +195,9 @@ resource "helm_release" "secrets_csi_driver" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -211,13 +212,15 @@ resource "kubernetes_manifest" "vpa" {
         name       = "secrets-csi"
       }
     }
-  }
-  depends_on = [helm_release.secrets_csi_driver]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.secrets_csi_driver]
 }
 
-resource "kubernetes_manifest" "pod_monitor" {
+resource "kubectl_manifest" "pod_monitor" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "monitoring.coreos.com/v1"
     kind       = "PodMonitor"
     metadata = {
@@ -240,8 +243,10 @@ resource "kubernetes_manifest" "pod_monitor" {
         matchLabels = module.util.match_labels
       }
     }
-  }
-  depends_on = [helm_release.secrets_csi_driver]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.secrets_csi_driver]
 }
 
 

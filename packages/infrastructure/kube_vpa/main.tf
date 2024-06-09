@@ -33,6 +33,7 @@ module "util_admission_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vpa-admission-controller"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
@@ -55,6 +56,7 @@ module "util_recommender" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vpa-recommender"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
@@ -76,6 +78,7 @@ module "util_updater" {
   source                                = "../kube_workload_utility"
   workload_name                         = "vpa-updater"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
@@ -167,10 +170,6 @@ resource "helm_release" "vpa" {
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-recommender"
           tag        = var.vertical_autoscaler_image_version
-        }
-
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
         }
 
         // ONLY 1 of these should be running at a time
@@ -266,10 +265,6 @@ resource "helm_release" "vpa" {
           tag        = var.vertical_autoscaler_image_version
         }
 
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
-
         // ONLY 1 of these should be running at a time
         // b/c there is no leader-election: https://github.com/kubernetes/autoscaler/issues/5481
         replicaCount = 1
@@ -310,9 +305,6 @@ resource "helm_release" "vpa" {
         annotations = {
           "reloader.stakater.com/auto" = "true"
         }
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
 
         // We do need at least 2 otherwise we may get stuck in a loop
         // b/c if this pod goes down, it cannot apply the appropriate
@@ -332,7 +324,8 @@ resource "helm_release" "vpa" {
         }
 
         podDisruptionBudget = {
-          minAvailable = 1
+          minAvailable               = 1
+          unhealthyPodEvictionPolicy = "AlwaysAllow"
         }
 
         resources = {
@@ -361,6 +354,7 @@ resource "helm_release" "vpa" {
       }
     })
   ]
+  depends_on = [module.webhook_cert]
 }
 
 resource "kubernetes_config_map" "dashboard" {
@@ -378,9 +372,9 @@ resource "kubernetes_config_map" "dashboard" {
 * VPA Resources
 ***************************************/
 
-resource "kubernetes_manifest" "vpa_controller" {
+resource "kubectl_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -395,12 +389,14 @@ resource "kubernetes_manifest" "vpa_controller" {
         name       = "vpa-admission-controller"
       }
     }
-  }
+  })
+  server_side_apply = true
+  force_conflicts   = true
 }
 
-resource "kubernetes_manifest" "vpa_recommender" {
+resource "kubectl_manifest" "vpa_recommender" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -423,12 +419,14 @@ resource "kubernetes_manifest" "vpa_recommender" {
         name       = "vpa-recommender"
       }
     }
-  }
+  })
+  server_side_apply = true
+  force_conflicts   = true
 }
 
-resource "kubernetes_manifest" "vpa_updater" {
+resource "kubectl_manifest" "vpa_updater" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -443,5 +441,7 @@ resource "kubernetes_manifest" "vpa_updater" {
         name       = "vpa-updater"
       }
     }
-  }
+  })
+  server_side_apply = true
+  force_conflicts   = true
 }

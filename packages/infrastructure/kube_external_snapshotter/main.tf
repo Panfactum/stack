@@ -37,6 +37,7 @@ module "util_controller" {
   workload_name                         = "external-snapshotter-controller"
   burstable_nodes_enabled               = true
   instance_type_anti_affinity_preferred = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -55,6 +56,7 @@ module "util_webhook" {
   workload_name                         = "external-snapshotter-webhook"
   burstable_nodes_enabled               = true
   instance_type_anti_affinity_preferred = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -200,6 +202,8 @@ resource "helm_release" "external_snapshotter" {
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
+
+  depends_on = [module.webhook_cert]
 }
 
 resource "kubernetes_service" "service" {
@@ -225,9 +229,9 @@ resource "kubernetes_service" "service" {
   depends_on = [helm_release.external_snapshotter]
 }
 
-resource "kubernetes_manifest" "service_monitor" {
+resource "kubectl_manifest" "service_monitor" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "monitoring.coreos.com/v1"
     kind       = "ServiceMonitor"
     metadata = {
@@ -251,14 +255,16 @@ resource "kubernetes_manifest" "service_monitor" {
         matchLabels = module.util_controller.match_labels
       }
     }
-  }
-  depends_on = [helm_release.external_snapshotter]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_snapshotter]
 }
 
 
-resource "kubernetes_manifest" "vpa_controller" {
+resource "kubectl_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -273,13 +279,15 @@ resource "kubernetes_manifest" "vpa_controller" {
         name       = "external-snapshotter"
       }
     }
-  }
-  depends_on = [helm_release.external_snapshotter]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_snapshotter]
 }
 
-resource "kubernetes_manifest" "vpa_webhook" {
+resource "kubectl_manifest" "vpa_webhook" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -294,12 +302,14 @@ resource "kubernetes_manifest" "vpa_webhook" {
         name       = "external-snapshotter-webhook"
       }
     }
-  }
-  depends_on = [helm_release.external_snapshotter]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_snapshotter]
 }
 
-resource "kubernetes_manifest" "pdb_controller" {
-  manifest = {
+resource "kubectl_manifest" "pdb_controller" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -308,17 +318,20 @@ resource "kubernetes_manifest" "pdb_controller" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.external_snapshotter]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_snapshotter]
 }
 
-resource "kubernetes_manifest" "pdb_webhook" {
-  manifest = {
+resource "kubectl_manifest" "pdb_webhook" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -327,13 +340,16 @@ resource "kubernetes_manifest" "pdb_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.external_snapshotter]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.external_snapshotter]
 }
 
 
