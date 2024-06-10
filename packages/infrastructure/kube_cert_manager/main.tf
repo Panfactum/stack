@@ -41,6 +41,7 @@ module "util_controller" {
   workload_name                         = "cert-manager"
   instance_type_anti_affinity_preferred = true
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -59,6 +60,7 @@ module "util_webhook" {
   workload_name                         = "cert-manager-webhook"
   instance_type_anti_affinity_preferred = true
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -76,6 +78,7 @@ module "util_ca_injector" {
   source                                = "../kube_workload_utility"
   workload_name                         = "cert-manager-ca-injector"
   instance_type_anti_affinity_preferred = true
+  arm_nodes_enabled                     = true
 
   // This _can_ be run on a spot node if necessary as a short temporary disruption
   // will not cause cascading failures
@@ -248,8 +251,7 @@ resource "helm_release" "cert_manager" {
         enabled = true
       }
       extraArgs = [
-        "--v=${var.log_verbosity}",
-        "--enable-certificate-owner-ref" // Deletes secrets when the certificate is deleted
+        "--v=${var.log_verbosity}"
       ]
       serviceAccount = {
         create = false
@@ -366,9 +368,9 @@ resource "kubernetes_config_map" "dashboard" {
 * Autoscaling
 ***************************************/
 
-resource "kubernetes_manifest" "vpa_controller" {
+resource "kubectl_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -383,13 +385,15 @@ resource "kubernetes_manifest" "vpa_controller" {
         name       = "cert-manager"
       }
     }
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }
 
-resource "kubernetes_manifest" "vpa_cainjector" {
+resource "kubectl_manifest" "vpa_cainjector" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -404,13 +408,15 @@ resource "kubernetes_manifest" "vpa_cainjector" {
         name       = "cert-manager-cainjector"
       }
     }
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }
 
-resource "kubernetes_manifest" "vpa_webhook" {
+resource "kubectl_manifest" "vpa_webhook" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -425,12 +431,14 @@ resource "kubernetes_manifest" "vpa_webhook" {
         name       = "cert-manager-webhook"
       }
     }
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }
 
-resource "kubernetes_manifest" "pdb_controller" {
-  manifest = {
+resource "kubectl_manifest" "pdb_controller" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -439,17 +447,20 @@ resource "kubernetes_manifest" "pdb_controller" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }
 
-resource "kubernetes_manifest" "pdb_webhook" {
-  manifest = {
+resource "kubectl_manifest" "pdb_webhook" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -458,17 +469,20 @@ resource "kubernetes_manifest" "pdb_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }
 
-resource "kubernetes_manifest" "pdb_ca_injector" {
-  manifest = {
+resource "kubectl_manifest" "pdb_ca_injector" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -477,22 +491,25 @@ resource "kubernetes_manifest" "pdb_ca_injector" {
       labels    = module.util_ca_injector.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_ca_injector.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }
 
 /***************************************
 * Canary Checks
 ***************************************/
 
-resource "kubernetes_manifest" "canary" {
+resource "kubectl_manifest" "canary" {
   count = var.canary_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "canaries.flanksource.com/v1"
     kind       = "Canary"
     metadata = {
@@ -511,9 +528,8 @@ resource "kubernetes_manifest" "canary" {
         }
       ]
     }
-  }
-  field_manager {
-    force_conflicts = true
-  }
-  depends_on = [helm_release.cert_manager]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cert_manager]
 }

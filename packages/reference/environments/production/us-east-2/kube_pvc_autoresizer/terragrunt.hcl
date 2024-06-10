@@ -7,18 +7,12 @@ terraform {
   source = include.panfactum.locals.pf_stack_source
 }
 
-dependency "cluster" {
-  config_path  = "../aws_eks"
+dependency "metrics-server" {
+  config_path  = "../kube_metrics_server"
   skip_outputs = true
 }
 
 inputs = {
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-
   # Only set to true if you have deployed kube_monitoring. Otherwise, leave false.
   prometheus_enabled = true
-
-  # Alpha: Do not use
-  monitoring_enabled = true
 }

@@ -88,8 +88,8 @@ The following instructions apply for **every** environment-region combination wh
 
 5. Run `terragrunt apply`.
 
-In the following sections, modules will have `pull_through_cache_enabled` as an input. Setting this to `true`
-will use the pull through cache that you just deployed. This is the default in the examples that we provide.
+6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
+This ensures all modules deployed in this environment will utilize the cache.
 
 <MarkdownAlert severity="warning">
   This should only be deployed *once* per environment-region combination. If you have multiple clusters

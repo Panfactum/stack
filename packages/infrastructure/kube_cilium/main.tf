@@ -38,6 +38,7 @@ module "util_controller" {
   workload_name                         = "cilium-operator"
   instance_type_anti_affinity_preferred = true
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -55,6 +56,7 @@ module "util_agent" {
   source                  = "../kube_workload_utility"
   workload_name           = "cilium-agent"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -235,6 +237,7 @@ resource "helm_release" "cilium" {
 
       tolerations = concat(
         [
+          // These are required b/c the agent is what removes the taint
           {
             key      = module.constants.cilium_taint.key
             operator = "Exists"
@@ -245,6 +248,15 @@ resource "helm_release" "cilium" {
             operator = "Exists"
             effect   = "NoSchedule"
           },
+
+          // This is required b/c otherwise networking will break during node shutdown
+          {
+            key      = "karpenter.sh/disruption"
+            operator = "Exists"
+            effect   = "NoSchedule"
+          },
+
+          // These are required b/c networking should never be disabled, even under resource pressure
           {
             key      = "node.kubernetes.io/unreachable"
             operator = "Exists"
@@ -378,9 +390,9 @@ resource "helm_release" "cilium" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa_operator" {
+resource "kubectl_manifest" "vpa_operator" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -395,13 +407,15 @@ resource "kubernetes_manifest" "vpa_operator" {
         name       = "cilium-operator"
       }
     }
-  }
-  depends_on = [helm_release.cilium]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cilium]
 }
 
-resource "kubernetes_manifest" "vpa_node" {
+resource "kubectl_manifest" "vpa_node" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -416,12 +430,14 @@ resource "kubernetes_manifest" "vpa_node" {
         name       = "cilium"
       }
     }
-  }
-  depends_on = [helm_release.cilium]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cilium]
 }
 
-resource "kubernetes_manifest" "pdb_operator" {
-  manifest = {
+resource "kubectl_manifest" "pdb_operator" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -430,11 +446,14 @@ resource "kubernetes_manifest" "pdb_operator" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.cilium]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cilium]
 }

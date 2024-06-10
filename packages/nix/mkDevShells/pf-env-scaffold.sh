@@ -24,8 +24,8 @@ if [[ -z ${PF_AWS_DIR} ]]; then
   exit 1
 fi
 
-if [[ ! -f "$PF_AWS_DIR/config" ]]; then
-  echo "Error: AWS CLI config file not found at $PF_AWS_DIR/config" >&2
+if [[ ! -f "$DEVENV_ROOT/$PF_AWS_DIR/config" ]]; then
+  echo "Error: AWS CLI config file not found at $DEVENV_ROOT/$PF_AWS_DIR/config" >&2
   exit 1
 fi
 
@@ -226,9 +226,9 @@ select_secondary_region() {
   echo "$SELECTED"
 }
 
-GLOBAL_FILE="$PF_ENVIRONMENTS_DIR/global.yaml"
+GLOBAL_FILE="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/global.yaml"
 if [[ ! -f $GLOBAL_FILE ]]; then
-  cat >"$ENV_DIR/environment.yaml" <<EOF
+  cat >"$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/global.yaml" <<EOF
 # For reference, see https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables
 EOF
 fi
@@ -236,7 +236,7 @@ fi
 for ENV in "${ENVIRONMENTS[@]}"; do
 
   # Create environment folder
-  ENV_DIR="$PF_ENVIRONMENTS_DIR/$ENV"
+  ENV_DIR="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/$ENV"
   mkdir -p "$ENV_DIR"
 
   # Generate random string for tf_state_bucket
@@ -293,4 +293,4 @@ EOF
   done
 done
 
-echo -e "Environment scaffolding complete. See configuration in $PF_ENVIRONMENTS_DIR.\n" >&2
+echo -e "Environment scaffolding complete. See configuration in $DEVENV_ROOT/$PF_ENVIRONMENTS_DIR.\n" >&2

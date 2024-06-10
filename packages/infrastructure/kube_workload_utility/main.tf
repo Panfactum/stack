@@ -161,6 +161,12 @@ locals {
     value    = "true"
     effect   = "NoSchedule"
   }
+  arm_node_toleration = {
+    key      = "arm64"
+    operator = "Equal"
+    value    = "true"
+    effect   = "NoSchedule"
+  }
   burstable_node_tolerations = [
     local.spot_node_toleration,
     {
@@ -172,6 +178,7 @@ locals {
   ]
   tolerations = concat(
     var.burstable_nodes_enabled ? local.burstable_node_tolerations : var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
+    var.arm_nodes_enabled ? [local.arm_node_toleration] : [],
     var.extra_tolerations
   )
 

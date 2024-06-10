@@ -49,6 +49,7 @@ module "util_controller" {
   workload_name                         = "ebs-csi-controller"
   burstable_nodes_enabled               = true
   instance_type_anti_affinity_preferred = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -171,9 +172,6 @@ resource "helm_release" "ebs_csi_driver" {
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
         }
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
         podLabels = module.util_controller.labels
         resources = {
           requests = {
@@ -242,10 +240,45 @@ resource "helm_release" "ebs_csi_driver" {
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
         }
-        resources = local.default_resources
+        resources         = local.default_resources
+        tolerateAllTaints = false // This prevents nodes from being detached in a timely manner
+        tolerations = concat(
+          [
+            // These are required b/c storage binding should never be disabled, even under resource pressure
+            {
+              key      = "node.kubernetes.io/unreachable"
+              operator = "Exists"
+              effect   = "NoExecute"
+            },
+            {
+              key      = "node.kubernetes.io/disk-pressure"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "node.kubernetes.io/memory-pressure"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "node.kubernetes.io/pid-pressure"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            }
+          ],
+          module.util_controller.tolerations
+        )
       }
     })
   ]
+
+  // We need to extend the termination grace period seconds for the daemonset pods
+  // to allow time for all other pods on the node to terminate as the
+  // ebs pod has to be the last one to terminate in order to detach the ebs volumes
+  postrender {
+    binary_path = "${path.module}/csi_kustomize/kustomize.sh"
+  }
+
   depends_on = [module.aws_permissions]
 }
 
@@ -295,9 +328,9 @@ resource "kubernetes_storage_class" "standard_retained" {
 * VPA
 ***************************************/
 
-resource "kubernetes_manifest" "vpa_deployment" {
+resource "kubectl_manifest" "vpa_deployment" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -312,12 +345,15 @@ resource "kubernetes_manifest" "vpa_deployment" {
         name       = "ebs-csi-controller"
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.ebs_csi_driver]
 }
 
-resource "kubernetes_manifest" "vpa_daemonset" {
+resource "kubectl_manifest" "vpa_daemonset" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -332,5 +368,8 @@ resource "kubernetes_manifest" "vpa_daemonset" {
         name       = "ebs-csi-node"
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.ebs_csi_driver]
 }

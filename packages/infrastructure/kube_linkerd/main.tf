@@ -43,6 +43,7 @@ module "util_controller" {
   source                  = "../kube_workload_utility"
   workload_name           = "linkerd-controller"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -60,6 +61,7 @@ module "util_proxy" {
   source                  = "../kube_workload_utility"
   workload_name           = "linkerd-proxy"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -77,6 +79,7 @@ module "util_viz" {
   source                  = "../kube_workload_utility"
   workload_name           = "linkerd-viz"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -289,7 +292,7 @@ resource "helm_release" "linkerd" {
       controllerImage           = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/controller"
       controllerReplicas        = 2
       enablePodAntiAffinity     = true
-      enablePodDisruptionBudget = true
+      enablePodDisruptionBudget = false # We do this below
       deploymentStrategy = {
         type          = "Recreate"
         rollingUpdate = null
@@ -524,13 +527,13 @@ resource "helm_release" "viz" {
     })
   ]
 
+  # Needed b/c tolerations are not set appropriately on the metrics-api
+  postrender {
+    binary_path = "${path.module}/kustomize_viz/kustomize.sh"
+  }
+
   depends_on = [
-    helm_release.linkerd_crds,
-    kubernetes_config_map.ca_bundle,
-    module.linkerd_policy_validator,
-    module.linkerd_proxy_injector,
-    module.linkerd_identity_issuer,
-    module.linkerd_profile_validator
+    helm_release.linkerd
   ]
 }
 
@@ -539,9 +542,9 @@ resource "helm_release" "viz" {
 ***************************************/
 
 
-resource "kubernetes_manifest" "vpa_identity" {
+resource "kubectl_manifest" "vpa_identity" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -556,13 +559,40 @@ resource "kubernetes_manifest" "vpa_identity" {
         name       = "linkerd-identity"
       }
     }
-  }
-  depends_on = [helm_release.linkerd]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
 }
 
-resource "kubernetes_manifest" "vpa_destination" {
+resource "kubectl_manifest" "pdb_identity" {
+  count = var.monitoring_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-identity"
+      namespace = local.namespace
+      labels    = module.util_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = {
+          "linkerd.io/control-plane-component" = "identity"
+        }
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
+}
+
+resource "kubectl_manifest" "vpa_destination" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -577,13 +607,41 @@ resource "kubernetes_manifest" "vpa_destination" {
         name       = "linkerd-destination"
       }
     }
-  }
-  depends_on = [helm_release.linkerd]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
 }
 
-resource "kubernetes_manifest" "vpa_proxy_injectory" {
+
+resource "kubectl_manifest" "pdb_destination" {
+  count = var.monitoring_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-destination"
+      namespace = local.namespace
+      labels    = module.util_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = {
+          "linkerd.io/control-plane-component" = "destination"
+        }
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
+}
+
+resource "kubectl_manifest" "vpa_proxy_injectory" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -598,13 +656,40 @@ resource "kubernetes_manifest" "vpa_proxy_injectory" {
         name       = "linkerd-proxy-injector"
       }
     }
-  }
-  depends_on = [helm_release.linkerd]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
 }
 
-resource "kubernetes_manifest" "vpa_metrics_api" {
+resource "kubectl_manifest" "pdb_proxy_injector" {
+  count = var.monitoring_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-proxy-injector"
+      namespace = local.namespace
+      labels    = module.util_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = {
+          "linkerd.io/control-plane-component" = "proxy-injector"
+        }
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
+}
+
+resource "kubectl_manifest" "vpa_metrics_api" {
   count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -619,13 +704,15 @@ resource "kubernetes_manifest" "vpa_metrics_api" {
         name       = "metrics-api"
       }
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
-resource "kubernetes_manifest" "pdb_metrics_api" {
+resource "kubectl_manifest" "pdb_metrics_api" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -634,6 +721,7 @@ resource "kubernetes_manifest" "pdb_metrics_api" {
       labels    = module.util_viz.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = {
           "linkerd.io/extension"        = "viz"
@@ -642,13 +730,15 @@ resource "kubernetes_manifest" "pdb_metrics_api" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
-resource "kubernetes_manifest" "vpa_tap_injector" {
+resource "kubectl_manifest" "vpa_tap_injector" {
   count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -663,13 +753,15 @@ resource "kubernetes_manifest" "vpa_tap_injector" {
         name       = "tap-injector"
       }
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
-resource "kubernetes_manifest" "pdb_tap_injector" {
+resource "kubectl_manifest" "pdb_tap_injector" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -678,6 +770,7 @@ resource "kubernetes_manifest" "pdb_tap_injector" {
       labels    = module.util_viz.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = {
           "linkerd.io/extension"        = "viz"
@@ -686,13 +779,15 @@ resource "kubernetes_manifest" "pdb_tap_injector" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
-resource "kubernetes_manifest" "vpa_web" {
+resource "kubectl_manifest" "vpa_web" {
   count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -707,14 +802,16 @@ resource "kubernetes_manifest" "vpa_web" {
         name       = "web"
       }
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
 
-resource "kubernetes_manifest" "pdb_web" {
+resource "kubectl_manifest" "pdb_web" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -723,6 +820,7 @@ resource "kubernetes_manifest" "pdb_web" {
       labels    = module.util_viz.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = {
           "linkerd.io/extension"        = "viz"
@@ -731,14 +829,16 @@ resource "kubernetes_manifest" "pdb_web" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
 
-resource "kubernetes_manifest" "vpa_tap" {
+resource "kubectl_manifest" "vpa_tap" {
   count = var.vpa_enabled && var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -753,13 +853,15 @@ resource "kubernetes_manifest" "vpa_tap" {
         name       = "tap"
       }
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }
 
-resource "kubernetes_manifest" "pdb_tap" {
+resource "kubectl_manifest" "pdb_tap" {
   count = var.monitoring_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -768,6 +870,7 @@ resource "kubernetes_manifest" "pdb_tap" {
       labels    = module.util_viz.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = {
           "linkerd.io/extension"        = "viz"
@@ -776,6 +879,8 @@ resource "kubernetes_manifest" "pdb_tap" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.viz]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.viz]
 }

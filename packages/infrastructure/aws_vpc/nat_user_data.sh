@@ -14,13 +14,16 @@ eip_allocation_id="${EIP_ALLOCATION_ID}"
 # to try again with a new instance
 instance_id=""
 handle_exit() {
-  if [ $? -eq 1 ]; then
+  # shellcheck disable=SC2181
+  if [ $? != 0 ]; then
     echo "Script exited with error."
     if [ "$instance_id" != "" ]; then
       echo "We have the instance ID, so terminating the instance..."
       aws ec2 terminate-instances --instance-ids "$instance_id"
     fi
     shutdown -h now
+  else
+    echo "NAT setup completed successfully!"
   fi
 }
 trap 'handle_exit' EXIT

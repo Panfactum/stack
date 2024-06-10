@@ -147,7 +147,7 @@ locals {
         "X-Suggested-File-Name",
         "Cookie"
       ]))
-      "nginx.ingress.kubernetes.io/cors-max-age" = "${var.cors_max_age_seconds}"
+      "nginx.ingress.kubernetes.io/cors-max-age" = tostring("${var.cors_max_age_seconds}")
       "nginx.ingress.kubernetes.io/cors-allow-origin" = join(", ", tolist(toset(concat(
         var.cors_allowed_origins_self ? local.domains : [],
         var.cors_allowed_origins_subdomains ? local.subdomains : [],
@@ -195,8 +195,8 @@ resource "random_id" "ingress_id" {
   byte_length = 8
 }
 
-resource "kubernetes_manifest" "ingress_cert" {
-  manifest = {
+resource "kubectl_manifest" "ingress_cert" {
+  yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
     kind       = "Certificate"
     metadata = {
@@ -224,18 +224,22 @@ resource "kubernetes_manifest" "ingress_cert" {
         group = "cert-manager.io"
       }
     }
-  }
-  wait {
-    condition {
-      type   = "Ready"
-      status = "True"
+  })
+
+  force_conflicts   = true
+  server_side_apply = true
+
+  wait_for {
+    field {
+      key   = "status.conditions.[0].status"
+      value = "True"
     }
   }
 }
 
-resource "kubernetes_manifest" "ingress" {
+resource "kubectl_manifest" "ingress" {
   count = (length(var.ingress_configs))
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "networking.k8s.io/v1"
     kind       = "Ingress"
     metadata = {
@@ -286,8 +290,10 @@ resource "kubernetes_manifest" "ingress" {
         }
       ]
     }
-  }
-  depends_on = [kubernetes_manifest.ingress_cert]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.ingress_cert]
 }
 
 resource "random_id" "rewrite_id" {
@@ -296,9 +302,9 @@ resource "random_id" "rewrite_id" {
   byte_length = 8
 }
 
-resource "kubernetes_manifest" "ingress_rewrites" {
+resource "kubectl_manifest" "ingress_rewrites" {
   count = length(local.rewrite_configs)
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "networking.k8s.io/v1"
     kind       = "Ingress"
     metadata = {
@@ -338,7 +344,9 @@ resource "kubernetes_manifest" "ingress_rewrites" {
         }
       ]
     }
-  }
-  depends_on = [kubernetes_manifest.ingress_cert]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.ingress_cert]
 }
 

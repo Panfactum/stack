@@ -21,8 +21,5 @@ inputs = {
   grafana_domain = "grafana.prod.panfactum.com"
   vault_domain   = dependency.vault.outputs.vault_domain
 
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-  ingress_enabled            = true
-  monitoring_enabled         = true
+  ingress_enabled = true
 }

@@ -73,7 +73,7 @@
     }) { inherit system; };
 
     # Custom Packages
-    terragrunt = panfactumResolvedPkgs.writeShellScriptBin "terragrunt" ''
+    customTerragrunt = panfactumResolvedPkgs.writeShellScriptBin "terragrunt" ''
       #!/bin/env bash
 
       export GIT_LFS_SKIP_SMUDGE=1
@@ -204,6 +204,8 @@
             (import ./setup { pkgs = panfactumResolvedPkgs; })
             (util.customShellScript
               "pf-env-scaffold") # helper for the bootstrapping guide
+            (util.customShellScript
+              "pf-env-bootstrap") # helper for the bootstrapping guide
 
             ####################################
             # Kubernetes
@@ -238,7 +240,7 @@
             # Infrastructure-as-Code
             ####################################
             src3.opentofu # declarative iac tool (open alternative to terraform)
-            terragrunt # opentofu-runner
+            customTerragrunt # opentofu-runner
             (util.customShellScript
               "get-version-hash") # helper for the IaC tagging
             (util.customShellScript

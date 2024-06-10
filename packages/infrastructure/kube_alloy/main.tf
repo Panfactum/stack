@@ -55,6 +55,7 @@ module "util" {
   source                  = "../kube_workload_utility"
   workload_name           = "alloy"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -187,9 +188,9 @@ resource "helm_release" "alloy" {
 * Autoscaling
 ***************************************/
 
-resource "kubernetes_manifest" "vpa_alloy" {
+resource "kubectl_manifest" "vpa_alloy" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -212,6 +213,8 @@ resource "kubernetes_manifest" "vpa_alloy" {
         name       = "alloy"
       }
     }
-  }
-  depends_on = [helm_release.alloy]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.alloy]
 }

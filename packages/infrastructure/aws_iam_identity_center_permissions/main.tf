@@ -133,7 +133,6 @@ module "permission_bindings" {
   source                               = "../aws_account_permission_binding"
   sso_instance_arn                     = local.sso_instance_arn
   identity_store_id                    = local.identity_store_id
-  environment                          = each.key
   aws_account_id                       = each.value.account_id
   superuser_groups                     = each.value.superuser_groups
   admin_groups                         = toset(concat(each.value.superuser_groups, each.value.admin_groups))

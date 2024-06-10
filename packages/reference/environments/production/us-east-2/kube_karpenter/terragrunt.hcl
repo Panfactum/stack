@@ -25,9 +25,4 @@ inputs = {
     "PRIVATE_B",
     "PRIVATE_C"
   ]
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-
-  # Alpha: Do not use
-  monitoring_enabled = true
 }

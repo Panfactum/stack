@@ -11,9 +11,50 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Added
 
+- Updates [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) with many new variables
+for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
+
+### Fixed
+
+- Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart
+if NAT setup failed with an exit code other than `1`.
+
+- Increased the memory floor of the Authentik server in [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
+to avoid OOM issues.
+
+- Updates [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to allow showing
+[Gravatar](https://gravatar.com/) profile images.
+
+## edge.24-06-08
+
+### Added
+
 - Updates [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) to support new command `pf-vpc-network-test` that
 will verify network connectivity properties of the instantiated VPC. This allows us to simplify an
 otherwise [complex validation step in the bootstrapping guide](/docs/edge/guides/bootstrapping/aws-networking#test-connectivity).
+
+- Adds the `pf-env-bootstrap` command that automatically bootstraps the necessary resources to begin working with
+IaC in an environment. This replaces the manual steps that used to be a part of the [bootstrapping guide.](/docs/edge/guides/bootstrapping/infrastructure-as-code#set-up-state-management)
+
+- Adds new `extra_inputs` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
+allows you to pass inputs to all modules in the current scope.
+
+- Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by $25 - 50 / month
+due to significantly better price / performance ratios for arm64 instances in AWS.
+
+- Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+This will allow the system to scale up quicker when running against resource pressure and pods become stuck in a temporary crash loop.
+
+- Sets maximum node lifetime to 24h to force Karpenter to try to consolidate instances at least once per day.
+
+### Fixed
+
+- Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during
+node shutdown. This resulted in EBS volumes not being detached and introduced an unnecessary 6min delay when moving
+EBS volumes between nodes.
+
+- Replaces most usages of `kubernetes_manifest` with `kubectl_manifest` to avoid type manifest parsing issues that prevent
+dynamic values in manifests.
 
 ## edge.24-06-06
 
@@ -200,9 +241,9 @@ inside `.nix` files.
   To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
 
 - [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) has two
-  new flags, `pg_bouncer_read_only_enabled` (default `false`) and `pg_bouncer_read_write_enabled` (default `true`), which will enable
+  new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`), which will enable
   the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
-  to have idle resources. This is a *breaking* change as `pg_bouncer_read_only_enabled` is set to `false` by default.
+  to have idle resources. This is a *breaking* change as `pgbouncer_read_only_enabled` is set to `false` by default.
 
 ### Added
 

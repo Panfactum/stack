@@ -35,8 +35,8 @@ locals {
   stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
 
   poolers_to_enable = toset(concat(
-    var.pg_bouncer_read_only_enabled ? ["r"] : [],
-    var.pg_bouncer_read_write_enabled ? ["rw"] : []
+    var.pgbouncer_read_only_enabled ? ["r"] : [],
+    var.pgbouncer_read_write_enabled ? ["rw"] : []
   ))
 }
 
@@ -66,6 +66,7 @@ module "util_cluster" {
   workload_name                        = "pg-${random_id.cluster_id.hex}"
   burstable_nodes_enabled              = var.burstable_instances_enabled
   spot_nodes_enabled                   = var.spot_instances_enabled
+  arm_nodes_enabled                    = var.arm_instances_enabled
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   lifetime_evictions_enabled           = false
@@ -88,6 +89,7 @@ module "util_pooler" {
 
   workload_name                        = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   pod_affinity_match_labels            = module.util_cluster.match_labels
@@ -463,11 +465,13 @@ resource "kubernetes_manifest" "postgres_cluster" {
   field_manager {
     force_conflicts = true
   }
+
+  depends_on = [module.client_certs, module.server_certs]
 }
 
-resource "kubernetes_manifest" "scheduled_backup" {
+resource "kubectl_manifest" "scheduled_backup" {
   count = var.backups_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "ScheduledBackup"
     metadata = {
@@ -481,8 +485,10 @@ resource "kubernetes_manifest" "scheduled_backup" {
         name = local.cluster_name
       }
     }
-  }
-  depends_on = [kubernetes_manifest.postgres_cluster]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster]
 }
 
 # TODO: Re-enable once https://github.com/cloudnative-pg/cloudnative-pg/issues/2574 is addressed
@@ -511,8 +517,8 @@ resource "kubernetes_manifest" "scheduled_backup" {
 #}
 
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -523,13 +529,16 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.util_cluster.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_cluster.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [kubernetes_manifest.postgres_cluster]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster]
 }
 
 /***************************************
@@ -697,9 +706,9 @@ module "pooler_certs" {
 }
 
 
-resource "kubernetes_manifest" "connection_pooler" {
+resource "kubectl_manifest" "connection_pooler" {
   for_each = local.poolers_to_enable
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Pooler"
     metadata = {
@@ -719,10 +728,38 @@ resource "kubernetes_manifest" "connection_pooler" {
         }
         authQuery = "SELECT usename, passwd FROM user_search($1)"
         poolMode  = var.pgbouncer_pool_mode
-        parameters = {
-          log_connections    = var.log_connections_enabled ? 1 : 0
-          log_disconnections = var.log_connections_enabled ? 1 : 0
-        }
+        parameters = { for k, v in {
+          max_client_conn           = tostring(var.pgbouncer_max_client_conn)
+          log_connections           = tostring(var.pgbouncer_log_connections ? 1 : 0)
+          log_disconnections        = tostring(var.pgbouncer_log_disconnections ? 1 : 0)
+          log_pooler_errors         = tostring(var.pgbouncer_log_pooler_errors ? 1 : 0)
+          application_name_add_host = tostring(var.pgbouncer_application_name_add_host ? 1 : 0)
+          autodb_idle_timeout       = tostring(var.pgbouncer_autodb_idle_timeout)
+          client_idle_timeout       = tostring(var.pgbouncer_client_idle_timeout)
+          client_login_timeout      = tostring(var.pgbouncer_client_login_timeout)
+          default_pool_size         = tostring(var.pgbouncer_default_pool_size)
+          disable_pqexec            = tostring(var.pgbouncer_disable_pqexec ? 1 : 0)
+          max_db_connections        = tostring(var.pgbouncer_max_db_connections)
+          max_prepared_statements   = tostring(var.pgbouncer_max_prepared_statements)
+          max_user_connections      = tostring(var.pgbouncer_max_user_connections)
+          min_pool_size             = tostring(var.pgbouncer_min_pool_size)
+          query_timeout             = tostring(var.pgbouncer_query_timeout)
+          query_wait_timeout        = tostring(var.pgbouncer_query_wait_timeout)
+          reserve_pool_size         = tostring(var.pgbouncer_reserve_pool_size)
+          reserve_pool_timeout      = tostring(var.pgbouncer_reserve_pool_timeout)
+          server_connect_timeout    = tostring(var.pgbouncer_server_connect_timeout)
+          server_fast_close         = tostring(var.pgbouncer_server_fast_close ? 1 : 0)
+          server_idle_timeout       = tostring(var.pgbouncer_server_idle_timeout)
+          server_lifetime           = tostring(var.pgbouncer_server_lifetime)
+          server_login_retry        = tostring(var.pgbouncer_server_login_retry)
+          stats_period              = tostring(var.pgbouncer_stats_period)
+          tcp_keepalive             = tostring(var.pgbouncer_tcp_keepalive ? 1 : 0)
+          tcp_keepcnt               = var.pgbouncer_tcp_keepcnt == null ? null : tostring(var.pgbouncer_tcp_keepcnt)
+          tcp_keepidle              = var.pgbouncer_tcp_keepidle == null ? null : tostring(var.pgbouncer_tcp_keepidle)
+          tcp_keepintvl             = var.pgbouncer_tcp_keepintvl == null ? null : tostring(var.pgbouncer_tcp_keepintvl)
+          tcp_user_timeout          = tostring(var.pgbouncer_tcp_user_timeout ? 1 : 0)
+          verbose                   = tostring(var.pgbouncer_verbose)
+        } : k => v if v != null }
       }
       monitoring = {
         enablePodMonitor = var.monitoring_enabled
@@ -769,9 +806,10 @@ resource "kubernetes_manifest" "connection_pooler" {
         }
       }
     }
-  }
-
-  depends_on = [kubernetes_manifest.postgres_cluster]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster, module.pooler_certs]
 }
 
 
@@ -799,9 +837,9 @@ resource "kubernetes_manifest" "connection_pooler" {
 #  depends_on = [kubernetes_manifest.connection_pooler]
 #}
 
-resource "kubernetes_manifest" "pdb_pooler" {
+resource "kubectl_manifest" "pdb_pooler" {
   for_each = local.poolers_to_enable
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -815,6 +853,8 @@ resource "kubernetes_manifest" "pdb_pooler" {
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [kubernetes_manifest.connection_pooler]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.connection_pooler]
 }

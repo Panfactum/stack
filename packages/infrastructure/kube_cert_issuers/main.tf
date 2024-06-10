@@ -76,8 +76,8 @@ module "aws_permissions" {
 }
 
 // the default issuer for PUBLIC tls certs in the default DNS zone for the env
-resource "kubernetes_manifest" "cluster_issuer" {
-  manifest = {
+resource "kubectl_manifest" "cluster_issuer" {
+  yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
     kind       = "ClusterIssuer"
     metadata = {
@@ -105,7 +105,9 @@ resource "kubernetes_manifest" "cluster_issuer" {
         }]
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 /***************************************
@@ -227,8 +229,8 @@ resource "vault_pki_secret_backend_role" "vault_issuer" {
   max_ttl = 60 * 60 * 24 * 90 // Internal certs need to be rotated at least quarterly
 }
 
-resource "kubernetes_manifest" "internal_ci" {
-  manifest = {
+resource "kubectl_manifest" "internal_ci" {
+  yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
     kind       = "ClusterIssuer"
     metadata = {
@@ -250,7 +252,9 @@ resource "kubernetes_manifest" "internal_ci" {
         }
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 # Make sure this CA data is available in all namespaces for mTLS
@@ -352,8 +356,8 @@ resource "vault_pki_secret_backend_role" "vault_ca_issuer" {
   max_ttl = 60 * 60 * 24 * 90 // Internal certs need to be rotated at least quarterly
 }
 
-resource "kubernetes_manifest" "internal_ca_ci" {
-  manifest = {
+resource "kubectl_manifest" "internal_ca_ci" {
+  yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
     kind       = "ClusterIssuer"
     metadata = {
@@ -375,5 +379,7 @@ resource "kubernetes_manifest" "internal_ca_ci" {
         }
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }

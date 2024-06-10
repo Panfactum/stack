@@ -69,6 +69,11 @@ variable "burstable_instances_enabled" {
   default     = false
 }
 
+variable "arm_instances_enabled" {
+  description = "Whether the database nodes can be scheduled on arm64 instances"
+  type        = bool
+  default     = false
+}
 
 variable "persistence_enabled" {
   description = "Whether the redis data will be stored on disk"

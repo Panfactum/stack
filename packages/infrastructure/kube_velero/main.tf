@@ -38,6 +38,7 @@ module "util" {
   source                                = "../kube_workload_utility"
   workload_name                         = "velero"
   burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
 
   # generate: common_vars.snippet.txt
@@ -173,8 +174,8 @@ module "aws_permissions" {
 * VolumeSnapshotClass
 ***************************************/
 
-resource "kubernetes_manifest" "snapshot_class" {
-  manifest = {
+resource "kubectl_manifest" "snapshot_class" {
+  yaml_body = yamlencode({
     apiVersion = "snapshot.storage.k8s.io/v1"
     kind       = "VolumeSnapshotClass"
     metadata = {
@@ -196,7 +197,7 @@ resource "kubernetes_manifest" "snapshot_class" {
       tagSpecification_2 = "Name={{ .VolumeSnapshotName }}"
       tagSpecification_3 = "ContentName={{ .VolumeSnapshotContentName }}"
     }
-  }
+  })
 }
 
 /***************************************
@@ -275,6 +276,7 @@ resource "helm_release" "velero" {
 
 
       priorityClassName = module.constants.cluster_important_priority_class_name
+      tolerations       = module.util.tolerations
 
       resources = {
         requests = {
@@ -370,9 +372,9 @@ resource "kubernetes_config_map" "dashboard" {
 }
 
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -395,12 +397,14 @@ resource "kubernetes_manifest" "vpa" {
         name       = "velero"
       }
     }
-  }
-  depends_on = [helm_release.velero]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.velero]
 }
 
-resource "kubernetes_manifest" "pdb" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -409,11 +413,14 @@ resource "kubernetes_manifest" "pdb" {
       labels    = module.util.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.velero]
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.velero]
 }

@@ -75,6 +75,7 @@ module "util" {
   source                               = "../kube_workload_utility"
   workload_name                        = "nginx-ingress"
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = true
   topology_spread_strict               = true
   lifetime_evictions_enabled           = false
@@ -477,9 +478,9 @@ resource "kubernetes_service" "nginx_status" {
   depends_on = [helm_release.nginx_ingress]
 }
 
-resource "kubernetes_manifest" "vpa_nginx" {
+resource "kubectl_manifest" "vpa_nginx" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -494,5 +495,8 @@ resource "kubernetes_manifest" "vpa_nginx" {
         name       = "nginx-controller"
       }
     }
-  }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.nginx_ingress]
 }

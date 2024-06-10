@@ -26,11 +26,6 @@ locals {
       values   = ["5"]
     },
     {
-      key      = "kubernetes.io/arch"
-      operator = "In"
-      values   = ["amd64"]
-    },
-    {
       key      = "kubernetes.io/os"
       operator = "In"
       values   = ["linux"]
@@ -49,11 +44,6 @@ locals {
       values   = ["2"]
     },
     {
-      key      = "kubernetes.io/arch"
-      operator = "In"
-      values   = ["amd64"]
-    },
-    {
       key      = "kubernetes.io/os"
       operator = "In"
       values   = ["linux"]
@@ -61,9 +51,43 @@ locals {
     {
       key      = "karpenter.k8s.aws/instance-memory"
       operator = "Gt"
-      values   = ["2047"]
+      // 2GB of memory is not efficient as each node requires about 1-1.5GB of memory just for the
+      // controllers that must run on each node
+      values = ["2048"]
     }
   ]
+
+  spot_taints = [
+    {
+      key    = "spot"
+      value  = "true"
+      effect = "NoSchedule"
+    }
+  ]
+
+  burstable_taints = concat(
+    local.spot_taints,
+    [
+      {
+        key    = "burstable"
+        value  = "true"
+        effect = "NoSchedule"
+      }
+    ]
+  )
+
+  arm_taints = [
+    {
+      key    = "arm64"
+      value  = "true"
+      effect = "NoSchedule"
+    }
+  ]
+
+  disruption_policy = {
+    consolidationPolicy = "WhenUnderutilized"
+    expireAfter         = "24h"
+  }
 
   node_class_template = {
     amiFamily = "Bottlerocket"
@@ -273,38 +297,84 @@ resource "kubernetes_manifest" "burstable_node_pool" {
             kind       = "EC2NodeClass"
             name       = "burstable"
           }
-          taints = [
-            {
-              key    = "burstable"
-              value  = "true"
-              effect = "NoSchedule"
-            },
-            {
-              key    = "spot"
-              value  = "true"
-              effect = "NoSchedule"
-            }
-          ]
+          taints = local.burstable_taints
           startupTaints = [
             module.constants.cilium_taint
           ]
           requirements = concat(
             local.burstable_requirements,
-            [{
-              key = "karpenter.sh/capacity-type"
-              operator : "In"
-              values : ["spot"]
-            }]
+            [
+              {
+                key = "karpenter.sh/capacity-type"
+                operator : "In"
+                values : ["spot"]
+              },
+              {
+                key      = "kubernetes.io/arch"
+                operator = "In"
+                values   = ["amd64"]
+              },
+            ]
           )
         }
       }
-      disruption = {
-        consolidationPolicy = "WhenUnderutilized"
-        expireAfter         = "${24 * 7}h"
-      }
+      disruption = local.disruption_policy
 
-      // This should be higher than the preference of normal spot nodes
-      weight = 20
+      weight = 10
+    }
+  }
+  depends_on = [kubernetes_manifest.burstable_node_class]
+}
+
+
+resource "kubernetes_manifest" "burstable_arm_node_pool" {
+  manifest = {
+    apiVersion = "karpenter.sh/v1beta1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "burstable-arm"
+      labels = module.util.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(module.util.labels, {
+            "panfactum.com/class" = "burstable"
+          })
+        }
+        spec = {
+          nodeClassRef = {
+            apiVersion = "karpenter.k8s.aws/v1beta1"
+            kind       = "EC2NodeClass"
+            name       = "burstable"
+          }
+          taints = concat(
+            local.burstable_taints,
+            local.arm_taints
+          )
+          startupTaints = [
+            module.constants.cilium_taint
+          ]
+          requirements = concat(
+            local.burstable_requirements,
+            [
+              {
+                key = "karpenter.sh/capacity-type"
+                operator : "In"
+                values : ["spot"]
+              },
+              {
+                key      = "kubernetes.io/arch"
+                operator = "In"
+                values   = ["arm64"]
+              },
+            ]
+          )
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 10
     }
   }
   depends_on = [kubernetes_manifest.burstable_node_class]
@@ -332,36 +402,137 @@ resource "kubernetes_manifest" "spot_node_pool" {
             kind       = "EC2NodeClass"
             name       = "spot"
           }
-          taints = [
-            {
-              key    = "spot"
-              value  = "true"
-              effect = "NoSchedule"
-            }
-          ]
+          taints = local.spot_taints
           startupTaints = [
             module.constants.cilium_taint
           ]
           requirements = concat(
             local.shared_requirements,
-            [{
-              key = "karpenter.sh/capacity-type"
-              operator : "In"
-              values : ["spot"]
-            }]
+            [
+              {
+                key = "karpenter.sh/capacity-type"
+                operator : "In"
+                values : ["spot"]
+              },
+              {
+                key      = "kubernetes.io/arch"
+                operator = "In"
+                values   = ["amd64"]
+              },
+            ]
           )
         }
       }
-      disruption = {
-        consolidationPolicy = "WhenUnderutilized"
-        expireAfter         = "${24 * 7}h"
-      }
+      disruption = local.disruption_policy
 
-      // This should be the preference over on demand nodes
       weight = 10
     }
   }
   depends_on = [kubernetes_manifest.spot_node_class]
+}
+
+resource "kubernetes_manifest" "spot_arm_node_pool" {
+  manifest = {
+    apiVersion = "karpenter.sh/v1beta1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "spot-arm"
+      labels = module.util.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(module.util.labels, {
+            "panfactum.com/class" = "spot"
+          })
+        }
+        spec = {
+          nodeClassRef = {
+            apiVersion = "karpenter.k8s.aws/v1beta1"
+            kind       = "EC2NodeClass"
+            name       = "spot"
+          }
+          taints = concat(
+            local.spot_taints,
+            local.arm_taints
+          )
+          startupTaints = [
+            module.constants.cilium_taint
+          ]
+          requirements = concat(
+            local.shared_requirements,
+            [
+              {
+                key = "karpenter.sh/capacity-type"
+                operator : "In"
+                values : ["spot"]
+              },
+              {
+                key      = "kubernetes.io/arch"
+                operator = "In"
+                values   = ["arm64"]
+              },
+            ]
+          )
+        }
+      }
+      disruption = local.disruption_policy
+
+      weight = 10
+    }
+  }
+  depends_on = [kubernetes_manifest.spot_node_class]
+}
+
+resource "kubernetes_manifest" "on_demand_arm_node_pool" {
+  manifest = {
+    apiVersion = "karpenter.sh/v1beta1"
+    kind       = "NodePool"
+    metadata = {
+      name   = "on-demand-arm"
+      labels = module.util.labels
+    }
+    spec = {
+      template = {
+        metadata = {
+          labels = merge(module.util.labels, {
+            "panfactum.com/class" = "worker"
+          })
+        }
+        spec = {
+          nodeClassRef = {
+            apiVersion = "karpenter.k8s.aws/v1beta1"
+            kind       = "EC2NodeClass"
+            name       = "default"
+          }
+          taints = local.arm_taints
+          startupTaints = [
+            module.constants.cilium_taint
+          ]
+          requirements = concat(
+            local.shared_requirements,
+            [
+              {
+                key = "karpenter.sh/capacity-type"
+                operator : "In"
+                values : ["on-demand"]
+              },
+              {
+                key      = "kubernetes.io/arch"
+                operator = "In"
+                values   = ["arm64"]
+              },
+            ]
+          )
+        }
+      }
+      disruption = local.disruption_policy
+
+      // This should have the lowest preference
+      weight = 1
+    }
+  }
+  depends_on = [kubernetes_manifest.default_node_class]
 }
 
 
@@ -391,18 +562,22 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
           ]
           requirements = concat(
             local.shared_requirements,
-            [{
-              key = "karpenter.sh/capacity-type"
-              operator : "In"
-              values : ["on-demand"]
-            }]
+            [
+              {
+                key = "karpenter.sh/capacity-type"
+                operator : "In"
+                values : ["on-demand"]
+              },
+              {
+                key      = "kubernetes.io/arch"
+                operator = "In"
+                values   = ["amd64"]
+              },
+            ]
           )
         }
       }
-      disruption = {
-        consolidationPolicy = "WhenUnderutilized"
-        expireAfter         = "${24 * 7}h"
-      }
+      disruption = local.disruption_policy
 
       // This should have the lowest preference
       weight = 1

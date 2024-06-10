@@ -21,10 +21,8 @@ dependency "ses_domain" {
 }
 
 inputs = {
-  eks_cluster_name           = dependency.cluster.outputs.cluster_name
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-  ingress_enabled            = true
+  eks_cluster_name = dependency.cluster.outputs.cluster_name
+  ingress_enabled  = true
 
   domain = "authentik.panfactum.com"
 
@@ -34,7 +32,4 @@ inputs = {
   email_from_address = "no-reply@panfactum.com"
 
   akadmin_email = "it@panfactum.com"
-
-  # Alpha: Do not use
-  monitoring_enabled = true
 }

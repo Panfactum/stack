@@ -20,10 +20,4 @@ inputs = {
 
   argo_domain  = "argo.prod.panfactum.com"
   vault_domain = dependency.vault.outputs.vault_domain
-
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-
-  # Alpha: Do not use
-  monitoring_enabled = true
 }

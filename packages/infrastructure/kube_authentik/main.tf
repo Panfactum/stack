@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -50,6 +48,7 @@ module "util_server" {
   workload_name                        = "authentik-server"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -67,6 +66,7 @@ module "util_worker" {
   source                  = "../kube_workload_utility"
   workload_name           = "authentik-worker"
   burstable_nodes_enabled = true
+  arm_nodes_enabled       = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -114,6 +114,7 @@ module "database" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   pgbouncer_pool_mode         = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   monitoring_enabled          = var.monitoring_enabled
 
   # generate: pass_common_vars.snippet.txt
@@ -138,6 +139,7 @@ module "redis" {
   namespace                   = local.namespace
   replica_count               = 3
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
@@ -417,10 +419,10 @@ resource "helm_release" "authentik" {
 
         resources = {
           requests = {
-            memory = "700Mi"
+            memory = "1250Mi"
           }
           limits = {
-            memory = "${floor(700 * 1.3)}Mi"
+            memory = "${floor(1250 * 1.3)}Mi"
           }
         }
       }
@@ -520,8 +522,8 @@ resource "kubernetes_config_map" "dashboard" {
   }
 }
 
-resource "kubernetes_manifest" "pdb_server" {
-  manifest = {
+resource "kubectl_manifest" "pdb_server" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -530,17 +532,20 @@ resource "kubernetes_manifest" "pdb_server" {
       labels    = module.util_server.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_server.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.authentik]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.authentik]
 }
 
-resource "kubernetes_manifest" "pdb_worker" {
-  manifest = {
+resource "kubectl_manifest" "pdb_worker" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
@@ -549,18 +554,21 @@ resource "kubernetes_manifest" "pdb_worker" {
       labels    = module.util_worker.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_worker.match_labels
       }
       maxUnavailable = 1
     }
-  }
-  depends_on = [helm_release.authentik]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.authentik]
 }
 
-resource "kubernetes_manifest" "vpa_server" {
+resource "kubectl_manifest" "vpa_server" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -573,7 +581,7 @@ resource "kubernetes_manifest" "vpa_server" {
         containerPolicies = [{
           containerName = "server"
           minAllowed = {
-            memory = "700Mi"
+            memory = "1250Mi"
           }
         }]
       }
@@ -583,13 +591,15 @@ resource "kubernetes_manifest" "vpa_server" {
         name       = "authentik-server"
       }
     }
-  }
-  depends_on = [helm_release.authentik]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.authentik]
 }
 
-resource "kubernetes_manifest" "vpa_worker" {
+resource "kubectl_manifest" "vpa_worker" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -612,8 +622,10 @@ resource "kubernetes_manifest" "vpa_worker" {
         name       = "authentik-worker"
       }
     }
-  }
-  depends_on = [helm_release.authentik]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.authentik]
 }
 
 
@@ -641,6 +653,7 @@ module "ingress" {
   # unsafe configuration is required
   csp_style_src  = "'self' 'unsafe-inline'"
   csp_script_src = "'self' 'unsafe-inline'"
+  csp_img_src    = "'self' data: https://*.gravatar.com/" // Allow gravatar profile images
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

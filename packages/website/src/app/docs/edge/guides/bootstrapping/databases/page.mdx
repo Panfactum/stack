@@ -91,8 +91,7 @@ Let's deploy it now:
      number of read replicas). Terminating one of the pods will automatically execute a failover. Downtime to the writable
      master will only be a second or two. [^2]
 
-   * Two different sets of "pooler" pods are launched. These are [PgBouncer](https://www.pgbouncer.org/) instances,
-     one running in read-write mode and the other in read-only. You should establish database connections to these
+   * "Pooler" pods are launched. These are [PgBouncer](https://www.pgbouncer.org/) instance. You should establish database connections to these
      services rather than directly to the databases to improve performance and resiliency.
 
 7. Navigate to the S3 view in the AWS web console. Notice that a new bucket was created for the cluster:
@@ -172,11 +171,11 @@ Once you are done working with the test database:
 
 4. Run `terragrunt destroy` again.
 
-5. Remove the folder
+5. Remove the folder.
 
 ## Redis
 
-Rivalling PostgreSQL in popularity, is the key-value database, [Redis.](https://github.com/redis/redis) Redis
+Rivalling PostgreSQL in popularity is the key-value database, [Redis.](https://github.com/redis/redis) Redis
 is much simpler than PostgreSQL and is often used as an in-memory cache or job queuing system.
 
 Due to its simplicity, it does not require a full Kubernetes Operator to run effectively in a production-hardened
@@ -196,9 +195,10 @@ Database engines are extremely powerful
 and flexible tools. We believe our stack contains the necessary databases to solve 99.9% of the problems
 organizations may face:
 
-* **Relational:** PostgreSQL
-* **Key-value:** Redis
+* **Relational:** PostgreSQL ([kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster))
+* **Key-value:** Redis ([kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel))
 * **Ledger:** Kafka (Coming soon)
+* **Warehouse:** ClickHouse (Coming soon)
 
 We are focusing our investments on those core modules to provide a best-in-class experience.
 

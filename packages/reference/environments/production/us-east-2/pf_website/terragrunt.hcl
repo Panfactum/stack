@@ -15,7 +15,6 @@ dependency "ingress" {
 inputs = {
   website_domain        = "panfactum.com"
   website_image_version = yamldecode(file("${get_terragrunt_dir()}/version.yaml")).version
-  vpa_enabled           = true
 }
 
 

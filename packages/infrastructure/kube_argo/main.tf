@@ -48,6 +48,7 @@ module "util_controller" {
   workload_name                        = "argo-controller"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -66,6 +67,7 @@ module "util_server" {
   workload_name                        = "argo-server"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -84,6 +86,7 @@ module "util_events_controller" {
   workload_name                        = "argo-events-controller"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -102,6 +105,7 @@ module "util_webhook" {
   workload_name                        = "argo-webhook"
   instance_type_anti_affinity_required = true
   burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -303,6 +307,7 @@ module "database" {
   aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_instances_enabled = true
+  arm_instances_enabled       = true
   backups_enabled             = var.workflow_archive_backups_enabled
   backups_force_delete        = true
   monitoring_enabled          = var.monitoring_enabled
@@ -442,16 +447,12 @@ resource "helm_release" "argo" {
           level  = var.log_level
         }
 
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
         podLabels         = module.util_controller.labels
         priorityClassName = module.constants.cluster_important_priority_class_name
         replicas          = 1
         tolerations       = module.util_controller.tolerations
         pdb = {
-          enabled        = true
-          maxUnavailable = 1
+          enabled = false # We enable below
         }
         resources = {
           requests = {
@@ -522,8 +523,7 @@ resource "helm_release" "argo" {
         affinity                  = module.util_server.affinity
         topologySpreadConstraints = module.util_server.topology_spread_constraints
         pdb = {
-          enabled        = true
-          maxUnavailable = 1
+          enabled = false # We enable below
         }
         resources = {
           requests = {
@@ -572,9 +572,9 @@ module "ingress" {
 }
 
 
-resource "kubernetes_manifest" "vpa_controller" {
+resource "kubectl_manifest" "vpa_controller" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -597,13 +597,37 @@ resource "kubernetes_manifest" "vpa_controller" {
         name       = "argo-workflow-controller"
       }
     }
-  }
-  depends_on = [helm_release.argo]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo]
 }
 
-resource "kubernetes_manifest" "vpa_server" {
+resource "kubectl_manifest" "pdb_controller" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "argo-controller"
+      namespace = local.namespace
+      labels    = module.util_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_controller.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo]
+}
+
+resource "kubectl_manifest" "vpa_server" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -626,8 +650,32 @@ resource "kubernetes_manifest" "vpa_server" {
         name       = "argo-server"
       }
     }
-  }
-  depends_on = [helm_release.argo]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo]
+}
+
+resource "kubectl_manifest" "pdb_server" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "argo-server"
+      namespace = local.namespace
+      labels    = module.util_server.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_server.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo]
 }
 
 /***************************************
@@ -674,9 +722,7 @@ resource "helm_release" "argo_events" {
         replicas          = 1
         tolerations       = module.util_events_controller.tolerations
         pdb = {
-          enabled        = true
-          maxUnavailable = 1
-          labels         = module.util_events_controller.labels
+          enabled = false # Enabled below
         }
         resources = {
           requests = {
@@ -698,9 +744,7 @@ resource "helm_release" "argo_events" {
         affinity                  = module.util_webhook.affinity
         topologySpreadConstraints = module.util_webhook.topology_spread_constraints
         pdb = {
-          enabled        = true
-          maxUnavailable = 1
-          labels         = module.util_webhook.labels
+          enabled = false # Enabled below
         }
         resources = {
           requests = {
@@ -716,9 +760,9 @@ resource "helm_release" "argo_events" {
   ]
 }
 
-resource "kubernetes_manifest" "vpa_events_controller" {
+resource "kubectl_manifest" "vpa_events_controller" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -733,13 +777,37 @@ resource "kubernetes_manifest" "vpa_events_controller" {
         name       = "argo-events-controller-manager"
       }
     }
-  }
-  depends_on = [helm_release.argo_events]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo_events]
 }
 
-resource "kubernetes_manifest" "vpa_webhook" {
+resource "kubectl_manifest" "pdb_events_controller" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "argo-events-controller-manager"
+      namespace = local.namespace
+      labels    = module.util_events_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_events_controller.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo_events]
+}
+
+resource "kubectl_manifest" "vpa_webhook" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
@@ -754,8 +822,32 @@ resource "kubernetes_manifest" "vpa_webhook" {
         name       = "events-webhook"
       }
     }
-  }
-  depends_on = [helm_release.argo_events]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo_events]
+}
+
+resource "kubectl_manifest" "pdb_webhook" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "events-webhook"
+      namespace = local.namespace
+      labels    = module.util_webhook.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_webhook.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo_events]
 }
 
 /***************************************
