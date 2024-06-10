@@ -98,8 +98,8 @@ Let's deploy the module now:
 
    <MarkdownImage src={SESSandboxImg} alt="SES Sandbox mode" />
 
-   Depending on your needs, you may need to request production access to authorize your account for more permissive
-   email sending. AWS adds this extra gate-keeping step to guard against spam senders.
+   Depending on your needs, you may need to [request production access](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html)
+   to authorize your account for more permissive email sending. AWS adds this extra gate-keeping step to guard against spam senders.
 
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
@@ -233,6 +233,14 @@ user account.
    4. In a minute or two, you should receive a recovery email at your user's email address: [^3]
 
       <MarkdownImage src={passwordSetupEmailImg} alt="Password recovery email" />
+
+      <MarkdownAlert severity="warning">
+          If Authentik is configured to send emails from a domain that is different that your user's
+          email domain, AWS SES will reject the email while in sandbox mode (see above).
+
+          You should resolve this issue, but you can continue with the guide by clicking on "Create Recovery Link"
+          instead.
+      </MarkdownAlert>
 
    5. Clicking on the link, you will be greeted with a prompt to set up a new password. Enter one. [^1]
 
