@@ -14,6 +14,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 - Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart
 if NAT setup failed with an exit code other than `1`.
 
+- Increased the memory floor of the Authentik server in [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
+to avoid OOM issues.
+
 ## edge.24-06-08
 
 ### Added

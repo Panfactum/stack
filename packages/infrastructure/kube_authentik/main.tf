@@ -419,10 +419,10 @@ resource "helm_release" "authentik" {
 
         resources = {
           requests = {
-            memory = "700Mi"
+            memory = "1250Mi"
           }
           limits = {
-            memory = "${floor(700 * 1.3)}Mi"
+            memory = "${floor(1250 * 1.3)}Mi"
           }
         }
       }
@@ -581,7 +581,7 @@ resource "kubectl_manifest" "vpa_server" {
         containerPolicies = [{
           containerName = "server"
           minAllowed = {
-            memory = "700Mi"
+            memory = "1250Mi"
           }
         }]
       }
