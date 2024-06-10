@@ -28,7 +28,7 @@ terraform {
 }
 
 locals {
-  path_prefix = "${var.path_prefix}/oauth2"
+  path_prefix = replace("${var.path_prefix}/oauth2", "////", "/") # //// required because // triggers regex matching
 }
 
 module "pull_through" {

@@ -27,11 +27,11 @@ variable "domain" {
 }
 
 variable "path_prefix" {
-  description = "Path prefix for the ingress resource"
+  description = "Path prefix for the ingress resource. Should be the same path prefix used by the upstream ingress resource."
   type        = string
   default     = "/"
   validation {
-    condition = van(regex("^/", var.path_prefix))
+    condition     = can(regex("^/", var.path_prefix))
     error_message = "Path prefix must be a valid URI path, starting with \"/\"."
   }
 }
