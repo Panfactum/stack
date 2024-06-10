@@ -36,7 +36,8 @@ module "pull_through" {
 module "util_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "cilium-operator"
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 

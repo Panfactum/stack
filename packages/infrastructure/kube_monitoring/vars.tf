@@ -232,4 +232,10 @@ variable "loki_storage_class_name" {
   default     = "ebs-standard"
 }
 
+variable "enhanced_ha_enabled" {
+  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+  type        = bool
+  default     = true
+}
+
 

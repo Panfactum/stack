@@ -157,8 +157,9 @@ module "util_webhook" {
   workload_name                        = "prometheus-operator-webhook"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -175,9 +176,11 @@ module "util_webhook" {
 module "util_operator" {
   source = "../kube_workload_utility"
 
-  workload_name           = "prometheus-operator"
-  arm_nodes_enabled       = true
-  burstable_nodes_enabled = true
+  workload_name                         = "prometheus-operator"
+  arm_nodes_enabled                     = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+  burstable_nodes_enabled               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -197,8 +200,9 @@ module "util_grafana" {
   workload_name                        = "grafana"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -218,7 +222,7 @@ module "util_prometheus" {
   workload_name                        = "prometheus"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
@@ -258,8 +262,9 @@ module "util_ksm" {
   workload_name                        = "kube-state-metrics"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -339,8 +344,9 @@ module "util_thanos_query" {
   workload_name                        = "thanos-query"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -360,8 +366,9 @@ module "util_thanos_frontend" {
   workload_name                        = "thanos-frontend"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -381,8 +388,9 @@ module "util_thanos_bucket_web" {
   workload_name                        = "thanos-bucket-web"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -402,7 +410,7 @@ module "util_alertmanager" {
   workload_name                        = "alertmanager"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
@@ -1664,6 +1672,7 @@ resource "helm_release" "thanos" {
         updateStrategy = {
           type = "Recreate"
         }
+        affinity    = module.util_thanos_bucket_web.affinity
         podLabels   = module.util_thanos_bucket_web.labels
         tolerations = module.util_thanos_bucket_web.tolerations
         resources   = local.default_resources
@@ -2505,6 +2514,7 @@ module "authenticating_proxy" {
   vpa_enabled                = var.vpa_enabled
   domain                     = local.bucket_web_domain
   vault_domain               = var.vault_domain
+  enhanced_ha_enabled        = var.enhanced_ha_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

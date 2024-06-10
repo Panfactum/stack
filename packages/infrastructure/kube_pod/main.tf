@@ -362,6 +362,8 @@ module "util" {
   controller_node_required              = var.controller_node_required
   prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
   prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
+  topology_spread_enabled               = var.topology_spread_enabled
+  topology_spread_strict                = var.topology_spread_strict
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

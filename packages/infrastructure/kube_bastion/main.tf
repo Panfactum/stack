@@ -182,8 +182,9 @@ module "bastion" {
   max_replicas                          = 2
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = false // TODO: Create an arm64 build
-  instance_type_anti_affinity_preferred = true
-  topology_spread_strict                = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_strict                = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   priority_class_name                   = module.constants.cluster_important_priority_class_name
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access

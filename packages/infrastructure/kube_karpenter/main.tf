@@ -41,6 +41,7 @@ module "pull_through" {
 module "util" {
   source                   = "../kube_workload_utility"
   workload_name            = "karpenter"
+  topology_spread_enabled  = false
   controller_node_required = true
 
   # generate: common_vars.snippet.txt

@@ -193,6 +193,12 @@ variable "topology_spread_strict" {
   default     = false
 }
 
+variable "topology_spread_enabled" {
+  description = "Whether to enable topology spread constraints"
+  type        = bool
+  default     = true
+}
+
 variable "instance_type_anti_affinity_required" {
   description = "Whether to prevent pods from being scheduled on the same instance types"
   type        = bool

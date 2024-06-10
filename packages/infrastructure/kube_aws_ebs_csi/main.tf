@@ -48,7 +48,8 @@ module "util_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "ebs-csi-controller"
   burstable_nodes_enabled               = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
@@ -172,7 +173,12 @@ resource "helm_release" "ebs_csi_driver" {
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
         }
-        podLabels = module.util_controller.labels
+        podLabels = merge(
+          {
+            customizationHash = md5(join("", [for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)]))
+          },
+          module.util_controller.labels
+        )
         resources = {
           requests = {
             memory = "100Mi"
@@ -272,11 +278,12 @@ resource "helm_release" "ebs_csi_driver" {
     })
   ]
 
-  // We need to extend the termination grace period seconds for the daemonset pods
+  // (1) We need to extend the termination grace period seconds for the daemonset pods
   // to allow time for all other pods on the node to terminate as the
   // ebs pod has to be the last one to terminate in order to detach the ebs volumes
+  // (2) We need to remove the default podAntiAffinity rules from the deployment
   postrender {
-    binary_path = "${path.module}/csi_kustomize/kustomize.sh"
+    binary_path = "${path.module}/kustomize/kustomize.sh"
   }
 
   depends_on = [module.aws_permissions]

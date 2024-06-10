@@ -56,7 +56,9 @@ module "website_deployment" {
   max_replicas                         = 2
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = false
-  instance_type_anti_affinity_required = true
+  instance_type_anti_affinity_required = false
+  topology_spread_enabled              = false
+  topology_spread_strict               = false
 
 
   common_env = {

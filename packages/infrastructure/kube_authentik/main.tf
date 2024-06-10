@@ -46,7 +46,9 @@ module "constants" {
 module "util_server" {
   source                               = "../kube_workload_utility"
   workload_name                        = "authentik-server"
-  instance_type_anti_affinity_required = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
 
@@ -63,10 +65,13 @@ module "util_server" {
 }
 
 module "util_worker" {
-  source                  = "../kube_workload_utility"
-  workload_name           = "authentik-worker"
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
+  source                               = "../kube_workload_utility"
+  workload_name                        = "authentik-worker"
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
+  burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

@@ -34,7 +34,8 @@ module "util_admission_controller" {
   workload_name                         = "vpa-admission-controller"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "admission-controller"
@@ -57,7 +58,8 @@ module "util_recommender" {
   workload_name                         = "vpa-recommender"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "recommender"
@@ -79,7 +81,8 @@ module "util_updater" {
   workload_name                         = "vpa-updater"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "updater"

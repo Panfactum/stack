@@ -10,3 +10,7 @@ patches:
     target:
       kind: DaemonSet
       name: ebs-csi-node
+  - path: deployment.yaml
+    target:
+      kind: Deployment
+      name: ebs-csi-controller

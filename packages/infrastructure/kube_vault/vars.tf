@@ -74,6 +74,12 @@ variable "monitoring_enabled" {
   default     = false
 }
 
+variable "enhanced_ha_enabled" {
+  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+  type        = bool
+  default     = true
+}
+
 ################################################################################
 ## KMS Access
 ################################################################################

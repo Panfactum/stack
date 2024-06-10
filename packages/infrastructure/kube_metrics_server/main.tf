@@ -34,7 +34,8 @@ module "util" {
   workload_name                         = "metrics-server"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

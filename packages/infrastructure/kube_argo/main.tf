@@ -44,11 +44,13 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "argo-controller"
-  instance_type_anti_affinity_required = true
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
+  source                                = "../kube_workload_utility"
+  workload_name                         = "argo-controller"
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+  topology_spread_strict                = var.enhanced_ha_enabled
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -63,11 +65,13 @@ module "util_controller" {
 }
 
 module "util_server" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "argo-server"
-  instance_type_anti_affinity_required = true
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
+  source                                = "../kube_workload_utility"
+  workload_name                         = "argo-server"
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+  topology_spread_strict                = var.enhanced_ha_enabled
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -82,11 +86,13 @@ module "util_server" {
 }
 
 module "util_events_controller" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "argo-events-controller"
-  instance_type_anti_affinity_required = true
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
+  source                                = "../kube_workload_utility"
+  workload_name                         = "argo-events-controller"
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+  topology_spread_strict                = var.enhanced_ha_enabled
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -101,11 +107,13 @@ module "util_events_controller" {
 }
 
 module "util_webhook" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "argo-webhook"
-  instance_type_anti_affinity_required = true
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
+  source                                = "../kube_workload_utility"
+  workload_name                         = "argo-webhook"
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+  topology_spread_strict                = var.enhanced_ha_enabled
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

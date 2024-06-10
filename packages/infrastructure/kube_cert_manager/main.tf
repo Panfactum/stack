@@ -39,7 +39,8 @@ module "pull_through" {
 module "util_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "cert-manager"
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -58,7 +59,8 @@ module "util_controller" {
 module "util_webhook" {
   source                                = "../kube_workload_utility"
   workload_name                         = "cert-manager-webhook"
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -77,7 +79,8 @@ module "util_webhook" {
 module "util_ca_injector" {
   source                                = "../kube_workload_utility"
   workload_name                         = "cert-manager-ca-injector"
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   arm_nodes_enabled                     = true
 
   // This _can_ be run on a spot node if necessary as a short temporary disruption

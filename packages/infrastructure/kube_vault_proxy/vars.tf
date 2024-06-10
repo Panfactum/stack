@@ -52,3 +52,9 @@ variable "allowed_vault_roles" {
   type        = set(string)
   default     = ["rbac-superusers", "rbac-admins", "rbac-readers", "rbac-restricted-readers"]
 }
+
+variable "enhanced_ha_enabled" {
+  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+  type        = bool
+  default     = true
+}

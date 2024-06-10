@@ -10,6 +10,12 @@ variable "workload_name" {
   default     = null
 }
 
+variable "topology_spread_enabled" {
+  description = "Whether to enable topology spread constraints"
+  type        = bool
+  default     = true
+}
+
 variable "topology_spread_strict" {
   description = "Whether the topology spread constraint should be set to DoNotSchedule"
   type        = bool
@@ -29,13 +35,19 @@ variable "controller_node_required" {
 }
 
 variable "prefer_spot_nodes_enabled" {
-  description = "Whether to pods will prefer scheduling on spot nodes (default true if spot nodes allowed)"
+  description = "Whether pods will prefer scheduling on spot nodes (default true if spot nodes allowed)"
   type        = bool
   default     = null
 }
 
 variable "prefer_burstable_nodes_enabled" {
-  description = "Whether to pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)"
+  description = "Whether pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)"
+  type        = bool
+  default     = null
+}
+
+variable "prefer_arm_nodes_enabled" {
+  description = "Whether pods will prefer scheduling on arm64 nodes (default true if arm nodes allowed)"
   type        = bool
   default     = null
 }

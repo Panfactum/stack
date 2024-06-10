@@ -291,7 +291,7 @@ resource "helm_release" "linkerd" {
       controllerLogFormat       = "json"
       controllerImage           = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/controller"
       controllerReplicas        = 2
-      enablePodAntiAffinity     = true
+      enablePodAntiAffinity     = true  # This should always be enabled as we really need to avoid having the service mesh go down
       enablePodDisruptionBudget = false # We do this below
       deploymentStrategy = {
         type          = "Recreate"
@@ -499,7 +499,7 @@ resource "helm_release" "viz" {
       defaultLogFormat      = "json"
       defaultLogLevel       = var.log_level
       tolerations           = module.util_viz.tolerations
-      enablePodAntiAffinity = true
+      enablePodAntiAffinity = var.enhanced_ha_enabled
       podLabels             = module.util_viz.labels
       commonLabels          = module.util_viz.labels
 

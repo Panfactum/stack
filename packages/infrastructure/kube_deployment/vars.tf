@@ -232,6 +232,12 @@ variable "topology_spread_strict" {
   default     = false
 }
 
+variable "topology_spread_enabled" {
+  description = "Whether to enable topology spread constraints"
+  type        = bool
+  default     = true
+}
+
 variable "controller_node_required" {
   description = "Whether the pods must be scheduled on a controller node"
   type        = bool
@@ -243,4 +249,3 @@ variable "wait_for_rollout" {
   type        = bool
   default     = false
 }
-

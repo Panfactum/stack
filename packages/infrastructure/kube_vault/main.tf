@@ -39,7 +39,7 @@ module "util_server" {
   workload_name                         = "vault"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_strict                = true
 
   # generate: common_vars.snippet.txt

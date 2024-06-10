@@ -16,6 +16,11 @@ for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
 
 - Adds support for `path_prefix` to [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault_proxy) ([@mschnee](https://github.com/mschnee))
 
+- Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
+allow for additional cost savings (approximately $50 / month) in exchange for introducing a small possibility of temporary
+outages. We estimate that setting this to false reduces availability from 99.995% to 99.9%.
+This can be used to decrease costs in less critical clusters (e.g., `development`).
+
 ### Fixed
 
 - Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart
@@ -26,6 +31,8 @@ to avoid OOM issues.
 
 - Updates [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to allow showing
 [Gravatar](https://gravatar.com/) profile images.
+
+- Correctly applies pod labels in [kube_aws_lb_controller](/docs/edge/reference/infrastructure-modules/kubernetes/kube_aws_lb_controller).
 
 ## edge.24-06-08
 

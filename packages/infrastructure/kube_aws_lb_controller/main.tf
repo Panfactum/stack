@@ -39,7 +39,8 @@ module "util_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "alb-controller"
   burstable_nodes_enabled               = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
   arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
@@ -380,6 +381,7 @@ resource "helm_release" "alb_controller" {
         "linkerd.io/inject"                      = "enabled"
         "config.linkerd.io/proxy-memory-request" = "5Mi"
       }
+      podLabels = module.util_controller.labels
       additionalLabels = merge(module.util_controller.labels, {
         customizationHash = md5(join("", [for filename in sort(fileset(path.module, "alb_kustomize/*")) : filesha256(filename)]))
       })
