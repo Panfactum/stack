@@ -9,6 +9,11 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Added
+
+- Updates [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) with many new variables
+for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
+
 ### Fixed
 
 - Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart
@@ -31,7 +36,7 @@ IaC in an environment. This replaces the manual steps that used to be a part of 
 - Adds new `extra_inputs` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
 allows you to pass inputs to all modules in the current scope.
 
-- Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by $50 - 100 / month
+- Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by $25 - 50 / month
 due to significantly better price / performance ratios for arm64 instances in AWS.
 
 - Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
@@ -233,9 +238,9 @@ inside `.nix` files.
   To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment)).
 
 - [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) has two
-  new flags, `pg_bouncer_read_only_enabled` (default `false`) and `pg_bouncer_read_write_enabled` (default `true`), which will enable
+  new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`), which will enable
   the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
-  to have idle resources. This is a *breaking* change as `pg_bouncer_read_only_enabled` is set to `false` by default.
+  to have idle resources. This is a *breaking* change as `pgbouncer_read_only_enabled` is set to `false` by default.
 
 ### Added
 

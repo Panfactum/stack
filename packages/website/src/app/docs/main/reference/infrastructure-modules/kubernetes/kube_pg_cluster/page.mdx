@@ -86,14 +86,6 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_log_connections_enabled" /> [log\_connections\_enabled](#input_log_connections_enabled)
-
-Description: Whether to log each connection
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
 Description: Whether to add active monitoring to the deployed systems
@@ -101,22 +93,6 @@ Description: Whether to add active monitoring to the deployed systems
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_pg_bouncer_read_only_enabled" /> [pg\_bouncer\_read\_only\_enabled](#input_pg_bouncer_read_only_enabled)
-
-Description: Whether to enable a pgbouncer deployment in read-only mode
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_pg_bouncer_read_write_enabled" /> [pg\_bouncer\_read\_write\_enabled](#input_pg_bouncer_read_write_enabled)
-
-Description: Whether to enable a pgbouncer deployment in read-write mode
-
-Type: `bool`
-
-Default: `true`
 
 ### <a name="input_pg_cpu_millicores" /> [pg\_cpu\_millicores](#input_pg_cpu_millicores)
 
@@ -182,6 +158,118 @@ Type: `string`
 
 Default: `"16.2-10"`
 
+### <a name="input_pgbouncer_application_name_add_host" /> [pgbouncer\_application\_name\_add\_host](#input_pgbouncer_application_name_add_host)
+
+Description: Add the client host address and port to the application name setting set on connection start.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_autodb_idle_timeout" /> [pgbouncer\_autodb\_idle\_timeout](#input_pgbouncer_autodb_idle_timeout)
+
+Description: If the automatically created (via “\*”) database pools have been unused this many seconds, they are freed.
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_pgbouncer_client_idle_timeout" /> [pgbouncer\_client\_idle\_timeout](#input_pgbouncer_client_idle_timeout)
+
+Description: Client connections idling longer than this many seconds are closed. This should be larger than the client-side connection lifetime settings, and only used for network problems.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_client_login_timeout" /> [pgbouncer\_client\_login\_timeout](#input_pgbouncer_client_login_timeout)
+
+Description: If a client connects but does not manage to log in in this amount of time, it will be disconnected. Mainly needed to avoid dead connections stalling SUSPEND and thus online restart.
+
+Type: `number`
+
+Default: `60`
+
+### <a name="input_pgbouncer_default_pool_size" /> [pgbouncer\_default\_pool\_size](#input_pgbouncer_default_pool_size)
+
+Description: How many server connections to allow per user/database pair.
+
+Type: `number`
+
+Default: `20`
+
+### <a name="input_pgbouncer_disable_pqexec" /> [pgbouncer\_disable\_pqexec](#input_pgbouncer_disable_pqexec)
+
+Description: Disable the Simple Query protocol (PQexec). Unlike the Extended Query protocol, Simple Query allows multiple queries in one packet, which allows some classes of SQL-injection attacks.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_log_connections" /> [pgbouncer\_log\_connections](#input_pgbouncer_log_connections)
+
+Description: Whether to log each connection.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_log_disconnections" /> [pgbouncer\_log\_disconnections](#input_pgbouncer_log_disconnections)
+
+Description: Whether to log each disconnection.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_log_pooler_errors" /> [pgbouncer\_log\_pooler\_errors](#input_pgbouncer_log_pooler_errors)
+
+Description: Whether to log errors the pooler sends to clients.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pgbouncer_max_client_conn" /> [pgbouncer\_max\_client\_conn](#input_pgbouncer_max_client_conn)
+
+Description: The maximum client connections allowed by pgbouncer
+
+Type: `number`
+
+Default: `10000`
+
+### <a name="input_pgbouncer_max_db_connections" /> [pgbouncer\_max\_db\_connections](#input_pgbouncer_max_db_connections)
+
+Description: Do not allow more than this many server connections per database (regardless of user). This considers the PgBouncer database that the client has connected to, not the PostgreSQL database of the outgoing connection.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_max_prepared_statements" /> [pgbouncer\_max\_prepared\_statements](#input_pgbouncer_max_prepared_statements)
+
+Description: When this is set to a non-zero value PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling mode. PgBouncer makes sure that any statement prepared by a client is available on the backing server connection. Even when the statement was originally prepared on another server connection.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_max_user_connections" /> [pgbouncer\_max\_user\_connections](#input_pgbouncer_max_user_connections)
+
+Description: Do not allow more than this many server connections per user (regardless of database).
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_min_pool_size" /> [pgbouncer\_min\_pool\_size](#input_pgbouncer_min_pool_size)
+
+Description: Add more server connections to pool if below this number. Improves behavior when the normal load suddenly comes back after a period of total inactivity. The value is effectively capped at the pool size.
+
+Type: `number`
+
+Default: `0`
+
 ### <a name="input_pgbouncer_pool_mode" /> [pgbouncer\_pool\_mode](#input_pgbouncer_pool_mode)
 
 Description: What pool\_mode to run pgbouncer in
@@ -189,6 +277,158 @@ Description: What pool\_mode to run pgbouncer in
 Type: `string`
 
 Default: `"session"`
+
+### <a name="input_pgbouncer_query_timeout" /> [pgbouncer\_query\_timeout](#input_pgbouncer_query_timeout)
+
+Description: Queries running longer than this amount of seconds are canceled. This should be used only with a slightly smaller server-side statement\_timeout, to apply only for network problems.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_query_wait_timeout" /> [pgbouncer\_query\_wait\_timeout](#input_pgbouncer_query_wait_timeout)
+
+Description: Maximum time queries are allowed to spend waiting for execution. If the query is not assigned to a server during that time, the client is disconnected. 0 disables. If this is disabled, clients will be queued indefinitely.
+
+Type: `number`
+
+Default: `120`
+
+### <a name="input_pgbouncer_read_only_enabled" /> [pgbouncer\_read\_only\_enabled](#input_pgbouncer_read_only_enabled)
+
+Description: Whether to enable a pgbouncer deployment in read-only mode
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_read_write_enabled" /> [pgbouncer\_read\_write\_enabled](#input_pgbouncer_read_write_enabled)
+
+Description: Whether to enable a pgbouncer deployment in read-write mode
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pgbouncer_reserve_pool_size" /> [pgbouncer\_reserve\_pool\_size](#input_pgbouncer_reserve_pool_size)
+
+Description: How many additional connections to allow to a pool (see reserve\_pool\_timeout). 0 disables.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_reserve_pool_timeout" /> [pgbouncer\_reserve\_pool\_timeout](#input_pgbouncer_reserve_pool_timeout)
+
+Description: If a client has not been serviced in this amount of seconds, use additional connections from the reserve pool. 0 disables.
+
+Type: `number`
+
+Default: `5`
+
+### <a name="input_pgbouncer_server_check_delay" /> [pgbouncer\_server\_check\_delay](#input_pgbouncer_server_check_delay)
+
+Description: How long to keep released connections available for immediate re-use.
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_pgbouncer_server_connect_timeout" /> [pgbouncer\_server\_connect\_timeout](#input_pgbouncer_server_connect_timeout)
+
+Description: If connection and login don’t finish in this amount of seconds, the connection will be closed.
+
+Type: `number`
+
+Default: `15`
+
+### <a name="input_pgbouncer_server_fast_close" /> [pgbouncer\_server\_fast\_close](#input_pgbouncer_server_fast_close)
+
+Description: Disconnect a server in session pooling mode immediately or after the end of the current transaction if it is in “close\_needed” mode (set by RECONNECT, RELOAD that changes connection settings, or DNS change), rather than waiting for the session end. In statement or transaction pooling mode, this has no effect since that is the default behavior there.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_server_idle_timeout" /> [pgbouncer\_server\_idle\_timeout](#input_pgbouncer_server_idle_timeout)
+
+Description: If a server connection has been idle more than this many seconds it will be closed. If 0 then this timeout is disabled.
+
+Type: `number`
+
+Default: `600`
+
+### <a name="input_pgbouncer_server_lifetime" /> [pgbouncer\_server\_lifetime](#input_pgbouncer_server_lifetime)
+
+Description: The pooler will close an unused (not currently linked to any client connection) server connection that has been connected longer than this. Setting it to 0 means the connection is to be used only once, then closed.
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_pgbouncer_server_login_retry" /> [pgbouncer\_server\_login\_retry](#input_pgbouncer_server_login_retry)
+
+Description: If login to the server failed, because of failure to connect or from authentication, the pooler waits this many seconds before retrying to connect. During the waiting interval, new clients trying to connect to the failing server will get an error immediately without another connection attempt.
+
+Type: `number`
+
+Default: `15`
+
+### <a name="input_pgbouncer_stats_period" /> [pgbouncer\_stats\_period](#input_pgbouncer_stats_period)
+
+Description: Sets how often the averages shown in various SHOW commands are updated and how often aggregated statistics are written to the log.
+
+Type: `number`
+
+Default: `60`
+
+### <a name="input_pgbouncer_tcp_keepalive" /> [pgbouncer\_tcp\_keepalive](#input_pgbouncer_tcp_keepalive)
+
+Description: Turns on basic keepalive with OS defaults.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pgbouncer_tcp_keepcnt" /> [pgbouncer\_tcp\_keepcnt](#input_pgbouncer_tcp_keepcnt)
+
+Description: Sets tcp\_keepcnt
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pgbouncer_tcp_keepidle" /> [pgbouncer\_tcp\_keepidle](#input_pgbouncer_tcp_keepidle)
+
+Description: Sets tcp\_keepidle
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pgbouncer_tcp_keepintvl" /> [pgbouncer\_tcp\_keepintvl](#input_pgbouncer_tcp_keepintvl)
+
+Description: Sets tcp\_keepintvl
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pgbouncer_tcp_user_timeout" /> [pgbouncer\_tcp\_user\_timeout](#input_pgbouncer_tcp_user_timeout)
+
+Description: Sets the TCP\_USER\_TIMEOUT socket option. This specifies the maximum amount of time in milliseconds that transmitted data may remain unacknowledged before the TCP connection is forcibly closed. If set to 0, then operating system’s default is used.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_verbose" /> [pgbouncer\_verbose](#input_pgbouncer_verbose)
+
+Description: Increase verbosity. Mirrors the “-v” switch on the command line. For example, using “-v -v” on the command line is the same as verbose=2.
+
+Type: `number`
+
+Default: `0`
 
 ### <a name="input_pgbouncer_version" /> [pgbouncer\_version](#input_pgbouncer_version)
 
