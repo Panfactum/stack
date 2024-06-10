@@ -653,6 +653,7 @@ module "ingress" {
   # unsafe configuration is required
   csp_style_src  = "'self' 'unsafe-inline'"
   csp_script_src = "'self' 'unsafe-inline'"
+  csp_img_src    = "'self' data: https://*.gravatar.com/" // Allow gravatar profile images
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

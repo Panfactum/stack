@@ -153,7 +153,13 @@ words: [
   "flanksource",
   "bursty",
   "wesbragagt",
-  "exfiltration"
+  "exfiltration",
+  "keepidle",
+  "keepintvl",
+  "pqexec",
+  "autodb",
+  "keepcnt",
+  "Qexec"
 ]
 languageSettings:
   - languageId: markdown,mdx
