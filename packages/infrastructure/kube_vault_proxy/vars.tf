@@ -26,6 +26,16 @@ variable "domain" {
   type        = string
 }
 
+variable "path_prefix" {
+  description = "Path prefix for the ingress resource"
+  type        = string
+  default     = "/"
+  validation {
+    condition = van(regex("^/", var.path_prefix))
+    error_message = "Path prefix must be a valid URI path, starting with \"/\"."
+  }
+}
+
 variable "vault_domain" {
   description = "The domain of the Vault instance running in the cluster."
   type        = string

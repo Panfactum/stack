@@ -27,6 +27,10 @@ terraform {
   }
 }
 
+locals {
+  path_prefix = "${var.path_prefix}/oauth2"
+}
+
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
@@ -85,7 +89,7 @@ resource "vault_identity_oidc_client" "oidc" {
   name = random_id.oauth2_proxy.hex
   key  = vault_identity_oidc_key.oidc.name
   redirect_uris = [
-    "https://${var.domain}/oauth2/callback",
+    "https://${var.domain}${local.path_prefix}/callback",
   ]
   assignments = [
     vault_identity_oidc_assignment.oidc.name
@@ -150,10 +154,11 @@ resource "helm_release" "oauth2_proxy" {
         [
           "--provider", "oidc",
           "--provider-display-name", "Vault",
-          "--redirect-url", "https://${var.domain}/oauth2/callback",
+          "--redirect-url", "https://${var.domain}${local.path_prefix}/callback",
           "--oidc-issuer-url", vault_identity_oidc_provider.oidc.issuer,
           "--cookie-secure", "true",
           "--cookie-domain", var.domain,
+          "--cookie-path", local.path_prefix,
           "--scope", "openid profile",
           "--silence-ping-logging"
         ],
@@ -247,7 +252,7 @@ module "ingress" {
     domains      = [var.domain]
     service      = random_id.oauth2_proxy.hex
     service_port = 80
-    path_prefix  = "/oauth2"
+    path_prefix  = local.path_prefix
   }]
 
   rate_limiting_enabled          = true
