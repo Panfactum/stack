@@ -161,9 +161,15 @@ Let's do this now for **every** environment:
 
    1. Enable the `aws` and `time` providers.
 
-   2. Set the `aws_account_id` and `aws_profile` to the appropriate values for the environment. Note that this module deploys
-      resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the environment account
-      and the secondary `aws` provider to deploy the appropriate DNS records in the `production` environment.
+   2. Set the `aws_account_id` and `aws_profile` to the appropriate values for the *target* environment.
+
+      For example, if setting up `aws_delegated_zones_development`, the `aws_account_id` should be set to your
+      development account and the `aws_profile` should be set to your profile for creating resources in the
+      development account (e.g., `development-superuser`).
+
+      Note that this module deploys resources in multiple accounts: it uses the primary `aws` provider to deploy the hosted zones in the
+      target environment account and the secondary `aws` provider to deploy the appropriate DNS records in root hosted
+      zone inside the `production` environment.
 
    3. Set `aws_secondary_region` to your primary region.
 
