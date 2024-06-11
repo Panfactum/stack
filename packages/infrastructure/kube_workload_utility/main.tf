@@ -108,9 +108,9 @@ locals {
   affinity = { for k, v in {
     nodeAffinity = { for k, v in {
       preferredDuringSchedulingIgnoredDuringExecution = concat(
-        (var.prefer_burstable_nodes_enabled == null ? var.burstable_nodes_enabled : var.prefer_burstable_nodes_enabled) ? [local.node_affinity.preferred.burstable] : [],
-        (var.prefer_spot_nodes_enabled == null ? var.spot_nodes_enabled : var.prefer_spot_nodes_enabled) ? [local.node_affinity.preferred.spot] : [],
-        (var.prefer_arm_nodes_enabled == null ? var.arm_nodes_enabled : var.prefer_arm_nodes_enabled) ? [local.node_affinity.preferred.arm] : []
+        (var.prefer_burstable_nodes_enabled && var.burstable_nodes_enabled) ? [local.node_affinity.preferred.burstable] : [],
+        (var.prefer_spot_nodes_enabled && var.spot_nodes_enabled) ? [local.node_affinity.preferred.spot] : [],
+        (var.prefer_arm_nodes_enabled && var.arm_nodes_enabled) ? [local.node_affinity.preferred.arm] : []
       )
       requiredDuringSchedulingIgnoredDuringExecution = var.controller_node_required ? local.node_affinity.required.controller : null
     } : k => v if v != null }

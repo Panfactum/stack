@@ -261,21 +261,29 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
 
-Description: Whether to pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)
+Description: Whether pods will prefer scheduling on arm64 nodes
 
 Type: `bool`
 
-Default: `null`
+Default: `false`
+
+### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+
+Description: Whether pods will prefer scheduling on burstable nodes
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
 
-Description: Whether to pods will prefer scheduling on spot nodes (default true if spot nodes allowed)
+Description: Whether pods will prefer scheduling on spot nodes
 
 Type: `bool`
 
-Default: `null`
+Default: `false`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 

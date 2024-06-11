@@ -197,15 +197,21 @@ variable "host_anti_affinity_required" {
 }
 
 variable "prefer_spot_nodes_enabled" {
-  description = "Whether to pods will prefer scheduling on spot nodes (default true if spot nodes allowed)"
+  description = "Whether pods will prefer scheduling on spot nodes"
   type        = bool
-  default     = null
+  default     = false
 }
 
 variable "prefer_burstable_nodes_enabled" {
-  description = "Whether to pods will prefer scheduling on burstable nodes (default true if burstable nodes allowed)"
+  description = "Whether pods will prefer scheduling on burstable nodes"
   type        = bool
-  default     = null
+  default     = false
+}
+
+variable "prefer_arm_nodes_enabled" {
+  description = "Whether pods will prefer scheduling on arm64 nodes"
+  type        = bool
+  default     = false
 }
 
 variable "spot_nodes_enabled" {

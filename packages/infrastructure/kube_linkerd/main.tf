@@ -355,8 +355,8 @@ resource "helm_release" "linkerd" {
       // These pods must be running in order to prevent cascading cluster failures
       priorityClassName = "system-cluster-critical"
 
-      nodeAffinity = module.util_controller.affinity.nodeAffinity
-      tolerations  = module.util_controller.tolerations
+      #nodeAffinity = module.util_controller.affinity.nodeAffinity
+      tolerations = module.util_controller.tolerations
 
       policyValidator = {
         externalSecret = true

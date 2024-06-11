@@ -5,6 +5,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 *To use stable Panfactum releases, please see [our available licenses](/stack/pricing).*
 
+*To upgrade your Panfactum stack version, please follow the instructions in the [upgrade guide.](/docs/edge/guides/versioning/upgrading/general)*
+
 {/* lint disable no-duplicate-headings */}
 
 ## Unreleased
@@ -18,7 +20,7 @@ for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
 
 - Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
 allow for additional cost savings (approximately $50 / month) in exchange for introducing a small possibility of temporary
-outages. We estimate that setting this to false reduces availability from 99.995% to 99.9%.
+outages. We estimate that setting this to `false` reduces availability from 99.995% to 99.9%.
 This can be used to decrease costs in less critical clusters (e.g., `development`).
 
 ### Fixed
@@ -33,6 +35,11 @@ to avoid OOM issues.
 [Gravatar](https://gravatar.com/) profile images.
 
 - Correctly applies pod labels in [kube_aws_lb_controller](/docs/edge/reference/infrastructure-modules/kubernetes/kube_aws_lb_controller).
+
+- Removes node preferences defaults from [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility)
+that were preventing efficient node deprovisioning.
+
+- Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
 
 ## edge.24-06-08
 
