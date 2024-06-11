@@ -107,12 +107,15 @@ data "authentik_provider_saml_metadata" "aws" {
   provider_id = authentik_provider_saml.aws.id
 }
 
-data "authentik_property_mapping_scim" "user" {
-  managed = "goauthentik.io/providers/scim/user"
-}
-
 data "authentik_property_mapping_scim" "group" {
   managed = "goauthentik.io/providers/scim/group"
+}
+
+// We need to use a custom mapping because we need to make the email the username
+// in order to work with AWS
+resource "authentik_property_mapping_scim" "aws" {
+  expression = file("${path.module}/mapping.py")
+  name       = "AWS SCIM Mapping"
 }
 
 resource "authentik_provider_scim" "aws" {
@@ -121,7 +124,7 @@ resource "authentik_provider_scim" "aws" {
   url                           = var.aws_scim_url
   token                         = var.aws_scim_token
   exclude_users_service_account = true
-  property_mappings             = [data.authentik_property_mapping_scim.user.id]
+  property_mappings             = [authentik_property_mapping_scim.aws.id]
   property_mappings_group       = [data.authentik_property_mapping_scim.group.id]
 }
 

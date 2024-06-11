@@ -16,12 +16,6 @@ variable "cluster_name" {
   default     = ""
 }
 
-variable "max_pods" {
-  description = "The maximum number of pods to run on this node type"
-  type        = number
-  default     = 50
-}
-
 variable "is_spot" {
   description = "Whether these settings are for a spot node"
   type        = bool

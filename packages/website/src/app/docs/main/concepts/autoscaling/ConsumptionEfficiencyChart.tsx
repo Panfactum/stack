@@ -34,7 +34,7 @@ function calcAvg (data: Array<{y: number}>) {
 export default function ConsumptionEfficiencyChart () {
   const [deviation, setDeviation] = useState(0.5)
   const [outlierMultiplier, setOutlierMultiplier] = useState(5)
-  const [outlierChance, setOutlierChance] = useState(0.1)
+  const [outlierChance, setOutlierChance] = useState(0.15)
 
   let efficiency = 1
   let data: Array<{y: number, x: number}> = []
@@ -79,12 +79,12 @@ export default function ConsumptionEfficiencyChart () {
       <div className="flex gap-3 items-center w-full">
         <div className="min-w-[150px]">Outlier Chance</div>
         <div>
-          0
+          10
         </div>
         <Slider
           value={outlierChance}
           step={0.01}
-          min={0}
+          min={0.1}
           max={0.3}
           marks={true}
           valueLabelDisplay="auto"

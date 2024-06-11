@@ -32,7 +32,7 @@ $$
 \left( \frac{\text{Consumed resources}}{\text{Requested resources}} \right) \times \left( \frac{\text{Requested resources}}{\text{Provisioned resources}} \right) = \frac{\text{Consumed resources}}{\text{Provisioned resources}}
 $$
 
-We call the first term *consumption* efficiency, the second term *provisioning* efficiency, and the result *net* efficiency.
+We call the first term *consumption* efficiency, the second term *provisioning* efficiency, and the result *net* efficiency / overall utilization.
 
 Why do we have the concept of *requested resources* in addition to consumed resources? In short, multi-node scheduling
 orchestrators like Kubernetes must know in advance how many resources the workload intends to use in order to ensure the workload is placed on a node with sufficient
@@ -53,9 +53,12 @@ Let's run through a simple example:
 
 We look at these numbers independently as they require different approaches to optimize.
 
+**Ultimately, best-in-class net efficiency tends be around 66%.** Any higher would likely jeopardize
+system stability by not allowing sufficient headroom to handle load spikes.
+
 ## Consumption Efficiency
 
-Optimizing consumption efficiency requires resource requests closely match the average resource usage
+Optimizing consumption efficiency requires that resource requests closely match the average resource usage
 of the workload.
 
 To achieve in this, we utilize the VPA to automatically calculate and adjust requests based on historical usage. However,

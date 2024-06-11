@@ -162,8 +162,6 @@ module "node_settings_burstable" {
   cluster_name           = var.cluster_name
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
-  cluster_ca_data        = var.cluster_ca_data
-  max_pods               = 20
   is_spot                = true
 
   # generate: pass_common_vars.snippet.txt
@@ -184,7 +182,6 @@ module "node_settings_spot" {
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
   cluster_ca_data        = var.cluster_ca_data
-  max_pods               = 40
   is_spot                = true
 
   # generate: pass_common_vars.snippet.txt
@@ -205,7 +202,6 @@ module "node_settings" {
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
   cluster_ca_data        = var.cluster_ca_data
-  max_pods               = 40
   is_spot                = false
 
   # generate: pass_common_vars.snippet.txt

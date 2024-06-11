@@ -18,5 +18,5 @@ extra_inputs:
   enhanced_ha_enabled: false # Only set to 'false' in non-production environments
   vpa_enabled: true # Do not enable until kube_vpa is deployed
   monitoring_enabled: true # Alpha: Do not use
-  canary_enabled: true # Alpha: Do not use
+  canary_enabled: false # Alpha: Do not use
 

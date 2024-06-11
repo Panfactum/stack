@@ -57,7 +57,6 @@ module "node_settings" {
   cluster_ca_data        = aws_eks_cluster.cluster.certificate_authority[0].data
   cluster_dns_service_ip = var.dns_service_ip
   cluster_endpoint       = aws_eks_cluster.cluster.endpoint
-  max_pods               = 25
   is_spot                = false
 
   # generate: pass_common_vars.snippet.txt
