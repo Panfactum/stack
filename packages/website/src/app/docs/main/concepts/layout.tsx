@@ -32,6 +32,10 @@ const SIDENAV_SECTIONS = [
         path: '/cluster-networking'
       }
     ]
+  },
+  {
+    text: 'Autoscaling',
+    path: '/autoscaling'
   }
 ]
 

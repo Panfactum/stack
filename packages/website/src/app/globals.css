@@ -408,6 +408,12 @@ pre > code.diff-highlight .token.token.inserted:not(.prefix) {
     b {
         font-weight: 600;
     }
+
+
+}
+
+.katex {
+    font: inherit !important;
 }
 
 .MuiAlert-message code {

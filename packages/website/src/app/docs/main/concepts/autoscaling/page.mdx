@@ -1,0 +1,65 @@
+# Autoscaling
+
+## Background
+
+In the Panfactum stack, there are three distinct flavors of autoscaling:
+
+* [Horizontal Pod Autoscaling (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/): A built-in controller
+  that adjusts the **number of pods** in a replicated service (e.g., Deployment, StatefulSet, etc.). This can be
+  extended with tools like [KEDA](https://keda.sh/).
+
+* [Vertical Pod Autoscaling (VPA)](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler): A specific controller
+  that can be installed to automatically adjust the **resource requests and limits** of pods based on historical usage.
+
+* Cluster Autoscaling: A category of controllers that will adjust **the number of nodes** running in the cluster.
+  [Karpenter](https://karpenter.sh/) runs the cluster autoscaling in the Panfactum stack.
+
+Horizontal and vertical autoscaling are opt-in and required creating specific autoscaling manifests. Cluster autoscaling
+occurs automatically.
+
+## Resource Utilization
+
+A key benefit of autoscaling is maximizing *resource utilization*. Importantly, there are two core
+components of overall utilization:
+
+$$
+\left( \frac{\text{Consumed resources}}{\text{Requested resources}} \right) \times \left( \frac{\text{Requested resources}}{\text{Provisioned resources}} \right) = \frac{\text{Consumed resources}}{\text{Provisioned resources}}
+$$
+
+We call the first term *consumption* efficiency, the second term *provisioning* efficiency, and the result *net* efficiency.
+
+Why do we have the concept of *requested resources* in addition to consumed resources? In short, multi-node scheduling
+orchestrators like Kubernetes must know in advance how many resources the workload intends to use in order to ensure the workload is placed on a node with sufficient
+free resources available. [^2]
+
+[^2]: Requested resources are the resources the workload requested be made available *before* it started running
+    while consumed resources are the resources actually used.
+
+Let's run through a simple example:
+
+A workload requests 780 MB of memory. However,
+throughout its lifetime, the workload actually only used an average of 400 MB of memory, resulting in
+a 51% consumption efficiency. Additionally, since EC2 instances only come in discrete
+sizes, a 1 GB EC2 node was provisioned, resulting in \~78% provisioning efficiency. Altogether, this produced
+a 40% net efficiency.
+
+We look at these numbers independently as they require different approaches to optimize.
+
+### Consumption Efficiency
+
+Optimizing consumption efficiency requires resource requests closely match the average resource usage
+of the workload.
+
+To achieve in this, we utilize the VPA to automatically calculate and adjust requests based on historical usage. However,
+the VPA does not simply request the average resource utilization. Instead, it calculates requests as the 90th percentile usage x 115%. [^1]
+
+[^1]: How far back the VPA looks for percentile calculations is configurable, and in the Panfactum stack we have it prioritize data
+    from the trailing four hours. We have found this allows for good balance between responsive scaling and system stability.
+
+Why? This ensures the workload is requesting enough resources to operate even under the heaviest load spikes, preventing
+issues such as application crashes or throttling.
+
+Ultimately, this means that in order to optimize consumption efficiency, you must attempt to minimize the
+gap between the average resource usage and the 90th percentile usage.
+
+## Best Practices

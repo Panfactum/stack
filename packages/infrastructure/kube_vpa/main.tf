@@ -203,7 +203,7 @@ resource "helm_release" "vpa" {
           "memory-histogram-decay-half-life" = "${max(1, floor(var.history_length_hours / 8))}h0m0s"
 
           // Provide 30% headroom (instead of the 15% default)
-          "recommendation-margin-fraction" = 0.3
+          "recommendation-margin-fraction" = 0.15
 
           v = var.log_verbosity
           }, var.prometheus_enabled ? {
