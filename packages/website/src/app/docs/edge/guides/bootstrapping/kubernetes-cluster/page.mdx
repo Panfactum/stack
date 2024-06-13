@@ -148,6 +148,10 @@ You will also need to choose a `dns_service_ip` which **must** be in the `servic
 
 ### Choose Node Subnets
 
+<MarkdownAlert severity="warning">
+    Your node subnets **cannot** be changed without downtime in the future.
+</MarkdownAlert>
+
 For `controller_node_subnets`, you have an important decision to make: how many availability zones do you want your nodes
 to run in.
 
@@ -157,7 +161,7 @@ availability zones incurs additional charge. [^6]
 [^6]: In practice, this is fairly minimal unless you have very chatty applications. As a result, it is normally best to
     run whatever you'd run in production in all environments. This allows for better testing and issue emulation.
 
-We generally recommend using three AZs, but in development or test environments it is perfectly acceptable to
+In production, **strongly** recommend using **three** AZs, but in development or test environments it is perfectly acceptable to
 choose one. [^4]
 
 [^4]: Note that this must be an odd number in order for many high availability algorithms to work in the case of an
@@ -167,16 +171,26 @@ The subnets you choose should be **private** and should each be in a different A
 
 ### Choose Node Count and Size
 
+<MarkdownAlert severity="warning">
+    Once you [deploy autoscaling](/docs/edge/guides/bootstrapping/autoscaling), you can reduce
+    the size and count of the EKS nodes recommended below, but until then, using less than our recommendations
+    can introduce issues in later guide sections.
+</MarkdownAlert>
+
 The nodes created by this module are used to run cluster-critical controllers, without which your cluster will not
-function properly. [^5] You **must** use at least three nodes in order to properly launch and update
+function properly. [^5] You **must** use at least **three** nodes in order to properly launch and update
 all cluster components. The `t3a.large` is the minimum recommended instance size if using three nodes.
 
 [^5]: Additional "worker" nodes will be dynamically provisioned by [Karpenter](https://karpenter.sh/) in a future section of this guide.
 
-<MarkdownAlert severity="info">
-    Once you [deploy autoscaling](/docs/edge/guides/bootstrapping/autoscaling), you can reduce
-    the size and count of the EKS nodes, but until then, using less can introduce issues in later guide sections.
-</MarkdownAlert>
+### Choose Cluster Availability Guarantees
+
+By default, all cluster components are deployed with very strong availability guarantees. Our target is 99.995% uptime.
+
+However, this comes at additional cost that is not necessary in all environments and deployment scenarios.
+
+The uptime guarantees can be slightly weakened to 99.9% by setting `extra_inputs.enhanced_ha_enabled` to `false` in your `region.yaml`
+like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml). This can save about $50 / month.
 
 ### Deploy the Cluster
 
@@ -192,7 +206,7 @@ all cluster components. The `t3a.large` is the minimum recommended instance size
 
 You are now ready to run `terragrunt apply`.
 
-This may take up to 30 minutes to complete.
+This may take up to 20 minutes to complete.
 
 When it is ready, you should see your EKS cluster in the AWS web console reporting as `Active` and without any health
 issues.

@@ -105,6 +105,14 @@ Default:
 ]
 ```
 
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_oauth2_proxy_helm_version" /> [oauth2\_proxy\_helm\_version](#input_oauth2_proxy_helm_version)
 
 Description: The version of the descheduler helm chart to deploy
@@ -112,6 +120,14 @@ Description: The version of the descheduler helm chart to deploy
 Type: `string`
 
 Default: `"7.5.4"`
+
+### <a name="input_path_prefix" /> [path\_prefix](#input_path_prefix)
+
+Description: Path prefix for the ingress resource. Should be the same path prefix used by the upstream ingress resource.
+
+Type: `string`
+
+Default: `"/"`
 
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 

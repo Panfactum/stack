@@ -185,6 +185,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_open_cost",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_pg_cluster",
       "group": "kubernetes"
     },

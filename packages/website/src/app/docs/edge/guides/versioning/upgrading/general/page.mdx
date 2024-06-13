@@ -30,9 +30,10 @@ you have reviewed the changes and understand what steps you need to take.
 1. If you use Panfactum terraform modules in your organization's terraform modules, update the `ref` across all of your modules.
 
 2. If you deploy Panfactum modules directly via terragrunt, update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
-in **only** your lowest environment level [^1].
+in **only** your lowest environment level. [^1]
 
-3. Ensure that the terragrunt `version` for that environment is set to `local` (review [these docs](/docs/edge/guides/iac/first-party-modules)) [^2].
+3. Ensure that the terragrunt `version` for that environment is set to `local` in order
+to deploy the local changes from step 1 (review [these docs](/docs/edge/guides/iac/first-party-modules)). [^2]
 
 4. On your local machine, run `terragrunt apply` across **all** modules in that environment.
 
