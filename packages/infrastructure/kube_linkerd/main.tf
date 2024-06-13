@@ -39,11 +39,53 @@ module "pull_through" {
   source = "../aws_ecr_pull_through_cache_addresses"
 }
 
-module "util_controller" {
-  source                  = "../kube_workload_utility"
-  workload_name           = "linkerd-controller"
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
+module "util_destination" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "linkerd-destination"
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+
+  # generate: common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+module "util_identity" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "linkerd-identity"
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
+
+  # generate: common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+module "util_proxy_injector" {
+  source                                = "../kube_workload_utility"
+  workload_name                         = "linkerd-proxy-injector"
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
+  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
+  topology_spread_enabled               = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -173,7 +215,7 @@ module "linkerd_identity_issuer" {
 resource "kubernetes_config_map" "ca_bundle" {
   metadata {
     name      = local.linkerd_root_ca_secret
-    labels    = module.util_controller.labels
+    labels    = module.util_identity.labels
     namespace = local.namespace
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
@@ -293,10 +335,6 @@ resource "helm_release" "linkerd" {
       controllerReplicas        = 2
       enablePodAntiAffinity     = true  # This should always be enabled as we really need to avoid having the service mesh go down
       enablePodDisruptionBudget = false # We do this below
-      deploymentStrategy = {
-        type          = "Recreate"
-        rollingUpdate = null
-      }
 
       # Was never able to get the CNI to work.
       # Given the additional downside of this breaking init containers,
@@ -350,13 +388,19 @@ resource "helm_release" "linkerd" {
         }
       }
 
-      podLabels = module.util_controller.labels
+      podLabels = merge(
+        module.util_proxy.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
 
       // These pods must be running in order to prevent cascading cluster failures
       priorityClassName = "system-cluster-critical"
 
-      #nodeAffinity = module.util_controller.affinity.nodeAffinity
-      tolerations = module.util_controller.tolerations
+      tolerations = module.util_identity.tolerations
 
       policyValidator = {
         externalSecret = true
@@ -457,13 +501,71 @@ resource "helm_release" "linkerd" {
     })
   ]
 
-  // The default pod monitor scrapes all pods, even
+  // (1) The default pod monitor scrapes all pods, even
   // ones without the proxy which generates prometheus errors
-  dynamic "postrender" {
-    for_each = var.monitoring_enabled ? ["1"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
+  // (2) There is no way to set pod labels for each individual controller
+  // (3) There is no way to customize affinities
+  postrender {
+    binary_path = "${path.module}/kustomize/kustomize.sh"
+    args = [
+      yamlencode({
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        metadata = {
+          name = "linkerd-destination"
+        }
+        spec = {
+          template = {
+            metadata = {
+              labels = module.util_destination.labels
+            }
+            spec = {
+              affinity                  = module.util_destination.affinity
+              topologySpreadConstraints = module.util_destination.topology_spread_constraints
+              tolerations               = module.util_destination.tolerations
+            }
+          }
+        }
+      }),
+      yamlencode({
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        metadata = {
+          name = "linkerd-identity"
+        }
+        spec = {
+          template = {
+            metadata = {
+              labels = module.util_identity.labels
+            }
+            spec = {
+              affinity                  = module.util_identity.affinity
+              topologySpreadConstraints = module.util_identity.topology_spread_constraints
+              tolerations               = module.util_identity.tolerations
+            }
+          }
+        }
+      }),
+      yamlencode({
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        metadata = {
+          name = "linkerd-proxy-injector"
+        }
+        spec = {
+          template = {
+            metadata = {
+              labels = module.util_proxy_injector.labels
+            }
+            spec = {
+              affinity                  = module.util_proxy_injector.affinity
+              topologySpreadConstraints = module.util_proxy_injector.topology_spread_constraints
+              tolerations               = module.util_proxy_injector.tolerations
+            }
+          }
+        }
+      })
+    ]
   }
 
   depends_on = [
@@ -527,6 +629,7 @@ resource "helm_release" "viz" {
     })
   ]
 
+
   # Needed b/c tolerations are not set appropriately on the metrics-api
   postrender {
     binary_path = "${path.module}/kustomize_viz/kustomize.sh"
@@ -550,7 +653,7 @@ resource "kubectl_manifest" "vpa_identity" {
     metadata = {
       name      = "linkerd-identity"
       namespace = local.namespace
-      labels    = module.util_controller.labels
+      labels    = module.util_identity.labels
     }
     spec = {
       targetRef = {
@@ -566,21 +669,18 @@ resource "kubectl_manifest" "vpa_identity" {
 }
 
 resource "kubectl_manifest" "pdb_identity" {
-  count = var.monitoring_enabled ? 1 : 0
   yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
       name      = "linkerd-identity"
       namespace = local.namespace
-      labels    = module.util_controller.labels
+      labels    = module.util_identity.labels
     }
     spec = {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
-        matchLabels = {
-          "linkerd.io/control-plane-component" = "identity"
-        }
+        matchLabels = module.util_identity.match_labels
       }
       maxUnavailable = 1
     }
@@ -598,7 +698,7 @@ resource "kubectl_manifest" "vpa_destination" {
     metadata = {
       name      = "linkerd-destination"
       namespace = local.namespace
-      labels    = module.util_controller.labels
+      labels    = module.util_destination.labels
     }
     spec = {
       targetRef = {
@@ -615,21 +715,18 @@ resource "kubectl_manifest" "vpa_destination" {
 
 
 resource "kubectl_manifest" "pdb_destination" {
-  count = var.monitoring_enabled ? 1 : 0
   yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
       name      = "linkerd-destination"
       namespace = local.namespace
-      labels    = module.util_controller.labels
+      labels    = module.util_destination.labels
     }
     spec = {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
-        matchLabels = {
-          "linkerd.io/control-plane-component" = "destination"
-        }
+        matchLabels = module.util_destination.match_labels
       }
       maxUnavailable = 1
     }
@@ -647,7 +744,7 @@ resource "kubectl_manifest" "vpa_proxy_injectory" {
     metadata = {
       name      = "linkerd-proxy-injector"
       namespace = local.namespace
-      labels    = module.util_controller.labels
+      labels    = module.util_proxy_injector.labels
     }
     spec = {
       targetRef = {
@@ -663,21 +760,18 @@ resource "kubectl_manifest" "vpa_proxy_injectory" {
 }
 
 resource "kubectl_manifest" "pdb_proxy_injector" {
-  count = var.monitoring_enabled ? 1 : 0
   yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
       name      = "linkerd-proxy-injector"
       namespace = local.namespace
-      labels    = module.util_controller.labels
+      labels    = module.util_proxy_injector.labels
     }
     spec = {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
-        matchLabels = {
-          "linkerd.io/control-plane-component" = "proxy-injector"
-        }
+        matchLabels = module.util_proxy_injector.match_labels
       }
       maxUnavailable = 1
     }

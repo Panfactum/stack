@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkerd-destination
+spec:
+  template:
+    spec:
+      affinity: null
+      topologySpreadConstraints: null
+      tolerations: null

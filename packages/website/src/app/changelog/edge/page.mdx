@@ -50,7 +50,11 @@ that were preventing efficient node deprovisioning.
 
 - Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
 
-- Fixes incorrect SCIM property mapping in [authentik_aws_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_aws_sso).'
+- Fixes incorrect SCIM property mapping in [authentik_aws_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_aws_sso).
+
+- Aligns pod labels, affinities, topologySpreadConstraints, and tolerations in
+[kube_linkerd](/docs/edge/reference/infrastructure-modules/kubernetes/kube_linkerd) to conventions used in all
+other modules.
 
 ## edge.24-06-08
 

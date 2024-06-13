@@ -38,6 +38,16 @@ locals {
       nodeFit                 = false
     }
   }
+
+  default_evictor_config_with_fit = {
+    name = "DefaultEvictor"
+    args = {
+      evictSystemCriticalPods = true
+      evictFailedBarePods     = true
+      evictLocalStoragePods   = true
+      nodeFit                 = true
+    }
+  }
 }
 
 module "pull_through" {
@@ -264,7 +274,33 @@ resource "helm_release" "descheduler" {
                 ]
               }
             }
-          }
+          },
+
+          // Help with node consolidation
+          // Doesn't work due to: https://github.com/aws/containers-roadmap/issues/1468
+          #          {
+          #            name = "node-consolidation"
+          #            pluginConfig = [
+          #              local.default_evictor_config_with_fit,
+          #              {
+          #                name = "HighNodeUtilization"
+          #                args = {
+          #                  thresholds = {
+          #                    pods = 110
+          #                    cpu = 35
+          #                    memory = 35
+          #                  }
+          #                }
+          #              },
+          #            ]
+          #            plugins = {
+          #              balance = {
+          #                enabled = [
+          #                  "HighNodeUtilization"
+          #                ]
+          #              }
+          #            }
+          #          }
         ]
       }
 

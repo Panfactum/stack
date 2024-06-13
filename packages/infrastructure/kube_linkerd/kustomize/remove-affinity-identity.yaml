@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkerd-identity
+spec:
+  template:
+    spec:
+      affinity: null
+      topologySpreadConstraints: null
+      tolerations: null

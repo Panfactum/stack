@@ -10,3 +10,27 @@ patches:
     target:
       kind: PodMonitor
       name: linkerd-proxy
+  - path: remove-affinity-destination.yaml
+    target:
+      kind: Deployment
+      name: linkerd-destination
+  - path: remove-affinity-identity.yaml
+    target:
+      kind: Deployment
+      name: linkerd-identity
+  - path: remove-affinity-proxy-injector.yaml
+    target:
+      kind: Deployment
+      name: linkerd-proxy-injector
+  - path: destination.yaml
+    target:
+      kind: Deployment
+      name: linkerd-destination
+  - path: identity.yaml
+    target:
+      kind: Deployment
+      name: linkerd-identity
+  - path: proxy-injector.yaml
+    target:
+      kind: Deployment
+      name: linkerd-proxy-injector

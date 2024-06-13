@@ -612,7 +612,9 @@ resource "helm_release" "karpenter" {
 
       priorityClassName = "system-cluster-critical"
 
-      replicas = 1
+      replicas                  = 1
+      topologySpreadConstraints = module.util.topology_spread_constraints
+      affinity                  = module.util.affinity
       strategy = {
         type          = "Recreate"
         rollingUpdate = null
