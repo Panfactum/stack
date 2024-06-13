@@ -1,0 +1,98 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# OpenCost
+
+<ModuleHeader name="kube_open_cost" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_open_cost" status="alpha" type="live" />
+
+This module equips our cluster with the [OpenCost](https://www.opencost.io/), a utility for
+assigning costs to every workload running in the cluster.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_spot_data_feed_bucket" /> [spot\_data\_feed\_bucket](#input_spot_data_feed_bucket)
+
+Description: The name of the spot data feed bucket
+
+Type: `string`
+
+### <a name="input_spot_data_feed_bucket_arn" /> [spot\_data\_feed\_bucket\_arn](#input_spot_data_feed_bucket_arn)
+
+Description: The arn of the spot data feed bucket
+
+Type: `string`
+
+### <a name="input_spot_data_feed_bucket_region" /> [spot\_data\_feed\_bucket\_region](#input_spot_data_feed_bucket_region)
+
+Description: The region of the spot data feed bucket
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_open_cost_helm_version" /> [open\_cost\_helm\_version](#input_open_cost_helm_version)
+
+Description: The image version of the stakater/reloader helm chart
+
+Type: `string`
+
+Default: `"1.38.1"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

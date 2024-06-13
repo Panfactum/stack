@@ -37,7 +37,8 @@ module "util_controller" {
   workload_name                         = "reflector"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = false
+  topology_spread_enabled               = false
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

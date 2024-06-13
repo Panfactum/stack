@@ -22,5 +22,6 @@ dependency "cert_issuers" {
 }
 
 inputs = {
-  vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
+  vault_ca_crt       = dependency.cert_issuers.outputs.vault_ca_crt
+  monitoring_enabled = false
 }

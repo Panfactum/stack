@@ -62,3 +62,9 @@ variable "kms_master_key_id" {
   default     = null
 }
 
+variable "acl_enabled" {
+  description = "Whether to allow ACL use on the bucket"
+  type        = bool
+  default     = false
+}
+

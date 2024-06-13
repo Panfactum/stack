@@ -238,4 +238,10 @@ variable "enhanced_ha_enabled" {
   default     = true
 }
 
+variable "kube_api_server_monitoring_enabled" {
+  description = "Whether to enable monitoring of the API server"
+  type        = bool
+  default     = false
+}
+
 

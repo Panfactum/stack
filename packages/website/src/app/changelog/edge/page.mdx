@@ -23,6 +23,12 @@ allow for additional cost savings (approximately $50 / month) in exchange for in
 outages. We estimate that setting this to `false` reduces availability from 99.995% to 99.9%.
 This can be used to decrease costs in less critical clusters (e.g., `development`).
 
+- Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
+to the [aws_account](/docs/edge/reference/infrastructure-modules/aws/aws_account) module.
+
+- Adds the [kube_open_cost](/docs/edge/reference/infrastructure-modules/kubernetes/kube_open_cost) module
+for calculating the cost of workloads running on Kubernetes.
+
 ### Fixed
 
 - Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart

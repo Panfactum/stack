@@ -968,7 +968,7 @@ resource "helm_release" "prometheus_stack" {
       // Kubernetes API server monitoring
       //////////////////////////////////////////////////////////
       kubeApiServer = {
-        enabled = true
+        enabled = var.kube_api_server_monitoring_enabled
         serviceMonitor = {
           metricRelabelings = [
             {
@@ -1135,6 +1135,7 @@ resource "helm_release" "prometheus_stack" {
                 type = "s3"
                 config = {
                   bucket       = module.metrics_bucket.bucket_name
+                  region       = data.aws_region.current.name
                   endpoint     = "s3.${data.aws_region.current.name}.amazonaws.com"
                   aws_sdk_auth = true
                 }
@@ -1832,6 +1833,7 @@ resource "helm_release" "thanos" {
           type = "s3"
           config = {
             bucket       = module.metrics_bucket.bucket_name
+            region       = data.aws_region.current.name
             endpoint     = "s3.${data.aws_region.current.name}.amazonaws.com"
             aws_sdk_auth = true
           }

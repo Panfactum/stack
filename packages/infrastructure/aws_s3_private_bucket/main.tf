@@ -58,7 +58,7 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
 resource "aws_s3_bucket_ownership_controls" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   rule {
-    object_ownership = "BucketOwnerEnforced"
+    object_ownership = var.acl_enabled ? "BucketOwnerPreferred" : "BucketOwnerEnforced"
   }
 }
 

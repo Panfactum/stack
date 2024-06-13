@@ -25,6 +25,8 @@ module "tags" {
   # end-generate
 }
 
+data "aws_region" "current" {}
+
 ###########################################################################
 ## Alias
 ###########################################################################
@@ -84,4 +86,41 @@ resource "aws_iam_service_linked_role" "spot" {
   aws_service_name = "spot.amazonaws.com"
   description      = "Used by various controllers to launch spot instances"
   tags             = module.tags.tags
+}
+
+/***************************************
+* Spot Data Feed
+* https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html
+***************************************/
+
+resource "random_id" "spot_data_feed_bucket_name" {
+  byte_length = 8
+  prefix      = "spot-data-"
+}
+
+## TODO: Move to its own module
+module "data_feed_bucket" {
+  source      = "../aws_s3_private_bucket"
+  bucket_name = random_id.spot_data_feed_bucket_name.hex
+  description = "Spot instance data feed"
+
+  expire_after_days               = 7
+  expire_old_versions             = true
+  intelligent_transitions_enabled = false
+  acl_enabled                     = true
+
+  # generate: pass_common_vars.snippet.txt
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+resource "aws_spot_datafeed_subscription" "feed" {
+  bucket     = module.data_feed_bucket.bucket_name
+  depends_on = [module.data_feed_bucket]
 }
