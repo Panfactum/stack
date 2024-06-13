@@ -104,7 +104,7 @@ locals {
 
         permissions_policy_enabled  = var.permissions_policy_enabled
         permissions_policy_override = var.permissions_policy_override
-        permissions_policy          = join(", ", [for directive, config in local.permissions_policy_config : "${directive}=${config}"])
+        permissions_policy          = join(", ", [for directive, config in local.permissions_policy_config : "${directive}=${replace(config, "\"", "\\\"")}"])
 
         cross_origin_isolation_enabled = var.cross_origin_isolation_enabled
         cross_origin_opener_policy     = var.cross_origin_opener_policy

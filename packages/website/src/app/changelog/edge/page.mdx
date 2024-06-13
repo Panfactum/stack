@@ -40,6 +40,9 @@ to avoid OOM issues.
 - Updates [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to allow showing
 [Gravatar](https://gravatar.com/) profile images.
 
+- Updates [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to provide the necessary Permissions-Policy headers to allow
+use of WebAuthn devices.
+
 - Correctly applies pod labels in [kube_aws_lb_controller](/docs/edge/reference/infrastructure-modules/kubernetes/kube_aws_lb_controller).
 
 - Removes node preferences defaults from [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility)
@@ -47,7 +50,7 @@ that were preventing efficient node deprovisioning.
 
 - Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
 
-- Fixes incorrect SCIM property mapping in [authentik_aws_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_aws_sso).
+- Fixes incorrect SCIM property mapping in [authentik_aws_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_aws_sso).'
 
 ## edge.24-06-08
 

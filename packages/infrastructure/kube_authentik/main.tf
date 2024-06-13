@@ -660,6 +660,10 @@ module "ingress" {
   csp_script_src = "'self' 'unsafe-inline'"
   csp_img_src    = "'self' data: https://*.gravatar.com/" // Allow gravatar profile images
 
+  # Allows webauthn credentialing
+  permissions_policy_publickey_credentials_create = "(self \"https://*.${var.domain}\")"
+  permissions_policy_publickey_credentials_get    = "(self \"https://*.${var.domain}\")"
+
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
