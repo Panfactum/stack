@@ -2,11 +2,14 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Reloader
+# Kubernetes Scheduler
 
-<ModuleHeader name="kube_reflector" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_reflector" status="stable" type="live" />
+<ModuleHeader name="kube_scheduler" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_scheduler" status="stable" type="live" />
 
-This module deploys the [reflector](https://github.com/emberstack/kubernetes-reflector), a utility that syncs ConfigMaps and Secrets across namespaces.
+An alternative Kubernetes scheduler used to optimize resource utilization
+in the Panfactum stack.
+
+See this article for [motivation.](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money?utm_medium=social\&utm_source=twitter\&utm_campaign=blog)
 
 ## Providers
 
@@ -30,17 +33,25 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
 
-Description: The log level for the reflector pods
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
-Type: `string`
+Type: `bool`
 
-Default: `"Error"`
+Default: `true`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
 
-Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+Description: The log verbosity (1-9) for the scheduler pods
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to add active monitoring to the deployed systems
 
 Type: `bool`
 
@@ -54,13 +65,13 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_reflector_helm_version" /> [reflector\_helm\_version](#input_reflector_helm_version)
+### <a name="input_scheduler_version" /> [scheduler\_version](#input_scheduler_version)
 
-Description: The image version of the emberstack/reflector helm chart
+Description: The version of the kube-scheduler to deploy
 
 Type: `string`
 
-Default: `"7.1.262"`
+Default: `"v1.29.6"`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

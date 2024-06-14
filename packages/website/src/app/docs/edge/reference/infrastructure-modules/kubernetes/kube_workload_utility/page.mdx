@@ -108,6 +108,14 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_pod_affinity_match_labels" /> [pod\_affinity\_match\_labels](#input_pod_affinity_match_labels)
 
 Description: Labels to match for pod affinity
@@ -195,6 +203,10 @@ Description: The labels to add to each pod
 ### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
 
 Description: The label selector to use to match pods in this workload
+
+### <a name="output_scheduler_name" /> [scheduler\_name](#output_scheduler_name)
+
+Description: The schedulerName to use for the pods in the workload
 
 ### <a name="output_tolerations" /> [tolerations](#output_tolerations)
 

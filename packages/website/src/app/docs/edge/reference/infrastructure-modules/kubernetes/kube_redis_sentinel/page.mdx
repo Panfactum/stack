@@ -66,6 +66,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_helm_version" /> [helm\_version](#input_helm_version)
 
 Description: The version of the bitnami/redis helm chart to use
@@ -93,6 +101,14 @@ Default: `25`
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
 Type: `bool`
 

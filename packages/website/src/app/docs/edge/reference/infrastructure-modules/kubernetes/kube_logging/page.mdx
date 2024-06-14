@@ -48,6 +48,14 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_log_level" /> [log\_level](#input_log_level)
 
 Description: The log level for the Loki pods
@@ -83,6 +91,14 @@ Default: `"ebs-standard"`
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
 Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
 Type: `bool`
 
