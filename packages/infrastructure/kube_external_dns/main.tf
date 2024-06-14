@@ -57,7 +57,9 @@ module "util" {
   match_labels                          = { id = random_id.ids[each.key].hex }
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_preferred = false
+  topology_spread_enabled               = false
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -158,7 +160,14 @@ resource "helm_release" "external_dns" {
     yamlencode({
       nameOverride = random_id.ids[each.key].hex
       commonLabels = module.util[each.key].labels
-      podLabels    = module.util[each.key].labels
+      podLabels = merge(
+        module.util[each.key].labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
       deploymentAnnotations = {
         "reloader.stakater.com/auto" = "true"
       }
@@ -194,10 +203,9 @@ resource "helm_release" "external_dns" {
 
       // Monitoring
       serviceMonitor = {
-        enabled          = var.monitoring_enabled
-        namespace        = local.namespace
-        additionalLabels = module.util[each.key].labels
-        interval         = "60s"
+        enabled   = var.monitoring_enabled
+        namespace = local.namespace
+        interval  = "60s"
       }
 
       // Provider configuration
@@ -221,6 +229,15 @@ resource "helm_release" "external_dns" {
       txtPrefix  = "external-dns-"
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+      args        = [random_id.ids[each.key].hex]
+    }
+  }
+
   depends_on = [module.aws_permissions]
 }
 

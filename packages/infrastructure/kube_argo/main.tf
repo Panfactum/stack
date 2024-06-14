@@ -49,6 +49,7 @@ module "util_controller" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   topology_spread_strict                = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -70,6 +71,7 @@ module "util_server" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   topology_spread_strict                = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -88,6 +90,7 @@ module "util_server" {
 module "util_events_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "argo-events-controller"
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   topology_spread_strict                = var.enhanced_ha_enabled
@@ -112,6 +115,7 @@ module "util_webhook" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   topology_spread_strict                = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -319,6 +323,8 @@ module "database" {
   backups_enabled             = var.workflow_archive_backups_enabled
   backups_force_delete        = true
   monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  enhanced_ha_enabled         = var.enhanced_ha_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -455,7 +461,14 @@ resource "helm_release" "argo" {
           level  = var.log_level
         }
 
-        podLabels         = module.util_controller.labels
+        podLabels = merge(
+          module.util_controller.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize_workflows/*")) : filesha256(filename)
+            ]))
+          }
+        )
         priorityClassName = module.constants.cluster_important_priority_class_name
         replicas          = 1
         tolerations       = module.util_controller.tolerations
@@ -546,6 +559,14 @@ resource "helm_release" "argo" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize_workflows/kustomize.sh"
+    }
+  }
+
   depends_on = [module.database]
 }
 
@@ -725,6 +746,14 @@ resource "helm_release" "argo_events" {
       }
 
       controller = {
+        podLabels = merge(
+          module.util_events_controller.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize_events/*")) : filesha256(filename)
+            ]))
+          }
+        )
         podLabels         = module.util_events_controller.labels
         priorityClassName = module.constants.cluster_important_priority_class_name
         replicas          = 1
@@ -744,8 +773,15 @@ resource "helm_release" "argo_events" {
       }
 
       webhook = {
-        enabled                   = true
-        podLabels                 = module.util_webhook.labels
+        enabled = true
+        podLabels = merge(
+          module.util_webhook.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize_events/*")) : filesha256(filename)
+            ]))
+          }
+        )
         priorityClassName         = module.constants.cluster_important_priority_class_name
         replicas                  = 2
         tolerations               = module.util_webhook.tolerations
@@ -766,6 +802,13 @@ resource "helm_release" "argo_events" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize_events/kustomize.sh"
+    }
+  }
 }
 
 resource "kubectl_manifest" "vpa_events_controller" {

@@ -59,6 +59,7 @@ module "website_deployment" {
   instance_type_anti_affinity_required = false
   topology_spread_enabled              = false
   topology_spread_strict               = false
+  panfactum_scheduler_enabled          = true
 
 
   common_env = {

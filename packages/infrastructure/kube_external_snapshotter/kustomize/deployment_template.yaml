@@ -1,0 +1,8 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-snapshotter
+spec:
+  template:
+    spec:
+      schedulerName: "${SCHEDULER}"

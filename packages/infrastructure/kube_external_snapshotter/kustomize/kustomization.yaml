@@ -10,3 +10,11 @@ patches:
     target:
       kind: ValidatingWebhookConfiguration
       name: external-snapshotter-webhook
+  - path: deployment.yaml
+    target:
+      kind: Deployment
+      name: external-snapshotter
+  - path: webhook_deployment.yaml
+    target:
+      kind: Deployment
+      name: external-snapshotter-webhook

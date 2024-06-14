@@ -1,8 +1,8 @@
 locals {
-  eviction_hard_memory_available              = "5%"
+  eviction_hard_memory_available              = "100Mi"
   eviction_hard_nodefs_available              = "10%"
   eviction_hard_inodes_free                   = "10%"
-  eviction_soft_memory_available              = "10%"
+  eviction_soft_memory_available              = "250Mi"
   eviction_soft_nodefs_available              = "15%"
   eviction_soft_inodes_free                   = "15%"
   eviction_soft_grace_period_memory_available = "2m0s"
@@ -18,6 +18,7 @@ locals {
     CLUSTER_CA_DATA                             = var.cluster_ca_data
     CLUSTER_NAME                                = var.cluster_name
     KUBE_RESERVED_MEMORY                        = 500
+    SYSTEM_RESERVED_MEMORY                      = 100
     SHUTDOWN_GRACE_PERIOD                       = local.shutdown_grace_period
     SHUTDOWN_GRACE_PERIOD_FOR_CRITICAL_PODS     = local.shutdown_grace_period_for_critical_pods
     IMAGE_GC_HIGH_THRESHOLD_PERCENT             = local.image_gc_high_threshold_percent

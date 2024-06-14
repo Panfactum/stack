@@ -147,6 +147,7 @@ module "core_dns" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_strict                = true
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   priority_class_name                   = "system-cluster-critical"
   dns_policy                            = "Default"
   containers = concat(

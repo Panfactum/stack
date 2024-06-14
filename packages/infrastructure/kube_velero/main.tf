@@ -39,7 +39,9 @@ module "util" {
   workload_name                         = "velero"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_preferred = false
+  topology_spread_enabled               = false
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -220,11 +222,14 @@ resource "helm_release" "velero" {
     yamlencode({
       fullnameOverride = "velero"
       labels           = module.util.labels
-      podLabels        = module.util.labels
-      podAnnotations = {
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }
-
+      podLabels = merge(
+        module.util.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
 
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/velero/velero"
@@ -356,6 +361,13 @@ resource "helm_release" "velero" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 
   depends_on = [module.aws_permissions]
 }

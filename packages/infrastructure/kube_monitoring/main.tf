@@ -144,6 +144,8 @@ locals {
 
   grafana_subdomain = join(".", slice(split(".", var.grafana_domain), 1, length(split(".", var.grafana_domain))))
   bucket_web_domain = var.thanos_bucket_web_domain != null ? var.thanos_bucket_web_domain : "thanos-bucket.${local.grafana_subdomain}"
+
+  scheduler = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
 }
 
 module "pull_through" {
@@ -157,6 +159,7 @@ module "util_webhook" {
   workload_name                        = "prometheus-operator-webhook"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
   topology_spread_enabled              = var.enhanced_ha_enabled
@@ -178,9 +181,10 @@ module "util_operator" {
 
   workload_name                         = "prometheus-operator"
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
   burstable_nodes_enabled               = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_preferred = false // only runs one copy
+  topology_spread_enabled               = false // only runs one copy
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -200,9 +204,10 @@ module "util_grafana" {
   workload_name                        = "grafana"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_enabled              = var.enhanced_ha_enabled
-  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -222,8 +227,11 @@ module "util_prometheus" {
   workload_name                        = "prometheus"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = true // stateful
+  lifetime_evictions_enabled           = false
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -240,9 +248,11 @@ module "util_prometheus" {
 module "util_node_exporter" {
   source = "../kube_workload_utility"
 
-  workload_name           = "node-exporter"
-  arm_nodes_enabled       = true
-  burstable_nodes_enabled = true
+  workload_name                         = "node-exporter"
+  arm_nodes_enabled                     = true
+  burstable_nodes_enabled               = true
+  topology_spread_enabled               = false // daemonset
+  instance_type_anti_affinity_preferred = false // daemonset
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -262,8 +272,9 @@ module "util_ksm" {
   workload_name                        = "kube-state-metrics"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_strict               = true
   topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
@@ -281,9 +292,12 @@ module "util_ksm" {
 module "util_thanos_compactor" {
   source = "../kube_workload_utility"
 
-  workload_name           = "thanos-compactor"
-  arm_nodes_enabled       = true
-  burstable_nodes_enabled = true
+  workload_name                         = "thanos-compactor"
+  arm_nodes_enabled                     = true
+  burstable_nodes_enabled               = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  topology_spread_enabled               = false // single pod
+  instance_type_anti_affinity_preferred = false // single pod
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -302,8 +316,10 @@ module "util_thanos_store_gateway" {
   workload_name                        = "thanos-store-gateway"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = true // stateful so always on
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -322,8 +338,10 @@ module "util_thanos_ruler" {
   workload_name                        = "thanos-ruler"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = true // stateful so always on
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -344,8 +362,9 @@ module "util_thanos_query" {
   workload_name                        = "thanos-query"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = var.enhanced_ha_enabled
+  topology_spread_strict               = true
   topology_spread_enabled              = var.enhanced_ha_enabled
 
   # generate: common_vars.snippet.txt
@@ -366,9 +385,10 @@ module "util_thanos_frontend" {
   workload_name                        = "thanos-frontend"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = var.enhanced_ha_enabled
   topology_spread_enabled              = var.enhanced_ha_enabled
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -388,9 +408,10 @@ module "util_thanos_bucket_web" {
   workload_name                        = "thanos-bucket-web"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = var.enhanced_ha_enabled
   topology_spread_enabled              = var.enhanced_ha_enabled
+  topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -410,8 +431,11 @@ module "util_alertmanager" {
   workload_name                        = "alertmanager"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = true // stateful so always on
+  lifetime_evictions_enabled           = false
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -471,6 +495,8 @@ module "grafana_db" {
   backups_enabled             = false
   backups_force_delete        = true
   monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  enhanced_ha_enabled         = var.enhanced_ha_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -500,6 +526,7 @@ module "thanos_redis_cache" {
   vpa_enabled                 = var.vpa_enabled
   minimum_memory_mb           = 100
   monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -668,11 +695,9 @@ resource "helm_release" "prometheus_stack" {
       cleanPrometheusOperatorObjectNames = true
       labels                             = module.util_prometheus.labels
       commonLabels = {
-        customizationHash = md5(join("", sort([for filename in [
-          "prometheus_kustomize/admission-cert.yaml",
-          "prometheus_kustomize/kustomization.yaml",
-          "prometheus_kustomize/kustomize.sh"
-        ] : filesha256("${path.module}/${filename}")])))
+        customizationHash = md5(join("", [
+          for filename in sort(fileset(path.module, "prometheus_customize/*")) : filesha256(filename)
+        ]))
       }
 
       crds = {
@@ -1391,6 +1416,7 @@ resource "helm_release" "prometheus_stack" {
 
   postrender {
     binary_path = "${path.module}/prometheus_kustomize/kustomize.sh"
+    args        = [local.scheduler]
   }
 
   depends_on = [module.grafana_db]
@@ -1603,6 +1629,7 @@ resource "helm_release" "thanos" {
         topologySpreadConstraints = module.util_thanos_query.topology_spread_constraints
         affinity                  = module.util_thanos_query.affinity
         tolerations               = module.util_thanos_query.tolerations
+        schedulerName             = local.scheduler
         resources                 = local.default_resources
 
         networkPolicy = {
@@ -1650,6 +1677,7 @@ resource "helm_release" "thanos" {
         topologySpreadConstraints = module.util_thanos_frontend.topology_spread_constraints
         affinity                  = module.util_thanos_frontend.affinity
         tolerations               = module.util_thanos_frontend.tolerations
+        schedulerName             = local.scheduler
         resources                 = local.default_resources
 
         networkPolicy = {
@@ -1673,10 +1701,11 @@ resource "helm_release" "thanos" {
         updateStrategy = {
           type = "Recreate"
         }
-        affinity    = module.util_thanos_bucket_web.affinity
-        podLabels   = module.util_thanos_bucket_web.labels
-        tolerations = module.util_thanos_bucket_web.tolerations
-        resources   = local.default_resources
+        affinity      = module.util_thanos_bucket_web.affinity
+        podLabels     = module.util_thanos_bucket_web.labels
+        tolerations   = module.util_thanos_bucket_web.tolerations
+        schedulerName = local.scheduler
+        resources     = local.default_resources
 
         networkPolicy = {
           enabled = false
@@ -1726,6 +1755,7 @@ resource "helm_release" "thanos" {
           name   = kubernetes_service_account.thanos_compactor.metadata[0].name
         }
         tolerations       = module.util_thanos_compactor.tolerations
+        schedulerName     = local.scheduler
         priorityClassName = module.constants.cluster_important_priority_class_name
         resources = {
           requests = {
@@ -1788,6 +1818,7 @@ resource "helm_release" "thanos" {
         topologySpreadConstraints = module.util_thanos_store_gateway.topology_spread_constraints
         affinity                  = module.util_thanos_store_gateway.affinity
         tolerations               = module.util_thanos_store_gateway.tolerations
+        schedulerName             = local.scheduler
         resources                 = local.default_resources
 
         networkPolicy = {
@@ -1800,7 +1831,8 @@ resource "helm_release" "thanos" {
           create = false
           name   = kubernetes_service_account.thanos_store_gateway.metadata[0].name
         }
-        tolerations = module.util_thanos_ruler.tolerations
+        tolerations   = module.util_thanos_ruler.tolerations
+        schedulerName = local.scheduler
         alertmanagers = [
           "http://monitoring-alertmanager.${local.namespace}.svc.cluster.local:9093"
         ]
@@ -2511,12 +2543,13 @@ module "authenticating_proxy" {
   count  = var.ingress_enabled && var.thanos_bucket_web_enable ? 1 : 0
   source = "../kube_vault_proxy"
 
-  namespace                  = local.namespace
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-  vpa_enabled                = var.vpa_enabled
-  domain                     = local.bucket_web_domain
-  vault_domain               = var.vault_domain
-  enhanced_ha_enabled        = var.enhanced_ha_enabled
+  namespace                   = local.namespace
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  vpa_enabled                 = var.vpa_enabled
+  domain                      = local.bucket_web_domain
+  vault_domain                = var.vault_domain
+  enhanced_ha_enabled         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

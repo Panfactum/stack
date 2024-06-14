@@ -49,6 +49,7 @@ module "util_server" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = var.enhanced_ha_enabled
   topology_spread_enabled              = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
 
@@ -67,6 +68,7 @@ module "util_server" {
 module "util_worker" {
   source                               = "../kube_workload_utility"
   workload_name                        = "authentik-worker"
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = var.enhanced_ha_enabled
   topology_spread_enabled              = var.enhanced_ha_enabled
@@ -121,6 +123,8 @@ module "database" {
   burstable_instances_enabled = true
   arm_instances_enabled       = true
   monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  enhanced_ha_enabled         = var.enhanced_ha_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -149,6 +153,8 @@ module "redis" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
   monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  enhanced_ha_enabled         = var.enhanced_ha_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -345,7 +351,14 @@ resource "helm_release" "authentik" {
       }
 
       server = {
-        podLabels = module.util_server.labels
+        podLabels = merge(
+          module.util_server.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+            ]))
+          }
+        )
         ingress = {
           enabled = false // We use our own ingress module
         }
@@ -433,7 +446,14 @@ resource "helm_release" "authentik" {
       }
 
       worker = {
-        podLabels = module.util_worker.labels
+        podLabels = merge(
+          module.util_worker.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+            ]))
+          }
+        )
 
         replicas                  = 1 // We only need one worker as it only processes background jobs
         priorityClassName         = module.constants.database_priority_class_name
@@ -509,6 +529,13 @@ resource "helm_release" "authentik" {
 
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 
   depends_on = [
     module.database,

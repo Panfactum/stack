@@ -7,6 +7,7 @@ shutdown-grace-period = "${SHUTDOWN_GRACE_PERIOD}"
 shutdown-grace-period-for-critical-pods = "${SHUTDOWN_GRACE_PERIOD_FOR_CRITICAL_PODS}"
 image-gc-high-threshold-percent = "${IMAGE_GC_HIGH_THRESHOLD_PERCENT}"
 image-gc-low-threshold-percent = "${IMAGE_GC_LOW_THRESHOLD_PERCENT}"
+max-pods = 110
 allowed-unsafe-sysctls = ["net.core.somaxconn"]
 
 [settings.kubernetes.eviction-hard]
@@ -24,6 +25,9 @@ allowed-unsafe-sysctls = ["net.core.somaxconn"]
 
 [settings.kubernetes.kube-reserved]
 memory = "${KUBE_RESERVED_MEMORY}Mi"
+
+[settings.kubernetes.system-reserved]
+memory = "${SYSTEM_RESERVED_MEMORY}Mi"
 
 [settings.kernel.sysctl]
 "user.max_user_namespaces" = "16384"

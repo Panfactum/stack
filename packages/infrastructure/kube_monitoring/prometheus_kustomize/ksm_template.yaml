@@ -1,0 +1,8 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-kube-state-metrics
+spec:
+  template:
+    spec:
+      schedulerName: "${SCHEDULER}"

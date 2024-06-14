@@ -5,6 +5,7 @@ metadata:
 spec:
   template:
     spec:
+      schedulerName: "${SCHEDULER}"
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution: null

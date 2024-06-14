@@ -39,8 +39,10 @@ module "util" {
   burstable_nodes_enabled              = var.burstable_instances_enabled
   spot_nodes_enabled                   = var.spot_instances_enabled
   arm_nodes_enabled                    = var.arm_instances_enabled
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = true // stateful
   lifetime_evictions_enabled           = false
 
   # generate: common_vars.snippet.txt
@@ -208,6 +210,7 @@ resource "helm_release" "redis" {
         affinity                  = module.util.affinity
         tolerations               = module.util.tolerations
         topologySpreadConstraints = module.util.topology_spread_constraints
+        schedulerName             = module.util.scheduler_name
 
         // Recommended by the helm chart docs
         podSecurityContext = {

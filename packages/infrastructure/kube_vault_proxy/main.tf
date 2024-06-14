@@ -46,6 +46,7 @@ module "util" {
   workload_name                         = random_id.oauth2_proxy.hex
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
@@ -169,8 +170,15 @@ resource "helm_release" "oauth2_proxy" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/oauth2-proxy/oauth2-proxy"
       }
-      labels    = module.util.labels
-      podLabels = module.util.labels
+      labels = module.util.labels
+      podLabels = merge(
+        module.util.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256("${path.module}/${filename}")
+          ]))
+        }
+      )
       podAnnotations = {
         "config.linkerd.io/proxy-memory-request" = "5Mi" # We can use lower requests / limits here b/c this will never receive much traffic
         "config.linkerd.io/proxy-memory-limit"   = "20Mi"
@@ -192,6 +200,15 @@ resource "helm_release" "oauth2_proxy" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+      args        = [random_id.oauth2_proxy.hex]
+    }
+  }
+
   timeout = 60
 }
 

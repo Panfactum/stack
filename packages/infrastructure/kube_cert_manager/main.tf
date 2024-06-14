@@ -41,6 +41,7 @@ module "util_controller" {
   workload_name                         = "cert-manager"
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -61,6 +62,7 @@ module "util_webhook" {
   workload_name                         = "cert-manager-webhook"
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -81,6 +83,7 @@ module "util_ca_injector" {
   workload_name                         = "cert-manager-ca-injector"
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   arm_nodes_enabled                     = true
 
   // This _can_ be run on a spot node if necessary as a short temporary disruption
@@ -223,7 +226,8 @@ resource "helm_release" "cert_manager" {
 
       installCRDs = true
       global = {
-        commonLabels = module.util_controller.labels
+        # Bug exists here where the labels are also applied to pods which messes up the postrender
+        # commonLabels = module.util_controller.labels
 
         // While the certificates are "critical" to the cluster, the provisioning infrastructure
         // can go down temporarily without taking down the cluster so this does not need to be "system-cluster-critical"
@@ -236,8 +240,15 @@ resource "helm_release" "cert_manager" {
       strategy = {
         type = "Recreate"
       }
-      podLabels = module.util_controller.labels
-      affinity  = module.util_controller.affinity
+      podLabels = merge(
+        module.util_controller.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
+      affinity = module.util_controller.affinity
 
       // This _can_ be run on a spot node if necessary as a short temporary disruption
       // will not cause cascading failures
@@ -273,7 +284,14 @@ resource "helm_release" "cert_manager" {
           create = false
           name   = kubernetes_service_account.webhook.metadata[0].name
         }
-        podLabels   = module.util_webhook.labels
+        podLabels = merge(
+          module.util_webhook.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+            ]))
+          }
+        )
         tolerations = module.util_webhook.tolerations
         affinity    = module.util_webhook.affinity
         resources = {
@@ -328,9 +346,16 @@ resource "helm_release" "cert_manager" {
           type = "Recreate"
         }
         extraArgs = ["--v=${var.log_verbosity}"]
-        podLabels = module.util_ca_injector.labels
-        affinity  = module.util_ca_injector.affinity
+        podLabels = merge(
+          module.util_ca_injector.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+            ]))
+          }
+        )
 
+        affinity    = module.util_ca_injector.affinity
         tolerations = module.util_ca_injector.tolerations
         resources = {
           requests = {
@@ -347,11 +372,17 @@ resource "helm_release" "cert_manager" {
         servicemonitor = {
           enabled  = var.monitoring_enabled
           interval = "60s"
-          labels   = module.util_controller.labels
         }
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 
   depends_on = [module.webhook_cert]
 }

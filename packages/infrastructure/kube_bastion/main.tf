@@ -186,6 +186,7 @@ module "bastion" {
   topology_spread_strict                = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   priority_class_name                   = module.constants.cluster_important_priority_class_name
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access
   // SSHD requires root to run unfortunately. However, we drop all capability except

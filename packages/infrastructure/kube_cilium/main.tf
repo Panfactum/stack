@@ -38,6 +38,7 @@ module "util_controller" {
   workload_name                         = "cilium-operator"
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
@@ -196,7 +197,14 @@ resource "helm_release" "cilium" {
       egressMasqueradeInterfaces = "eth0"
       routingMode                = "native"
 
-      podLabels = module.util_agent.labels
+      podLabels = merge(
+        module.util_agent.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
 
       policyEnforcementMode = "default"
 
@@ -389,6 +397,11 @@ resource "helm_release" "cilium" {
       }
     })
   ]
+
+  postrender {
+    binary_path = "${path.module}/kustomize/kustomize.sh"
+    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
+  }
 }
 
 resource "kubectl_manifest" "vpa_operator" {

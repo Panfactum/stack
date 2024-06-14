@@ -39,8 +39,10 @@ module "util_server" {
   workload_name                         = "vault"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_strict                = true
+  topology_spread_enabled               = true // stateful
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -59,7 +61,8 @@ module "util_csi" {
   workload_name                         = "vault-csi"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = false // ds
+  topology_spread_enabled               = false // ds
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -277,7 +280,14 @@ resource "helm_release" "vault" {
           }
         }
         updateStrategyType = "RollingUpdate"
-        extraLabels        = module.util_server.labels
+        extraLabels = merge(
+          module.util_server.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+            ]))
+          }
+        )
         serviceAccount = {
           create = false,
           name   = kubernetes_service_account.vault.metadata[0].name
@@ -317,6 +327,14 @@ resource "helm_release" "vault" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
+
   depends_on = [module.aws_permissions]
 }
 

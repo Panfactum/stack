@@ -10,3 +10,7 @@ patches:
     target:
       kind: Certificate
       name: pvc-autoresizer-controller
+  - path: deployment.yaml
+    target:
+      kind: Deployment
+      name: pvc-autoresizer-controller

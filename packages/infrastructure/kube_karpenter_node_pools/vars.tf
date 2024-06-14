@@ -22,3 +22,9 @@ variable "cluster_dns_service_ip" {
   description = "The IP address of the cluster's DNS service."
   type        = string
 }
+
+variable "monitoring_enabled" {
+  description = "Whether to active monitoring has been added to the cluster"
+  type        = bool
+  default     = false
+}

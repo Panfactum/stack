@@ -37,6 +37,7 @@ module "util_controller" {
   workload_name                         = "reloader"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = false
   topology_spread_enabled               = false
 
@@ -102,7 +103,14 @@ resource "helm_release" "reloader" {
           image = {
             name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/stakater/reloader"
           }
-          labels = module.util_controller.labels
+          labels = merge(
+            { for k, v in module.util_controller.labels : k => v if k != "id" }, # id gets duplicated by matchLabels and breaks kustomize
+            {
+              customizationHash = md5(join("", [
+                for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+              ]))
+            }
+          )
 
           replicas          = 1
           priorityClassName = module.constants.cluster_important_priority_class_name
@@ -126,6 +134,13 @@ resource "helm_release" "reloader" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 }
 
 resource "kubectl_manifest" "vpa" {

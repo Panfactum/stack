@@ -38,7 +38,9 @@ module "util_controller" {
   workload_name                         = "pvc-autoresizer"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = false // Does not have an arm build
-  instance_type_anti_affinity_preferred = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_preferred = false // single copy
+  topology_spread_enabled               = false // single copy
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -76,24 +78,6 @@ module "namespace" {
 * Autoresizer
 ***************************************/
 
-#module "webhook_cert" {
-#  source = "../kube_internal_cert"
-#
-#  service_names = ["external-snapshotter-webhook"]
-#  secret_name   = "external-snapshotter-webhook-certs"
-#  namespace     = local.namespace
-#
-#  # generate: pass_common_vars.snippet.txt
-#  pf_stack_version = var.pf_stack_version
-#  pf_stack_commit  = var.pf_stack_commit
-#  environment      = var.environment
-#  region           = var.region
-#  pf_root_module   = var.pf_root_module
-#  is_local         = var.is_local
-#  extra_tags       = var.extra_tags
-#  # end-generate
-#}
-
 resource "helm_release" "pvc_autoresizer" {
   namespace       = local.namespace
   name            = "pvc-autoresizer"
@@ -116,7 +100,14 @@ resource "helm_release" "pvc_autoresizer" {
           prometheusURL    = var.prometheus_enabled ? "http://thanos-query-frontend.monitoring.svc.cluster.local:9090" : null
           useK8sMetricsApi = !var.prometheus_enabled
         }
-        podLabels = module.util_controller.labels
+        podLabels = merge(
+          module.util_controller.labels,
+          {
+            customizationHash = md5(join("", [
+              for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+            ]))
+          }
+        )
 
         replicaCount      = 1
         priorityClassName = module.constants.cluster_important_priority_class_name
@@ -151,9 +142,9 @@ resource "helm_release" "pvc_autoresizer" {
     })
   ]
 
-  // Adjusts the certificate to align with Panfactum standards
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
+    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 }
 

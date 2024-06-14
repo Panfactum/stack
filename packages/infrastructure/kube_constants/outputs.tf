@@ -17,3 +17,7 @@ output "default_priority_class_name" {
 output "cluster_important_priority_class_name" {
   value = "cluster-important"
 }
+
+output "panfactum_scheduler_name" {
+  value = "panfactum"
+}

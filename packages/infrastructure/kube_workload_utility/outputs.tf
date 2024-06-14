@@ -22,3 +22,8 @@ output "match_labels" {
   description = "The label selector to use to match pods in this workload"
   value       = local.match_labels
 }
+
+output "scheduler_name" {
+  description = "The schedulerName to use for the pods in the workload"
+  value       = var.panfactum_scheduler_enabled ? "panfactum" : "default-scheduler"
+}

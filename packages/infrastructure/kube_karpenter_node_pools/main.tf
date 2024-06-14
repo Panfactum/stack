@@ -14,6 +14,13 @@ terraform {
 locals {
   name = "karpenter"
 
+  // (1) <2GB of memory is not efficient as each node requires about 1GB of memory just for the
+  // base kubernetes utilities and controllers that must run on each node
+  // (2) If monitoring has been deployed, this gets even worse as we have monitoring systems
+  // deployed on each node. As a result, increase the minimum node size even further to improve
+  // efficiency
+  min_instance_memory = var.monitoring_enabled ? 2500 : 2500 // TODO: For now keep it low as we experiment
+
   shared_requirements = [
     {
       key      = "karpenter.k8s.aws/instance-category"
@@ -29,6 +36,11 @@ locals {
       key      = "kubernetes.io/os"
       operator = "In"
       values   = ["linux"]
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-memory"
+      operator = "Gt"
+      values   = [tostring(local.min_instance_memory)]
     }
   ]
 
@@ -51,9 +63,7 @@ locals {
     {
       key      = "karpenter.k8s.aws/instance-memory"
       operator = "Gt"
-      // 2GB of memory is not efficient as each node requires about 1-1.5GB of memory just for the
-      // controllers that must run on each node
-      values = ["2048"]
+      values   = [tostring(local.min_instance_memory)]
     }
   ]
 
@@ -134,6 +144,12 @@ locals {
         }
       }
     ]
+  }
+
+  # For some reason some settings have to be set in the NodePool
+  # configuration in order to take effect
+  kubelet = {
+    maxPods = 110
   }
 }
 
@@ -297,6 +313,7 @@ resource "kubernetes_manifest" "burstable_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
+          kubelet = local.kubelet
           requirements = concat(
             local.burstable_requirements,
             [
@@ -351,6 +368,7 @@ resource "kubernetes_manifest" "burstable_arm_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
+          kubelet = local.kubelet
           requirements = concat(
             local.burstable_requirements,
             [
@@ -402,6 +420,7 @@ resource "kubernetes_manifest" "spot_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
+          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -455,6 +474,7 @@ resource "kubernetes_manifest" "spot_arm_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
+          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -505,6 +525,7 @@ resource "kubernetes_manifest" "on_demand_arm_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
+          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -556,6 +577,7 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
+          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [

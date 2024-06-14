@@ -110,3 +110,9 @@ variable "pod_affinity_match_labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = false
+}

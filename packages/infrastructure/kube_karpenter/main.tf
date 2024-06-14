@@ -614,7 +614,7 @@ resource "helm_release" "karpenter" {
 
       replicas                  = 1
       topologySpreadConstraints = module.util.topology_spread_constraints
-      affinity                  = module.util.affinity
+      # affinity                  = module.util.affinity // This breaks the helm chart for some reason
       strategy = {
         type          = "Recreate"
         rollingUpdate = null

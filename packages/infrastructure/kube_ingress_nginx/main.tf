@@ -72,13 +72,23 @@ module "pull_through" {
 }
 
 module "util" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "nginx-ingress"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
-  lifetime_evictions_enabled           = false
+  source                      = "../kube_workload_utility"
+  workload_name               = "nginx-ingress"
+  burstable_nodes_enabled     = true
+  arm_nodes_enabled           = true
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  lifetime_evictions_enabled  = false
+
+  // TODO: We really just need to ensure this spread across at least 3 instance types
+  // but having instance_type_anti_affinity_required will explode costs as the count
+  // of these increases
+  // instance_type_anti_affinity_required = var.enhanced_ha_enabled
+
+  // This does need to be spread across AZs in order to not end up
+  // withe constant service disruptions
+  topology_spread_enabled = true
+  topology_spread_strict  = true
+
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -208,7 +218,7 @@ resource "helm_release" "nginx_ingress" {
           registry = var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"
         }
 
-        replicaCount = var.min_replicas
+        replicaCount = var.min_replicas < 6 && var.enhanced_ha_enabled ? 6 : var.min_replicas < 3 ? 3 : var.min_replicas
 
         annotations = {
           // Required b/c the webhook certificate doesn't automatically renew
@@ -426,6 +436,7 @@ resource "helm_release" "nginx_ingress" {
   // so we manually inject the "plugins" field into the configmap
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
+    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [module.webhook_cert]

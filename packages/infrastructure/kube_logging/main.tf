@@ -46,6 +46,12 @@ locals {
       memory = "390Mi"
     }
   }
+
+  kustomization_labels = {
+    customizationHash = md5(join("", [
+      for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+    ]))
+  }
 }
 
 module "pull_through" {
@@ -58,7 +64,9 @@ module "util_read" {
   workload_name                        = "loki-read"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
@@ -78,7 +86,8 @@ module "util_write" {
   workload_name                        = "loki-write"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
@@ -98,7 +107,8 @@ module "util_backend" {
   workload_name                        = "loki-backend"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
   # generate: common_vars.snippet.txt
@@ -114,12 +124,12 @@ module "util_backend" {
 }
 
 module "util_canary" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "loki-canary"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
-  topology_spread_strict               = true
+  source                                = "../kube_workload_utility"
+  workload_name                         = "loki-canary"
+  burstable_nodes_enabled               = true
+  arm_nodes_enabled                     = true
+  instance_type_anti_affinity_preferred = false
+  topology_spread_enabled               = false
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -174,6 +184,7 @@ module "redis_cache" {
   vpa_enabled                 = var.vpa_enabled
   minimum_memory_mb           = 50
   monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
   # generate: pass_common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -582,8 +593,11 @@ resource "helm_release" "loki" {
       }
 
       backend = {
-        replicas      = 3
-        podLabels     = module.util_backend.labels
+        replicas = 3
+        podLabels = merge(
+          module.util_backend.labels,
+          local.kustomization_labels
+        )
         serviceLabels = module.util_backend.labels
         extraArgs = [
           "-config.expand-env=true",
@@ -616,8 +630,11 @@ resource "helm_release" "loki" {
       }
 
       read = {
-        replicas      = 3
-        podLabels     = module.util_read.labels
+        replicas = 3
+        podLabels = merge(
+          module.util_read.labels,
+          local.kustomization_labels
+        )
         serviceLabels = module.util_read.labels
         extraArgs = [
           "-config.expand-env=true",
@@ -644,8 +661,11 @@ resource "helm_release" "loki" {
       }
 
       write = {
-        replicas      = 3
-        podLabels     = module.util_write.labels
+        replicas = 3
+        podLabels = merge(
+          module.util_write.labels,
+          local.kustomization_labels
+        )
         serviceLabels = module.util_write.labels
         extraArgs = [
           "-config.expand-env=true",
@@ -738,6 +758,13 @@ resource "helm_release" "loki" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 
   depends_on = [module.redis_cache]
 }

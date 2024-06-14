@@ -58,9 +58,11 @@ module "pull_through" {
 module "util_controller" {
   source                                = "../kube_workload_utility"
   workload_name                         = "descheduler"
-  burstable_nodes_enabled               = true
-  instance_type_anti_affinity_preferred = true
+  instance_type_anti_affinity_preferred = false
+  topology_spread_enabled               = false
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   arm_nodes_enabled                     = true
+  burstable_nodes_enabled               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -120,8 +122,14 @@ resource "helm_release" "descheduler" {
       image = {
         repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/descheduler/descheduler"
       }
-      commonLabels         = module.util_controller.labels
-      podLabels            = module.util_controller.labels
+      podLabels = merge(
+        module.util_controller.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
       deschedulingInterval = "5m"
 
       replicas    = 1
@@ -152,156 +160,175 @@ resource "helm_release" "descheduler" {
         maxNoOfPodsToEvictPerNode      = 10
         maxNoOfPodsToEvictPerNamespace = 10
 
-        profiles = [
+        profiles = concat(
+          [
 
-          // Evict pods violating schedule constraints
-          {
-            name = "scheduling-violation"
-            pluginConfig = [
-              local.default_evictor_config,
-              {
-                name = "RemovePodsViolatingNodeAffinity"
-                args = {
-                  nodeAffinityType = [
-                    "requiredDuringSchedulingIgnoredDuringExecution"
+            // Evict pods violating schedule constraints
+            {
+              name = "scheduling-violation"
+              pluginConfig = [
+                local.default_evictor_config,
+                {
+                  name = "RemovePodsViolatingNodeAffinity"
+                  args = {
+                    nodeAffinityType = [
+                      "requiredDuringSchedulingIgnoredDuringExecution"
+                    ]
+                  }
+                },
+                {
+                  name = "RemovePodsViolatingTopologySpreadConstraint"
+                  args = {
+                    constraints = [
+                      "DoNotSchedule",
+                      "ScheduleAnyway"
+                    ]
+                  }
+                },
+                {
+                  name = "RemovePodsViolatingInterPodAntiAffinity"
+                },
+                {
+                  name = "RemoveDuplicates"
+                },
+                {
+                  name = "RemovePodsViolatingNodeTaints"
+                }
+              ]
+              plugins = {
+                balance = {
+                  enabled = [
+                    "RemoveDuplicates",
+                    "RemovePodsViolatingTopologySpreadConstraint"
                   ]
                 }
-              },
-              {
-                name = "RemovePodsViolatingTopologySpreadConstraint"
-                args = {
-                  constraints = [
-                    "DoNotSchedule",
-                    "ScheduleAnyway"
+                deschedule = {
+                  enabled = [
+                    "RemovePodsViolatingInterPodAntiAffinity",
+                    "RemovePodsViolatingNodeAffinity",
+                    "RemovePodsViolatingNodeTaints",
                   ]
                 }
-              },
-              {
-                name = "RemovePodsViolatingInterPodAntiAffinity"
-              },
-              {
-                name = "RemoveDuplicates"
-              },
-              {
-                name = "RemovePodsViolatingNodeTaints"
               }
-            ]
-            plugins = {
-              balance = {
-                enabled = [
-                  "RemoveDuplicates",
-                  "RemovePodsViolatingTopologySpreadConstraint"
-                ]
-              }
-              deschedule = {
-                enabled = [
-                  "RemovePodsViolatingInterPodAntiAffinity",
-                  "RemovePodsViolatingNodeAffinity",
-                  "RemovePodsViolatingNodeTaints",
-                ]
-              }
-            }
-          },
+            },
 
-          // Evicts pods that cannot run properly
-          {
-            name = "pod-runtime-problems"
-            pluginConfig = [
-              local.default_evictor_config,
-              {
-                name = "PodLifeTime"
-                args = {
-                  maxPodLifeTimeSeconds = 60 * 3
-                  states = [
-                    "Pending",
-                    "PodInitializing",
-                    "ContainerCreating",
-                    "ImagePullBackOff"
-                  ]
-                }
-              },
-              {
-                name = "RemoveFailedPods"
-                args = {
-                  minPodLifetimeSeconds   = 60
-                  includingInitContainers = true
-                  excludeOwnerKinds = [
-                    "Job" // Jobs will be handled by the job controller
-                  ]
-                }
-              },
-              {
-                name = "RemovePodsHavingTooManyRestarts"
-                args = {
-                  podRestartThreshold     = 5
-                  includingInitContainers = true
-                }
-              }
-            ]
-            plugins = {
-              deschedule = {
-                enabled = [
-                  "PodLifeTime",
-                  "RemoveFailedPods",
-                  "RemovePodsHavingTooManyRestarts"
-                ]
-              }
-            }
-          },
-
-          // Evicts pods over a certain age
-          {
-            name = "pod-lifetime"
-            pluginConfig = [
-              local.default_evictor_config,
-              {
-                name = "PodLifeTime"
-                args = {
-                  maxPodLifeTimeSeconds = 60 * 60 * 4
-                  labelSelector = {
-                    matchExpressions = [{
-                      key      = "panfactum.com/prevent-lifetime-eviction"
-                      operator = "DoesNotExist"
-                    }]
+            // Evicts pods that cannot run properly
+            {
+              name = "pod-runtime-problems"
+              pluginConfig = [
+                local.default_evictor_config,
+                {
+                  name = "PodLifeTime"
+                  args = {
+                    maxPodLifeTimeSeconds = 60 * 3
+                    states = [
+                      "Pending",
+                      "PodInitializing",
+                      "ContainerCreating",
+                      "ImagePullBackOff"
+                    ]
+                  }
+                },
+                {
+                  name = "RemoveFailedPods"
+                  args = {
+                    minPodLifetimeSeconds   = 60
+                    includingInitContainers = true
+                    excludeOwnerKinds = [
+                      "Job" // Jobs will be handled by the job controller
+                    ]
+                  }
+                },
+                {
+                  name = "RemovePodsHavingTooManyRestarts"
+                  args = {
+                    podRestartThreshold     = 5
+                    includingInitContainers = true
                   }
                 }
-              },
-            ]
-            plugins = {
-              deschedule = {
-                enabled = [
-                  "PodLifeTime"
-                ]
+              ]
+              plugins = {
+                deschedule = {
+                  enabled = [
+                    "PodLifeTime",
+                    "RemoveFailedPods",
+                    "RemovePodsHavingTooManyRestarts"
+                  ]
+                }
+              }
+            },
+
+            // Evicts pods over a certain age
+            {
+              name = "pod-lifetime"
+              pluginConfig = [
+                local.default_evictor_config,
+                {
+                  name = "PodLifeTime"
+                  args = {
+                    maxPodLifeTimeSeconds = 60 * 60 * 4
+                    labelSelector = {
+                      matchExpressions = [{
+                        key      = "panfactum.com/prevent-lifetime-eviction"
+                        operator = "DoesNotExist"
+                      }]
+                    }
+                  }
+                },
+              ]
+              plugins = {
+                deschedule = {
+                  enabled = [
+                    "PodLifeTime"
+                  ]
+                }
               }
             }
-          },
-
-          // Help with node consolidation
-          // Doesn't work due to: https://github.com/aws/containers-roadmap/issues/1468
-          #          {
-          #            name = "node-consolidation"
-          #            pluginConfig = [
-          #              local.default_evictor_config_with_fit,
-          #              {
-          #                name = "HighNodeUtilization"
-          #                args = {
-          #                  thresholds = {
-          #                    pods = 110
-          #                    cpu = 35
-          #                    memory = 35
-          #                  }
-          #                }
-          #              },
-          #            ]
-          #            plugins = {
-          #              balance = {
-          #                enabled = [
-          #                  "HighNodeUtilization"
-          #                ]
-          #              }
-          #            }
-          #          }
-        ]
+          ],
+          // Note that this only works if the panfactum scheduler is enabled
+          var.panfactum_scheduler_enabled ? [
+            {
+              name = "node-consolidation"
+              pluginConfig = [
+                merge(
+                  local.default_evictor_config_with_fit,
+                  // This ensures that this is opt-in so that we do not end up in a deschedule
+                  // loop for pods that do not use the panfactum scheduler
+                  {
+                    labelSelector = {
+                      matchLabels = {
+                        "panfactum.com/scheduler" = "true"
+                      }
+                    }
+                  }
+                ),
+                {
+                  name = "HighNodeUtilization"
+                  args = {
+                    thresholds = {
+                      pods   = 50
+                      cpu    = 35
+                      memory = 35
+                    }
+                    evictableNamespaces = {
+                      exclude = [
+                        "scheduler", # The scheduler doesn't schedule itself
+                        "karpenter", # karpenter is always on the eks node pool
+                      ]
+                    }
+                  }
+                },
+              ]
+              plugins = {
+                balance = {
+                  enabled = [
+                    "HighNodeUtilization"
+                  ]
+                }
+              }
+            }
+          ] : []
+        )
       }
 
       priorityClassName = module.constants.cluster_important_priority_class_name
@@ -313,6 +340,14 @@ resource "helm_release" "descheduler" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
+
 }
 
 resource "kubectl_manifest" "vpa_descheduler" {

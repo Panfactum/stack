@@ -14,3 +14,8 @@ patches:
     target:
       kind: MutatingWebhookConfiguration
       name: cnpg-mutating-webhook-configuration
+  - path: deployment.yaml
+    target:
+      kind: Deployment
+      name: cloudnative-pg
+

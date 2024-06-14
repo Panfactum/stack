@@ -44,6 +44,7 @@ module "util_destination" {
   workload_name                         = "linkerd-destination"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
@@ -64,6 +65,7 @@ module "util_identity" {
   workload_name                         = "linkerd-identity"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
@@ -84,6 +86,7 @@ module "util_proxy_injector" {
   workload_name                         = "linkerd-proxy-injector"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
@@ -520,6 +523,7 @@ resource "helm_release" "linkerd" {
               labels = module.util_destination.labels
             }
             spec = {
+              schedulerName             = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
               affinity                  = module.util_destination.affinity
               topologySpreadConstraints = module.util_destination.topology_spread_constraints
               tolerations               = module.util_destination.tolerations
@@ -539,6 +543,7 @@ resource "helm_release" "linkerd" {
               labels = module.util_identity.labels
             }
             spec = {
+              schedulerName             = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
               affinity                  = module.util_identity.affinity
               topologySpreadConstraints = module.util_identity.topology_spread_constraints
               tolerations               = module.util_identity.tolerations
@@ -558,6 +563,7 @@ resource "helm_release" "linkerd" {
               labels = module.util_proxy_injector.labels
             }
             spec = {
+              schedulerName             = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
               affinity                  = module.util_proxy_injector.affinity
               topologySpreadConstraints = module.util_proxy_injector.topology_spread_constraints
               tolerations               = module.util_proxy_injector.tolerations

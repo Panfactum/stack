@@ -200,7 +200,7 @@ locals {
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     }
     limits = {
-      memory            = container.minimum_memory * 1024 * 1024 * 1.3
+      memory            = container.minimum_memory * 1024 * 1024 * container.memory_limit_multiplier
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     }
   } }
@@ -247,6 +247,7 @@ locals {
       ///////////////////////////
       // Scheduling
       ///////////////////////////
+      schedulerName             = var.panfactum_scheduler_enabled ? "panfactum" : null
       tolerations               = module.util.tolerations
       affinity                  = module.util.affinity
       topologySpreadConstraints = module.util.topology_spread_constraints
@@ -365,6 +366,7 @@ module "util" {
   prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
   topology_spread_enabled               = var.topology_spread_enabled
   topology_spread_strict                = var.topology_spread_strict
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

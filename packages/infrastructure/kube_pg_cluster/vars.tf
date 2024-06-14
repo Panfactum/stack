@@ -336,3 +336,15 @@ variable "monitoring_enabled" {
   type        = bool
   default     = false
 }
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = false
+}
+
+variable "enhanced_ha_enabled" {
+  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+  type        = bool
+  default     = true
+}

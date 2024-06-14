@@ -41,3 +41,9 @@ variable "spot_data_feed_bucket_region" {
   description = "The region of the spot data feed bucket"
   type        = string
 }
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = false
+}

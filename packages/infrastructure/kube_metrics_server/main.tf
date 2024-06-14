@@ -34,6 +34,7 @@ module "util" {
   workload_name                         = "metrics-server"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
@@ -158,7 +159,7 @@ resource "helm_release" "metrics_server" {
       }
       priorityClassName   = "system-cluster-critical"
       podDisruptionBudget = { enabled = false } # Created below
-
+      schedulerName       = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
 
       ///////////////////////////////////////
       // Custom Cert Config

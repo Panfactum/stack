@@ -16,6 +16,7 @@ vault_addr: "https://vault.prod.panfactum.com"
 extra_inputs:
   pull_through_cache_enabled: true
   enhanced_ha_enabled: false # Only set to 'false' in non-production environments
+  panfactum_scheduler_enabled: true # Only set to `true` when kube_scheduler has been deployed
   vpa_enabled: true # Do not enable until kube_vpa is deployed
   monitoring_enabled: true # Alpha: Do not use
   canary_enabled: false # Alpha: Do not use

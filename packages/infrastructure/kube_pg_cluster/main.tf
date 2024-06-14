@@ -67,8 +67,10 @@ module "util_cluster" {
   burstable_nodes_enabled              = var.burstable_instances_enabled
   spot_nodes_enabled                   = var.spot_instances_enabled
   arm_nodes_enabled                    = var.arm_instances_enabled
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
+  topology_spread_enabled              = true // stateful so always on
   lifetime_evictions_enabled           = false
 
   # generate: common_vars.snippet.txt
@@ -90,7 +92,9 @@ module "util_pooler" {
   workload_name                        = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  topology_spread_enabled              = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
   pod_affinity_match_labels            = module.util_cluster.match_labels
   lifetime_evictions_enabled           = false
@@ -307,6 +311,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       primaryUpdateStrategy = "unsupervised"
       primaryUpdateMethod   = "switchover"
       enablePDB             = false // We perform our own PDB logic
+      schedulerName         = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : null
 
       // This is required for Vault as vault uses
       // the superuser to dynamically provision the less-privileged users
@@ -798,7 +803,7 @@ resource "kubectl_manifest" "connection_pooler" {
               }
             }
           ]
-
+          schedulerName             = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : null
           priorityClassName         = module.constants.database_priority_class_name
           topologySpreadConstraints = module.util_pooler[each.key].topology_spread_constraints
           tolerations               = module.util_pooler[each.key].tolerations

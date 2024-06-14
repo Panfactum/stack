@@ -10,3 +10,7 @@ patches:
     target:
       kind: ConfigMap
       name: nginx-controller
+  - path: deployment.yaml
+    target:
+      kind: Deployment
+      name: nginx-controller

@@ -163,6 +163,9 @@ locals {
     var.lifetime_evictions_enabled ? null : {
       "panfactum.com/prevent-lifetime-eviction" = "true"
     },
+    var.panfactum_scheduler_enabled ? {
+      "panfactum.com/scheduler" = "true"
+    } : null,
     local.match_labels
   )
 

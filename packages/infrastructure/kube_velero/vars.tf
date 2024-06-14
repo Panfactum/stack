@@ -54,3 +54,9 @@ variable "monitoring_enabled" {
   type        = bool
   default     = false
 }
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = false
+}

@@ -33,12 +33,14 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "external-snapshotter-controller"
-  burstable_nodes_enabled               = true
+  source        = "../kube_workload_utility"
+  workload_name = "external-snapshotter-controller"
+
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   arm_nodes_enabled                     = true
+  burstable_nodes_enabled               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -203,6 +205,7 @@ resource "helm_release" "external_snapshotter" {
   // Injects the CA data into the webhook manifest
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
+    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [module.webhook_cert]

@@ -22,6 +22,12 @@ terraform {
 locals {
   name      = "vertical-pod-autoscaler"
   namespace = module.namespace.namespace
+
+  kustomization_labels = {
+    customizationHash = md5(join("", [
+      for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+    ]))
+  }
 }
 
 module "pull_through" {
@@ -34,6 +40,7 @@ module "util_admission_controller" {
   workload_name                         = "vpa-admission-controller"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   match_labels = {
@@ -58,6 +65,7 @@ module "util_recommender" {
   workload_name                         = "vpa-recommender"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   match_labels = {
@@ -81,6 +89,7 @@ module "util_updater" {
   workload_name                         = "vpa-updater"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
   match_labels = {
@@ -162,13 +171,15 @@ resource "helm_release" "vpa" {
     yamlencode({
       fullnameOverride = "vpa"
 
-      podLabels = merge(module.util_recommender.labels, {
-        customizationHash = md5(join("", [for filename in fileset(path.module, "vpa_kustomize/*") : filesha256(filename)]))
-      })
-
       priorityClassName = "system-cluster-critical"
 
       recommender = {
+
+        podLabels = merge(
+          # We must filter out the labels added by the helm chart b/c this will cause a duplicate label issue in kustomize
+          { for k, v in module.util_recommender.labels : k => v if k != "app.kubernetes.io/name" && k != "app.kubernetes.io/component" },
+          local.kustomization_labels
+        )
 
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-recommender"
@@ -263,6 +274,12 @@ resource "helm_release" "vpa" {
 
       updater = {
 
+        podLabels = merge(
+          # We must filter out the labels added by the helm chart b/c this will cause a duplicate label issue in kustomize
+          { for k, v in module.util_updater.labels : k => v if k != "app.kubernetes.io/name" && k != "app.kubernetes.io/component" },
+          local.kustomization_labels
+        )
+
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-updater"
           tag        = var.vertical_autoscaler_image_version
@@ -299,6 +316,12 @@ resource "helm_release" "vpa" {
       }
 
       admissionController = {
+
+        podLabels = merge(
+          # We must filter out the labels added by the helm chart b/c this will cause a duplicate label issue in kustomize
+          { for k, v in module.util_admission_controller.labels : k => v if k != "app.kubernetes.io/name" && k != "app.kubernetes.io/component" },
+          local.kustomization_labels
+        )
 
         image = {
           repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/autoscaling/vpa-admission-controller"
@@ -357,6 +380,14 @@ resource "helm_release" "vpa" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
+
   depends_on = [module.webhook_cert]
 }
 

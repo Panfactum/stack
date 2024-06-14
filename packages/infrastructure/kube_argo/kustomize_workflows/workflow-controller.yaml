@@ -1,0 +1,8 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argo-workflow-controller
+spec:
+  template:
+    spec:
+      schedulerName: panfactum

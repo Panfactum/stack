@@ -43,7 +43,7 @@ module "pod_template" {
   tmp_directories = var.tmp_directories
   mount_owner     = var.mount_owner
 
-  workload_name                         = var.namespace
+  workload_name                         = var.name
   match_labels                          = { id = random_id.deployment_id.hex }
   burstable_nodes_enabled               = var.burstable_nodes_enabled
   spot_nodes_enabled                    = var.spot_nodes_enabled
@@ -59,6 +59,7 @@ module "pod_template" {
   prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
   topology_spread_enabled               = var.topology_spread_enabled
   topology_spread_strict                = var.topology_spread_strict
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

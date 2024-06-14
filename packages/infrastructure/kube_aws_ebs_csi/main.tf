@@ -50,6 +50,7 @@ module "util_controller" {
   burstable_nodes_enabled               = true
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   arm_nodes_enabled                     = true
 
   # generate: common_vars.snippet.txt
@@ -284,6 +285,7 @@ resource "helm_release" "ebs_csi_driver" {
   // (2) We need to remove the default podAntiAffinity rules from the deployment
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
+    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [module.aws_permissions]

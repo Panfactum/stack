@@ -37,6 +37,7 @@ module "util_controller" {
   workload_name                         = "reflector"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = false
   topology_spread_enabled               = false
 
@@ -99,7 +100,14 @@ resource "helm_release" "reflector" {
           minimumLevel = var.log_level
         }
       }
-      podLabels = module.util_controller.labels
+      podLabels = merge(
+        module.util_controller.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
 
       replicaCount      = 1
       tolerations       = module.util_controller.tolerations
@@ -114,6 +122,13 @@ resource "helm_release" "reflector" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 }
 
 resource "kubectl_manifest" "vpa" {

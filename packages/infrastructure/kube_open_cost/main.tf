@@ -40,8 +40,9 @@ module "util" {
   workload_name                         = "open-cost"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = false
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_preferred = false // single copy
+  topology_spread_enabled               = false // single copy
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -60,8 +61,8 @@ module "util_network_cost" {
   workload_name                         = "network-cost"
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = false
+  instance_type_anti_affinity_preferred = false // ds
+  topology_spread_enabled               = false // ds
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version
@@ -180,6 +181,14 @@ resource "helm_release" "open_cost" {
         create = false
         name   = kubernetes_service_account.open_cost.metadata[0].name
       }
+      podLabels = merge(
+        module.util.labels,
+        {
+          customizationHash = md5(join("", [
+            for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
+          ]))
+        }
+      )
       opencost = {
         customPricing = {
           enabled  = true
@@ -238,7 +247,6 @@ resource "helm_release" "open_cost" {
           }
         }
 
-        podLabels         = module.util.labels
         priorityClassName = module.constants.cluster_important_priority_class_name
         affinity          = module.util.affinity
         tolerations       = module.util.tolerations
@@ -249,6 +257,13 @@ resource "helm_release" "open_cost" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 }
 
 resource "kubectl_manifest" "vpa" {
