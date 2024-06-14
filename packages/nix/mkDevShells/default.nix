@@ -267,6 +267,7 @@
             yq # yaml
             fzf # fuzzy selector
             getopt # for parsing command-line arguments
+            envsubst # environment substitution in files
 
             ####################################
             # AWS Utilities

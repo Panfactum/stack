@@ -57,10 +57,11 @@ module "util_controller" {
 module "util_webhook" {
   source                                = "../kube_workload_utility"
   workload_name                         = "external-snapshotter-webhook"
-  burstable_nodes_enabled               = true
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   arm_nodes_enabled                     = true
+  burstable_nodes_enabled               = true
 
   # generate: common_vars.snippet.txt
   pf_stack_version = var.pf_stack_version

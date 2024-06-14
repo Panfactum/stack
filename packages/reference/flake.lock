@@ -351,27 +351,23 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1717803097,
-        "narHash": "sha256-3B8/D5rauw8sdKfTg9pXP7ICRitwjbtds9RE51CjxT8=",
-        "owner": "panfactum",
-        "repo": "stack",
-        "rev": "6b11f2a4d4bd04e46ab27bfb17bbb3dd982d5e5b",
-        "type": "github"
+        "lastModified": 0,
+        "narHash": "sha256-RxYwoEFp9TimjjZ7zNmaKbnQ4g/A0w73DKP+rfzu9DU=",
+        "path": "../..",
+        "type": "path"
       },
       "original": {
-        "owner": "panfactum",
-        "ref": "main",
-        "repo": "stack",
-        "type": "github"
+        "path": "../..",
+        "type": "path"
       }
     },
     "pkgs": {
       "locked": {
-        "lastModified": 1717530100,
-        "narHash": "sha256-b4Dn+PnrZoVZ/BoR9JN2fTxXxplJrAsdSUIePf4Cacs=",
+        "lastModified": 1718229064,
+        "narHash": "sha256-ZFav8A9zPNfjZg/wrxh1uZeMJHELRfRgFP+meq01XYk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a2e1d0414259a144ebdc048408a807e69e0565af",
+        "rev": "5c2ec3a5c2ee9909904f860dadc19bc12cd9cc44",
         "type": "github"
       },
       "original": {
