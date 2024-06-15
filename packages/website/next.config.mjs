@@ -12,7 +12,7 @@ const withBundleAnalyzer = createBundleAnalyzer({
 const withMDX = createMDX({
   // Add markdown plugins here, as desired
   options: {
-    remarkPlugins: [customPlugin, remarkGfm, [remarkPrism, {transformInlineCode: false}], remarkMath],
+    remarkPlugins: [customPlugin, remarkGfm, [remarkPrism, {transformInlineCode: false, plugins: ['diff-highlight']}], remarkMath],
     rehypePlugins: [rehypeKatex]
   },
 })

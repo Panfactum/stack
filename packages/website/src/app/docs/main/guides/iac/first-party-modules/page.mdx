@@ -96,25 +96,25 @@ environments/
    - development/
      - environment.yaml
      - us-east-2/
-        - aws_eks/
-        - aws_vpc/
+        - module1/
+        - module2/
    - staging/
      - environment.yaml
      - us-east-2/
-        - aws_eks/
-        - aws_vpc/
+        - module1/
+        - module2/
    - production/
      - environment.yaml
      - us-east-2/
-        - aws_eks/
-        - aws_vpc/
+        - module1/
+        - module2/
      - us-west-2/
         - region.yaml
-        - aws_eks/
-        - aws_vpc/
+        - module1/
+        - module2/
 infrastructure/
-   - aws_eks/
-   - aws_vpc/
+   - module1/
+   - module2/
 ```
 
 Each `environment.yaml` as the following `version` keys:
@@ -125,7 +125,7 @@ Each `environment.yaml` as the following `version` keys:
 
 Additionally, the `production/us-west-2/region.yaml` file has the `version` key set to `v1.0.0`.
 
-In this scenario, even though all three environments will use both the `aws_eks` and `aws_vpc` modules:
+In this scenario, even though all three environments will use both the `module1` and `module2` modules:
 
 * **All** modules in `development` will use the latest `infrastructure/*` code on the `main` branch (useful for ensuring the latest
   code is always deployed).

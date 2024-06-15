@@ -21,19 +21,49 @@ you have reviewed the changes and understand what steps you need to take.
 
 1. Update the version in your `flake.nix` file.
 
+   ```diff-nix[class="diff-highlight"]
+   {
+       inputs = {
+           pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+   -       panfactum.url = "github:NixOS/nixpkgs/old-version";
+   +       panfactum.url = "github:NixOS/nixpkgs/new-version";
+       };
+
+       outputs = { self, panfactum, pkgs, ... }@inputs: {
+           devShells = panfactum.lib.mkDevShells {
+               inherit pkgs;
+               modules = [ (import ./devenv.nix) ];
+           };
+       };
+   }
+   ```
+
 2. Run `nix flake update`. This will update your lockfile and then download the new versions of all utilities.
 
 3. If you receive some warnings when your `devenv` reloads, run the recommended commands to update your repo files.
 
 ## Update your Infrastructure
 
-1. If you use Panfactum terraform modules in your organization's terraform modules, update the `ref` across all of your modules.
+1. If you use Panfactum IaC submodules in your organization's IaC modules, update the `ref` across all of your modules:
+
+   ```diff-hcl[class="diff-highlight"]
+   module "pod_template" {
+   -    source       = "github.com/Panfactum/stack.git/packages/infrastructure//kube_pod?ref=old-version"
+   +    source       = "github.com/Panfactum/stack.git/packages/infrastructure//kube_pod?ref=new-version"
+   }
+   ```
 
 2. If you deploy Panfactum modules directly via terragrunt, update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
-in **only** your lowest environment level. [^1]
+   in **only** your lowest environment level: [^1]
+
+   ```diff-yaml[class="diff-highlight"]
+   environment: "development"
+   - pf_stack_version: "old-version"
+   + pf_stack_version: "new-version"
+   ```
 
 3. Ensure that the terragrunt `version` for that environment is set to `local` in order
-to deploy the local changes from step 1 (review [these docs](/docs/main/guides/iac/first-party-modules)). [^2]
+   to deploy the local changes from step 1 (review [these docs](/docs/main/guides/iac/first-party-modules)). [^2]
 
 4. On your local machine, run `terragrunt apply` across **all** modules in that environment.
 
