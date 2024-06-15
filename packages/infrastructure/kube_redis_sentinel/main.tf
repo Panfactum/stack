@@ -167,7 +167,6 @@ resource "helm_release" "redis" {
         automountServiceAccountToken = true
 
         extraFlags = concat(
-          var.persistence_enabled ? [] : ["--appendonly", "no"],
           var.lfu_cache_enabled ? [
             "--maxmemory", "$MEMORY_REQUEST",
             "--maxmemory-policy", "allkeys-lfu",
@@ -176,7 +175,14 @@ resource "helm_release" "redis" {
           [
             // This ensures that client buffers don't crash redis when payloads are very large and
             // fill the buffers
-            "--maxmemory-clients", "$(( MEMORY_REQUEST * 15 / 100))"
+            "--maxmemory-clients", "$(( MEMORY_REQUEST * 15 / 100))",
+
+            // Append only file settings for saving data since the last snapshot
+            "--appendonly", "yes",
+            "--appendfsync", var.redis_appendfsync,
+
+            // Snapshot settings
+            "--save", var.redis_save
           ],
           var.redis_flags
         )
@@ -223,18 +229,12 @@ resource "helm_release" "redis" {
         }
 
         persistence = {
-          enabled   = var.persistence_enabled
-          size      = "${var.persistence_size_gb}Gi"
-          sizeLimit = "100Mi" // only used by the emptydir when persistence is disabled
+          enabled = true
+          size    = "${var.persistence_size_gb}Gi"
           persistentVolumeClaimRetentionPolicy = {
             enabled     = true
             whenScaled  = "Delete"
             whenDeleted = "Delete"
-          }
-          annotations = {
-            "resize.topolvm.io/storage_limit" = "${var.persistence_storage_limit_gb != null ? var.persistence_storage_limit_gb : var.persistence_size_gb * 10}Gi"
-            "resize.topolvm.io/increase"      = "${var.persistence_storage_increase_percent}%"
-            "resize.topolvm.io/threshold"     = "${var.persistence_storage_increase_threshold_percent}%"
           }
         }
         resources = {
@@ -307,6 +307,23 @@ resource "helm_release" "redis" {
       }
     })
   ]
+}
+
+resource "kubernetes_annotations" "redis_pvc" {
+  count       = var.replica_count
+  api_version = "v1"
+  kind        = "PersistentVolumeClaim"
+  metadata {
+    name      = "redis-data-${random_id.id.hex}-node-${count.index}"
+    namespace = var.namespace
+  }
+  annotations = {
+    "resize.topolvm.io/storage_limit" = "${var.persistence_storage_limit_gb != null ? var.persistence_storage_limit_gb : var.persistence_size_gb * 10}Gi"
+    "resize.topolvm.io/increase"      = "${var.persistence_storage_increase_gb}Gi"
+    "resize.topolvm.io/threshold"     = "${var.persistence_storage_increase_threshold_percent}%"
+  }
+  force      = true
+  depends_on = [helm_release.redis]
 }
 
 resource "kubectl_manifest" "pdb" {

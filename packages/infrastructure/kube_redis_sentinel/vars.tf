@@ -16,9 +16,9 @@ variable "helm_version" {
 }
 
 variable "persistence_size_gb" {
-  description = "How many GB to allocate for persistent storage"
+  description = "How many GB to initially allocate for persistent storage (will grow automatically as needed)"
   type        = number
-  default     = 5
+  default     = 1
 }
 
 variable "persistence_storage_limit_gb" {
@@ -33,10 +33,10 @@ variable "persistence_storage_increase_threshold_percent" {
   default     = 20
 }
 
-variable "persistence_storage_increase_percent" {
-  description = "The percent to increase storage by if free space drops below the threshold"
+variable "persistence_storage_increase_gb" {
+  description = "The amount of GB to increase storage by if free space drops below the threshold"
   type        = number
-  default     = 50
+  default     = 1
 }
 
 variable "replica_count" {
@@ -56,6 +56,17 @@ variable "redis_flags" {
   default     = []
 }
 
+variable "redis_appendfsync" {
+  description = "Sets the appendfsync option for AOF saving"
+  type        = string
+  default     = "everysec"
+}
+
+variable "redis_save" {
+  description = "Sets the save option for periodic snapshotting"
+  type        = string
+  default     = "300 100" # Every 5 min if at least 100 keys have changed
+}
 
 variable "spot_instances_enabled" {
   description = "Whether the database nodes can be scheduled on spot instances"
@@ -71,12 +82,6 @@ variable "burstable_instances_enabled" {
 
 variable "arm_instances_enabled" {
   description = "Whether the database nodes can be scheduled on arm64 instances"
-  type        = bool
-  default     = false
-}
-
-variable "persistence_enabled" {
-  description = "Whether the redis data will be stored on disk"
   type        = bool
   default     = false
 }

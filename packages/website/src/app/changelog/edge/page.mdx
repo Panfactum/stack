@@ -9,11 +9,31 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+- The `persistence_enabled` option was removed from [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel).
+Redis is now always deployed with persistence enabled. This decision was made b/c the cross-AZ network costs of re-instantiating
+Redis nodes without PVC storage dwarf the costs of the PVC storage (by a factor of 100x). As a result, there is no benefit
+to not periodically saving the redis database to a persistent disk.
+
+    To compensate for potential performance impacts, we have exposed another input, `redis_appendfsync`. Setting this to
+    `"no"` will achieve the same performance as having persistence disabled. However, the default setting of `"everysec"` is
+    likely sufficient for the vast majority of use cases and reduces the risk of data loss.
+
+    Unfortunately, if you were previously running with `persistence_enabled` set to `false`, you will need to delete
+    the Redis StatefulSets in order to apply the new module. In particular, this impacts the `kube_authentik` module.
+
+    Since `persistence_enabled` should only have been used in scenarios where data retention was not important,
+    this should be considered a safe operation. However, it will introduce a minor
+    service disruption during the replacement period.
+
 ## edge.24-06-14
 
 ### Added
 
-- Added [kube_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler), an alternative Kubernetes
+- Adds [kube_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler), an alternative Kubernetes
 scheduler that can be used to improve bin-packing of pods on nodes in the Kubernetes cluster. This allows for better,
 smaller node selection and our tests show an estimated 25-33% reduction in node costs when used. We provide
 instructions for installing it [here](/docs/edge/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler).

@@ -179,7 +179,6 @@ module "redis_cache" {
   lfu_cache_enabled           = true
   burstable_instances_enabled = true
   arm_instances_enabled       = true
-  persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
   minimum_memory_mb           = 50

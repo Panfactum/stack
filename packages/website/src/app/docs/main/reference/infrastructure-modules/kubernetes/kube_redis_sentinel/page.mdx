@@ -114,29 +114,21 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_persistence_enabled" /> [persistence\_enabled](#input_persistence_enabled)
-
-Description: Whether the redis data will be stored on disk
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_persistence_size_gb" /> [persistence\_size\_gb](#input_persistence_size_gb)
 
-Description: How many GB to allocate for persistent storage
+Description: How many GB to initially allocate for persistent storage (will grow automatically as needed)
 
 Type: `number`
 
-Default: `5`
+Default: `1`
 
-### <a name="input_persistence_storage_increase_percent" /> [persistence\_storage\_increase\_percent](#input_persistence_storage_increase_percent)
+### <a name="input_persistence_storage_increase_gb" /> [persistence\_storage\_increase\_gb](#input_persistence_storage_increase_gb)
 
-Description: The percent to increase storage by if free space drops below the threshold
+Description: The amount of GB to increase storage by if free space drops below the threshold
 
 Type: `number`
 
-Default: `50`
+Default: `1`
 
 ### <a name="input_persistence_storage_increase_threshold_percent" /> [persistence\_storage\_increase\_threshold\_percent](#input_persistence_storage_increase_threshold_percent)
 
@@ -162,6 +154,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_redis_appendfsync" /> [redis\_appendfsync](#input_redis_appendfsync)
+
+Description: Sets the appendfsync option for AOF saving
+
+Type: `string`
+
+Default: `"everysec"`
+
 ### <a name="input_redis_flags" /> [redis\_flags](#input_redis_flags)
 
 Description: Extra configuration flags to pass to each redis node
@@ -169,6 +169,14 @@ Description: Extra configuration flags to pass to each redis node
 Type: `list(string)`
 
 Default: `[]`
+
+### <a name="input_redis_save" /> [redis\_save](#input_redis_save)
+
+Description: Sets the save option for periodic snapshotting
+
+Type: `string`
+
+Default: `"300 100"`
 
 ### <a name="input_replica_count" /> [replica\_count](#input_replica_count)
 

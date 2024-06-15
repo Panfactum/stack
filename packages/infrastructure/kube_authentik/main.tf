@@ -149,7 +149,6 @@ module "redis" {
   replica_count               = 3
   burstable_instances_enabled = true
   arm_instances_enabled       = true
-  persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
   monitoring_enabled          = var.monitoring_enabled

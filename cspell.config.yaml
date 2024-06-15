@@ -161,7 +161,8 @@ words: [
   "keepcnt",
   "Qexec",
   "kubelet",
-  "containerd"
+  "containerd",
+  "appendfsync"
 ]
 languageSettings:
   - languageId: markdown,mdx

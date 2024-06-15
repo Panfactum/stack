@@ -33,10 +33,10 @@ variable "vault_storage_increase_threshold_percent" {
   default     = 20
 }
 
-variable "vault_storage_increase_percent" {
-  description = "The percent to increase storage by if free space drops below the threshold"
+variable "vault_storage_increase_gb" {
+  description = "The GB to increase storage by if free space drops below the threshold"
   type        = number
-  default     = 100
+  default     = 1
 }
 
 variable "vault_domain" {

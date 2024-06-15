@@ -363,7 +363,7 @@ resource "kubernetes_annotations" "vault_pvc" {
   }
   annotations = {
     "resize.topolvm.io/storage_limit" = "${var.vault_storage_limit_gb != null ? var.vault_storage_limit_gb : 10 * var.vault_storage_size_gb}Gi"
-    "resize.topolvm.io/increase"      = "${var.vault_storage_increase_percent}%"
+    "resize.topolvm.io/increase"      = "${var.vault_storage_increase_gb}Gi"
     "resize.topolvm.io/threshold"     = "${var.vault_storage_increase_threshold_percent}%"
   }
   force = true

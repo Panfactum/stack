@@ -521,7 +521,6 @@ module "thanos_redis_cache" {
   lfu_cache_enabled           = true
   burstable_instances_enabled = true
   arm_instances_enabled       = true
-  persistence_enabled         = false
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   vpa_enabled                 = var.vpa_enabled
   minimum_memory_mb           = 100
@@ -1746,7 +1745,7 @@ resource "helm_release" "thanos" {
           annotations = {
             "velero.io/exclude-from-backup"   = "true"
             "resize.topolvm.io/storage_limit" = "${10 * var.thanos_compactor_disk_storage_gb}Gi"
-            "resize.topolvm.io/increase"      = "50%"
+            "resize.topolvm.io/increase"      = "25Gi"
             "resize.topolvm.io/threshold"     = "20%"
           }
         }
@@ -2139,7 +2138,7 @@ resource "kubernetes_annotations" "prometheus_pvc" {
   annotations = {
     "velero.io/exclude-from-backup"   = "true"
     "resize.topolvm.io/storage_limit" = "100Gi"
-    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/increase"      = "5Gi"
     "resize.topolvm.io/threshold"     = "20%"
   }
   force = true
@@ -2158,7 +2157,7 @@ resource "kubernetes_annotations" "alertmanager_pvc" {
   annotations = {
     "velero.io/exclude-from-backup"   = "true"
     "resize.topolvm.io/storage_limit" = "100Gi"
-    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/increase"      = "5Gi"
     "resize.topolvm.io/threshold"     = "20%"
   }
   force = true
@@ -2177,7 +2176,7 @@ resource "kubernetes_annotations" "thanos_store_gateway_pvc" {
   annotations = {
     "velero.io/exclude-from-backup"   = "true"
     "resize.topolvm.io/storage_limit" = "100Gi"
-    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/increase"      = "5Gi"
     "resize.topolvm.io/threshold"     = "20%"
   }
   force = true
@@ -2196,7 +2195,7 @@ resource "kubernetes_annotations" "thanos_ruler_pvc" {
   annotations = {
     "velero.io/exclude-from-backup"   = "true"
     "resize.topolvm.io/storage_limit" = "100Gi"
-    "resize.topolvm.io/increase"      = "50%"
+    "resize.topolvm.io/increase"      = "5Gi"
     "resize.topolvm.io/threshold"     = "20%"
   }
   force = true
