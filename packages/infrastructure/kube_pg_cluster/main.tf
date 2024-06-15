@@ -311,7 +311,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       primaryUpdateStrategy = "unsupervised"
       primaryUpdateMethod   = "switchover"
       enablePDB             = false // We perform our own PDB logic
-      schedulerName         = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : null
+      schedulerName         = module.util_cluster.scheduler_name
 
       // This is required for Vault as vault uses
       // the superuser to dynamically provision the less-privileged users
@@ -803,7 +803,7 @@ resource "kubectl_manifest" "connection_pooler" {
               }
             }
           ]
-          schedulerName             = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : null
+          schedulerName             = module.util_pooler[each.key].scheduler_name
           priorityClassName         = module.constants.database_priority_class_name
           topologySpreadConstraints = module.util_pooler[each.key].topology_spread_constraints
           tolerations               = module.util_pooler[each.key].tolerations
