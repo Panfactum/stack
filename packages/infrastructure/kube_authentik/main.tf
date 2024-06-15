@@ -677,9 +677,10 @@ module "ingress" {
   }]
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = true
+  cross_origin_embedder_policy   = "credentialless" // Required to load gravatar images
   permissions_policy_enabled     = true
   csp_enabled                    = true
-  cross_origin_opener_policy     = "unsafe-none" // Required for SSO login pop-ups
+  cross_origin_opener_policy     = "same-origin-allow-popups" // Required for SSO login pop-ups
 
   # TODO: Open an issue in the repo to report that this
   # unsafe configuration is required
