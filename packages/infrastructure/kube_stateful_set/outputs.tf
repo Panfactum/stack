@@ -8,6 +8,10 @@ output "labels" {
   value       = module.pod_template.labels
 }
 
+output "headless_service_name" {
+  value = kubernetes_service.headless.metadata[0].name
+}
+
 output "service_account_name" {
   description = "The service account used for the pods"
   value       = kubernetes_service_account.service_account.metadata[0].name

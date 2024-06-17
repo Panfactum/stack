@@ -1,0 +1,109 @@
+import ModuleHeader from "../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Moby BuildKit
+
+<ModuleHeader name="kube_buildkit" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_buildkit" status="alpha" type="live" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_cpu_millicores" /> [cpu\_millicores](#input_cpu_millicores)
+
+Description: The number of cpus millicores to request for the buildkit pod
+
+Type: `number`
+
+Default: `2000`
+
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_local_storage_gb" /> [local\_storage\_gb](#input_local_storage_gb)
+
+Description: The number of GB to use for the local image temp storage
+
+Type: `number`
+
+Default: `25`
+
+### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
+
+Description: The maximum number of replicas of buildkit to use
+
+Type: `number`
+
+Default: `10`
+
+### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
+
+Description: The amount of memory in MB to request for the buildkit pod
+
+Type: `number`
+
+Default: `8000`
+
+### <a name="input_min_replicas" /> [min\_replicas](#input_min_replicas)
+
+Description: The minimum number of replicas of buildkit to use
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_scale_down_delay_seconds" /> [scale\_down\_delay\_seconds](#input_scale_down_delay_seconds)
+
+Description: How long since the last build was initiated that BuildKit will be automatically scaled to zero
+
+Type: `number`
+
+Default: `1800`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_cache_bucket" /> [cache\_bucket](#output_cache_bucket)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

@@ -19,9 +19,29 @@
         panfactumPkgs = nixpkgs;
       };
     in {
-      packages = forEachSystem (system: {
-        devenv-up = self.devShells.${system}.default.config.procfileScript;
-      });
+      packages = forEachSystem (system:
+        let pkgs = nixpkgs.legacyPackages.${system};
+        in {
+          image = pkgs.dockerTools.buildImage {
+            name = "panfactum";
+            tag = "latest";
+
+            copyToRoot = pkgs.buildEnv {
+              name = "image-root";
+              paths = (import ./packages/nix/packages {
+                inherit nixpkgs forEachSystem;
+              }).${system};
+              pathsToLink = [ "/bin" ];
+            };
+
+            config = {
+              Env = [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              ];
+              Entrypoint = [ "/bin/bash" ];
+            };
+          };
+        });
 
       lib = { inherit mkDevShells forEachSystem; };
 

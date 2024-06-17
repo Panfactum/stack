@@ -101,6 +101,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_buildkit",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_canary",
       "group": "kubernetes"
     },
@@ -193,6 +197,10 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_pod",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_priority_classes",
       "group": "kubernetes"
     },
@@ -221,11 +229,19 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_sa_auth_workflow",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_scheduler",
       "group": "kubernetes"
     },
     {
       "module": "kube_secrets_csi",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_stateful_set",
       "group": "kubernetes"
     },
     {

@@ -25,22 +25,27 @@ variable "containers" {
     command                 = list(string)
     image_pull_policy       = optional(string, "IfNotPresent")
     working_dir             = optional(string, null)
-    minimum_memory          = optional(number, 100)      # The minimum amount of memory in megabytes
-    memory_limit_multiplier = optional(number, 1.3)      # memory limits = memory request x this value
-    minimum_cpu             = optional(number, 10)       # The minimum amount of cpu millicores
-    run_as_root             = optional(bool, false)      # Whether to run the container as root
-    uid                     = optional(number, 1000)     # user to use when running the container if not root
-    linux_capabilities      = optional(list(string), []) # Default is drop ALL
-    readonly                = optional(bool, true)       # Whether to use a readonly file system
-    env                     = optional(map(string), {})  # Environment variables specific to the container
-    liveness_check_port     = optional(number, null)     # The number of the port for the liveness_check
-    liveness_check_type     = optional(string, null)     # Either HTTP or TCP
-    liveness_check_route    = optional(string, null)     # The route if using HTTP liveness_checks
-    liveness_check_scheme   = optional(string, "HTTP")   # HTTP or HTTPS
-    ready_check_port        = optional(number, null)     # The number of the port for the ready_check (default to liveness_check_port)
-    ready_check_type        = optional(string, null)     # Either HTTP or TCP (default to liveness_check_type)
-    ready_check_route       = optional(string, null)     # The route if using HTTP ready_checks (default to liveness_check_route)
-    ready_check_scheme      = optional(string, null)     # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
+    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
+    minimum_memory          = optional(number, 100)        # The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)       #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)        # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)         # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)       # The maximum amount of cpu to allow (in millicores)
+    run_as_root             = optional(bool, false)        # Whether to run the container as root
+    uid                     = optional(number, 1000)       # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])   # Default is drop ALL
+    readonly                = optional(bool, true)         # Whether to use a readonly file system
+    env                     = optional(map(string), {})    # Environment variables specific to the container
+    liveness_check_command  = optional(list(string), null) # Will run the specified command as the liveness probe if type is exec
+    liveness_check_port     = optional(number, null)       # The number of the port for the liveness_check
+    liveness_check_type     = optional(string, null)       # Either exec, HTTP, or TCP
+    liveness_check_route    = optional(string, null)       # The route if using HTTP liveness_checks
+    liveness_check_scheme   = optional(string, "HTTP")     # HTTP or HTTPS
+    ready_check_command     = optional(list(string), null) # Will run the specified command as the ready check probe if type is exec (default to liveness_check_command)
+    ready_check_port        = optional(number, null)       # The number of the port for the ready check (default to liveness_check_port)
+    ready_check_type        = optional(string, null)       # Either exec, HTTP, or TCP (default to liveness_check_type)
+    ready_check_route       = optional(string, null)       # The route if using HTTP ready checks (default to liveness_check_route)
+    ready_check_scheme      = optional(string, null)       # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
   }))
 }
 
@@ -75,25 +80,40 @@ variable "service_account" {
 }
 
 variable "tmp_directories" {
-  description = "A list of paths that contain empty temporary directories"
+  description = "A mapping of temporary directory names (arbitrary) to their configuration"
   type = map(object({
-    size_gb = optional(number, 1)
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the node rather than a PVC
+  }))
+  default = {}
+}
+
+variable "secret_mounts" {
+  description = "A mapping of Secret names to their mount configuration in the containers of the Pod"
+  type = map(object({
+    mount_path = string                # Where in the containers to mount the Secret
+    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
   }))
   default = {}
 }
 
 variable "config_map_mounts" {
-  description = "A list ConfigMap names to their absolute mount paths in the containers of the deployment"
-  type        = map(string)
-  default     = {}
+  description = "A mapping of ConfigMap names to their mount configuration in the containers of the Pod"
+  type = map(object({
+    mount_path = string                # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+  }))
+  default = {}
 }
 
-variable "secret_mounts" {
-  description = "A mapping of Kubernetes secret names to their absolute mount paths in the containers of the deployment"
-  type        = map(string)
-  default     = {}
+variable "extra_volume_mounts" {
+  description = "A mapping of volume names to their mount configuration in the containers of the Pod. Used for dynamically generated Volumes such as in StatefulSets."
+  type = map(object({
+    mount_path = string # Where in the containers to mount the Volume
+  }))
+  default = {}
 }
-
 
 variable "mount_owner" {
   description = "The ID of the group that owns the mounted volumes"
@@ -127,6 +147,7 @@ variable "secrets" {
   description = "Key pair values of secrets to add to the containers as environment variables"
   type        = map(string)
   default     = {}
+  sensitive   = true
 }
 
 variable "extra_tolerations" {
@@ -234,5 +255,11 @@ variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler"
   type        = bool
   default     = true
+}
+
+variable "termination_grace_period_seconds" {
+  description = "The number of seconds to wait for graceful termination before forcing termination"
+  type        = number
+  default     = 30
 }
 

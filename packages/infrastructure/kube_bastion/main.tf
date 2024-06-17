@@ -135,14 +135,6 @@ module "nlb_common" {
   # end-generate
 }
 
-resource "kubernetes_service_account" "bastion" {
-  metadata {
-    name      = local.name
-    namespace = local.namespace
-    labels    = module.bastion.labels
-  }
-}
-
 resource "kubernetes_secret" "bastion_ca" {
   metadata {
     name      = "${local.name}-ca"
@@ -173,13 +165,11 @@ resource "kubernetes_secret" "bastion_host" {
 }
 
 module "bastion" {
-  source          = "../kube_deployment"
-  namespace       = module.namespace.namespace
-  name            = local.name
-  service_account = kubernetes_service_account.bastion.metadata[0].name
+  source    = "../kube_deployment"
+  namespace = module.namespace.namespace
+  name      = local.name
 
-  min_replicas                          = 2
-  max_replicas                          = 2
+  replicas                              = 2
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = false // TODO: Create an arm64 build
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
@@ -232,12 +222,22 @@ module "bastion" {
   ]
 
   secret_mounts = {
-    "${kubernetes_secret.bastion_ca.metadata[0].name}"   = "/etc/ssh/vault"
-    "${kubernetes_secret.bastion_host.metadata[0].name}" = "/etc/ssh/host"
+    "${kubernetes_secret.bastion_ca.metadata[0].name}" = {
+      mount_path = "/etc/ssh/vault"
+    }
+    "${kubernetes_secret.bastion_host.metadata[0].name}" = {
+      mount_path = "/etc/ssh/host"
+    }
   }
 
-  tmp_directories = { "/run/sshd" = {} }
-  mount_owner     = 0
+  tmp_directories = {
+    sshd = {
+      mount_path = "/run/sshd"
+      size_mb    = 10
+      node_local = true
+    }
+  }
+  mount_owner = 0
 
   ports = {
     ssh = {

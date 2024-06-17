@@ -1743,10 +1743,7 @@ resource "helm_release" "thanos" {
           size         = "${var.thanos_compactor_disk_storage_gb}Gi"
           storageClass = var.thanos_compactor_storage_class_name
           annotations = {
-            "velero.io/exclude-from-backup"   = "true"
-            "resize.topolvm.io/storage_limit" = "${10 * var.thanos_compactor_disk_storage_gb}Gi"
-            "resize.topolvm.io/increase"      = "25Gi"
-            "resize.topolvm.io/threshold"     = "20%"
+            "velero.io/exclude-from-backup" = "true"
           }
         }
         serviceAccount = {

@@ -675,7 +675,7 @@ module "ingress" {
     service_port = 80
   }]
   rate_limiting_enabled          = true
-  cross_origin_isolation_enabled = true
+  cross_origin_isolation_enabled = false
   cross_origin_embedder_policy   = "credentialless" // Required to load gravatar images
   permissions_policy_enabled     = true
   csp_enabled                    = true

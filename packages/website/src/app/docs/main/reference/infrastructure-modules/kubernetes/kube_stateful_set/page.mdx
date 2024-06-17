@@ -2,9 +2,9 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Deployment
+# Kubernetes StatefulSet
 
-<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_deployment" status="beta" type="submodule" />
+<ModuleHeader name="kube_stateful_set" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_stateful_set" status="beta" type="submodule" />
 
 ## Providers
 
@@ -15,6 +15,8 @@ The following providers are needed by this module:
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
@@ -61,7 +63,7 @@ list(object({
 
 ### <a name="input_name" /> [name](#input_name)
 
-Description: The name of this deployment
+Description: The name of this workload
 
 Type: `string`
 
@@ -70,6 +72,25 @@ Type: `string`
 Description: The namespace the cluster is in
 
 Type: `string`
+
+### <a name="input_volume_mounts" /> [volume\_mounts](#input_volume_mounts)
+
+Description: A mapping of names to configuration for PersistentVolumeClaims used by the StatefulSet
+
+Type:
+
+```hcl
+map(object({
+    storage_class              = optional(string, "ebs-standard-retained")
+    access_modes               = optional(list(string), ["ReadWriteOnce"])
+    initial_size_gb            = optional(number, 1)    # The initial size of the volume when first created
+    size_limit_gb              = optional(number, null) # The maximum number of GB that this volume will scale to
+    increase_threshold_percent = optional(number, 20)   # Dropping below this percent of free storage will trigger an automatic increase in storage size
+    increase_gb                = optional(number, 1)    # The number of GB to increase the volume by when it needs to scale up
+    mount_path                 = string                 # Where in the containers to mount the volume
+    backups_enabled            = optional(bool, true)   # True iff velero should make snapshot backups of the volumes
+  }))
+```
 
 ## Optional Inputs
 
@@ -101,7 +122,7 @@ Default: `{}`
 
 ### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
 
-Description: A mapping of ConfigMap names to their mount configuration in the containers of the Deployment
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
 
 Type:
 
@@ -203,6 +224,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_max_unavailable" /> [max\_unavailable](#input_max_unavailable)
+
+Description: Sets the maxUnavailable field of the associated PodDisruptionBudget
+
+Type: `number`
+
+Default: `1`
+
 ### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
 
 Description: The ID of the group that owns the mounted volumes
@@ -237,11 +266,19 @@ Default: `true`
 
 ### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
 
-Description: Annotations to add to the pods in the deployment
+Description: Annotations to add to the pods in the Pod
 
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_pod_management_policy" /> [pod\_management\_policy](#input_pod_management_policy)
+
+Description: The StatefulSets pod management policy
+
+Type: `string`
+
+Default: `"OrderedReady"`
 
 ### <a name="input_ports" /> [ports](#input_ports)
 
@@ -284,7 +321,7 @@ Default: `false`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
-Description: The priority class to use for pods in the Deployment
+Description: The priority class to use for pods in the StatefulSet
 
 Type: `string`
 
@@ -292,7 +329,7 @@ Default: `null`
 
 ### <a name="input_replicas" /> [replicas](#input_replicas)
 
-Description: The number of pods in the Deployment
+Description: The desired number of pods in the StatefulSet
 
 Type: `number`
 
@@ -308,7 +345,7 @@ Default: `"Always"`
 
 ### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
 
-Description: A mapping of Secret names to their mount configuration in the containers of the Deployment
+Description: A mapping of Secret names to their mount configuration in the containers of the Pod
 
 Type:
 
@@ -379,11 +416,33 @@ Default: `false`
 
 ### <a name="input_update_type" /> [update\_type](#input_update_type)
 
-Description: The type of update that the deployment should use
+Description: The type of update that the StatefulSEt should use
 
 Type: `string`
 
 Default: `"RollingUpdate"`
+
+### <a name="input_volume_retention_policy" /> [volume\_retention\_policy](#input_volume_retention_policy)
+
+Description: The persistentVolumeClaimRetentionPolicy to use of the StatefulSet
+
+Type:
+
+```hcl
+object({
+    when_deleted = optional(string, "Retain")
+    when_scaled  = optional(string, "Retain")
+  })
+```
+
+Default:
+
+```json
+{
+  "when_deleted": "Retain",
+  "when_scaled": "Retain"
+}
+```
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
@@ -392,14 +451,6 @@ Description: Whether to enable the vertical pod autoscaler
 Type: `bool`
 
 Default: `true`
-
-### <a name="input_wait_for_rollout" /> [wait\_for\_rollout](#input_wait_for_rollout)
-
-Description: Whether to wait for the deployment rollout before allowing terraform to proceed
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
 
@@ -412,6 +463,10 @@ Default: `false`
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_headless_service_name" /> [headless\_service\_name](#output_headless_service_name)
+
+Description: n/a
 
 ### <a name="output_labels" /> [labels](#output_labels)
 

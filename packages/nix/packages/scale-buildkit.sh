@@ -53,10 +53,13 @@ case $1 in
 
   THRESHOLD=$2
   CURRENT_TIME=$(date +%s)
-  LAST_BUILD=$(kubectl get statefulset $STATEFULSET_NAME --namespace=$NAMESPACE -o=go-template="{{index .metadata.annotations \"$ANNOTATION_KEY\"}}" 2>/dev/null)
+  LAST_BUILD=$(kubectl get statefulset $STATEFULSET_NAME --namespace=$NAMESPACE -o=go-template="{{index .metadata.annotations \"$ANNOTATION_KEY\"}}")
   echo >&2 "LAST_BUILD: $LAST_BUILD"
 
-  if [[ -z $LAST_BUILD || $((CURRENT_TIME - LAST_BUILD)) -gt $THRESHOLD ]]; then
+  if [[ -z $LAST_BUILD || $LAST_BUILD == "<no value>" ]]; then
+    echo >&2 "No builds recorded. Scaling down..."
+    kubectl scale statefulset $STATEFULSET_NAME --namespace=$NAMESPACE --replicas=0
+  elif [[ $((CURRENT_TIME - LAST_BUILD)) -gt $THRESHOLD ]]; then
     echo >&2 "Last build occurred over $THRESHOLD seconds ago. Scaling down..."
     kubectl scale statefulset $STATEFULSET_NAME --namespace=$NAMESPACE --replicas=0
   else

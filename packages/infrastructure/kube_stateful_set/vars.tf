@@ -4,18 +4,18 @@ variable "namespace" {
 }
 
 variable "name" {
-  description = "The name of this deployment"
+  description = "The name of this workload"
   type        = string
 }
 
 variable "priority_class_name" {
-  description = "The priority class to use for pods in the Deployment"
+  description = "The priority class to use for pods in the StatefulSet"
   type        = string
   default     = null
 }
 
 variable "update_type" {
-  description = "The type of update that the deployment should use"
+  description = "The type of update that the StatefulSEt should use"
   type        = string
   default     = "RollingUpdate"
 }
@@ -56,7 +56,7 @@ variable "common_env" {
 }
 
 variable "replicas" {
-  description = "The number of pods in the Deployment"
+  description = "The desired number of pods in the StatefulSet"
   type        = number
   default     = 1
 }
@@ -134,7 +134,7 @@ variable "tmp_directories" {
 }
 
 variable "secret_mounts" {
-  description = "A mapping of Secret names to their mount configuration in the containers of the Deployment"
+  description = "A mapping of Secret names to their mount configuration in the containers of the Pod"
   type = map(object({
     mount_path = string                # Where in the containers to mount the Secret
     optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
@@ -143,16 +143,15 @@ variable "secret_mounts" {
 }
 
 variable "config_map_mounts" {
-  description = "A mapping of ConfigMap names to their mount configuration in the containers of the Deployment"
+  description = "A mapping of ConfigMap names to their mount configuration in the containers of the Pod"
   type = map(object({
     mount_path = string                # Where in the containers to mount the ConfigMap
     optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
   }))
   default = {}
 }
-
 variable "pod_annotations" {
-  description = "Annotations to add to the pods in the deployment"
+  description = "Annotations to add to the pods in the Pod"
   type        = map(string)
   default     = {}
 }
@@ -251,22 +250,48 @@ variable "controller_node_required" {
   default     = false
 }
 
-variable "wait_for_rollout" {
-  description = "Whether to wait for the deployment rollout before allowing terraform to proceed"
-  type        = bool
-  default     = false
-}
-
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
   default     = true
 }
 
+variable "pod_management_policy" {
+  description = "The StatefulSets pod management policy "
+  type        = string
+  default     = "OrderedReady"
+}
+
 variable "termination_grace_period_seconds" {
   description = "The number of seconds to wait for graceful termination before forcing termination"
   type        = number
   default     = 30
+}
+
+variable "volume_mounts" {
+  description = "A mapping of names to configuration for PersistentVolumeClaims used by the StatefulSet"
+  type = map(object({
+    storage_class              = optional(string, "ebs-standard-retained")
+    access_modes               = optional(list(string), ["ReadWriteOnce"])
+    initial_size_gb            = optional(number, 1)    # The initial size of the volume when first created
+    size_limit_gb              = optional(number, null) # The maximum number of GB that this volume will scale to
+    increase_threshold_percent = optional(number, 20)   # Dropping below this percent of free storage will trigger an automatic increase in storage size
+    increase_gb                = optional(number, 1)    # The number of GB to increase the volume by when it needs to scale up
+    mount_path                 = string                 # Where in the containers to mount the volume
+    backups_enabled            = optional(bool, true)   # True iff velero should make snapshot backups of the volumes
+  }))
+}
+
+variable "volume_retention_policy" {
+  description = "The persistentVolumeClaimRetentionPolicy to use of the StatefulSet"
+  type = object({
+    when_deleted = optional(string, "Retain")
+    when_scaled  = optional(string, "Retain")
+  })
+  default = {
+    when_deleted = "Retain"
+    when_scaled  = "Retain"
+  }
 }
 
 variable "extra_pod_labels" {
@@ -281,3 +306,8 @@ variable "ignore_replica_count" {
   default     = false
 }
 
+variable "max_unavailable" {
+  description = "Sets the maxUnavailable field of the associated PodDisruptionBudget"
+  type        = number
+  default     = 1
+}

@@ -2,9 +2,9 @@ import ModuleHeader from "../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Deployment
+# Kubernetes Pod Template
 
-<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_deployment" status="beta" type="submodule" />
+<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pod" status="beta" type="submodule" />
 
 ## Providers
 
@@ -35,12 +35,12 @@ list(object({
     command                 = list(string)
     image_pull_policy       = optional(string, "IfNotPresent")
     working_dir             = optional(string, null)
-    minimum_memory          = optional(number, 100)        #The minimum amount of memory in megabytes
+    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
+    minimum_memory          = optional(number, 100)        # The minimum amount of memory in megabytes
     maximum_memory          = optional(number, null)       #The maximum amount of memory in megabytes
     memory_limit_multiplier = optional(number, 1.3)        # memory limits = memory request x this value
     minimum_cpu             = optional(number, 10)         # The minimum amount of cpu millicores
     maximum_cpu             = optional(number, null)       # The maximum amount of cpu to allow (in millicores)
-    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
     run_as_root             = optional(bool, false)        # Whether to run the container as root
     uid                     = optional(number, 1000)       # user to use when running the container if not root
     linux_capabilities      = optional(list(string), [])   # Default is drop ALL
@@ -59,15 +59,9 @@ list(object({
   }))
 ```
 
-### <a name="input_name" /> [name](#input_name)
-
-Description: The name of this deployment
-
-Type: `string`
-
 ### <a name="input_namespace" /> [namespace](#input_namespace)
 
-Description: The namespace the cluster is in
+Description: The namespace where the pod will run
 
 Type: `string`
 
@@ -101,7 +95,7 @@ Default: `{}`
 
 ### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
 
-Description: A mapping of ConfigMap names to their mount configuration in the containers of the Deployment
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
 
 Type:
 
@@ -124,7 +118,7 @@ Default: `false`
 
 ### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
 
-Description: The DNS policy for the pods
+Description: The DNS policy for the pod
 
 Type: `string`
 
@@ -171,6 +165,20 @@ list(object({
 
 Default: `[]`
 
+### <a name="input_extra_volume_mounts" /> [extra\_volume\_mounts](#input_extra_volume_mounts)
+
+Description: A mapping of volume names to their mount configuration in the containers of the Pod. Used for dynamically generated Volumes such as in StatefulSets.
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string # Where in the containers to mount the Volume
+  }))
+```
+
+Default: `{}`
+
 ### <a name="input_host_anti_affinity_required" /> [host\_anti\_affinity\_required](#input_host_anti_affinity_required)
 
 Description: Whether to prefer preventing pods from being scheduled on the same host
@@ -178,14 +186,6 @@ Description: Whether to prefer preventing pods from being scheduled on the same 
 Type: `bool`
 
 Default: `true`
-
-### <a name="input_ignore_replica_count" /> [ignore\_replica\_count](#input_ignore_replica_count)
-
-Description: Whether to ignore changes to the replica count. Useful when implementing horizontal autoscaling.
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
 
@@ -203,6 +203,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_match_labels" /> [match\_labels](#input_match_labels)
+
+Description: kubernetes labels to use in selectors to match the workload
+
+Type: `map(string)`
+
+Default: `null`
+
 ### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
 
 Description: The ID of the group that owns the mounted volumes
@@ -213,7 +221,7 @@ Default: `1000`
 
 ### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
 
-Description: Node label preferences for the pods
+Description: Node label preferences for the pod
 
 Type: `map(object({ weight = number, operator = string, values = list(string) }))`
 
@@ -221,7 +229,7 @@ Default: `{}`
 
 ### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
 
-Description: Node label requirements for the pods
+Description: Node label requirements for the pod
 
 Type: `map(list(string))`
 
@@ -229,7 +237,7 @@ Default: `{}`
 
 ### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
 
-Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+Description: Whether to use the Panfactum pod scheduler
 
 Type: `bool`
 
@@ -240,21 +248,6 @@ Default: `true`
 Description: Annotations to add to the pods in the deployment
 
 Type: `map(string)`
-
-Default: `{}`
-
-### <a name="input_ports" /> [ports](#input_ports)
-
-Description: The port the application is listening on inside the container
-
-Type:
-
-```hcl
-map(object({
-    service_port = number
-    pod_port     = number
-  }))
-```
 
 Default: `{}`
 
@@ -284,19 +277,11 @@ Default: `false`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
-Description: The priority class to use for pods in the Deployment
+Description: The priority class to use for pods in the deployment
 
 Type: `string`
 
 Default: `null`
-
-### <a name="input_replicas" /> [replicas](#input_replicas)
-
-Description: The number of pods in the Deployment
-
-Type: `number`
-
-Default: `1`
 
 ### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
 
@@ -308,7 +293,7 @@ Default: `"Always"`
 
 ### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
 
-Description: A mapping of Secret names to their mount configuration in the containers of the Deployment
+Description: A mapping of Secret names to their mount configuration in the containers of the Pod
 
 Type:
 
@@ -328,6 +313,14 @@ Description: Key pair values of secrets to add to the containers as environment 
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_service_account" /> [service\_account](#input_service_account)
+
+Description: The name of the service account to use for this deployment
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
@@ -377,29 +370,13 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_update_type" /> [update\_type](#input_update_type)
+### <a name="input_workload_name" /> [workload\_name](#input_workload_name)
 
-Description: The type of update that the deployment should use
+Description: The name of the workload. Used by observability platform for grouping pods.
 
 Type: `string`
 
-Default: `"RollingUpdate"`
-
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
-
-Description: Whether to enable the vertical pod autoscaler
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_wait_for_rollout" /> [wait\_for\_rollout](#input_wait_for_rollout)
-
-Description: Whether to wait for the deployment rollout before allowing terraform to proceed
-
-Type: `bool`
-
-Default: `false`
+Default: `null`
 
 ### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
 
@@ -413,17 +390,25 @@ Default: `false`
 
 The following outputs are exported:
 
+### <a name="output_containers" /> [containers](#output_containers)
+
+Description: n/a
+
+### <a name="output_init_containers" /> [init\_containers](#output_init_containers)
+
+Description: n/a
+
 ### <a name="output_labels" /> [labels](#output_labels)
 
-Description: The labels assigned to all resources in this deployment
+Description: n/a
 
 ### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
 
-Description: The labels unique to this deployment that can be used to select the pods in this deployment
+Description: n/a
 
-### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+### <a name="output_pod_template" /> [pod\_template](#output_pod_template)
 
-Description: The service account used for the pods
+Description: n/a
 
 ## Usage
 

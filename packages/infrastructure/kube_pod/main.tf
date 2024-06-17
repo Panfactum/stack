@@ -114,27 +114,49 @@ locals {
   ************************************************/
 
   // Note: Sum cannot take an empty array so we concat 0
-  total_tmp_storage_mb = sum(concat([for dir, config in var.tmp_directories : config.size_gb * 1024], [0]))
+  total_tmp_storage_mb = sum(concat([for name, config in var.tmp_directories : config.size_mb if config.node_local], [0]))
 
   volumes = concat(
-    [for path, config in var.tmp_directories : {
-      name = replace(path, "/[^a-z0-9]/", "")
+    [for name, config in var.tmp_directories : {
+      name = replace(name, "/[^a-z0-9]/", "")
       emptyDir = {
-        sizeLimit = "${config.size_gb}Gi"
+        sizeLimit = "${config.size_mb}Mi"
       }
-    }],
+    } if config.node_local],
+    [for name, config in var.tmp_directories : {
+      name = replace(name, "/[^a-z0-9]/", "")
+      ephemeral = {
+        volumeClaimTemplate = {
+          metadata = {
+            annotations = {
+              "velero.io/exclude-from-backups" = "true" // ephemeral storage shouldn't be backed up
+            }
+          }
+          spec = {
+            accessModes      = ["ReadWriteOnce"]
+            storageClassName = "ebs-standard"
+            volumeMode       = "Filesystem"
+            resources = {
+              requests = {
+                storage = "${config.size_mb}Mi"
+              }
+            }
+          }
+        }
+      }
+    } if !config.node_local],
     [for name, config in var.secret_mounts : {
       name = "secret-${name}"
       secret = {
         secretName = name
-        optional   = false
+        optional   = config.optional
       }
     }],
     [for name, config in var.config_map_mounts : {
       name = "config-map-${name}"
       configMap = {
         name     = name
-        optional = false
+        optional = config.optional
       }
     }],
     [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -153,20 +175,25 @@ locals {
   * Mounts
   ************************************************/
 
-  common_tmp_volume_mounts = [for path, config in var.tmp_directories : {
-    name      = replace(path, "/[^a-z0-9]/", "")
-    mountPath = path
+  common_tmp_volume_mounts = [for name, config in var.tmp_directories : {
+    name      = replace(name, "/[^a-z0-9]/", "")
+    mountPath = config.mount_path
   }]
 
-  common_secret_volume_mounts = [for name, mount in var.secret_mounts : {
+  common_extra_volume_mounts = [for name, config in var.extra_volume_mounts : {
+    name      = name
+    mountPath = config.mount_path
+  }]
+
+  common_secret_volume_mounts = [for name, config in var.secret_mounts : {
     name      = "secret-${name}"
-    mountPath = mount
+    mountPath = config.mount_path
     readOnly  = true
   }]
 
-  common_config_map_volume_mounts = [for name, mount in var.config_map_mounts : {
+  common_config_map_volume_mounts = [for name, config in var.config_map_mounts : {
     name      = "config-map-${name}"
-    mountPath = mount
+    mountPath = config.mount_path
     readOnly  = true
   }]
 
@@ -177,6 +204,7 @@ locals {
 
   common_volume_mounts = concat(
     local.common_tmp_volume_mounts,
+    local.common_extra_volume_mounts,
     local.common_secret_volume_mounts,
     local.common_config_map_volume_mounts,
     local.common_dynamic_secret_volume_mounts
@@ -199,10 +227,11 @@ locals {
       memory            = container.minimum_memory * 1024 * 1024
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     }
-    limits = {
-      memory            = container.minimum_memory * 1024 * 1024 * container.memory_limit_multiplier
+    limits = { for k, v in {
+      cpu               = container.maximum_cpu != null ? container.maximum_cpu : null
+      memory            = floor(container.minimum_memory * 1024 * 1024 * container.memory_limit_multiplier)
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
-    }
+    } : k => v if v != null }
   } }
 
   /************************************************
@@ -214,11 +243,12 @@ locals {
       runAsGroup               = container.run_as_root ? 0 : var.is_local ? 0 : 1000
       runAsUser                = container.run_as_root ? 0 : var.is_local ? 0 : container.uid
       runAsNonRoot             = !container.run_as_root && !var.is_local
-      allowPrivilegeEscalation = container.run_as_root || var.is_local
+      allowPrivilegeEscalation = container.run_as_root || container.privileged || var.is_local
       readOnlyRootFilesystem   = !var.is_local && container.readonly
+      privileged               = container.privileged
       capabilities = {
         add  = container.linux_capabilities
-        drop = var.is_local ? [] : ["ALL"]
+        drop = var.is_local || container.privileged ? [] : ["ALL"]
       }
     }
   }
@@ -247,11 +277,12 @@ locals {
       ///////////////////////////
       // Scheduling
       ///////////////////////////
-      schedulerName             = var.panfactum_scheduler_enabled ? "panfactum" : null
-      tolerations               = module.util.tolerations
-      affinity                  = module.util.affinity
-      topologySpreadConstraints = module.util.topology_spread_constraints
-      restartPolicy             = var.restart_policy
+      schedulerName                 = var.panfactum_scheduler_enabled ? "panfactum" : null
+      tolerations                   = module.util.tolerations
+      affinity                      = module.util.affinity
+      topologySpreadConstraints     = module.util.topology_spread_constraints
+      restartPolicy                 = var.restart_policy
+      terminationGracePeriodSeconds = var.termination_grace_period_seconds
 
       ///////////////////////////
       // Storage
@@ -287,19 +318,25 @@ locals {
           tcpSocket = config.liveness_check_type == "TCP" ? {
             port = config.liveness_check_port
           } : null
+          exec = lower(config.liveness_check_type) == "exec" ? {
+            command = config.liveness_check_command
+          } : null
           failureThreshold = 120
           periodSeconds    = 1
           timeoutSeconds   = 3
         } : null
 
         readinessProbe = config.liveness_check_type != null ? {
-          httpGet = (config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "HTTP" ? {
+          httpGet = lower(config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "http" ? {
             path   = config.ready_check_route != null ? config.ready_check_route : config.liveness_check_route
             port   = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
             scheme = config.ready_check_scheme != null ? config.ready_check_scheme : config.liveness_check_scheme
           } : null
-          tcpSocket = (config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "TCP" ? {
+          tcpSocket = lower(config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "tcp" ? {
             port = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
+          } : null
+          exec = lower(config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "exec" ? {
+            command = config.ready_check_command != null ? config.ready_check_command : config.liveness_check_command
           } : null
           successThreshold = 1
           failureThreshold = 3
@@ -308,13 +345,16 @@ locals {
         } : null
 
         livenessProbe = config.liveness_check_type != null ? {
-          httpGet = config.liveness_check_type == "HTTP" ? {
+          httpGet = lower(config.liveness_check_type) == "http" ? {
             path   = config.liveness_check_route
             port   = config.liveness_check_port
             scheme = config.liveness_check_scheme
           } : null
-          tcpSocket = config.liveness_check_type == "TCP" ? {
+          tcpSocket = lower(config.liveness_check_type) == "tcp" ? {
             port = config.liveness_check_port
+          } : null
+          exec = lower(config.liveness_check_type) == "exec" ? {
+            command = config.liveness_check_command
           } : null
           successThreshold = 1
           failureThreshold = 15

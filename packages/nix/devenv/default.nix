@@ -72,6 +72,11 @@ in {
     (customShellScript "precommit-terraform-docs")
     (customShellScript "precommit-website")
     (customShellScript "lint")
+
+    #########################################
+    # CI / CD
+    #########################################
+    (customShellScript "build-panfactum-image")
   ];
 
   dotenv.enable = true;

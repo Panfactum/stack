@@ -13,19 +13,14 @@ variable "eks_cluster_name" {
   type        = string
 }
 
-variable "iam_policy_json" {
-  description = "An IAM policy document in rendered JSON string form."
-  type        = string
-}
-
-variable "annotate_service_account" {
-  description = "Whether or not to annotate the service account"
-  type        = bool
-  default     = true
-}
-
 variable "ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
   default     = []
+}
+
+variable "annotate_service_account" {
+  description = "Whether or not to annotate the service account with the AWS role ARN"
+  type        = bool
+  default     = true
 }

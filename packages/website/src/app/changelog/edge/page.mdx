@@ -13,216 +13,223 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Breaking Changes
 
-- The `persistence_enabled` option was removed from [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel).
-Redis is now always deployed with persistence enabled. This decision was made b/c the cross-AZ network costs of re-instantiating
-Redis nodes without PVC storage dwarf the costs of the PVC storage (by a factor of 100x). As a result, there is no benefit
-to not periodically saving the redis database to a persistent disk.
+* The `persistence_enabled` option was removed from [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel).
+  Redis is now always deployed with persistence enabled. This decision was made b/c the cross-AZ network costs of re-instantiating
+  Redis nodes without PVC storage dwarf the costs of the PVC storage (by a factor of 100x). As a result, there is no benefit
+  to not periodically saving the redis database to a persistent disk.
 
-    To compensate for potential performance impacts, we have exposed another input, `redis_appendfsync`. Setting this to
-    `"no"` will achieve the same performance as having persistence disabled. However, the default setting of `"everysec"` is
-    likely sufficient for the vast majority of use cases and reduces the risk of data loss.
+  To compensate for potential performance impacts, we have exposed another input, `redis_appendfsync`. Setting this to
+  `"no"` will achieve the same performance as having persistence disabled. However, the default setting of `"everysec"` is
+  likely sufficient for the vast majority of use cases and reduces the risk of data loss.
 
-    Unfortunately, if you were previously running with `persistence_enabled` set to `false`, you will need to delete
-    the Redis StatefulSets in order to apply the new module. In particular, this impacts the `kube_authentik` module.
+  Unfortunately, if you were previously running with `persistence_enabled` set to `false`, you will need to delete
+  the Redis StatefulSets in order to apply the new module. In particular, this impacts the `kube_authentik` module.
 
-    Since `persistence_enabled` should only have been used in scenarios where data retention was not important,
-    this should be considered a safe operation. However, it will introduce a minor
-    service disruption during the replacement period.
+  Since `persistence_enabled` should only have been used in scenarios where data retention was not important,
+  this should be considered a safe operation. However, it will introduce a minor
+  service disruption during the replacement period.
+
+### Added
+
+* [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment),
+  [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/kubernetes/kube_stateful_set),
+  and [kube\_pod](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pod) have graduated to Beta status. They
+  are now safe to use.
 
 ## edge.24-06-14
 
 ### Added
 
-- Adds [kube_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler), an alternative Kubernetes
-scheduler that can be used to improve bin-packing of pods on nodes in the Kubernetes cluster. This allows for better,
-smaller node selection and our tests show an estimated 25-33% reduction in node costs when used. We provide
-instructions for installing it [here](/docs/edge/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler).
+* Adds [kube\_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler), an alternative Kubernetes
+  scheduler that can be used to improve bin-packing of pods on nodes in the Kubernetes cluster. This allows for better,
+  smaller node selection and our tests show an estimated 25-33% reduction in node costs when used. We provide
+  instructions for installing it [here](/docs/edge/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler).
 
-- Adds `panfactum_scheduler_enabled` (default: `false`) input to most infrastructure modules. When enabled, will
-use the scheduler provided by [kube_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler)
-instead of the less-efficient EKS scheduler.
+* Adds `panfactum_scheduler_enabled` (default: `false`) input to most infrastructure modules. When enabled, will
+  use the scheduler provided by [kube\_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler)
+  instead of the less-efficient EKS scheduler.
 
-- If `panfactum_scheduler_enabled` is `true`, the [kube_descheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_descheduler)
-will automatically remove pods from low utilization nodes to allow the [kube_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler)
-to bin-pack them on other nodes.
+* If `panfactum_scheduler_enabled` is `true`, the [kube\_descheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_descheduler)
+  will automatically remove pods from low utilization nodes to allow the [kube\_scheduler](/docs/edge/reference/infrastructure-modules/kubernetes/kube_scheduler)
+  to bin-pack them on other nodes.
 
 ### Fixed
 
-- Addresses a bug in the previous release that left [kube_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter)
-not deployable.
+* Addresses a bug in the previous release that left [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter)
+  not deployable.
 
-- Addresses an issue where nodes were limited a hard cap of 29 pods.
+* Addresses an issue where nodes were limited a hard cap of 29 pods.
 
-- Configures Kubernetes nodes to use a fixed amount of system overhead rather than one that scales unnecessarily with node size.
+* Configures Kubernetes nodes to use a fixed amount of system overhead rather than one that scales unnecessarily with node size.
 
 ## edge.24-06-13
 
 ### Added
 
-- Updates [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) with many new variables
-for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
+* Updates [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pg_cluster) with many new variables
+  for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
 
-- Adds support for `path_prefix` to [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault_proxy) ([@mschnee](https://github.com/mschnee))
+* Adds support for `path_prefix` to [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault_proxy) ([@mschnee](https://github.com/mschnee))
 
-- Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
-allow for additional cost savings (approximately $50 / month) in exchange for introducing a small possibility of temporary
-outages. We estimate that setting this to `false` reduces availability from 99.995% to 99.9%.
-This can be used to decrease costs in less critical clusters (e.g., `development`).
+* Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
+  allow for additional cost savings (approximately \$50 / month) in exchange for introducing a small possibility of temporary
+  outages. We estimate that setting this to `false` reduces availability from 99.995% to 99.9%.
+  This can be used to decrease costs in less critical clusters (e.g., `development`).
 
-- Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
-to the [aws_account](/docs/edge/reference/infrastructure-modules/aws/aws_account) module.
+* Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
+  to the [aws\_account](/docs/edge/reference/infrastructure-modules/aws/aws_account) module.
 
-- Adds the [kube_open_cost](/docs/edge/reference/infrastructure-modules/kubernetes/kube_open_cost) module
-for calculating the cost of workloads running on Kubernetes.
+* Adds the [kube\_open\_cost](/docs/edge/reference/infrastructure-modules/kubernetes/kube_open_cost) module
+  for calculating the cost of workloads running on Kubernetes.
 
 ### Fixed
 
-- Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart
-if NAT setup failed with an exit code other than `1`.
+* Addressed issue in [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) where NAT nodes wouldn't restart
+  if NAT setup failed with an exit code other than `1`.
 
-- Increased the memory floor of the Authentik server in [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
-to avoid OOM issues.
+* Increased the memory floor of the Authentik server in [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
+  to avoid OOM issues.
 
-- Updates [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to allow showing
-[Gravatar](https://gravatar.com/) profile images.
+* Updates [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to allow showing
+  [Gravatar](https://gravatar.com/) profile images.
 
-- Updates [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to provide the necessary Permissions-Policy headers to allow
-use of WebAuthn devices.
+* Updates [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) to provide the necessary Permissions-Policy headers to allow
+  use of WebAuthn devices.
 
-- Correctly applies pod labels in [kube_aws_lb_controller](/docs/edge/reference/infrastructure-modules/kubernetes/kube_aws_lb_controller).
+* Correctly applies pod labels in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/kubernetes/kube_aws_lb_controller).
 
-- Removes node preferences defaults from [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility)
-that were preventing efficient node deprovisioning.
+* Removes node preferences defaults from [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility)
+  that were preventing efficient node deprovisioning.
 
-- Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
+* Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
 
-- Fixes incorrect SCIM property mapping in [authentik_aws_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_aws_sso).
+* Fixes incorrect SCIM property mapping in [authentik\_aws\_sso](/docs/edge/reference/infrastructure-modules/authentik/authentik_aws_sso).
 
-- Aligns pod labels, affinities, topologySpreadConstraints, and tolerations in
-[kube_linkerd](/docs/edge/reference/infrastructure-modules/kubernetes/kube_linkerd) to conventions used in all
-other modules.
+* Aligns pod labels, affinities, topologySpreadConstraints, and tolerations in
+  [kube\_linkerd](/docs/edge/reference/infrastructure-modules/kubernetes/kube_linkerd) to conventions used in all
+  other modules.
 
 ## edge.24-06-08
 
 ### Added
 
-- Updates [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) to support new command `pf-vpc-network-test` that
-will verify network connectivity properties of the instantiated VPC. This allows us to simplify an
-otherwise [complex validation step in the bootstrapping guide](/docs/edge/guides/bootstrapping/aws-networking#test-connectivity).
+* Updates [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) to support new command `pf-vpc-network-test` that
+  will verify network connectivity properties of the instantiated VPC. This allows us to simplify an
+  otherwise [complex validation step in the bootstrapping guide](/docs/edge/guides/bootstrapping/aws-networking#test-connectivity).
 
-- Adds the `pf-env-bootstrap` command that automatically bootstraps the necessary resources to begin working with
-IaC in an environment. This replaces the manual steps that used to be a part of the [bootstrapping guide.](/docs/edge/guides/bootstrapping/infrastructure-as-code#set-up-state-management)
+* Adds the `pf-env-bootstrap` command that automatically bootstraps the necessary resources to begin working with
+  IaC in an environment. This replaces the manual steps that used to be a part of the [bootstrapping guide.](/docs/edge/guides/bootstrapping/infrastructure-as-code#set-up-state-management)
 
-- Adds new `extra_inputs` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
-allows you to pass inputs to all modules in the current scope.
+* Adds new `extra_inputs` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
+  allows you to pass inputs to all modules in the current scope.
 
-- Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by $25 - 50 / month
-due to significantly better price / performance ratios for arm64 instances in AWS.
+* Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by \$25 - 50 / month
+  due to significantly better price / performance ratios for arm64 instances in AWS.
 
-- Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
-This will allow the system to scale up quicker when running against resource pressure and pods become stuck in a temporary crash loop.
+* Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+  This will allow the system to scale up quicker when running against resource pressure and pods become stuck in a temporary crash loop.
 
-- Sets maximum node lifetime to 24h to force Karpenter to try to consolidate instances at least once per day.
+* Sets maximum node lifetime to 24h to force Karpenter to try to consolidate instances at least once per day.
 
 ### Fixed
 
-- Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during
-node shutdown. This resulted in EBS volumes not being detached and introduced an unnecessary 6min delay when moving
-EBS volumes between nodes.
+* Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during
+  node shutdown. This resulted in EBS volumes not being detached and introduced an unnecessary 6min delay when moving
+  EBS volumes between nodes.
 
-- Replaces most usages of `kubernetes_manifest` with `kubectl_manifest` to avoid type manifest parsing issues that prevent
-dynamic values in manifests.
+* Replaces most usages of `kubernetes_manifest` with `kubectl_manifest` to avoid type manifest parsing issues that prevent
+  dynamic values in manifests.
 
 ## edge.24-06-06
 
 ### Breaking Changes
 
-- [kube_trust_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
-[kube_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector). We are keeping the module
-in the repo to support backwards compatibility, but it will be removed in the future. You should apply this release
-and then run `terragrunt destroy` on the module to remove it.
+* [kube\_trust\_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
+  [kube\_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector). We are keeping the module
+  in the repo to support backwards compatibility, but it will be removed in the future. You should apply this release
+  and then run `terragrunt destroy` on the module to remove it.
 
 ### Added
 
-- [aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains) can now set the contact type
-for each contact.
+* [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains) can now set the contact type
+  for each contact.
 
-- Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
-[aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module.
+* Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
+  [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module.
 
-- The manual steps needed to reset new EKS clusters to a clean slate during the bootstrapping guide have been consolidated
-into a single new command, `pf-eks-reset`.
+* The manual steps needed to reset new EKS clusters to a clean slate during the bootstrapping guide have been consolidated
+  into a single new command, `pf-eks-reset`.
 
 ### Fixed
 
-- Addressed issue in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) that caused a temporary, harmless error to crash
-the `terragrunt apply` on initial bootstrapping.
+* Addressed issue in [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) that caused a temporary, harmless error to crash
+  the `terragrunt apply` on initial bootstrapping.
 
-- Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
-[kube_core_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns) module.
+* Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
+  [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns) module.
 
 ## edge.24-06-04
 
 ### Breaking Changes
 
-- The reloader deployment must be deleted before the next apply of [kube_reloader](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reloader). No
-inputs have changed.
+* The reloader deployment must be deleted before the next apply of [kube\_reloader](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reloader). No
+  inputs have changed.
 
-- The alpha module `kube_labels` has been removed in favor of the labels provided by [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility).
+* The alpha module `kube_labels` has been removed in favor of the labels provided by [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility).
 
-- VPC flow logs in [aws_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) are now disabled by default as they
-can be fairly expensive and should only be used if you have a specific use-case in mind. They can be enabled
-by setting `vpc_flow_logs_enabled` to `true`.
+* VPC flow logs in [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) are now disabled by default as they
+  can be fairly expensive and should only be used if you have a specific use-case in mind. They can be enabled
+  by setting `vpc_flow_logs_enabled` to `true`.
 
 ### Added
 
-- Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
-[bootstrapping guide section for setting up terragrunt.](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
+* Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
+  [bootstrapping guide section for setting up terragrunt.](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
 
-- Added [kube_workload_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened
-Pod specs that take advantage of all capabilities included in the Panfactum stack.
+* Added [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened
+  Pod specs that take advantage of all capabilities included in the Panfactum stack.
 
-- A new standard label `panfactum.com/workload` can be used to group replicated pods for the purpose of aggregating metrics. This is
-now applied in all core infrastructure modules.
+* A new standard label `panfactum.com/workload` can be used to group replicated pods for the purpose of aggregating metrics. This is
+  now applied in all core infrastructure modules.
 
-- Added [kube_constants](/docs/edge/reference/infrastructure-modules/kubernetes/kube_constants) that export static configuration values that can be useful
-when creating resources that run on clusters in the Panfactum stack.
+* Added [kube\_constants](/docs/edge/reference/infrastructure-modules/kubernetes/kube_constants) that export static configuration values that can be useful
+  when creating resources that run on clusters in the Panfactum stack.
 
-- [kube_cert_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cert_manager) will now automatically delete Certificate secrets if the Certificate is deleted.
+* [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cert_manager) will now automatically delete Certificate secrets if the Certificate is deleted.
 
-- [aws_ses_domain](/docs/edge/reference/infrastructure-modules/aws/aws_ses_domain) now takes an optional input `smtp_allowed_cidrs`
-that restricts what IPs can use the generated SMTP credentials. This allows users to mitigate
-credential exfiltration attacks. We provide an example of how to use this [here.](https://github.com/Panfactum/stack/blob/main/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl)
+* [aws\_ses\_domain](/docs/edge/reference/infrastructure-modules/aws/aws_ses_domain) now takes an optional input `smtp_allowed_cidrs`
+  that restricts what IPs can use the generated SMTP credentials. This allows users to mitigate
+  credential exfiltration attacks. We provide an example of how to use this [here.](https://github.com/Panfactum/stack/blob/main/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl)
 
-- The Vault login UI will now have the OIDC login as the default method.
+* The Vault login UI will now have the OIDC login as the default method.
 
-- Terragrunt will now automatically retry on some errors up to three times before exiting the process with a failure. This should
-address intermittent issues such as network disruptions or race conditions.
+* Terragrunt will now automatically retry on some errors up to three times before exiting the process with a failure. This should
+  address intermittent issues such as network disruptions or race conditions.
 
 ### Fixed
 
-- `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
-instead of full devenv re-evaluations.
+* `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
+  instead of full devenv re-evaluations.
 
-- Temporarily adds `GIT_CLONE_PROTECTION_ACTIVE=false` to the shell environment in order to address
-[this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
-disables new bleeding edge security features which were accidentally shipped in a broken
-state.
+* Temporarily adds `GIT_CLONE_PROTECTION_ACTIVE=false` to the shell environment in order to address
+  [this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
+  disables new bleeding edge security features which were accidentally shipped in a broken
+  state.
 
-- Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when bootstrapping before VPA
-take effect.
+* Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when bootstrapping before VPA
+  take effect.
 
-- [kube_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) now respects `log_level` input.
+* [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik) now respects `log_level` input.
 
-- Sets `max_history` to `5` for all Helm charts to prevent overloading the Kubernetes API server with an every-growing amount
-of historical Helm deployments.
+* Sets `max_history` to `5` for all Helm charts to prevent overloading the Kubernetes API server with an every-growing amount
+  of historical Helm deployments.
 
 ## edge.24-06-02
 
 ### Breaking Changes
 
-- Upgraded to devenv 1.0. As a part of this upgrade, `.env` file values can no longer be referenced directly
-inside `.nix` files.
+* Upgraded to devenv 1.0. As a part of this upgrade, `.env` file values can no longer be referenced directly
+  inside `.nix` files.
 
 ### Added
 
@@ -278,7 +285,7 @@ inside `.nix` files.
   [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
 
 - Added validation for phone number format in
-[aws_registered_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
+  [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
 
 ### Fixed
 
@@ -389,8 +396,8 @@ inside `.nix` files.
   are replaced with `.`). ([@mschnee](https://github.com/mschnee))
 
 - Added scheduling constraints to prevent critical workloads from scheduling all pods on the same
-instance type in order to minimize the possibility of disruption on events that only affect one
-instance type (e.g., spot node preemption).
+  instance type in order to minimize the possibility of disruption on events that only affect one
+  instance type (e.g., spot node preemption).
 
 - Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
   in order to reduce resource utilization in the Stack.

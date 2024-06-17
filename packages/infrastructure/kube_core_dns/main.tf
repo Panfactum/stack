@@ -47,14 +47,6 @@ module "constants" {
 * CoreDNS RBAC
 ************************************************/
 
-resource "kubernetes_service_account" "core_dns" {
-  metadata {
-    name      = local.name
-    namespace = local.namespace
-    labels    = module.core_dns.labels
-  }
-}
-
 resource "kubernetes_cluster_role" "core_dns" {
   metadata {
     name   = local.name
@@ -88,7 +80,7 @@ resource "kubernetes_cluster_role_binding" "core_dns" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.core_dns.metadata[0].name
+    name      = module.core_dns.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -132,16 +124,14 @@ module "metrics_cert" {
 }
 
 module "core_dns" {
-  source          = "../kube_deployment"
-  namespace       = local.namespace
-  name            = local.name
-  service_account = kubernetes_service_account.core_dns.metadata[0].name
+  source    = "../kube_deployment"
+  namespace = local.namespace
+  name      = local.name
   pod_annotations = {
     "linkerd.io/inject" = "disabled"
   }
 
-  min_replicas                          = 2
-  max_replicas                          = 2
+  replicas                              = 2
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
@@ -198,12 +188,18 @@ module "core_dns" {
   )
 
   config_map_mounts = merge({
-    "${kubernetes_config_map.config.metadata[0].name}" = "/etc/coredns"
+    "${kubernetes_config_map.config.metadata[0].name}" = {
+      mount_path = "/etc/coredns"
+    }
     }, var.monitoring_enabled ? {
-    internal-ca = "/etc/internal-ca"
+    internal-ca = {
+      mount_path = "/etc/internal-ca"
+    }
   } : {})
   secret_mounts = merge({}, var.monitoring_enabled ? {
-    "${module.metrics_cert[0].secret_name}" = "/etc/metrics-certs"
+    "${module.metrics_cert[0].secret_name}" = {
+      mount_path = "/etc/metrics-certs"
+    }
   } : {})
 
   vpa_enabled = var.vpa_enabled
