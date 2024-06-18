@@ -1,3 +1,4 @@
+# pf-generate: standard_vars
 variable "environment" {
   description = "The name of the environment the infrastructure is being deployed into. #injected"
   type        = string
@@ -45,3 +46,4 @@ variable "pf_stack_commit" {
   type        = string
   default     = "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
+# end-generate

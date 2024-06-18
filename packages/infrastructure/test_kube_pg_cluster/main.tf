@@ -31,7 +31,7 @@ module "namespace" {
 
   namespace = "test-pg"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -57,7 +57,7 @@ module "database" {
   arm_instances_enabled       = true
   pgbouncer_pool_mode         = "transaction"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

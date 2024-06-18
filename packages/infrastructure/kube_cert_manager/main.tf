@@ -45,7 +45,7 @@ module "util_controller" {
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -66,7 +66,7 @@ module "util_webhook" {
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -90,7 +90,7 @@ module "util_ca_injector" {
   // will not cause cascading failures
   burstable_nodes_enabled = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -115,7 +115,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -155,7 +155,7 @@ module "webhook_cert" {
   secret_name   = local.webhook_secret
   namespace     = local.namespace
 
-  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  # pf-generate: pass_vars_no_extra_tags
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

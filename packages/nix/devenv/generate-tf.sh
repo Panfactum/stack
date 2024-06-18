@@ -6,7 +6,7 @@
 ## Step 1: Add common variables to every terraform module
 #######################################################
 
-generate-tf-common
+pf-iac-update
 
 #######################################################
 ## Step 2: Generate the terraform documentation using terraform-docs

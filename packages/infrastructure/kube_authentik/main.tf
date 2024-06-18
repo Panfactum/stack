@@ -53,7 +53,7 @@ module "util_server" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -75,7 +75,7 @@ module "util_worker" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -92,7 +92,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -126,7 +126,7 @@ module "database" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   enhanced_ha_enabled         = var.enhanced_ha_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -155,7 +155,7 @@ module "redis" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   enhanced_ha_enabled         = var.enhanced_ha_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -691,7 +691,7 @@ module "ingress" {
   permissions_policy_publickey_credentials_create = "(self \"https://*.${var.domain}\")"
   permissions_policy_publickey_credentials_get    = "(self \"https://*.${var.domain}\")"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

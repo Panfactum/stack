@@ -14,8 +14,8 @@ To begin deploying infrastructure, you will first need both a state backend and 
 
 We provide two infrastructure modules that define both those resources:
 
-* [tf\_bootstrap\_resources](/docs/main/reference/infrastructure-modules/utility/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
-* [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
+* [tf\_bootstrap\_resources](/docs/main/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
+* [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
 
 Deploying these modules for the first time is a bit cumbersome as they have circular references. [^1]
 
@@ -110,7 +110,7 @@ Let's perform a quick test to ensure sops is working properly.
 ## Deploy the AWS Account Module
 
 Now that you have both the state backends and encryption keys established, we can start deploying infrastructure.
-The first resource will be the [aws\_account](/docs/main/reference/infrastructure-modules/aws/aws_account) module. This module adds some critical metadata
+The first resource will be the [aws\_account](/docs/main/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
 to your account including setting up its alias and contact information.
 
 Let's deploy it now:
@@ -124,9 +124,7 @@ Let's deploy it now:
 
    Replace the values as needed for your organization. Feel free to also change what values are secret or not.
 
-3. Add a `module.yaml` with the `aws` provider enabled.
-
-4. Add a `secrets.yaml` to the directory:
+3. Add a `secrets.yaml` to the directory:
 
    ```yaml
    address_line_1: 1234 Platform Engineering Way
@@ -140,7 +138,9 @@ Let's deploy it now:
 
    Adjust the values as necessary.
 
-5. Run `sops -e -i secrets.yaml` to encrypt the file.
+4. Run `sops -e -i secrets.yaml` to encrypt the file.
+
+5. Run `pf-providers-enable` in the module directory to enable the required providers.
 
 6. Run `terragrunt apply` in the module directory.
 

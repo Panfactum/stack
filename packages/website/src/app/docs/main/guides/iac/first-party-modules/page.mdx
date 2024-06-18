@@ -1,6 +1,11 @@
+import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
+
+import VersioningImg from './versioning.svg'
+
 # Developing First-party Modules
 
-First-party modules are those infrastructure modules that are unique to your organization. They are
+First-party modules are those infrastructure modules that are written and maintained by your organization
+and located in your organization's infrastructure stack repository. They are
 written using the OpenTofu (Terraform) [syntax](https://opentofu.org/docs/language/syntax/).
 
 ## Setting up the Infrastructure Directory
@@ -28,10 +33,13 @@ All the normal conventions for developing OpenTofu (Terraform) modules apply.
 
 ## Deploying Modules
 
+All the rules in the [main module deployment guide](/docs/main/guides/iac/deploying-modules#defining-a-module-for-deployment) apply.
+However, there are some additional considerations for first-party modules:
+
 ### Sourcing
 
 We provide convenience functionality for sourcing first-party modules in your terragrunt configuration.
-This takes care of common issues around versioning and caching that can often hinder engineers.
+This takes care of common issues around versioning and caching that can often cause confusing results.
 
 In your `terragrunt.hcl`, you should source your module as follows:
 
@@ -50,16 +58,16 @@ For example, consider the following repository layout:
 environments/
    - development/
      - us-east-2/
-        - aws_eks/
+        - module1/
           - terragrunt.hcl
           - module.yaml
 infrastructure/
-   - aws_eks/
-   - aws_eks_alternative/
+   - module1/
+   - module2/
 ```
 
-The `environments/development/us-east-2/aws_eks/terragrunt.hcl` configuration will automatically
-source the `infrastructure/aws_eks` module since the `terragrunt.hcl` is in a directory called `aws_eks`.
+The `environments/development/us-east-2/module1/terragrunt.hcl` configuration will automatically
+source the `infrastructure/module1` module since the `terragrunt.hcl` is in a directory called `module1`.
 
 ### Overriding Default Source
 
@@ -68,10 +76,10 @@ You can override this behavior by setting the `module` key in the `module.yaml`.
 Consider the above example again. This time, the `module.yaml` has the following contents:
 
 ```yaml
-module: aws_eks_alternative
+module: module2
 ```
 
-Now the sourced module will be `infrastructure/aws_eks_alternative`.
+Now the sourced module will be `infrastructure/module2`.
 
 ### Versioning
 
@@ -84,7 +92,7 @@ You likely already have some strategy for creating versioned releases in your re
 
 You can pin terragrunt to a particular version of your module by setting the `version` key to your desired
 [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in one of the `environment.yaml`, `region.yaml`, or `module.yaml` files.
-A git ref can be a tag, a branch name, or even a specific commit sha.
+A git ref can be a tag, a branch name, or even a specific commit hash.
 
 For example, consider a stack repo that has the git tags `v1.0.0`, `v1.1.0`, and `v2.0.0` representing versioned
 releases of code.
@@ -127,11 +135,106 @@ Additionally, the `production/us-west-2/region.yaml` file has the `version` key 
 
 In this scenario, even though all three environments will use both the `module1` and `module2` modules:
 
+* The [configuration-as-code](/docs/main/concepts/iac#configuration-as-code) (e.g., module versions, module inputs, etc.) will **always** be defined
+  by the primary integration branch (set by `PF_REPO_PRIMARY_BRANCH`), in this case `main`.
 * **All** modules in `development` will use the latest `infrastructure/*` code on the `main` branch (useful for ensuring the latest
   code is always deployed).
 * **All** modules in `staging` will use the `infrastructure/*` code at the `v2.0.0` git tag.
 * The modules in `production` will default to using the `infrastructure/*` code at the `v1.1.0` tag except for the modules
-  in `us-west-2` which will use `v1.0.0` (useful for incremental or blue/green deployments).
+  in `us-west-2` which will use `v1.0.0`.
+
+<MarkdownSVGImage src={VersioningImg} alt="Versioning diagram" />
+
+## Writing Modules
+
+### Standard Inputs
+
+When deploying modules, the Panfactum Terragrunt setup will automatically provide the
+[standard inputs](/docs/main/reference/infrastructure-modules/overview#standard-variables)
+to your module during deployment. However, you must define [variables](https://opentofu.org/docs/language/values/variables/)
+for these inputs in each module in order to be able to reference them.
+
+We provide a [templating system](/docs/main/reference/iac-templating#standard-vars) to make maintaining these
+variables easier.
+
+1. In your `vars.tf`, add the following lines:
+
+   ```hcl
+   # pf-generate: standard_vars
+   # end-generate
+   ```
+
+2. Run `pf-update-iac`.
+
+3. Notice that this block has expanded to include the standard variables. Additionally,
+   if new standard variables are ever added in the future, they will be automatically added when
+   you next run `pf-update-iac`.
+
+### Using Panfactum Submodules
+
+In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/docs/main/reference/infrastructure-modules/overview)
+that you many import directly for use in your custom modules.
+
+You can accomplish this via `module` blocks in your infrastructure code ([docs](https://developer.hashicorp.com/terraform/language/modules/sources)).
+
+For example:
+
+```hcl
+module "pod" {
+  source       = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pod?ref=__PANFACTUM_VERSION_MAIN__"
+}
+```
+
+When using Panfactum modules, you will want to pass in the
+[standard inputs](/docs/main/reference/infrastructure-modules/overview#standard-variables). We
+use [templating system](/docs/main/reference/iac-templating#standard-vars) to make maintaining
+these calling conventions easier:
+
+1. Add a [template directive](/docs/main/reference/iac-templating#directives) to the module:
+
+   ```hcl
+   module "pod" {
+     source       = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pod?ref=__PANFACTUM_VERSION_MAIN__"
+     # pf-generate: pass_vars
+     # end-generate
+   }
+   ```
+
+2. Run `pf-update-iac`.
+
+3. Notice that this block has expanded to include the variables defined be the chosen directive. If new standard variables are ever added in the future, they will be automatically added when
+   you next run `pf-update-iac`.
+
+Additionally, you will generally want to ensure that all Panfactum modules in your ecosystem are pinned
+to the same version as your development environment. We provide an annotation that will automatically
+synchronize your versions:
+
+1. Append `# pf-update` to the `module.source` line:
+
+   ```hcl
+   module "pod" {
+     source       = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pod?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+   }
+   ```
+
+2. Run `pf-update-iac`.
+
+3. Notice that the `ref` has been updated to the commit hash of git version that your devenv is pinned to. If you
+   wish to prevent this automatic updating behavior, simply omit the `# pf-update` comment.
+
+### Using First-Party Submodules
+
+You may also want to create submodules that you can reference in other modules. There are no special
+rules to follow, but we recommend sourcing the modules via relative paths rather than via a remote address:
+
+```hcl
+module "utility" {
+  source       = "../utility_module"
+}
+```
+
+This ensures that you do not need to keep track of version dependencies across modules and reduces
+your deployment runtimes by avoiding unnecessary network calls.
 
 ## Local Development
 

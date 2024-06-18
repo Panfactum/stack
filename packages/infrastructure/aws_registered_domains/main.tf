@@ -17,7 +17,7 @@ terraform {
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -134,7 +134,7 @@ module "dnssec" {
 
   hosted_zones = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -178,7 +178,7 @@ module "iam_role" {
   hosted_zone_ids                           = [for zone, config in aws_route53_zone.zones : config.zone_id]
   additional_account_ids_with_record_access = var.additional_account_ids_with_record_access
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

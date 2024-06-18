@@ -48,7 +48,7 @@ module "util_destination" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -69,7 +69,7 @@ module "util_identity" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -90,7 +90,7 @@ module "util_proxy_injector" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -108,7 +108,7 @@ module "util_proxy" {
   burstable_nodes_enabled = true
   arm_nodes_enabled       = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -126,7 +126,7 @@ module "util_viz" {
   burstable_nodes_enabled = true
   arm_nodes_enabled       = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -151,7 +151,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  # pf-generate: pass_vars_no_extra_tags
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -196,7 +196,7 @@ module "linkerd_identity_issuer" {
   duration     = "2160h0m0s"
   renew_before = "1680h0m0s"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -246,7 +246,7 @@ module "linkerd_policy_validator" {
   duration             = "2160h0m0s"
   renew_before         = "1680h0m0s"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -268,7 +268,7 @@ module "linkerd_proxy_injector" {
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -289,7 +289,7 @@ module "linkerd_profile_validator" {
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

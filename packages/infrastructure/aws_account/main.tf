@@ -13,7 +13,7 @@ terraform {
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -109,7 +109,7 @@ module "data_feed_bucket" {
   intelligent_transitions_enabled = false
   acl_enabled                     = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

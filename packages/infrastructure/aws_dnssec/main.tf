@@ -13,7 +13,7 @@ terraform {
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars_no_region.snippet.txt
+  # pf-generate: set_vars_no_region
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

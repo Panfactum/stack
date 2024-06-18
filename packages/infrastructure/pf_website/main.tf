@@ -32,7 +32,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -85,7 +85,7 @@ module "website_deployment" {
 
   vpa_enabled = var.vpa_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -137,7 +137,7 @@ module "ingress" {
   rate_limiting_enabled          = true
   permissions_policy_enabled     = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

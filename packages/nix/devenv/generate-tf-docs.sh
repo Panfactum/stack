@@ -14,6 +14,8 @@ rm -rf "$OUTPUT_DIR/kubernetes"
 rm -rf "$OUTPUT_DIR/authentik"
 rm -rf "$OUTPUT_DIR/vault"
 rm -rf "$OUTPUT_DIR/utility"
+rm -rf "$OUTPUT_DIR/direct"
+rm -rf "$OUTPUT_DIR/submodule"
 
 function skip_injected_variables() {
   awk '
@@ -49,8 +51,8 @@ function remove_version_header() {
 }
 
 function add_header() {
-  sed -E "1iimport ModuleHeader from \"../../ModuleHeader\";\n" |
-    sed -E "6i<ModuleHeader name=\"$1\" sourceHref=\"https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/$1\" status=\"$2\" type=\"$3\"/>"
+  sed -E "1iimport ModuleHeader from \"../../../ModuleHeader\";\n" |
+    sed -E "6i<ModuleHeader name=\"$1\" sourceHref=\"https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/$1\" status=\"$2\" type=\"$3\"/>"
 }
 
 # Loop through each directory in the script's directory
@@ -70,10 +72,10 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
     fi
 
     # Append the directory name to the modules array in the JSON object
-    JSON=$(jq --arg module "$MODULE" --arg group "$GROUP" '.modules += [{"module": $module, "group": $group}]' <<<"$JSON")
+    JSON=$(jq --arg module "$MODULE" --arg group "$GROUP" --arg type "$TYPE" '.modules += [{"module": $module, "type": $type, "group": $group}]' <<<"$JSON")
 
     # Make the docs
-    DOCS_DIR="$OUTPUT_DIR/$GROUP/$MODULE"
+    DOCS_DIR="$OUTPUT_DIR/$TYPE/$GROUP/$MODULE"
     mkdir -p "$DOCS_DIR"
     terraform-docs -c "$TERRAFORM_MODULES_DIR/.terraform-docs.yml" "$d" |
       add_provider_links |

@@ -38,7 +38,7 @@ module "util" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -63,7 +63,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -81,7 +81,7 @@ module "cert" {
   service_names = ["metrics-server"]
   namespace     = local.namespace
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

@@ -24,7 +24,7 @@ data "aws_region" "region" {}
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -39,7 +39,7 @@ module "tags" {
 module "constants" {
   source = "../kube_constants"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -59,7 +59,7 @@ module "node_settings" {
   cluster_endpoint       = aws_eks_cluster.cluster.endpoint
   is_spot                = false
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -209,7 +209,7 @@ module "encrypt_key" {
   reader_iam_arns            = var.reader_iam_arns
   restricted_reader_iam_arns = var.restricted_reader_iam_arns
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -243,8 +243,6 @@ resource "aws_eks_addon" "kube_proxy" {
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-
-
 ////////////////////////////////////////////////////////////
 // Logging and Monitoring
 // Currently we use the default set provided by AWS to get access to control plane logs
@@ -256,7 +254,7 @@ module "aws_cloudwatch_log_group" {
   name        = "/aws/eks/${var.cluster_name}/cluster"
   description = "Collects logs for our AWS EKS Cluster"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

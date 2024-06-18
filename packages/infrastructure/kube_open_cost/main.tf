@@ -44,7 +44,7 @@ module "util" {
   instance_type_anti_affinity_preferred = false // single copy
   topology_spread_enabled               = false // single copy
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -64,7 +64,7 @@ module "util_network_cost" {
   instance_type_anti_affinity_preferred = false // ds
   topology_spread_enabled               = false // ds
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -86,7 +86,7 @@ module "namespace" {
 
   namespace = "open-cost"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -139,7 +139,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.spot_data.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

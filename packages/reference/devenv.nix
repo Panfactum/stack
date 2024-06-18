@@ -9,6 +9,6 @@
     PF_REPO_URL = "github.com/panfactum/stack";
     PF_REPO_NAME = "stack";
     PF_REPO_PRIMARY_BRANCH = "main";
-    PF_IAC_DIR = "packages/reference/infrastructure";
+    PF_IAC_DIR = "infrastructure";
   };
 }

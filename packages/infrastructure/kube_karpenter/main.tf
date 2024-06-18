@@ -44,7 +44,7 @@ module "util" {
   topology_spread_enabled  = false
   controller_node_required = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -63,7 +63,7 @@ module "constants" {
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -80,7 +80,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -555,7 +555,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.karpenter.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

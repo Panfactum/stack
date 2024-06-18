@@ -73,7 +73,7 @@ module "util_cluster" {
   topology_spread_enabled              = true // stateful so always on
   lifetime_evictions_enabled           = false
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -99,7 +99,7 @@ module "util_pooler" {
   pod_affinity_match_labels            = module.util_cluster.match_labels
   lifetime_evictions_enabled           = false
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -136,7 +136,7 @@ module "s3_bucket" {
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -173,7 +173,7 @@ module "irsa" {
   // the service account for us, so we let it to the annotations
   annotate_service_account = false
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -206,7 +206,7 @@ module "server_certs" {
     "${local.cluster_name}-pooler-rw"
   ]
 
-  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  # pf-generate: pass_vars_no_extra_tags
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -232,7 +232,7 @@ module "client_certs" {
   usages      = ["client auth"]
   common_name = "streaming_replica"
 
-  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  # pf-generate: pass_vars_no_extra_tags
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -696,7 +696,7 @@ module "pooler_certs" {
   usages      = ["client auth"]
   common_name = "cnpg_pooler_pgbouncer"
 
-  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  # pf-generate: pass_vars_no_extra_tags
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

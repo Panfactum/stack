@@ -24,7 +24,7 @@ data "aws_caller_identity" "current" {}
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -547,7 +547,7 @@ module "log_bucket" {
 
   access_policy = data.aws_iam_policy_document.log_delivery.json
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

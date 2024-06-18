@@ -14,7 +14,7 @@ terraform {
 module "util" {
   source = "../kube_workload_utility"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -29,7 +29,7 @@ module "util" {
 module "constants" {
   source = "../kube_constants"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

@@ -44,7 +44,7 @@ module "util_controller" {
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -59,7 +59,7 @@ module "util_controller" {
 module "tags" {
   source = "../aws_tags"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -81,7 +81,7 @@ module "namespace" {
   namespace      = local.name
   linkerd_inject = false
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

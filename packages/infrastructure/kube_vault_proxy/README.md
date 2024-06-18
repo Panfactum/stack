@@ -7,7 +7,7 @@ that requires authentication with the cluster's Vault instance.
 
 ### Setup
 
-This module is intended to be used in conjunction with the [kube_ingress](/docs/main/reference/infrastructure-modules/kubernetes/kube_ingress)
+This module is intended to be used in conjunction with the [kube_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
 module. `domain` should be set to a domain used in `kube_ingress` and the `upstream_ingress_annotations` output
 should be passed to the `extra_annotations` input of `kube_ingress`.
 

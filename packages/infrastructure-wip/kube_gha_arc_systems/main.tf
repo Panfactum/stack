@@ -25,7 +25,7 @@ locals {
 module "kube_labels" {
   source = "../kube_labels"
 
-  # generate: common_vars.snippet.txt
+  # generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

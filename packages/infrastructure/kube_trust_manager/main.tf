@@ -31,7 +31,7 @@ module "util" {
   arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

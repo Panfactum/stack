@@ -53,7 +53,7 @@ module "util_controller" {
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -75,7 +75,7 @@ module "util_server" {
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -97,7 +97,7 @@ module "util_events_controller" {
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -119,7 +119,7 @@ module "util_webhook" {
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -144,7 +144,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -223,7 +223,7 @@ module "artifact_bucket" {
 
   intelligent_transitions_enabled = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -269,7 +269,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.argo.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -326,7 +326,7 @@ module "database" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   enhanced_ha_enabled         = var.enhanced_ha_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -587,7 +587,7 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

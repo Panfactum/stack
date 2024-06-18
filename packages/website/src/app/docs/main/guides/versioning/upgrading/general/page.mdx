@@ -44,16 +44,10 @@ you have reviewed the changes and understand what steps you need to take.
 
 ## Update your Infrastructure
 
-1. If you use Panfactum IaC submodules in your organization's IaC modules, update the `ref` across all of your modules:
+1. **After** updating your development environment, run `pf-update-iac` to upgrade the versions of all Panfactum
+submodules in your [first-party infrastructure code](/docs/main/guides/iac/first-party-modules).
 
-   ```diff-hcl[class="diff-highlight"]
-   module "pod_template" {
-   -    source       = "github.com/Panfactum/stack.git/packages/infrastructure//kube_pod?ref=old-version"
-   +    source       = "github.com/Panfactum/stack.git/packages/infrastructure//kube_pod?ref=new-version"
-   }
-   ```
-
-2. If you deploy Panfactum modules directly via terragrunt, update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
+2. Update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
    in **only** your lowest environment level: [^1]
 
    ```diff-yaml[class="diff-highlight"]

@@ -3,17 +3,17 @@ import React from 'react'
 
 import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
 
-export type Type = 'live' | 'submodule' | 'utility';
+export type Type = 'direct' | 'submodule' | 'utility';
 export default function TypeChip (props: {type: Type}) {
   const { type } = props
-  const color = type === 'live' ? 'bg-primary text-white' : 'bg-secondary text-white'
+  const color = type === 'direct' ? 'bg-primary text-white' : 'bg-secondary text-white'
 
-  const text = type === 'live'
-    ? 'Live'
+  const text = type === 'direct'
+    ? 'Direct'
     : type === 'submodule' ? 'Submodule' : 'Utility'
 
-  const explainer = type === 'live'
-    ? 'Live modules are meant to be deployed directly using terragrunt'
+  const explainer = type === 'direct'
+    ? 'Direct modules are meant to be deployed directly using terragrunt'
     : type === 'submodule' ? 'Submodules are meant to be used in your Tofu (Terraform) modules' : 'Do not use utility modules'
 
   return (

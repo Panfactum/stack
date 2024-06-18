@@ -66,8 +66,8 @@ in the hands of a third-party leaves you vulnerable to outages and security inci
 Fortunately, there are also many production-ready self-hosted IdPs that contain all the same functionality. In our analysis,
 the most robust and well-integrated tool is [Authentik](https://goauthentik.io/).
 
-We provide both a module to deploy Authentik ([kube\_authentik](/docs/main/reference/infrastructure-modules/kubernetes/kube_authentik)) and
-many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/docs/main/reference/infrastructure-modules/authentik/authentik_aws_sso)).
+We provide both a module to deploy Authentik ([kube\_authentik](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_authentik)) and
+many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_aws_sso)).
 
 ### Configure AWS SES
 
@@ -78,7 +78,7 @@ AWS provides a service called [Simple Email Service (SES)](https://aws.amazon.co
 (the standard protocol for sending email).
 
 Before using it, you must first configure SES to use the domain you want to use send email from (e.g., `panfactum.com`).
-We provide a module to do this: [aws\_ses\_domain](/docs/main/reference/infrastructure-modules/aws/aws_ses_domain).
+We provide a module to do this: [aws\_ses\_domain](/docs/main/reference/infrastructure-modules/direct/aws/aws_ses_domain).
 
 Let's deploy the module now:
 
@@ -89,7 +89,7 @@ Let's deploy the module now:
 
 3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl).
 
-4. Enable the `aws`, `random`, and `time` providers in your `module.yaml`.
+4. Run `pf-providers-enable` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -103,7 +103,7 @@ Let's deploy the module now:
 
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
-   to set this up. You can use the [aws\_dns\_records](/docs/main/reference/infrastructure-modules/aws/aws_dns_records) module to
+   to set this up. You can use the [aws\_dns\_records](/docs/main/reference/infrastructure-modules/direct/aws/aws_dns_records) module to
    deploy the record like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
 
 ### Deploy Authentik
@@ -120,7 +120,7 @@ We are now ready to deploy Authentik:
 
    3. The `akadmin_email` should be a real email address that will be used for the initial root authentik user.
 
-3. Enable the `aws`, `kubernetes`, `helm`, `vault`, and `random` providers in your `module.yaml`.
+3. Run `pf-providers-enable` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -154,7 +154,7 @@ We are now ready to deploy Authentik:
 
 Out-of-the box, Authentik provides a nearly blank slate with only enough to facilitate the initial admin login. We
 provide a module that augments this initial setup with more secure authentication flows, recovery flows, and
-branding: [authentik\_core\_resources](/docs/main/reference/infrastructure-modules/authentik/authentik_core_resources).
+branding: [authentik\_core\_resources](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
 
 This module also allows you to define user groups. Groups in Authentik will be assigned to roles in
 service providers as the foundational mechanism for implementing RBAC across your ecosystem. See the [Panfactum
@@ -183,7 +183,7 @@ Let's deploy this configuration now:
 
    6. `extra_groups` allows you to create arbitrary additional groups.
 
-3. Enable the `authentik`, `kubernetes`, and `time` providers in your `module.yaml`.
+3. Run `pf-providers-enable` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

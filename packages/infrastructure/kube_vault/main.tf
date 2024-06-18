@@ -44,7 +44,7 @@ module "util_server" {
   topology_spread_strict                = true
   topology_spread_enabled               = true // stateful
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -64,7 +64,7 @@ module "util_csi" {
   instance_type_anti_affinity_preferred = false // ds
   topology_spread_enabled               = false // ds
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -92,7 +92,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -123,7 +123,7 @@ module "unseal_key" {
   reader_iam_arns            = concat([module.aws_permissions.role_arn], var.reader_iam_arns)
   restricted_reader_iam_arns = var.restricted_reader_iam_arns
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -165,7 +165,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.sa.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -468,7 +468,7 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = false
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

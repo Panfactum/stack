@@ -112,7 +112,7 @@ module "metrics_cert" {
   secret_name   = "core-dns-metrics-certs"
   namespace     = local.namespace
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -204,7 +204,7 @@ module "core_dns" {
 
   vpa_enabled = var.vpa_enabled
 
-  # generate: pass_common_vars_no_extra_tags.snippet.txt
+  # pf-generate: pass_vars_no_extra_tags
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

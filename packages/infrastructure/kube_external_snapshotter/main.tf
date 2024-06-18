@@ -42,7 +42,7 @@ module "util_controller" {
   arm_nodes_enabled                     = true
   burstable_nodes_enabled               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -63,7 +63,7 @@ module "util_webhook" {
   arm_nodes_enabled                     = true
   burstable_nodes_enabled               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -84,7 +84,7 @@ module "namespace" {
 
   namespace = "external-snapshotter"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -106,7 +106,7 @@ module "webhook_cert" {
   secret_name   = "external-snapshotter-webhook-certs"
   namespace     = local.namespace
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

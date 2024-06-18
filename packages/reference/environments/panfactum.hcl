@@ -3,26 +3,26 @@
 #################################################################
 
 locals {
-  global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), null)
-  global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), null)
+  global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), {})
+  global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), {})
   global_vars         = merge({}, local.global_raw_vars, local.global_user_vars)
   global_extra_tags   = lookup(local.global_vars, "extra_tags", {})
   global_extra_inputs = lookup(local.global_vars, "extra_inputs", {})
 
-  environment_raw_vars     = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), null)
-  environment_user_vars    = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), null)
+  environment_raw_vars     = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), {})
+  environment_user_vars    = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), {})
   environment_vars         = merge({}, local.environment_raw_vars, local.environment_user_vars)
   environment_extra_tags   = lookup(local.environment_vars, "extra_tags", {})
   environment_extra_inputs = lookup(local.environment_vars, "extra_inputs", {})
 
-  region_raw_vars     = try(yamldecode(file(find_in_parent_folders("region.yaml"))), null)
-  region_user_vars    = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), null)
+  region_raw_vars     = try(yamldecode(file(find_in_parent_folders("region.yaml"))), {})
+  region_user_vars    = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), {})
   region_vars         = merge({}, local.region_raw_vars, local.region_user_vars)
   region_extra_tags   = lookup(local.region_vars, "extra_tags", {})
   region_extra_inputs = lookup(local.region_vars, "extra_inputs", {})
 
-  module_raw_vars     = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), null)
-  module_user_vars    = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), null)
+  module_raw_vars     = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), {})
+  module_user_vars    = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), {})
   module_vars         = merge({}, local.module_raw_vars, local.module_user_vars)
   module_extra_tags   = lookup(local.module_vars, "extra_tags", {})
   module_extra_inputs = lookup(local.module_vars, "extra_inputs", {})
@@ -78,9 +78,10 @@ locals {
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
   use_local_iac = contains(["local", local.primary_branch], local.version)
+  root_dir      = get_env("DEVENV_ROOT", get_repo_root())
   iac_dir       = get_env("PF_IAC_DIR")
   iac_path      = "${startswith(local.iac_dir, "/") ? local.iac_dir : "/${local.iac_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
-  source        = local.use_local_iac ? "${get_repo_root()}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
+  source        = local.use_local_iac ? "${local.root_dir}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
 
   # Folder of shared snippets to generate
   provider_folder = "providers"
@@ -196,25 +197,25 @@ generate "authentik_provider" {
 generate "time_provider" {
   path      = "time.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "time") ? file("${local.provider_folder}/time.tf") : ""
+  contents  = contains(local.providers, "time") ? file("${local.provider_folder}/time.tf") : ""
 }
 
 generate "random_provider" {
   path      = "random.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "random") ? file("${local.provider_folder}/random.tf") : ""
+  contents  = contains(local.providers, "random") ? file("${local.provider_folder}/random.tf") : ""
 }
 
 generate "local_provider" {
   path      = "local.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "local") ? file("${local.provider_folder}/local.tf") : ""
+  contents  = contains(local.providers, "local") ? file("${local.provider_folder}/local.tf") : ""
 }
 
 generate "tls_provider" {
   path      = "tls.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.vars.providers, "tls") ? file("${local.provider_folder}/tls.tf") : ""
+  contents  = contains(local.providers, "tls") ? file("${local.provider_folder}/tls.tf") : ""
 }
 
 generate "vault_provider" {

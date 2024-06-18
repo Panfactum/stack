@@ -33,7 +33,7 @@ module "util_scale_to_zero" {
 
   workload_name = var.service_account
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -104,7 +104,7 @@ module "aws_permissions" {
   ip_allow_list             = var.ip_allow_list
   annotate_service_account  = var.annotate_service_account
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

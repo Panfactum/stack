@@ -50,6 +50,9 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-check-repo-setup.sh $out/bin/pf-check-repo-setup
     chmod +x $out/bin/pf-check-repo-setup
 
+    cp ${src}/pf-update-iac.sh $out/bin/pf-update-iac
+    chmod +x $out/bin/pf-update-iac
+
     # Copy the static source files to $out/source_files
     mkdir -p $out/files
     cp -r ${src}/files/* $out/files/

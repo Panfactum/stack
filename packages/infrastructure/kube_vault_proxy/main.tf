@@ -50,7 +50,7 @@ module "util" {
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -279,7 +279,7 @@ module "ingress" {
   csp_enabled                    = true
   csp_style_src                  = "'self' 'unsafe-inline'"
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

@@ -90,7 +90,7 @@ module "util" {
   topology_spread_strict  = true
 
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -112,7 +112,7 @@ module "namespace" {
   namespace            = local.name
   loadbalancer_enabled = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -134,7 +134,7 @@ module "webhook_cert" {
   secret_name   = local.webhook_secret
   namespace     = local.namespace
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -174,7 +174,7 @@ module "nlb_common" {
   // Should be the same as the termination grace period seconds (minus the controller exit time)
   deregistration_delay_seconds = local.deregistration_buffer + ceil(local.nginx_base_timeout * 1.5)
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

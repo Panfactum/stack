@@ -184,7 +184,7 @@ module "buildkit" {
     }
   }
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -278,7 +278,7 @@ module "util_scale_to_zero" {
   topology_spread_enabled              = false
   lifetime_evictions_enabled           = false
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -335,7 +335,7 @@ module "workflow_perms" {
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

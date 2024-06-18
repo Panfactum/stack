@@ -48,7 +48,7 @@ module "util_admission_controller" {
     "app.kubernetes.io/component" = "admission-controller"
   }
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -72,7 +72,7 @@ module "util_recommender" {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "recommender"
   }
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -97,7 +97,7 @@ module "util_updater" {
     "app.kubernetes.io/component" = "updater"
   }
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -122,7 +122,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -144,7 +144,7 @@ module "webhook_cert" {
   secret_name   = "vpa-webhook-certs"
   namespace     = local.namespace
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

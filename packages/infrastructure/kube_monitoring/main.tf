@@ -164,7 +164,7 @@ module "util_webhook" {
   topology_spread_strict               = true
   topology_spread_enabled              = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -186,7 +186,7 @@ module "util_operator" {
   instance_type_anti_affinity_preferred = false // only runs one copy
   topology_spread_enabled               = false // only runs one copy
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -209,7 +209,7 @@ module "util_grafana" {
   topology_spread_enabled              = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -233,7 +233,7 @@ module "util_prometheus" {
   topology_spread_enabled              = true // stateful
   lifetime_evictions_enabled           = false
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -254,7 +254,7 @@ module "util_node_exporter" {
   topology_spread_enabled               = false // daemonset
   instance_type_anti_affinity_preferred = false // daemonset
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -277,7 +277,7 @@ module "util_ksm" {
   topology_spread_strict               = true
   topology_spread_enabled              = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -299,7 +299,7 @@ module "util_thanos_compactor" {
   topology_spread_enabled               = false // single pod
   instance_type_anti_affinity_preferred = false // single pod
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -321,7 +321,7 @@ module "util_thanos_store_gateway" {
   topology_spread_strict               = true
   topology_spread_enabled              = true // stateful so always on
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -343,7 +343,7 @@ module "util_thanos_ruler" {
   topology_spread_strict               = true
   topology_spread_enabled              = true // stateful so always on
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -367,7 +367,7 @@ module "util_thanos_query" {
   topology_spread_strict               = true
   topology_spread_enabled              = var.enhanced_ha_enabled
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -390,7 +390,7 @@ module "util_thanos_frontend" {
   topology_spread_enabled              = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -413,7 +413,7 @@ module "util_thanos_bucket_web" {
   topology_spread_enabled              = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -437,7 +437,7 @@ module "util_alertmanager" {
   topology_spread_enabled              = true // stateful so always on
   lifetime_evictions_enabled           = false
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -462,7 +462,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -498,7 +498,7 @@ module "grafana_db" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   enhanced_ha_enabled         = var.enhanced_ha_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -527,7 +527,7 @@ module "thanos_redis_cache" {
   monitoring_enabled          = var.monitoring_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -563,7 +563,7 @@ module "metrics_bucket" {
 
   intelligent_transitions_enabled = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -633,7 +633,7 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -665,7 +665,7 @@ module "prometheus_cert" {
   secret_name   = "prometheus-identity-cert"
   namespace     = local.namespace
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -1490,7 +1490,7 @@ module "aws_permissions_thanos_compactor" {
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -1518,7 +1518,7 @@ module "aws_permissions_thanos_store_gateway" {
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -1546,7 +1546,7 @@ module "aws_permissions_thanos_ruler" {
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -1574,7 +1574,7 @@ module "aws_permissions_thanos_bucket_web" {
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -2547,7 +2547,7 @@ module "authenticating_proxy" {
   enhanced_ha_enabled         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -2578,7 +2578,7 @@ module "bucket_web_ingress" {
   extra_annotations              = module.authenticating_proxy[0].upstream_ingress_annotations
   extra_configuration_snippet    = file("${path.module}/bucket_configuration_snippet.txt") # Blocks mutating requests
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -2607,7 +2607,7 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

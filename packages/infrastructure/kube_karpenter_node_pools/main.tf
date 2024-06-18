@@ -156,7 +156,7 @@ locals {
 module "util" {
   source = "../kube_workload_utility"
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -180,7 +180,7 @@ module "node_settings_burstable" {
   cluster_dns_service_ip = var.cluster_dns_service_ip
   is_spot                = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -200,7 +200,7 @@ module "node_settings_spot" {
   cluster_ca_data        = var.cluster_ca_data
   is_spot                = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -220,7 +220,7 @@ module "node_settings" {
   cluster_ca_data        = var.cluster_ca_data
   is_spot                = false
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

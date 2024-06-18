@@ -25,7 +25,7 @@ Vault serves several important purposes in the Panfactum stack:
 
 ## Deploy Vault
 
-We will use the [kube\_vault](/docs/main/reference/infrastructure-modules/kubernetes/kube_vault) infrastructure module to deploy
+We will use the [kube\_vault](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vault) infrastructure module to deploy
 Vault in a highly available manner using
 [it's integrated Raft storage backend](https://developer.hashicorp.com/vault/docs/configuration/storage/raft).
 
@@ -37,11 +37,11 @@ Let's do this now:
 
 3. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, `random`, and `helm` providers.
+4. Run `pf-providers-enable` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
-6. Note that this deployment may or may not succeed, but you should see three vault instances which are in the unready state:
+6. Note that this deployment **may not succeed,** but you should see three vault instances which are in the unready state:
 
    <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
 
@@ -202,7 +202,7 @@ a remote terminal session to perform the initialization:
 One of the major benefits of Vault is that it can be [configured directly with OpenTofu (Terraform)](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
 alongside our other infrastructure components. The Panfactum stack includes several
 modules for working with Vault. In this section we will deploy some foundational configuration
-via the [vault\_core\_resources](/docs/main/reference/infrastructure-modules/vault/vault_core_resources) module.
+via the [vault\_core\_resources](/docs/main/reference/infrastructure-modules/direct/vault/vault_core_resources) module.
 
 ### Connect to Vault
 
@@ -262,13 +262,13 @@ Here is how we will work around this issue:
 
 ### Deploy Configuration Module
 
-Let's now deploy [vault\_core\_resources](/docs/main/reference/infrastructure-modules/vault/vault_core_resources):
+Let's now deploy [vault\_core\_resources](/docs/main/reference/infrastructure-modules/direct/vault/vault_core_resources):
 
 1. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/vault_core_resources/terragrunt.hcl).
 
-3. Add a `module.yaml` that enables the `kubernetes`, `time`, and `vault` providers.
+3. Run `pf-providers-enable` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

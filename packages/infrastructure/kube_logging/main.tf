@@ -69,7 +69,7 @@ module "util_read" {
   topology_spread_enabled              = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -90,7 +90,7 @@ module "util_write" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -111,7 +111,7 @@ module "util_backend" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   topology_spread_strict               = true
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -131,7 +131,7 @@ module "util_canary" {
   instance_type_anti_affinity_preferred = false
   topology_spread_enabled               = false
 
-  # generate: common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -156,7 +156,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -185,7 +185,7 @@ module "redis_cache" {
   monitoring_enabled          = var.monitoring_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -221,7 +221,7 @@ module "logs_bucket" {
 
   intelligent_transitions_enabled = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -244,7 +244,7 @@ module "loki_ruler_bucket" {
 
   intelligent_transitions_enabled = true
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -308,7 +308,7 @@ module "loki_aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.loki.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment

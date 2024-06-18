@@ -36,6 +36,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   and [kube\_pod](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pod) have graduated to Beta status. They
   are now safe to use.
 
+- Adds the `pf-providers-enable` command that will automatically inspect the source infrastructure module
+  and enable the required providers in a module's `module.yaml`.
+
+- Adds the `pf-update-iac` command that will update [first-party infrastructure modules](/docs/edge/guides/iac/first-party-modules)
+  in the following ways:
+
+  * Executes the [templating directives](/docs/edge/reference/iac-templating).
+
+  * Updates the `ref` in sourced Panfactum submodules to the commit hash of the devenv if the `# pf-update` annotation
+    is provided. See the [documentation](/docs/edge/guides/iac/first-party-modules#using-panfactum-submodules) for more details.
+
+### Fixed
+
+* Addressed an issue in [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
+  that prevented the SSO login pop-up from working.
+
 ## edge.24-06-14
 
 ### Added
@@ -298,7 +314,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * We have removed the EKS CoreDNS addon and replaced it with the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/kubernetes/kube_core_dns)
   module in order to provide better guarantees about the behavior of DNS in the Panfactum stack. In order to migrate:
 
-  1. Add the `dns_service_ip` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/kubernetes/aws_eks) deployments
+  1. Add the `dns_service_ip` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/aws/aws_eks) deployments
      by following [this guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr). Double check that the `dns_service_ip` is the
      same IP as defined by `kube-system/kube-dns`.
 

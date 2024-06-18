@@ -25,8 +25,16 @@ let
 in {
   env = {
     TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/packages/infrastructure";
+    PF_SKIP_IAC_REF_UPDATE = "1";
+    PF_IAC_DIR = "${config.env.DEVENV_ROOT}/packages/infrastructure";
   };
   packages = with pkgs; [
+
+    ####################################
+    # We use the setup utilities for templating
+    # in the main repo
+    ####################################
+    (import ../mkDevShells/setup { inherit pkgs; })
 
     ####################################
     # Programming Langauges
@@ -56,7 +64,6 @@ in {
     src5.kubectl
     terraform-docs
     (customShellScript "generate-tf-docs")
-    (customShellScript "generate-tf-common")
     (customShellScript "generate-tf")
 
     #########################################
