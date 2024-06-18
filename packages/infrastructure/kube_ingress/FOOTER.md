@@ -2,6 +2,33 @@
 
 ### Headers
 
+#### CORS Headers
+
+The NGINX instance can handle [CORS response headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+for the upstream server.
+
+Set `cors_enabled` to `true` to begin CORS handling.
+
+Variables prefixed with `cors_` control the behavior.
+
+A few important notes:
+
+- If cors handling is enabled, `OPTIONS` requests will not be forwarded to the upstream server.
+
+- Our CORS handling this will overwrite any CORS headers returned from the upstream server.
+
+- Due to [problems in the default NGINX ingress controller behavior](https://github.com/kubernetes/ingress-nginx/issues/8469),
+we implement our own CORS handling logic that fixes many issues in the default behavior. If you would
+rather use the default behavior, set `cors_native_handling_enabled` to `true`.
+
+- As a convenience, by default we allow the following popular headers in `Access-Control-Allow-Headers`: `DNT`, `Keep-Alive`,
+`User-Agent`, `X-Requested-With`, `If-Modified-Since`, `Cache-Control`, `Content-Disposition`, `Content-Type`, `Range`,
+`Authorization`, `Cookies`, `Referrer`, `Accept`, `sec-ch-ua`, `sec-ch-ua-mobile`, `sec-ch-ua-platform`, `X-Suggested-File-Name`,
+`Cookie`. You can change this via `cors_allowed_headers`.
+
+- As a convenience, by default we expose the following popular headers in `Access-Control-Expose-Headers`: `Content-Encoding`, `Date`,
+    `Location`, `X-Frame-Options`, `X-Content-Type-Options`, `Permissions-Policy`, `X-XSS-Protection`, `Vary`, `Cross-Origin-Response-Policy`,
+    `Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`, `Content-Security-Policy`, `Referrer-Policy`. You can change this via `cors_exposed_headers`.
 
 #### Content-Security-Policy
 

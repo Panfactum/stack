@@ -47,12 +47,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   * Updates the `ref` in sourced Panfactum submodules to the commit hash of the devenv if the `# pf-update` annotation
     is provided. See the [documentation](/docs/edge/guides/iac/first-party-modules#using-panfactum-submodules) for more details.
 
-- Adds phone number validation in [aws_account](/docs/edge/reference/infrastructure-modules/aws/aws_account).
+- Adds phone number validation in [aws\_account](/docs/edge/reference/infrastructure-modules/aws/aws_account).
+
+- Adds `cors_enabled` (default: `false`) input variable to [kube\_vault](/docs/edge/reference/infrastructure-modules/kubernetes/kube_vault)
+  that can enabled [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) handling.
+
+  This can be useful
+  when building web applications that interact with Vault in client-side JavaScript. By default, this will
+  allow CORS requests from all sibling and child domains.
 
 ### Fixed
 
 * Addressed an issue in [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
   that prevented the SSO login pop-up from working.
+
+* Implemented custom CORS handling logic in [kube\_ingress](/docs/edge/reference/infrastructure-modules/kubernetes/kube_ingress)
+  that resolves [issues in the default behavior provided by the NGINX ingress controller.](https://github.com/kubernetes/ingress-nginx/issues/8469)
 
 ## edge.24-06-14
 

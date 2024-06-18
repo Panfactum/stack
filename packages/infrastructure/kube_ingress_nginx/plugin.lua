@@ -43,6 +43,48 @@ function _M.header_filter()
       ngx.header["Content-Security-Policy"] = ngx.var.pf_csp_non_html
     end
   end
+
+  local cors_enabled = ngx.var.pf_cors_enabled == "true"
+  if cors_enabled then
+    local origin = ngx.var.http_origin
+    if ngx.re.match(origin, "^" .. ngx.var.pf_cors_origin_regex .. "$", "jo") then
+      ngx.header["Access-Control-Allow-Origin"] = origin
+      ngx.header["Access-Control-Allow-Methods"] = ngx.var.pf_cors_allowed_methods
+      ngx.header["Access-Control-Allow-Headers"] = ngx.var.pf_cors_allowed_headers
+      ngx.header["Access-Control-Expose-Headers"] = ngx.var.pf_cors_exposed_headers
+      ngx.header["Access-Control-Max-Age"] = ngx.var.pf_cors_max_age_seconds
+      ngx.header["Access-Control-Allow-Credentials"] = ngx.var.pf_cors_allow_credentials
+      local vary_header = ngx.header["Vary"]
+      if vary_header then
+          if not string.find(vary_header, "Origin", 1, true) then
+              ngx.header["Vary"] = vary_header .. ", Origin"
+          end
+      else
+          ngx.header["Vary"] = "Origin"
+      end
+    end
+  end
 end
+
+-- Use this for processing the request BEFORE it has been sent to the upstream
+function _M.rewrite()
+  local cors_enabled = ngx.var.pf_cors_enabled == "true"
+  if cors_enabled and ngx.var.request_method == "OPTIONS" then
+    local origin = ngx.var.http_origin
+    if ngx.re.match(origin, "^" .. ngx.var.pf_cors_origin_regex .. "$", "jo") then
+      ngx.header["Access-Control-Allow-Origin"] = origin
+      ngx.header["Access-Control-Allow-Methods"] = ngx.var.pf_cors_allowed_methods
+      ngx.header["Access-Control-Allow-Headers"] = ngx.var.pf_cors_allowed_headers
+      ngx.header["Access-Control-Expose-Headers"] = ngx.var.pf_cors_exposed_headers
+      ngx.header["Access-Control-Max-Age"] = ngx.var.pf_cors_max_age_seconds
+      ngx.header["Access-Control-Allow-Credentials"] = ngx.var.pf_cors_allow_credentials
+      ngx.header["Content-Type"] = "text/plain charset=UTF-8"
+      ngx.header["Content-Length"] = "0"
+      ngx.header["Vary"] = "Origin"
+      ngx.exit(204)
+    end
+  end
+end
+
 
 return _M

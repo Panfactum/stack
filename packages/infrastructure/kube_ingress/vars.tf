@@ -483,16 +483,36 @@ variable "cors_enabled" {
   default     = false
 }
 
+variable "cors_native_handling_enabled" {
+  description = "Whether to use the native NGINX-ingress annotations to handle cors rather than the Panfactum logic"
+  type        = bool
+  default     = false
+}
+
 variable "cors_exposed_headers" {
-  description = "The headers to expose in CORS responses"
-  type        = string
-  default     = "*"
+  description = "The extra headers to expose in CORS responses"
+  type        = list(string)
+  default = [
+    "Content-Encoding",
+    "Date",
+    "Location",
+    "X-Frame-Options",
+    "X-Content-Type-Options",
+    "Permissions-Policy",
+    "X-XSS-Protection",
+    "Vary",
+    "Cross-Origin-Response-Policy",
+    "Cross-Origin-Opener-Policy",
+    "Cross-Origin-Embedder-Policy",
+    "Content-Security-Policy",
+    "Referrer-Policy"
+  ]
 }
 
 variable "cors_allowed_methods" {
   description = "The methods to allow on CORS requests"
-  type        = string
-  default     = "GET,HEAD,POST,OPTIONS,PUT,PATCH,DELETE"
+  type        = list(string)
+  default     = ["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"]
 }
 
 variable "cors_max_age_seconds" {
@@ -519,16 +539,47 @@ variable "cors_allowed_origins_sibling_domains" {
   default     = true
 }
 
+variable "cors_allowed_origins_any" {
+  description = "Whether to allow any origin on CORS requests"
+  type        = bool
+  default     = false
+}
+
 variable "cors_extra_allowed_origins" {
   description = "Extra origins allowed on CORS requests"
   type        = list(string)
   default     = []
 }
 
-variable "cors_extra_allowed_headers" {
+variable "cors_allowed_headers" {
   description = "Extra headers to allow on CORS requests"
   type        = list(string)
-  default     = []
+  default = [
+    "DNT",
+    "Keep-Alive",
+    "User-Agent",
+    "X-Requested-With",
+    "If-Modified-Since",
+    "Cache-Control",
+    "Content-Disposition",
+    "Content-Type",
+    "Range",
+    "Authorization",
+    "Cookies",
+    "Referrer",
+    "Accept",
+    "sec-ch-ua",
+    "sec-ch-ua-mobile",
+    "sec-ch-ua-platform",
+    "X-Suggested-File-Name",
+    "Cookie"
+  ]
+}
+
+variable "cors_allow_credentials" {
+  description = "Whether to set the 'Access-Control-Allow-Credentials' header to 'true'"
+  type        = bool
+  default     = true
 }
 
 variable "extra_response_headers" {

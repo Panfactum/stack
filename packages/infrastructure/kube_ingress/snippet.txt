@@ -25,4 +25,14 @@ set $pf_x_xss_protection "${x_xss_protection}";
 set $pf_x_frame_options "${x_frame_options}";
 set $pf_referrer_policy "${referrer_policy}";
 
+set $pf_cors_enabled ${cors_enabled};
+%{ if cors_enabled }
+set $pf_cors_allowed_methods "${cors_allowed_methods}";
+set $pf_cors_allowed_headers "${cors_allowed_headers}";
+set $pf_cors_exposed_headers "${cors_exposed_headers}";
+set $pf_cors_max_age_seconds "${cors_max_age_seconds}";
+set $pf_cors_allow_credentials "${cors_allow_credentials}";
+set $pf_cors_origin_regex "${cors_origin_regex}";
+%{ endif }
+
 ${extra_configuration_snippet}

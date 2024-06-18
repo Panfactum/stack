@@ -65,13 +65,72 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_cors_allow_credentials" /> [cors\_allow\_credentials](#input_cors_allow_credentials)
+
+Description: Whether to set the 'Access-Control-Allow-Credentials' header to 'true'
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_cors_allowed_headers" /> [cors\_allowed\_headers](#input_cors_allowed_headers)
+
+Description: Extra headers to allow on CORS requests
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "DNT",
+  "Keep-Alive",
+  "User-Agent",
+  "X-Requested-With",
+  "If-Modified-Since",
+  "Cache-Control",
+  "Content-Disposition",
+  "Content-Type",
+  "Range",
+  "Authorization",
+  "Cookies",
+  "Referrer",
+  "Accept",
+  "sec-ch-ua",
+  "sec-ch-ua-mobile",
+  "sec-ch-ua-platform",
+  "X-Suggested-File-Name",
+  "Cookie"
+]
+```
+
 ### <a name="input_cors_allowed_methods" /> [cors\_allowed\_methods](#input_cors_allowed_methods)
 
 Description: The methods to allow on CORS requests
 
-Type: `string`
+Type: `list(string)`
 
-Default: `"GET,HEAD,POST,OPTIONS,PUT,PATCH,DELETE"`
+Default:
+
+```json
+[
+  "GET",
+  "HEAD",
+  "POST",
+  "OPTIONS",
+  "PUT",
+  "PATCH",
+  "DELETE"
+]
+```
+
+### <a name="input_cors_allowed_origins_any" /> [cors\_allowed\_origins\_any](#input_cors_allowed_origins_any)
+
+Description: Whether to allow any origin on CORS requests
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_cors_allowed_origins_self" /> [cors\_allowed\_origins\_self](#input_cors_allowed_origins_self)
 
@@ -107,19 +166,29 @@ Default: `false`
 
 ### <a name="input_cors_exposed_headers" /> [cors\_exposed\_headers](#input_cors_exposed_headers)
 
-Description: The headers to expose in CORS responses
-
-Type: `string`
-
-Default: `"*"`
-
-### <a name="input_cors_extra_allowed_headers" /> [cors\_extra\_allowed\_headers](#input_cors_extra_allowed_headers)
-
-Description: Extra headers to allow on CORS requests
+Description: The extra headers to expose in CORS responses
 
 Type: `list(string)`
 
-Default: `[]`
+Default:
+
+```json
+[
+  "Content-Encoding",
+  "Date",
+  "Location",
+  "X-Frame-Options",
+  "X-Content-Type-Options",
+  "Permissions-Policy",
+  "X-XSS-Protection",
+  "Vary",
+  "Cross-Origin-Response-Policy",
+  "Cross-Origin-Opener-Policy",
+  "Cross-Origin-Embedder-Policy",
+  "Content-Security-Policy",
+  "Referrer-Policy"
+]
+```
 
 ### <a name="input_cors_extra_allowed_origins" /> [cors\_extra\_allowed\_origins](#input_cors_extra_allowed_origins)
 
@@ -136,6 +205,14 @@ Description: Controls how long the CORS preflight requests are allowed to be cac
 Type: `number`
 
 Default: `86400`
+
+### <a name="input_cors_native_handling_enabled" /> [cors\_native\_handling\_enabled](#input_cors_native_handling_enabled)
+
+Description: Whether to use the native NGINX-ingress annotations to handle cors rather than the Panfactum logic
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_cross_origin_embedder_policy" /> [cross\_origin\_embedder\_policy](#input_cross_origin_embedder_policy)
 
@@ -728,6 +805,34 @@ No outputs.
 ## Usage
 
 ### Headers
+
+#### CORS Headers
+
+The NGINX instance can handle [CORS response headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+for the upstream server.
+
+Set `cors_enabled` to `true` to begin CORS handling.
+
+Variables prefixed with `cors_` control the behavior.
+
+A few important notes:
+
+* If cors handling is enabled, `OPTIONS` requests will not be forwarded to the upstream server.
+
+* Our CORS handling this will overwrite any CORS headers returned from the upstream server.
+
+* Due to [problems in the default NGINX ingress controller behavior](https://github.com/kubernetes/ingress-nginx/issues/8469),
+  we implement our own CORS handling logic that fixes many issues in the default behavior. If you would
+  rather use the default behavior, set `cors_native_handling_enabled` to `true`.
+
+* As a convenience, by default we allow the following popular headers in `Access-Control-Allow-Headers`: `DNT`, `Keep-Alive`,
+  `User-Agent`, `X-Requested-With`, `If-Modified-Since`, `Cache-Control`, `Content-Disposition`, `Content-Type`, `Range`,
+  `Authorization`, `Cookies`, `Referrer`, `Accept`, `sec-ch-ua`, `sec-ch-ua-mobile`, `sec-ch-ua-platform`, `X-Suggested-File-Name`,
+  `Cookie`. You can change this via `cors_allowed_headers`.
+
+* As a convenience, by default we expose the following popular headers in `Access-Control-Expose-Headers`: `Content-Encoding`, `Date`,
+  `Location`, `X-Frame-Options`, `X-Content-Type-Options`, `Permissions-Policy`, `X-XSS-Protection`, `Vary`, `Cross-Origin-Response-Policy`,
+  `Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`, `Content-Security-Policy`, `Referrer-Policy`. You can change this via `cors_exposed_headers`.
 
 #### Content-Security-Policy
 

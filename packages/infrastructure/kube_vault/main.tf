@@ -467,6 +467,8 @@ module "ingress" {
   cross_origin_opener_policy     = "same-origin-allow-popups" // Required for SSO logins
   permissions_policy_enabled     = true
   csp_enabled                    = false
+  cors_enabled                   = var.cors_enabled
+  cors_extra_allowed_origins     = var.cors_extra_allowed_origins
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

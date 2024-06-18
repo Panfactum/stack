@@ -90,6 +90,19 @@ locals {
   subdomains      = flatten([for config in var.ingress_configs : [for domain in config.domains : "https://*.${domain}"]])
   sibling_domains = flatten([for config in var.ingress_configs : [for domain in config.domains : "https://*.${join(".", slice(split(".", domain), 1, length(split(".", domain))))}"]])
 
+  cors_allowed_headers = join(", ", tolist(toset(var.cors_allowed_headers)))
+  cors_allowed_methods = join(", ", tolist(toset(var.cors_allowed_methods)))
+  cors_exposed_headers = join(", ", tolist(toset(var.cors_exposed_headers)))
+  cors_allowed_origins = tolist(toset(concat(
+    var.cors_allowed_origins_self ? local.domains : [],
+    var.cors_allowed_origins_subdomains ? local.subdomains : [],
+    var.cors_allowed_origins_sibling_domains ? local.sibling_domains : [],
+    var.cors_extra_allowed_origins
+  )))
+  cors_allowed_origin_regex_list = [for origin in local.cors_allowed_origins :
+    replace(replace(replace(origin, "/", "\\/"), ".", "\\."), "*", ".+")
+  ]
+
   common_annotations = merge(
     {
       // Adds security headers
@@ -118,43 +131,30 @@ locals {
 
         extra_response_headers      = var.extra_response_headers
         extra_configuration_snippet = var.extra_configuration_snippet
+
+        cors_enabled           = var.cors_enabled && !var.cors_native_handling_enabled
+        cors_origin_regex      = var.cors_allowed_origins_any ? ".+" : join("|", local.cors_allowed_origin_regex_list)
+        cors_allowed_methods   = local.cors_allowed_methods
+        cors_allowed_headers   = local.cors_allowed_headers
+        cors_exposed_headers   = local.cors_exposed_headers
+        cors_max_age_seconds   = tostring(var.cors_max_age_seconds)
+        cors_allow_credentials = var.cors_allow_credentials
       })
 
       // Since we use regex in all our ingress routing, this MUST be set to true
       "nginx.ingress.kubernetes.io/use-regex" = "true"
 
-      // Enable CORS handling
-      "nginx.ingress.kubernetes.io/enable-cors"         = var.cors_enabled ? "true" : "false",
-      "nginx.ingress.kubernetes.io/cors-allow-methods"  = "GET,HEAD,POST,OPTIONS,PUT,PATCH,DELETE"
-      "nginx.ingress.kubernetes.io/cors-expose-headers" = var.cors_exposed_headers
-      "nginx.ingress.kubernetes.io/cors-allow-headers" = join(", ", concat(var.cors_extra_allowed_headers, [
-        "DNT",
-        "Keep-Alive",
-        "User-Agent",
-        "X-Requested-With",
-        "If-Modified-Since",
-        "Cache-Control",
-        "Content-Disposition",
-        "Content-Type",
-        "Range",
-        "Authorization",
-        "Cookies",
-        "Referrer",
-        "Accept",
-        "sec-ch-ua",
-        "sec-ch-ua-mobile",
-        "sec-ch-ua-platform",
-        "X-Suggested-File-Name",
-        "Cookie"
-      ]))
-      "nginx.ingress.kubernetes.io/cors-max-age" = tostring("${var.cors_max_age_seconds}")
-      "nginx.ingress.kubernetes.io/cors-allow-origin" = join(", ", tolist(toset(concat(
-        var.cors_allowed_origins_self ? local.domains : [],
-        var.cors_allowed_origins_subdomains ? local.subdomains : [],
-        var.cors_allowed_origins_sibling_domains ? local.sibling_domains : [],
-        var.cors_extra_allowed_origins
-      ))))
     },
+    // Enable native CORS handling
+    var.cors_native_handling_enabled ? {
+      "nginx.ingress.kubernetes.io/enable-cors"            = var.cors_enabled ? "true" : "false",
+      "nginx.ingress.kubernetes.io/cors-allow-methods"     = local.cors_allowed_methods
+      "nginx.ingress.kubernetes.io/cors-expose-headers"    = local.cors_exposed_headers
+      "nginx.ingress.kubernetes.io/cors-allow-headers"     = local.cors_allowed_headers
+      "nginx.ingress.kubernetes.io/cors-max-age"           = tostring(var.cors_max_age_seconds)
+      "nginx.ingress.kubernetes.io/cors-allow-origin"      = join(", ", local.cors_allowed_origins)
+      "nginx.ingress.kubernetes.io/cors-allow-credentials" = tostring(var.cors_allow_credentials)
+    } : null,
     // very basic DOS protection via rate-limiting (https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#rate-limiting)
     var.rate_limiting_enabled == false ? null : {
       "nginx.ingress.kubernetes.io/limit-connections"      = "60"

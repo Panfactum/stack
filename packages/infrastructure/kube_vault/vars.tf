@@ -86,6 +86,18 @@ variable "panfactum_scheduler_enabled" {
   default     = false
 }
 
+variable "cors_enabled" {
+  description = "Whether to enable CORS handling in the Vault ingress"
+  type        = bool
+  default     = false
+}
+
+variable "cors_extra_allowed_origins" {
+  description = "Extra allowed origins for CORS handling"
+  type        = list(string)
+  default     = []
+}
+
 ################################################################################
 ## KMS Access
 ################################################################################
