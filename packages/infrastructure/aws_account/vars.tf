@@ -48,6 +48,10 @@ variable "contact_phone_number" {
   type        = string
   description = "The phone number of the primary contact who manages your organization's AWS account"
   sensitive   = true
+  validation {
+    condition     = can(regex("^\\+\\d{1,3} \\d{1,4}-\\d{1,4}-[\\d-]{4,20}$", var.contact_phone_number))
+    error_message = "The phone number must be in the format +[country dialing code] [area code]-[exchange-code]-[local-code], e.g., +1 555-555-5555"
+  }
 }
 
 variable "contact_postal_code" {
@@ -83,6 +87,10 @@ variable "security_phone_number" {
   type        = string
   description = "The phone number of the person who leads security for your organization"
   sensitive   = true
+  validation {
+    condition     = can(regex("^\\+\\d{1,3} \\d{1,4}-\\d{1,4}-[\\d-]{4,20}$", var.security_phone_number))
+    error_message = "The phone number must be in the format +[country dialing code] [area code]-[exchange-code]-[local-code], e.g., +1 555-555-5555"
+  }
 }
 
 variable "security_title" {
@@ -105,6 +113,11 @@ variable "operations_phone_number" {
   type        = string
   description = "The phone number of the person who leads operations for your organization"
   sensitive   = true
+
+  validation {
+    condition     = can(regex("^\\+\\d{1,3} \\d{1,4}-\\d{1,4}-[\\d-]{4,20}$", var.operations_phone_number))
+    error_message = "The phone number must be in the format +[country dialing code] [area code]-[exchange-code]-[local-code], e.g., +1 555-555-5555"
+  }
 }
 
 variable "operations_title" {
@@ -127,6 +140,11 @@ variable "billing_phone_number" {
   type        = string
   description = "The phone number of the person who receives invoices for your organization"
   sensitive   = true
+
+  validation {
+    condition     = can(regex("^\\+\\d{1,3} \\d{1,4}-\\d{1,4}-[\\d-]{4,20}$", var.billing_phone_number))
+    error_message = "The phone number must be in the format +[country dialing code] [area code]-[exchange-code]-[local-code], e.g., +1 555-555-5555"
+  }
 }
 
 variable "billing_title" {

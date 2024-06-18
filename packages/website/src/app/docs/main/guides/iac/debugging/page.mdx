@@ -3,25 +3,21 @@
 Unfortunately, there is no step-by-step guide that can resolve all issues with Terragrunt and OpenTofu (Terraform). However,
 most issues can be resolved through the following:
 
-* Ensure that you are authenticated:
+* Ensure that you have the correct providers enabled by running `pf-providers-enable` in the module directory.
+
+* Ensure that you are authenticated for the region / environment you are attempting to run the command in:
 
   * aws
-
-    * Run `aws sts get-caller-identity`.
-
-    * If this fails, run `aws sso login`.
+    * Should succeed: `aws --profile <profile> sts get-caller-identity`
+    * To fix: `aws --profile <profile> sso login`
 
   * kubernetes
-
-    * Run `kubectl get cluster-info`.
-
-    * If this fails, run (TODO).
+    * Should succeed: `kubectl --context <context> get cluster-info`
+    * To fix: `pf-update-kube`
 
   * vault
-
-    * Run `vault token lookup`.
-
-    * If this fails, run (TODO).
+    * Should succeed: `vault token lookup --address <vault-address>`
+    * To fix: `pf-get-vault-token <vault-address>`
 
 * Delete the `.terragrunt-cache` directory at the root of the repo to resolve issues caused by a stale cache.
 
@@ -30,3 +26,18 @@ most issues can be resolved through the following:
 * Review the [debugging documentation](https://terragrunt.gruntwork.io/docs/features/debugging/) provided by the Terragrunt team.
 
 * Review the [debugging documentation](https://opentofu.org/docs/internals/debugging/) provided by the OpenTofu team.
+
+## Common Errors
+
+### sops Not Authenticated
+
+`Call to function "sops_decrypt_file" failed: Error getting data key: 0 successful groups required, got 0.`
+
+This means the AWS profile needed to access the secrets file by sops is not currently available. This usually
+occurs when your SSO session has expired. Login to the correct profile: `aws --profile <profile> sso login`.
+
+### sops File Not Encrypted
+
+`Error in function call; Call to function "sops_decrypt_file" failed: sops metadata not found.`
+
+This means your secrets file was not encrypted by sops. Encrypt it via `sops -e -i <file>` to resolve.
