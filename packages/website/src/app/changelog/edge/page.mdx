@@ -13,6 +13,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Breaking Changes
 
+* [kube\_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) has upgraded the Karpenter
+  version to `v0.37`. During this release cycle, the Karpenter team moved the CRDs required by Karpenter to a dedicated Helm chart
+  to improve the upgrade ergonomics. Unfortunately, this introduces a few one-time manual steps that you must perform
+  to enable the migration. Specifically, the following commands must be run against your cluster **before** applying the
+  latest version of `kube_karpenter`:
+
+  ```bash
+  kubectl label crd ec2nodeclasses.karpenter.k8s.aws nodepools.karpenter.sh nodeclaims.karpenter.sh app.kubernetes.io/managed-by=Helm --overwrite
+  kubectl annotate crd ec2nodeclasses.karpenter.k8s.aws nodepools.karpenter.sh nodeclaims.karpenter.sh meta.helm.sh/release-name=karpenter-crd --overwrite
+  kubectl annotate crd ec2nodeclasses.karpenter.k8s.aws nodepools.karpenter.sh nodeclaims.karpenter.sh meta.helm.sh/release-namespace=karpenter --overwrite
+  ```
+
+* [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter_node_pools)
+  has a new input `node_labels` which defines what labels will be applied to generated
+  nodes. The standard Panfactum labeling system will no longer apply to Karpenter nodes due to [this upstream issue.](https://github.com/aws/karpenter-provider-aws/issues/6387)
+
 * The `persistence_enabled` option was removed from [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/kubernetes/kube_redis_sentinel).
   Redis is now always deployed with persistence enabled. This decision was made b/c the cross-AZ network costs of re-instantiating
   Redis nodes without PVC storage dwarf the costs of the PVC storage (by a factor of 100x). As a result, there is no benefit

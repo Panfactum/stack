@@ -566,6 +566,20 @@ module "aws_permissions" {
   # end-generate
 }
 
+resource "helm_release" "karpenter_crds" {
+  namespace       = local.namespace
+  name            = "karpenter-crd"
+  repository      = "oci://public.ecr.aws/karpenter"
+  chart           = "karpenter-crd"
+  version         = var.karpenter_helm_version
+  recreate_pods   = false
+  cleanup_on_fail = true
+  wait            = true
+  wait_for_jobs   = true
+  force_update    = true # required b/c the CRDs might already be installed
+  max_history     = 5
+}
+
 resource "helm_release" "karpenter" {
   namespace       = local.namespace
   name            = "karpenter"
@@ -576,6 +590,7 @@ resource "helm_release" "karpenter" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  skip_crds       = true # managed above
   max_history     = 5
 
   values = [
@@ -653,6 +668,8 @@ resource "helm_release" "karpenter" {
       }
     })
   ]
+
+  depends_on = [helm_release.karpenter_crds]
 }
 
 resource "kubernetes_config_map" "dashboard" {

@@ -1,7 +1,7 @@
 variable "karpenter_helm_version" {
   description = "The version of the karpenter helm chart to deploy"
   type        = string
-  default     = "0.35.2"
+  default     = "0.37.0"
 }
 
 variable "cluster_name" {

@@ -299,7 +299,7 @@ resource "kubernetes_manifest" "burstable_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(module.util.labels, {
+          labels = merge(var.node_labels, {
             "panfactum.com/class" = "burstable"
           })
         }
@@ -351,7 +351,7 @@ resource "kubernetes_manifest" "burstable_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(module.util.labels, {
+          labels = merge(var.node_labels, {
             "panfactum.com/class" = "burstable"
           })
         }
@@ -406,7 +406,7 @@ resource "kubernetes_manifest" "spot_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(module.util.labels, {
+          labels = merge(var.node_labels, {
             "panfactum.com/class" = "spot"
           })
         }
@@ -457,7 +457,7 @@ resource "kubernetes_manifest" "spot_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(module.util.labels, {
+          labels = merge(var.node_labels, {
             "panfactum.com/class" = "spot"
           })
         }
@@ -511,7 +511,7 @@ resource "kubernetes_manifest" "on_demand_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(module.util.labels, {
+          labels = merge(var.node_labels, {
             "panfactum.com/class" = "worker"
           })
         }
@@ -564,7 +564,7 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(module.util.labels, {
+          labels = merge(var.node_labels, {
             "panfactum.com/class" = "worker"
           })
         }
