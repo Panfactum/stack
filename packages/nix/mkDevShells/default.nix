@@ -57,7 +57,6 @@
       in {
         env = with panfactumResolvedPkgs.lib; {
           CI = mkOverride 1001 "false"; # true iff running in a CI environment
-          VAULT_ADDR = mkOverride 1001 "@INVALID@"; # the vault address
           PF_AWS_DIR = mkOverride 1001 ".aws";
           PF_SSH_DIR = mkOverride 1001 ".ssh";
           PF_KUBE_DIR = mkOverride 1001 ".kube";

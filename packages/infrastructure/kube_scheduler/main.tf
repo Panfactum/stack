@@ -28,30 +28,15 @@ terraform {
 locals {
   name      = "scheduler"
   namespace = module.namespace.namespace
+
+  labels = merge(module.scheduler.labels, {
+    "panfactum.com/module" = "kube_scheduler"
+  })
 }
 
 module "pull_through" {
   count  = var.pull_through_cache_enabled ? 1 : 0
   source = "../aws_ecr_pull_through_cache_addresses"
-}
-
-module "util" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = local.name
-  burstable_nodes_enabled               = true
-  instance_type_anti_affinity_preferred = true
-  arm_nodes_enabled                     = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "constants" {
@@ -78,22 +63,15 @@ module "namespace" {
 * Scheduler
 ***************************************/
 
-resource "kubernetes_service_account" "scheduler" {
-  metadata {
-    name      = "scheduler"
-    namespace = local.namespace
-    labels    = module.util.labels
-  }
-}
 
 resource "kubernetes_cluster_role_binding" "scheduler" {
   metadata {
     name   = "panfactum-scheduler"
-    labels = module.util.labels
+    labels = local.labels
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.scheduler.metadata[0].name
+    name      = module.scheduler.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -106,11 +84,11 @@ resource "kubernetes_cluster_role_binding" "scheduler" {
 resource "kubernetes_cluster_role_binding" "volume_scheduler" {
   metadata {
     name   = "panfactum-volume-scheduler"
-    labels = module.util.labels
+    labels = local.labels
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.scheduler.metadata[0].name
+    name      = module.scheduler.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -123,12 +101,12 @@ resource "kubernetes_cluster_role_binding" "volume_scheduler" {
 resource "kubernetes_role_binding" "scheduler_extension" {
   metadata {
     name      = "panfactum-scheduler-extension"
-    labels    = module.util.labels
+    labels    = local.labels
     namespace = "kube-system"
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.scheduler.metadata[0].name
+    name      = module.scheduler.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -142,7 +120,7 @@ resource "kubernetes_config_map" "scheduler" {
   metadata {
     name      = "scheduler"
     namespace = local.namespace
-    labels    = module.util.labels
+    labels    = local.labels
   }
   data = {
     "config.yaml" = yamlencode({
@@ -185,13 +163,11 @@ resource "kubernetes_config_map" "scheduler" {
 }
 
 module "scheduler" {
-  source          = "../kube_deployment"
-  namespace       = local.namespace
-  name            = local.name
-  service_account = kubernetes_service_account.scheduler.metadata[0].name
+  source    = "../kube_deployment"
+  namespace = local.namespace
+  name      = local.name
 
-  min_replicas                          = 1
-  max_replicas                          = 1
+  replicas                              = 1
   burstable_nodes_enabled               = true
   arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
@@ -216,7 +192,9 @@ module "scheduler" {
   ]
 
   config_map_mounts = {
-    "${kubernetes_config_map.scheduler.metadata[0].name}" = "/etc/kubernetes/scheduler"
+    "${kubernetes_config_map.scheduler.metadata[0].name}" = {
+      mount_path = "/etc/kubernetes/scheduler"
+    }
   }
 
   vpa_enabled = var.vpa_enabled

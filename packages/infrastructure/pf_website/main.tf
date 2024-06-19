@@ -52,8 +52,7 @@ module "website_deployment" {
   namespace = module.namespace.namespace
   name      = local.name
 
-  min_replicas                         = 2
-  max_replicas                         = 2
+  replicas                             = 2
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = false
   instance_type_anti_affinity_required = false

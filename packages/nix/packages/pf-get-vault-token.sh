@@ -7,39 +7,116 @@ set -eo pipefail
 
 export VAULT_ADDR="${1:-$VAULT_ADDR}"
 
-function login() {
+####################################################################
+# Step 1: Variable parsing
+####################################################################
+ADDRESS=""
+SILENT=0
+NOOP=0
 
-  if [[ $CI == "true" ]]; then
-    # This is specific to the kube_gha_arc_runners module
-    TOKEN=$(vault write \
-      --format=json \
-      auth/kubernetes/login \
-      role=arc-runners \
-      jwt=@/var/run/secrets/kubernetes.io/serviceaccount/token |
-      jq -r .auth.client_token)
-  else
-    TOKEN=$(vault login -method=oidc -field=token)
+usage() {
+  echo "Usage: pf-get-vault-token [-a <vault-address>] [-s] [-n]" >&2
+  echo "       pf-get-vault-token [--address <vault-address>] [--silent] [--noop]" >&2
+  echo "" >&2
+  echo "<vault-address>: The URL of the Vault cluster. Defaults to VAULT_ADDR if not set." >&2
+  echo "" >&2
+  echo "--silent: Exit with 0 if failing to get the vault token." >&2
+  echo "" >&2
+  echo "--noop: Exit with 0 immediately (used by terragrunt to skip execution if provider is not enabled)" >&2
+  exit 1
+}
+
+# Parse command line arguments
+TEMP=$(getopt -o a:sn --long address:,silent,noop -- "$@")
+
+# shellcheck disable=SC2181
+if [[ $? != 0 ]]; then
+  echo "Failed parsing options." >&2
+  exit 1
+fi
+
+# Note the quotes around `$TEMP`: they are essential!
+eval set -- "$TEMP"
+
+# Extract options and their arguments into variables
+while true; do
+  case "$1" in
+  -a | --address)
+    ADDRESS="$2"
+    shift 2
+    ;;
+  -s | --silent)
+    SILENT=1
+    shift 1
+    ;;
+  -n | --noop)
+    NOOP=1
+    shift 1
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *)
+    usage
+    ;;
+  esac
+done
+
+if [[ $NOOP == 1 ]]; then
+  exit 0
+fi
+
+# Force a clean exit if --silent is enabled
+if [[ $SILENT == 1 ]]; then
+  handle_exit() {
+    # shellcheck disable=SC2181
+    if [[ $? != 0 ]]; then
+
+      # Don't pollute terragrunt logs if vault isn't initialized yet
+      if [[ $VAULT_ADDR != "@@TERRAGRUNT_INVALID@@" ]]; then
+        echo "Warning: pf-get-vault-token failed, but exiting with 0 as --silent is enabled." >&2
+      fi
+
+      echo "invalid_token"
+    fi
+    exit 0
+  }
+  trap 'handle_exit' EXIT
+fi
+
+if [[ -z $ADDRESS ]]; then
+  if [[ -z $VAULT_ADDR ]]; then
+    echo "VAULT_ADDR is not set. Either set the env variable or use the --address flag." >&2
+    exit 1
   fi
+else
+  VAULT_ADDR="$ADDRESS"
+fi
 
+# Provide a special error message for use in terragrunt to aid
+# users in debugging
+if [[ $VAULT_ADDR == "@@TERRAGRUNT_INVALID@@" ]]; then
+  if [[ $SILENT == 0 ]]; then
+    echo "Error: Vault provider is enabled by vault_addr is not set." >&2
+  fi
+  exit 1
+fi
+
+export VAULT_ADDR
+
+####################################################################
+# Step 2: Get the Vault token
+####################################################################
+
+function login() {
+  TOKEN=$(vault login -method=oidc -field=token)
   print_token "$TOKEN"
 }
 
 function print_token() {
-  # In the CI system, we never want to print the token to stdout directly.
-  # Instead, we want to mask it and save it to an environment variable.
-  if [[ $CI == "true" ]]; then
-    echo "::add-mask::$1"
-    echo "VAULT_TOKEN=$1" >>"$GITHUB_ENV"
-  else
-    echo "$1"
-  fi
+  echo "$1"
 }
-
-# Allow disabling this for use in our terragrunt config
-# when we don't have vault enabled
-if [[ $VAULT_ADDR == "@INVALID@" ]]; then
-  exit 0
-fi
 
 # Allow overriding via the VAULT_TOKEN env var
 if [[ -n $VAULT_TOKEN ]]; then

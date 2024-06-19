@@ -14,7 +14,7 @@ AWS_PROFILE=""
 
 usage() {
   echo "Usage: pf-get-kube-token -r <region> -c <cluster-name> -p <aws-profile>" >&2
-  echo "       pf-get-db-creds --region <region> --cluster-name <cluster-name> --profile <aws-profile>" >&2
+  echo "       pf-get-kube-token --region <region> --cluster-name <cluster-name> --profile <aws-profile>" >&2
   echo "" >&2
   echo "<region>: The AWS region of the EKS cluster" >&2
   echo "" >&2
