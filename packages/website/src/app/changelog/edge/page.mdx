@@ -74,13 +74,15 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Fixed
 
-* Addressed an issue in [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
+* Addresses an issue in [kube\_authentik](/docs/edge/reference/infrastructure-modules/kubernetes/kube_authentik)
   that prevented the SSO login pop-up from working.
 
-* Implemented custom CORS handling logic in [kube\_ingress](/docs/edge/reference/infrastructure-modules/kubernetes/kube_ingress)
+* Implements custom CORS handling logic in [kube\_ingress](/docs/edge/reference/infrastructure-modules/kubernetes/kube_ingress)
   that resolves [issues in the default behavior provided by the NGINX ingress controller.](https://github.com/kubernetes/ingress-nginx/issues/8469)
 
-* Remove invalid failure cases when using `pf-get-vault-token` in Terragrunt and improve failure messaging.
+* Removes invalid failure cases when using `pf-get-vault-token` in Terragrunt and improve failure messaging.
+
+* Fixes an issue that occurs when the `kubernetes` provider is enabled but the sourced module does not use the `kubectl` provider.
 
 ## edge.24-06-14
 

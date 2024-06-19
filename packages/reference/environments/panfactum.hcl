@@ -182,6 +182,12 @@ generate "kubectl_provider" {
   }) : ""
 }
 
+generate "kubectl_override_provider" {
+  path      = "kubectl_override.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = local.enable_kubernetes ? file("${local.provider_folder}/kubectl_override.tf") : ""
+}
+
 generate "helm_provider" {
   path      = "helm.tf"
   if_exists = "overwrite_terragrunt"
@@ -197,6 +203,12 @@ generate "authentik_provider" {
   contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik.tftpl", {
     authentik_url = local.enable_authentik ? local.vars.authentik_url : ""
   }) : ""
+}
+
+generate "authentik_override_provider" {
+  path      = "authentik_override.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = local.enable_authentik ? file("${local.provider_folder}/authentik_override.tf") : ""
 }
 
 generate "time_provider" {
