@@ -28,8 +28,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -101,7 +101,7 @@ resource "helm_release" "reloader" {
         enableHA               = false
         deployment = {
           image = {
-            name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/stakater/reloader"
+            name = "${module.pull_through.github_registry}/stakater/reloader"
           }
           labels = merge(
             { for k, v in module.util_controller.labels : k => v if k != "id" }, # id gets duplicated by matchLabels and breaks kustomize

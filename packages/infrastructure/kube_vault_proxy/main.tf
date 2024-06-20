@@ -32,8 +32,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 resource "random_id" "oauth2_proxy" {
@@ -168,7 +168,7 @@ resource "helm_release" "oauth2_proxy" {
       ))
 
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/oauth2-proxy/oauth2-proxy"
+        repository = "${module.pull_through.quay_registry}/oauth2-proxy/oauth2-proxy"
       }
       labels = module.util.labels
       podLabels = merge(

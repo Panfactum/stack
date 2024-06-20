@@ -41,8 +41,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "constants" {
@@ -185,7 +185,7 @@ module "bastion" {
   containers = [
     {
       name    = "bastion"
-      image   = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/bastion"
+      image   = "${module.pull_through.github_registry}/panfactum/bastion"
       version = var.bastion_image_version
       command = [
         "/usr/sbin/sshd",
@@ -209,7 +209,7 @@ module "bastion" {
     {
       name    = "permission-init"
       init    = true
-      image   = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/bastion"
+      image   = "${module.pull_through.github_registry}/panfactum/bastion"
       version = var.bastion_image_version
       command = [
         "/usr/bin/bash",

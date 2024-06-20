@@ -1,20 +1,20 @@
 output "ecr_public_registry" {
-  value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ecr-public"
+  value = var.pull_through_cache_enabled ? "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/ecr-public" : "public.ecr.aws"
 }
 
 output "kubernetes_registry" {
-  value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/kubernetes"
+  value = var.pull_through_cache_enabled ? "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/kubernetes" : "registry.k8s.io"
 }
 
 output "quay_registry" {
-  value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/quay"
+  value = var.pull_through_cache_enabled ? "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/quay" : "quay.io"
 }
 
 output "docker_hub_registry" {
-  value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/docker-hub"
+  value = var.pull_through_cache_enabled ? "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/docker-hub" : "docker.io"
 }
 
 output "github_registry" {
-  value = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/github"
+  value = var.pull_through_cache_enabled ? "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/github" : "ghcr.io"
 }
 

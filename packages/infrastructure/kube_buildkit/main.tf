@@ -31,8 +31,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 /***************************************
@@ -137,7 +137,7 @@ module "buildkit" {
   containers = [
     {
       name    = local.name
-      image   = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/moby/buildkit"
+      image   = "${module.pull_through.docker_hub_registry}/moby/buildkit"
       version = "v0.12.2"
       command = [
         "buildkitd",
@@ -310,7 +310,7 @@ module "scale_to_zero" {
   cron_schedule = "*/15 * * * *"
   containers = [{
     name    = "scale-to-zero"
-    image   = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/panfactum"
+    image   = "${module.pull_through.github_registry}/panfactum/panfactum"
     version = "alpha.3"
     command = [
       "/bin/scale-buildkit",

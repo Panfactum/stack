@@ -40,8 +40,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -159,7 +159,7 @@ resource "helm_release" "ebs_csi_driver" {
     yamlencode({
 
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/aws-ebs-csi-driver"
+        repository = "${module.pull_through.ecr_public_registry}/ebs-csi-driver/aws-ebs-csi-driver"
       }
       labels = module.util_controller.labels
 
@@ -198,44 +198,44 @@ resource "helm_release" "ebs_csi_driver" {
       sidecars = {
         provisioner = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-provisioner"
+            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-provisioner"
           }
           resources = local.default_resources
         }
         attacher = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-attacher"
+            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-attacher"
           }
           resources = local.default_resources
         }
         resizer = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-resizer"
+            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-resizer"
           }
           resources = local.default_resources
         }
         livenessProbe = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/livenessprobe"
+            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/livenessprobe"
           }
           resources = local.default_resources
         }
         nodeDriverRegistrar = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/node-driver-registrar"
+            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/node-driver-registrar"
           }
           resources = local.default_resources
         }
         volumemodifier = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/ebs-csi-driver/volume-modifier-for-k8s"
+            repository = "${module.pull_through.ecr_public_registry}/ebs-csi-driver/volume-modifier-for-k8s"
           }
           resources = local.default_resources
         }
         snapshotter = {
           forceEnable = true
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks-distro/kubernetes-csi/external-snapshotter/csi-snapshotter"
+            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-snapshotter/csi-snapshotter"
           }
           resources = local.default_resources
         }

@@ -67,8 +67,8 @@ resource "random_id" "controller_id" {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -215,7 +215,7 @@ resource "helm_release" "nginx_ingress" {
 
       controller = {
         image = {
-          registry = var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"
+          registry = module.pull_through.kubernetes_registry
         }
 
         replicaCount = var.min_replicas < 6 && var.enhanced_ha_enabled ? 6 : var.min_replicas < 3 ? 3 : var.min_replicas

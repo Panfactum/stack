@@ -32,8 +32,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -234,7 +234,7 @@ resource "helm_release" "cert_manager" {
         priorityClassName = module.constants.cluster_important_priority_class_name
       }
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-controller"
+        repository = "${module.pull_through.quay_registry}/jetstack/cert-manager-controller"
       }
       replicaCount = 1
       strategy = {
@@ -276,7 +276,7 @@ resource "helm_release" "cert_manager" {
       }
       webhook = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-webhook"
+          repository = "${module.pull_through.quay_registry}/jetstack/cert-manager-webhook"
         }
         replicaCount = 2
         extraArgs    = ["--v=${var.log_verbosity}"]
@@ -338,7 +338,7 @@ resource "helm_release" "cert_manager" {
       }
       cainjector = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/cert-manager-cainjector"
+          repository = "${module.pull_through.quay_registry}/jetstack/cert-manager-cainjector"
         }
         enabled      = true
         replicaCount = 1

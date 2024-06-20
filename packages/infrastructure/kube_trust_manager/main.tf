@@ -20,8 +20,8 @@ terraform {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -72,7 +72,7 @@ resource "helm_release" "trust_manager" {
       commonLabels = module.util.labels
 
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/jetstack/trust-manager"
+        repository = "${module.pull_through.quay_registry}/jetstack/trust-manager"
       }
 
       app = {

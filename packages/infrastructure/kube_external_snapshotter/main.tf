@@ -28,8 +28,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -135,7 +135,7 @@ resource "helm_release" "external_snapshotter" {
         enabled          = true
         fullnameOverride = "external-snapshotter"
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/sig-storage/snapshot-controller"
+          repository = "${module.pull_through.kubernetes_registry}/sig-storage/snapshot-controller"
         }
         args = {
           v               = var.log_verbosity
@@ -164,7 +164,7 @@ resource "helm_release" "external_snapshotter" {
         enabled          = true
         fullnameOverride = "external-snapshotter-webhook"
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/sig-storage/snapshot-validation-webhook"
+          repository = "${module.pull_through.kubernetes_registry}/sig-storage/snapshot-validation-webhook"
         }
         args = {
           v = var.log_verbosity

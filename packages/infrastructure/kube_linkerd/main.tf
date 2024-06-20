@@ -35,8 +35,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_destination" {
@@ -334,7 +334,7 @@ resource "helm_release" "linkerd" {
     yamlencode({
       controllerLogLevel        = var.log_level
       controllerLogFormat       = "json"
-      controllerImage           = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/controller"
+      controllerImage           = "${module.pull_through.github_registry}/linkerd/controller"
       controllerReplicas        = 2
       enablePodAntiAffinity     = true  # This should always be enabled as we really need to avoid having the service mesh go down
       enablePodDisruptionBudget = false # We do this below
@@ -358,7 +358,7 @@ resource "helm_release" "linkerd" {
 
       proxy = {
         image = {
-          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy"
+          name = "${module.pull_through.github_registry}/linkerd/proxy"
         }
         nativeSidecar = true
         logFormat     = "json"
@@ -378,7 +378,7 @@ resource "helm_release" "linkerd" {
 
       policyController = {
         image = {
-          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/policy-controller"
+          name = "${module.pull_through.github_registry}/linkerd/policy-controller"
         }
         logLevel = var.log_level
         resources = {
@@ -459,13 +459,13 @@ resource "helm_release" "linkerd" {
 
       debugContainer = {
         image = {
-          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/debug"
+          name = "${module.pull_through.github_registry}/linkerd/debug"
         }
       }
 
       proxyInit = {
         image = {
-          name = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd/proxy-init"
+          name = "${module.pull_through.github_registry}/linkerd/proxy-init"
         }
         logFormat = "json"
         logLevel  = var.log_level
@@ -603,7 +603,7 @@ resource "helm_release" "viz" {
 
   values = [
     yamlencode({
-      defaultRegistry       = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/linkerd"
+      defaultRegistry       = "${module.pull_through.github_registry}/linkerd"
       defaultLogFormat      = "json"
       defaultLogLevel       = var.log_level
       tolerations           = module.util_viz.tolerations

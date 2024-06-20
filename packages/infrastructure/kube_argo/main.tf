@@ -39,8 +39,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -453,7 +453,7 @@ resource "helm_release" "argo" {
           "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${kubernetes_secret.postgres_creds.metadata[0].name}"
         }
         image = {
-          registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
+          registry = module.pull_through.quay_registry
         }
 
         logging = {
@@ -488,7 +488,7 @@ resource "helm_release" "argo" {
 
       executor = {
         image = {
-          registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
+          registry = module.pull_through.quay_registry
         }
         resources = {
           requests = {
@@ -530,7 +530,7 @@ resource "helm_release" "argo" {
           "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${kubernetes_secret.postgres_creds.metadata[0].name}"
         }
         image = {
-          registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
+          registry = module.pull_through.quay_registry
         }
         logging = {
           format = "json"
@@ -729,7 +729,7 @@ resource "helm_release" "argo_events" {
 
       global = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/argoproj/argo-events"
+          repository = "${module.pull_through.quay_registry}/argoproj/argo-events"
         }
       }
 
@@ -737,9 +737,9 @@ resource "helm_release" "argo_events" {
         jetstream = {
           versions = [{
             version              = "default"
-            natsImage            = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/library/nats:${var.event_bus_nats_version}"
-            metricsExporterImage = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/natsio/prometheus-nats-exporter:${var.event_bus_prometheus_nats_exporter_version}"
-            configReloaderImage  = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/natsio/nats-server-config-reloader:${var.event_bus_nats_server_config_reloader_version}"
+            natsImage            = "${module.pull_through.docker_hub_registry}/library/nats:${var.event_bus_nats_version}"
+            metricsExporterImage = "${module.pull_through.docker_hub_registry}/natsio/prometheus-nats-exporter:${var.event_bus_prometheus_nats_exporter_version}"
+            configReloaderImage  = "${module.pull_through.docker_hub_registry}/natsio/nats-server-config-reloader:${var.event_bus_nats_server_config_reloader_version}"
             startCommand         = "/nats-server"
           }]
         }

@@ -55,8 +55,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_read" {
@@ -337,7 +337,7 @@ resource "helm_release" "loki" {
       fullnameOverride = "loki"
       global = {
         image = {
-          registry = var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"
+          registry = module.pull_through.docker_hub_registry
         }
       }
       deploymentMode = "SimpleScalable"

@@ -35,8 +35,8 @@ locals {
 data "aws_region" "current" {}
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "constants" {
@@ -250,7 +250,7 @@ resource "helm_release" "authentik" {
 
       global = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/goauthentik/server"
+          repository = "${module.pull_through.github_registry}/goauthentik/server"
         }
         podAnnotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"

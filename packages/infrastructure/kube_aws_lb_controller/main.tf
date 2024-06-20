@@ -31,8 +31,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -369,7 +369,7 @@ resource "helm_release" "alb_controller" {
 
       ingressClass = "alb"
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/eks/aws-load-balancer-controller"
+        repository = "${module.pull_through.ecr_public_registry}/eks/aws-load-balancer-controller"
       }
       serviceAccount = {
         create = false

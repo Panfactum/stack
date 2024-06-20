@@ -31,8 +31,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -121,7 +121,7 @@ resource "helm_release" "cnpg" {
       }
 
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/cloudnative-pg/cloudnative-pg"
+        repository = "${module.pull_through.github_registry}/cloudnative-pg/cloudnative-pg"
       }
 
       additionalArgs = [

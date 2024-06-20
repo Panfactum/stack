@@ -30,8 +30,8 @@ locals {
 data "aws_region" "current" {}
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -232,13 +232,13 @@ resource "helm_release" "velero" {
       )
 
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/velero/velero"
+        repository = "${module.pull_through.docker_hub_registry}/velero/velero"
       }
 
       initContainers = [
         {
           name            = "velero-plugin-for-aws"
-          image           = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/velero/velero-plugin-for-aws:${var.aws_plugin_version}"
+          image           = "${module.pull_through.docker_hub_registry}/velero/velero-plugin-for-aws:${var.aws_plugin_version}"
           imagePullPolicy = "IfNotPresent"
           volumeMounts = [
             {
@@ -249,7 +249,7 @@ resource "helm_release" "velero" {
         },
         {
           name            = "velero-plugin-for-csi"
-          image           = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/velero/velero-plugin-for-csi:${var.csi_plugin_version}"
+          image           = "${module.pull_through.docker_hub_registry}/velero/velero-plugin-for-csi:${var.csi_plugin_version}"
           imagePullPolicy = "IfNotPresent"
           volumeMounts = [
             {
@@ -262,7 +262,7 @@ resource "helm_release" "velero" {
 
       kubectl = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/bitnami/kubectl"
+          repository = "${module.pull_through.docker_hub_registry}/bitnami/kubectl"
         }
         annotations = {
           "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"

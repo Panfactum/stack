@@ -35,8 +35,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "constants" {
@@ -144,7 +144,7 @@ module "core_dns" {
     [
       {
         name    = "coredns"
-        image   = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/coredns/coredns"
+        image   = "${module.pull_through.docker_hub_registry}/coredns/coredns"
         version = var.core_dns_image_version
         command = [
           "/coredns",
@@ -164,7 +164,7 @@ module "core_dns" {
     var.monitoring_enabled ? [
       {
         name    = "proxy"
-        image   = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/brancz/kube-rbac-proxy"
+        image   = "${module.pull_through.quay_registry}/brancz/kube-rbac-proxy"
         version = "v0.17.1"
         # Note we don't need a config because
         # prometheus is authorized to `get` the `/metrics` non-resource url

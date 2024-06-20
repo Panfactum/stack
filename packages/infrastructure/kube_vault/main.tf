@@ -30,8 +30,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_server" {
@@ -210,7 +210,7 @@ resource "helm_release" "vault" {
       csi = {
         enabled = true
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault-csi-provider"
+          repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault-csi-provider"
         }
         resources = {
           requests = {
@@ -222,7 +222,7 @@ resource "helm_release" "vault" {
         }
         agent = {
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
+            repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault"
             tag        = var.vault_image_tag
           }
           resources = {
@@ -262,7 +262,7 @@ resource "helm_release" "vault" {
 
       server = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"}/hashicorp/vault"
+          repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault"
           tag        = var.vault_image_tag
         }
         resources = {

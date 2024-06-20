@@ -28,8 +28,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -93,7 +93,7 @@ resource "helm_release" "pvc_autoresizer" {
   values = [
     yamlencode({
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/topolvm/pvc-autoresizer"
+        repository = "${module.pull_through.github_registry}/topolvm/pvc-autoresizer"
       }
       controller = {
         args = {

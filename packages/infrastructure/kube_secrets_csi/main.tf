@@ -29,8 +29,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 module "util" {
   source                  = "../kube_workload_utility"
@@ -99,11 +99,11 @@ resource "helm_release" "secrets_csi_driver" {
         crds = {
           enabled = true
           image = {
-            repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/csi-secrets-store/driver-crds"
+            repository = "${module.pull_through.kubernetes_registry}/csi-secrets-store/driver-crds"
           }
         }
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/csi-secrets-store/driver"
+          repository = "${module.pull_through.kubernetes_registry}/csi-secrets-store/driver"
         }
         driver = {
           resources = {
@@ -117,7 +117,7 @@ resource "helm_release" "secrets_csi_driver" {
         }
 
         registrarImage = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/sig-storage/csi-node-driver-registrar"
+          repository = "${module.pull_through.kubernetes_registry}/sig-storage/csi-node-driver-registrar"
         }
         registrar = {
           resources = {
@@ -131,7 +131,7 @@ resource "helm_release" "secrets_csi_driver" {
         }
 
         livenessProbeImage = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/sig-storage/livenessprobe"
+          repository = "${module.pull_through.kubernetes_registry}/sig-storage/livenessprobe"
         }
         livenessProbe = {
           resources = {

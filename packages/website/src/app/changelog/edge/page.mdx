@@ -45,6 +45,10 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   this should be considered a safe operation. However, it will introduce a minor
   service disruption during the replacement period.
 
+* [aws_ecr_pull_through_cache_addresses](/docs/edge/reference/infrastructure-modules/aws/aws_ecr_pull_through_cache_addresses)
+  has been refactored to improve the ergonomics of using the module. It now requires an input, `pull_through_cache_enabled`,
+  and will output the correct registry names regardless of whether using a pull through cache or not.
+
 ### Added
 
 * [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment),

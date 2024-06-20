@@ -29,8 +29,8 @@ locals {
 data "aws_region" "region" {}
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -178,7 +178,7 @@ resource "helm_release" "cilium" {
   values = [
     yamlencode({
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/cilium/cilium"
+        repository = "${module.pull_through.quay_registry}/cilium/cilium"
       }
 
       eni = {
@@ -337,7 +337,7 @@ resource "helm_release" "cilium" {
 
       operator = {
         image = {
-          repository = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/cilium/operator"
+          repository = "${module.pull_through.quay_registry}/cilium/operator"
         }
         replicas = 2
         updateStrategy = {

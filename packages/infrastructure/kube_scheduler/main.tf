@@ -35,8 +35,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "constants" {
@@ -179,7 +179,7 @@ module "scheduler" {
   containers = [
     {
       name    = "scheduler"
-      image   = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/kube-scheduler"
+      image   = "${module.pull_through.kubernetes_registry}/kube-scheduler"
       version = var.scheduler_version
       command = [
         "/usr/local/bin/kube-scheduler",

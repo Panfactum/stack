@@ -31,8 +31,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -215,7 +215,7 @@ resource "helm_release" "open_cost" {
             EMIT_KSM_V1_METRICS_ONLY = true
           }
           image = {
-            registry = var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"
+            registry = module.pull_through.github_registry
           }
           resources = {
             requests = {
@@ -476,7 +476,7 @@ resource "kubectl_manifest" "network_cost" {
           affinity           = module.util_network_cost.affinity
           containers = [{
             name  = "network-cost"
-            image = "${var.pull_through_cache_enabled ? module.pull_through[0].ecr_public_registry : "public.ecr.aws"}/kubecost/kubecost-network-costs:v0.17.3"
+            image = "${module.pull_through.ecr_public_registry}/kubecost/kubecost-network-costs:v0.17.3"
             securityContext = {
               privileged = true
             }

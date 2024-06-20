@@ -25,8 +25,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -115,7 +115,7 @@ resource "helm_release" "metrics_server" {
 
 
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/metrics-server/metrics-server"
+        repository = "${module.pull_through.kubernetes_registry}/metrics-server/metrics-server"
       }
       args = [
         "--v=${var.log_verbosity}",

@@ -45,8 +45,8 @@ resource "random_id" "ids" {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -178,7 +178,7 @@ resource "helm_release" "external_dns" {
       logLevel  = var.log_level
       logFormat = "json"
       image = {
-        repository = "${var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"}/external-dns/external-dns"
+        repository = "${module.pull_through.kubernetes_registry}/external-dns/external-dns"
       }
 
       tolerations       = module.util[each.key].tolerations

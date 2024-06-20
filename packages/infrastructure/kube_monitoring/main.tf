@@ -91,15 +91,15 @@ locals {
   }
 
   default_image = {
-    registry = var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"
+    registry = module.pull_through.quay_registry
   }
 
   default_docker_image = {
-    registry = var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"
+    registry = module.pull_through.docker_hub_registry
   }
 
   default_k8s_image = {
-    registry = var.pull_through_cache_enabled ? module.pull_through[0].kubernetes_registry : "registry.k8s.io"
+    registry = module.pull_through.kubernetes_registry
   }
 
   thanos_store_gateway_index_config = {
@@ -149,8 +149,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_webhook" {
@@ -1149,7 +1149,7 @@ resource "helm_release" "prometheus_stack" {
           ]
 
           thanos = {
-            image     = "${var.pull_through_cache_enabled ? module.pull_through[0].quay_registry : "quay.io"}/thanos/thanos:${var.thanos_image_version}"
+            image     = "${module.pull_through.quay_registry}/thanos/thanos:${var.thanos_image_version}"
             logLevel  = var.prometheus_log_level
             logFormat = "json"
             resources = local.default_resources
@@ -1603,7 +1603,7 @@ resource "helm_release" "thanos" {
     yamlencode({
       fullnameOverride = "thanos"
       global = {
-        imageRegistry = var.pull_through_cache_enabled ? module.pull_through[0].docker_hub_registry : "docker.io"
+        imageRegistry = module.pull_through.docker_hub_registry
       }
       query = {
         enabled = true

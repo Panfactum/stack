@@ -41,8 +41,8 @@ locals {
 }
 
 module "pull_through" {
-  count  = var.pull_through_cache_enabled ? 1 : 0
-  source = "../aws_ecr_pull_through_cache_addresses"
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 resource "random_id" "cluster_id" {
@@ -306,7 +306,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       }
     }
     spec = merge({
-      imageName             = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/cloudnative-pg/postgresql:${var.pg_version}"
+      imageName             = "${module.pull_through.github_registry}/cloudnative-pg/postgresql:${var.pg_version}"
       instances             = var.pg_instances
       primaryUpdateStrategy = "unsupervised"
       primaryUpdateMethod   = "switchover"
@@ -780,7 +780,7 @@ resource "kubectl_manifest" "connection_pooler" {
           containers = [
             {
               name  = "pgbouncer"
-              image = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/cloudnative-pg/pgbouncer:${var.pgbouncer_version}"
+              image = "${module.pull_through.github_registry}/cloudnative-pg/pgbouncer:${var.pgbouncer_version}"
 
               // Running this as a prestop hook ensures that the open connections can be drained
               // prior to disconnecting the network interface from the pods. This reduces connection errors
