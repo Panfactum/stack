@@ -150,10 +150,6 @@ const SIDENAV_SECTIONS = [
         path: '/deploying-modules'
       },
       {
-        text: 'Using Panfactum Modules',
-        path: '/panfactum-modules'
-      },
-      {
         text: 'Developing First-Party Modules',
         path: '/first-party-modules'
       },

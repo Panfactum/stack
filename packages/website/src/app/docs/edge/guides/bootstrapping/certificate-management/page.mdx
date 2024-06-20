@@ -29,7 +29,7 @@ It handles the entire certificate lifecycle: provisioning, deployment, and renew
 with both public certificate authorities (e.g., [Let's Encrypt](https://letsencrypt.org/)) and private CAs
 (e.g., Vault).
 
-We provide a module for deploying cert-manager: [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cert_manager).
+We provide a module for deploying cert-manager: [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager).
 
 Let's deploy it now:
 
@@ -40,7 +40,7 @@ Let's deploy it now:
 3. Set `self_generated_certs_enabled` to `true`. We will disable insecure self-signed certificates
    after we set up certificate issuers in the next section.
 
-4. Add a `module.yaml` that enables the `aws`, `kubernetes`, `helm`, and `random` providers.
+4. Run `pf-providers-enable` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -75,7 +75,7 @@ Creating certificates using cert-manager is a two-step process:
 
 You can read more about this process in the [cert-manager documentation here](https://cert-manager.io/docs/configuration/).
 
-We provide a module to set up the issuers required by the Panfactum stack: [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cert_issuers).
+We provide a module to set up the issuers required by the Panfactum stack: [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers).
 
 This module creates three different types of issuers:
 
@@ -104,8 +104,8 @@ Let's deploy it now:
       DNS challenge flow](https://letsencrypt.org/docs/challenge-types/). That means cert-manager
       needs access to our AWS Route53 zones that host our DNS records for the cluster's environment.
 
-   2. In the prior [DNS guide](/docs/edge/guides/bootstrapping/dns), we configured DNS in the [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/aws/aws_registered_domains)
-      and [aws\_delegated\_zones](/docs/edge/reference/infrastructure-modules/aws/aws_delegated_zones) modules
+   2. In the prior [DNS guide](/docs/edge/guides/bootstrapping/dns), we configured DNS in the [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains)
+      and [aws\_delegated\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_delegated_zones) modules
       under `production/global`. If you are setting up an environment **other than** production,
       we cannot reference them in terragrunt `dependency` blocks.
       Instead, we must copy the necessary values manually from the module outputs. [^2]
@@ -119,7 +119,7 @@ Let's deploy it now:
       zone created by the module. The `zone_id` is the unique internal AWS identifier for
       the Route53 zone hosting records for the domain.
 
-5. Add a `module.yaml` that enables the `aws`, `vault`, and `kubernetes` providers.
+5. Run `pf-providers-enable` to enable the required providers.
 
 6. Run `terragrunt apply`.
 
@@ -211,7 +211,7 @@ will instruct the Reflector to synchronize them across namespaces. [^7]
 [^7]: The cert-manager maintainers offer a similar solution called [trust-manager](https://cert-manager.io/docs/trust/trust-manager/),
     but trust-manager only works for certificate bundles and the Reflector works for any Secret or ConfigMap.
 
-We provide a module to deploy this controller: [kube\_reflector](/docs/edge/reference/infrastructure-modules/kubernetes/kube_reflector).
+We provide a module to deploy this controller: [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector).
 
 Let's deploy the Reflector now:
 
@@ -219,7 +219,7 @@ Let's deploy the Reflector now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_reflector/terragrunt.hcl).
 
-3. Add a `module.yaml` that enables the `aws`, `random`, `helm`, and `kubernetes` providers.
+3. Run `pf-providers-enable` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

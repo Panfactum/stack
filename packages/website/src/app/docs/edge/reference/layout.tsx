@@ -4,6 +4,15 @@ import ArticleWithSideNavLayout from '@/components/layout/web/article/withNav/Ar
 
 import modules from './infrastructure-modules/modules.json'
 
+function makeModuleDir (modules: Array<{type: string, group: string, module: string}>, group: string, type: string) {
+  return modules
+    .filter(module => module.group === group && module.type === type)
+    .map(({ module }) => ({
+      text: module,
+      path: `/${module}`
+    }))
+}
+
 const SIDENAV_SECTIONS = [
   {
     text: 'Releases',
@@ -40,6 +49,10 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
+    text: 'IaC Templating',
+    path: '/iac-templating'
+  },
+  {
     text: 'Infrastructure Modules',
     path: '/infrastructure-modules',
     sub: [
@@ -48,54 +61,46 @@ const SIDENAV_SECTIONS = [
         path: '/overview'
       },
       {
-        text: 'AWS',
-        path: '/aws',
-        sub: modules.modules
-          .filter(module => module.group === 'aws')
-          .map(({ module }) => ({
-            text: module,
-            path: `/${module}`
-          }))
+        text: 'Direct Modules',
+        path: '/direct',
+        sub: [
+          {
+            text: 'AWS',
+            path: '/aws',
+            sub: makeModuleDir(modules.modules, 'aws', 'direct')
+          },
+          {
+            text: 'Authentik',
+            path: '/authentik',
+            sub: makeModuleDir(modules.modules, 'authentik', 'direct')
+          },
+          {
+            text: 'Kubernetes',
+            path: '/kubernetes',
+            sub: makeModuleDir(modules.modules, 'kubernetes', 'direct')
+          },
+          {
+            text: 'Vault',
+            path: '/vault',
+            sub: makeModuleDir(modules.modules, 'vault', 'direct')
+          }
+        ]
       },
       {
-        text: 'Authentik',
-        path: '/authentik',
-        sub: modules.modules
-          .filter(module => module.group === 'authentik')
-          .map(({ module }) => ({
-            text: module,
-            path: `/${module}`
-          }))
-      },
-      {
-        text: 'Kubernetes',
-        path: '/kubernetes',
-        sub: modules.modules
-          .filter(module => module.group === 'kubernetes')
-          .map(({ module }) => ({
-            text: module,
-            path: `/${module}`
-          }))
-      },
-      {
-        text: 'Vault',
-        path: '/vault',
-        sub: modules.modules
-          .filter(module => module.group === 'vault')
-          .map(({ module }) => ({
-            text: module,
-            path: `/${module}`
-          }))
-      },
-      {
-        text: 'Utility',
-        path: '/utility',
-        sub: modules.modules
-          .filter(module => module.group === 'utility')
-          .map(({ module }) => ({
-            text: module,
-            path: `/${module}`
-          }))
+        text: 'Submodules',
+        path: '/submodule',
+        sub: [
+          {
+            text: 'AWS',
+            path: '/aws',
+            sub: makeModuleDir(modules.modules, 'aws', 'submodule')
+          },
+          {
+            text: 'Kubernetes',
+            path: '/kubernetes',
+            sub: makeModuleDir(modules.modules, 'kubernetes', 'submodule')
+          }
+        ]
       }
     ]
   },

@@ -26,7 +26,7 @@ If you are new to cloud networking, we recommend that your review the [concept d
 
 ## Create your VPC
 
-We will use the [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module to deploy the VPC.
+We will use the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
 
@@ -89,19 +89,19 @@ NAT Gateway costs alone can produce 10-50% of total AWS spend.
 Instead, we deploy a Panfactum-enhanced version of the [fck-nat project](https://github.com/AndrewGuenther/fck-nat). Using this
 pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and reduces the costs of NAT by over 90%.
 
-See the [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) documentation for more details and to decide if it is right for you
+See the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) documentation for more details and to decide if it is right for you
 (it probably is).
 
 ### Deploy the AWS VPC Module
 
-We will now deploy the [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) module via terragrunt:
+We will now deploy the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
 
 1. Set up a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
 2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl). Replace
    the subnet configuration with your chosen settings.
 
-3. Enable the `aws` provider in the `module.yaml`.
+3. Run `pf-providers-enable` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

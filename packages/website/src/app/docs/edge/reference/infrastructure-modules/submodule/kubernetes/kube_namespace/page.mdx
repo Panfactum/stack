@@ -1,0 +1,111 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes Namespace
+
+<ModuleHeader name="kube_namespace" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_namespace" status="stable" type="submodule" />
+
+Sets up a Kubernetes namespace and grants namespace-scoped permissions to specific Kubernetes user groups.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The name of the kubernetes namespace to instantiate.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_admin_groups" /> [admin\_groups](#input_admin_groups)
+
+Description: The names of the kubernetes groups to give admin access to the namespace.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "system:admins"
+]
+```
+
+### <a name="input_bot_reader_groups" /> [bot\_reader\_groups](#input_bot_reader_groups)
+
+Description: The names of the kubernetes groups to give elevated read access to the namespace.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "system:bot-readers"
+]
+```
+
+### <a name="input_linkerd_inject" /> [linkerd\_inject](#input_linkerd_inject)
+
+Description: Whether to inject linkerd sidecars into pods in this namespace.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_loadbalancer_enabled" /> [loadbalancer\_enabled](#input_loadbalancer_enabled)
+
+Description: Whether the namespace is going to create LoadBalancer services
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
+
+Description: The names of the kubernetes groups to give read access to the namespace.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "system:readers"
+]
+```
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

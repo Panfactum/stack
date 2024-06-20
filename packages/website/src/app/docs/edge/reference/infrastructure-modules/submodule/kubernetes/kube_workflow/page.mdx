@@ -1,0 +1,581 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Argo Workflow
+
+<ModuleHeader name="kube_workflow" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_workflow" status="alpha" type="submodule" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster that contains the service account.
+
+Type: `string`
+
+### <a name="input_entrypoint" /> [entrypoint](#input_entrypoint)
+
+Description: Name of the template that will be used as the first node in this workflow
+
+Type: `string`
+
+### <a name="input_name" /> [name](#input_name)
+
+Description: The name of this Workflow
+
+Type: `string`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+### <a name="input_templates" /> [templates](#input_templates)
+
+Description: The workflow templates
+
+Type: `list(any)`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_active_deadline_seconds" /> [active\_deadline\_seconds](#input_active_deadline_seconds)
+
+Description: Duration in seconds relative to the workflow start time which the workflow is allowed to run before the controller terminates the Workflow
+
+Type: `number`
+
+Default: `86400`
+
+### <a name="input_archive_logs_enabled" /> [archive\_logs\_enabled](#input_archive_logs_enabled)
+
+Description: Whether logs should be archived and made available in the Argo web UI
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+
+Description: Whether to allow Pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+
+Description: Whether to allow Pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_cluster_workflow_template_ref" /> [cluster\_workflow\_template\_ref](#input_cluster_workflow_template_ref)
+
+Description: Name is the resource name of the ClusterWorkflowTemplate template ([https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/](https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/))
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_common_env" /> [common\_env](#input_common_env)
+
+Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
+
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Workflow
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+
+Description: Whether the Pods must be scheduled on a controller node
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_delete_artifacts_on_deletion" /> [delete\_artifacts\_on\_deletion](#input_delete_artifacts_on_deletion)
+
+Description: Change the default behavior to delete artifacts on workflow deletion
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_disruptions_enabled" /> [disruptions\_enabled](#input_disruptions_enabled)
+
+Description: Whether disruptions should be enabled for Pods in the Workflow
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
+
+Description: The DNS policy for the Pods
+
+Type: `string`
+
+Default: `"ClusterFirst"`
+
+### <a name="input_dynamic_secrets" /> [dynamic\_secrets](#input_dynamic_secrets)
+
+Description: Dynamic variable secrets
+
+Type:
+
+```hcl
+list(object({             // key is the secret provider class
+    secret_provider_class = string // name of the secret provider class
+    mount_path            = string // absolute path of where to mount the secret
+    env_var               = string // name of the env var that will have a path to the secret mount
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
+
+Description: Extra Pod labels to use
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+
+Description: Extra tolerations to add to the Pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_extra_workflow_labels" /> [extra\_workflow\_labels](#input_extra_workflow_labels)
+
+Description: Extra labels to add to the Workflow object
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_linux_capabilities" /> [linux\_capabilities](#input_linux_capabilities)
+
+Description: Extra linux capabilities to add to containers by default
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_maximum_cpu" /> [maximum\_cpu](#input_maximum_cpu)
+
+Description: The maximum amount of cpu to allocate to containers by default (millicores)
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_maximum_memory" /> [maximum\_memory](#input_maximum_memory)
+
+Description: The maximum amount of memory to allocate to containers by default (MB) (default to minimum memory)
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_minimum_cpu" /> [minimum\_cpu](#input_minimum_cpu)
+
+Description: The minimum amount of cpu to allocate to containers by default (millicores)
+
+Type: `number`
+
+Default: `10`
+
+### <a name="input_minimum_memory" /> [minimum\_memory](#input_minimum_memory)
+
+Description: The minimum amount of memory to allocate to containers by default (MB)
+
+Type: `number`
+
+Default: `100`
+
+### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+
+Description: Node label preferences for the Pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+
+Description: Node label requirements for the Pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### <a name="input_on_exit" /> [on\_exit](#input_on_exit)
+
+Description: A template reference which is invoked at the end of the workflow, irrespective of the success, failure, or error of the primary template.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
+
+Description: Annotations to add to the Pods in the Workflow
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_pod_delete_delay_seconds" /> [pod\_delete\_delay\_seconds](#input_pod_delete_delay_seconds)
+
+Description: The number of seconds after Workflow completion that Pods will be deleted
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
+
+Description: Whether Pods will prefer scheduling on arm64 nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+
+Description: Whether Pods will prefer scheduling on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
+
+Description: Whether Pods will prefer scheduling on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_priority" /> [priority](#input_priority)
+
+Description: Priority is used if controller is configured to process limited number of workflows in parallel. Workflows with higher priority are processed first.
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
+
+Description: The default priority class to use for Pods in the Workflow
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_privileged" /> [privileged](#input_privileged)
+
+Description: Whether the generated containers run with elevated privileges
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_read_only_root_fs" /> [read\_only\_root\_fs](#input_read_only_root_fs)
+
+Description: Whether the generated containers default to read-only root filesystems
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_retry_backoff_initial_duration_seconds" /> [retry\_backoff\_initial\_duration\_seconds](#input_retry_backoff_initial_duration_seconds)
+
+Description: The initial number of seconds to wait before the next retry in an exponential backoff strategy
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_retry_backoff_max_duration_seconds" /> [retry\_backoff\_max\_duration\_seconds](#input_retry_backoff_max_duration_seconds)
+
+Description: The maximum number of seconds to wait before the next retry in an exponential backoff strategy
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_retry_expression" /> [retry\_expression](#input_retry_expression)
+
+Description: Expression is a condition expression for when a node will be retried. If it evaluates to false, the node will not be retried and the retry strategy will be ignored.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_retry_max_attempts" /> [retry\_max\_attempts](#input_retry_max_attempts)
+
+Description: The maximum number of allowable retries
+
+Type: `number`
+
+Default: `5`
+
+### <a name="input_retry_policy" /> [retry\_policy](#input_retry_policy)
+
+Description: The policy that determines when the Workflow will be retried
+
+Type: `string`
+
+Default: `"Always"`
+
+### <a name="input_run_as_root" /> [run\_as\_root](#input_run_as_root)
+
+Description: Whether to enable running as root in the Pods
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
+
+Description: A mapping of Secret names to their mount configuration in the containers of the Workflow
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the Secret
+    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_secrets" /> [secrets](#input_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether to allow Pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_suspend" /> [suspend](#input_suspend)
+
+Description: Whether this workflow is suspended
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_task_parallelism" /> [task\_parallelism](#input_task_parallelism)
+
+Description: Limits the max total parallel tasks that can execute at the same time in a workflow
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
+
+Description: The default number of seconds to wait for graceful termination before forcing termination
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
+
+Description: A mapping of temporary directory names (arbitrary) to their configuration
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the host node rather than a PVC
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_uid" /> [uid](#input_uid)
+
+Description: The UID to use for the user in the Pods
+
+Type: `number`
+
+Default: `1000`
+
+### <a name="input_volume_mounts" /> [volume\_mounts](#input_volume_mounts)
+
+Description: A mapping of names to configuration for PersistentVolumeClaims used by all Pods in the Workflow
+
+Type:
+
+```hcl
+map(object({
+    storage_class = optional(string, "ebs-standard")
+    access_modes  = optional(list(string), ["ReadWriteOnce"])
+    size_gb       = optional(number, 1) # The size of the volume in GB
+    mount_path    = string              # Where in the containers to mount the volume
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether to enable the vertical Pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_workflow_annotations" /> [workflow\_annotations](#input_workflow_annotations)
+
+Description: Annotations to add to the Workflow object
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_workflow_delete_seconds_after_completion" /> [workflow\_delete\_seconds\_after\_completion](#input_workflow_delete_seconds_after_completion)
+
+Description: The number of seconds after workflow completion that the Workflow object will be deleted
+
+Type: `number`
+
+Default: `86400`
+
+### <a name="input_workflow_delete_seconds_after_failure" /> [workflow\_delete\_seconds\_after\_failure](#input_workflow_delete_seconds_after_failure)
+
+Description: The number of seconds after workflow failure that the Workflow object will be deleted
+
+Type: `number`
+
+Default: `86400`
+
+### <a name="input_workflow_delete_seconds_after_success" /> [workflow\_delete\_seconds\_after\_success](#input_workflow_delete_seconds_after_success)
+
+Description: The number of seconds after workflow success that the Workflow object will be deleted
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_workflow_parallelism" /> [workflow\_parallelism](#input_workflow_parallelism)
+
+Description: Number of concurrent instances of this Workflow allowed to be running at any given time
+
+Type: `number`
+
+Default: `1`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_labels" /> [labels](#output_labels)
+
+Description: The default labels assigned to all resources in this Workflow
+
+### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+
+Description: The labels unique to this deployment that can be used to select the pods in this Workflow
+
+### <a name="output_pod_spec_patch" /> [pod\_spec\_patch](#output_pod_spec_patch)
+
+Description: The patch applied to all pods generated by this Workflow
+
+### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+
+Description: The default service account used for the pods
+
+### <a name="output_workflow_spec" /> [workflow\_spec](#output_workflow_spec)
+
+Description: The specification for the Workflow
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

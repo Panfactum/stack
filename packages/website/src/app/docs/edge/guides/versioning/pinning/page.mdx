@@ -7,17 +7,17 @@ version you want to use.
 
 **You should ensure that the versions match in all locations.**
 
-## Nix Flake
+## Developer Environment
 
-Set `inputs.panfactum.url` to `"github:Panfactum/stack/__PANFACTUM_VERSION_EDGE__"`.
+Set `inputs.panfactum.url` to `"github:Panfactum/stack/__PANFACTUM_VERSION_EDGE__"` in your `flake.nix`.
 
 ## Terragrunt Deployments
 
 If you are deploying Panfactum terraform modules directly, update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables).
 
-## Terraform Modules
+## Infrastructure Submodules
 
-If you are using Panfactum terraform modules in your own terraform modules, set the `source` in `module` blocks
+If you are using Panfactum submodules in your own modules, set the `source` in `module` blocks
 to the correct `ref` to match the desired version. For example:
 
 ```hcl
@@ -27,3 +27,15 @@ module "pod_template" {
 ```
 
 Ensure you do this for **every** module.
+
+Alternatively, you can set the `# pf-update` command adjacent to `module.source` and the version
+will automatically be pinned to the version used by the developer environment when you
+next run `pf-update-iac`:
+
+```hcl
+module "pod_template" {
+  source       = "github.com/Panfactum/stack.git/packages/terraform//kube_pod?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+}
+```
+
+

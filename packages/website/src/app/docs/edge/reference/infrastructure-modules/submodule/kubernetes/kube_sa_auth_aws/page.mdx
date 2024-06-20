@@ -1,0 +1,108 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# AWS Authentication via Kubernetes Service Account
+
+<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
+
+Gives a kubernetes service account in an EKS cluster access to an AWS IAM role through IRSA.
+
+This allows our Kubernetes pods to utilize the AWS API without static credentials. The IRSA functionality
+is included in the latest version of all AWS SDKs so code should be able to pick up the IRSA credentials
+using the implicit AWS provider-chain resolver (i.e., code changes to utilize these credentials is generally not required).
+
+See [the IRSA docs](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for more information.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster that contains the service account.
+
+Type: `string`
+
+### <a name="input_iam_policy_json" /> [iam\_policy\_json](#input_iam_policy_json)
+
+Description: An IAM policy document in rendered JSON string form.
+
+Type: `string`
+
+### <a name="input_service_account" /> [service\_account](#input_service_account)
+
+Description: The name of the service account that should be able to assume the AWS permissions.
+
+Type: `string`
+
+### <a name="input_service_account_namespace" /> [service\_account\_namespace](#input_service_account_namespace)
+
+Description: The namespace of the service account.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_annotate_service_account" /> [annotate\_service\_account](#input_annotate_service_account)
+
+Description: Whether or not to annotate the service account
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_policy_arn" /> [policy\_arn](#output_policy_arn)
+
+Description: The ARN of the policy assigned to the role.
+
+### <a name="output_role_arn" /> [role\_arn](#output_role_arn)
+
+Description: The ARN of the role created for the service account.
+
+### <a name="output_role_name" /> [role\_name](#output_role_name)
+
+Description: The name of the role created for the service account.
+
+### <a name="output_service_account_annotations" /> [service\_account\_annotations](#output_service_account_annotations)
+
+Description: The annotations to apply to the service account
+
+## Usage
+
+### IP Whitelisting
+
+By default, this module's IRSA authentication will only work when the service account token is presented from an IP address
+inside the cluster (this also includes the cluster's public NAT IPs).
+
+This limits the usefulness of tokens that are extracted from the cluster by an attacker.
+
+The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
+assigned in the [aws\_vpc](/docs/edge/reference/infrastructure-modules/aws/aws_vpc) and [aws\_eks](/docs/edge/reference/infrastructure-modules/aws/aws_eks)
+modules. If you need additional IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
+
+{/* lint enable no-duplicate-headings */}
