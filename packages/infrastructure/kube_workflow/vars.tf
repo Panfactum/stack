@@ -4,18 +4,18 @@ variable "namespace" {
 }
 
 variable "name" {
-  description = "The name of this deployment"
+  description = "The name of this Workflow"
   type        = string
 }
 
 variable "priority_class_name" {
-  description = "The default priority class to use for pods in the Workflow"
+  description = "The default priority class to use for Pods in the Workflow"
   type        = string
   default     = null
 }
 
 variable "extra_tolerations" {
-  description = "Extra tolerations to add to the pods"
+  description = "Extra tolerations to add to the Pods"
   type = list(object({
     key      = optional(string)
     operator = string
@@ -26,13 +26,13 @@ variable "extra_tolerations" {
 }
 
 variable "node_preferences" {
-  description = "Node label preferences for the pods"
+  description = "Node label preferences for the Pods"
   type        = map(object({ weight = number, operator = string, values = list(string) }))
   default     = {}
 }
 
 variable "node_requirements" {
-  description = "Node label requirements for the pods"
+  description = "Node label requirements for the Pods"
   type        = map(list(string))
   default     = {}
 }
@@ -50,7 +50,7 @@ variable "common_env" {
 }
 
 variable "vpa_enabled" {
-  description = "Whether to enable the vertical pod autoscaler"
+  description = "Whether to enable the vertical Pod autoscaler"
   type        = bool
   default     = true
 }
@@ -66,31 +66,31 @@ variable "tmp_directories" {
   type = map(object({
     mount_path = string                # Where in the containers to mount the temporary directories
     size_mb    = optional(number, 100) # The number of MB to allocate for the directory
-    node_local = optional(bool, false) # If true, the temporary storage will come from the node rather than a PVC
+    node_local = optional(bool, false) # If true, the temporary storage will come from the host node rather than a PVC
   }))
   default = {}
 }
 
 variable "secret_mounts" {
-  description = "A mapping of Secret names to their mount configuration in the containers of the Deployment"
+  description = "A mapping of Secret names to their mount configuration in the containers of the Workflow"
   type = map(object({
     mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
   }))
   default = {}
 }
 
 variable "config_map_mounts" {
-  description = "A mapping of ConfigMap names to their mount configuration in the containers of the Deployment"
+  description = "A mapping of ConfigMap names to their mount configuration in the containers of the Workflow"
   type = map(object({
     mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
   }))
   default = {}
 }
 
 variable "pod_annotations" {
-  description = "Annotations to add to the pods in the deployment"
+  description = "Annotations to add to the Pods in the Workflow"
   type        = map(string)
   default     = {}
 }
@@ -106,49 +106,49 @@ variable "dynamic_secrets" {
 }
 
 variable "prefer_spot_nodes_enabled" {
-  description = "Whether pods will prefer scheduling on spot nodes"
+  description = "Whether Pods will prefer scheduling on spot nodes"
   type        = bool
   default     = false
 }
 
 variable "prefer_burstable_nodes_enabled" {
-  description = "Whether pods will prefer scheduling on burstable nodes"
+  description = "Whether Pods will prefer scheduling on burstable nodes"
   type        = bool
   default     = false
 }
 
 variable "prefer_arm_nodes_enabled" {
-  description = "Whether pods will prefer scheduling on arm64 nodes"
+  description = "Whether Pods will prefer scheduling on arm64 nodes"
   type        = bool
   default     = false
 }
 
 variable "spot_nodes_enabled" {
-  description = "Whether to allow pods to schedule on spot nodes"
+  description = "Whether to allow Pods to schedule on spot nodes"
   type        = bool
   default     = false
 }
 
 variable "burstable_nodes_enabled" {
-  description = "Whether to allow pods to schedule on burstable nodes"
+  description = "Whether to allow Pods to schedule on burstable nodes"
   type        = bool
   default     = false
 }
 
 variable "arm_nodes_enabled" {
-  description = "Whether to allow pods to schedule on arm64 nodes"
+  description = "Whether to allow Pods to schedule on arm64 nodes"
   type        = bool
   default     = false
 }
 
 variable "controller_node_required" {
-  description = "Whether the pods must be scheduled on a controller node"
+  description = "Whether the Pods must be scheduled on a controller node"
   type        = bool
   default     = false
 }
 
 variable "panfactum_scheduler_enabled" {
-  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  description = "Whether to use the Panfactum Pod scheduler with enhanced bin-packing"
   type        = bool
   default     = true
 }
@@ -160,7 +160,7 @@ variable "termination_grace_period_seconds" {
 }
 
 variable "extra_pod_labels" {
-  description = "Extra pod labels to use"
+  description = "Extra Pod labels to use"
   type        = map(string)
   default     = {}
 }
@@ -189,7 +189,7 @@ variable "archive_logs_enabled" {
 }
 
 variable "dns_policy" {
-  description = "The DNS policy for the pods"
+  description = "The DNS policy for the Pods"
   type        = string
   default     = "ClusterFirst"
 }
@@ -207,7 +207,7 @@ variable "task_parallelism" {
 }
 
 variable "pod_delete_delay_seconds" {
-  description = "The number of seconds after Workflow completion that pods will be deleted"
+  description = "The number of seconds after Workflow completion that Pods will be deleted"
   type        = number
   default     = 60 * 60
 }
@@ -329,7 +329,7 @@ variable "run_as_root" {
 }
 
 variable "volume_mounts" {
-  description = "A mapping of names to configuration for PersistentVolumeClaims used by all pods in the Workflow"
+  description = "A mapping of names to configuration for PersistentVolumeClaims used by all Pods in the Workflow"
   type = map(object({
     storage_class = optional(string, "ebs-standard")
     access_modes  = optional(list(string), ["ReadWriteOnce"])
@@ -340,7 +340,7 @@ variable "volume_mounts" {
 }
 
 variable "workflow_parallelism" {
-  description = "Number of concurrent instances of this worklow allowed to be running at any given time"
+  description = "Number of concurrent instances of this Workflow allowed to be running at any given time"
   type        = number
   default     = 1
 }

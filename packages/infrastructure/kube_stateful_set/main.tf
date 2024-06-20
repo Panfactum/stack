@@ -72,6 +72,7 @@ module "pod_template" {
   topology_spread_strict                = var.topology_spread_strict
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   termination_grace_period_seconds      = var.termination_grace_period_seconds
+  restart_policy                        = var.restart_policy
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -241,7 +242,6 @@ resource "kubectl_manifest" "pdb" {
       labels    = module.pod_template.labels
     }
     spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.pod_template.match_labels
       }

@@ -201,12 +201,9 @@ done
 
 # Search for the string and extract the capture group
 FLAKE_FILE="$DEVENV_ROOT/flake.nix"
-PF_VERSION=$(grep -oP 'panfactum/stack/\K([-\.0-9a-zA-Z]+)' "$FLAKE_FILE")
-
-# Check if a capture group was found
-if [[ -z $PF_VERSION ]]; then
+if ! PF_VERSION=$(grep -oiP 'panfactum/stack/\K([-\.0-9a-zA-Z]+)' "$FLAKE_FILE"); then
   echo "Warning: No stack version found in $FLAKE_FILE. Using 'main'" >&2
-  PF_VERSION=main
+  PF_VERSION="main"
 fi
 
 ####################################################################

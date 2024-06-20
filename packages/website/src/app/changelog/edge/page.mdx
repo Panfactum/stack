@@ -49,6 +49,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * [kube\_deployment](/docs/edge/reference/infrastructure-modules/kubernetes/kube_deployment),
   [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/kubernetes/kube_stateful_set),
+  [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/kubernetes/kube_cron_job),
   and [kube\_pod](/docs/edge/reference/infrastructure-modules/kubernetes/kube_pod) have graduated to Beta status. They
   are now safe to use.
 
@@ -83,6 +84,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * Removes invalid failure cases when using `pf-get-vault-token` in Terragrunt and improve failure messaging.
 
 * Fixes an issue that occurs when the `kubernetes` provider is enabled but the sourced module does not use the `kubectl` provider.
+
+* Fixes failure cases in `pf-env-scaffold` and adds more debug logging.
 
 ## edge.24-06-14
 

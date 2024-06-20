@@ -1,10 +1,10 @@
 output "match_labels" {
-  description = "The labels unique to this Deployment that can be used to select any pods in this Deployment"
+  description = "The labels unique to this Workflow that can be used to select any pods in this Workflow"
   value       = module.pod_template.match_labels
 }
 
 output "labels" {
-  description = "The default labels assigned to all resources in this Deployment"
+  description = "The default labels assigned to all resources in this Workflow"
   value       = module.pod_template.labels
 }
 

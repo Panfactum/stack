@@ -25,7 +25,7 @@ locals {
   port = 1234
 
   workflow_labels = merge(
-    module.workflow.labels,
+    module.scale_to_zero.labels,
     { "panfactum.com/module" = "kube_buildkit" }
   )
 }
@@ -288,7 +288,7 @@ resource "kubernetes_role_binding" "scale_to_zero" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = module.workflow.service_account_name
+    name      = module.scale_to_zero.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -298,29 +298,28 @@ resource "kubernetes_role_binding" "scale_to_zero" {
   }
 }
 
-module "workflow" {
-  source                      = "../kube_workflow"
+module "scale_to_zero" {
+  source = "../kube_cron_job"
+
   name                        = "scale-to-zero"
   namespace                   = local.namespace
-  eks_cluster_name            = var.eks_cluster_name
-  ip_allow_list               = var.ip_allow_list
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   spot_nodes_enabled          = true
   burstable_nodes_enabled     = true
-  entrypoint                  = "scale-to-zero"
-  templates = [
-    {
-      name = "scale-to-zero"
-      container = {
-        image = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/panfactum:alpha.3"
-        command = [
-          "/bin/scale-buildkit",
-          "--attempt-scale-down",
-          tostring(var.scale_down_delay_seconds)
-        ]
-      }
-    }
-  ]
+
+  cron_schedule = "*/15 * * * *"
+  containers = [{
+    name    = "scale-to-zero"
+    image   = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/panfactum"
+    version = "alpha.3"
+    command = [
+      "/bin/scale-buildkit",
+      "--attempt-scale-down",
+      tostring(var.scale_down_delay_seconds)
+    ]
+  }]
+  starting_deadline_seconds = 60 * 5
+  active_deadline_seconds   = 60 * 5
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -331,26 +330,4 @@ module "workflow" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
-}
-
-resource "kubectl_manifest" "scale_to_zero" {
-  yaml_body = yamlencode({
-    apiVersion = "argoproj.io/v1alpha1"
-    kind       = "CronWorkflow"
-    metadata = {
-      name      = "buildkit-scale-to-zero"
-      namespace = local.namespace
-      labels    = local.workflow_labels
-    }
-    spec = {
-      schedule          = "*/15 * * * *"
-      concurrencyPolicy = "Forbid"
-      workflowSpec      = module.workflow.workflow_spec
-    }
-  })
-
-  force_conflicts   = true
-  server_side_apply = true
-
-  depends_on = [module.buildkit]
 }

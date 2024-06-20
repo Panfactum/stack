@@ -34,7 +34,7 @@ Type: `string`
 
 ### <a name="input_name" /> [name](#input_name)
 
-Description: The name of this deployment
+Description: The name of this Workflow
 
 Type: `string`
 
@@ -72,7 +72,7 @@ Default: `true`
 
 ### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
 
-Description: Whether to allow pods to schedule on arm64 nodes
+Description: Whether to allow Pods to schedule on arm64 nodes
 
 Type: `bool`
 
@@ -80,7 +80,7 @@ Default: `false`
 
 ### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
 
-Description: Whether to allow pods to schedule on burstable nodes
+Description: Whether to allow Pods to schedule on burstable nodes
 
 Type: `bool`
 
@@ -104,14 +104,14 @@ Default: `{}`
 
 ### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
 
-Description: A mapping of ConfigMap names to their mount configuration in the containers of the Deployment
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Workflow
 
 Type:
 
 ```hcl
 map(object({
     mount_path = string                # Where in the containers to mount the ConfigMap
-    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
   }))
 ```
 
@@ -119,7 +119,7 @@ Default: `{}`
 
 ### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
 
-Description: Whether the pods must be scheduled on a controller node
+Description: Whether the Pods must be scheduled on a controller node
 
 Type: `bool`
 
@@ -143,7 +143,7 @@ Default: `false`
 
 ### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
 
-Description: The DNS policy for the pods
+Description: The DNS policy for the Pods
 
 Type: `string`
 
@@ -167,7 +167,7 @@ Default: `[]`
 
 ### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
 
-Description: Extra pod labels to use
+Description: Extra Pod labels to use
 
 Type: `map(string)`
 
@@ -175,7 +175,7 @@ Default: `{}`
 
 ### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
 
-Description: Extra tolerations to add to the pods
+Description: Extra tolerations to add to the Pods
 
 Type:
 
@@ -256,7 +256,7 @@ Default: `1000`
 
 ### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
 
-Description: Node label preferences for the pods
+Description: Node label preferences for the Pods
 
 Type: `map(object({ weight = number, operator = string, values = list(string) }))`
 
@@ -264,7 +264,7 @@ Default: `{}`
 
 ### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
 
-Description: Node label requirements for the pods
+Description: Node label requirements for the Pods
 
 Type: `map(list(string))`
 
@@ -280,7 +280,7 @@ Default: `null`
 
 ### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
 
-Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
 
 Type: `bool`
 
@@ -288,7 +288,7 @@ Default: `true`
 
 ### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
 
-Description: Annotations to add to the pods in the deployment
+Description: Annotations to add to the Pods in the Workflow
 
 Type: `map(string)`
 
@@ -296,7 +296,7 @@ Default: `{}`
 
 ### <a name="input_pod_delete_delay_seconds" /> [pod\_delete\_delay\_seconds](#input_pod_delete_delay_seconds)
 
-Description: The number of seconds after Workflow completion that pods will be deleted
+Description: The number of seconds after Workflow completion that Pods will be deleted
 
 Type: `number`
 
@@ -304,7 +304,7 @@ Default: `3600`
 
 ### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
 
-Description: Whether pods will prefer scheduling on arm64 nodes
+Description: Whether Pods will prefer scheduling on arm64 nodes
 
 Type: `bool`
 
@@ -312,7 +312,7 @@ Default: `false`
 
 ### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
 
-Description: Whether pods will prefer scheduling on burstable nodes
+Description: Whether Pods will prefer scheduling on burstable nodes
 
 Type: `bool`
 
@@ -320,7 +320,7 @@ Default: `false`
 
 ### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
 
-Description: Whether pods will prefer scheduling on spot nodes
+Description: Whether Pods will prefer scheduling on spot nodes
 
 Type: `bool`
 
@@ -336,7 +336,7 @@ Default: `null`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
-Description: The default priority class to use for pods in the Workflow
+Description: The default priority class to use for Pods in the Workflow
 
 Type: `string`
 
@@ -408,14 +408,14 @@ Default: `false`
 
 ### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
 
-Description: A mapping of Secret names to their mount configuration in the containers of the Deployment
+Description: A mapping of Secret names to their mount configuration in the containers of the Workflow
 
 Type:
 
 ```hcl
 map(object({
     mount_path = string                # Where in the containers to mount the Secret
-    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
   }))
 ```
 
@@ -431,7 +431,7 @@ Default: `{}`
 
 ### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
-Description: Whether to allow pods to schedule on spot nodes
+Description: Whether to allow Pods to schedule on spot nodes
 
 Type: `bool`
 
@@ -471,7 +471,7 @@ Type:
 map(object({
     mount_path = string                # Where in the containers to mount the temporary directories
     size_mb    = optional(number, 100) # The number of MB to allocate for the directory
-    node_local = optional(bool, false) # If true, the temporary storage will come from the node rather than a PVC
+    node_local = optional(bool, false) # If true, the temporary storage will come from the host node rather than a PVC
   }))
 ```
 
@@ -487,7 +487,7 @@ Default: `1000`
 
 ### <a name="input_volume_mounts" /> [volume\_mounts](#input_volume_mounts)
 
-Description: A mapping of names to configuration for PersistentVolumeClaims used by all pods in the Workflow
+Description: A mapping of names to configuration for PersistentVolumeClaims used by all Pods in the Workflow
 
 Type:
 
@@ -504,7 +504,7 @@ Default: `{}`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
-Description: Whether to enable the vertical pod autoscaler
+Description: Whether to enable the vertical Pod autoscaler
 
 Type: `bool`
 
@@ -544,7 +544,7 @@ Default: `3600`
 
 ### <a name="input_workflow_parallelism" /> [workflow\_parallelism](#input_workflow_parallelism)
 
-Description: Number of concurrent instances of this worklow allowed to be running at any given time
+Description: Number of concurrent instances of this Workflow allowed to be running at any given time
 
 Type: `number`
 

@@ -16,8 +16,8 @@ terraform {
 }
 
 // This is needed b/c this can never
-// change without destroying the deployment first
-resource "random_id" "deployment_id" {
+// change without destroying the CronJob first
+resource "random_id" "cron_job_id" {
   byte_length = 8
 }
 
@@ -28,7 +28,7 @@ module "pod_template" {
   namespace        = var.namespace
   service_account  = kubernetes_service_account.service_account.metadata[0].name
   workload_name    = var.name
-  match_labels     = { id = random_id.deployment_id.hex }
+  match_labels     = { id = random_id.cron_job_id.hex }
   dns_policy       = var.dns_policy
   pod_annotations  = var.pod_annotations
   extra_pod_labels = var.extra_pod_labels
@@ -50,19 +50,19 @@ module "pod_template" {
   burstable_nodes_enabled               = var.burstable_nodes_enabled
   spot_nodes_enabled                    = var.spot_nodes_enabled
   arm_nodes_enabled                     = var.arm_nodes_enabled
-  instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
-  instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
-  zone_anti_affinity_required           = var.zone_anti_affinity_required
-  host_anti_affinity_required           = var.host_anti_affinity_required
+  instance_type_anti_affinity_preferred = false
+  instance_type_anti_affinity_required  = false
+  zone_anti_affinity_required           = false
+  host_anti_affinity_required           = false
   extra_tolerations                     = var.extra_tolerations
-  controller_node_required              = var.controller_node_required
+  controller_node_required              = false
   node_requirements                     = var.node_requirements
   node_preferences                      = var.node_preferences
   prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
   prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
   prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
-  topology_spread_enabled               = var.topology_spread_enabled
-  topology_spread_strict                = var.topology_spread_strict
+  topology_spread_enabled               = false
+  topology_spread_strict                = false
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   termination_grace_period_seconds      = var.termination_grace_period_seconds
   restart_policy                        = var.restart_policy
@@ -81,41 +81,48 @@ module "pod_template" {
 
 resource "kubernetes_service_account" "service_account" {
   metadata {
-    name      = random_id.deployment_id.hex
+    name      = random_id.cron_job_id.hex
     namespace = var.namespace
     labels    = module.pod_template.labels
   }
 }
 
-resource "kubectl_manifest" "deployment" {
+resource "kubectl_manifest" "cron_job" {
   yaml_body = yamlencode({
-    apiVersion = "apps/v1"
-    kind       = "Deployment"
+    apiVersion = "batch/v1"
+    kind       = "CronJob"
     metadata = {
-      namespace = var.namespace
-      name      = var.name
-      labels    = module.pod_template.labels
-      annotations = {
-        "reloader.stakater.com/auto" = "true"
-      }
+      namespace   = var.namespace
+      name        = var.name
+      labels      = module.pod_template.labels
+      annotations = var.cron_job_annotations
     }
     spec = {
-      replicas = var.replicas
-      strategy = {
-        type = var.update_type
+      concurrencyPolicy          = var.concurrency_policy
+      failedJobsHistoryLimit     = var.failed_jobs_history_limit
+      successfulJobsHistoryLimit = var.successful_jobs_history_limit
+      suspend                    = var.suspend
+      startingDeadlineSeconds    = var.starting_deadline_seconds
+      schedule                   = var.cron_schedule
+      jobTemplate = {
+        metadata = {
+          labels      = module.pod_template.labels
+          annotations = var.job_annotations
+        }
+        spec = {
+          activeDeadlineSeconds   = var.active_deadline_seconds
+          backoffLimit            = var.backoff_limit
+          template                = module.pod_template.pod_template
+          parallelism             = var.pod_parallelism
+          completions             = var.pod_completions
+          ttlSecondsAfterFinished = var.ttl_seconds_after_finished
+          podReplacementPolicy    = var.pod_replacement_policy
+        }
       }
-      selector = {
-        matchLabels = module.pod_template.match_labels
-      }
-      template = module.pod_template.pod_template
     }
   })
   server_side_apply = true
   force_conflicts   = true
-  ignore_fields = var.ignore_replica_count ? [
-    "spec.replicas"
-  ] : []
-  wait_for_rollout = var.wait_for_rollout
 }
 
 resource "kubectl_manifest" "vpa" {
@@ -130,8 +137,8 @@ resource "kubectl_manifest" "vpa" {
     }
     spec = {
       targetRef = {
-        apiVersion = "apps/v1"
-        kind       = "Deployment"
+        apiVersion = "batch/v1"
+        kind       = "CronJob"
         name       = var.name
       }
       updatePolicy = {
@@ -152,7 +159,7 @@ resource "kubectl_manifest" "vpa" {
       }
     }
   })
-  depends_on = [kubectl_manifest.deployment]
+  depends_on = [kubectl_manifest.cron_job]
 }
 
 resource "kubectl_manifest" "pdb" {
@@ -165,16 +172,15 @@ resource "kubectl_manifest" "pdb" {
       labels    = module.pod_template.labels
     }
     spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.pod_template.match_labels
       }
-      maxUnavailable             = 1
+      maxUnavailable             = var.disruptions_enabled ? 1 : 0
       unhealthyPodEvictionPolicy = "AlwaysAllow"
     }
   })
   force_conflicts   = true
   server_side_apply = true
-  depends_on        = [kubectl_manifest.deployment]
+  depends_on        = [kubectl_manifest.cron_job]
 }
 

@@ -171,6 +171,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_cron_job",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_deployment",
       "type": "submodule",
       "group": "kubernetes"
