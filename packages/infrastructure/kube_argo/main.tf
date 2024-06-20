@@ -492,11 +492,11 @@ resource "helm_release" "argo" {
         }
         resources = {
           requests = {
-            memory = "10Mi"
+            memory = "20Mi"
             cpu    = "10m"
           }
           limits = {
-            memory = "13Mi"
+            memory = "26Mi"
           }
         }
       }

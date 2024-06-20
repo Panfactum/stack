@@ -63,6 +63,8 @@ module "pod_template" {
   host_anti_affinity_required           = var.host_anti_affinity_required
   extra_tolerations                     = var.extra_tolerations
   controller_node_required              = var.controller_node_required
+  node_requirements                     = var.node_requirements
+  node_preferences                      = var.node_preferences
   prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
   prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
   prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
@@ -224,7 +226,9 @@ resource "kubectl_manifest" "vpa" {
       }
     }
   })
-  depends_on = [kubectl_manifest.stateful_set]
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.stateful_set]
 }
 
 resource "kubectl_manifest" "pdb" {

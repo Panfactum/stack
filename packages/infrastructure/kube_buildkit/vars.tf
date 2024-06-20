@@ -51,3 +51,9 @@ variable "scale_down_delay_seconds" {
   default     = 60 * 30
 }
 
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = false
+}
+

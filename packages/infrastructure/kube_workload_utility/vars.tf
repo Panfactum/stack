@@ -34,6 +34,18 @@ variable "controller_node_required" {
   default     = false
 }
 
+variable "node_requirements" {
+  description = "Node label requirements for the pods"
+  type        = map(list(string))
+  default     = {}
+}
+
+variable "node_preferences" {
+  description = "Node label preferences for the pods"
+  type        = map(object({ weight = number, operator = string, values = list(string) }))
+  default     = {}
+}
+
 variable "prefer_spot_nodes_enabled" {
   description = "Whether pods will prefer scheduling on spot nodes"
   type        = bool

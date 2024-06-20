@@ -108,6 +108,22 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+
+Description: Node label preferences for the pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+
+Description: Node label requirements for the pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
 ### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing

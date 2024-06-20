@@ -22,13 +22,12 @@ locals {
   name      = "buildkit"
   namespace = module.namespace.namespace
 
-  match_labels = {
-    service        = local.name
-    pf_root_module = var.pf_root_module
-  }
-
   port = 1234
 
+  workflow_labels = merge(
+    module.workflow.labels,
+    { "panfactum.com/module" = "kube_buildkit" }
+  )
 }
 
 module "pull_through" {
@@ -127,6 +126,7 @@ module "buildkit" {
   pod_management_policy            = "Parallel"
   replicas                         = 1
   ignore_replica_count             = true
+  panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
   termination_grace_period_seconds = 30 * 60
 
   # We don't use the VPA for the builder b/c the workloads are extremely uneven
@@ -179,8 +179,8 @@ module "buildkit" {
 
   ports = {
     buildkitd = {
-      service_port = 1234
-      pod_port     = 1234
+      service_port = local.port
+      pod_port     = local.port
     }
   }
 
@@ -266,43 +266,12 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "autoscaler" {
 * recent builds
 ***************************************/
 
-module "util_scale_to_zero" {
-  source = "../kube_workload_utility"
-
-  workload_name                        = "buildkit-scale-to-zero"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = false
-  panfactum_scheduler_enabled          = true
-  instance_type_anti_affinity_required = false
-  topology_spread_strict               = false
-  topology_spread_enabled              = false
-  lifetime_evictions_enabled           = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
-resource "kubernetes_service_account" "scale_to_zero" {
-  metadata {
-    name      = "scale-to-zero"
-    namespace = local.namespace
-    labels    = module.util_scale_to_zero.labels
-  }
-}
 
 resource "kubernetes_role" "scale_to_zero" {
   metadata {
     name      = "scale-to-zero"
     namespace = local.namespace
-    labels    = module.util_scale_to_zero.labels
+    labels    = local.workflow_labels
   }
   rule {
     api_groups = ["apps"]
@@ -315,11 +284,11 @@ resource "kubernetes_role_binding" "scale_to_zero" {
   metadata {
     name      = "scale-to-zero"
     namespace = local.namespace
-    labels    = module.util_scale_to_zero.labels
+    labels    = local.workflow_labels
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.scale_to_zero.metadata[0].name
+    name      = module.workflow.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -329,11 +298,29 @@ resource "kubernetes_role_binding" "scale_to_zero" {
   }
 }
 
-module "workflow_perms" {
-  source                    = "../kube_sa_auth_workflow"
-  service_account           = kubernetes_service_account.scale_to_zero.metadata[0].name
-  service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
+module "workflow" {
+  source                      = "../kube_workflow"
+  name                        = "scale-to-zero"
+  namespace                   = local.namespace
+  eks_cluster_name            = var.eks_cluster_name
+  ip_allow_list               = var.ip_allow_list
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  spot_nodes_enabled          = true
+  burstable_nodes_enabled     = true
+  entrypoint                  = "scale-to-zero"
+  templates = [
+    {
+      name = "scale-to-zero"
+      container = {
+        image = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/panfactum:alpha.3"
+        command = [
+          "/bin/scale-buildkit",
+          "--attempt-scale-down",
+          tostring(var.scale_down_delay_seconds)
+        ]
+      }
+    }
+  ]
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -353,42 +340,12 @@ resource "kubectl_manifest" "scale_to_zero" {
     metadata = {
       name      = "buildkit-scale-to-zero"
       namespace = local.namespace
-      labels    = module.util_scale_to_zero.labels
+      labels    = local.workflow_labels
     }
     spec = {
       schedule          = "*/15 * * * *"
       concurrencyPolicy = "Forbid"
-      workflowMetadata = {
-        labels = module.util_scale_to_zero.labels
-      }
-      workflowSpec = {
-        serviceAccountName = kubernetes_service_account.scale_to_zero.metadata[0].name
-
-        affinity      = module.util_scale_to_zero.affinity
-        schedulerName = module.util_scale_to_zero.scheduler_name
-        tolerations   = module.util_scale_to_zero.tolerations
-        podDisruptionBudget = {
-          maxUnavailable = 0
-        }
-        podMetadata = {
-          labels = module.util_scale_to_zero.labels
-        }
-
-        entrypoint = "scale-to-zero"
-        templates = [
-          {
-            name = "scale-to-zero"
-            container = {
-              image = "${var.pull_through_cache_enabled ? module.pull_through[0].github_registry : "ghcr.io"}/panfactum/panfactum:alpha.3"
-              command = [
-                "/bin/scale-buildkit",
-                "--attempt-scale-down",
-                tostring(var.scale_down_delay_seconds)
-              ]
-            }
-          }
-        ]
-      }
+      workflowSpec      = module.workflow.workflow_spec
     }
   })
 

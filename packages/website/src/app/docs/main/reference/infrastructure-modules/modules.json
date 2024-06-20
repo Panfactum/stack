@@ -336,6 +336,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_workflow",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_workload_utility",
       "type": "submodule",
       "group": "kubernetes"

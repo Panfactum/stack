@@ -54,19 +54,23 @@ locals {
       }
     }
     required = {
-      controller = {
-        nodeSelectorTerms = {
-          matchExpressions = [
+      nodeSelectorTerms = {
+        matchExpressions = concat(
+          var.controller_node_required ? [
             {
               key      = "panfactum.com/class"
               operator = "In"
               values   = ["controller"]
             }
-          ]
-        }
+          ] : [],
+          [for key, value in var.node_requirements : {
+            key      = key
+            operator = "In"
+            values   = [value]
+          }]
+        )
       }
     }
-
   }
 
   // Pod Anti-Affinity
@@ -110,9 +114,21 @@ locals {
       preferredDuringSchedulingIgnoredDuringExecution = concat(
         (var.prefer_burstable_nodes_enabled && var.burstable_nodes_enabled) ? [local.node_affinity.preferred.burstable] : [],
         (var.prefer_spot_nodes_enabled && var.spot_nodes_enabled) ? [local.node_affinity.preferred.spot] : [],
-        (var.prefer_arm_nodes_enabled && var.arm_nodes_enabled) ? [local.node_affinity.preferred.arm] : []
+        (var.prefer_arm_nodes_enabled && var.arm_nodes_enabled) ? [local.node_affinity.preferred.arm] : [],
+        [for k, v in var.node_preferences : {
+          weight = v.weight
+          preference = {
+            matchExpressions = [
+              {
+                key      = k
+                operator = "In"
+                values   = v.values
+              }
+            ]
+          }
+        }]
       )
-      requiredDuringSchedulingIgnoredDuringExecution = var.controller_node_required ? local.node_affinity.required.controller : null
+      requiredDuringSchedulingIgnoredDuringExecution = length(local.node_affinity.required.nodeSelectorTerms.matchExpressions) != 0 ? local.node_affinity.required : null
     } : k => v if v != null }
     podAntiAffinity = { for k, v in {
       requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.instance_type_anti_affinity_required) ? concat(
