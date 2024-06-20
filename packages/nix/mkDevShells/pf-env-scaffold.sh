@@ -29,6 +29,11 @@ if [[ ! -f "$DEVENV_ROOT/$PF_AWS_DIR/config" ]]; then
   exit 1
 fi
 
+if [[ ! -d "$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR" ]]; then
+  echo "Error: Environments directory does not exist. Run pf-update to scaffold repository." >&2
+  exit 1
+fi
+
 ####################################################################
 # Step 1: Argument parsing
 ####################################################################
@@ -162,7 +167,10 @@ declare -A AWS_ACCOUNT_IDS
 declare -A AWS_PROFILES
 
 # Extracts the available AWS profiles from the config file
-AVAILABLE_AWS_PROFILES=$(grep -oP '(?<=\[profile ).*?(?=\])' "$DEVENV_ROOT/$PF_AWS_DIR/config")
+if ! AVAILABLE_AWS_PROFILES=$(grep -oP '(?<=\[profile ).*?(?=\])' "$DEVENV_ROOT/$PF_AWS_DIR/config"); then
+  echo -e "No AWS profiles available in $DEVENV_ROOT/$PF_AWS_DIR/config. Please add one or validate the config file syntax.\n" >&2
+  exit 1
+fi
 
 # Iterate over the environments and collect additional parameters
 for ENV in "${ENVIRONMENTS[@]}"; do
