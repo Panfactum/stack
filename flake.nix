@@ -22,17 +22,19 @@
       packages = forEachSystem (system:
         let pkgs = nixpkgs.legacyPackages.${system};
         in {
-          image = pkgs.dockerTools.buildImage {
+        # See https://github.com/NixOs/nixpkgs/pull/122608 for future optimizations
+          image = pkgs.dockerTools.streamLayeredImage  {
             name = "panfactum";
             tag = "latest";
 
-            copyToRoot = pkgs.buildEnv {
+            contents = pkgs.buildEnv {
               name = "image-root";
               paths = (import ./packages/nix/packages {
                 inherit nixpkgs forEachSystem;
               }).${system};
               pathsToLink = [ "/bin" ];
             };
+            maxLayers = 125;
 
             config = {
               Env = [
