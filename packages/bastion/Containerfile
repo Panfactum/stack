@@ -1,4 +1,4 @@
-FROM docker.io/debian:12-slim as production
+FROM debian:12-slim AS production
 
 LABEL org.opencontainers.image.source=https://github.com/panfactum/stack
 LABEL org.opencontainers.image.description="Bastion host for the Panfactum stack"
