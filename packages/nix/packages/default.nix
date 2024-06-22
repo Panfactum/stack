@@ -186,6 +186,7 @@
     src5.kubectl-cnpg # for managing the cnpg postgres databases
     linkerd # utility for working with the service mesh
     cilium # for managing the cilium CNI
+    src5.argo # utility for working with argo workflows
     src4.cmctl # for working with cert-manager
     src4.stern # log aggregator for quick cli log inspection
     src3.velero # backups of cluster state
