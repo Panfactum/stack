@@ -26,6 +26,7 @@
           image = pkgs.dockerTools.streamLayeredImage  {
             name = "panfactum";
             tag = "latest";
+            fromImage = "gcr.io/distroless/base-debian12:nonroot";
 
             contents = pkgs.buildEnv {
               name = "image-root";
