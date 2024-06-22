@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS SES Domain
-
-<ModuleHeader name="aws_ses_domain" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ses_domain" status="stable" type="direct" />
+<ModuleHeader name="aws_ses_domain" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ses_domain" status="stable" type="direct"/>
 
 Sets up a domain with [AWS SES](https://aws.amazon.com/ses/) for email sending
 
@@ -12,17 +11,17 @@ Sets up a domain with [AWS SES](https://aws.amazon.com/ses/) for email sending
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+-  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
-* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+-  [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_domain" /> [domain](#input_domain)
+### <a name="input_domain"></a> [domain](#input\_domain)
 
 Description: Domain name that will send emails
 
@@ -32,7 +31,15 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_send_from_subdomain" /> [send\_from\_subdomain](#input_send_from_subdomain)
+
+
+
+
+
+
+
+
+### <a name="input_send_from_subdomain"></a> [send\_from\_subdomain](#input\_send\_from\_subdomain)
 
 Description: The default subdomain to send emails from
 
@@ -40,7 +47,7 @@ Type: `string`
 
 Default: `"mail"`
 
-### <a name="input_smtp_allowed_cidrs" /> [smtp\_allowed\_cidrs](#input_smtp_allowed_cidrs)
+### <a name="input_smtp_allowed_cidrs"></a> [smtp\_allowed\_cidrs](#input\_smtp\_allowed\_cidrs)
 
 Description: CIDR blocks that can use the SMTP credentials
 
@@ -52,15 +59,15 @@ Default: `[]`
 
 The following outputs are exported:
 
-### <a name="output_smtp_host" /> [smtp\_host](#output_smtp_host)
+### <a name="output_smtp_host"></a> [smtp\_host](#output\_smtp\_host)
 
 Description: The SMTP server for sending email
 
-### <a name="output_smtp_password" /> [smtp\_password](#output_smtp_password)
+### <a name="output_smtp_password"></a> [smtp\_password](#output\_smtp\_password)
 
 Description: The secret access key converted into an SES SMTP password by applying AWS's Sigv4 conversion algorithm
 
-### <a name="output_smtp_user" /> [smtp\_user](#output_smtp_user)
+### <a name="output_smtp_user"></a> [smtp\_user](#output\_smtp\_user)
 
 Description: The user to use for sending emails via SMTP
 
@@ -77,9 +84,9 @@ it only removes them from the terraform state.
 
 There are three different domain contacts:
 
-* Registrant: The owner of the domain
-* Admin: The person responsible for administrative decisions about the domain
-* Tech: The person responsible for executing changes for the domain
+- Registrant: The owner of the domain
+- Admin: The person responsible for administrative decisions about the domain
+- Tech: The person responsible for executing changes for the domain
 
 It is possible for the same person to serve multiple roles.
 

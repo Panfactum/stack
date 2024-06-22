@@ -251,6 +251,13 @@ resource "helm_release" "ebs_csi_driver" {
         tolerateAllTaints = false // This prevents nodes from being detached in a timely manner
         tolerations = concat(
           [
+            // This is required b/c otherwise storage won't be detached during node shutdown
+            {
+              key      = "karpenter.sh/disruption"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+
             // These are required b/c storage binding should never be disabled, even under resource pressure
             {
               key      = "node.kubernetes.io/unreachable"

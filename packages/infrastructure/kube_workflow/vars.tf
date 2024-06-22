@@ -153,12 +153,6 @@ variable "panfactum_scheduler_enabled" {
   default     = true
 }
 
-variable "termination_grace_period_seconds" {
-  description = "The default number of seconds to wait for graceful termination before forcing termination"
-  type        = number
-  default     = 30
-}
-
 variable "extra_pod_labels" {
   description = "Extra Pod labels to use"
   type        = map(string)
@@ -266,8 +260,8 @@ variable "entrypoint" {
 }
 
 variable "templates" {
-  description = "The workflow templates"
-  type        = list(any)
+  description = "A list of workflow templates. See https://argo-workflows.readthedocs.io/en/stable/fields/#template."
+  type = any
 }
 
 variable "retry_backoff_initial_duration_seconds" {
@@ -363,27 +357,15 @@ variable "linux_capabilities" {
   default     = []
 }
 
-variable "minimum_memory" {
-  description = "The minimum amount of memory to allocate to containers by default (MB)"
-  type        = number
-  default     = 100
-}
-
-variable "maximum_memory" {
-  description = "The maximum amount of memory to allocate to containers by default (MB) (default to minimum memory)"
-  type        = number
-  default     = null
-}
-
-variable "minimum_cpu" {
-  description = "The minimum amount of cpu to allocate to containers by default (millicores)"
-  type        = number
-  default     = 10
-}
-
-variable "maximum_cpu" {
-  description = "The maximum amount of cpu to allocate to containers by default (millicores)"
-  type        = number
-  default     = null
+variable "arguments" {
+  description = "The arguments to set for the Workflow"
+  type = object({
+    artifacts = optional(list(any), [])
+    parameters = optional(list(any), [])
+  })
+  default = {
+    artifacts = []
+    parameters = []
+  }
 }
 

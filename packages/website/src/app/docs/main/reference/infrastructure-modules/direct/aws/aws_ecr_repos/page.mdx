@@ -3,20 +3,19 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS ECR Repositories
-
-<ModuleHeader name="aws_ecr_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_repos" status="stable" type="direct" />
+<ModuleHeader name="aws_ecr_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_repos" status="stable" type="direct"/>
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_ecr_repository_names" /> [ecr\_repository\_names](#input_ecr_repository_names)
+### <a name="input_ecr_repository_names"></a> [ecr\_repository\_names](#input\_ecr\_repository\_names)
 
 Description: The names of the repositories to create.
 
@@ -26,7 +25,8 @@ Type: `list(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_expire_tagged_images" /> [expire\_tagged\_images](#input_expire_tagged_images)
+
+### <a name="input_expire_tagged_images"></a> [expire\_tagged\_images](#input\_expire\_tagged\_images)
 
 Description: Whether tagged images should be removed after 14 days
 
@@ -34,7 +34,8 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_is_immutable" /> [is\_immutable](#input_is_immutable)
+
+### <a name="input_is_immutable"></a> [is\_immutable](#input\_is\_immutable)
 
 Description: Whether immutable tags are enabled
 
@@ -42,7 +43,13 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_trusted_account_ids" /> [trusted\_account\_ids](#input_trusted_account_ids)
+
+
+
+
+
+
+### <a name="input_trusted_account_ids"></a> [trusted\_account\_ids](#input\_trusted\_account\_ids)
 
 Description: The ids of the accounts that have completed access to each repository.
 
@@ -54,7 +61,7 @@ Default: `[]`
 
 The following outputs are exported:
 
-### <a name="output_repos" /> [repos](#output_repos)
+### <a name="output_repos"></a> [repos](#output\_repos)
 
 Description: n/a
 

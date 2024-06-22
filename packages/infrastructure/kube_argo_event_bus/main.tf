@@ -32,10 +32,12 @@ data "aws_region" "current" {}
 module "util" {
   source                               = "../kube_workload_utility"
   workload_name                        = "argo-event-bus"
-  instance_type_anti_affinity_required = true
-  zone_anti_affinity_required          = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  zone_anti_affinity_required          = var.enhanced_ha_enabled
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
+  topology_spread_enabled = true
+  topology_spread_strict = true // stateful workload
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -141,6 +143,8 @@ resource "kubectl_manifest" "event_bus" {
   #    }
   #  }
 }
+
+# TODO: PVC Autoscaling annotations
 
 
 resource "kubectl_manifest" "vpa_event_bus" {

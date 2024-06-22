@@ -1,7 +1,8 @@
 {
   inputs = {
-    panfactum.url = "github:panfactum/stack/main";
-    #panfactum.url = "path:../.."; # When developing locally, use this to test changes, but don't forget to change it back before committing!
+    #panfactum.url = "github:panfactum/stack/main";
+    panfactum.url =
+      "path:../.."; # When developing locally, use this to test changes, but don't forget to change it back before committing!
     pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
   };
 

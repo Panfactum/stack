@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS Load Balancer Controller
-
-<ModuleHeader name="kube_aws_lb_controller" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_lb_controller" status="stable" type="direct" />
+<ModuleHeader name="kube_aws_lb_controller" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_lb_controller" status="stable" type="direct"/>
 
 [Documentation](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.7/)
 
@@ -12,33 +11,33 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+-  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+-  [kubectl](#requirement\_kubectl) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+-  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
 
 Description: The name of the EKS cluster that this is being deployed to
 
 Type: `string`
 
-### <a name="input_subnets" /> [subnets](#input_subnets)
+### <a name="input_subnets"></a> [subnets](#input\_subnets)
 
 Description: List of subnet names to deploy load balancers into. Must be in at least two different availability zones.
 
 Type: `set(string)`
 
-### <a name="input_vpc_id" /> [vpc\_id](#input_vpc_id)
+### <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id)
 
 Description: The ID of the VPC to use for AWS networked resources
 
@@ -48,7 +47,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_alb_controller_helm_version" /> [alb\_controller\_helm\_version](#input_alb_controller_helm_version)
+### <a name="input_alb_controller_helm_version"></a> [alb\_controller\_helm\_version](#input\_alb\_controller\_helm\_version)
 
 Description: The version of aws-application-loadbalancer-controller helm chart to deploy
 
@@ -56,7 +55,7 @@ Type: `string`
 
 Default: `"1.8.0"`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### <a name="input_aws_iam_ip_allow_list"></a> [aws\_iam\_ip\_allow\_list](#input\_aws\_iam\_ip\_allow\_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -64,7 +63,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### <a name="input_enhanced_ha_enabled"></a> [enhanced\_ha\_enabled](#input\_enhanced\_ha\_enabled)
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -72,7 +71,10 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+
+
+### <a name="input_log_level"></a> [log\_level](#input\_log\_level)
 
 Description: The log level for the ALB controller pods
 
@@ -80,7 +82,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### <a name="input_monitoring_enabled"></a> [monitoring\_enabled](#input\_monitoring\_enabled)
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -88,7 +90,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### <a name="input_panfactum_scheduler_enabled"></a> [panfactum\_scheduler\_enabled](#input\_panfactum\_scheduler\_enabled)
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -96,7 +98,11 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+
+
+
+### <a name="input_pull_through_cache_enabled"></a> [pull\_through\_cache\_enabled](#input\_pull\_through\_cache\_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -104,7 +110,8 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
 
 Description: Whether the VPA resources should be enabled
 

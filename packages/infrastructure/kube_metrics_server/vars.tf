@@ -19,7 +19,7 @@ variable "pull_through_cache_enabled" {
 variable "log_verbosity" {
   description = "The log verbosity (0-9) for the metrics-server pods"
   type        = number
-  default     = 0
+  default     = 5
 }
 
 variable "monitoring_enabled" {

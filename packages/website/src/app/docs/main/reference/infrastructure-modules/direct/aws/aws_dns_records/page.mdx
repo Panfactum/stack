@@ -3,26 +3,25 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS DNS Records
-
-<ModuleHeader name="aws_dns_records" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_dns_records" status="stable" type="direct" />
+<ModuleHeader name="aws_dns_records" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_dns_records" status="stable" type="direct"/>
 
 This module is used to deploy the following DNS record types
 to the indicated hosted zones:
 
-* [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
-* [TXT](https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/)
+- [MX](https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/)
+- [TXT](https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/)
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_zones" /> [zones](#input_zones)
+### <a name="input_zones"></a> [zones](#input\_zones)
 
 Description: Zone configurations. Keys are the domain names.
 
@@ -46,6 +45,14 @@ map(object({
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+
+
+
+
+
+
+
 
 ## Outputs
 

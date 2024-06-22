@@ -5,17 +5,18 @@
     pkgs = nixpkgs.legacyPackages.${system};
 
     # Utitily functions
-    utilBuilder = dir: {
-      customNixModule = module: import ./${dir}/${module}.nix { inherit pkgs; };
+    util = {
+      customNixModule = module: import ./${module}.nix { inherit pkgs; };
       customShellScript = name:
         (pkgs.writeScriptBin name
-          (builtins.readFile ./${dir}/${name}.sh)).overrideAttrs (old: {
+          (builtins.readFile ./${name}.sh)).overrideAttrs (old: {
             buildCommand = ''
               ${old.buildCommand}
-               patchShebangs $out'';
+               patchShebangs $out
+            '';
+            env = { };
           });
     };
-    util = utilBuilder ".";
 
     # Pinned Package Sources
     src1 = import (pkgs.fetchFromGitHub {
@@ -193,6 +194,14 @@
     src3.k9s # kubernetes tui
     (util.customShellScript
       "pf-eks-reset") # script for resetting cluster during bootstrapping
+
+    ####################################
+    # BuildKit Management
+    ####################################
+    (util.customShellScript "pf-buildkit-scale-up")
+    (util.customShellScript "pf-buildkit-scale-down")
+    (util.customShellScript "pf-buildkit-validate")
+    (util.customShellScript "pf-buildkit-get-address")
 
     ####################################
     # Hashicorp Vault

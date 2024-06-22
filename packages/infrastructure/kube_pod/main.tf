@@ -240,10 +240,10 @@ locals {
   // Note: we allow some extra permissions when running in local dev mode
   security_context = {
     for container in var.containers : container.name => {
-      runAsGroup               = container.run_as_root ? 0 : var.is_local ? 0 : 1000
+      runAsGroup               = container.run_as_root ? 0 : var.is_local ? 0 : container.uid
       runAsUser                = container.run_as_root ? 0 : var.is_local ? 0 : container.uid
       runAsNonRoot             = !container.run_as_root && !var.is_local
-      allowPrivilegeEscalation = container.run_as_root || container.privileged || var.is_local
+      allowPrivilegeEscalation = container.run_as_root || container.privileged || contains(container.linux_capabilities, "SYS_ADMIN")
       readOnlyRootFilesystem   = !var.is_local && container.readonly
       privileged               = container.privileged
       capabilities = {
@@ -407,6 +407,8 @@ module "util" {
   topology_spread_enabled               = var.topology_spread_enabled
   topology_spread_strict                = var.topology_spread_strict
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  node_requirements = var.node_requirements
+  node_preferences = var.node_preferences
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

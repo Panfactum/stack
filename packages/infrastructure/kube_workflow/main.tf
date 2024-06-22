@@ -104,6 +104,66 @@ locals {
   )
 
   /************************************************
+  * Volumes
+  ************************************************/
+
+  common_volumes = concat(
+    [for name, config in var.tmp_directories : {
+      name = replace(name, "/[^a-z0-9]/", "")
+      emptyDir = {
+        sizeLimit = "${config.size_mb}Mi"
+      }
+    } if config.node_local],
+    [for name, config in var.tmp_directories : {
+      name = replace(name, "/[^a-z0-9]/", "")
+      ephemeral = {
+        volumeClaimTemplate = {
+          metadata = {
+            annotations = {
+              "velero.io/exclude-from-backups" = "true" // ephemeral storage shouldn't be backed up
+            }
+          }
+          spec = {
+            accessModes      = ["ReadWriteOnce"]
+            storageClassName = "ebs-standard"
+            volumeMode       = "Filesystem"
+            resources = {
+              requests = {
+                storage = "${config.size_mb}Mi"
+              }
+            }
+          }
+        }
+      }
+    } if !config.node_local],
+    [for name, config in var.secret_mounts : {
+      name = "secret-${name}"
+      secret = {
+        secretName = name
+        optional   = config.optional
+      }
+    }],
+    [for name, config in var.config_map_mounts : {
+      name = "config-map-${name}"
+      configMap = {
+        name     = name
+        defaultMode = 511 # TODO: Make a flag -- Give all permissions so we can mount executables
+        optional = config.optional
+      }
+    }],
+    [for path, config in local.dynamic_env_secrets_by_provider : {
+      name = path
+      csi = {
+        driver   = "secrets-store.csi.k8s.io"
+        readOnly = true
+        volumeAttributes = {
+          secretProviderClass = path
+        }
+      }
+    }]
+  )
+
+  /************************************************
   * Mounts
   ************************************************/
 
@@ -135,41 +195,22 @@ locals {
     local.common_config_map_volume_mounts,
     local.common_dynamic_secret_volume_mounts
   )
+
   /************************************************
-  * Workflow Definition
+  * Container Security Context
   ************************************************/
 
-  pod_spec_patch = {
-    containers = [
-      {
-        name         = "main"
-        env          = local.common_env
-        volumeMounts = local.common_volume_mounts
-        securityContext = {
-          runAsGroup               = var.run_as_root ? 0 : var.uid
-          runAsUser                = var.run_as_root ? 0 : var.uid
-          runAsNonRoot             = !var.run_as_root
-          allowPrivilegeEscalation = var.run_as_root || var.privileged
-          readOnlyRootFilesystem   = var.read_only_root_fs
-          privileged               = var.privileged
-          capabilities = {
-            add  = var.linux_capabilities
-            drop = var.privileged ? [] : ["ALL"]
-          }
-        }
-        resources = {
-          requests = {
-            memory = "${var.minimum_memory}Mi"
-            cpu    = "${var.minimum_cpu}m"
-          }
-          limits = { for k, v in {
-            memory = "${var.maximum_memory == null ? var.minimum_memory : var.maximum_memory}Mi"
-            cpu    = var.maximum_cpu == null ? null : "${var.maximum_cpu}m"
-          } : k => v if v != null }
-        }
-      }
-    ]
-    terminationGracePeriodSeconds = var.termination_grace_period_seconds
+  security_context = {
+    runAsGroup               = var.run_as_root ? 0 : var.uid
+    runAsUser                = var.run_as_root ? 0 : var.uid
+    runAsNonRoot             = !var.run_as_root
+    allowPrivilegeEscalation = var.run_as_root || var.privileged
+    readOnlyRootFilesystem   = var.read_only_root_fs
+    privileged               = var.privileged
+    capabilities = {
+      add  = var.linux_capabilities
+      drop = var.privileged ? [] : ["ALL"]
+    }
   }
 
   /************************************************
@@ -182,6 +223,7 @@ locals {
     artifactGC = var.delete_artifacts_on_deletion ? {
       strategy = "OnWorkflowDeletion"
     } : null
+    arguments = var.arguments
     dnsPolicy   = var.dns_policy
     entrypoint  = var.entrypoint
     onExit      = var.on_exit
@@ -196,7 +238,6 @@ locals {
       annotations = var.pod_annotations
     }
     podPriorityClassName = var.priority_class_name
-    #podSpecPatch = jsonencode(local.pod_spec_patch)
     priority = var.priority
     retryStrategy = { for k, v in {
       #      affinity = {
@@ -214,7 +255,7 @@ locals {
     schedulerName = module.util.scheduler_name
     securityContext = {
       fsGroup      = var.run_as_root ? 0 : var.uid
-      runAsNonRoot = var.run_as_root
+      runAsNonRoot = false // Argo's executor must run as root
       runAsUser    = var.run_as_root ? 0 : var.uid
       runAsGroup   = var.run_as_root ? 0 : var.uid
     }
@@ -227,9 +268,6 @@ locals {
           key  = "workflow"
         }
       }
-    }
-    templateDefaults = {
-      podSpecPatch = jsonencode(local.pod_spec_patch)
     }
     templates   = var.templates
     tolerations = module.util.tolerations
@@ -258,60 +296,6 @@ locals {
         }
       }
     }]
-    volumes = concat(
-      [for name, config in var.tmp_directories : {
-        name = replace(name, "/[^a-z0-9]/", "")
-        emptyDir = {
-          sizeLimit = "${config.size_mb}Mi"
-        }
-      } if config.node_local],
-      [for name, config in var.tmp_directories : {
-        name = replace(name, "/[^a-z0-9]/", "")
-        ephemeral = {
-          volumeClaimTemplate = {
-            metadata = {
-              annotations = {
-                "velero.io/exclude-from-backups" = "true" // ephemeral storage shouldn't be backed up
-              }
-            }
-            spec = {
-              accessModes      = ["ReadWriteOnce"]
-              storageClassName = "ebs-standard"
-              volumeMode       = "Filesystem"
-              resources = {
-                requests = {
-                  storage = "${config.size_mb}Mi"
-                }
-              }
-            }
-          }
-        }
-      } if !config.node_local],
-      [for name, config in var.secret_mounts : {
-        name = "secret-${name}"
-        secret = {
-          secretName = name
-          optional   = config.optional
-        }
-      }],
-      [for name, config in var.config_map_mounts : {
-        name = "config-map-${name}"
-        configMap = {
-          name     = name
-          optional = config.optional
-        }
-      }],
-      [for path, config in local.dynamic_env_secrets_by_provider : {
-        name = path
-        csi = {
-          driver   = "secrets-store.csi.k8s.io"
-          readOnly = true
-          volumeAttributes = {
-            secretProviderClass = path
-          }
-        }
-      }]
-    )
     workflowMetadata = {
       labels      = merge(module.util.labels, var.extra_workflow_labels)
       annotations = var.workflow_annotations

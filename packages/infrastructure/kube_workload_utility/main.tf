@@ -54,7 +54,7 @@ locals {
       }
     }
     required = {
-      nodeSelectorTerms = {
+      nodeSelectorTerms = [{
         matchExpressions = concat(
           var.controller_node_required ? [
             {
@@ -66,10 +66,10 @@ locals {
           [for key, value in var.node_requirements : {
             key      = key
             operator = "In"
-            values   = [value]
+            values   = value
           }]
         )
-      }
+      }]
     }
   }
 
@@ -128,7 +128,7 @@ locals {
           }
         }]
       )
-      requiredDuringSchedulingIgnoredDuringExecution = length(local.node_affinity.required.nodeSelectorTerms.matchExpressions) != 0 ? local.node_affinity.required : null
+      requiredDuringSchedulingIgnoredDuringExecution = length(local.node_affinity.required.nodeSelectorTerms[0].matchExpressions) != 0 ? local.node_affinity.required : null
     } : k => v if v != null }
     podAntiAffinity = { for k, v in {
       requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.instance_type_anti_affinity_required) ? concat(

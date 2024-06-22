@@ -21,6 +21,7 @@ locals {
 
   name      = "buildkit"
   namespace = module.namespace.namespace
+  arch = toset(["amd64", "arm64"])
 
   port = 1234
 
@@ -97,9 +98,10 @@ data "aws_iam_policy_document" "buildkit" {
 }
 
 module "aws_permissions" {
+  for_each = local.arch
   source = "../kube_sa_auth_aws"
 
-  service_account           = module.buildkit.service_account_name
+  service_account           = module.buildkit[each.key].service_account_name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.buildkit.json
@@ -120,32 +122,50 @@ module "aws_permissions" {
 
 module "buildkit" {
   source = "../kube_stateful_set"
+  for_each = local.arch
 
-  name                             = "buildkit"
+  name                             = "${local.name}-${each.key}"
   namespace                        = local.namespace
   pod_management_policy            = "Parallel"
   replicas                         = 1
   ignore_replica_count             = true
   panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
+  arm_nodes_enabled = each.key == "arm64"
+  node_requirements = {
+    "kubernetes.io/arch" = [each.key]
+  }
+  spot_nodes_enabled = true
   termination_grace_period_seconds = 30 * 60
 
   # We don't use the VPA for the builder b/c the workloads are extremely uneven
   # and we never want to disrupt the builder pods
   vpa_enabled     = false
-  max_unavailable = 1
+  max_unavailable = 0
 
+  common_env = {
+    XDG_RUNTIME_DIR = "/home/user/.local/tmp"
+  }
+  pod_annotations = {
+    "container.apparmor.security.beta.kubernetes.io/buildkitd" = "unconfined"
+  }
   containers = [
     {
-      name    = local.name
+      name    = "buildkitd"
       image   = "${module.pull_through.docker_hub_registry}/moby/buildkit"
-      version = "v0.12.2"
+      version = "v0.14.1-rootless"
       command = [
+        "rootlesskit",
         "buildkitd",
         "--addr", "tcp://0.0.0.0:${local.port}",
-        "--addr", "unix:///run/buildkit/buildkitd.sock"
+        "--addr", "unix:///run/user/1000/buildkit/buildkitd.sock",
+        "--oci-worker-no-process-sandbox"
       ]
-      privileged             = true
-      run_as_root            = true
+      uid = 1000
+      linux_capabilities = [
+        "SYS_ADMIN",
+        "SETUID",
+        "SETGID"
+      ]
       liveness_check_type    = "exec"
       liveness_check_command = ["buildctl", "debug", "workers"]
       minimum_cpu            = var.cpu_millicores
@@ -160,13 +180,23 @@ module "buildkit" {
       storage_class_name = "ebs-standard"
       access_modes       = ["ReadWriteOnce"]
       increase_gb        = 25
-      mount_path         = "/var/lib/buildkit"
+      mount_path         = "/home/user/.local/share/buildkit"
     }
   }
 
   tmp_directories = {
+    "tmp" = {
+      mount_path = "/home/user/.local/tmp"
+      size_mb    = 100
+      node_local = true
+    }
+    "root-tmp" = {
+      mount_path = "/tmp"
+      size_mb    = 10
+      node_local = true
+    }
     "run" = {
-      mount_path = "/run/buildkit"
+      mount_path = "/run/user/1000/buildkit"
       size_mb    = 10
       node_local = true
     }
@@ -175,7 +205,6 @@ module "buildkit" {
   volume_retention_policy = {
     when_deleted = "Delete"
   }
-
 
   ports = {
     buildkitd = {
@@ -196,16 +225,17 @@ module "buildkit" {
 }
 
 resource "kubernetes_horizontal_pod_autoscaler_v2" "autoscaler" {
+  for_each = local.arch
   metadata {
-    name      = local.name
+    name      = "${local.name}-${each.key}"
     namespace = local.namespace
-    labels    = module.buildkit.labels
+    labels    = module.buildkit[each.key].labels
   }
   spec {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "StatefulSet"
-      name        = local.name
+      name        = "${local.name}-${each.key}"
     }
     min_replicas = var.min_replicas
     max_replicas = var.max_replicas
@@ -305,16 +335,17 @@ module "scale_to_zero" {
   namespace                   = local.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   spot_nodes_enabled          = true
+  arm_nodes_enabled = true
   burstable_nodes_enabled     = true
 
   cron_schedule = "*/15 * * * *"
   containers = [{
     name    = "scale-to-zero"
     image   = "${module.pull_through.github_registry}/panfactum/panfactum"
-    version = "alpha.3"
+    version = "main"
     command = [
-      "/bin/scale-buildkit",
-      "--attempt-scale-down",
+      "/bin/pf-buildkit-scale-down",
+      "--timeout",
       tostring(var.scale_down_delay_seconds)
     ]
   }]

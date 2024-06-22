@@ -79,7 +79,7 @@ resource "kubernetes_role_binding" "role_binding" {
 data "kubernetes_config_map" "artifact_config" {
   metadata {
     name      = "artifact-repositories"
-    namespace = var.service_account_namespace
+    namespace = "argo"
   }
 }
 

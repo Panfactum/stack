@@ -3,38 +3,37 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS Virtual Private Cloud (VPC)
-
-<ModuleHeader name="aws_vpc" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_vpc" status="stable" type="direct" />
+<ModuleHeader name="aws_vpc" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_vpc" status="stable" type="direct"/>
 
 This module configures the following infrastructure resources for a Virtual Private Cloud:
 
-* Establishes a [VPC](https://aws.amazon.com/vpc/)
+- Establishes a [VPC](https://aws.amazon.com/vpc/)
 
-* Deploys [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) with associated [CIDR reservations](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-cidr-reservation.html) and [Route tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
+- Deploys [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) with associated [CIDR reservations](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-cidr-reservation.html) and [Route tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
 
-* [NAT](https://en.wikipedia.org/wiki/Network_address_translation) instances with static [Elastic IP](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html)
+- [NAT](https://en.wikipedia.org/wiki/Network_address_translation) instances with static [Elastic IP](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html)
   addresses associated and mapped correctly.
 
-* An [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow resources that get public IPs in the VPC to be accessible from the internet.
+- An [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow resources that get public IPs in the VPC to be accessible from the internet.
 
-* [VPC peering](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html) as required with resources outside the VPC.
+- [VPC peering](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html) as required with resources outside the VPC.
 
-* Full [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) with appropriate retention and tiering for compliance and cost management.
+- Full [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) with appropriate retention and tiering for compliance and cost management.
 
-* An [S3 Gateway endpoint](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) for free network
+- An [S3 Gateway endpoint](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) for free network
   traffic to/from AWS S3
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_subnets" /> [subnets](#input_subnets)
+### <a name="input_subnets"></a> [subnets](#input\_subnets)
 
 Description: Subnet configuration
 
@@ -49,13 +48,13 @@ map(object({
   }))
 ```
 
-### <a name="input_vpc_cidr" /> [vpc\_cidr](#input_vpc_cidr)
+### <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr)
 
 Description: The main CIDR range for the VPC.
 
 Type: `string`
 
-### <a name="input_vpc_name" /> [vpc\_name](#input_vpc_name)
+### <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name)
 
 Description: The name of the VPC resource.
 
@@ -65,7 +64,10 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_nat_associations" /> [nat\_associations](#input_nat_associations)
+
+
+
+### <a name="input_nat_associations"></a> [nat\_associations](#input\_nat\_associations)
 
 Description: A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values represent destination subnets that will contain the NAT resources.
 
@@ -73,7 +75,12 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_vpc_extra_tags" /> [vpc\_extra\_tags](#input_vpc_extra_tags)
+
+
+
+
+
+### <a name="input_vpc_extra_tags"></a> [vpc\_extra\_tags](#input\_vpc\_extra\_tags)
 
 Description: Extra tags to add to the VPC resource.
 
@@ -81,7 +88,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_vpc_flow_logs_enabled" /> [vpc\_flow\_logs\_enabled](#input_vpc_flow_logs_enabled)
+### <a name="input_vpc_flow_logs_enabled"></a> [vpc\_flow\_logs\_enabled](#input\_vpc\_flow\_logs\_enabled)
 
 Description: Whether to enable VPC flow logs
 
@@ -89,7 +96,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpc_flow_logs_expire_after_days" /> [vpc\_flow\_logs\_expire\_after\_days](#input_vpc_flow_logs_expire_after_days)
+### <a name="input_vpc_flow_logs_expire_after_days"></a> [vpc\_flow\_logs\_expire\_after\_days](#input\_vpc\_flow\_logs\_expire\_after\_days)
 
 Description: How many days until VPC flow logs expire.
 
@@ -97,7 +104,7 @@ Type: `number`
 
 Default: `30`
 
-### <a name="input_vpc_peer_acceptances" /> [vpc\_peer\_acceptances](#input_vpc_peer_acceptances)
+### <a name="input_vpc_peer_acceptances"></a> [vpc\_peer\_acceptances](#input\_vpc\_peer\_acceptances)
 
 Description: A list of VPC peering requests to accept. All VPC peers will be routable from all subnets.
 
@@ -117,23 +124,23 @@ Default: `{}`
 
 The following outputs are exported:
 
-### <a name="output_nat_ips" /> [nat\_ips](#output_nat_ips)
+### <a name="output_nat_ips"></a> [nat\_ips](#output\_nat\_ips)
 
 Description: n/a
 
-### <a name="output_subnet_info" /> [subnet\_info](#output_subnet_info)
+### <a name="output_subnet_info"></a> [subnet\_info](#output\_subnet\_info)
 
 Description: Outputs a map of Subnet info.
 
-### <a name="output_test_config" /> [test\_config](#output_test_config)
+### <a name="output_test_config"></a> [test\_config](#output\_test\_config)
 
 Description: Configuration for the pf-vpc-network-test command
 
-### <a name="output_vpc_cidr" /> [vpc\_cidr](#output_vpc_cidr)
+### <a name="output_vpc_cidr"></a> [vpc\_cidr](#output\_vpc\_cidr)
 
 Description: n/a
 
-### <a name="output_vpc_id" /> [vpc\_id](#output_vpc_id)
+### <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id)
 
 Description: n/a
 
@@ -148,7 +155,7 @@ project.
 This means that instead of using an [AWS NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html), we perform NAT through
 EC2 instances deployed into autoscaling groups.
 
-Why? NAT Gateways are *extremely* expensive for what they do. For many organizations,
+Why? NAT Gateways are _extremely_ expensive for what they do. For many organizations,
 this single infrastructure component can be 10-50% of total AWS spend. Because NAT
 is trivial to implement in linux, we can reduce this spend by over 90% by implementing
 it ourselves as we do in this module.
@@ -159,19 +166,19 @@ IP whitelisting purposes.
 
 This setup does come with some limitations:
 
-* *Outbound* network bandwidth is limited to 5 Gbit/s per AZ (vs 25 Gbit/s for AWS NAT Gateways)
-* *Outbound* network connectivity in each AZ is impacted by the health of a single EC2 node
+- _Outbound_ network bandwidth is limited to 5 Gbit/s per AZ (vs 25 Gbit/s for AWS NAT Gateways)
+- _Outbound_ network connectivity in each AZ is impacted by the health of a single EC2 node
 
 In practice, these limitations rarely impact an organization, especially as they only
-impact *outbound* connections (not inbound traffic):
+impact _outbound_ connections (not inbound traffic):
 
-* If you need > 5 Gbit/s of outbound public internet traffic, you would usually establish
+- If you need > 5 Gbit/s of outbound public internet traffic, you would usually establish
   a private network tunnel to the destination to improve throughput beyond even 25 Gbit/s.
-* The EC2 nodes are *extremely* stable as NAT only relies on functionality that is
+- The EC2 nodes are _extremely_ stable as NAT only relies on functionality that is
   native to the linux kernel (we have never seen a NAT node crash).
-* The primary downside  is that during NAT node upgrades,
+- The primary downside  is that during NAT node upgrades,
   outbound network connectivity will be temporarily
-  suspended. This typically manifests as a \~2 minute delay in outbound traffic. Upgrades
+  suspended. This typically manifests as a ~2 minute delay in outbound traffic. Upgrades
   are typically only necessary every 6 months, so you can still easily achieve 99.99% uptime
   in this configuration.
 
@@ -179,7 +186,7 @@ impact *outbound* connections (not inbound traffic):
 
 ### NAT
 
-* [Reduce fck-nat downtime during node upgrades](https://github.com/Panfactum/stack/issues/12)
-* [Allow using AWS NAT Gateway instead of fck-nat](https://github.com/Panfactum/stack/issues/13)
+- [Reduce fck-nat downtime during node upgrades](https://github.com/Panfactum/stack/issues/12)
+- [Allow using AWS NAT Gateway instead of fck-nat](https://github.com/Panfactum/stack/issues/13)
 
 {/* lint enable no-duplicate-headings */}

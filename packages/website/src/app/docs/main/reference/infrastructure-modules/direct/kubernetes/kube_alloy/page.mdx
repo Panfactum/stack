@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # Alloy
-
-<ModuleHeader name="kube_alloy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_alloy" status="alpha" type="direct" />
+<ModuleHeader name="kube_alloy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_alloy" status="alpha" type="direct"/>
 
 This module deploys [Grafana Alloy](https://grafana.com/docs/alloy/latest/)
 for collecting logs and traces from various ecosystem components
@@ -13,15 +12,15 @@ for collecting logs and traces from various ecosystem components
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+-  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+-  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+-  [kubectl](#requirement\_kubectl) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+-  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -31,7 +30,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_alloy_chart_version" /> [alloy\_chart\_version](#input_alloy_chart_version)
+### <a name="input_alloy_chart_version"></a> [alloy\_chart\_version](#input\_alloy\_chart\_version)
 
 Description: The version of the grafana/alloy helm chart to deploy
 
@@ -39,7 +38,10 @@ Type: `string`
 
 Default: `"0.3.1"`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+
+
+### <a name="input_log_level"></a> [log\_level](#input\_log\_level)
 
 Description: The log level for the Alloy pods
 
@@ -47,7 +49,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### <a name="input_monitoring_enabled"></a> [monitoring\_enabled](#input\_monitoring\_enabled)
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -55,7 +57,11 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+
+
+
+### <a name="input_pull_through_cache_enabled"></a> [pull\_through\_cache\_enabled](#input\_pull\_through\_cache\_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -63,7 +69,8 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -75,7 +82,7 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_namespace" /> [namespace](#output_namespace)
+### <a name="output_namespace"></a> [namespace](#output\_namespace)
 
 Description: n/a
 

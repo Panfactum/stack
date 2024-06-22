@@ -492,11 +492,11 @@ resource "helm_release" "argo" {
         }
         resources = {
           requests = {
-            memory = "20Mi"
+            memory = "50Mi"
             cpu    = "10m"
           }
           limits = {
-            memory = "26Mi"
+            memory = "70Mi"
           }
         }
       }
@@ -905,6 +905,20 @@ resource "kubectl_manifest" "pdb_webhook" {
 * Argo RBAC
 ***************************************/
 
+// This is required to view logs from argo-events
+// See https://github.com/argoproj/argo-events/issues/2176
+resource "kubernetes_cluster_role" "argo_pods_viewer" {
+  metadata {
+    name = "argo-pods-viewer"
+    labels = module.util_server.labels
+  }
+  rule {
+    api_groups = [""]
+    verbs = ["get", "list", "watch"]
+    resources = ["pods", "pods/log", "events"]
+  }
+}
+
 resource "time_rotating" "token_rotation" {
   rotation_days = 7
 }
@@ -954,6 +968,24 @@ resource "kubernetes_cluster_role_binding" "superuser_events_binding" {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
     name      = "argo-events-aggregate-to-admin" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+resource "kubernetes_cluster_role_binding" "superuser_pods_binding" {
+  metadata {
+    name   = "argo-pods-superuser"
+    labels = module.util_server.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.superuser.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.argo_pods_viewer.metadata[0].name
   }
   depends_on = [helm_release.argo_events]
 }

@@ -32,11 +32,15 @@ inputs = {
   service_cidr          = "172.20.0.0/16"
   dns_service_ip        = "172.20.0.10"
 
-  controller_node_count          = 1
-  controller_node_instance_types = ["t3a.medium"]
   controller_node_subnets = [
     "PRIVATE_A",
     "PRIVATE_B",
     "PRIVATE_C"
   ]
+
+  # WARNING: These settings are for AFTER you have deployed the
+  # autoscalers. If you are following the bootstrapping guide,
+  # please follow the recommendations in the documentation.
+  controller_node_count          = 1
+  controller_node_instance_types = ["t3a.medium"]
 }

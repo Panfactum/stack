@@ -3,42 +3,41 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # Argo Workflows
-
-<ModuleHeader name="kube_argo" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo" status="alpha" type="direct" />
+<ModuleHeader name="kube_argo" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo" status="alpha" type="direct"/>
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+-  [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+-  [kubectl](#requirement\_kubectl) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+-  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+-  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
-* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+-  [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+-  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_argo_domain" /> [argo\_domain](#input_argo_domain)
+### <a name="input_argo_domain"></a> [argo\_domain](#input\_argo\_domain)
 
 Description: The domain to use for the argo UI. Must be in a subdomain available to the environment.
 
 Type: `string`
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### <a name="input_eks_cluster_name"></a> [eks\_cluster\_name](#input\_eks\_cluster\_name)
 
 Description: The name of the EKS cluster that contains the service account.
 
 Type: `string`
 
-### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+### <a name="input_vault_domain"></a> [vault\_domain](#input\_vault\_domain)
 
 Description: The domain of the Vault instance running in the cluster.
 
@@ -48,7 +47,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_argo_events_helm_version" /> [argo\_events\_helm\_version](#input_argo_events_helm_version)
+### <a name="input_argo_events_helm_version"></a> [argo\_events\_helm\_version](#input\_argo\_events\_helm\_version)
 
 Description: The version of the argo events helm chart to deploy
 
@@ -56,7 +55,7 @@ Type: `string`
 
 Default: `"2.4.4"`
 
-### <a name="input_argo_workflows_helm_version" /> [argo\_workflows\_helm\_version](#input_argo_workflows_helm_version)
+### <a name="input_argo_workflows_helm_version"></a> [argo\_workflows\_helm\_version](#input\_argo\_workflows\_helm\_version)
 
 Description: The version of the argo workflows helm chart to deploy
 
@@ -64,7 +63,7 @@ Type: `string`
 
 Default: `"0.41.1"`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### <a name="input_aws_iam_ip_allow_list"></a> [aws\_iam\_ip\_allow\_list](#input\_aws\_iam\_ip\_allow\_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -72,7 +71,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### <a name="input_enhanced_ha_enabled"></a> [enhanced\_ha\_enabled](#input\_enhanced\_ha\_enabled)
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -80,7 +79,8 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_event_bus_nats_server_config_reloader_version" /> [event\_bus\_nats\_server\_config\_reloader\_version](#input_event_bus_nats_server_config_reloader_version)
+
+### <a name="input_event_bus_nats_server_config_reloader_version"></a> [event\_bus\_nats\_server\_config\_reloader\_version](#input\_event\_bus\_nats\_server\_config\_reloader\_version)
 
 Description: The version of nats-server-config-reloader to use for the event bus
 
@@ -88,7 +88,7 @@ Type: `string`
 
 Default: `"0.14.2"`
 
-### <a name="input_event_bus_nats_version" /> [event\_bus\_nats\_version](#input_event_bus_nats_version)
+### <a name="input_event_bus_nats_version"></a> [event\_bus\_nats\_version](#input\_event\_bus\_nats\_version)
 
 Description: The version of nats to use for the event bus
 
@@ -96,7 +96,7 @@ Type: `string`
 
 Default: `"2.10.14"`
 
-### <a name="input_event_bus_prometheus_nats_exporter_version" /> [event\_bus\_prometheus\_nats\_exporter\_version](#input_event_bus_prometheus_nats_exporter_version)
+### <a name="input_event_bus_prometheus_nats_exporter_version"></a> [event\_bus\_prometheus\_nats\_exporter\_version](#input\_event\_bus\_prometheus\_nats\_exporter\_version)
 
 Description: The version of prometheus-nats-exporter to use for the event bus
 
@@ -104,7 +104,8 @@ Type: `string`
 
 Default: `"0.15.0"`
 
-### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
+
+### <a name="input_ingress_enabled"></a> [ingress\_enabled](#input\_ingress\_enabled)
 
 Description: Whether or not to enable the ingress for routing traffic to argo
 
@@ -112,7 +113,8 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+### <a name="input_log_level"></a> [log\_level](#input\_log\_level)
 
 Description: The log level for the argo pods
 
@@ -120,7 +122,7 @@ Type: `string`
 
 Default: `"info"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### <a name="input_monitoring_enabled"></a> [monitoring\_enabled](#input\_monitoring\_enabled)
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -128,7 +130,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### <a name="input_panfactum_scheduler_enabled"></a> [panfactum\_scheduler\_enabled](#input\_panfactum\_scheduler\_enabled)
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -136,7 +138,11 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+
+
+
+### <a name="input_pull_through_cache_enabled"></a> [pull\_through\_cache\_enabled](#input\_pull\_through\_cache\_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -144,7 +150,8 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -152,7 +159,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_workflow_archive_backups_enabled" /> [workflow\_archive\_backups\_enabled](#input_workflow_archive_backups_enabled)
+### <a name="input_workflow_archive_backups_enabled"></a> [workflow\_archive\_backups\_enabled](#input\_workflow\_archive\_backups\_enabled)
 
 Description: Whether to enable backups of the workflow archives
 
@@ -160,7 +167,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_workflow_archive_ttl" /> [workflow\_archive\_ttl](#input_workflow_archive_ttl)
+### <a name="input_workflow_archive_ttl"></a> [workflow\_archive\_ttl](#input\_workflow\_archive\_ttl)
 
 Description: Length of time that previously run workflow states are stored
 
@@ -172,11 +179,11 @@ Default: `"60d"`
 
 The following outputs are exported:
 
-### <a name="output_artifact_bucket_arn" /> [artifact\_bucket\_arn](#output_artifact_bucket_arn)
+### <a name="output_artifact_bucket_arn"></a> [artifact\_bucket\_arn](#output\_artifact\_bucket\_arn)
 
 Description: ARN of the S3 bucket holding workflow artifacts
 
-### <a name="output_artifact_bucket_name" /> [artifact\_bucket\_name](#output_artifact_bucket_name)
+### <a name="output_artifact_bucket_name"></a> [artifact\_bucket\_name](#output\_artifact\_bucket\_name)
 
 Description: Name of the S3 bucket holding workflow artifacts
 
