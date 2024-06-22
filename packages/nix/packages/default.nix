@@ -242,6 +242,10 @@
     fzf # fuzzy selector
     getopt # for parsing command-line arguments
     envsubst # environment substitution in files
+    gawk # awk
+    gnused # sed
+    gnugrep # grep
+    gnutar # tar
 
     ####################################
     # AWS Utilities
