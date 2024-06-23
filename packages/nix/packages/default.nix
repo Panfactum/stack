@@ -203,6 +203,7 @@
     (util.customShellScript "pf-buildkit-scale-down")
     (util.customShellScript "pf-buildkit-validate")
     (util.customShellScript "pf-buildkit-get-address")
+    (util.customShellScript "pf-buildkit-record-build")
 
     ####################################
     # Hashicorp Vault
@@ -267,14 +268,6 @@
     ####################################
     git # vcs CLI
     git-lfs # stores binary files in git host
-
-    ####################################
-    # CI / CD
-    ####################################
-    (util.customShellScript
-      "get-buildkit-address") # Helper used to get the buildkit address to use for building images
-    (util.customShellScript
-      "scale-buildkit") # Helper used for autoscaling buildkit
 
     ####################################
     # Container Utilities
