@@ -281,6 +281,7 @@
     ####################################
     buildkit # used for building containers using moby/buildkit
     skopeo # used for moving images around
+    manifest-tool # for working with image manifests
 
     ####################################
     # Network Utilities
