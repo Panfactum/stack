@@ -38,6 +38,14 @@ Type: `number`
 
 Default: `2000`
 
+### <a name="input_initial_storage_gb" /> [initial\_storage\_gb](#input_initial_storage_gb)
+
+Description: The initial number of GB to use for the local image temp storage
+
+Type: `number`
+
+Default: `25`
+
 ### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
@@ -46,14 +54,6 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_local_storage_gb" /> [local\_storage\_gb](#input_local_storage_gb)
-
-Description: The number of GB to use for the local image temp storage
-
-Type: `number`
-
-Default: `25`
-
 ### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
 
 Description: The maximum number of replicas of buildkit to use
@@ -61,6 +61,14 @@ Description: The maximum number of replicas of buildkit to use
 Type: `number`
 
 Default: `10`
+
+### <a name="input_max_storage_gb" /> [max\_storage\_gb](#input_max_storage_gb)
+
+Description: The maximum number of GB to use for the local image temp storage
+
+Type: `number`
+
+Default: `250`
 
 ### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
 

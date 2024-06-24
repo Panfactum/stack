@@ -77,6 +77,12 @@ loki.process "pod_logs" {
     drop_counter_reason = "vpa"
   }
 
+  // buildkitd generates many logs erroneously due to this issue: https://github.com/moby/buildkit/issues/4483
+  stage.drop {
+    source = "content"
+    expression = ".+buildkit-runc did not terminate successfully.+"
+    drop_counter_reason = "buildkitd-runc"
+  }
 
   // Extract the level field from JSON logs
   stage.json {

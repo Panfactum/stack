@@ -21,10 +21,16 @@ variable "max_replicas" {
   default     = 10
 }
 
-variable "local_storage_gb" {
-  description = "The number of GB to use for the local image temp storage"
+variable "initial_storage_gb" {
+  description = "The initial number of GB to use for the local image temp storage"
   type        = number
   default     = 25
+}
+
+variable "max_storage_gb" {
+  description = "The maximum number of GB to use for the local image temp storage"
+  type        = number
+  default     = 250
 }
 
 variable "cpu_millicores" {

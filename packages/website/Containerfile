@@ -3,8 +3,6 @@
 #################################################
 FROM node:20-bullseye-slim AS base
 WORKDIR /code
-RUN chown -R 1000:1000 /code
-USER 1000
 
 #################################################
 ## Dependencies Image
@@ -12,15 +10,13 @@ USER 1000
 FROM base AS deps
 
 # Install package manager
-USER 0
 RUN npm i -g pnpm@8.6.12
-USER 1000
 
 # Install Dependencies
-COPY --chown=1000 package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
-COPY --chown=1000 packages/website/package.json packages/website/
-COPY --chown=1000 packages/eslint/ packages/eslint/
-RUN --mount=type=cache,id=pnpm,target=/code/.pnpm,uid=1000,gid=1000 pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
+COPY packages/website/package.json packages/website/
+COPY packages/eslint/ packages/eslint/
+RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
 
 #################################################
 ## Development Image
@@ -28,8 +24,8 @@ RUN --mount=type=cache,id=pnpm,target=/code/.pnpm,uid=1000,gid=1000 pnpm install
 
 FROM deps AS development
 WORKDIR /code/packages/website
-COPY --chown=1000 packages/website/ .
-RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY,uid=1000,gid=1000 \
+COPY packages/website/ .
+RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build --no-lint
 
 #################################################
@@ -39,8 +35,10 @@ RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_K
 FROM deps AS builder
 ENV NODE_ENV=production
 WORKDIR /code/packages/website
-COPY --chown=1000 packages/website/ .
-RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY,uid=1000,gid=1000 \
+COPY packages/website/ .
+RUN mkdir /code/packages/website/build
+RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
+  --mount=type=cache,id=website-build,target=/code/packages/website/build/cache \
   NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build --no-lint
 
 #################################################
@@ -50,7 +48,7 @@ RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_K
 FROM base AS production
 WORKDIR /code
 ENV NODE_ENV=production
-COPY --from=builder --chown=1000:1000 /code/packages/website/build/standalone ./
+COPY --from=builder /code/packages/website/build/standalone ./
 WORKDIR /code/packages/website
-COPY --from=builder --chown=1000:1000 /code/packages/website/public ./public
-COPY --from=builder --chown=1000:1000 /code/packages/website/build/static ./build/static
+COPY --from=builder /code/packages/website/public ./public
+COPY --from=builder /code/packages/website/build/static ./build/static

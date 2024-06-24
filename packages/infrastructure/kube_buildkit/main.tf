@@ -161,7 +161,9 @@ module "buildkit" {
         "buildkitd",
         "--addr", "tcp://0.0.0.0:${local.port}",
         "--addr", "unix:///run/user/1000/buildkit/buildkitd.sock",
-        "--oci-worker-no-process-sandbox"
+        "--oci-worker-no-process-sandbox",
+        # GC is enabled by default so we need to increase the limits in order to keep a meaningful cache
+        "--oci-worker-gc-keepstorage", tostring(var.max_storage_gb * 1000)
       ]
       uid = 1000
       linux_capabilities = [
@@ -179,7 +181,7 @@ module "buildkit" {
 
   volume_mounts = {
     buildkitd = {
-      initial_size_gb    = var.local_storage_gb
+      initial_size_gb    = var.initial_storage_gb
       storage_class_name = "ebs-standard"
       access_modes       = ["ReadWriteOnce"]
       increase_gb        = 25

@@ -14,6 +14,16 @@ packages/website/.lint
 .github
 .idea
 .pre-commit-config.yaml
+**/Containerfile
+**/Tiltfile
+**/.gitignore
+**/.dockerignore
+cspell.config.yaml
+**/flake.lock
+**/flake.nix
+LICENSE
+**/README.md
+SECURITY.md
 
 
 
