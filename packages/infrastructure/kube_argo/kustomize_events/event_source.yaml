@@ -1,0 +1,64 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+    meta.helm.sh/release-name: argo-events
+    meta.helm.sh/release-namespace: argo
+  creationTimestamp: "2024-05-15T17:21:28Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: eventsources.argoproj.io
+  resourceVersion: "36583651"
+  uid: fe65a9a4-7c6b-4370-8d82-c34d631a4286
+spec:
+  conversion:
+    strategy: None
+  group: argoproj.io
+  names:
+    kind: EventSource
+    listKind: EventSourceList
+    plural: eventsources
+    shortNames:
+      - es
+    singular: eventsource
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+              properties:
+                replicas:
+                  type: number
+                labelSelector:
+                  type: string
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+          required:
+            - metadata
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status:
+          properties:
+            replicas:
+              type: number
+        scale:
+          specReplicasPath: '.spec.replicas'
+          statusReplicasPath: '.status.replicas'
+          labelSelectorPath: '.spec.labelSelector'
+

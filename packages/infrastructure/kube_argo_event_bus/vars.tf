@@ -36,5 +36,3 @@ variable "enhanced_ha_enabled" {
   type        = bool
   default     = true
 }
-
-#karpenter.sh/disruption=disrupting:NoSchedule

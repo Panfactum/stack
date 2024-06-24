@@ -1,7 +1,7 @@
 #################################################
 ## Base Image
 #################################################
-FROM node:20-bullseye-slim as base
+FROM node:20-bullseye-slim AS base
 WORKDIR /code
 RUN chown -R 1000:1000 /code
 USER 1000
@@ -9,7 +9,7 @@ USER 1000
 #################################################
 ## Dependencies Image
 #################################################
-FROM base as deps
+FROM base AS deps
 
 # Install package manager
 USER 0
@@ -26,7 +26,7 @@ RUN --mount=type=cache,id=pnpm,target=/code/.pnpm,uid=1000,gid=1000 pnpm install
 ## Development Image
 #################################################
 
-FROM deps as development
+FROM deps AS development
 WORKDIR /code/packages/website
 COPY --chown=1000 packages/website/ .
 RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY,uid=1000,gid=1000 \
@@ -36,7 +36,7 @@ RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_K
 ## Builder Image
 #################################################
 
-FROM deps as builder
+FROM deps AS builder
 ENV NODE_ENV=production
 WORKDIR /code/packages/website
 COPY --chown=1000 packages/website/ .
@@ -47,7 +47,7 @@ RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_K
 ## Production Image
 #################################################
 
-FROM base as production
+FROM base AS production
 WORKDIR /code
 ENV NODE_ENV=production
 COPY --from=builder --chown=1000:1000 /code/packages/website/build/standalone ./

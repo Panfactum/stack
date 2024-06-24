@@ -146,7 +146,7 @@ resource "helm_release" "metrics_server" {
       ///////////////////////////////////////
       // High Availability Config
       ////////////////////////////////////////
-      replicas = 2
+      replicas                  = 2
       affinity                  = module.util.affinity
       topologySpreadConstraints = module.util.topology_spread_constraints
       tolerations               = module.util.tolerations

@@ -2506,7 +2506,7 @@ resource "kubectl_manifest" "vpa_thanos_query" {
 #    metadata = {
 #      name      = "alertmanager"
 #      namespace = local.namespace
-#      labels    = module.labels_alertmanager.labels
+#      labels    = module.util_alertmanager.labels
 #    }
 #    spec = {
 #      targetRef = {

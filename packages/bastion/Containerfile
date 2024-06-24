@@ -1,4 +1,5 @@
-FROM debian:12-slim AS production
+# slim-12
+FROM debian@sha256:67f3931ad8cb1967beec602d8c0506af1e37e8d73c2a0b38b181ec5d8560d395 AS production
 
 LABEL org.opencontainers.image.source=https://github.com/panfactum/stack
 LABEL org.opencontainers.image.description="Bastion host for the Panfactum stack"

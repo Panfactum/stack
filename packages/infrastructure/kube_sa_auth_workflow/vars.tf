@@ -24,3 +24,9 @@ variable "annotate_service_account" {
   type        = bool
   default     = true
 }
+
+variable "extra_aws_permissions" {
+  description = "Extra JSON-encoded AWS permissions to assign to the workflow"
+  type        = string
+  default     = "{}"
+}

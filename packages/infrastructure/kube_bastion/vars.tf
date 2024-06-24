@@ -1,7 +1,7 @@
 variable "bastion_image_version" {
   description = "The version of the image to use for the deployment"
   type        = string
-  default     = "alpha"
+  default     = "17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"
 }
 
 variable "bastion_domains" {

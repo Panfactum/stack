@@ -270,7 +270,8 @@ locals {
       priorityClassName  = var.priority_class_name
       serviceAccountName = var.service_account
       securityContext = {
-        fsGroup = var.mount_owner
+        fsGroup             = var.mount_owner
+        fsGroupChangePolicy = "OnRootMismatch" # Provides significant performance increase
       }
       dnsPolicy = var.dns_policy
 
@@ -407,8 +408,8 @@ module "util" {
   topology_spread_enabled               = var.topology_spread_enabled
   topology_spread_strict                = var.topology_spread_strict
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  node_requirements = var.node_requirements
-  node_preferences = var.node_preferences
+  node_requirements                     = var.node_requirements
+  node_preferences                      = var.node_preferences
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

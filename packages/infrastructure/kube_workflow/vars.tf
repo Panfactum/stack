@@ -49,12 +49,6 @@ variable "common_env" {
   default     = {}
 }
 
-variable "vpa_enabled" {
-  description = "Whether to enable the vertical Pod autoscaler"
-  type        = bool
-  default     = true
-}
-
 variable "mount_owner" {
   description = "The ID of the group that owns the mounted volumes"
   type        = number
@@ -203,7 +197,7 @@ variable "task_parallelism" {
 variable "pod_delete_delay_seconds" {
   description = "The number of seconds after Workflow completion that Pods will be deleted"
   type        = number
-  default     = 60 * 60
+  default     = 60 * 3
 }
 
 variable "priority" {
@@ -261,7 +255,7 @@ variable "entrypoint" {
 
 variable "templates" {
   description = "A list of workflow templates. See https://argo-workflows.readthedocs.io/en/stable/fields/#template."
-  type = any
+  type        = any
 }
 
 variable "retry_backoff_initial_duration_seconds" {
@@ -360,12 +354,47 @@ variable "linux_capabilities" {
 variable "arguments" {
   description = "The arguments to set for the Workflow"
   type = object({
-    artifacts = optional(list(any), [])
+    artifacts  = optional(list(any), [])
     parameters = optional(list(any), [])
   })
   default = {
-    artifacts = []
+    artifacts  = []
     parameters = []
   }
+}
+
+variable "default_resources" {
+  description = "The default container resources to use"
+  type = object({
+    requests = optional(object({
+      memory = optional(string, "100Mi")
+      cpu    = optional(string, "50m")
+    }), { memory = "100Mi", cpu = "50m" })
+    limits = optional(object({
+      memory = optional(string, "100Mi")
+      cpu    = optional(string, null)
+    }), { memory = "100Mi" })
+  })
+  default = {
+    requests = {
+      cpu    = "50m"
+      memory = "100Mi"
+    }
+    limits = {
+      memory = "100Mi"
+    }
+  }
+}
+
+variable "default_container_image" {
+  description = "The default container image to use"
+  type        = string
+  default     = "docker.io/library/busybox:1.36.1"
+}
+
+variable "extra_aws_permissions" {
+  description = "Extra JSON-encoded AWS permissions to assign to the Workflow's service account"
+  type        = string
+  default     = "{}"
 }
 

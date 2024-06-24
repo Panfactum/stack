@@ -1,0 +1,84 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes trust-manager
+
+<ModuleHeader name="kube_trust_manager" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_trust_manager" status="deprecated" type="direct" />
+
+This module create a deployment of cert-manager's
+[trust-manager](https://cert-manager.io/docs/trust/trust-manager/).
+
+trust-manager is a single-purpose utility with copies X.509 CA trust bundles
+to every namespace in the cluster so that they can be consumed by various workloads.
+This is particularly useful for distributing CA certificates for a service mesh.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The name of the cert-manager namespace.
+
+Type: `string`
+
+Default: `"cert-manager"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_trust_manager_version" /> [trust\_manager\_version](#input_trust_manager_version)
+
+Description: The version of trust-manager to deploy
+
+Type: `string`
+
+Default: `"0.9.1"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

@@ -83,7 +83,7 @@ data "kubernetes_config_map" "artifact_config" {
   }
 }
 
-data "aws_iam_policy_document" "artifact_access" {
+data "aws_iam_policy_document" "aws_access" {
   statement {
     effect  = "Allow"
     actions = ["s3:*"]
@@ -92,6 +92,7 @@ data "aws_iam_policy_document" "artifact_access" {
       "arn:aws:s3:::${local.bucket}/*"
     ]
   }
+  override_policy_documents = [var.extra_aws_permissions]
 }
 
 module "aws_permissions" {
@@ -100,7 +101,7 @@ module "aws_permissions" {
   service_account           = var.service_account
   service_account_namespace = var.service_account_namespace
   eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.artifact_access.json
+  iam_policy_json           = data.aws_iam_policy_document.aws_access.json
   ip_allow_list             = var.ip_allow_list
   annotate_service_account  = var.annotate_service_account
 

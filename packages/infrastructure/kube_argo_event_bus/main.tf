@@ -36,8 +36,8 @@ module "util" {
   zone_anti_affinity_required          = var.enhanced_ha_enabled
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
-  topology_spread_enabled = true
-  topology_spread_strict = true // stateful workload
+  topology_spread_enabled              = true
+  topology_spread_strict               = true // stateful workload
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

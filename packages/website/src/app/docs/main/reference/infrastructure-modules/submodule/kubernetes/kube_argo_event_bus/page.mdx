@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # Argo Event Bus
-<ModuleHeader name="kube_argo_event_bus" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_bus" status="alpha" type="submodule"/>
+
+<ModuleHeader name="kube_argo_event_bus" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_bus" status="alpha" type="submodule" />
 
 Deploys an [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/) resource as a part of
 the [Argo Events architecture](https://argoproj.github.io/argo-events/concepts/architecture/).
@@ -16,30 +17,30 @@ distributing them via [Sensors](https://argoproj.github.io/argo-events/concepts/
 
 A few notes for the proper usage of an EventBus:
 
-- An EventBus is a namespaced resource, and you can have **at most one** per namespace.
+* An EventBus is a namespaced resource, and you can have **at most one** per namespace.
 
-- For every namespace where you want to deploy EventSources and Sensors, you must have
-an EventBus deployed.
+* For every namespace where you want to deploy EventSources and Sensors, you must have
+  an EventBus deployed.
 
-- Updates to the EventBus configuration will cause the EventBus to be destroyed and recreated
-due to [this issue](https://github.com/argoproj/argo-events/issues/3133). This will
-cause downtime, so plan accordingly.
+* Updates to the EventBus configuration will cause the EventBus to be destroyed and recreated
+  due to [this issue](https://github.com/argoproj/argo-events/issues/3133). This will
+  cause downtime, so plan accordingly.
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [kubectl](#requirement\_kubectl) (2.0.4)
+* [kubectl](#requirement_kubectl) (2.0.4)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_namespace"></a> [namespace](#input\_namespace)
+### <a name="input_namespace" /> [namespace](#input_namespace)
 
 Description: The namespace to deploy the EventBus into.
 
@@ -49,7 +50,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_enhanced_ha_enabled"></a> [enhanced\_ha\_enabled](#input\_enhanced\_ha\_enabled)
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -57,8 +58,7 @@ Type: `bool`
 
 Default: `true`
 
-
-### <a name="input_event_bus_initial_volume_size"></a> [event\_bus\_initial\_volume\_size](#input\_event\_bus\_initial\_volume\_size)
+### <a name="input_event_bus_initial_volume_size" /> [event\_bus\_initial\_volume\_size](#input_event_bus_initial_volume_size)
 
 Description: The initial volume size to use for each node in the event bus
 
@@ -66,7 +66,7 @@ Type: `string`
 
 Default: `"1Gi"`
 
-### <a name="input_event_bus_storage_class_name"></a> [event\_bus\_storage\_class\_name](#input\_event\_bus\_storage\_class\_name)
+### <a name="input_event_bus_storage_class_name" /> [event\_bus\_storage\_class\_name](#input_event_bus_storage_class_name)
 
 Description: The storage class to use for the event bus
 
@@ -74,9 +74,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-
-
-### <a name="input_log_level"></a> [log\_level](#input\_log\_level)
+### <a name="input_log_level" /> [log\_level](#input_log_level)
 
 Description: The log level for the argo pods
 
@@ -84,12 +82,7 @@ Type: `string`
 
 Default: `"info"`
 
-
-
-
-
-
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -100,7 +93,5 @@ Default: `false`
 ## Outputs
 
 No outputs.
-
-
 
 {/* lint enable no-duplicate-headings */}

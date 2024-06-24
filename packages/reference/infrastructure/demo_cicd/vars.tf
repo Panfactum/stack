@@ -19,6 +19,16 @@ variable "webhook_domain" {
   type = string
 }
 
+variable "buildkit_bucket_name" {
+  description = "The S3 bucket to use as the layer cache"
+  type = string
+}
+
+variable "buildkit_bucket_region" {
+  description = "The region of the S3 bucket to use as the layer cache"
+  type = string
+}
+
 # pf-generate: standard_vars
 variable "environment" {
   description = "The name of the environment the infrastructure is being deployed into. #injected"

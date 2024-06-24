@@ -8,7 +8,13 @@ terraform {
 }
 
 inputs = {
-  ecr_repository_names = [
-    "website"
-  ]
+  ecr_repositories = {
+    website = {}
+    bastion = {
+      expire_all_images = true # b/c we copy to the public ecr
+    }
+    panfactum = {
+      expire_all_images = true # b/c we copy to the public ecr
+    }
+  }
 }

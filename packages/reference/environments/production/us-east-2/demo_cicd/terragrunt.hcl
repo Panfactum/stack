@@ -15,11 +15,17 @@ dependency "cluster" {
   config_path = "../aws_eks"
 }
 
+dependency "buildkit" {
+  config_path = "../kube_buildkit"
+}
+
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  github_username = "fullykubed"
-  github_token = local.secrets.github_token
-  webhook_domain = "cicd.prod.panfactum.com"
+  eks_cluster_name       = dependency.cluster.outputs.cluster_name
+  github_username        = "fullykubed"
+  github_token           = local.secrets.github_token
+  webhook_domain         = "cicd.prod.panfactum.com"
+  buildkit_bucket_name   = dependency.buildkit.outputs.cache_bucket_name
+  buildkit_bucket_region = dependency.buildkit.outputs.cache_bucket_region
 }
 
 

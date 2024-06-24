@@ -220,7 +220,7 @@ resource "helm_release" "descheduler" {
                 {
                   name = "PodLifeTime"
                   args = {
-                    maxPodLifeTimeSeconds = 60 * 3
+                    maxPodLifeTimeSeconds = 60 * 5
                     states = [
                       "Pending",
                       "PodInitializing",
@@ -235,7 +235,8 @@ resource "helm_release" "descheduler" {
                     minPodLifetimeSeconds   = 60
                     includingInitContainers = true
                     excludeOwnerKinds = [
-                      "Job" // Jobs will be handled by the job controller
+                      "Job",     // Jobs will be handled by the job controller
+                      "Workflow" // Workflow pods will be handled by argo
                     ]
                   }
                 },

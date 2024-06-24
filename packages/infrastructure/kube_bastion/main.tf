@@ -171,7 +171,7 @@ module "bastion" {
 
   replicas                              = 2
   burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = false // TODO: Create an arm64 build
+  arm_nodes_enabled                     = true
   instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
   topology_spread_strict                = var.enhanced_ha_enabled
   topology_spread_enabled               = var.enhanced_ha_enabled
@@ -185,7 +185,7 @@ module "bastion" {
   containers = [
     {
       name    = "bastion"
-      image   = "${module.pull_through.github_registry}/panfactum/bastion"
+      image   = "${module.pull_through.ecr_public_registry}/t8f0s7h5/bastion"
       version = var.bastion_image_version
       command = [
         "/usr/sbin/sshd",
@@ -209,7 +209,7 @@ module "bastion" {
     {
       name    = "permission-init"
       init    = true
-      image   = "${module.pull_through.github_registry}/panfactum/bastion"
+      image   = "${module.pull_through.ecr_public_registry}/t8f0s7h5/bastion"
       version = var.bastion_image_version
       command = [
         "/usr/bin/bash",

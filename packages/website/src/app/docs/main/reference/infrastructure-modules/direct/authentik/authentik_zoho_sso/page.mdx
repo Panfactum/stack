@@ -3,57 +3,58 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # Authentik SSO with Zoho
-<ModuleHeader name="authentik_zoho_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_zoho_sso" status="stable" type="direct"/>
+
+<ModuleHeader name="authentik_zoho_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_zoho_sso" status="stable" type="direct" />
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [authentik](https://registry.terraform.io/providers/hashicorp/authentik/2024.2.0/docs) (2024.2.0)
+* [authentik](https://registry.terraform.io/providers/hashicorp/authentik/2024.2.0/docs) (2024.2.0)
 
--  [kubectl](#requirement\_kubectl) (2.0.4)
+* [kubectl](#requirement_kubectl) (2.0.4)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
--  [tls](#requirement\_tls) (4.0.5)
+* [tls](#requirement_tls) (4.0.5)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_authentik_domain"></a> [authentik\_domain](#input\_authentik\_domain)
+### <a name="input_authentik_domain" /> [authentik\_domain](#input_authentik_domain)
 
 Description: The domain name of the authentik instance
 
 Type: `string`
 
-### <a name="input_authentik_namespace"></a> [authentik\_namespace](#input\_authentik\_namespace)
+### <a name="input_authentik_namespace" /> [authentik\_namespace](#input_authentik_namespace)
 
 Description: The kubernetes namespace where Authentik is deployed
 
 Type: `string`
 
-### <a name="input_media_configmap"></a> [media\_configmap](#input\_media\_configmap)
+### <a name="input_media_configmap" /> [media\_configmap](#input_media_configmap)
 
 Description: The configmap holding the static media that Authentik will use
 
 Type: `string`
 
-### <a name="input_organization_name"></a> [organization\_name](#input\_organization\_name)
+### <a name="input_organization_name" /> [organization\_name](#input_organization_name)
 
 Description: The name of your organization
 
 Type: `string`
 
-### <a name="input_zoho_acs_url"></a> [zoho\_acs\_url](#input\_zoho\_acs\_url)
+### <a name="input_zoho_acs_url" /> [zoho\_acs\_url](#input_zoho_acs_url)
 
 Description: The ACS url provided by Zoho when configuring an external identity provider
 
 Type: `string`
 
-### <a name="input_zoho_sign_in_url"></a> [zoho\_sign\_in\_url](#input\_zoho\_sign\_in\_url)
+### <a name="input_zoho_sign_in_url" /> [zoho\_sign\_in\_url](#input_zoho_sign_in_url)
 
 Description: The sign-in url provided by Zoho when configuring an external identity provider
 
@@ -63,7 +64,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_allowed_groups"></a> [allowed\_groups](#input\_allowed\_groups)
+### <a name="input_allowed_groups" /> [allowed\_groups](#input_allowed_groups)
 
 Description: Only members of these groups can access AWS
 
@@ -71,15 +72,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-
-
-
-
-
-
-
-
-### <a name="input_ui_description"></a> [ui\_description](#input\_ui\_description)
+### <a name="input_ui_description" /> [ui\_description](#input_ui_description)
 
 Description: The description to display in the Authentik web dashboard
 
@@ -87,7 +80,7 @@ Type: `string`
 
 Default: `"Zoho"`
 
-### <a name="input_ui_group"></a> [ui\_group](#input\_ui\_group)
+### <a name="input_ui_group" /> [ui\_group](#input_ui_group)
 
 Description: The section in the Authentik web dashboard that this will appear in
 
@@ -95,7 +88,7 @@ Type: `string`
 
 Default: `"Admin"`
 
-### <a name="input_zoho_issuer"></a> [zoho\_issuer](#input\_zoho\_issuer)
+### <a name="input_zoho_issuer" /> [zoho\_issuer](#input_zoho_issuer)
 
 Description: The issuer provided by Zoho when configuring an external identity provider
 
@@ -107,7 +100,7 @@ Default: `"zoho.com"`
 
 The following outputs are exported:
 
-### <a name="output_saml_metadata"></a> [saml\_metadata](#output\_saml\_metadata)
+### <a name="output_saml_metadata" /> [saml\_metadata](#output_saml_metadata)
 
 Description: n/a
 
@@ -121,8 +114,8 @@ This is not found in the Zoho web UI and must be constructed manually.
 
 It is of the form `https://accounts.zoho.com/samlauthrequest/<domain>?serviceurl=<zoho_service>` where
 
-- `<domain>` is a domain **that has been verified with Zoho**
+* `<domain>` is a domain **that has been verified with Zoho**
 
-- `<zoho_service>` is the `https` url of a Zoho service (e.g., `https://one.zoho.com`)
+* `<zoho_service>` is the `https` url of a Zoho service (e.g., `https://one.zoho.com`)
 
 {/* lint enable no-duplicate-headings */}

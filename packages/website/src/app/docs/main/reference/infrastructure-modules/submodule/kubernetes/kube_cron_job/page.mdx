@@ -1,0 +1,445 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes CronJob
+
+<ModuleHeader name="kube_cron_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cron_job" status="beta" type="submodule" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_containers" /> [containers](#input_containers)
+
+Description: A list of container configurations for the Pod
+
+Type:
+
+```hcl
+list(object({
+    name                    = string
+    init                    = optional(bool, false)
+    image                   = string
+    version                 = string
+    command                 = list(string)
+    image_pull_policy       = optional(string, "IfNotPresent")
+    working_dir             = optional(string, null)
+    minimum_memory          = optional(number, 100)      #The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)     #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)      # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)       # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)     # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)      # Whether to allow the container to run in privileged mode
+    run_as_root             = optional(bool, false)      # Whether to run the container as root
+    uid                     = optional(number, 1000)     # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), []) # Default is drop ALL
+    readonly                = optional(bool, true)       # Whether to use a readonly file system
+    env                     = optional(map(string), {})  # Environment variables specific to the container
+  }))
+```
+
+### <a name="input_cron_schedule" /> [cron\_schedule](#input_cron_schedule)
+
+Description: The cron expression to use for the CronJob
+
+Type: `string`
+
+### <a name="input_name" /> [name](#input_name)
+
+Description: The name of this CronJob
+
+Type: `string`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_active_deadline_seconds" /> [active\_deadline\_seconds](#input_active_deadline_seconds)
+
+Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before the system tries to terminate it; value must be positive integer.
+
+Type: `number`
+
+Default: `86400`
+
+### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+
+Description: Whether to allow Pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_backoff_limit" /> [backoff\_limit](#input_backoff_limit)
+
+Description: Specifies the number of retries before marking the Job failed.
+
+Type: `number`
+
+Default: `6`
+
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+
+Description: Whether to allow Pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_common_env" /> [common\_env](#input_common_env)
+
+Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_concurrency_policy" /> [concurrency\_policy](#input_concurrency_policy)
+
+Description: Specifies how to treat concurrent executions of a Job.
+
+Type: `string`
+
+Default: `"Forbid"`
+
+### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
+
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the CronJob
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_cron_job_annotations" /> [cron\_job\_annotations](#input_cron_job_annotations)
+
+Description: Annotations to add to the generated CronJob
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_disruptions_enabled" /> [disruptions\_enabled](#input_disruptions_enabled)
+
+Description: Whether to enable disrupting the Pods in the middle of execution.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
+
+Description: The DNS policy for the Pod
+
+Type: `string`
+
+Default: `"ClusterFirst"`
+
+### <a name="input_dynamic_secrets" /> [dynamic\_secrets](#input_dynamic_secrets)
+
+Description: Dynamic variable secrets
+
+Type:
+
+```hcl
+list(object({             // key is the secret provider class
+    secret_provider_class = string // name of the secret provider class
+    mount_path            = string // absolute path of where to mount the secret
+    env_var               = string // name of the env var that will have a path to the secret mount
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
+
+Description: Extra pod labels to use
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+
+Description: Extra tolerations to add to the Pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_failed_jobs_history_limit" /> [failed\_jobs\_history\_limit](#input_failed_jobs_history_limit)
+
+Description: The number of failed jobs to retain
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_job_annotations" /> [job\_annotations](#input_job_annotations)
+
+Description: Annotations to add to generated Job resources
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+
+Description: Node label preferences for the Pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+
+Description: Node label requirements for the Pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
+
+Description: Annotations to add to the pods in the CronJob
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_pod_completions" /> [pod\_completions](#input_pod_completions)
+
+Description: Specifies the desired number of successfully finished Pods the Job should be run with.
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_pod_parallelism" /> [pod\_parallelism](#input_pod_parallelism)
+
+Description: Specifies the maximum desired number of Pods the Job should run at any given time.
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_pod_replacement_policy" /> [pod\_replacement\_policy](#input_pod_replacement_policy)
+
+Description: Specifies when to create replacement Pods
+
+Type: `string`
+
+Default: `"Failed"`
+
+### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
+
+Description: Whether Pods will prefer scheduling on arm64 nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+
+Description: Whether Pods will prefer scheduling on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
+
+Description: Whether Pods will prefer scheduling on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
+
+Description: The priority class to use for Pods in the CronJob
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
+
+Description: The Pod restart policy
+
+Type: `string`
+
+Default: `"OnFailure"`
+
+### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
+
+Description: A mapping of Secret names to their mount configuration in the containers of the CronJob
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the Secret
+    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_secrets" /> [secrets](#input_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether to allow Pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_starting_deadline_seconds" /> [starting\_deadline\_seconds](#input_starting_deadline_seconds)
+
+Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones.
+
+Type: `number`
+
+Default: `900`
+
+### <a name="input_successful_jobs_history_limit" /> [successful\_jobs\_history\_limit](#input_successful_jobs_history_limit)
+
+Description: The number of successful jobs to retain
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_suspend" /> [suspend](#input_suspend)
+
+Description: Whether the CronJob is suspended
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
+
+Description: The number of seconds to wait for graceful termination before forcing termination
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
+
+Description: A mapping of temporary directory names (arbitrary) to their configuration
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the host node rather than a PVC
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_ttl_seconds_after_finished" /> [ttl\_seconds\_after\_finished](#input_ttl_seconds_after_finished)
+
+Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it is eligible to be automatically deleted.
+
+Type: `number`
+
+Default: `600`
+
+### <a name="input_update_type" /> [update\_type](#input_update_type)
+
+Description: The type of update that the CronJob should use
+
+Type: `string`
+
+Default: `"RollingUpdate"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether to enable the Vertical Pod Autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_labels" /> [labels](#output_labels)
+
+Description: The default labels assigned to all resources in this Workflow
+
+### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+
+Description: The labels unique to this Workflow that can be used to select any pods in this Workflow
+
+### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+
+Description: The service account used for the pods
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

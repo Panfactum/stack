@@ -1,0 +1,125 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Argo Event Sensor
+
+<ModuleHeader name="kube_argo_sensor" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_sensor" status="alpha" type="submodule" />
+
+Deploys a [Sensor](hhttps://argoproj.github.io/argo-events/concepts/sensor/)
+resource as a part of the
+[Argo Events architecture](https://argoproj.github.io/argo-events/concepts/architecture/).
+
+The Sensor is a Deployment that executes
+[Triggers](https://argoproj.github.io/argo-events/concepts/trigger/)
+based on events on the
+[EventBus.](https://argoproj.github.io/argo-events/concepts/eventbus/)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_dependencies" /> [dependencies](#input_dependencies)
+
+Description: A list of events that can activate triggers on the sensor
+
+Type:
+
+```hcl
+list(object({
+    name                   = string
+    eventSourceName        = string
+    eventName              = optional(string, "default")
+    filtersLogicalOperator = optional(string, "and")
+    filters = optional(object({
+      dataLogicalOperator = optional(string, "and")
+      exprLogicalOperator = optional(string, "and")
+      script              = optional(string)
+      time = optional(object({
+        start = string
+        stop  = string
+      }))
+      context = optional(object({
+        id              = string
+        source          = optional(string)
+        specversion     = optional(string)
+        type            = optional(string)
+        datacontenttype = optional(string)
+        subject         = optional(string)
+        time            = optional(string)
+      }))
+      data = optional(list(object({
+        path       = string
+        type       = string
+        value      = list(string)
+        comparator = optional(string, "=")
+        template   = optional(string)
+      })))
+      exprs = optional(list(object({
+        expr = string
+        fields = list(object({
+          path = string
+          name = string
+        }))
+      })))
+    }))
+  }))
+```
+
+### <a name="input_name" /> [name](#input_name)
+
+Description: The name of the Sensor
+
+Type: `string`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace to deploy the Sensor into.
+
+Type: `string`
+
+### <a name="input_triggers" /> [triggers](#input_triggers)
+
+Description: A list of actions that can be triggered by events from the EventBus
+
+Type: `any`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_event_bus_name" /> [event\_bus\_name](#input_event_bus_name)
+
+Description: The EventBus to read from. Should almost always be 'default'.
+
+Type: `string`
+
+Default: `"default"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+
+Description: n/a
+
+{/* lint enable no-duplicate-headings */}

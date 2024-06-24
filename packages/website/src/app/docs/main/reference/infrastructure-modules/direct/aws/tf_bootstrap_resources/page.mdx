@@ -1,0 +1,62 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Terraform / OpenTofu Bootstrap Resources
+
+<ModuleHeader name="tf_bootstrap_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/tf_bootstrap_resources" status="stable" type="direct" />
+
+Sets up the AWS resources necessary to begin using OpenTofu (Terraform) in an AWS account:
+
+* S3 state bucket
+
+* DynamoDB lock table
+
+Provides the following features over the default Terragrunt bootstrapped resources:
+
+* Multi-region replication for dynamodb tables
+
+* Lifecycle transitions for S3 objects to cheaper storage tiers
+
+* Point-in-time backups retained for 24 hours via [AWS Backup](https://aws.amazon.com/backup/)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_lock_table" /> [lock\_table](#input_lock_table)
+
+Description: The name of the dynamodb terraform lock table..
+
+Type: `string`
+
+### <a name="input_state_bucket" /> [state\_bucket](#input_state_bucket)
+
+Description: The name of the terraform state bucket.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+## Maintainer Notes
+
+* This module MUST be deployed in the ops environment. It defines its own aws provider for this reason.
+  As a result, it uses its own aws profile which must be passed in as an input argument.
+
+{/* lint enable no-duplicate-headings */}

@@ -3,57 +3,58 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS SSO with Authentik
-<ModuleHeader name="authentik_vault_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_vault_sso" status="stable" type="direct"/>
+
+<ModuleHeader name="authentik_vault_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_vault_sso" status="stable" type="direct" />
 
 ## Providers
 
 The following providers are needed by this module:
 
--  [authentik](https://registry.terraform.io/providers/hashicorp/authentik/2024.2.0/docs) (2024.2.0)
+* [authentik](https://registry.terraform.io/providers/hashicorp/authentik/2024.2.0/docs) (2024.2.0)
 
--  [kubectl](#requirement\_kubectl) (2.0.4)
+* [kubectl](#requirement_kubectl) (2.0.4)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
--  [tls](#requirement\_tls) (4.0.5)
+* [tls](#requirement_tls) (4.0.5)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_authentik_domain"></a> [authentik\_domain](#input\_authentik\_domain)
+### <a name="input_authentik_domain" /> [authentik\_domain](#input_authentik_domain)
 
 Description: The domain name of the authentik instance
 
 Type: `string`
 
-### <a name="input_authentik_namespace"></a> [authentik\_namespace](#input\_authentik\_namespace)
+### <a name="input_authentik_namespace" /> [authentik\_namespace](#input_authentik_namespace)
 
 Description: The kubernetes namespace where Authentik is deployed
 
 Type: `string`
 
-### <a name="input_media_configmap"></a> [media\_configmap](#input\_media\_configmap)
+### <a name="input_media_configmap" /> [media\_configmap](#input_media_configmap)
 
 Description: The configmap holding the static media that Authentik will use
 
 Type: `string`
 
-### <a name="input_organization_name"></a> [organization\_name](#input\_organization\_name)
+### <a name="input_organization_name" /> [organization\_name](#input_organization_name)
 
 Description: The name of your organization
 
 Type: `string`
 
-### <a name="input_vault_domain"></a> [vault\_domain](#input\_vault\_domain)
+### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
 
 Description: The domain name of the Vault instance
 
 Type: `string`
 
-### <a name="input_vault_name"></a> [vault\_name](#input\_vault\_name)
+### <a name="input_vault_name" /> [vault\_name](#input_vault_name)
 
 Description: The name of the vault instance. Must be unique in the Authentik system.
 
@@ -63,7 +64,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_allowed_groups"></a> [allowed\_groups](#input\_allowed\_groups)
+### <a name="input_allowed_groups" /> [allowed\_groups](#input_allowed_groups)
 
 Description: Only members of these groups can access AWS
 
@@ -71,15 +72,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-
-
-
-
-
-
-
-
-### <a name="input_ui_description"></a> [ui\_description](#input\_ui\_description)
+### <a name="input_ui_description" /> [ui\_description](#input_ui_description)
 
 Description: The description to display in the Authentik web dashboard
 
@@ -87,7 +80,7 @@ Type: `string`
 
 Default: `"A Hashicorp Vault cluster"`
 
-### <a name="input_ui_group"></a> [ui\_group](#input\_ui\_group)
+### <a name="input_ui_group" /> [ui\_group](#input_ui_group)
 
 Description: The section in the Authentik web dashboard that this will appear in
 
@@ -99,23 +92,23 @@ Default: `"Vault"`
 
 The following outputs are exported:
 
-### <a name="output_client_id"></a> [client\_id](#output\_client\_id)
+### <a name="output_client_id" /> [client\_id](#output_client_id)
 
 Description: The client ID to provide to the auth/oidc auth method in Vault
 
-### <a name="output_client_secret"></a> [client\_secret](#output\_client\_secret)
+### <a name="output_client_secret" /> [client\_secret](#output_client_secret)
 
 Description: The client secret to provide the auth/oidc auth method in Vault
 
-### <a name="output_oidc_discovery_url"></a> [oidc\_discovery\_url](#output\_oidc\_discovery\_url)
+### <a name="output_oidc_discovery_url" /> [oidc\_discovery\_url](#output_oidc_discovery_url)
 
 Description: The OIDC discovery url to use for the auth/oidc auth method in Vault
 
-### <a name="output_oidc_issuer"></a> [oidc\_issuer](#output\_oidc\_issuer)
+### <a name="output_oidc_issuer" /> [oidc\_issuer](#output_oidc_issuer)
 
 Description: The issuer to use for the auth/oidc auth method in Vault
 
-### <a name="output_oidc_redirect_uris"></a> [oidc\_redirect\_uris](#output\_oidc\_redirect\_uris)
+### <a name="output_oidc_redirect_uris" /> [oidc\_redirect\_uris](#output_oidc_redirect_uris)
 
 Description: The redirect URIs to use for the auth/oidc auth method in Vault
 

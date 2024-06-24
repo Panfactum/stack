@@ -34,6 +34,69 @@ resource "kubectl_manifest" "pvc" {
 }
 
 #############################################################
+# AWS Permissions
+#
+# This policy gives the Workflow the ability to upload
+# and download images from the repository
+#############################################################
+
+data "aws_iam_policy_document" "nix_builder_ecr" {
+  statement {
+    sid = "PrivateECR"
+    effect = "Allow"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:CompleteLayerUpload",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:InitiateLayerUpload",
+      "ecr:ListImages",
+      "ecr:PutImage",
+      "ecr:UploadLayerPart"
+    ]
+    resources = [
+      "arn:aws:ecr:us-east-2:891377197483:repository/panfactum"
+    ]
+  }
+  statement {
+    sid = "PrivateECRAuth"
+    effect = "Allow"
+    actions = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+  }
+  statement {
+    sid = "PublicECR"
+    effect = "Allow"
+    actions = [
+      "ecr-public:BatchCheckLayerAvailability",
+      "ecr-public:BatchGetImage",
+      "ecr-public:CompleteLayerUpload",
+      "ecr-public:DescribeImages",
+      "ecr-public:DescribeRepositories",
+      "ecr-public:GetDownloadUrlForLayer",
+      "ecr-public:InitiateLayerUpload",
+      "ecr-public:ListImages",
+      "ecr-public:PutImage",
+      "ecr-public:UploadLayerPart"
+    ]
+    resources = [
+      "arn:aws:ecr-public::891377197483:repository/panfactum"
+    ]
+  }
+  statement {
+    sid = "PublicECRAuth"
+    effect = "Allow"
+    actions = [
+      "ecr-public:GetAuthorizationToken",
+      "sts:GetServiceBearerToken"
+    ]
+    resources = ["*"]
+  }
+}
+
+#############################################################
 # Workflow
 #
 # A few important notes:
@@ -68,7 +131,7 @@ resource "kubernetes_config_map" "nix_image_builder_scripts" {
   data = {
     "build-and-push.sh" = file("${path.module}/nix_image_builder/build-and-push.sh")
     "init-store.sh" = file("${path.module}/nix_image_builder/init-store.sh")
-    "merge-manifests.sh" = file("${path.module}/nix_image_builder/merge-manifests.sh")
+    "merge-and-copy.sh" = file("${path.module}/nix_image_builder/merge-and-copy.sh")
   }
 }
 
@@ -112,6 +175,14 @@ module "nix_image_builder_workflow" {
       }
     ]
   }
+  common_env = {
+    GIT_REF = "{{workflow.parameters.git_ref}}"
+    IMAGE_REPO = "panfactum"
+    PUBLIC_IMAGE_REGISTRY = "public.ecr.aws/t8f0s7h5"
+    IMAGE_REGISTRY = "891377197483.dkr.ecr.us-east-2.amazonaws.com"
+    IMAGE_REGION = "us-east-2"
+  }
+  extra_aws_permissions = data.aws_iam_policy_document.nix_builder_ecr.json
   templates = [
     {
       name = "build-image",
@@ -138,8 +209,14 @@ module "nix_image_builder_workflow" {
             }
           },
           {
-            name = "merge-manifests"
-            template = "merge-manifests"
+            name = "merge-and-copy"
+            template = "merge-and-copy"
+            arguments = {
+              parameters = [{
+                name = "commit-sha"
+                value = "{{tasks.build-and-push.outputs.parameters.commit-sha}}"
+              }]
+            }
             dependencies = [
               "build-and-push",
               "build-and-push-arm"
@@ -189,6 +266,16 @@ module "nix_image_builder_workflow" {
           }
         }]
       )
+      outputs = {
+        parameters = [
+          {
+            name = "commit-sha"
+            valueFrom = {
+              path = "/tmp/commit-sha"
+            }
+          }
+        ]
+      }
       containerSet = {
         containers = [
           {
@@ -208,7 +295,7 @@ module "nix_image_builder_workflow" {
             )
           },
           {
-            name = "builder"
+            name = "main"
             image = "${module.pull_through.docker_hub_registry}/nixos/nix"
             command = [
               "/scripts/build-and-push.sh"
@@ -216,7 +303,6 @@ module "nix_image_builder_workflow" {
             env = concat(
               module.nix_image_builder_workflow.env,
               [
-                {name = "GIT_REF", value = "{{workflow.parameters.git_ref}}"},
                 {name = "ARCH", value = "{{inputs.parameters.arch}}"}
               ]
             )
@@ -243,7 +329,20 @@ module "nix_image_builder_workflow" {
       }
     },
     {
-      name = "merge-manifests"
+      name = "merge-and-copy"
+      affinity = {
+        nodeAffinity = {
+          requiredDuringSchedulingIgnoredDuringExecution = {
+            nodeSelectorTerms = [{
+              matchExpressions = [{
+                key = "kubernetes.io/arch"
+                operator = "In"
+                values = ["arm64"]
+              }]
+            }]
+          }
+        }
+      }
       tolerations = concat(
         module.nix_image_builder_workflow.tolerations,
         [{
@@ -253,28 +352,47 @@ module "nix_image_builder_workflow" {
           effect   = "NoSchedule"
         }]
       )
-      volumes = module.nix_image_builder_workflow.volumes
+      volumes = concat(
+        module.nix_image_builder_workflow.volumes,
+        [{
+          name = "nix-store"
+          persistentVolumeClaim ={
+            claimName = "nix-store-arm64"
+          }
+        }]
+      )
+      inputs = {
+        parameters = [{
+          name = "commit-sha"
+        }]
+      }
       container = {
-        name = "merger"
+        name = "merge-and-copy"
         image = "${module.pull_through.docker_hub_registry}/nixos/nix"
         command = [
-          "/scripts/merge-manifests.sh"
+          "/scripts/merge-and-copy.sh"
         ]
         env = concat(
           module.nix_image_builder_workflow.env,
           [
-            {name = "GIT_REF", value ="{{workflow.parameters.git_ref}}"}
+            {name = "COMMIT_SHA", value ="{{inputs.parameters.commit-sha}}"}
           ]
         )
         securityContext = module.nix_image_builder_workflow.container_security_context
-        volumeMounts = module.nix_image_builder_workflow.volume_mounts
+        volumeMounts = concat(
+          module.nix_image_builder_workflow.volume_mounts,
+          [{
+            name = "nix-store"
+            mountPath = "/nix"
+          }]
+        )
         resources = {
           requests = {
-            memory = "200Mi"
+            memory = "250Mi"
             cpu = "100m"
           }
           limits = {
-            memory = "200Mi"
+            memory = "400Mi"
           }
         }
       }
@@ -299,9 +417,6 @@ module "nix_image_builder_workflow" {
       mount_path = "/etc/containers"
     }
   }
-  secrets = {
-    GITHUB_TOKEN = var.github_token
-  }
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -314,7 +429,7 @@ module "nix_image_builder_workflow" {
   # end-generate
 }
 
-resource "kubectl_manifest" "workflow_template" {
+resource "kubectl_manifest" "nix_workflow_template" {
   yaml_body = yamlencode({
     apiVersion = "argoproj.io/v1alpha1"
     kind = "WorkflowTemplate"

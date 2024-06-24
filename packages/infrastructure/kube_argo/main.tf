@@ -803,11 +803,9 @@ resource "helm_release" "argo_events" {
     })
   ]
 
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize_events/kustomize.sh"
-    }
+  postrender {
+    binary_path = "${path.module}/kustomize_events/kustomize.sh"
+    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 }
 
@@ -909,13 +907,13 @@ resource "kubectl_manifest" "pdb_webhook" {
 // See https://github.com/argoproj/argo-events/issues/2176
 resource "kubernetes_cluster_role" "argo_pods_viewer" {
   metadata {
-    name = "argo-pods-viewer"
+    name   = "argo-pods-viewer"
     labels = module.util_server.labels
   }
   rule {
     api_groups = [""]
-    verbs = ["get", "list", "watch"]
-    resources = ["pods", "pods/log", "events"]
+    verbs      = ["get", "list", "watch"]
+    resources  = ["pods", "pods/log", "events"]
   }
 }
 

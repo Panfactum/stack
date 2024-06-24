@@ -1,0 +1,121 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes cert-manager
+
+<ModuleHeader name="kube_cert_manager" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cert_manager" status="stable" type="direct" />
+
+This module provides our standard set up for [cert-manager](https://cert-manager.io/).
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_canary_enabled" /> [canary\_enabled](#input_canary_enabled)
+
+Description: Whether to add canary checks to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_cert_manager_version" /> [cert\_manager\_version](#input_cert_manager_version)
+
+Description: The version of cert-manager to deploy
+
+Type: `string`
+
+Default: `"1.14.4"`
+
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+
+Description: The log verbosity (0-9) for the cert-manager pods
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_self_generated_certs_enabled" /> [self\_generated\_certs\_enabled](#input_self_generated_certs_enabled)
+
+Description: Whether to enable self-generated webhook certs (only use on initial installation)
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
+
+### <a name="output_service_account" /> [service\_account](#output_service_account)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

@@ -2,6 +2,7 @@
 
 set -eo pipefail
 
+# shellcheck disable=SC1091
 source pf-buildkit-validate
 
 ####################################################################
@@ -69,7 +70,7 @@ function scale-down() {
   local CURRENT_TIME
   local LAST_BUILD
   CURRENT_TIME=$(date +%s)
-  LAST_BUILD=$(kubectl get statefulset "$STATEFULSET_NAME" --namespace="$BUILDKIT_NAMESPACE" -o=go-template="{{index .metadata.annotations \"$ANNOTATION_KEY\"}}")
+  LAST_BUILD=$(kubectl get statefulset "$STATEFULSET_NAME" --namespace="$BUILDKIT_NAMESPACE" -o=go-template="{{index .metadata.annotations \"$BUILDKIT_LAST_BUILD_ANNOTATION_KEY\"}}")
   echo "$ARCH: The last recorded build was: $LAST_BUILD" >&2
   if [[ -z $LAST_BUILD || $LAST_BUILD == "<no value>" ]]; then
     echo "$ARCH: No builds recorded. Scaling down..." >&2

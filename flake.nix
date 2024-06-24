@@ -20,11 +20,10 @@
       };
     in {
       packages = forEachSystem (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
+        let pkgs = nixpkgs.legacyPackages.${system};
         in {
-        # See https://github.com/NixOs/nixpkgs/pull/122608 for future optimizations
-          image = pkgs.dockerTools.streamLayeredImage  {
+          # See https://github.com/NixOs/nixpkgs/pull/122608 for future optimizations
+          image = pkgs.dockerTools.streamLayeredImage {
             name = "panfactum";
             tag = "latest";
 

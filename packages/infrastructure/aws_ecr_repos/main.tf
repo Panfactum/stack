@@ -65,49 +65,65 @@ data "aws_iam_policy_document" "trust_accounts" {
 }
 
 resource "aws_ecr_repository" "repo" {
-  for_each             = toset(var.ecr_repository_names)
+  for_each             = var.ecr_repositories
   name                 = each.key
-  image_tag_mutability = var.is_immutable ? "IMMUTABLE" : "MUTABLE"
+  image_tag_mutability = each.value.is_immutable ? "IMMUTABLE" : "MUTABLE"
   tags                 = module.tags.tags
 }
 
 resource "aws_ecr_repository_policy" "delegated_access" {
-  for_each   = toset(var.ecr_repository_names)
+  for_each   = var.ecr_repositories
   policy     = data.aws_iam_policy_document.trust_accounts.json
   repository = aws_ecr_repository.repo[each.key].name
 }
 
 resource "aws_ecr_lifecycle_policy" "lifecycle" {
-  for_each = toset(var.ecr_repository_names)
+  for_each = var.ecr_repositories
   policy = jsonencode({
-    rules = concat([
-      {
+    rules = concat(
+      [
+        {
+          action = {
+            type = "expire"
+          }
+          selection = {
+            countType   = "imageCountMoreThan"
+            countNumber = 3
+            tagStatus   = "untagged"
+          }
+          description  = "Keep last 3 untagged images"
+          rulePriority = 1
+        }
+        ], each.value.expire_all_images ? [
+        {
+          action = {
+            type = "expire"
+          }
+          selection = {
+            tagStatus   = "any",
+            countType   = "sinceImagePushed",
+            countUnit   = "days",
+            countNumber = 14
+          },
+          description  = "Remove old images"
+          rulePriority = 100
+        }
+      ] : [],
+      [for rule_index in range(length(each.value.expiration_rules)) : {
         action = {
           type = "expire"
         }
         selection = {
-          countType   = "imageCountMoreThan"
-          countNumber = 3
-          tagStatus   = "untagged"
-        }
-        description  = "Keep last 3 untagged images"
-        rulePriority = 1
-      }
-      ], var.expire_tagged_images ? [
-      {
-        action = {
-          type = "expire"
-        }
-        selection = {
-          tagStatus   = "any",
-          countType   = "sinceImagePushed",
-          countUnit   = "days",
-          countNumber = 14
+          tagStatus      = "tagged",
+          countType      = "sinceImagePushed",
+          countUnit      = "days",
+          countNumber    = each.value.expiration_rules[rule_index].days,
+          tagPatternList = [each.value.expiration_rules[rule_index].tag_pattern]
         },
-        description  = "Remove old images"
-        rulePriority = 2
-      }
-    ] : [])
+        description  = "Remove old by pattern"
+        rulePriority = rule_index + 2
+      }]
+    )
   })
   repository = aws_ecr_repository.repo[each.key].name
 }

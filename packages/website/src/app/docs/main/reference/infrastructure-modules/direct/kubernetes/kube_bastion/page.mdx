@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # Kubernetes Ingress Bastion
-<ModuleHeader name="kube_bastion" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_bastion" status="stable" type="direct"/>
+
+<ModuleHeader name="kube_bastion" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_bastion" status="stable" type="direct" />
 
 This launches an SSH bastion that utilizes Vault for authenticating the present SSH certificates.
 Shell sessions cannot be started directly in the bastion, but the bastion can be used as a proxy
@@ -13,23 +14,23 @@ to private network resources.
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
--  [kubectl](#requirement\_kubectl) (2.0.4)
+* [kubectl](#requirement_kubectl) (2.0.4)
 
--  [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
--  [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
--  [tls](#requirement\_tls) (4.0.5)
+* [tls](#requirement_tls) (4.0.5)
 
--  [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_bastion_domains"></a> [bastion\_domains](#input\_bastion\_domains)
+### <a name="input_bastion_domains" /> [bastion\_domains](#input_bastion_domains)
 
 Description: The domain names of the bastion
 
@@ -39,15 +40,15 @@ Type: `list(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_bastion_image_version"></a> [bastion\_image\_version](#input\_bastion\_image\_version)
+### <a name="input_bastion_image_version" /> [bastion\_image\_version](#input_bastion_image_version)
 
 Description: The version of the image to use for the deployment
 
 Type: `string`
 
-Default: `"alpha"`
+Default: `"17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"`
 
-### <a name="input_bastion_port"></a> [bastion\_port](#input\_bastion\_port)
+### <a name="input_bastion_port" /> [bastion\_port](#input_bastion_port)
 
 Description: The port the bastion should use for the ssh server
 
@@ -55,7 +56,7 @@ Type: `number`
 
 Default: `45459`
 
-### <a name="input_enhanced_ha_enabled"></a> [enhanced\_ha\_enabled](#input\_enhanced\_ha\_enabled)
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -63,10 +64,7 @@ Type: `bool`
 
 Default: `true`
 
-
-
-
-### <a name="input_panfactum_scheduler_enabled"></a> [panfactum\_scheduler\_enabled](#input\_panfactum\_scheduler\_enabled)
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -74,11 +72,7 @@ Type: `bool`
 
 Default: `false`
 
-
-
-
-
-### <a name="input_pull_through_cache_enabled"></a> [pull\_through\_cache\_enabled](#input\_pull\_through\_cache\_enabled)
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -86,8 +80,7 @@ Type: `bool`
 
 Default: `false`
 
-
-### <a name="input_ssh_cert_lifetime_seconds"></a> [ssh\_cert\_lifetime\_seconds](#input\_ssh\_cert\_lifetime\_seconds)
+### <a name="input_ssh_cert_lifetime_seconds" /> [ssh\_cert\_lifetime\_seconds](#input_ssh_cert_lifetime_seconds)
 
 Description: The lifetime of SSH certs provisioned by Vault
 
@@ -95,7 +88,7 @@ Type: `number`
 
 Default: `28800`
 
-### <a name="input_vpa_enabled"></a> [vpa\_enabled](#input\_vpa\_enabled)
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
@@ -107,15 +100,15 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_bastion_domains"></a> [bastion\_domains](#output\_bastion\_domains)
+### <a name="output_bastion_domains" /> [bastion\_domains](#output_bastion_domains)
 
 Description: The domains the SSH server is available on
 
-### <a name="output_bastion_host_public_key"></a> [bastion\_host\_public\_key](#output\_bastion\_host\_public\_key)
+### <a name="output_bastion_host_public_key" /> [bastion\_host\_public\_key](#output_bastion_host_public_key)
 
 Description: The bastion host's public key for mutual verification
 
-### <a name="output_bastion_port"></a> [bastion\_port](#output\_bastion\_port)
+### <a name="output_bastion_port" /> [bastion\_port](#output_bastion_port)
 
 Description: The port the SSH server is available on in each domain
 

@@ -41,6 +41,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_ecr_public_repos",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
       "module": "aws_ecr_pull_through_cache",
       "type": "direct",
       "group": "aws"
@@ -107,6 +112,16 @@
     },
     {
       "module": "kube_argo_event_bus",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo_event_source",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo_sensor",
       "type": "submodule",
       "group": "kubernetes"
     },

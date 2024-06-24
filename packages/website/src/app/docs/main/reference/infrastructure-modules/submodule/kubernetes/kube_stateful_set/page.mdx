@@ -1,0 +1,487 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Kubernetes StatefulSet
+
+<ModuleHeader name="kube_stateful_set" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_stateful_set" status="beta" type="submodule" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_containers" /> [containers](#input_containers)
+
+Description: A list of container configurations for the pod
+
+Type:
+
+```hcl
+list(object({
+    name                    = string
+    init                    = optional(bool, false)
+    image                   = string
+    version                 = string
+    command                 = list(string)
+    image_pull_policy       = optional(string, "IfNotPresent")
+    working_dir             = optional(string, null)
+    minimum_memory          = optional(number, 100)        #The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)       #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)        # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)         # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)       # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
+    run_as_root             = optional(bool, false)        # Whether to run the container as root
+    uid                     = optional(number, 1000)       # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])   # Default is drop ALL
+    readonly                = optional(bool, true)         # Whether to use a readonly file system
+    env                     = optional(map(string), {})    # Environment variables specific to the container
+    liveness_check_command  = optional(list(string), null) # Will run the specified command as the liveness probe if type is exec
+    liveness_check_port     = optional(number, null)       # The number of the port for the liveness_check
+    liveness_check_type     = optional(string, null)       # Either exec, HTTP, or TCP
+    liveness_check_route    = optional(string, null)       # The route if using HTTP liveness_checks
+    liveness_check_scheme   = optional(string, "HTTP")     # HTTP or HTTPS
+    ready_check_command     = optional(list(string), null) # Will run the specified command as the ready check probe if type is exec (default to liveness_check_command)
+    ready_check_port        = optional(number, null)       # The number of the port for the ready check (default to liveness_check_port)
+    ready_check_type        = optional(string, null)       # Either exec, HTTP, or TCP (default to liveness_check_type)
+    ready_check_route       = optional(string, null)       # The route if using HTTP ready checks (default to liveness_check_route)
+    ready_check_scheme      = optional(string, null)       # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
+  }))
+```
+
+### <a name="input_name" /> [name](#input_name)
+
+Description: The name of this workload
+
+Type: `string`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+### <a name="input_volume_mounts" /> [volume\_mounts](#input_volume_mounts)
+
+Description: A mapping of names to configuration for PersistentVolumeClaims used by the StatefulSet
+
+Type:
+
+```hcl
+map(object({
+    storage_class              = optional(string, "ebs-standard-retained")
+    access_modes               = optional(list(string), ["ReadWriteOnce"])
+    initial_size_gb            = optional(number, 1)    # The initial size of the volume when first created
+    size_limit_gb              = optional(number, null) # The maximum number of GB that this volume will scale to
+    increase_threshold_percent = optional(number, 20)   # Dropping below this percent of free storage will trigger an automatic increase in storage size
+    increase_gb                = optional(number, 1)    # The number of GB to increase the volume by when it needs to scale up
+    mount_path                 = string                 # Where in the containers to mount the volume
+    backups_enabled            = optional(bool, true)   # True iff velero should make snapshot backups of the volumes
+  }))
+```
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+
+Description: Whether to allow pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_common_env" /> [common\_env](#input_common_env)
+
+Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
+
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+
+Description: Whether the pods must be scheduled on a controller node
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
+
+Description: The DNS policy for the pods
+
+Type: `string`
+
+Default: `"ClusterFirst"`
+
+### <a name="input_dynamic_secrets" /> [dynamic\_secrets](#input_dynamic_secrets)
+
+Description: Dynamic variable secrets
+
+Type:
+
+```hcl
+list(object({             // key is the secret provider class
+    secret_provider_class = string // name of the secret provider class
+    mount_path            = string // absolute path of where to mount the secret
+    env_var               = string // name of the env var that will have a path to the secret mount
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
+
+Description: Extra pod labels to use
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+
+Description: Extra tolerations to add to the pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### <a name="input_host_anti_affinity_required" /> [host\_anti\_affinity\_required](#input_host_anti_affinity_required)
+
+Description: Whether to prefer preventing pods from being scheduled on the same host
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_ignore_replica_count" /> [ignore\_replica\_count](#input_ignore_replica_count)
+
+Description: Whether to ignore changes to the replica count. Useful when implementing horizontal autoscaling.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
+
+Description: Whether to prefer preventing pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_instance_type_anti_affinity_required" /> [instance\_type\_anti\_affinity\_required](#input_instance_type_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_max_unavailable" /> [max\_unavailable](#input_max_unavailable)
+
+Description: Sets the maxUnavailable field of the associated PodDisruptionBudget
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+
+Description: Node label preferences for the pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+
+Description: Node label requirements for the pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
+
+Description: Annotations to add to the pods in the Pod
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_pod_management_policy" /> [pod\_management\_policy](#input_pod_management_policy)
+
+Description: The StatefulSets pod management policy
+
+Type: `string`
+
+Default: `"OrderedReady"`
+
+### <a name="input_ports" /> [ports](#input_ports)
+
+Description: The port the application is listening on inside the container
+
+Type:
+
+```hcl
+map(object({
+    service_port = number
+    pod_port     = number
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
+
+Description: Whether pods will prefer scheduling on arm64 nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
+
+Description: Whether pods will prefer scheduling on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
+
+Description: Whether pods will prefer scheduling on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
+
+Description: The priority class to use for pods in the StatefulSet
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_replicas" /> [replicas](#input_replicas)
+
+Description: The desired number of pods in the StatefulSet
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
+
+Description: The pod restart policy
+
+Type: `string`
+
+Default: `"Always"`
+
+### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
+
+Description: A mapping of Secret names to their mount configuration in the containers of the Pod
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the Secret
+    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_secrets" /> [secrets](#input_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
+
+Description: The number of seconds to wait for graceful termination before forcing termination
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
+
+Description: A mapping of temporary directory names (arbitrary) to their configuration
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the node rather than a PVC
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_topology_spread_enabled" /> [topology\_spread\_enabled](#input_topology_spread_enabled)
+
+Description: Whether to enable topology spread constraints
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_topology_spread_strict" /> [topology\_spread\_strict](#input_topology_spread_strict)
+
+Description: Whether the topology spread constraint should be set to DoNotSchedule
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_update_type" /> [update\_type](#input_update_type)
+
+Description: The type of update that the StatefulSEt should use
+
+Type: `string`
+
+Default: `"RollingUpdate"`
+
+### <a name="input_volume_retention_policy" /> [volume\_retention\_policy](#input_volume_retention_policy)
+
+Description: The persistentVolumeClaimRetentionPolicy to use of the StatefulSet
+
+Type:
+
+```hcl
+object({
+    when_deleted = optional(string, "Retain")
+    when_scaled  = optional(string, "Retain")
+  })
+```
+
+Default:
+
+```json
+{
+  "when_deleted": "Retain",
+  "when_scaled": "Retain"
+}
+```
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same zone
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_headless_service_name" /> [headless\_service\_name](#output_headless_service_name)
+
+Description: n/a
+
+### <a name="output_labels" /> [labels](#output_labels)
+
+Description: The labels assigned to all resources in this deployment
+
+### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+
+Description: The labels unique to this deployment that can be used to select the pods in this deployment
+
+### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+
+Description: The service account used for the pods
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

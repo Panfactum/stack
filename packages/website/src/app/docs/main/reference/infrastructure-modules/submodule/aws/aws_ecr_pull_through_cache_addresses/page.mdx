@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 # AWS ECR Pull Through Cache Address
-<ModuleHeader name="aws_ecr_pull_through_cache_addresses" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache_addresses" status="stable" type="submodule"/>
+
+<ModuleHeader name="aws_ecr_pull_through_cache_addresses" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache_addresses" status="stable" type="submodule" />
 
 Used to find the pull through cache address for the AWS account
 
@@ -11,13 +12,13 @@ Used to find the pull through cache address for the AWS account
 
 The following providers are needed by this module:
 
--  [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_pull_through_cache_enabled"></a> [pull\_through\_cache\_enabled](#input\_pull\_through\_cache\_enabled)
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -27,35 +28,27 @@ Type: `bool`
 
 The following input variables are optional (have default values):
 
-
-
-
-
-
-
-
-
 ## Outputs
 
 The following outputs are exported:
 
-### <a name="output_docker_hub_registry"></a> [docker\_hub\_registry](#output\_docker\_hub\_registry)
+### <a name="output_docker_hub_registry" /> [docker\_hub\_registry](#output_docker_hub_registry)
 
 Description: n/a
 
-### <a name="output_ecr_public_registry"></a> [ecr\_public\_registry](#output\_ecr\_public\_registry)
+### <a name="output_ecr_public_registry" /> [ecr\_public\_registry](#output_ecr_public_registry)
 
 Description: n/a
 
-### <a name="output_github_registry"></a> [github\_registry](#output\_github\_registry)
+### <a name="output_github_registry" /> [github\_registry](#output_github_registry)
 
 Description: n/a
 
-### <a name="output_kubernetes_registry"></a> [kubernetes\_registry](#output\_kubernetes\_registry)
+### <a name="output_kubernetes_registry" /> [kubernetes\_registry](#output_kubernetes_registry)
 
 Description: n/a
 
-### <a name="output_quay_registry"></a> [quay\_registry](#output\_quay\_registry)
+### <a name="output_quay_registry" /> [quay\_registry](#output_quay_registry)
 
 Description: n/a
 

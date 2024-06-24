@@ -23,6 +23,7 @@ data "aws_region" "current" {}
 
 locals {
   namespace = module.namespace.namespace
+  ci_image = "${module.pull_through.github_registry}/panfactum/panfactum:17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"
 }
 
 module "pull_through" {

@@ -146,9 +146,9 @@ locals {
     [for name, config in var.config_map_mounts : {
       name = "config-map-${name}"
       configMap = {
-        name     = name
+        name        = name
         defaultMode = 511 # TODO: Make a flag -- Give all permissions so we can mount executables
-        optional = config.optional
+        optional    = config.optional
       }
     }],
     [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -223,7 +223,7 @@ locals {
     artifactGC = var.delete_artifacts_on_deletion ? {
       strategy = "OnWorkflowDeletion"
     } : null
-    arguments = var.arguments
+    arguments   = var.arguments
     dnsPolicy   = var.dns_policy
     entrypoint  = var.entrypoint
     onExit      = var.on_exit
@@ -238,11 +238,8 @@ locals {
       annotations = var.pod_annotations
     }
     podPriorityClassName = var.priority_class_name
-    priority = var.priority
+    priority             = var.priority
     retryStrategy = { for k, v in {
-      #      affinity = {
-      #        nodeAntiAffinity = "true"
-      #      }
       backoff = {
         duration    = "${var.retry_backoff_initial_duration_seconds}s"
         factor      = 2
@@ -253,12 +250,13 @@ locals {
       expression  = var.retry_expression
     } : k => v if v != null }
     schedulerName = module.util.scheduler_name
-    securityContext = {
-      fsGroup      = var.run_as_root ? 0 : var.uid
-      runAsNonRoot = false // Argo's executor must run as root
-      runAsUser    = var.run_as_root ? 0 : var.uid
-      runAsGroup   = var.run_as_root ? 0 : var.uid
-    }
+    securityContext = { for k, v in {
+      fsGroup             = var.run_as_root ? null : var.uid # This will trigger a full recursive chown if set, so avoid doing this if the runner is root
+      fsGroupChangePolicy = "OnRootMismatch"                 # Provides significant performance increase for mounting caches
+      runAsNonRoot        = false                            # Argo's executor must run as root
+      runAsUser           = var.run_as_root ? 0 : var.uid
+      runAsGroup          = var.run_as_root ? 0 : var.uid
+    } : k => v if v != null }
     serviceAccountName = kubernetes_service_account.sa.metadata[0].name
     suspend            = var.suspend
     synchronization = {
@@ -305,6 +303,20 @@ locals {
       name         = var.cluster_workflow_template_ref
     }
   } : k => v if v != null }
+
+  /************************************************
+  * Container Defaults
+  ************************************************/
+  container_defaults = {
+    image           = var.default_container_image
+    securityContext = local.security_context
+    volumeMounts    = local.common_volume_mounts
+    env             = local.common_env
+    resources = {
+      requests = var.default_resources.requests
+      limits   = { for k, v in var.default_resources.limits : k => v if v != null }
+    }
+  }
 }
 
 resource "random_id" "workflow_id" {
@@ -361,6 +373,7 @@ module "workflow_perms" {
   service_account           = kubernetes_service_account.sa.metadata[0].name
   service_account_namespace = var.namespace
   eks_cluster_name          = var.eks_cluster_name
+  extra_aws_permissions     = var.extra_aws_permissions
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -404,11 +417,11 @@ resource "kubectl_manifest" "pdb" {
       labels    = module.util.labels
     }
     spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util.match_labels
       }
-      maxUnavailable = 0
+      # Must be minAvailable b/c this is argo Workflow CRD doesn't implement the scale subresource
+      minAvailable = 100
     }
   })
   force_conflicts   = true

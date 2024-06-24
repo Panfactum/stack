@@ -1,0 +1,557 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Postgres Cluster on Kubernetes
+
+<ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule" />
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### <a name="input_pg_cluster_namespace" /> [pg\_cluster\_namespace](#input_pg_cluster_namespace)
+
+Description: The namespace to deploy to the cluster into
+
+Type: `string`
+
+### <a name="input_pg_storage_gb" /> [pg\_storage\_gb](#input_pg_storage_gb)
+
+Description: The initial number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_arm_instances_enabled" /> [arm\_instances\_enabled](#input_arm_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on arm instances
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_backups_enabled" /> [backups\_enabled](#input_backups_enabled)
+
+Description: Whether this database has backups enabled
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_backups_force_delete" /> [backups\_force\_delete](#input_backups_force_delete)
+
+Description: Whether to delete backups on destroy
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on burstable instances
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pg_cpu_millicores" /> [pg\_cpu\_millicores](#input_pg_cpu_millicores)
+
+Description: The amount of cpu to allocate to the postgres pods (in millicores)
+
+Type: `number`
+
+Default: `250`
+
+### <a name="input_pg_instances" /> [pg\_instances](#input_pg_instances)
+
+Description: The number of instances to deploy in the postgres cluster
+
+Type: `number`
+
+Default: `2`
+
+### <a name="input_pg_memory_mb" /> [pg\_memory\_mb](#input_pg_memory_mb)
+
+Description: The amount of memory to allocate to the postgres pods (in Mi)
+
+Type: `number`
+
+Default: `1000`
+
+### <a name="input_pg_shutdown_timeout" /> [pg\_shutdown\_timeout](#input_pg_shutdown_timeout)
+
+Description: The number of seconds to wait for open connections to close before shutting down postgres nodes
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pg_storage_increase_percent" /> [pg\_storage\_increase\_percent](#input_pg_storage_increase_percent)
+
+Description: The percent to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `100`
+
+### <a name="input_pg_storage_increase_threshold_percent" /> [pg\_storage\_increase\_threshold\_percent](#input_pg_storage_increase_threshold_percent)
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### <a name="input_pg_storage_limit_gb" /> [pg\_storage\_limit\_gb](#input_pg_storage_limit_gb)
+
+Description: The maximum number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pg_version" /> [pg\_version](#input_pg_version)
+
+Description: The version of postgres to deploy
+
+Type: `string`
+
+Default: `"16.2-10"`
+
+### <a name="input_pgbouncer_application_name_add_host" /> [pgbouncer\_application\_name\_add\_host](#input_pgbouncer_application_name_add_host)
+
+Description: Add the client host address and port to the application name setting set on connection start.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_autodb_idle_timeout" /> [pgbouncer\_autodb\_idle\_timeout](#input_pgbouncer_autodb_idle_timeout)
+
+Description: If the automatically created (via “\*”) database pools have been unused this many seconds, they are freed.
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_pgbouncer_client_idle_timeout" /> [pgbouncer\_client\_idle\_timeout](#input_pgbouncer_client_idle_timeout)
+
+Description: Client connections idling longer than this many seconds are closed. This should be larger than the client-side connection lifetime settings, and only used for network problems.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_client_login_timeout" /> [pgbouncer\_client\_login\_timeout](#input_pgbouncer_client_login_timeout)
+
+Description: If a client connects but does not manage to log in in this amount of time, it will be disconnected. Mainly needed to avoid dead connections stalling SUSPEND and thus online restart.
+
+Type: `number`
+
+Default: `60`
+
+### <a name="input_pgbouncer_default_pool_size" /> [pgbouncer\_default\_pool\_size](#input_pgbouncer_default_pool_size)
+
+Description: How many server connections to allow per user/database pair.
+
+Type: `number`
+
+Default: `20`
+
+### <a name="input_pgbouncer_disable_pqexec" /> [pgbouncer\_disable\_pqexec](#input_pgbouncer_disable_pqexec)
+
+Description: Disable the Simple Query protocol (PQexec). Unlike the Extended Query protocol, Simple Query allows multiple queries in one packet, which allows some classes of SQL-injection attacks.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_log_connections" /> [pgbouncer\_log\_connections](#input_pgbouncer_log_connections)
+
+Description: Whether to log each connection.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_log_disconnections" /> [pgbouncer\_log\_disconnections](#input_pgbouncer_log_disconnections)
+
+Description: Whether to log each disconnection.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_log_pooler_errors" /> [pgbouncer\_log\_pooler\_errors](#input_pgbouncer_log_pooler_errors)
+
+Description: Whether to log errors the pooler sends to clients.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pgbouncer_max_client_conn" /> [pgbouncer\_max\_client\_conn](#input_pgbouncer_max_client_conn)
+
+Description: The maximum client connections allowed by pgbouncer
+
+Type: `number`
+
+Default: `10000`
+
+### <a name="input_pgbouncer_max_db_connections" /> [pgbouncer\_max\_db\_connections](#input_pgbouncer_max_db_connections)
+
+Description: Do not allow more than this many server connections per database (regardless of user). This considers the PgBouncer database that the client has connected to, not the PostgreSQL database of the outgoing connection.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_max_prepared_statements" /> [pgbouncer\_max\_prepared\_statements](#input_pgbouncer_max_prepared_statements)
+
+Description: When this is set to a non-zero value PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling mode. PgBouncer makes sure that any statement prepared by a client is available on the backing server connection. Even when the statement was originally prepared on another server connection.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_max_user_connections" /> [pgbouncer\_max\_user\_connections](#input_pgbouncer_max_user_connections)
+
+Description: Do not allow more than this many server connections per user (regardless of database).
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_min_pool_size" /> [pgbouncer\_min\_pool\_size](#input_pgbouncer_min_pool_size)
+
+Description: Add more server connections to pool if below this number. Improves behavior when the normal load suddenly comes back after a period of total inactivity. The value is effectively capped at the pool size.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_pool_mode" /> [pgbouncer\_pool\_mode](#input_pgbouncer_pool_mode)
+
+Description: What pool\_mode to run pgbouncer in
+
+Type: `string`
+
+Default: `"session"`
+
+### <a name="input_pgbouncer_query_timeout" /> [pgbouncer\_query\_timeout](#input_pgbouncer_query_timeout)
+
+Description: Queries running longer than this amount of seconds are canceled. This should be used only with a slightly smaller server-side statement\_timeout, to apply only for network problems.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_query_wait_timeout" /> [pgbouncer\_query\_wait\_timeout](#input_pgbouncer_query_wait_timeout)
+
+Description: Maximum time queries are allowed to spend waiting for execution. If the query is not assigned to a server during that time, the client is disconnected. 0 disables. If this is disabled, clients will be queued indefinitely.
+
+Type: `number`
+
+Default: `120`
+
+### <a name="input_pgbouncer_read_only_enabled" /> [pgbouncer\_read\_only\_enabled](#input_pgbouncer_read_only_enabled)
+
+Description: Whether to enable a pgbouncer deployment in read-only mode
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_read_write_enabled" /> [pgbouncer\_read\_write\_enabled](#input_pgbouncer_read_write_enabled)
+
+Description: Whether to enable a pgbouncer deployment in read-write mode
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pgbouncer_reserve_pool_size" /> [pgbouncer\_reserve\_pool\_size](#input_pgbouncer_reserve_pool_size)
+
+Description: How many additional connections to allow to a pool (see reserve\_pool\_timeout). 0 disables.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_reserve_pool_timeout" /> [pgbouncer\_reserve\_pool\_timeout](#input_pgbouncer_reserve_pool_timeout)
+
+Description: If a client has not been serviced in this amount of seconds, use additional connections from the reserve pool. 0 disables.
+
+Type: `number`
+
+Default: `5`
+
+### <a name="input_pgbouncer_server_check_delay" /> [pgbouncer\_server\_check\_delay](#input_pgbouncer_server_check_delay)
+
+Description: How long to keep released connections available for immediate re-use.
+
+Type: `number`
+
+Default: `30`
+
+### <a name="input_pgbouncer_server_connect_timeout" /> [pgbouncer\_server\_connect\_timeout](#input_pgbouncer_server_connect_timeout)
+
+Description: If connection and login don’t finish in this amount of seconds, the connection will be closed.
+
+Type: `number`
+
+Default: `15`
+
+### <a name="input_pgbouncer_server_fast_close" /> [pgbouncer\_server\_fast\_close](#input_pgbouncer_server_fast_close)
+
+Description: Disconnect a server in session pooling mode immediately or after the end of the current transaction if it is in “close\_needed” mode (set by RECONNECT, RELOAD that changes connection settings, or DNS change), rather than waiting for the session end. In statement or transaction pooling mode, this has no effect since that is the default behavior there.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_server_idle_timeout" /> [pgbouncer\_server\_idle\_timeout](#input_pgbouncer_server_idle_timeout)
+
+Description: If a server connection has been idle more than this many seconds it will be closed. If 0 then this timeout is disabled.
+
+Type: `number`
+
+Default: `600`
+
+### <a name="input_pgbouncer_server_lifetime" /> [pgbouncer\_server\_lifetime](#input_pgbouncer_server_lifetime)
+
+Description: The pooler will close an unused (not currently linked to any client connection) server connection that has been connected longer than this. Setting it to 0 means the connection is to be used only once, then closed.
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_pgbouncer_server_login_retry" /> [pgbouncer\_server\_login\_retry](#input_pgbouncer_server_login_retry)
+
+Description: If login to the server failed, because of failure to connect or from authentication, the pooler waits this many seconds before retrying to connect. During the waiting interval, new clients trying to connect to the failing server will get an error immediately without another connection attempt.
+
+Type: `number`
+
+Default: `15`
+
+### <a name="input_pgbouncer_stats_period" /> [pgbouncer\_stats\_period](#input_pgbouncer_stats_period)
+
+Description: Sets how often the averages shown in various SHOW commands are updated and how often aggregated statistics are written to the log.
+
+Type: `number`
+
+Default: `60`
+
+### <a name="input_pgbouncer_tcp_keepalive" /> [pgbouncer\_tcp\_keepalive](#input_pgbouncer_tcp_keepalive)
+
+Description: Turns on basic keepalive with OS defaults.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pgbouncer_tcp_keepcnt" /> [pgbouncer\_tcp\_keepcnt](#input_pgbouncer_tcp_keepcnt)
+
+Description: Sets tcp\_keepcnt
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pgbouncer_tcp_keepidle" /> [pgbouncer\_tcp\_keepidle](#input_pgbouncer_tcp_keepidle)
+
+Description: Sets tcp\_keepidle
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pgbouncer_tcp_keepintvl" /> [pgbouncer\_tcp\_keepintvl](#input_pgbouncer_tcp_keepintvl)
+
+Description: Sets tcp\_keepintvl
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_pgbouncer_tcp_user_timeout" /> [pgbouncer\_tcp\_user\_timeout](#input_pgbouncer_tcp_user_timeout)
+
+Description: Sets the TCP\_USER\_TIMEOUT socket option. This specifies the maximum amount of time in milliseconds that transmitted data may remain unacknowledged before the TCP connection is forcibly closed. If set to 0, then operating system’s default is used.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pgbouncer_verbose" /> [pgbouncer\_verbose](#input_pgbouncer_verbose)
+
+Description: Increase verbosity. Mirrors the “-v” switch on the command line. For example, using “-v -v” on the command line is the same as verbose=2.
+
+Type: `number`
+
+Default: `0`
+
+### <a name="input_pgbouncer_version" /> [pgbouncer\_version](#input_pgbouncer_version)
+
+Description: The version of the cloudnative-pg/pgbouncer image to use
+
+Type: `string`
+
+Default: `"1.22.1"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+
+Description: Whether the database nodes can be scheduled on spot instances
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_database" /> [database](#output_database)
+
+Description: The database to use for application data
+
+### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
+
+Description: n/a
+
+### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
+
+Description: n/a
+
+### <a name="output_db_superuser_role" /> [db\_superuser\_role](#output_db_superuser_role)
+
+Description: n/a
+
+### <a name="output_pooler_r_service_name" /> [pooler\_r\_service\_name](#output_pooler_r_service_name)
+
+Description: The service name of the pgbouncer connection pooler that allows read access
+
+### <a name="output_pooler_r_service_port" /> [pooler\_r\_service\_port](#output_pooler_r_service_port)
+
+Description: n/a
+
+### <a name="output_pooler_rw_service_name" /> [pooler\_rw\_service\_name](#output_pooler_rw_service_name)
+
+Description: The service name of the pgbouncer connection pooler that allows read-write access
+
+### <a name="output_pooler_rw_service_port" /> [pooler\_rw\_service\_port](#output_pooler_rw_service_port)
+
+Description: n/a
+
+### <a name="output_r_service_name" /> [r\_service\_name](#output_r_service_name)
+
+Description: The service name for all db instances that allow read access
+
+### <a name="output_r_service_port" /> [r\_service\_port](#output_r_service_port)
+
+Description: n/a
+
+### <a name="output_ro_service_name" /> [ro\_service\_name](#output_ro_service_name)
+
+Description: The service name for the db instances that only allow read access
+
+### <a name="output_ro_service_port" /> [ro\_service\_port](#output_ro_service_port)
+
+Description: n/a
+
+### <a name="output_rw_service_name" /> [rw\_service\_name](#output_rw_service_name)
+
+Description: The service name of the db node that allows read-write access
+
+### <a name="output_rw_service_port" /> [rw\_service\_port](#output_rw_service_port)
+
+Description: n/a
+
+### <a name="output_server_certs_secret" /> [server\_certs\_secret](#output_server_certs_secret)
+
+Description: The secret containing the server certificates for the database
+
+### <a name="output_superuser_password" /> [superuser\_password](#output_superuser_password)
+
+Description: The password for root user of the database
+
+### <a name="output_superuser_username" /> [superuser\_username](#output_superuser_username)
+
+Description: The root user of the database
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

@@ -6,7 +6,7 @@ resources:
   - all.yaml
 
 patches:
-  - path: events-controller.yaml
+  - path: events_controller.yaml
     target:
       kind: Deployment
       name: argo-events-controller-manager
@@ -14,3 +14,11 @@ patches:
     target:
       kind: Deployment
       name: events-webhook
+  - path: sensor.yaml
+    target:
+      kind: CustomResourceDefinition
+      name: sensors.argoproj.io
+  - path: event_source.yaml
+    target:
+      kind: CustomResourceDefinition
+      name: eventsources.argoproj.io

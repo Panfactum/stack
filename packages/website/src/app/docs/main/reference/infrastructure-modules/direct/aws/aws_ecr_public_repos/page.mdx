@@ -1,0 +1,78 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Public AWS ECR Repositories
+
+<ModuleHeader name="aws_ecr_public_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_public_repos" status="stable" type="direct" />
+
+## Differences from Private ECR Repositories
+
+* All public ECR repositories are created in `us-east-1`.
+
+* Once published, image tags are immutable.
+
+* There is no automatic lifecycle management for images published to public repositories.
+
+## Custom Registry Alias
+
+Once you deploy public ECR repos, you should request a
+[custom alias](https://docs.aws.amazon.com/AmazonECR/latest/public/public-registry-settings.html).
+This may take a few days to be approved.
+
+## Deployment Notes
+
+* This module should be deployed in the `global` region.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_ecr_repositories" /> [ecr\_repositories](#input_ecr_repositories)
+
+Description: Mapping of names to the repositories to create.
+
+Type:
+
+```hcl
+map(object({
+    about_text        = optional(string, null)       # A detailed description of the contents of the repository. It is publicly visible in the Amazon ECR Public Gallery. The text must be in markdown format.
+    architectures     = optional(list(string), null) #  On the Amazon ECR Public Gallery, the following supported architectures will appear as badges on the repository and are used as search filters: ARM, ARM 64, x86, x86-64
+    description       = optional(string, null)       # A short description of the contents of the repository. This text appears in both the image details and also when searching for repositories on the Amazon ECR Public Gallery.
+    logo_image_blob   = optional(string, null)       # The base64-encoded repository logo payload. (Only visible for verified accounts) Note that drift detection is disabled for this attribute.
+    operating_systems = optional(list(string), null) # On the Amazon ECR Public Gallery, the following supported operating systems will appear as badges on the repository and are used as search filters: Linux, Windows
+    usage_text        = optional(string, null)       # Detailed information on how to use the contents of the repository. It is publicly visible in the Amazon ECR Public Gallery. The usage text provides context, support information, and additional usage details for users of the repository. The text must be in markdown format.
+  }))
+```
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_trusted_account_ids" /> [trusted\_account\_ids](#input_trusted_account_ids)
+
+Description: The ids of the accounts that have completed access to each repository.
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_ecr_repositories" /> [ecr\_repositories](#output_ecr_repositories)
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}
