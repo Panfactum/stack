@@ -196,14 +196,7 @@ module "bastion_image_builder_workflow" {
             dependencies = ["scale-buildkit", "clone"]
           },
           {
-            name = "build-arm64"
-            command = ["/scripts/build.sh"]
-            env = concat(
-              module.bastion_image_builder_workflow.env,
-              [
-                { name = "ARCH", value = "arm64" }
-              ]
-            )
+
             dependencies = ["scale-buildkit", "clone"]
           },
           {
@@ -240,9 +233,6 @@ module "bastion_image_builder_workflow" {
     "${kubernetes_config_map.bastion_image_builder_scripts.metadata[0].name}" = {
       mount_path = "/scripts"
     }
-    "${kubernetes_config_map.bastion_image_builder_containers.metadata[0].name}" = {
-      mount_path = "/etc/containers"
-    }
   }
 
   # pf-generate: pass_vars
@@ -270,9 +260,5 @@ resource "kubectl_manifest" "bastion_workflow_template" {
 
   server_side_apply = true
   force_conflicts   = true
-
-  depends_on = [
-    kubectl_manifest.pvc
-  ]
 }
 

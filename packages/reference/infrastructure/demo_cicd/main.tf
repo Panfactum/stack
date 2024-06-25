@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "3.25.0"
+    }
   }
 }
 
@@ -23,7 +27,7 @@ data "aws_region" "current" {}
 
 locals {
   namespace = module.namespace.namespace
-  ci_image = "${module.pull_through.github_registry}/panfactum/panfactum:17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"
+  ci_image = "${module.pull_through.ecr_public_registry}/t8f0s7h5/panfactum:95508e2e860c95cee40e61245c8f588b6b73a39b"
 }
 
 module "pull_through" {

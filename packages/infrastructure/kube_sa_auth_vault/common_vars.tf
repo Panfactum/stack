@@ -1,40 +1,3 @@
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
-variable "github_username" {
-  description = "The username of the GitHub account used by the CI/CD system"
-  type = string
-}
-
-variable "github_token" {
-  description = "The API token of the GitHub account used by the CI/CD system"
-  type = string
-  sensitive= true
-}
-
-variable "webhook_domain" {
-  description = "The domain to use for the EventSource webhook"
-  type = string
-}
-
-variable "buildkit_bucket_name" {
-  description = "The S3 bucket to use as the layer cache"
-  type = string
-}
-
-variable "buildkit_bucket_region" {
-  description = "The region of the S3 bucket to use as the layer cache"
-  type = string
-}
-
-variable "authentik_token" {
-  description = "An API token for setting up Authentik"
-  type = string
-  sensitive = true
-}
-
 # pf-generate: standard_vars
 variable "environment" {
   description = "The name of the environment the infrastructure is being deployed into. #injected"
@@ -45,13 +8,13 @@ variable "environment" {
 variable "pf_root_module" {
   description = "The name of the root Panfactum module in the module tree. #injected"
   type        = string
-  default     = "image_builder_panfactum"
+  default     = "kube_sa_auth_aws"
 }
 
 variable "pf_module" {
   description = "The name of the Panfactum module where the containing resources are directly defined. #injected"
   type        = string
-  default     = "image_builder_panfactum"
+  default     = "kube_sa_auth_aws"
 }
 
 variable "region" {

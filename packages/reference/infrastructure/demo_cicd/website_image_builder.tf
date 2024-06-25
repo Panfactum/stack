@@ -222,9 +222,5 @@ resource "kubectl_manifest" "website_workflow_template" {
 
   server_side_apply = true
   force_conflicts   = true
-
-  depends_on = [
-    kubectl_manifest.pvc
-  ]
 }
 

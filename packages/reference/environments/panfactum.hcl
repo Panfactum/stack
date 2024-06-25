@@ -91,7 +91,7 @@ locals {
   is_local            = local.vars.environment == "local"
 
   # get vault_token (only if the vault provider is enabled)
-  vault_address = lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
+  vault_address = local.is_ci ? get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
   vault_token = run_cmd(
     "--terragrunt-global-cache", "--terragrunt-quiet",
     "pf-get-vault-token",
@@ -139,7 +139,7 @@ generate "aws_provider" {
   contents = local.enable_aws ? templatefile("${local.provider_folder}/aws.tftpl", {
     aws_region     = local.enable_aws ? local.vars.aws_region : ""
     aws_account_id = local.enable_aws ? local.vars.aws_account_id : ""
-    aws_profile    = local.enable_aws ? local.vars.aws_profile : ""
+    aws_profile    = local.enable_aws ? (local.is_ci ? "ci" : local.vars.aws_profile) : ""
   }) : ""
 }
 
@@ -150,7 +150,7 @@ generate "aws_secondary_provider" {
   contents = local.enable_aws ? templatefile("${local.provider_folder}/aws_secondary.tftpl", {
     aws_region     = local.enable_aws ? local.vars.aws_secondary_region : ""
     aws_account_id = local.enable_aws ? local.vars.aws_secondary_account_id : ""
-    aws_profile    = local.enable_aws ? local.vars.aws_secondary_profile : ""
+    aws_profile    = local.enable_aws ? (local.is_ci ? "ci" : local.vars.aws_secondary_profile) : ""
   }) : ""
 }
 
@@ -160,7 +160,7 @@ generate "aws_global_provider" {
   # Note: If the aws provider is enabled, always enable the global as it removes a footgun at no extra cost
   contents = local.enable_aws ? templatefile("${local.provider_folder}/aws_global.tftpl", {
     aws_account_id = local.enable_aws ? local.vars.aws_account_id : ""
-    aws_profile    = local.enable_aws ? local.vars.aws_profile : ""
+    aws_profile    = local.enable_aws ? (local.is_ci ? "ci" : local.vars.aws_profile) : ""
   }) : ""
 }
 
@@ -168,8 +168,8 @@ generate "kubernetes_provider" {
   path      = "kubernetes.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubernetes.tftpl", {
-    kube_api_server     = local.enable_kubernetes ? local.vars.kube_api_server : ""
-    kube_config_context = local.enable_kubernetes ? local.vars.kube_config_context : ""
+    kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
+    kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
   }) : ""
 }
 
@@ -177,8 +177,8 @@ generate "kubectl_provider" {
   path      = "kubectl.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl.tftpl", {
-    kube_api_server     = local.enable_kubernetes ? local.vars.kube_api_server : ""
-    kube_config_context = local.enable_kubernetes ? local.vars.kube_config_context : ""
+    kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
+    kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
   }) : ""
 }
 
@@ -192,8 +192,8 @@ generate "helm_provider" {
   path      = "helm.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_helm ? templatefile("${local.provider_folder}/helm.tftpl", {
-    kube_api_server     = local.enable_helm ? local.vars.kube_api_server : ""
-    kube_config_context = local.enable_helm ? local.vars.kube_config_context : ""
+    kube_api_server     = local.enable_helm ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
+    kube_config_context = local.enable_helm ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
   }) : ""
 }
 

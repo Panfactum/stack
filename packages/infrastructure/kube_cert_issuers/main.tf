@@ -197,18 +197,14 @@ data "vault_policy_document" "vault_issuer" {
   }
 }
 
-resource "vault_policy" "vault_issuer" {
-  name   = kubernetes_service_account.vault_issuer.metadata[0].name
-  policy = data.vault_policy_document.vault_issuer.hcl
-}
+module "vault_role" {
+  source = "../kube_sa_auth_vault"
 
-resource "vault_kubernetes_auth_backend_role" "vault_issuer" {
-  bound_service_account_names      = [kubernetes_service_account.vault_issuer.metadata[0].name]
-  bound_service_account_namespaces = [kubernetes_service_account.vault_issuer.metadata[0].namespace]
-  audience                         = "vault://${local.ci_internal_name}"
-  role_name                        = vault_pki_secret_backend_role.vault_issuer.name
-  token_ttl                        = 60
-  token_policies                   = [vault_policy.vault_issuer.name]
+  service_account = kubernetes_service_account.vault_issuer.metadata[0].name
+  service_account_namespace = var.namespace
+  vault_policy_hcl = data.vault_policy_document.vault_issuer.hcl
+  audience = "vault://${local.ci_internal_name}"
+  token_ttl_seconds = 120
 }
 
 resource "vault_pki_secret_backend_role" "vault_issuer" {
@@ -243,7 +239,7 @@ resource "kubectl_manifest" "internal_ci" {
         server = var.vault_internal_url
         auth = {
           kubernetes = {
-            role      = vault_kubernetes_auth_backend_role.vault_issuer.role_name
+            role      = module.vault_role.role_name
             mountPath = "/v1/auth/kubernetes"
             serviceAccountRef = {
               name = kubernetes_service_account.vault_issuer.metadata[0].name
@@ -324,18 +320,14 @@ data "vault_policy_document" "vault_ca_issuer" {
   }
 }
 
-resource "vault_policy" "vault_ca_issuer" {
-  name   = kubernetes_service_account.vault_ca_issuer.metadata[0].name
-  policy = data.vault_policy_document.vault_ca_issuer.hcl
-}
+module "vault_ca_role" {
+  source = "../kube_sa_auth_vault"
 
-resource "vault_kubernetes_auth_backend_role" "vault_ca_issuer" {
-  bound_service_account_names      = [kubernetes_service_account.vault_ca_issuer.metadata[0].name]
-  bound_service_account_namespaces = [kubernetes_service_account.vault_ca_issuer.metadata[0].namespace]
-  audience                         = "vault://${local.ci_internal_ca_name}"
-  role_name                        = vault_pki_secret_backend_role.vault_ca_issuer.name
-  token_ttl                        = 60
-  token_policies                   = [vault_policy.vault_ca_issuer.name]
+  service_account = kubernetes_service_account.vault_ca_issuer.metadata[0].name
+  service_account_namespace = var.namespace
+  vault_policy_hcl = data.vault_policy_document.vault_ca_issuer.hcl
+  audience = "vault://${local.ci_internal_ca_name}"
+  token_ttl_seconds = 120
 }
 
 resource "vault_pki_secret_backend_role" "vault_ca_issuer" {
@@ -370,7 +362,7 @@ resource "kubectl_manifest" "internal_ca_ci" {
         server = var.vault_internal_url
         auth = {
           kubernetes = {
-            role      = vault_kubernetes_auth_backend_role.vault_ca_issuer.role_name
+            role      = module.vault_ca_role.role_name
             mountPath = "/v1/auth/kubernetes"
             serviceAccountRef = {
               name = kubernetes_service_account.vault_ca_issuer.metadata[0].name

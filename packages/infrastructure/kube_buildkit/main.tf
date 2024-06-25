@@ -155,7 +155,7 @@ module "buildkit" {
     {
       name    = "buildkitd"
       image   = "${module.pull_through.docker_hub_registry}/moby/buildkit"
-      version = "v0.14.1-rootless"
+      version = var.buildkit_image_version
       command = [
         "rootlesskit",
         "buildkitd",
@@ -355,8 +355,8 @@ module "scale_to_zero" {
   cron_schedule = "*/15 * * * *"
   containers = [{
     name    = "scale-to-zero"
-    image   = "${module.pull_through.github_registry}/panfactum/panfactum"
-    version = "3e05e894bfe5a85148473f886eb99bfb576ed431"
+    image   = "${module.pull_through.ecr_public_registry}/t8f0s7h5/panfactum"
+    version = "95508e2e860c95cee40e61245c8f588b6b73a39b"
     command = [
       "/bin/pf-buildkit-scale-down",
       "--timeout",
