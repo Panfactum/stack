@@ -11,11 +11,6 @@ dependency "aws_vpc" {
   config_path = "../aws_vpc"
 }
 
-dependency "pull_through_cache" {
-  config_path  = "../aws_ecr_pull_through_cache"
-  skip_outputs = true
-}
-
 inputs = {
   vpc_id     = dependency.aws_vpc.outputs.vpc_id
   egress_ips = dependency.aws_vpc.outputs.nat_ips

@@ -240,6 +240,9 @@ module "bastion_image_builder_workflow" {
     "${kubernetes_config_map.bastion_image_builder_scripts.metadata[0].name}" = {
       mount_path = "/scripts"
     }
+    "${kubernetes_config_map.bastion_image_builder_containers.metadata[0].name}" = {
+      mount_path = "/etc/containers"
+    }
   }
 
   # pf-generate: pass_vars

@@ -248,6 +248,7 @@
     gnused # sed
     gnugrep # grep
     gnutar # tar
+    findutils # find
 
     ####################################
     # AWS Utilities

@@ -106,6 +106,7 @@ module "tf_deploy_workflow" {
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
     VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
     TF_PLUGIN_CACHE_DIR="/terraform"
+    AWS_CONFIG_FILE="/.aws/config"
   }
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {

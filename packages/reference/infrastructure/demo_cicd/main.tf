@@ -27,7 +27,7 @@ data "aws_region" "current" {}
 
 locals {
   namespace = module.namespace.namespace
-  ci_image = "${module.pull_through.ecr_public_registry}/t8f0s7h5/panfactum:95508e2e860c95cee40e61245c8f588b6b73a39b"
+  ci_image = "${module.pull_through.ecr_public_registry}/t8f0s7h5/panfactum:54b9ca5cfa25b3100656df032473f638ca024b20"
 }
 
 module "pull_through" {
