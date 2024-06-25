@@ -8,7 +8,7 @@ set -eo pipefail
 
 cd /code
 git clone https://github.com/Panfactum/stack.git --depth=1
-cd stack
+cd "$DEVENV_ROOT"
 git fetch origin "$GIT_REF"
 git checkout "$GIT_REF"
 git lfs install --local
@@ -46,11 +46,11 @@ update_sops() {
   local file="$1"
 
   # Check if the file contains sops.kms
-  if yq '.sops.kms' "$file" > /dev/null 2>&1; then
+  if yq -e '.sops.kms' "$file" > /dev/null 2>&1; then
     echo "Processing $file"
 
     # Use yq to update aws_profile value to ci
-    yq -Y '(.sops.kms[] | select(has("aws_profile"))).aws_profile = "ci"' -i "$file"
+    yq -Yi '(.sops.kms[] | select(has("aws_profile"))).aws_profile = "ci"' "$file"
   fi
 }
 
@@ -61,7 +61,7 @@ done
 #####################################################
 # Step 5: Deploy terragrunt
 #####################################################
-cd packages/reference/environments/production/us-east-2/aws_vpc
+cd environments/production/us-east-2/aws_vpc
 
 terragrunt run-all apply \
   --terragrunt-ignore-external-dependencies \

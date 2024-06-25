@@ -77,6 +77,9 @@ function scale-up() {
   if [[ $CURRENT_REPLICAS -eq 0 ]]; then
     kubectl scale statefulset "$STATEFULSET_NAME" --namespace="$BUILDKIT_NAMESPACE" --replicas=1
   fi
+   # We record a scale-up as a "build" so that our autoscaler does not attempt to scale down
+   # buildkit between the scale-up and the build initiating.
+  pf-buildkit-record-build --arch="$ARCH"
 }
 
 if [[ -n $ONLY_ARCH ]]; then

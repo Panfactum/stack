@@ -249,6 +249,7 @@
     gnugrep # grep
     gnutar # tar
     findutils # find
+    gzip # compression programs
 
     ####################################
     # AWS Utilities

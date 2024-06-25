@@ -103,6 +103,7 @@ module "tf_deploy_workflow" {
     PF_ENVIRONMENTS_DIR = "environments"
     PF_REPO_PRIMARY_BRANCH = "main"
     PF_REPO_NAME = "stack"
+    DEVENV_ROOT = "/code/stack/packages/reference"
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
     VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
     TF_PLUGIN_CACHE_DIR="/terraform"

@@ -258,7 +258,7 @@ remote_state {
   }
 
   config = {
-    profile        = local.environment_vars.tf_state_profile
+    profile        = local.is_ci ? "ci" : local.environment_vars.tf_state_profile
     bucket         = local.environment_vars.tf_state_bucket
     key            = "${local.repo_name}/${local.is_local ? "${local.local_dev_namespace}/" : ""}${path_relative_to_include()}/terraform.tfstate"
     region         = local.environment_vars.tf_state_region

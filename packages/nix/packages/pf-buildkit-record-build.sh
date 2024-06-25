@@ -18,7 +18,7 @@ usage() {
   echo "in order to defer scale down" >&2
   echo "" >&2
   echo "Usage: pf-buildkit-record-build --arch=<arch>" >&2
-  echo "       pf-buildkit-record-build -arch=<arch>" >&2
+  echo "       pf-buildkit-record-build -a=<arch>" >&2
   echo "" >&2
   echo "--arch: The CPU architecture of the BuildKit StatefulSet where the build was submitted" >&2
   echo "" >&2

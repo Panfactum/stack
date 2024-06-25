@@ -17,7 +17,7 @@ usage() {
   echo "Returns the internal cluster TCP address of the BuildKit instances with the least CPU usage" >&2
   echo "" >&2
   echo "Usage: pf-buildkit-get-address --arch=<arch>" >&2
-  echo "       pf-buildkit-get-address -arch=<arch>" >&2
+  echo "       pf-buildkit-get-address -a=<arch>" >&2
   echo "" >&2
   echo "--arch: The CPU architecture of BuildKit to use. For building multi-arch container images." >&2
   echo "" >&2
