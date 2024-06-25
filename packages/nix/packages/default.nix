@@ -217,7 +217,7 @@
     ####################################
     src3.opentofu # declarative iac tool (open alternative to terraform)
     customTerragrunt # opentofu-runner
-    (util.customShellScript "get-version-hash") # helper for the IaC tagging
+    (util.customShellScript "pf-get-version-hash") # helper for the IaC tagging
     (util.customShellScript
       "wait-on-image") # helper for waiting on image availability
 

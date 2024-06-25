@@ -197,6 +197,13 @@ module "bastion_image_builder_workflow" {
           },
           {
             name = "build-arm64"
+            command = ["/scripts/build.sh"]
+            env = concat(
+              module.bastion_image_builder_workflow.env,
+              [
+                { name = "ARCH", value = "arm64" }
+              ]
+            )
             dependencies = ["scale-buildkit", "clone"]
           },
           {
