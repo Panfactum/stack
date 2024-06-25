@@ -59,7 +59,7 @@
       owner = "NixOS";
       repo = "nixpkgs";
       rev = "a9858885e197f984d92d7fe64e9fff6b2e488d40";
-      sha256 = "PDwAcHahc6hEimyrgGmFdft75gmLrJOZ0txX7lFqq+I=";
+      sha256 = "aTIpfLT+hQr0H1d7QA2k5a5rWrkL+M8ECN2tI9ClpSg=";
     }) { inherit system; };
     src8 = import (pkgs.fetchFromGitHub {
       owner = "NixOS";

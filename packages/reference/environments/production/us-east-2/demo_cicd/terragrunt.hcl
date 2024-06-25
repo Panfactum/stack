@@ -29,5 +29,7 @@ inputs = {
   buildkit_bucket_region = dependency.buildkit.outputs.cache_bucket_region
 }
 
+skip = get_env("CI", "false") == "true"
+
 
 
