@@ -196,7 +196,7 @@ module "bastion_image_builder_workflow" {
             dependencies = ["scale-buildkit", "clone"]
           },
           {
-
+            name = "build-arm64"
             dependencies = ["scale-buildkit", "clone"]
           },
           {

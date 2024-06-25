@@ -98,8 +98,14 @@ module "tf_deploy_workflow" {
   }
   common_env = {
     GIT_REF = "{{workflow.parameters.git_ref}}"
+    PF_REPO_URL = "github.com/panfactum/stack"
+    PF_IAC_DIR = "infrastructure"
+    PF_ENVIRONMENTS_DIR = "environments"
+    PF_REPO_PRIMARY_BRANCH = "main"
+    PF_REPO_NAME = "stack"
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
     VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
+    TF_PLUGIN_CACHE_DIR="/terraform"
   }
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {
@@ -137,6 +143,14 @@ module "tf_deploy_workflow" {
       mount_path = "/.kube"
       size_mb = 10
       node_local = true
+    }
+    terragrunt = {
+      mount_path = "/terragrunt"
+      size_mb = 1000
+    }
+    terraform = {
+      mount_path = "/terraform"
+      size_mb = 1000
     }
   }
   config_map_mounts = {

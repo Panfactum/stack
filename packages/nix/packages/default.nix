@@ -79,7 +79,7 @@
               export TERRAGRUNT_PROVIDER_CACHE=1
               export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
               ${src7.terragrunt}/bin/terragrunt "$@"
-              exit 0
+              exit "$?"
           fi
       done
       ${src7.terragrunt}/bin/terragrunt "$@"

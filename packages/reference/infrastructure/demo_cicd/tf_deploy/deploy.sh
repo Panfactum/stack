@@ -6,9 +6,9 @@ set -eo pipefail
 # Step 1: Clone the repo
 #####################################################
 
-cd /code || exit
+cd /code
 git clone https://github.com/Panfactum/stack.git --depth=1
-cd stack || exit
+cd stack
 git fetch origin "$GIT_REF"
 git checkout "$GIT_REF"
 git lfs install --local
@@ -40,9 +40,16 @@ kubectl config set-context ci --cluster=ci --user=ci --namespace=default
 #####################################################
 VAULT_TOKEN=$(vault write auth/kubernetes/login role="$VAULT_ROLE" jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" -format=json | jq -r '.auth.client_token')
 export VAULT_TOKEN
-vault token lookup
 
 #####################################################
-# Step 5: Setup vault
+# Step 5: Deploy terragrunt
 #####################################################
+cd packages/reference/environments/production/us-east-2
+
+terragrunt run-all apply \
+  --terragrunt-ignore-external-dependencies \
+  --terragrunt-download-dir /terragrunt \
+  --terragrunt-non-interactive \
+  --terragrunt-fetch-dependency-output-from-state
+
 
