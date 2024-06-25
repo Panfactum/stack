@@ -10,6 +10,17 @@ terraform {
   }
 }
 
+locals {
+  # We omit some tags that change frequently from node group
+  # replicas b/c changing these tags take a very long time to update
+  replica_tags = {
+    for k, v in module.secondary_tags.tags : k => v if !contains([
+      "panfactum.com/stack-commit",
+      "panfactum.com/stack-version"
+    ], v)
+  }
+}
+
 data "aws_region" "primary" {}
 data "aws_region" "secondary" {
   provider = aws.secondary

@@ -17,8 +17,8 @@ git lfs pull
 #####################################################
 # Step 2: Setup AWS profile
 #####################################################
-
-cat >"/.aws/config" <<EOF
+export AWS_CONFIG_FILE="/.aws/config"
+cat >"$AWS_CONFIG_FILE" <<EOF
 [profile ci]
 role_arn = $AWS_ROLE_ARN
 web_identity_token_file = /var/run/secrets/eks.amazonaws.com/serviceaccount/token
@@ -28,6 +28,8 @@ EOF
 #####################################################
 # Step 3: Setup the kubeconfig Context
 #####################################################
+export KUBE_CONFIG_PATH="/.kube/config"
+export KUBECONFIG="/.kube/config"
 kubectl config set-cluster ci \
   --server="https://$KUBERNETES_SERVICE_HOST" \
   --certificate-authority /var/run/secrets/kubernetes.io/serviceaccount/ca.crt --embed-certs
@@ -61,11 +63,16 @@ done
 #####################################################
 # Step 5: Deploy terragrunt
 #####################################################
-cd environments/production/us-east-2/aws_vpc
-
+mkdir -p "$TF_PLUGIN_CACHE_DIR"
+cd environments/production/us-east-2
+export TERRAGRUNT_PROVIDER_CACHE=1
+export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
+export HELM_REPOSITORY_CACHE="/tmp/.helm"
+export HELM_CACHE_HOME="/tmp/.helm"
+export HELM_DATA_HOME="/tmp/.helm"
 terragrunt run-all apply \
   --terragrunt-ignore-external-dependencies \
-  --terragrunt-download-dir /terragrunt \
+  --terragrunt-download-dir /tmp/.terragrunt \
   --terragrunt-non-interactive \
   --terragrunt-fetch-dependency-output-from-state
 

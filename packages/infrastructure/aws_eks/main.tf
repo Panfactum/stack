@@ -17,6 +17,16 @@ terraform {
 locals {
   vpc_id                       = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
   controller_nodes_description = "Nodes for cluster-critical components and bootstrapping processes. Not autoscaled."
+
+  # We omit some tags that change frequently from node group
+  # instances b/c changing these tags forces the nodes to roll
+  # which is a disruptive and time consuming operation
+  instance_tags =       {
+    for k,v in module.tags.tags: k => v if !contains([
+      "panfactum.com/stack-commit",
+      "panfactum.com/stack-version"
+    ], v)
+  }
 }
 
 data "aws_region" "region" {}
@@ -330,11 +340,13 @@ resource "aws_launch_template" "controller" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(module.tags.tags, {
-      Name        = "${var.cluster_name}-controller"
-      description = local.controller_nodes_description
-      eks-managed = "true"
-    })
+    tags = merge(local.instance_tags,
+      {
+        Name        = "${var.cluster_name}-controller"
+        description = local.controller_nodes_description
+        eks-managed = "true"
+      }
+    )
   }
 
   tags = merge(module.tags.tags, {
@@ -371,7 +383,7 @@ resource "aws_eks_node_group" "controllers" {
   }
 
   capacity_type = "ON_DEMAND"
-  tags = merge(module.tags.tags, {
+  tags = merge(local.instance_tags, {
     description = local.controller_nodes_description
   })
   labels = {

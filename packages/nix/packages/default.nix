@@ -58,7 +58,7 @@
     src7 = import (pkgs.fetchFromGitHub {
       owner = "NixOS";
       repo = "nixpkgs";
-      rev = "a3ed7406349a9335cb4c2a71369b697cecd9d351";
+      rev = "a9858885e197f984d92d7fe64e9fff6b2e488d40";
       sha256 = "PDwAcHahc6hEimyrgGmFdft75gmLrJOZ0txX7lFqq+I=";
     }) { inherit system; };
     src8 = import (pkgs.fetchFromGitHub {

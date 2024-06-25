@@ -106,17 +106,18 @@ module "tf_deploy_workflow" {
     DEVENV_ROOT = "/code/stack/packages/reference"
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
     VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
-    TF_PLUGIN_CACHE_DIR="/terraform"
+    TF_PLUGIN_CACHE_DIR="/tmp/.terraform"
     AWS_CONFIG_FILE="/.aws/config"
+    CI="true"
   }
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {
     requests = {
-      memory = "25Mi"
-      cpu = "25m"
+      memory = "2000Mi"
+      cpu = "500m"
     }
     limits = {
-      memory = "100Mi"
+      memory = "2000Mi"
     }
   }
   default_container_image = local.ci_image
@@ -134,7 +135,7 @@ module "tf_deploy_workflow" {
   tmp_directories = {
     code = {
       mount_path = "/code"
-      size_mb = 1024
+      size_mb = 1000
     }
     aws = {
       mount_path = "/.aws"
@@ -146,13 +147,9 @@ module "tf_deploy_workflow" {
       size_mb = 10
       node_local = true
     }
-    terragrunt = {
-      mount_path = "/terragrunt"
-      size_mb = 1000
-    }
-    terraform = {
-      mount_path = "/terraform"
-      size_mb = 1000
+    tmp = {
+      mount_path = "/tmp"
+      size_mb = 3000
     }
   }
   config_map_mounts = {
