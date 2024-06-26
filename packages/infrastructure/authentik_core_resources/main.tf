@@ -38,6 +38,7 @@ resource "kubernetes_config_map_v1_data" "media" {
   }
   data = {
     "logo.svg" = var.logo_svg_b64 != null ? base64decode(var.logo_svg_b64) : file("${path.module}/logo.svg")
+    "favicon.ico" = var.favicon_ico_b64 != null ? base64decode(var.favicon_ico_b64) : file("${path.module}/favicon.ico")
   }
   field_manager = "authentik-core-resources"
   force         = true
