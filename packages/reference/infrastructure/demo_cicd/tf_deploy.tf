@@ -103,6 +103,7 @@ module "tf_deploy_workflow" {
     PF_ENVIRONMENTS_DIR = "environments"
     PF_REPO_PRIMARY_BRANCH = "main"
     PF_REPO_NAME = "stack"
+    TF_APPLY_DIR= "environments/production/us-east-2"
     DEVENV_ROOT = "/code/stack/packages/reference"
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
     VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
@@ -114,7 +115,7 @@ module "tf_deploy_workflow" {
   default_resources = {
     requests = {
       memory = "2000Mi"
-      cpu = "500m"
+      cpu = "100m"
     }
     limits = {
       memory = "2000Mi"
@@ -129,6 +130,15 @@ module "tf_deploy_workflow" {
       volumes = module.tf_deploy_workflow.volumes
       container = merge(module.tf_deploy_workflow.container_defaults, {
           command = ["/scripts/deploy.sh"]
+      })
+    },
+    {
+      name = "unlock"
+      # affinity = module.tf_deploy_workflow.affinity TODO
+      tolerations = module.tf_deploy_workflow.tolerations
+      volumes = module.tf_deploy_workflow.volumes
+      container = merge(module.tf_deploy_workflow.container_defaults, {
+        command = ["/scripts/deploy.sh"]
       })
     }
   ]
@@ -150,6 +160,11 @@ module "tf_deploy_workflow" {
     tmp = {
       mount_path = "/tmp"
       size_mb = 3000
+    }
+    cache = {
+      mount_path = "/.cache" # This folder needed by terragrunt event though it is never used
+      size_mb = 10
+      node_local = true
     }
   }
   config_map_mounts = {

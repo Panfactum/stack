@@ -63,10 +63,13 @@ done
 #####################################################
 # Step 5: Deploy terragrunt
 #####################################################
+
+# Set the host name as that gets set as the tf lock holder
+# that we will use in the emergency unlock logic
+HOSTNAME=$(md5sum <<< "$PF_REPO_URL$TF_APPLY_DIR" | cut -f 1 -d' ')
+
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
-cd environments/production/us-east-2
-export TERRAGRUNT_PROVIDER_CACHE=1
-export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
+cd "$TF_APPLY_DIR"
 export HELM_REPOSITORY_CACHE="/tmp/.helm"
 export HELM_CACHE_HOME="/tmp/.helm"
 export HELM_DATA_HOME="/tmp/.helm"
@@ -74,6 +77,8 @@ terragrunt run-all apply \
   --terragrunt-ignore-external-dependencies \
   --terragrunt-download-dir /tmp/.terragrunt \
   --terragrunt-non-interactive \
-  --terragrunt-fetch-dependency-output-from-state
+  --terragrunt-fetch-dependency-output-from-state \
+  --terragrunt-provider-cache \
+  --terragrunt-provider-cache-dir "$TF_PLUGIN_CACHE_DIR"
 
 

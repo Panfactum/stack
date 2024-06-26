@@ -220,6 +220,8 @@
     (util.customShellScript "pf-get-version-hash") # helper for the IaC tagging
     (util.customShellScript
       "wait-on-image") # helper for waiting on image availability
+    (util.customShellScript
+      "pf-tf-delete-locks") # helper for waiting on image availability
 
     ####################################
     # Editors

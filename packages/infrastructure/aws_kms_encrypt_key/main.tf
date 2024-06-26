@@ -238,7 +238,7 @@ resource "aws_kms_replica_key" "replica" {
   enabled                 = true
   policy                  = data.aws_iam_policy_document.key.json
 
-  tags = module.secondary_tags.tags
+  tags = local.replica_tags
 
   lifecycle {
     prevent_destroy = true
