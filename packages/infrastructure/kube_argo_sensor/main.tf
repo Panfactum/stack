@@ -22,7 +22,8 @@ locals {
       cpu    = "100m"
     }
     limits = {
-      memory = "130Mi"
+      # We set a 2x limit here b/c losing the sensor due to an OOM can result in data loss
+      memory = "200Mi"
     }
   }
 }
@@ -168,6 +169,14 @@ resource "kubectl_manifest" "vpa" {
       labels    = module.util.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "main"
+          minAllowed = {
+            memory = "50Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "argoproj.io/v1alpha1"
         kind       = "Sensor"

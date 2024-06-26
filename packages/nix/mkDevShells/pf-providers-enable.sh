@@ -70,3 +70,18 @@ if [[ $KEEP == 1 ]]; then
 else
   yq -yi '.providers = '"$NEW_PROVIDERS_YAML"' | .providers |= unique' "$CWD/module.yaml"
 fi
+
+echo "Enabled providers:" >&2
+yq -r '.providers[]' "$CWD/module.yaml" 1>&2
+echo "" >&2
+
+####################################################################
+# Step 4: Add all platform checksums to .terraform.lock.hcl
+####################################################################
+
+echo "Updating .terraform.lock.hcl with provider checksums:" >&2
+terragrunt providers lock \
+  -platform=linux_amd64 \
+  -platform=linux_arm64 \
+  -platform=darwin_amd64 \
+  -platform=darwin_arm64

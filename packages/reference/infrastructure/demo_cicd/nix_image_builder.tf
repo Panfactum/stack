@@ -405,8 +405,7 @@ module "nix_image_builder_workflow" {
     }
     tmp = {
       mount_path = "/tmp"
-      size_mb = 100
-      node_local = true
+      size_mb = 1000
     }
   }
   config_map_mounts = {
