@@ -69,6 +69,51 @@
     }) { inherit system; };
 
     # Custom Packages
+    terragrunt = src7.buildGoModule rec {
+      pname = "terragrunt";
+      version = "0.59.3";
+
+      src = src7.fetchFromGitHub {
+        owner = "gruntwork-io";
+        repo = pname;
+        rev = "refs/tags/v${version}";
+        hash = "sha256-3tXhv/W8F9ag5G7hOjuS7AOU0sdpjdasedhPgMQAV0k=";
+      };
+
+      nativeBuildInputs = [ src7.go-mockery ];
+
+      preBuild = ''
+        make generate-mocks
+      '';
+
+      vendorHash = "sha256-a/pWEgEcT8MFES0/Z1vFCnbSaI47ZIVjhWZbvMC/OJk=";
+
+      doCheck = false;
+
+      ldflags = [
+        "-s"
+        "-w"
+        "-X github.com/gruntwork-io/go-commons/version.Version=v${version}"
+      ];
+
+      doInstallCheck = true;
+
+      installCheckPhase = ''
+        runHook preInstallCheck
+        $out/bin/terragrunt --help
+        $out/bin/terragrunt --version | grep "v${version}"
+        runHook postInstallCheck
+      '';
+
+      meta = with src7.lib; {
+        homepage = "https://terragrunt.gruntwork.io";
+        changelog = "https://github.com/gruntwork-io/terragrunt/releases/tag/v${version}";
+        description = "Thin wrapper for Terraform that supports locking for Terraform state and enforces best practices";
+        mainProgram = "terragrunt";
+        license = licenses.mit;
+        maintainers = with maintainers; [ jk qjoly kashw2 ];
+      };
+    };
     customTerragrunt = pkgs.writeShellScriptBin "terragrunt" ''
       #!/bin/env bash
 
@@ -78,11 +123,11 @@
           if [[ "$arg" == "run-all" ]]; then
               export TERRAGRUNT_PROVIDER_CACHE=1
               export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
-              ${src7.terragrunt}/bin/terragrunt "$@"
+              ${terragrunt}/bin/terragrunt "$@"
               exit "$?"
           fi
       done
-      ${src7.terragrunt}/bin/terragrunt "$@"
+      ${terragrunt}/bin/terragrunt "$@"
     '';
     cilium = pkgs.symlinkJoin {
       name = "cilium-cli";

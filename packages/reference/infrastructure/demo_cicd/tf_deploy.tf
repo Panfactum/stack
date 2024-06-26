@@ -72,6 +72,7 @@ resource "kubernetes_config_map" "tf_deploy_scripts" {
   }
   data = {
     "deploy.sh" = file("${path.module}/tf_deploy/deploy.sh")
+    "force-unlock.sh" = file("${path.module}/tf_deploy/force-unlock.sh")
   }
 }
 
@@ -112,12 +113,13 @@ module "tf_deploy_workflow" {
     TF_PLUGIN_CACHE_DIR="/tmp/.terraform"
     AWS_CONFIG_FILE="/.aws/config"
     CI="true"
+    WHO="@${md5("github.com/panfactum/stackenvironments/production/us-east-2")}"
   }
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {
     requests = {
       memory = "2000Mi"
-      cpu = "100m"
+      cpu = "500m"
     }
     limits = {
       memory = "2000Mi"
@@ -127,20 +129,30 @@ module "tf_deploy_workflow" {
   templates = [
     {
       name = "dag"
-      tasks = [
-        {
-          name = "deploy"
-          template = "deploy"
-        },
-        {
-          name = "force-unlock"
-          template = "force-unlock"
-          depends = "deploy.Failed"
-        }
-      ]
+      dag = {
+        tasks = [
+          {
+            name = "deploy"
+            template = "deploy"
+            hooks = {
+              # This must run as a hook instead of a separate DAG node in order
+              # to not mark the workflow as succeeded if the deploy fails but force-unlock succeeds
+              fail = {
+                expression = "tasks[\"deploy\"].status == \"Failed\""
+                template = "force-unlock"
+              }
+            }
+          }
+        ]
+      }
     },
     {
       name = "deploy"
+      podSpecPatch = yamlencode({
+        # Use this as a consistent hostname so that force-unlock can work between
+        # workflow runs
+        hostname = md5("github.com/panfactum/stackenvironments/production/us-east-2")
+      })
      # affinity = module.tf_deploy_workflow.affinity TODO
       tolerations = module.tf_deploy_workflow.tolerations
       volumes = module.tf_deploy_workflow.volumes
@@ -155,9 +167,9 @@ module "tf_deploy_workflow" {
       name = "force-unlock"
       # affinity = module.tf_deploy_workflow.affinity TODO
       tolerations = module.tf_deploy_workflow.tolerations
-      volumes = [for volume in module.tf_deploy_workflow.volumes: volume if volume.name == "aws"]
+      volumes = [for volume in module.tf_deploy_workflow.volumes: volume if !contains(["code", "tmp", "cache"], volume.name)]
       container = merge(module.tf_deploy_workflow.container_defaults, {
-        volumeMounts = [for mount in module.tf_deploy_workflow.container_defaults.volumeMounts: mount if mount.name == "aws"]
+        volumeMounts = [for mount in module.tf_deploy_workflow.container_defaults.volumeMounts: mount if !contains(["code", "tmp", "cache"], mount.name)]
         command = ["/scripts/force-unlock.sh"]
       })
       retryStrategy = { limit = "0" }

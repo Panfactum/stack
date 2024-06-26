@@ -63,6 +63,9 @@ module "sensor" {
             }
           ]
         }
+      },
+      retryStrategy = {
+        steps = 1
       }
     },
     {
@@ -96,6 +99,9 @@ module "sensor" {
             }
           ]
         }
+      },
+      retryStrategy = {
+        steps = 1
       }
     },
     {
@@ -129,6 +135,9 @@ module "sensor" {
             }
           ]
         }
+      },
+      retryStrategy = {
+        steps = 1
       }
     }
 #        {

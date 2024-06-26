@@ -26,10 +26,13 @@ role_session_name = ci-runner
 EOF
 
 #####################################################
-# Step 3: Setup the kubeconfig Context
+# Step 3: Setup the kubeconfig context and various kube-related variables
 #####################################################
 export KUBE_CONFIG_PATH="/.kube/config"
 export KUBECONFIG="/.kube/config"
+export HELM_REPOSITORY_CACHE="/tmp/.helm"
+export HELM_CACHE_HOME="/tmp/.helm"
+export HELM_DATA_HOME="/tmp/.helm"
 kubectl config set-cluster ci \
   --server="https://$KUBERNETES_SERVICE_HOST" \
   --certificate-authority /var/run/secrets/kubernetes.io/serviceaccount/ca.crt --embed-certs
@@ -43,7 +46,7 @@ kubectl config set-context ci --cluster=ci --user=ci --namespace=default
 VAULT_TOKEN=$(vault write auth/kubernetes/login role="$VAULT_ROLE" jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" -format=json | jq -r '.auth.client_token')
 export VAULT_TOKEN
 
-
+# TODO: Move to built-in command
 update_sops() {
   local file="$1"
 
@@ -71,9 +74,6 @@ export HOSTNAME
 
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 cd "$TF_APPLY_DIR"
-export HELM_REPOSITORY_CACHE="/tmp/.helm"
-export HELM_CACHE_HOME="/tmp/.helm"
-export HELM_DATA_HOME="/tmp/.helm"
 terragrunt run-all apply \
   --terragrunt-ignore-external-dependencies \
   --terragrunt-download-dir /tmp/.terragrunt \

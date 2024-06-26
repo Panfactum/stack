@@ -25,7 +25,7 @@ locals {
     for k,v in module.tags.tags: k => v if !contains([
       "panfactum.com/stack-commit",
       "panfactum.com/stack-version"
-    ], v)
+    ], k)
   }
 }
 
