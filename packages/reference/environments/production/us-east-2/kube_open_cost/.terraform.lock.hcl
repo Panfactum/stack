@@ -128,6 +128,7 @@ provider "registry.opentofu.org/hashicorp/time" {
     "zh:fb28ffd2b641a449bd5526bef6e547894b4c5ddac0cef05ee03881a6c53eac39",
     "zh:fcfcd35ff1178cbf11034e2eaf4254f9aadd8531f75d1b15b5e245715183d49b",
   ]
+  constraints = "0.11.2"
 }
 
 provider "registry.opentofu.org/hashicorp/vault" {
@@ -148,4 +149,5 @@ provider "registry.opentofu.org/hashicorp/vault" {
     "zh:c6032c5ec771b964cb36074215808351c1cb9e9d71d6f323a348c60edcde1f4b",
     "zh:dcf2b711f08d1dc83082860087fd57f5dcd78c77392cec913a9c8573ab95b26a",
   ]
+  constraints = "4.2.0"
 }

@@ -14,6 +14,7 @@ module "sensor" {
       name = "push-to-main"
       eventSourceName = local.event_source_name
       eventName = "default"
+      filtersLogicalOperator = "and"
       filters = {
         dataLogicalOperator = "and"
         data = [
@@ -29,12 +30,40 @@ module "sensor" {
           }
         ]
       }
+    },
+    {
+      name = "push-to-test"
+      eventSourceName = local.event_source_name
+      eventName = "default"
+      filters = {
+        dataLogicalOperator = "and"
+        data = [
+          {
+            path = "body.X-GitHub-Event"
+            type = "string"
+            value = ["push"]
+          },
+          {
+            path = "body.ref"
+            type = "string"
+            value = ["refs/heads/test"]
+          }
+        ]
+        script = <<-EOT
+        ${file("${path.module}/is_modified.lua")}
+        return is_modified(event.body, {
+          "packages/reference/infrastructure/demo_cicd/.*",
+          "packages/reference/environments/.*"
+        })
+        EOT
+      }
     }
   ]
   triggers = [
     {
       template = {
         name = local.nix_image_builder_name
+        conditions = "push-to-main"
         argoWorkflow = {
           operation = "submit"
           source = {
@@ -71,6 +100,7 @@ module "sensor" {
     {
       template = {
         name = local.bastion_image_builder_name
+        conditions = "push-to-main"
         argoWorkflow = {
           operation = "submit"
           source = {
@@ -107,6 +137,7 @@ module "sensor" {
     {
       template = {
         name = local.website_image_builder_name
+        conditions = "push-to-test"
         argoWorkflow = {
           operation = "submit"
           source = {
@@ -129,7 +160,7 @@ module "sensor" {
             {
               dest = "spec.arguments.parameters.0.value"
               src = {
-                dependencyName = "push-to-main"
+                dependencyName = "push-to-test"
                 dataKey = "body.after" # The git commit after the push
               }
             }
@@ -139,15 +170,16 @@ module "sensor" {
       retryStrategy = {
         steps = 1
       }
-    }
-#        {
-#          template = {
-#            name = "log"
-#            log = {
-#              intervalSeconds = 1
-#            }
-#          }
-#        }
+    },
+        {
+          template = {
+            conditions = "push-to-test"
+            name = "log"
+            log = {
+              intervalSeconds = 1
+            }
+          }
+        }
   ]
 
   # pf-generate: pass_vars

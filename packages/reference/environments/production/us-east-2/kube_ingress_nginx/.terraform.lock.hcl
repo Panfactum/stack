@@ -130,4 +130,5 @@ provider "registry.opentofu.org/hashicorp/vault" {
     "zh:c6032c5ec771b964cb36074215808351c1cb9e9d71d6f323a348c60edcde1f4b",
     "zh:dcf2b711f08d1dc83082860087fd57f5dcd78c77392cec913a9c8573ab95b26a",
   ]
+  constraints = "4.2.0"
 }

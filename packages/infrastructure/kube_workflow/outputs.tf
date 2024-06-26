@@ -52,3 +52,13 @@ output "container_defaults" {
   description = "Default options for every container spec"
   value       = local.container_defaults
 }
+
+output "aws_role_name" {
+  description = "The name of the AWS role used by the Workflow's Service Account"
+  value = module.workflow_perms.role_name
+}
+
+output "aws_role_arn" {
+  description = "The name of the AWS role used by the Workflow's Service Account"
+  value = module.workflow_perms.role_arn
+}

@@ -21,3 +21,7 @@ output "cluster_important_priority_class_name" {
 output "panfactum_scheduler_name" {
   value = "panfactum"
 }
+
+output "default_workflow_image" {
+  value = "t8f0s7h5/panfactum:f06e9fd7ab80321190532a26a4b2ed9067a058a1"
+}

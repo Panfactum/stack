@@ -69,6 +69,9 @@
     }) { inherit system; };
 
     # Custom Packages
+    # We need to us a later version of terragrunt than publicly available
+    # b/c the provider-cache is broken and we need it for CI pipelines to
+    # work properly
     terragrunt = src7.buildGoModule rec {
       pname = "terragrunt";
       version = "0.59.3";
@@ -269,6 +272,10 @@
       "wait-on-image") # helper for waiting on image availability
     (util.customShellScript
       "pf-tf-delete-locks") # helper for waiting on image availability
+    (util.customShellScript
+      "pf-sops-set-profile") # helper for unifiying profile used to access sops-encrypted files
+    (util.customShellScript
+      "pf-get-terragrunt-variables") # helper for getting terragrunt variables that would be used by modules in the current directory
 
     ####################################
     # Editors

@@ -63,7 +63,7 @@ data "aws_subnet" "cluster_subnet_info" {
 # ################################################################################
 
 resource "aws_iam_policy" "service_account" {
-  name_prefix = "${var.service_account}-"
+  name_prefix = "${substr(var.service_account, 0, 37)}-"
   description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   policy      = var.iam_policy_json
   tags = merge(module.tags.tags, {
@@ -92,7 +92,7 @@ data "aws_iam_policy_document" "service_account_assume" {
 }
 
 resource "aws_iam_role" "service_account" {
-  name_prefix        = "${var.service_account}-"
+  name_prefix        = "${substr(var.service_account, 0, 37)}-"
   description        = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   assume_role_policy = data.aws_iam_policy_document.service_account_assume.json
   tags = merge(module.tags.tags, {
@@ -138,7 +138,7 @@ data "aws_iam_policy_document" "ip_blocks" {
 }
 
 resource "aws_iam_policy" "ip_blocks" {
-  name_prefix = "${var.service_account}-ip-blocks-"
+  name_prefix = "${substr(var.service_account, 0, 26)}-ip-blocks-"
   description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
   policy      = data.aws_iam_policy_document.ip_blocks.json
   tags = merge(module.tags.tags, {
