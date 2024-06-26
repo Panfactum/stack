@@ -108,7 +108,7 @@ get_instance_id() {
 run_ssm_command() {
   local instance_id=$1
   local command_id=""
-  local retries=10
+  local retries=20
 
   for ((i = 1; i <= retries; i++)); do
     set +eo pipefail
@@ -126,13 +126,16 @@ run_ssm_command() {
     set -eo pipefail
 
     if [[ -n $command_id ]]; then
+      echo -e "\tTest started." >&2
       echo "$command_id"
       exit 0
+    else
+      echo -e "\tWaiting for instance $instance_id to become ready..." >&2
     fi
     sleep 5
   done
 
-  echo -e "\tFailed to execute test!"
+  echo -e "\tTimeout exceeded. Failed to execute test!" >&2
   exit 1
 }
 
@@ -142,6 +145,7 @@ get_ssm_command_output() {
   local command_id=$2
   local status=""
   while true; do
+    echo -e "\tWaiting for test to complete..." >&2
     status="$(
       aws --region "$AWS_REGION" \
         --profile "$AWS_PROFILE" \

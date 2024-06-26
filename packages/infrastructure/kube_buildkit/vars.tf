@@ -65,13 +65,13 @@ variable "panfactum_scheduler_enabled" {
 
 variable "panfactum_image_version" {
   description = "The version of the Panfactum image to use for maintenance tasks"
-  type = string
-  default = "95508e2e860c95cee40e61245c8f588b6b73a39b"
+  type        = string
+  default     = "95508e2e860c95cee40e61245c8f588b6b73a39b"
 }
 
 variable "buildkit_image_version" {
   description = "The version of BuildKit to use"
-  type = string
-  default = "v0.14.1-rootless"
+  type        = string
+  default     = "v0.14.1-rootless"
 }
 

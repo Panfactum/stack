@@ -39,7 +39,6 @@ kubectl config set-cluster ci \
 kubectl config set-credentials ci --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
 kubectl config set-context ci --cluster=ci --user=ci --namespace=default
 
-
 #####################################################
 # Step 4: Setup vault
 #####################################################
@@ -51,7 +50,7 @@ update_sops() {
   local file="$1"
 
   # Check if the file contains sops.kms
-  if yq -e '.sops.kms' "$file" > /dev/null 2>&1; then
+  if yq -e '.sops.kms' "$file" >/dev/null 2>&1; then
     echo "Processing $file"
 
     # Use yq to update aws_profile value to ci
@@ -69,7 +68,7 @@ done
 
 # Set the host name as that gets set as the tf lock holder
 # that we will use in the emergency unlock logic
-HOSTNAME=$(md5sum <<< "$PF_REPO_URL$TF_APPLY_DIR" | cut -f 1 -d' ')
+HOSTNAME=$(md5sum <<<"$PF_REPO_URL$TF_APPLY_DIR" | cut -f 1 -d' ')
 export HOSTNAME
 
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
@@ -82,5 +81,3 @@ terragrunt run-all apply \
   --terragrunt-provider-cache \
   --terragrunt-provider-cache-dir "$TF_PLUGIN_CACHE_DIR" \
   --terragrunt-parallelism 5
-
-

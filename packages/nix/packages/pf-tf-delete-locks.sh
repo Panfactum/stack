@@ -6,7 +6,6 @@ set -eo pipefail
 # the terraform locks that they might be holding in the event that they
 # are terminated before they can release the locks themselves
 
-
 ####################################################################
 # Step 1: Variable parsing
 ####################################################################
@@ -92,14 +91,15 @@ fi
 # Step 2: Get the Locks
 ####################################################################
 
-ITEMS=$(aws \
-  --profile "$AWS_PROFILE" \
-  --region "$AWS_REGION" \
-  dynamodb scan \
-  --table-name "$LOCK_TABLE" \
-  --scan-filter '{"Info": {"ComparisonOperator": "NOT_NULL"}}' \
-  --output=json \
-  | jq -c '.Items[] | select( if .Info.S then (.Info.S | fromjson).Who == "'"$WHO"'" else false end )'
+ITEMS=$(
+  aws \
+    --profile "$AWS_PROFILE" \
+    --region "$AWS_REGION" \
+    dynamodb scan \
+    --table-name "$LOCK_TABLE" \
+    --scan-filter '{"Info": {"ComparisonOperator": "NOT_NULL"}}' \
+    --output=json |
+    jq -c '.Items[] | select( if .Info.S then (.Info.S | fromjson).Who == "'"$WHO"'" else false end )'
 )
 
 ####################################################################

@@ -684,8 +684,8 @@ resource "helm_release" "prometheus_stack" {
   version         = var.kube_prometheus_stack_version
   recreate_pods   = false
   cleanup_on_fail = true
-  wait            = true
-  wait_for_jobs   = true
+  wait            = false
+  wait_for_jobs   = false
   max_history     = 5
 
   values = [
@@ -1595,8 +1595,8 @@ resource "helm_release" "thanos" {
   version         = var.thanos_chart_version
   recreate_pods   = false
   cleanup_on_fail = true
-  wait            = true
-  wait_for_jobs   = true
+  wait            = false
+  wait_for_jobs   = false
   max_history     = 5
 
   values = [

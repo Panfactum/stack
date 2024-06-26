@@ -200,11 +200,11 @@ data "vault_policy_document" "vault_issuer" {
 module "vault_role" {
   source = "../kube_sa_auth_vault"
 
-  service_account = kubernetes_service_account.vault_issuer.metadata[0].name
+  service_account           = kubernetes_service_account.vault_issuer.metadata[0].name
   service_account_namespace = var.namespace
-  vault_policy_hcl = data.vault_policy_document.vault_issuer.hcl
-  audience = "vault://${local.ci_internal_name}"
-  token_ttl_seconds = 120
+  vault_policy_hcl          = data.vault_policy_document.vault_issuer.hcl
+  audience                  = "vault://${local.ci_internal_name}"
+  token_ttl_seconds         = 120
 }
 
 resource "vault_pki_secret_backend_role" "vault_issuer" {
@@ -323,11 +323,11 @@ data "vault_policy_document" "vault_ca_issuer" {
 module "vault_ca_role" {
   source = "../kube_sa_auth_vault"
 
-  service_account = kubernetes_service_account.vault_ca_issuer.metadata[0].name
+  service_account           = kubernetes_service_account.vault_ca_issuer.metadata[0].name
   service_account_namespace = var.namespace
-  vault_policy_hcl = data.vault_policy_document.vault_ca_issuer.hcl
-  audience = "vault://${local.ci_internal_ca_name}"
-  token_ttl_seconds = 120
+  vault_policy_hcl          = data.vault_policy_document.vault_ca_issuer.hcl
+  audience                  = "vault://${local.ci_internal_ca_name}"
+  token_ttl_seconds         = 120
 }
 
 resource "vault_pki_secret_backend_role" "vault_ca_issuer" {

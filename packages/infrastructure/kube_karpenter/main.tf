@@ -43,7 +43,7 @@ module "util" {
   workload_name            = "karpenter"
   topology_spread_enabled  = false
   controller_node_required = true
-  arm_nodes_enabled = true
+  arm_nodes_enabled        = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -630,7 +630,7 @@ resource "helm_release" "karpenter" {
 
       replicas                  = 1
       topologySpreadConstraints = module.util.topology_spread_constraints
-      tolerations = module.util.tolerations
+      tolerations               = module.util.tolerations
       # affinity                  = module.util.affinity // This breaks the helm chart for some reason
       strategy = {
         type          = "Recreate"

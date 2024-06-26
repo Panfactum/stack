@@ -21,8 +21,8 @@ locals {
   # We omit some tags that change frequently from node group
   # instances b/c changing these tags forces the nodes to roll
   # which is a disruptive and time consuming operation
-  instance_tags =       {
-    for k,v in module.tags.tags: k => v if !contains([
+  instance_tags = {
+    for k, v in module.tags.tags : k => v if !contains([
       "panfactum.com/stack-commit",
       "panfactum.com/stack-version"
     ], k)

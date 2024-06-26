@@ -16,6 +16,16 @@ locals {
   peering_routes     = { for peer_route in local.peering_route_list : "${peer_route.subnet}_${peer_route.vpc}" => peer_route }
   public_subnets     = { for name, subnet in var.subnets : name => subnet if subnet.public }
   private_subnets    = { for name, subnet in var.subnets : name => subnet if contains(keys(var.nat_associations), name) }
+
+  # We omit some tags that change frequently from node group
+  # instances b/c changing these tags forces the nodes to roll
+  # which is a disruptive and time consuming operation
+  instance_tags = {
+    for k, v in module.tags.tags : k => v if !contains([
+      "panfactum.com/stack-commit",
+      "panfactum.com/stack-version"
+    ], k)
+  }
 }
 
 data "aws_region" "region" {}
@@ -207,6 +217,15 @@ data "aws_ami" "fck_nat" {
     name   = "architecture"
     values = ["arm64"]
   }
+
+  # This ensures the AMI won't update unless we explicitly allow it
+  # as changing the AMI will force the instances to update which might cause
+  # a service disruption
+  filter {
+    name   = "creation-date"
+    values = ["2024-01-25*"]
+  }
+
   owners      = ["568608671756"]
   most_recent = true
 }
@@ -227,7 +246,7 @@ resource "aws_launch_template" "nats" {
   tag_specifications {
     resource_type = "instance"
     tags = merge(
-      { for k, v in module.tags.tags : replace(k, "/", ":") => v }, // For some reason, "/" is now disallowed here?
+      { for k, v in local.instance_tags : replace(k, "/", ":") => v }, // For some reason, "/" is now disallowed here?
       {
         Name        = "nat-${each.key}"
         description = "NAT node in ${each.key}"
@@ -343,7 +362,7 @@ resource "aws_security_group" "test" {
 data "aws_ami" "test" {
   filter {
     name   = "name"
-    values = ["al2023-ami-*"]
+    values = ["al2023-ami-ecs-*"]
   }
   filter {
     name   = "architecture"

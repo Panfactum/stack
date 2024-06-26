@@ -28,7 +28,8 @@ terraform {
 }
 
 locals {
-  path_prefix = replace("${var.path_prefix}/oauth2", "////", "/") # //// required because // triggers regex matching
+  path_prefix = replace(var.path_prefix, "////", "/") # //// required because // triggers regex matching
+  proxy_path  = replace("${var.path_prefix}/oauth2", "////", "/")
 }
 
 module "pull_through" {
@@ -91,7 +92,7 @@ resource "vault_identity_oidc_client" "oidc" {
   name = random_id.oauth2_proxy.hex
   key  = vault_identity_oidc_key.oidc.name
   redirect_uris = [
-    "https://${var.domain}${local.path_prefix}/callback",
+    "https://${var.domain}${local.proxy_path}/callback",
   ]
   assignments = [
     vault_identity_oidc_assignment.oidc.name
@@ -142,8 +143,8 @@ resource "helm_release" "oauth2_proxy" {
   version         = var.oauth2_proxy_helm_version
   recreate_pods   = false
   cleanup_on_fail = true
-  wait            = true
-  wait_for_jobs   = true
+  wait            = false
+  wait_for_jobs   = false
   max_history     = 5
 
   values = [
@@ -156,7 +157,7 @@ resource "helm_release" "oauth2_proxy" {
         [
           "--provider", "oidc",
           "--provider-display-name", "Vault",
-          "--redirect-url", "https://${var.domain}${local.path_prefix}/callback",
+          "--redirect-url", "https://${var.domain}${local.proxy_path}/callback",
           "--oidc-issuer-url", vault_identity_oidc_provider.oidc.issuer,
           "--cookie-secure", "true",
           "--cookie-domain", var.domain,
@@ -270,7 +271,7 @@ module "ingress" {
     domains      = [var.domain]
     service      = random_id.oauth2_proxy.hex
     service_port = 80
-    path_prefix  = local.path_prefix
+    path_prefix  = local.proxy_path
   }]
 
   rate_limiting_enabled          = true

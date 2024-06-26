@@ -107,8 +107,10 @@
 
       meta = with src7.lib; {
         homepage = "https://terragrunt.gruntwork.io";
-        changelog = "https://github.com/gruntwork-io/terragrunt/releases/tag/v${version}";
-        description = "Thin wrapper for Terraform that supports locking for Terraform state and enforces best practices";
+        changelog =
+          "https://github.com/gruntwork-io/terragrunt/releases/tag/v${version}";
+        description =
+          "Thin wrapper for Terraform that supports locking for Terraform state and enforces best practices";
         mainProgram = "terragrunt";
         license = licenses.mit;
         maintainers = with maintainers; [ jk qjoly kashw2 ];
