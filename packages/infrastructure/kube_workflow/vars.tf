@@ -398,3 +398,9 @@ variable "extra_aws_permissions" {
   default     = "{}"
 }
 
+variable "hooks" {
+  description = "Hooks to add to the Workflow"
+  type = any
+  default = {}
+}
+

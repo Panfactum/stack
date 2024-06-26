@@ -67,6 +67,7 @@ done
 # Set the host name as that gets set as the tf lock holder
 # that we will use in the emergency unlock logic
 HOSTNAME=$(md5sum <<< "$PF_REPO_URL$TF_APPLY_DIR" | cut -f 1 -d' ')
+export HOSTNAME
 
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 cd "$TF_APPLY_DIR"
@@ -79,6 +80,7 @@ terragrunt run-all apply \
   --terragrunt-non-interactive \
   --terragrunt-fetch-dependency-output-from-state \
   --terragrunt-provider-cache \
-  --terragrunt-provider-cache-dir "$TF_PLUGIN_CACHE_DIR"
+  --terragrunt-provider-cache-dir "$TF_PLUGIN_CACHE_DIR" \
+  --terragrunt-parallelism 5
 
 

@@ -5,6 +5,9 @@ provider "registry.opentofu.org/hashicorp/vault" {
   version     = "3.25.0"
   constraints = "3.25.0"
   hashes = [
+    "h1:23nPKlKLjSNQ/W0VK0YMIihXS790IEKXpZb+gHGDNgc=",
+    "h1:BIyXCyH7Fg/U2mDcTThWlMcF+Lp/h3yLgiHEe29p0T0=",
+    "h1:LTweyJp/06Lzyw/i61/7uv9+eex3thvlSakK42fL7I0=",
     "h1:SbKJsSGoOCp0kpoMEi1Sqt6KxchDcqNLMXD9ZwhoIjU=",
     "zh:150cbcd541b33e98309a158b27c35dee04fafb7d4e4d8df4431a4bb27a154b9f",
     "zh:1da7e4654d4814c84f891eeb66a75cf01fcd4f27bfa273a732254f6957fcce17",

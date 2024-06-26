@@ -86,7 +86,7 @@ module "tf_deploy_workflow" {
   panfactum_scheduler_enabled = true
   active_deadline_seconds = 60 * 60
 
-  entrypoint = "deploy"
+  entrypoint = "dag"
   arguments = {
     parameters = [
       {
@@ -104,6 +104,8 @@ module "tf_deploy_workflow" {
     PF_REPO_PRIMARY_BRANCH = "main"
     PF_REPO_NAME = "stack"
     TF_APPLY_DIR= "environments/production/us-east-2"
+    TF_LOCK_TABLE="pf-tf-locks-production"
+    TF_LOCK_TABLE_REGION="us-east-2"
     DEVENV_ROOT = "/code/stack/packages/reference"
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
     VAULT_ADDR = "http://vault-active.vault.svc.cluster.local:8200"
@@ -124,6 +126,20 @@ module "tf_deploy_workflow" {
   default_container_image = local.ci_image
   templates = [
     {
+      name = "dag"
+      tasks = [
+        {
+          name = "deploy"
+          template = "deploy"
+        },
+        {
+          name = "force-unlock"
+          template = "force-unlock"
+          depends = "deploy.Failed"
+        }
+      ]
+    },
+    {
       name = "deploy"
      # affinity = module.tf_deploy_workflow.affinity TODO
       tolerations = module.tf_deploy_workflow.tolerations
@@ -131,15 +147,20 @@ module "tf_deploy_workflow" {
       container = merge(module.tf_deploy_workflow.container_defaults, {
           command = ["/scripts/deploy.sh"]
       })
+      # We do not retry this template b/c we need to proceed to force-unlock if this fails
+      # unexpectedly. Retry is done via the dag.
+      retryStrategy = { limit = "0" }
     },
     {
-      name = "unlock"
+      name = "force-unlock"
       # affinity = module.tf_deploy_workflow.affinity TODO
       tolerations = module.tf_deploy_workflow.tolerations
-      volumes = module.tf_deploy_workflow.volumes
+      volumes = [for volume in module.tf_deploy_workflow.volumes: volume if volume.name == "aws"]
       container = merge(module.tf_deploy_workflow.container_defaults, {
-        command = ["/scripts/deploy.sh"]
+        volumeMounts = [for mount in module.tf_deploy_workflow.container_defaults.volumeMounts: mount if mount.name == "aws"]
+        command = ["/scripts/force-unlock.sh"]
       })
+      retryStrategy = { limit = "0" }
     }
   ]
   tmp_directories = {
@@ -162,9 +183,8 @@ module "tf_deploy_workflow" {
       size_mb = 3000
     }
     cache = {
-      mount_path = "/.cache" # This folder needed by terragrunt event though it is never used
-      size_mb = 10
-      node_local = true
+      mount_path = "/.cache"
+      size_mb = 1000
     }
   }
   config_map_mounts = {

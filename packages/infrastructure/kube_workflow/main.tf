@@ -228,6 +228,7 @@ locals {
     entrypoint  = var.entrypoint
     onExit      = var.on_exit
     parallelism = var.task_parallelism
+    hooks = var.hooks
     podGC = {
       labelSelector       = module.util.match_labels
       strategy            = "OnWorkflowCompletion"

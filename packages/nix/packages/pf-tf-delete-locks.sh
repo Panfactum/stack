@@ -92,7 +92,15 @@ fi
 # Step 2: Get the Locks
 ####################################################################
 
-ITEMS=$(aws --profile "$AWS_PROFILE" --region "$AWS_REGION" dynamodb scan --table-name "$LOCK_TABLE" --output=json | jq -c '.Items[] | select( if .Info.S then (.Info.S | fromjson).Who == "'"$WHO"'" else false end )')
+ITEMS=$(aws \
+  --profile "$AWS_PROFILE" \
+  --region "$AWS_REGION" \
+  dynamodb scan \
+  --table-name "$LOCK_TABLE" \
+  --scan-filter '{"Info": {"ComparisonOperator": "NOT_NULL"}}' \
+  --output=json \
+  | jq -c '.Items[] | select( if .Info.S then (.Info.S | fromjson).Who == "'"$WHO"'" else false end )'
+)
 
 ####################################################################
 # Step 3: Unlock

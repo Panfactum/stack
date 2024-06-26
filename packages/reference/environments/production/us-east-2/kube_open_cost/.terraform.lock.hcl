@@ -5,7 +5,10 @@ provider "registry.opentofu.org/alekc/kubectl" {
   version     = "2.0.4"
   constraints = "2.0.4"
   hashes = [
+    "h1:1Ence3VDSQ7BNO+IFD6QoGBiBf6rJgCbygkATSdjcTA=",
     "h1:6xRO3WlBsOTbeJ90QFjxGbc4BjnoGdEaeSCdWI/B1jU=",
+    "h1:TUeUq1UdVkHTxcgq7CJWWXBrc8VEQTufmgU18qDmfGE=",
+    "h1:mCz0lOwNsFCZEcFf7DBSe6b4hZgn5piiy0mZDwRGUIU=",
     "zh:15c227886bac78c8b8827f85595648212574ec81febc39e1055e1a6bf048fe65",
     "zh:2211ebeeb0918dbb3587d206e32adca9e1f343a93bbffcd37d8d99bf4d8dea9a",
     "zh:2303836cdea12ece8dbe39c2d7d30a9378fd06e9c2ebda66cbe5e01cc096ee2e",
@@ -27,7 +30,10 @@ provider "registry.opentofu.org/hashicorp/aws" {
   version     = "5.39.1"
   constraints = "5.39.1"
   hashes = [
+    "h1:1njVwDkj6MvpTOygoksA5TNk/TNwRCTRLjdBJ3/Psrw=",
+    "h1:nmOlV0F3p+fQC9NT1qqBXeZN44UvNI0jVkzg7jf9maM=",
     "h1:qZhF5fCdxCIc51RfVjH1kMCaxykETMwshevWYfDjfME=",
+    "h1:rjSduYdaseaQunozYyIwb6Nj9MzMF2CXJsFafPWs0BY=",
     "zh:12d3ff805159f275d090b5cb5c3e92fab9cf8b2b1c391cdce84206d97ab97b15",
     "zh:14fe4bd684d9da0fb8b3cd4cf61a45862e8fc978d78697ace1e14fa7bbb6b392",
     "zh:18db1968590fd124794c25868f95dd3f427658d08de519a6184e4bcfc82e8e43",
@@ -46,6 +52,9 @@ provider "registry.opentofu.org/hashicorp/helm" {
   constraints = "2.12.1"
   hashes = [
     "h1:S0+5VN/viVA4YYpm9q45bZ903EqP3bwjv5abps+a3lE=",
+    "h1:ajWSFsohX3kQNLs8DbQd93UJlKTUy4HnccLZ2xWCfFM=",
+    "h1:mRK57Pn5YGikn9jT4GyZtB1zf5gvu9ynNbwWq6YuPyA=",
+    "h1:tL9ieFCQwLYpzZ31L8wKQPgMq7GK+mbs7mQ6ifMDWUU=",
     "zh:0349149992646530c33314cb973eba68757606a037017ba47e56db695d4b3afe",
     "zh:3138ffe23c481b01419a4a21adf83538efe6e698b421c4a8f7d142b198518709",
     "zh:44658e3070405b88fbd76161ecddde62f478dc31aaebee3b93c2f2783a6d45f9",
@@ -63,7 +72,10 @@ provider "registry.opentofu.org/hashicorp/kubernetes" {
   version     = "2.27.0"
   constraints = "2.27.0"
   hashes = [
+    "h1:9vg5+TEl3vLm1c5ziq3LPxl74sDf8QEm/tXXtCZOmeY=",
     "h1:Jtbdvbq8kIXUENtH3tVwgcjHqbuYp1pGfg4gFocY+e4=",
+    "h1:NizNLna+XXErem0C5DRd2P4XqztALsxl3BFmHjcS0TQ=",
+    "h1:sQ413yweMfNSLmWSFzUXiBnSfH7NlrPWaPIRERV7mRg=",
     "zh:1146f53fb39fd4bcea5574303c4871001a97d7891f65a60a4ecbc64da2a90d75",
     "zh:1f7e3dc0dbb854f56a0f5ba3c50588272984ae9775da027c3c7f32cb6d8245b0",
     "zh:2166f7fdade75266658603280bc822edab848e52a674340485847dde1c5d9324",
@@ -82,6 +94,9 @@ provider "registry.opentofu.org/hashicorp/random" {
   constraints = "3.6.0"
   hashes = [
     "h1:/xwPFz7kMERBIEk8i6UJt2fTvgzMFbwKlcyCvRJO8Ok=",
+    "h1:6QMZ6JACl+V2t8daN5GTlw22EtG7nhc3BbkbJDw2a5M=",
+    "h1:FO1uXAZ3l/kAHovHpmg/IoCGi7WMRso7G9ffLfyMnNs=",
+    "h1:dMz6mC37wIEfyrB0VA8gzPx/tsCQJuQmjpoxUgwwEqU=",
     "zh:486a1c921eab5c51a480f2eb0ad85173f207c9b7bb215f3893e58bc38d3b7c75",
     "zh:6901b3afa4607d1e31934ba91ed2625215ada42b3518c3a9adeeac7a5f656dc3",
     "zh:7e93752c9de710e417191353ad1a41b5a60432ab7ef4f8b556bf248297ec5e23",
@@ -98,7 +113,10 @@ provider "registry.opentofu.org/hashicorp/random" {
 provider "registry.opentofu.org/hashicorp/time" {
   version = "0.11.2"
   hashes = [
+    "h1:IvMZQ0uJOCmB23DmMSf56rsNig7iQ2Qb1Xp4ZqAds4c=",
     "h1:WVXqTGyMwPRVhT7R9DAMhTwdNaoAQeuGKqAncyS5yh8=",
+    "h1:qxivXg2too+UTcA8O3ZOdajC1lpTfKHXA/CCcVOgpsc=",
+    "h1:t1tveBcykPPNcPVMgh/THf4IFe/6CYga6zJl8Q3YrsI=",
     "zh:534d56fac2daa5c15737fa1907b7afe2d91474197a0ec272d3f864d2a0a87743",
     "zh:67c7765dc3b5ec19b6df32c29620de4b3e7846f5aa1a6b1b0e15394d87d0f875",
     "zh:9502412f028d17051ea0550f5015d0515da78bc938f415191d9171742481330c",
@@ -115,7 +133,10 @@ provider "registry.opentofu.org/hashicorp/time" {
 provider "registry.opentofu.org/hashicorp/vault" {
   version = "4.2.0"
   hashes = [
+    "h1:6U2Me3cbDHTWp6WuHlGvpnYiClDbCaRSfa0JCCaVpmU=",
+    "h1:6gLVELzqQBbBqov4t8QckqE1sSDDT93gwewxGWcpdB8=",
     "h1:B2TeJRBRbPqW7qMkazQ4DzY+4++KxYhPRD5nM0RWTos=",
+    "h1:VJ22Dhk3Hb2DHbJQLxrLwT9Ju7UEZbTxlqowe2/pIsQ=",
     "zh:0c97843a9c4619aa9708c833764448e8db472510785f886772fa798e9f14786e",
     "zh:16267cfb01aec8ffe331bbc8558e35c2220951a2d431818c074499c97e7b2ae0",
     "zh:2c7c3417b296e45277f7363c248edf9228e1946d528f1870c86d3417cc701b90",

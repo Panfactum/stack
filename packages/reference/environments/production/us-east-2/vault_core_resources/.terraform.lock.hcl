@@ -4,7 +4,10 @@
 provider "registry.opentofu.org/alekc/kubectl" {
   version = "2.0.4"
   hashes = [
+    "h1:1Ence3VDSQ7BNO+IFD6QoGBiBf6rJgCbygkATSdjcTA=",
     "h1:6xRO3WlBsOTbeJ90QFjxGbc4BjnoGdEaeSCdWI/B1jU=",
+    "h1:TUeUq1UdVkHTxcgq7CJWWXBrc8VEQTufmgU18qDmfGE=",
+    "h1:mCz0lOwNsFCZEcFf7DBSe6b4hZgn5piiy0mZDwRGUIU=",
     "zh:15c227886bac78c8b8827f85595648212574ec81febc39e1055e1a6bf048fe65",
     "zh:2211ebeeb0918dbb3587d206e32adca9e1f343a93bbffcd37d8d99bf4d8dea9a",
     "zh:2303836cdea12ece8dbe39c2d7d30a9378fd06e9c2ebda66cbe5e01cc096ee2e",
@@ -25,6 +28,9 @@ provider "registry.opentofu.org/alekc/kubectl" {
 provider "registry.opentofu.org/hashicorp/kubernetes" {
   version = "2.31.0"
   hashes = [
+    "h1:MLk6rnv1ExXguVTT/lMa9VPubPYS6VF9sKBjzaVUASE=",
+    "h1:MfkGdRph9sDol+ukIgIigdXuLLpC2JPUHH5oF2zEfTM=",
+    "h1:qqatdCju5nmc5IpGsuK92P0yGqzNbVl4S+Qdg+fBTYU=",
     "h1:z2qlqn6WbrjbezwQo4vvlwAgVUGz59klzDU4rlYhYi8=",
     "zh:0dd25babf78a88a61dd329b8c18538a295ea63630f1b69575e7898c89307da39",
     "zh:3138753e4b2ce6e9ffa5d65d73e9236169ff077c10089c7dc71031a0a139ff6d",
@@ -43,6 +49,9 @@ provider "registry.opentofu.org/hashicorp/vault" {
   version     = "3.25.0"
   constraints = "3.25.0"
   hashes = [
+    "h1:23nPKlKLjSNQ/W0VK0YMIihXS790IEKXpZb+gHGDNgc=",
+    "h1:BIyXCyH7Fg/U2mDcTThWlMcF+Lp/h3yLgiHEe29p0T0=",
+    "h1:LTweyJp/06Lzyw/i61/7uv9+eex3thvlSakK42fL7I0=",
     "h1:SbKJsSGoOCp0kpoMEi1Sqt6KxchDcqNLMXD9ZwhoIjU=",
     "zh:150cbcd541b33e98309a158b27c35dee04fafb7d4e4d8df4431a4bb27a154b9f",
     "zh:1da7e4654d4814c84f891eeb66a75cf01fcd4f27bfa273a732254f6957fcce17",
