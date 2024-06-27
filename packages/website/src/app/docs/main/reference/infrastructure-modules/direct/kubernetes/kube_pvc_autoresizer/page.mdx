@@ -8,6 +8,15 @@ import ModuleHeader from "../../../ModuleHeader";
 
 This module provides support for automatically expanding PVCs via the [pvc-autoresizer](https://github.com/topolvm/pvc-autoresizer) project.
 
+## Custom Image
+
+We provide our own images for the autoresizer because the upstream project only provides images
+that are compatible with amd64 system architectures. Our image is multi-platform and allows
+the autoresizer to run on arm64 nodes.
+
+As a result, the `pvc_autoresizer_version` needs to be set to a commit hash that we have actually
+built. Not all commit hashes from the upstream project are available.
+
 ## Providers
 
 The following providers are needed by this module:
@@ -77,6 +86,14 @@ Description: The version of the pvc-autoresizer helm chart to deploy
 Type: `string`
 
 Default: `"0.11.3"`
+
+### <a name="input_pvc_autoresizer_version" /> [pvc\_autoresizer\_version](#input_pvc_autoresizer_version)
+
+Description: The commit sha of the pvc-autoresizer to deploy
+
+Type: `string`
+
+Default: `"0723820ac895cfe86f49a2f582da59f95f02d9ae"`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

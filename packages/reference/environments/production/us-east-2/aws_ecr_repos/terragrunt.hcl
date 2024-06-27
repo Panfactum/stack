@@ -16,5 +16,8 @@ inputs = {
     panfactum = {
       expire_all_images = true # b/c we copy to the public ecr
     }
+    pvc-autoresizer = {
+      expire_all_images = true # b/c we copy to the public ecr
+    }
   }
 }

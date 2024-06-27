@@ -5,7 +5,7 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 ## Folder Setup
 
 <MarkdownAlert severity="info">
-    For a complete example, see [our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
+  For a complete example, see [our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
 </MarkdownAlert>
 
 Your environments folder at `$PF_ENVIRONMENTS_DIR` **must** have three levels of scoping for the [configuration-as-code](/docs/main/concepts/iac#configuration-as-code):
@@ -72,8 +72,6 @@ A few rules about these files:
         ***
 ```
 
-
-
 ## Variables
 
 These are variables that can be found in the `global.yaml`, `environment.yaml`, `region.yaml` or `module.yaml`
@@ -101,11 +99,11 @@ Used to pass extra inputs to all modules in the scope.
 
 Used to configure the `terraform.source` [option](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#terraform) when deploying a module.
 
-| Variable           | Type   | Description                                                                                                                                                                                                                                                | Recommended File   |
-| :----------------- | :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
-| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_IAC_DIR` you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`$PF_REPO_URL`).                                | `environment.yaml` |
-| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack)                                         | `environment.yaml` |
-| `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_IAC_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory. | `module.yaml`      |
+| Variable           | Type   | Description                                                                                                                                                                                                                                                        | Recommended File   |
+| :----------------- | :----- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_IAC_DIR` you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`$PF_REPO_URL`).              | `environment.yaml` |
+| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack) | `environment.yaml` |
+| `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_IAC_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory.         | `module.yaml`      |
 
 ### State Backend Setup
 

@@ -55,10 +55,10 @@ output "container_defaults" {
 
 output "aws_role_name" {
   description = "The name of the AWS role used by the Workflow's Service Account"
-  value = module.workflow_perms.role_name
+  value       = module.workflow_perms.role_name
 }
 
 output "aws_role_arn" {
   description = "The name of the AWS role used by the Workflow's Service Account"
-  value = module.workflow_perms.role_arn
+  value       = module.workflow_perms.role_arn
 }

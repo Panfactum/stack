@@ -37,7 +37,7 @@ module "util_controller" {
 
   workload_name                         = "pvc-autoresizer"
   burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = false // Does not have an arm build
+  arm_nodes_enabled                     = true
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = false // single copy
   topology_spread_enabled               = false // single copy
@@ -93,7 +93,8 @@ resource "helm_release" "pvc_autoresizer" {
   values = [
     yamlencode({
       image = {
-        repository = "${module.pull_through.github_registry}/topolvm/pvc-autoresizer"
+        repository = "${module.pull_through.ecr_public_registry}/t8f0s7h5/pvc-autoresizer"
+        tag        = var.pvc_autoresizer_version
       }
       controller = {
         args = {
@@ -172,26 +173,6 @@ resource "kubectl_manifest" "vpa_controller" {
   depends_on        = [helm_release.pvc_autoresizer]
 }
 
-#resource "kubernetes_manifest" "vpa_webhook" {
-#  count = var.vpa_enabled ? 1 : 0
-#  manifest = {
-#    apiVersion = "autoscaling.k8s.io/v1"
-#    kind       = "VerticalPodAutoscaler"
-#    metadata = {
-#      name      = "external-snapshotter-webhook"
-#      namespace = local.namespace
-#      labels    = module.kube_labels_webhook.kube_labels
-#    }
-#    spec = {
-#      targetRef = {
-#        apiVersion = "apps/v1"
-#        kind       = "Deployment"
-#        name       = "external-snapshotter-webhook"
-#      }
-#    }
-#  }
-#  depends_on = [helm_release.external_snapshotter]
-#}
 
 resource "kubectl_manifest" "pdb_controller" {
   yaml_body = yamlencode({
@@ -214,24 +195,5 @@ resource "kubectl_manifest" "pdb_controller" {
   force_conflicts   = true
   depends_on        = [helm_release.pvc_autoresizer]
 }
-#
-#resource "kubernetes_manifest" "pdb_webhook" {
-#  manifest = {
-#    apiVersion = "policy/v1"
-#    kind       = "PodDisruptionBudget"
-#    metadata = {
-#      name      = "external-snapshotter-webhook"
-#      namespace = local.namespace
-#      labels    = module.kube_labels_webhook.kube_labels
-#    }
-#    spec = {
-#      selector = {
-#        matchLabels = local.webhook_match_labels
-#      }
-#      maxUnavailable = 1
-#    }
-#  }
-#  depends_on = [helm_release.external_snapshotter]
-#}
 
 

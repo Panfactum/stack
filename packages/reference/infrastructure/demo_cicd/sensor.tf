@@ -137,7 +137,7 @@ module "sensor" {
     {
       template = {
         name = local.website_image_builder_name
-        conditions = "push-to-test"
+        conditions = "push-to-main"
         argoWorkflow = {
           operation = "submit"
           source = {
@@ -171,15 +171,14 @@ module "sensor" {
         steps = 1
       }
     },
-        {
-          template = {
-            conditions = "push-to-test"
-            name = "log"
-            log = {
-              intervalSeconds = 1
-            }
-          }
-        }
+#    {
+#      template = {
+#        name = "log"
+#        log = {
+#          intervalSeconds = 1
+#        }
+#      }
+#    }
   ]
 
   # pf-generate: pass_vars

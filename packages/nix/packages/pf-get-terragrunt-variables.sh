@@ -20,35 +20,35 @@ fi
 declare -a FILES
 DIRECTORY="${1:-$(pwd)}"
 DIRECTORY=$(realpath "$DIRECTORY")
-while [[ ! -d "${DIRECTORY}/.git" ]] && [[ "$DIRECTORY" != "/" ]]; do
-    # User files take precedence
-    for FILE in "$DIRECTORY"/{module.user.yaml,region.user.yaml,environment.user.yaml,global.user.yaml}; do
-        if [[ -f "$FILE" ]]; then
-            FILES+=("$FILE")
-        fi
-    done
-    for FILE in "$DIRECTORY"/{module.yaml,region.yaml,environment.yaml,global.yaml}; do
-        if [[ -f "$FILE" ]]; then
-            FILES+=("$FILE")
-        fi
-    done
-    DIRECTORY=$(dirname "$DIRECTORY")
+while [[ ! -d "${DIRECTORY}/.git" ]] && [[ $DIRECTORY != "/" ]]; do
+  # User files take precedence
+  for FILE in "$DIRECTORY"/{module.user.yaml,region.user.yaml,environment.user.yaml,global.user.yaml}; do
+    if [[ -f $FILE ]]; then
+      FILES+=("$FILE")
+    fi
+  done
+  for FILE in "$DIRECTORY"/{module.yaml,region.yaml,environment.yaml,global.yaml}; do
+    if [[ -f $FILE ]]; then
+      FILES+=("$FILE")
+    fi
+  done
+  DIRECTORY=$(dirname "$DIRECTORY")
 done
 
 # If YAML files are found, merge and convert to JSON
 if [[ ${#FILES[@]} -gt 0 ]]; then
-    # Initialize the merged content
-    MERGED="{}"
+  # Initialize the merged content
+  MERGED="{}"
 
-    # Perform shallow merge using yq
-    for FILE in "${FILES[@]}"; do
-      # The merge order here is important b/c files earlier in the array should take precedence
-      MERGED=$(echo "$MERGED" | yq -ys '.[1] * .[0]' - "$FILE")
-    done
+  # Perform shallow merge using yq
+  for FILE in "${FILES[@]}"; do
+    # The merge order here is important b/c files earlier in the array should take precedence
+    MERGED=$(echo "$MERGED" | yq -ys '.[1] * .[0]' - "$FILE")
+  done
 
-    # Convert merged YAML to JSON and output
-    echo "$MERGED" | yq -r .
+  # Convert merged YAML to JSON and output
+  echo "$MERGED" | yq -r .
 else
-    echo "Warning: No configuration files found." >&2
-    echo "{}"
+  echo "Warning: No configuration files found." >&2
+  echo "{}"
 fi

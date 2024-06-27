@@ -1,5 +1,5 @@
 locals {
-  website_image_builder_name = "website-builder"
+  pvc_autoresizer_image_name = "pvc-autoresizer-builder"
 }
 
 
@@ -13,15 +13,15 @@ locals {
 #############################################################
 
 
-resource "kubernetes_role_binding" "website_builder" {
+resource "kubernetes_role_binding" "pvc_autoresizer_builder" {
   metadata {
     generate_name      = local.nix_image_builder_name
     namespace = "buildkit"
-    labels    = module.website_image_builder_workflow.labels
+    labels    = module.pvc_autoresizer_image_builder_workflow.labels
   }
   subject {
     kind      = "ServiceAccount"
-    name      = module.website_image_builder_workflow.service_account_name
+    name      = module.pvc_autoresizer_image_builder_workflow.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -38,7 +38,7 @@ resource "kubernetes_role_binding" "website_builder" {
 # and download images from the repository
 #############################################################
 
-data "aws_iam_policy_document" "website_builder_ecr" {
+data "aws_iam_policy_document" "pvc_autoresizer_builder_ecr" {
   statement {
     sid = "PrivateECR"
     effect = "Allow"
@@ -55,13 +55,41 @@ data "aws_iam_policy_document" "website_builder_ecr" {
       "ecr:UploadLayerPart"
     ]
     resources = [
-      "arn:aws:ecr:us-east-2:891377197483:repository/website"
+      "arn:aws:ecr:us-east-2:891377197483:repository/pvc-autoresizer"
     ]
   }
   statement {
     sid = "PrivateECRAuth"
     effect = "Allow"
     actions = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+  }
+  statement {
+    sid = "PublicECR"
+    effect = "Allow"
+    actions = [
+      "ecr-public:BatchCheckLayerAvailability",
+      "ecr-public:BatchGetImage",
+      "ecr-public:CompleteLayerUpload",
+      "ecr-public:DescribeImages",
+      "ecr-public:DescribeRepositories",
+      "ecr-public:GetDownloadUrlForLayer",
+      "ecr-public:InitiateLayerUpload",
+      "ecr-public:ListImages",
+      "ecr-public:PutImage",
+      "ecr-public:UploadLayerPart"
+    ]
+    resources = [
+      "arn:aws:ecr-public::891377197483:repository/pvc-autoresizer"
+    ]
+  }
+  statement {
+    sid = "PublicECRAuth"
+    effect = "Allow"
+    actions = [
+      "ecr-public:GetAuthorizationToken",
+      "sts:GetServiceBearerToken"
+    ]
     resources = ["*"]
   }
 }
@@ -72,23 +100,36 @@ data "aws_iam_policy_document" "website_builder_ecr" {
 #############################################################
 
 # These define our workflow scripts
-resource "kubernetes_config_map" "website_image_builder_scripts" {
+resource "kubernetes_config_map" "pvc_autoresizer_image_builder_scripts" {
   metadata {
-    name = "${local.website_image_builder_name}-scripts"
-    labels = module.website_image_builder_workflow.labels
+    name = "${local.pvc_autoresizer_image_name}-scripts"
+    labels = module.pvc_autoresizer_image_builder_workflow.labels
     namespace = local.namespace
   }
   data = {
-    "build.sh" = file("${path.module}/website_image_builder/build.sh")
-    "clone.sh" = file("${path.module}/website_image_builder/clone.sh")
-    "merge-manifests.sh" = file("${path.module}/website_image_builder/merge-manifests.sh")
+    "build.sh" = file("${path.module}/pvc_autoresizer_image_builder/build.sh")
+    "clone.sh" = file("${path.module}/pvc_autoresizer_image_builder/clone.sh")
+    "merge-manifests.sh" = file("${path.module}/pvc_autoresizer_image_builder/merge-manifests.sh")
+    "copy-to-public.sh" = file("${path.module}/pvc_autoresizer_image_builder/copy-to-public.sh")
   }
 }
 
-module "website_image_builder_workflow" {
+# This configuration is required by skopeo
+resource "kubernetes_config_map" "pvc_autoresizer_image_builder_containers" {
+  metadata {
+    name = "${local.pvc_autoresizer_image_name}-containers"
+    labels = module.pvc_autoresizer_image_builder_workflow.labels
+    namespace = local.namespace
+  }
+  data = {
+    "policy.json" = file("${path.module}/pvc_autoresizer_image_builder/policy.json")
+  }
+}
+
+module "pvc_autoresizer_image_builder_workflow" {
   source                    = "../../../../../infrastructure//kube_workflow_spec" #pf-update
 
-  name = local.website_image_builder_name
+  name = local.pvc_autoresizer_image_name
   namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   burstable_nodes_enabled = true
@@ -108,16 +149,15 @@ module "website_image_builder_workflow" {
   }
   common_env = {
     GIT_REF = "{{workflow.parameters.git_ref}}"
-    IMAGE_REPO = "website"
+    IMAGE_REPO = "pvc-autoresizer"
     PUBLIC_IMAGE_REGISTRY = "public.ecr.aws/t8f0s7h5"
     IMAGE_REGISTRY = "891377197483.dkr.ecr.us-east-2.amazonaws.com"
     IMAGE_REGION = "us-east-2"
     PUSH_IMAGE = "true"
     BUILDKIT_BUCKET_NAME = var.buildkit_bucket_name
     BUILDKIT_BUCKET_REGION = var.buildkit_bucket_region
-    MUI_X_LICENSE_KEY = "placeholder"
   }
-  extra_aws_permissions = data.aws_iam_policy_document.website_builder_ecr.json
+  extra_aws_permissions = data.aws_iam_policy_document.pvc_autoresizer_builder_ecr.json
   default_resources = {
     requests = {
       memory = "25Mi"
@@ -131,9 +171,9 @@ module "website_image_builder_workflow" {
   templates = [
     {
       name = "build-images"
-     # affinity = module.website_image_builder_workflow.affinity TODO
-      tolerations = module.website_image_builder_workflow.tolerations
-      volumes = module.website_image_builder_workflow.volumes
+     # affinity = module.pvc_autoresizer_image_builder_workflow.affinity TODO
+      tolerations = module.pvc_autoresizer_image_builder_workflow.tolerations
+      volumes = module.pvc_autoresizer_image_builder_workflow.volumes
       containerSet = {
         containers = [for container in [
           {
@@ -148,7 +188,7 @@ module "website_image_builder_workflow" {
             name = "build-amd64"
             command = ["/scripts/build.sh"]
             env = concat(
-              module.website_image_builder_workflow.env,
+              module.pvc_autoresizer_image_builder_workflow.env,
               [
                 { name = "ARCH", value = "amd64" }
               ]
@@ -159,7 +199,7 @@ module "website_image_builder_workflow" {
             name = "build-arm64"
             command = ["/scripts/build.sh"]
             env = concat(
-              module.website_image_builder_workflow.env,
+              module.pvc_autoresizer_image_builder_workflow.env,
               [
                 { name = "ARCH", value = "arm64" }
               ]
@@ -170,8 +210,13 @@ module "website_image_builder_workflow" {
             name = "merge-manifests"
             command = [ "/scripts/merge-manifests.sh"]
             dependencies = ["build-arm64", "build-amd64"]
+          },
+          {
+            name = "copy-to-public-ecr"
+            command = [ "/scripts/copy-to-public.sh"]
+            dependencies = ["merge-manifests"]
           }
-        ]: merge(module.website_image_builder_workflow.container_defaults, container)]
+        ]: merge(module.pvc_autoresizer_image_builder_workflow.container_defaults, container)]
       }
     }
   ]
@@ -192,8 +237,11 @@ module "website_image_builder_workflow" {
     }
   }
   config_map_mounts = {
-    "${kubernetes_config_map.website_image_builder_scripts.metadata[0].name}" = {
+    "${kubernetes_config_map.pvc_autoresizer_image_builder_scripts.metadata[0].name}" = {
       mount_path = "/scripts"
+    }
+    "${kubernetes_config_map.pvc_autoresizer_image_builder_containers.metadata[0].name}" = {
+      mount_path = "/etc/containers"
     }
   }
 
@@ -208,16 +256,16 @@ module "website_image_builder_workflow" {
   # end-generate
 }
 
-resource "kubectl_manifest" "website_workflow_template" {
+resource "kubectl_manifest" "pvc_autoresizer_workflow_template" {
   yaml_body = yamlencode({
     apiVersion = "argoproj.io/v1alpha1"
     kind = "WorkflowTemplate"
     metadata = {
-      name = local.website_image_builder_name
+      name = local.pvc_autoresizer_image_name
       namespace = local.namespace
-      labels = module.website_image_builder_workflow.labels
+      labels = module.pvc_autoresizer_image_builder_workflow.labels
     }
-    spec = module.website_image_builder_workflow.workflow_spec
+    spec = module.pvc_autoresizer_image_builder_workflow.workflow_spec
   })
 
   server_side_apply = true

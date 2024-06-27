@@ -234,6 +234,7 @@
       "pf-get-kube-token") # used for authentication within kube_config
     src5.kube-capacity # for visualizing resource utilization in the cluster
     src5.kubectl-cnpg # for managing the cnpg postgres databases
+    src5.kubectl-evict-pod # for initiating pod evictions
     linkerd # utility for working with the service mesh
     cilium # for managing the cilium CNI
     src5.argo # utility for working with argo workflows

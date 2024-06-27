@@ -6,6 +6,12 @@ variable "pvc_autoresizer_helm_version" {
   default     = "0.11.3"
 }
 
+variable "pvc_autoresizer_version" {
+  description = "The commit sha of the pvc-autoresizer to deploy"
+  type        = string
+  default     = "0723820ac895cfe86f49a2f582da59f95f02d9ae"
+}
+
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool

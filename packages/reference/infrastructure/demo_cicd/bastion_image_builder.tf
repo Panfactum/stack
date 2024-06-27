@@ -127,7 +127,7 @@ resource "kubernetes_config_map" "bastion_image_builder_containers" {
 }
 
 module "bastion_image_builder_workflow" {
-  source                    = "../../../../../infrastructure//kube_workflow" #pf-update
+  source                    = "../../../../../infrastructure//kube_workflow_spec" #pf-update
 
   name = local.bastion_image_builder_name
   namespace = local.namespace

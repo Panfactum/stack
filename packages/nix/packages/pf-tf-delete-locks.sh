@@ -81,16 +81,16 @@ fi
 if [[ -z $AWS_PROFILE ]]; then
   AWS_PROFILE=$(echo "$TG_VARS" | jq -r .tf_state_profile)
   if [[ $AWS_PROFILE == "null" ]]; then
-      echo "Was not able to derive the AWS profile to use from the current context. Retry with --profile." >&2
-      exit 1
+    echo "Was not able to derive the AWS profile to use from the current context. Retry with --profile." >&2
+    exit 1
   fi
 fi
 
 if [[ -z $AWS_REGION ]]; then
   AWS_REGION=$(echo "$TG_VARS" | jq -r .tf_state_region)
   if [[ $AWS_REGION == "null" ]]; then
-      echo "Was not able to derive the region of the lock table from the current context. Retry with --region." >&2
-      exit 1
+    echo "Was not able to derive the region of the lock table from the current context. Retry with --region." >&2
+    exit 1
   fi
 fi
 
@@ -127,6 +127,6 @@ echo "$ITEMS" | jq -c ".LockID.S" | while read -r id; do
     --profile "$AWS_PROFILE" \
     --region "$AWS_REGION" \
     dynamodb delete-item \
-    --table-name "$TF_LOCK_TABLE" \
+    --table-name "$LOCK_TABLE" \
     --key "{\"LockID\": {\"S\": $id}}"
 done

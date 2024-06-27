@@ -235,8 +235,14 @@ locals {
       deleteDelayDuration = "${var.pod_delete_delay_seconds}s"
     }
     podMetadata = {
-      labels      = merge(module.util.labels, var.extra_pod_labels)
-      annotations = var.pod_annotations
+      labels = merge(module.util.labels, var.extra_pod_labels)
+      annotations = merge(
+        var.pod_annotations,
+        var.disruptions_enabled ? {} : {
+          # This is required for pods that take a long time to initialize as PDB's won't protect them
+          "karpenter.sh/do-not-disrupt" = "true"
+        }
+      )
     }
     podPriorityClassName = var.priority_class_name
     priority             = var.priority
@@ -348,6 +354,7 @@ module "util" {
   topology_spread_enabled               = false
   topology_spread_strict                = false
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  lifetime_evictions_enabled            = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

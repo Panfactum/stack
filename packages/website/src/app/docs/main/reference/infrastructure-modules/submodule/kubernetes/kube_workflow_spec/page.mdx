@@ -4,7 +4,7 @@ import ModuleHeader from "../../../ModuleHeader";
 
 # Argo Workflow
 
-<ModuleHeader name="kube_workflow" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_workflow" status="alpha" type="submodule" />
+<ModuleHeader name="kube_workflow_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_workflow_spec" status="alpha" type="submodule" />
 
 ## Providers
 
@@ -588,6 +588,14 @@ The following outputs are exported:
 ### <a name="output_arguments" /> [arguments](#output_arguments)
 
 Description: The arguments to the workflow
+
+### <a name="output_aws_role_arn" /> [aws\_role\_arn](#output_aws_role_arn)
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
+
+Description: The name of the AWS role used by the Workflow's Service Account
 
 ### <a name="output_container_defaults" /> [container\_defaults](#output_container_defaults)
 

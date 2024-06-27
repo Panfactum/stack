@@ -15,5 +15,8 @@ inputs = {
     bastion = {
 
     }
+    pvc-autoresizer = {
+
+    }
   }
 }
