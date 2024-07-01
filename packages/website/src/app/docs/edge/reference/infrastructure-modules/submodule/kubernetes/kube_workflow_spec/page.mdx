@@ -4,7 +4,7 @@ import ModuleHeader from "../../../ModuleHeader";
 
 # Argo Workflow
 
-<ModuleHeader name="kube_workflow" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_workflow" status="alpha" type="submodule" />
+<ModuleHeader name="kube_workflow_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_workflow_spec" status="alpha" type="submodule" />
 
 ## Providers
 
@@ -46,9 +46,9 @@ Type: `string`
 
 ### <a name="input_templates" /> [templates](#input_templates)
 
-Description: The workflow templates
+Description: A list of workflow templates. See [https://argo-workflows.readthedocs.io/en/stable/fields/#template](https://argo-workflows.readthedocs.io/en/stable/fields/#template).
 
-Type: `list(any)`
+Type: `any`
 
 ## Optional Inputs
 
@@ -69,6 +69,28 @@ Description: Whether logs should be archived and made available in the Argo web 
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_arguments" /> [arguments](#input_arguments)
+
+Description: The arguments to set for the Workflow
+
+Type:
+
+```hcl
+object({
+    artifacts  = optional(list(any), [])
+    parameters = optional(list(any), [])
+  })
+```
+
+Default:
+
+```json
+{
+  "artifacts": [],
+  "parameters": []
+}
+```
 
 ### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
 
@@ -125,6 +147,47 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_default_container_image" /> [default\_container\_image](#input_default_container_image)
+
+Description: The default container image to use
+
+Type: `string`
+
+Default: `"docker.io/library/busybox:1.36.1"`
+
+### <a name="input_default_resources" /> [default\_resources](#input_default_resources)
+
+Description: The default container resources to use
+
+Type:
+
+```hcl
+object({
+    requests = optional(object({
+      memory = optional(string, "100Mi")
+      cpu    = optional(string, "50m")
+    }), { memory = "100Mi", cpu = "50m" })
+    limits = optional(object({
+      memory = optional(string, "100Mi")
+      cpu    = optional(string, null)
+    }), { memory = "100Mi" })
+  })
+```
+
+Default:
+
+```json
+{
+  "limits": {
+    "memory": "100Mi"
+  },
+  "requests": {
+    "cpu": "50m",
+    "memory": "100Mi"
+  }
+}
+```
+
 ### <a name="input_delete_artifacts_on_deletion" /> [delete\_artifacts\_on\_deletion](#input_delete_artifacts_on_deletion)
 
 Description: Change the default behavior to delete artifacts on workflow deletion
@@ -165,6 +228,14 @@ list(object({             // key is the secret provider class
 
 Default: `[]`
 
+### <a name="input_extra_aws_permissions" /> [extra\_aws\_permissions](#input_extra_aws_permissions)
+
+Description: Extra JSON-encoded AWS permissions to assign to the Workflow's service account
+
+Type: `string`
+
+Default: `"{}"`
+
 ### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
 
 Description: Extra Pod labels to use
@@ -198,6 +269,14 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_hooks" /> [hooks](#input_hooks)
+
+Description: Hooks to add to the Workflow
+
+Type: `any`
+
+Default: `{}`
+
 ### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
@@ -213,38 +292,6 @@ Description: Extra linux capabilities to add to containers by default
 Type: `list(string)`
 
 Default: `[]`
-
-### <a name="input_maximum_cpu" /> [maximum\_cpu](#input_maximum_cpu)
-
-Description: The maximum amount of cpu to allocate to containers by default (millicores)
-
-Type: `number`
-
-Default: `null`
-
-### <a name="input_maximum_memory" /> [maximum\_memory](#input_maximum_memory)
-
-Description: The maximum amount of memory to allocate to containers by default (MB) (default to minimum memory)
-
-Type: `number`
-
-Default: `null`
-
-### <a name="input_minimum_cpu" /> [minimum\_cpu](#input_minimum_cpu)
-
-Description: The minimum amount of cpu to allocate to containers by default (millicores)
-
-Type: `number`
-
-Default: `10`
-
-### <a name="input_minimum_memory" /> [minimum\_memory](#input_minimum_memory)
-
-Description: The minimum amount of memory to allocate to containers by default (MB)
-
-Type: `number`
-
-Default: `100`
 
 ### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
 
@@ -300,7 +347,7 @@ Description: The number of seconds after Workflow completion that Pods will be d
 
 Type: `number`
 
-Default: `3600`
+Default: `180`
 
 ### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
 
@@ -453,14 +500,6 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
-
-Description: The default number of seconds to wait for graceful termination before forcing termination
-
-Type: `number`
-
-Default: `30`
-
 ### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
@@ -501,14 +540,6 @@ map(object({
 ```
 
 Default: `{}`
-
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
-
-Description: Whether to enable the vertical Pod autoscaler
-
-Type: `bool`
-
-Default: `true`
 
 ### <a name="input_workflow_annotations" /> [workflow\_annotations](#input_workflow_annotations)
 
@@ -554,6 +585,30 @@ Default: `1`
 
 The following outputs are exported:
 
+### <a name="output_arguments" /> [arguments](#output_arguments)
+
+Description: The arguments to the workflow
+
+### <a name="output_aws_role_arn" /> [aws\_role\_arn](#output_aws_role_arn)
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### <a name="output_container_defaults" /> [container\_defaults](#output_container_defaults)
+
+Description: Default options for every container spec
+
+### <a name="output_container_security_context" /> [container\_security\_context](#output_container_security_context)
+
+Description: The security context to be applied to each container in each Pod generated by this Workflow
+
+### <a name="output_env" /> [env](#output_env)
+
+Description: The environment variables to be added to each container in each Pod generated by this Workflow
+
 ### <a name="output_labels" /> [labels](#output_labels)
 
 Description: The default labels assigned to all resources in this Workflow
@@ -562,13 +617,21 @@ Description: The default labels assigned to all resources in this Workflow
 
 Description: The labels unique to this deployment that can be used to select the pods in this Workflow
 
-### <a name="output_pod_spec_patch" /> [pod\_spec\_patch](#output_pod_spec_patch)
-
-Description: The patch applied to all pods generated by this Workflow
-
 ### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
 
 Description: The default service account used for the pods
+
+### <a name="output_tolerations" /> [tolerations](#output_tolerations)
+
+Description: Tolerations added to each pod by default
+
+### <a name="output_volume_mounts" /> [volume\_mounts](#output_volume_mounts)
+
+Description: The volume mounts to be applied to the main container in each Pod generated by this Workflow
+
+### <a name="output_volumes" /> [volumes](#output_volumes)
+
+Description: The volume specification to be applied to all pods generated by this Workflow
 
 ### <a name="output_workflow_spec" /> [workflow\_spec](#output_workflow_spec)
 

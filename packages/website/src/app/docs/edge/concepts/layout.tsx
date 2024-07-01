@@ -36,6 +36,10 @@ const SIDENAV_SECTIONS = [
   {
     text: 'Autoscaling',
     path: '/autoscaling'
+  },
+  {
+    text: 'BuildKit',
+    path: '/buildkit'
   }
 ]
 

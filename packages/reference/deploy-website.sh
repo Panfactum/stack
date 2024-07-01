@@ -16,9 +16,6 @@ VERSION_NUMBER="${CURRENT_VERSION##*.}" # Extracts the integer part
 NEXT_VERSION_NUMBER=$((VERSION_NUMBER + 1))
 NEXT_VERSION="$BASE_VERSION.$NEXT_VERSION_NUMBER"
 
-# Login to ECR
-aws --profile production-superuser ecr get-login-password --region us-east-2 | podman login --username AWS --password-stdin 891377197483.dkr.ecr.us-east-2.amazonaws.com
-
 # Build the image
 "$DEVENV_ROOT/../website/scripts/build-and-push-image.sh" "$NEXT_VERSION"
 
