@@ -22,6 +22,10 @@ output "panfactum_scheduler_name" {
   value = "panfactum"
 }
 
-output "default_workflow_image" {
-  value = "t8f0s7h5/panfactum:c37fbaa6eb4ed72c7696d3b2a35a580a8bc3351d"
+output "panfactum_image" {
+  value = "t8f0s7h5/panfactum"
+}
+
+output "panfactum_image_version" {
+  value = "c37fbaa6eb4ed72c7696d3b2a35a580a8bc3351d"
 }

@@ -246,6 +246,7 @@
     src3.k9s # kubernetes tui
     (util.customShellScript
       "pf-eks-reset") # script for resetting cluster during bootstrapping
+    (util.customShellScript "pf-get-aws-profile-for-kube-context")
 
     ####################################
     # BuildKit Management
@@ -255,6 +256,9 @@
     (util.customShellScript "pf-buildkit-validate")
     (util.customShellScript "pf-buildkit-get-address")
     (util.customShellScript "pf-buildkit-record-build")
+    (util.customShellScript "docker-credential-panfactum")
+    (util.customShellScript "pf-buildkit-tunnel")
+    (util.customShellScript "pf-buildkit-build")
 
     ####################################
     # Hashicorp Vault
@@ -307,6 +311,7 @@
     gnutar # tar
     findutils # find
     gzip # compression programs
+    procps # process info
 
     ####################################
     # AWS Utilities
@@ -344,6 +349,7 @@
     autossh # automatically restart tunnels
     step-cli # working with certificates
     curl # submit network requests from the CLI
+    (util.customShellScript "pf-get-open-port") # Test vpc connectivity
 
     ####################################
     # Database Tools
@@ -351,8 +357,6 @@
     src7.redis # redis-cli
     src6.postgresql_16 # psql, cli for working with postgres
     src2.barman # barman cli for backups and restore with postgres
-    (util.customShellScript
-      "pf-db-tunnel") # for connecting to private databases through ssh bastion
     (util.customShellScript
       "pf-get-db-creds") # gets database credentials from vault
   ]))

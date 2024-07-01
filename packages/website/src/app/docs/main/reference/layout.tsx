@@ -45,6 +45,10 @@ const SIDENAV_SECTIONS = [
       {
         text: 'K8s Config Files',
         path: '/kubernetes'
+      },
+      {
+        text: 'BuildKit Config Files',
+        path: '/buildkit'
       }
     ]
   },
@@ -99,6 +103,11 @@ const SIDENAV_SECTIONS = [
             text: 'Kubernetes',
             path: '/kubernetes',
             sub: makeModuleDir(modules.modules, 'kubernetes', 'submodule')
+          },
+          {
+            text: 'Workflows',
+            path: '/workflow',
+            sub: makeModuleDir(modules.modules, 'workflow', 'submodule')
           }
         ]
       }

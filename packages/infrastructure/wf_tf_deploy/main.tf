@@ -173,7 +173,7 @@ module "tf_deploy_workflow" {
       memory = "${var.memory_mb}Mi"
     }
   }
-  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.default_workflow_image}"
+  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
   templates = [
     {
       name = "dag"

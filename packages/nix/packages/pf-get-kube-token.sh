@@ -91,12 +91,49 @@ RESPONSE=$(get_token)
 if [[ $? -eq 0 ]]; then
   echo -e "$RESPONSE"
 else
+  # This ensures that only one sso process is running at a time
+  AWS_SSO_LOCK_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/aws.lock"
+  if [[ -f $AWS_SSO_LOCK_FILE ]]; then
+
+    # Wait for a bit if the lock is held by another process
+    # to prevent duplicate prompts
+    MAX_WAIT=180
+    CURRENT_WAIT=0
+    while [[ -f $AWS_SSO_LOCK_FILE ]]; do
+      sleep 1
+      CURRENT_WAIT=$((CURRENT_WAIT + 1))
+      if [[ CURRENT_WAIT -ge MAX_WAIT ]]; then
+        break
+        rm -f "$DEVENV_ROOT/$PF_KUBE_DIR/aws.lock"
+      fi
+    done
+
+    # If we are sleeping, when we wake, we should try again to get the token
+    # before we initiate the sso login b/c the sso login might have happened
+    # in another process
+    RESPONSE=$(get_token)
+    if [[ $? -eq 0 ]]; then
+      echo -e "$RESPONSE"
+      exit 0
+    fi
+  fi
+
+  function cleanup() {
+    rm -f "$AWS_SSO_LOCK_FILE"
+  }
+
   if echo "$RESPONSE" | grep -q "Error loading SSO Token: Token for $AWS_PROFILE does not exist"; then
+    touch "$AWS_SSO_LOCK_FILE"
+    trap cleanup EXIT SIGINT SIGTERM
     aws --profile "$AWS_PROFILE" sso login >&2
+    cleanup
     get_token
   elif echo "$RESPONSE" | grep -q "Error when retrieving token from sso: Token has expired and refresh failed"; then
+    touch "$AWS_SSO_LOCK_FILE"
+    trap cleanup EXIT SIGINT SIGTERM
     aws --profile "$AWS_PROFILE" sso logout >&2
     aws --profile "$AWS_PROFILE" sso login >&2
+    cleanup
     get_token
   else
     echo -e "$RESPONSE" >&2

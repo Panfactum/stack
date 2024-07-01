@@ -1,6 +1,4 @@
-config
-*.user.yaml
-state.user.lock
+*
 !*.crt
 !state.lock
 !config.user.example.yaml

@@ -160,7 +160,7 @@ module "sensor" {
             {
               dest = "spec.arguments.parameters.0.value"
               src = {
-                dependencyName = "push-to-test"
+                dependencyName = "push-to-main"
                 dataKey = "body.after" # The git commit after the push
               }
             }

@@ -10,6 +10,10 @@ terraform {
 inputs = {
   ecr_repositories = {
     website = {}
+    test = {
+      expire_all_images = true  # b/c this is only for testing BuildKit functionality
+      is_immutable      = false # b/c this is only used for testing BuildKit functionality
+    }
     bastion = {
       expire_all_images = true # b/c we copy to the public ecr
     }

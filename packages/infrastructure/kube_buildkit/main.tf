@@ -36,7 +36,12 @@ module "pull_through" {
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
+module "constants" {
+  source = "../kube_constants"
+}
+
 data "aws_region" "region" {}
+data "aws_caller_identity" "current" {}
 
 /***************************************
 * Namespace
@@ -355,8 +360,8 @@ module "scale_to_zero" {
   cron_schedule = "*/15 * * * *"
   containers = [{
     name    = "scale-to-zero"
-    image   = "${module.pull_through.ecr_public_registry}/t8f0s7h5/panfactum"
-    version = "95508e2e860c95cee40e61245c8f588b6b73a39b"
+    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
+    version = module.constants.panfactum_image_version
     command = [
       "/bin/pf-buildkit-scale-down",
       "--timeout",

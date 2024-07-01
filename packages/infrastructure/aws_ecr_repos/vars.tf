@@ -7,11 +7,7 @@ variable "ecr_repositories" {
       tag_pattern = string
       days        = number # days since pushed that the image will be removed
     })), [])
+    additional_push_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have push access to the repository
+    additional_pull_account_ids = optional(list(string), []) # The ids of the additional AWS accounts that have pull access to the repository
   }))
-}
-
-variable "trusted_account_ids" {
-  description = "The ids of the accounts that have completed access to each repository."
-  type        = list(string)
-  default     = []
 }

@@ -53,6 +53,15 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-update-iac.sh $out/bin/pf-update-iac
     chmod +x $out/bin/pf-update-iac
 
+    cp ${src}/pf-get-buildkit-state-hash.sh $out/bin/pf-get-buildkit-state-hash
+    chmod +x $out/bin/pf-get-buildkit-state-hash
+
+    cp ${src}/pf-get-buildkit-user-state-hash.sh $out/bin/pf-get-buildkit-user-state-hash
+    chmod +x $out/bin/pf-get-buildkit-user-state-hash
+
+    cp ${src}/pf-update-buildkit.sh $out/bin/pf-update-buildkit
+    chmod +x $out/bin/pf-update-buildkit
+
     # Copy the static source files to $out/source_files
     mkdir -p $out/files
     cp -r ${src}/files/* $out/files/

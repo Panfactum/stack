@@ -91,7 +91,7 @@ elif ! dirs_are_equal "$files_dir"/files/ssh "$(realpath "$DEVENV_ROOT/$PF_SSH_D
 elif [[ "$(pf-get-ssh-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_SSH_DIR/state.lock")" ]]; then
   if [[ -f "$DEVENV_ROOT/$PF_SSH_DIR/config.yaml" ]]; then
     has_build_required_error=1
-    errors+="\033[33mGenerated SSH config files is out of date. A superuser must run 'pf-update-ssh --build' to update.\033[0m\n\n"
+    errors+="\033[33mGenerated SSH config files are out of date. A superuser must run 'pf-update-ssh --build' to update.\033[0m\n\n"
   else
     errors+="\033[33mSSH files are out of date. Run pf-update-ssh to update.\033[0m\n\n"
   fi
@@ -127,10 +127,29 @@ elif ! dirs_are_equal "$files_dir"/files/aws "$(realpath "$DEVENV_ROOT/$PF_AWS_D
 elif [[ "$(pf-get-aws-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_AWS_DIR/state.lock")" ]]; then
   if [[ -f "$DEVENV_ROOT/$PF_AWS_DIR/config.yaml" ]]; then
     has_build_required_error=1
-    errors+="\033[33mGenerated AWS config files is out of date. A superuser must run 'pf-update-aws --build' to update.\033[0m\n\n"
+    errors+="\033[33mGenerated AWS config files are out of date. A superuser must run 'pf-update-aws --build' to update.\033[0m\n\n"
   else
     errors+="\033[33mAWS config files are out of date. Run 'pf-update-aws' to update.\033[0m\n\n"
   fi
+fi
+
+#################################################
+## Check BuildKit setup
+#################################################
+
+if [[ -z ${PF_BUILDKIT_DIR} ]]; then
+  environment_errors+="\t\033[33mEnvironment variable PF_BUILDKIT_DIR is not set. Add it to your devenv.nix file.\033[0m\n\n"
+elif ! dirs_are_equal "$files_dir"/files/buildkit "$(realpath "$DEVENV_ROOT/$PF_BUILDKIT_DIR")"; then
+  errors+="\033[33mBuildKit config files are out of date. Run 'pf-update-buildkit' to update.\033[0m\n\n"
+elif [[ "$(pf-get-buildkit-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_BUILDKIT_DIR/state.lock")" ]]; then
+  if [[ -f "$DEVENV_ROOT/$PF_BUILDKIT_DIR/config.yaml" ]]; then
+    has_build_required_error=1
+    errors+="\033[33mGenerated BuildKit config files are out of date. A superuser must run 'pf-update-buildkit --build' to update.\033[0m\n\n"
+  else
+    errors+="\033[33mBuildKit config files are out of date. Run 'pf-update-buildkit' to update.\033[0m\n\n"
+  fi
+elif [[ "$(pf-get-buildkit-user-state-hash)" != "$(cat "$DEVENV_ROOT/$PF_BUILDKIT_DIR/state.user.lock")" ]]; then
+  errors+="\033[33mBuildKit config is out of date. Run pf-update-buildkit to update.\033[0m\n\n"
 fi
 
 #################################################

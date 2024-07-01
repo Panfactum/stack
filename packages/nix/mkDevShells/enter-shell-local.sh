@@ -47,6 +47,12 @@ mkdir -p "$TF_PLUGIN_CACHE_DIR"
 export GIT_CLONE_PROTECTION_ACTIVE=false
 
 #############################################
+## Local BuildKit Configuration
+#############################################
+export REGISTRY_AUTH_FILE="$DEVENV_ROOT/$PF_BUILDKIT_DIR/config.json"
+export DOCKER_CONFIG="$DEVENV_ROOT/$PF_BUILDKIT_DIR" # Needed for buildkit to work
+
+#############################################
 ## Run checks
 #############################################
 pf-check-repo-setup

@@ -62,6 +62,7 @@
           PF_KUBE_DIR = mkOverride 1001 ".kube";
           PF_ENVIRONMENTS_DIR = mkOverride 1001 "environments";
           PF_IAC_DIR = mkOverride 1001 "infrastructure";
+          PF_BUILDKIT_DIR = mkOverride 1001 ".buildkit";
           LOCAL_DEV_NAMESPACE = mkOverride 1001 "@INVALID@";
         };
 

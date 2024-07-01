@@ -29,13 +29,15 @@ module "tags" {
 ##########################################################################
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
-data "aws_iam_policy_document" "trust_accounts" {
+data "aws_iam_policy_document" "access" {
+  for_each = var.ecr_repositories
   statement {
     effect = "Allow"
     principals {
       identifiers = [
-        for id in tolist(toset(concat(var.trusted_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
+        for id in tolist(toset(concat(each.value.additional_push_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
       ]
       type = "AWS"
     }
@@ -62,6 +64,26 @@ data "aws_iam_policy_document" "trust_accounts" {
       "ecr:UploadLayerPart"
     ]
   }
+  statement {
+    effect = "Allow"
+    principals {
+      identifiers = [
+        for id in tolist(toset(concat(each.value.additional_pull_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
+      ]
+      type = "AWS"
+    }
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImages",
+      "ecr:DescribeRepositories",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+    ]
+  }
 }
 
 resource "aws_ecr_repository" "repo" {
@@ -73,7 +95,7 @@ resource "aws_ecr_repository" "repo" {
 
 resource "aws_ecr_repository_policy" "delegated_access" {
   for_each   = var.ecr_repositories
-  policy     = data.aws_iam_policy_document.trust_accounts.json
+  policy     = data.aws_iam_policy_document.access[each.key].json
   repository = aws_ecr_repository.repo[each.key].name
 }
 

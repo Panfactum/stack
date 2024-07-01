@@ -132,6 +132,13 @@ data "aws_iam_policy_document" "admin_policy" {
       "iam:UpdateAccessKey",
       "iam:DeleteAccessKey",
 
+      // Prevent deleting images which would allow
+      // immutability bypass
+      "ecr:DeleteRepository",
+      "ecr:DeleteRepositoryPolicy",
+      "ecr-public:DeleteRepository",
+      "ecr-public:DeleteRepositoryPolicy",
+
       // Prevent messing with identity center
       "sso:*",
       "sso-directory:*",

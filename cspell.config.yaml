@@ -162,7 +162,15 @@ words: [
   "Qexec",
   "kubelet",
   "containerd",
-  "appendfsync"
+  "appendfsync",
+  "Dockerfiles",
+  "frontends",
+  "runc",
+  "buildah",
+  "kaniko",
+  "kubelets",
+  "buildctl",
+  "statefulset"
 ]
 languageSettings:
   - languageId: markdown,mdx

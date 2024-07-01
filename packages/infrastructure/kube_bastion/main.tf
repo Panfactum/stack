@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -201,7 +199,7 @@ module "bastion" {
       linux_capabilities  = ["SYS_CHROOT", "SETGID", "SETUID"]
       liveness_check_port = var.bastion_port
       liveness_check_type = "TCP"
-      minimum_memory      = 10
+      minimum_memory      = 50
     },
 
     // SSHD requires that root be the only

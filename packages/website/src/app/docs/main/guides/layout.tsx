@@ -116,6 +116,34 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
+    text: 'Stack Addons',
+    path: '/addons',
+    sub: [
+      {
+        text: 'Overview',
+        path: '/overview'
+      },
+      {
+        text: 'BuildKit',
+        path: '/buildkit',
+        sub: [
+          {
+            text: 'Installing',
+            path: '/installing'
+          },
+          {
+            text: 'Building Images',
+            path: '/building-images'
+          },
+          {
+            text: 'Debugging',
+            path: '/debugging'
+          }
+        ]
+      }
+    ]
+  },
+  {
     text: 'Developer Environment',
     path: '/developer-environment',
     sub: [

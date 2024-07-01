@@ -29,37 +29,59 @@ module "tags" {
 ##########################################################################
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
-data "aws_iam_policy_document" "trust_accounts" {
+data "aws_iam_policy_document" "access" {
+  for_each = var.ecr_repositories
   statement {
     effect = "Allow"
     principals {
       identifiers = [
-        for id in tolist(toset(concat(var.trusted_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
+        for id in tolist(toset(concat(each.value.additional_push_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
       ]
       type = "AWS"
     }
     actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchDeleteImage",
-      "ecr:BatchGetImage",
-      "ecr:CompleteLayerUpload",
-      "ecr:DeleteLifecyclePolicy",
-      "ecr:DeleteRepository",
-      "ecr:DeleteRepositoryPolicy",
-      "ecr:DescribeImages",
-      "ecr:DescribeRepositories",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetLifecyclePolicy",
-      "ecr:GetLifecyclePolicyPreview",
-      "ecr:GetRepositoryPolicy",
-      "ecr:InitiateLayerUpload",
-      "ecr:ListImages",
-      "ecr:PutImage",
-      "ecr:PutLifecyclePolicy",
-      "ecr:SetRepositoryPolicy",
-      "ecr:StartLifecyclePolicyPreview",
-      "ecr:UploadLayerPart"
+      "ecr-public:BatchCheckLayerAvailability",
+      "ecr-public:BatchDeleteImage",
+      "ecr-public:BatchGetImage",
+      "ecr-public:CompleteLayerUpload",
+      "ecr-public:DeleteLifecyclePolicy",
+      "ecr-public:DeleteRepository",
+      "ecr-public:DeleteRepositoryPolicy",
+      "ecr-public:DescribeImages",
+      "ecr-public:DescribeRepositories",
+      "ecr-public:GetDownloadUrlForLayer",
+      "ecr-public:GetLifecyclePolicy",
+      "ecr-public:GetLifecyclePolicyPreview",
+      "ecr-public:GetRepositoryPolicy",
+      "ecr-public:InitiateLayerUpload",
+      "ecr-public:ListImages",
+      "ecr-public:PutImage",
+      "ecr-public:PutLifecyclePolicy",
+      "ecr-public:SetRepositoryPolicy",
+      "ecr-public:StartLifecyclePolicyPreview",
+      "ecr-public:UploadLayerPart"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    principals {
+      identifiers = [
+        for id in tolist(toset(concat(each.value.additional_pull_account_ids, [data.aws_caller_identity.current.account_id]))) : "arn:aws:iam::${id}:root"
+      ]
+      type = "AWS"
+    }
+    actions = [
+      "ecr-public:BatchCheckLayerAvailability",
+      "ecr-public:BatchGetImage",
+      "ecr-public:DescribeImages",
+      "ecr-public:DescribeRepositories",
+      "ecr-public:GetDownloadUrlForLayer",
+      "ecr-public:GetLifecyclePolicy",
+      "ecr-public:GetLifecyclePolicyPreview",
+      "ecr-public:GetRepositoryPolicy",
+      "ecr-public:ListImages",
     ]
   }
 }
@@ -82,6 +104,6 @@ resource "aws_ecrpublic_repository" "repo" {
 resource "aws_ecrpublic_repository_policy" "delegated_access" {
   provider        = aws.global
   for_each        = var.ecr_repositories
-  policy          = data.aws_iam_policy_document.trust_accounts.json
+  policy          = data.aws_iam_policy_document.access[each.key].json
   repository_name = aws_ecrpublic_repository.repo[each.key].repository_name
 }

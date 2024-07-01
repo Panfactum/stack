@@ -1,4 +1,6 @@
 providers:
   - aws
-  - kubernetes
   - helm
+  - kubernetes
+  - random
+  - time
