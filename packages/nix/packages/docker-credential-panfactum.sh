@@ -24,8 +24,10 @@ if [[ -z ${PF_KUBE_DIR} ]]; then
   exit 1
 fi
 
+AWS_PUBLIC_ECR=0
 if [[ $REGISTRY == "public.ecr.aws" ]]; then
   AWS_REGION="us-east-1" # public-ecr is in us-east-1 always
+  AWS_PUBLIC_ECR=1
 elif [[ $REGISTRY =~ ^([^.]+)\.dkr\.ecr\.([^.]+)\.amazonaws\.com$ ]]; then
   AWS_REGION="${BASH_REMATCH[2]}"
 else
@@ -57,7 +59,11 @@ if [[ $COMMAND == "get" ]]; then
 
   # Attempts to retrieves a fresh token from the AWS API
   function get_new_token() {
-    aws --profile "$AWS_PROFILE" --region "$AWS_REGION" ecr get-login-password 2>&1
+    if [[ $AWS_PUBLIC_ECR == 1 ]]; then
+      aws --profile "$AWS_PROFILE" --region "$AWS_REGION" ecr-public get-login-password 2>&1
+    else
+      aws --profile "$AWS_PROFILE" --region "$AWS_REGION" ecr get-login-password 2>&1
+    fi
   }
 
   # Prints the credential payload in the format expected by the calling tool
@@ -67,7 +73,7 @@ if [[ $COMMAND == "get" ]]; then
 
   # Saves a retrieved token from the filesystem cache
   function save() {
-    if [[ ! -f $CREDS_FILE ]]; then
+    if [[ ! -f $CREDS_FILE ]] || [[ ! -s $CREDS_FILE ]]; then
       echo '{}' >"$CREDS_FILE"
     fi
     jq --arg registry "$REGISTRY" --arg token "$1" --arg expires "$(date -d "4 hours" +%s)" '.[$registry] = {"token": $token, "expires": $expires}' "$CREDS_FILE" \
@@ -77,20 +83,21 @@ if [[ $COMMAND == "get" ]]; then
 
   # Attempts to retrieve a token from the filesystem cache
   function get_saved_token() {
-    if ! [[ -f $CREDS_FILE ]]; then
+    if [[ ! -f $CREDS_FILE ]] || [[ ! -s $CREDS_FILE ]]; then
       exit 1
     fi
     local EXPIRES
-    EXPIRES=$(jq --arg registry "$REGISTRY" '.[$registry].expires')
+    EXPIRES=$(jq -r --arg registry "$REGISTRY" '.[$registry].expires' "$CREDS_FILE")
     if [[ $EXPIRES == "null" ]] || [[ $(date +%s) -ge $EXPIRES ]]; then
       exit 1
     fi
-    jq --arg registry "$REGISTRY" '.[$registry].token'
+    jq -r --arg registry "$REGISTRY" '.[$registry].token' "$CREDS_FILE"
   }
 
   # First, attempt to get the token from cache
   if TOKEN=$(get_saved_token); then
     output "$TOKEN"
+    exit 0
   fi
 
   # Then, if no token could be retrieved locally, get a new one from the remote API

@@ -90,7 +90,7 @@ resource "aws_eks_cluster" "cluster" {
 
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
-  version  = var.control_plane_version
+  version  = var.kube_version
 
   vpc_config {
     subnet_ids              = [for subnet in data.aws_subnet.control_plane_subnets : subnet.id]
@@ -279,7 +279,7 @@ module "aws_cloudwatch_log_group" {
 ## Node Groups
 ##########################################################################
 data "aws_subnet" "node_groups" {
-  for_each = toset(var.controller_node_subnets)
+  for_each = toset(var.node_subnets)
   vpc_id   = var.vpc_id
   filter {
     name   = "tag:Name"
@@ -288,7 +288,7 @@ data "aws_subnet" "node_groups" {
 }
 
 resource "aws_ec2_tag" "node_subnet_tags" {
-  for_each    = toset(var.controller_node_subnets)
+  for_each    = toset(var.node_security_groups)
   resource_id = data.aws_subnet.node_groups[each.key].id
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
@@ -297,7 +297,7 @@ resource "aws_ec2_tag" "node_subnet_tags" {
 // Latest bottlerocket image
 // See https://docs.aws.amazon.com/eks/latest/userguide/retrieve-ami-id-bottlerocket.html
 data "aws_ssm_parameter" "controller_ami" {
-  name = "/aws/service/bottlerocket/aws-k8s-${var.controller_node_kube_version}/x86_64/latest/image_id"
+  name = "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/arm64/latest/image_id"
 }
 
 resource "aws_launch_template" "controller" {
@@ -358,31 +358,43 @@ resource "aws_launch_template" "controller" {
   }
 }
 
-
 resource "aws_eks_node_group" "controllers" {
   node_group_name_prefix = "controllers-"
   cluster_name           = var.cluster_name
   node_role_arn          = aws_iam_role.node_group.arn
-  subnet_ids             = [for subnet in var.controller_node_subnets : data.aws_subnet.node_groups[subnet].id]
+  subnet_ids             = [for subnet in var.node_subnets : data.aws_subnet.node_groups[subnet].id]
 
-  instance_types = var.controller_node_instance_types
+  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.medium", "m6g.medium"]
 
+  # Unlike Karpenter, applies of this module will fail if EKS cannot replace the nodes in the node groups
+  # with updated versions due to being unable to evict modules. As a result, we enable force eviction
+  # as these nodes should NOT be used to run workloads that are not capable of temporary disruption
   force_update_version = true
 
   launch_template {
     id      = aws_launch_template.controller.id
     version = aws_launch_template.controller.latest_version
   }
+
+  # During bootstrapping, we want to have 3 nodes always as this is required
+  # for bootstrapping core components like Vault; after bootstrapping, we can drop it to
+  # 2 as Karpenter will take care of extra node provisioning. We need 2 so that
+  # Karpenter can always be running even if one node is taken offline during the
+  # upgrade process.
   scaling_config {
-    desired_size = var.controller_node_count
-    max_size     = var.controller_node_count
-    min_size     = var.controller_node_count
+    desired_size = var.bootstrap_mode_enabled ? 3 : 2
+    max_size     = var.bootstrap_mode_enabled ? 3 : 2
+    min_size     = var.bootstrap_mode_enabled ? 3 : 2
   }
   update_config {
     max_unavailable_percentage = 50
   }
 
-  capacity_type = "ON_DEMAND"
+  # During bootstrapping, we should prevent disruptions as much as possible
+  # but after Karpenter is running, we should make the EKS nodes spot as
+  # they can already be disrupted at inconvenient times due to 'force_update_version = true'
+  capacity_type = var.bootstrap_mode_enabled ? "ON_DEMAND" : "SPOT"
+
   tags = merge(local.instance_tags, {
     description = local.controller_nodes_description
   })
@@ -393,6 +405,19 @@ resource "aws_eks_node_group" "controllers" {
     effect = "NO_SCHEDULE"
     key    = module.constants.cilium_taint.key
     value  = module.constants.cilium_taint.value
+  }
+  taint {
+    effect = "NO_SCHEDULE"
+    key    = "arm64"
+    value  = "true"
+  }
+  dynamic "taint" {
+    for_each = var.bootstrap_mode_enabled ? toset([]) : toset(["burstable", "spot"])
+    content {
+      effect = "NO_SCHEDULE"
+      key    = taint.key
+      value  = "true"
+    }
   }
   lifecycle {
     create_before_destroy = true
@@ -407,7 +432,7 @@ resource "aws_eks_node_group" "controllers" {
 // All nodes
 ////////////////////////////////////////////////////////////
 data "aws_security_group" "all_nodes_source" {
-  for_each = var.all_nodes_allowed_security_groups
+  for_each = var.node_security_groups
   vpc_id   = var.vpc_id
   name     = each.key
 }
@@ -461,7 +486,7 @@ resource "aws_security_group_rule" "ingress_api_extensions" {
 }
 
 resource "aws_security_group_rule" "ingress_dynamic" {
-  for_each                 = var.all_nodes_allowed_security_groups
+  for_each                 = var.node_security_groups
   security_group_id        = aws_security_group.all_nodes.id
   type                     = "ingress"
   protocol                 = "-1"

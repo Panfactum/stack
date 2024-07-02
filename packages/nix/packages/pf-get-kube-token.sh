@@ -125,14 +125,14 @@ else
   if echo "$RESPONSE" | grep -q "Error loading SSO Token: Token for $AWS_PROFILE does not exist"; then
     touch "$AWS_SSO_LOCK_FILE"
     trap cleanup EXIT SIGINT SIGTERM
-    aws --profile "$AWS_PROFILE" sso login >&2
+    timeout 3m aws --profile "$AWS_PROFILE" sso login >&2
     cleanup
     get_token
   elif echo "$RESPONSE" | grep -q "Error when retrieving token from sso: Token has expired and refresh failed"; then
     touch "$AWS_SSO_LOCK_FILE"
     trap cleanup EXIT SIGINT SIGTERM
     aws --profile "$AWS_PROFILE" sso logout >&2
-    aws --profile "$AWS_PROFILE" sso login >&2
+    timeout 3m aws --profile "$AWS_PROFILE" sso login >&2
     cleanup
     get_token
   else

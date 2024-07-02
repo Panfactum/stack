@@ -44,6 +44,7 @@ module "util" {
   topology_spread_enabled  = false
   controller_node_required = true
   arm_nodes_enabled        = true
+  burstable_nodes_enabled  = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

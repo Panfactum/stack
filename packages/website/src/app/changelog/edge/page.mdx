@@ -9,6 +9,29 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* We have made a small, breaking refactor of [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+  to reduce unnecessary options that made onboarding and maintenance more difficult:
+  * Most importantly, users will no longer able to set the instance type and count for nodes in EKS node groups. This
+    flexibility is unnecessary since node provisioning is handled
+    by Karpenter and not EKS. Moving forward, there are just two static configurations that are guaranteed to work
+    in all use cases: one for before autoscaling is installed and one for after. This is controlled via the new input,
+    `bootstrap_mode_enabled` (default: `false`).
+  * `control_plane_version` and `controller_node_kube_version` have been unified into a single variable
+    called `kube_version` that applies to all subsystems.
+  * `controller_node_subnets` has been renamed to `node_subnets` to indicate these subnets are used
+    for all cluster nodes, not just the EKS node groups.
+  * `all_nodes_allowed_security_groups` has been renamed to `node_security_groups` to align naming conventions
+
+### Fixed
+
+* Fixes handling of public ECR registries in `docker-credential-panfactum`.
+
+* Fixes handling of ECR token caching in `docker-credential-panfactum`.
+
 ## edge.24-07-01
 
 ### Breaking Changes
@@ -25,41 +48,41 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Added
 
-- [kube_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) has graduated to beta
-and is now ready for general consumption. This is the first [stack addon](/docs/edge/guides/addons/overview) that
-can be used to extend the behavior of the core stack. Installation and usage instructions can be found
-[here](/docs/edge/guides/addons/buildkit/installing).
+* [kube\_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) has graduated to beta
+  and is now ready for general consumption. This is the first [stack addon](/docs/edge/guides/addons/overview) that
+  can be used to extend the behavior of the core stack. Installation and usage instructions can be found
+  [here](/docs/edge/guides/addons/buildkit/installing).
 
-* [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now supports custom image
+- [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now supports custom image
   expirations rules and both pull and push permissions.
 
-* [aws\_ecr\_public\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) has been added
+- [aws\_ecr\_public\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) has been added
   to support created public ECR repositories.
 
-* Adds ARM support in [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) and
-[kube\_pvc_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_resizer). All core cluster
-components can now be run on both amd64 and arm64 nodes allow for optimal cost savings.
+- Adds ARM support in [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) and
+  [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_resizer). All core cluster
+  components can now be run on both amd64 and arm64 nodes allow for optimal cost savings.
 
-* Changes the default `securityContext.fsGroupChangePolicy` to `OnRootMismatch` for Pods created by Panfactum submodules
+- Changes the default `securityContext.fsGroupChangePolicy` to `OnRootMismatch` for Pods created by Panfactum submodules
   in order to improve PVC mounting performance.
 
-* `pf-providers-enable` now ensures that `.terraform.lock.hcl` files have all common platform checksums.
+- `pf-providers-enable` now ensures that `.terraform.lock.hcl` files have all common platform checksums.
 
-* Adds `pf-get-terragrunt-variables` which can be used to derive the
-[Terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables) that would be used if Terragrunt were
-run in the given directory.
+- Adds `pf-get-terragrunt-variables` which can be used to derive the
+  [Terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables) that would be used if Terragrunt were
+  run in the given directory.
 
-* Adds `pf-tf-delete-locks` which can be used to bulk-release Tofu state locks.
+- Adds `pf-tf-delete-locks` which can be used to bulk-release Tofu state locks.
 
-* Adds `pf-sops-set-profile` which will update all sops-encrypted files in the given directory to use the indicated AWS
-profile for KMS operations. This can be used in CI pipelines to allow the CI user to access sops-encrypted files.
+- Adds `pf-sops-set-profile` which will update all sops-encrypted files in the given directory to use the indicated AWS
+  profile for KMS operations. This can be used in CI pipelines to allow the CI user to access sops-encrypted files.
 
-- (Alpha) Adds [kube_argo_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor) and
-[kube_argo_event_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) submodules
-for deploying these core components of the [Argo Events](https://argoproj.github.io/argo-events/) system.
+* (Alpha) Adds [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor) and
+  [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) submodules
+  for deploying these core components of the [Argo Events](https://argoproj.github.io/argo-events/) system.
 
-- (Alpha) Adds the [kube_workflow_spec](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workflow_spec)
-submodule to help in defining production-ready [Argo Workflows.](https://argo-workflows.readthedocs.io/en/latest/)
+* (Alpha) Adds the [kube\_workflow\_spec](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workflow_spec)
+  submodule to help in defining production-ready [Argo Workflows.](https://argo-workflows.readthedocs.io/en/latest/)
 
 ### Fixed
 

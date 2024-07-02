@@ -11,8 +11,8 @@ variable "cluster_description" {
   type        = string
 }
 
-variable "control_plane_version" {
-  description = "Desired Kubernetes master version."
+variable "kube_version" {
+  description = "Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied."
   type        = string
   default     = "1.29"
 }
@@ -65,16 +65,16 @@ variable "dns_service_ip" {
   type        = string
 }
 
+######################################################################################
+# EKS add-ons versions
+# For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
+#######################################################################################
+
 variable "core_dns_addon_enabled" {
   description = "FOR BACKWARDS COMPATIBILITY AND MIGRATIONS ONLY"
   type        = bool
   default     = false
 }
-
-######################################################################################
-# EKS add-ons versions
-# For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
-#######################################################################################
 
 variable "coredns_version" {
   description = "The version to use for the coredns EKS add-on."
@@ -86,28 +86,18 @@ variable "coredns_version" {
 ## Node Group Configurations
 ################################################################################
 
-variable "controller_node_count" {
-  description = "The number of controller nodes to use"
-  type        = number
+variable "bootstrap_mode_enabled" {
+  description = "Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled."
+  type        = bool
+  default     = false
 }
 
-variable "controller_node_instance_types" {
-  description = "The allowable instance types for the controller nodes"
-  type        = list(string)
-}
-
-variable "controller_node_subnets" {
+variable "node_subnets" {
   description = "List of names for subnets that controller nodes should be deployed to"
   type        = list(string)
 }
 
-variable "controller_node_kube_version" {
-  description = "The version of kubernetes to use on the nodes"
-  type        = string
-  default     = "1.29"
-}
-
-variable "all_nodes_allowed_security_groups" {
+variable "node_security_groups" {
   description = "Names of security groups allowed to communicate directly with the cluster nodes."
   type        = set(string)
   default     = []
