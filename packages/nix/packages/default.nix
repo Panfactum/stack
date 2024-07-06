@@ -313,6 +313,7 @@
     gzip # compression programs
     procps # process info
     lsof # query for open files and (and other fds like ports)
+    mktemp # utility for making temporary directories and files
 
     ####################################
     # AWS Utilities
