@@ -350,6 +350,7 @@
     step-cli # working with certificates
     curl # submit network requests from the CLI
     (util.customShellScript "pf-get-open-port") # Test vpc connectivity
+    iproute2 # utilities for inspecting local network configs
 
     ####################################
     # Database Tools
