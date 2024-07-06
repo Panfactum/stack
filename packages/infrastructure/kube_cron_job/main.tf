@@ -25,13 +25,14 @@ module "pod_template" {
   source = "../kube_pod"
 
   # Pod metadata
-  namespace        = var.namespace
-  service_account  = kubernetes_service_account.service_account.metadata[0].name
-  workload_name    = var.name
-  match_labels     = { id = random_id.cron_job_id.hex }
-  dns_policy       = var.dns_policy
-  pod_annotations  = var.pod_annotations
-  extra_pod_labels = var.extra_pod_labels
+  namespace                  = var.namespace
+  service_account            = kubernetes_service_account.service_account.metadata[0].name
+  workload_name              = var.name
+  match_labels               = { id = random_id.cron_job_id.hex }
+  dns_policy                 = var.dns_policy
+  pod_annotations            = var.pod_annotations
+  extra_pod_labels           = var.extra_pod_labels
+  pod_version_labels_enabled = var.pod_version_labels_enabled
 
   # Container configuration
   common_env = var.common_env

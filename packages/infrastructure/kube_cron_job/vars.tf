@@ -298,3 +298,9 @@ variable "disruptions_enabled" {
   type        = bool
   default     = false
 }
+
+variable "pod_version_labels_enabled" {
+  description = "Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates."
+  type        = bool
+  default     = true
+}

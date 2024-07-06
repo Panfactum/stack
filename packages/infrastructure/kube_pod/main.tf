@@ -261,10 +261,15 @@ locals {
 
   pod = {
     metadata = {
-      labels = module.util.labels
-      annotations = merge({
-        "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-      }, var.pod_annotations)
+      labels = var.pod_version_labels_enabled ? module.util.labels : {
+        for k, v in module.util.labels : k => v if !contains([
+          "panfactum.com/stack-commit",
+          "panfactum.com/stack-version",
+          "panfactum.com/version",
+          "panfactum.com/commit"
+        ], k)
+      }
+      annotations = var.pod_annotations
     }
     spec = {
       priorityClassName  = var.priority_class_name

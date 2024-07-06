@@ -246,6 +246,10 @@ module "bastion" {
 
   vpa_enabled = var.vpa_enabled
 
+  # Changing the version labels on the pods will cause a disruption to any running tunnels
+  # which can be disruptive in local development
+  pod_version_labels_enabled = false
+
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit

@@ -263,3 +263,9 @@ variable "termination_grace_period_seconds" {
   default     = 30
 }
 
+variable "pod_version_labels_enabled" {
+  description = "Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates."
+  type        = bool
+  default     = true
+}
+
