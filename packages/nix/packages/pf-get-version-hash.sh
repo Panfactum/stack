@@ -17,14 +17,31 @@ if [[ $git_repo == "local" ]]; then
   exit 0
 fi
 
-# We first attempt to fetch it from the remote
-# in case we are working with a shallow repo clone
-commit_hash=$(git ls-remote "$git_repo" "$git_ref" | awk '{print $1}')
-
-# shellcheck disable=SC2181
-if [[ $? -eq 0 ]]; then
-  echo "$commit_hash"
-else
-  # Otherwise, we fallback to attempting to fetch it from our local system
-  git rev-parse
+# If the ref is a commit hash already, we check to see if it is a valid hash
+if [[ $git_ref =~ ^[0-9a-f]{40}$ ]]; then
+  if [[ $git_repo == "origin" ]]; then
+    if git fetch origin "$git_ref" 2>/dev/null; then
+      echo "$git_ref"
+      exit 0
+    else
+      echo "Error: commit $git_ref does not exist in the remote origin" >&2
+      exit 1
+    fi
+  else
+    temp_dir=$(mktemp -d)
+    cd "$temp_dir"
+    git init
+    if git fetch "$git_repo" "$git_ref" 2>/dev/null; then
+      echo "$git_ref"
+      rm -rf "$temp_dir"
+      exit 0
+    else
+      echo "Error: commit $git_ref does not exist in $git_repo" >&2
+      rm -rf "$temp_dir"
+      exit 1
+    fi
+  fi
 fi
+
+# Otherwise, we can simply fetch the hash from the remote
+git ls-remote --exit-code "$git_repo" "$git_ref" | awk '{print $1}'
