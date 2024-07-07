@@ -317,3 +317,9 @@ variable "pod_version_labels_enabled" {
   type        = bool
   default     = true
 }
+
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the annotator images"
+  type        = bool
+  default     = false
+}

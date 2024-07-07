@@ -215,7 +215,7 @@ variable "failed_jobs_history_limit" {
 variable "successful_jobs_history_limit" {
   description = "The number of successful jobs to retain"
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "suspend" {

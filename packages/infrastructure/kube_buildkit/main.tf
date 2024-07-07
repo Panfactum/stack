@@ -137,6 +137,7 @@ module "buildkit" {
   replicas                    = 1
   ignore_replica_count        = true
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   arm_nodes_enabled           = each.key == "arm64"
   node_requirements = {
     "kubernetes.io/arch" = [each.key]
@@ -356,6 +357,7 @@ module "scale_to_zero" {
   spot_nodes_enabled          = true
   arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
+  vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = "*/15 * * * *"
   containers = [{
@@ -367,6 +369,7 @@ module "scale_to_zero" {
       "--timeout",
       tostring(var.scale_down_delay_seconds)
     ]
+    minimum_memory = 50
   }]
   starting_deadline_seconds = 60 * 5
   active_deadline_seconds   = 60 * 5

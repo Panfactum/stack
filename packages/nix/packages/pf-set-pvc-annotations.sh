@@ -80,7 +80,6 @@ echo "$CONFIG" | jq -c 'to_entries[]' | while read -r ENTRY; do
 
   # Add annotations to each PVC
   for PVC in $PVCS; do
-    # Construct the kubectl annotate command
-    kubectl annotate pvc "$PVC" -n "$NAMESPACE" "$ANNOTATIONS" --overwrite
+    kubectl annotate "$PVC" -n "$NAMESPACE" "$ANNOTATIONS" --overwrite
   done
 done

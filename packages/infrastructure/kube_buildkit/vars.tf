@@ -75,3 +75,9 @@ variable "buildkit_image_version" {
   default     = "v0.14.1-rootless"
 }
 
+variable "vpa_enabled" {
+  description = "Whether the VPA resources should be enabled. Does not apply to the actual BuildKit containers."
+  type        = bool
+  default     = false
+}
+
