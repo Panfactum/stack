@@ -90,22 +90,25 @@ function scale-up() {
   local STATEFULSET_NAME="$BUILDKIT_STATEFULSET_NAME_PREFIX$ARCH"
   local CURRENT_REPLICAS
   CURRENT_REPLICAS=$(
+    # shellcheck disable=SC2086
     kubectl \
       get statefulset "$STATEFULSET_NAME" \
       --namespace="$BUILDKIT_NAMESPACE" \
-      "$CONTEXT_ARGS" \
+      $CONTEXT_ARGS \
       -o=jsonpath='{.spec.replicas}'
   )
   if [[ $CURRENT_REPLICAS -eq 0 ]]; then
+    # shellcheck disable=SC2086
     kubectl \
       scale statefulset "$STATEFULSET_NAME" \
       --namespace="$BUILDKIT_NAMESPACE" \
-      "$CONTEXT_ARGS" \
+      $CONTEXT_ARGS \
       --replicas=1
   fi
   # We record a scale-up as a "build" so that our autoscaler does not attempt to scale down
   # buildkit between the scale-up and the build initiating.
-  pf-buildkit-record-build "$CONTEXT_ARGS" --arch="$ARCH"
+  # shellcheck disable=SC2086
+  pf-buildkit-record-build $CONTEXT_ARGS --arch="$ARCH"
 }
 
 if [[ -n $ONLY_ARCH ]]; then
@@ -125,8 +128,9 @@ ELAPSED_TIME=0
 COUNTDOWN=0
 function get-available-replica-count() {
   local ARCH=$1
+  # shellcheck disable=SC2086
   kubectl \
-    "$CONTEXT_ARGS" \
+    $CONTEXT_ARGS \
     get statefulset "$BUILDKIT_STATEFULSET_NAME_PREFIX$ARCH" \
     --namespace="$BUILDKIT_NAMESPACE" \
     -o=jsonpath='{.status.availableReplicas}'

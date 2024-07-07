@@ -87,10 +87,11 @@ fi
 
 # Note that if the pod was just started, `pods.metrics.k8s.io` might not exist for the pod yet.
 # Instead of creating an error, we put those pods at the TOP of the sort b/c that means they likely have not received any builds yet
+# shellcheck disable=SC2086
 POD=$(kubectl \
   get pods \
   -n "$BUILDKIT_NAMESPACE" \
-  "$CONTEXT_ARGS" \
+  $CONTEXT_ARGS \
   -o=jsonpath='{range .items[?(@.status.phase=="Running")]}{.metadata.name}{"\n"}' |
   head -n -1 |
   grep "$ARCH" |
@@ -98,11 +99,12 @@ POD=$(kubectl \
     echo "$podname $(kubectl get pods.metrics.k8s.io -n "$BUILDKIT_NAMESPACE" "$podname" 2>/dev/null | tail -n +2 | awk '{print $2}')"
   done | sort -k2 -n | head -n1 | awk '{print $1}')
 
+# shellcheck disable=SC2086
 IP=$(
   kubectl \
     get pod "$POD" \
     -n "$BUILDKIT_NAMESPACE" \
-    "$CONTEXT_ARGS" \
+    $CONTEXT_ARGS \
     -o=jsonpath='{.status.podIP}' |
     tr '.' '-'
 )

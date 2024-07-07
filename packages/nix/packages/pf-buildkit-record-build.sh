@@ -81,9 +81,10 @@ fi
 ####################################################################
 
 STATEFULSET_NAME="$BUILDKIT_STATEFULSET_NAME_PREFIX$ARCH"
+# shellcheck disable=SC2086
 kubectl annotate \
   statefulset "$STATEFULSET_NAME" \
-  "$CONTEXT_ARGS" \
+  $CONTEXT_ARGS \
   --namespace="$BUILDKIT_NAMESPACE" \
   "$BUILDKIT_LAST_BUILD_ANNOTATION_KEY"="$(date +%s)" \
   --overwrite \

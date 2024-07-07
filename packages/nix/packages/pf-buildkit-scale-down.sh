@@ -85,27 +85,31 @@ function scale-down() {
   local CURRENT_TIME
   local LAST_BUILD
   CURRENT_TIME=$(date +%s)
+  echo "$STATEFULSET_NAME"
+  # shellcheck disable=SC2086
   LAST_BUILD=$(
     kubectl \
       get statefulset "$STATEFULSET_NAME" \
       --namespace="$BUILDKIT_NAMESPACE" \
-      "$CONTEXT_ARGS" \
+      $CONTEXT_ARGS \
       -o=go-template="{{index .metadata.annotations \"$BUILDKIT_LAST_BUILD_ANNOTATION_KEY\"}}"
   )
   echo "$ARCH: The last recorded build was: $LAST_BUILD" >&2
   if [[ -z $LAST_BUILD || $LAST_BUILD == "<no value>" ]]; then
     echo "$ARCH: No builds recorded. Scaling down..." >&2
+    # shellcheck disable=SC2086
     kubectl \
       scale statefulset "$STATEFULSET_NAME" \
       --namespace="$BUILDKIT_NAMESPACE" \
-      "$CONTEXT_ARGS" \
+      $CONTEXT_ARGS \
       --replicas=0
   elif [[ $((CURRENT_TIME - LAST_BUILD)) -gt $TIMEOUT ]]; then
     echo "$ARCH: Last build occurred over $TIMEOUT seconds ago. Scaling down..." >&2
+    # shellcheck disable=SC2086
     kubectl \
       scale statefulset "$STATEFULSET_NAME" \
       --namespace="$BUILDKIT_NAMESPACE" \
-      "$CONTEXT_ARGS" \
+      $CONTEXT_ARGS \
       --replicas=0
   else
     echo "$ARCH: Last build occurred less than $TIMEOUT seconds ago. Skipping scale down." >&2
