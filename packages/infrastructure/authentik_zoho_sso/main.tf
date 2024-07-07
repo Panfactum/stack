@@ -114,7 +114,7 @@ resource "authentik_application" "zoho" {
   meta_launch_url   = var.zoho_sign_in_url
   meta_description  = var.ui_description
   meta_publisher    = "Panfactum"
-  meta_icon         = "/media/public/${random_id.logo.hex}.svg"
+  meta_icon         = "https://${var.authentik_domain}/media/public/${random_id.logo.hex}.svg"
   group             = var.ui_group
   open_in_new_tab   = true
 }
