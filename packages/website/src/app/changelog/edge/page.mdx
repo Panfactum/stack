@@ -36,6 +36,8 @@ images. We provide instructions for installing this module [here](docs/edge/guid
 - Adds a new [common variable](docs/edge/reference/infrastructure-modules/overview#common-variables), `node_image_cache_enabled`,
 to Panfactum modules that can be used to enable pre-pulling images to nodes via the `kube_fledged` operator.
 
+- Adds the `pf-set-pvc-annotations` utility command for syncing annotations across groups of PVCs.
+
 ### Fixed
 
 * Fixes handling of public ECR registries in `docker-credential-panfactum`.

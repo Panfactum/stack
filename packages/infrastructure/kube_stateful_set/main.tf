@@ -179,18 +179,12 @@ resource "kubernetes_config_map" "pvc_annotations" {
     name      = "${var.name}-pvc-config"
     namespace = var.namespace
     labels    = module.pod_template.labels
-    annotations = {
-      "panfactum.com/pvc-sync" = "true"
-    }
   }
-  data = { for name, config in var.volume_mounts : name => yamlencode({
-    pvc-group = "${var.namespace}.${var.name}.${name}"
-    annotations = {
-      "velero.io/exclude-from-backups"  = tostring(!config.backups_enabled)
-      "resize.topolvm.io/storage_limit" = "${config.size_limit_gb != null ? config.size_limit_gb : 10 * config.initial_size_gb}Gi"
-      "resize.topolvm.io/increase"      = "${config.increase_gb}Gi"
-      "resize.topolvm.io/threshold"     = "${config.increase_threshold_percent}%"
-    }
+  data = { for name, config in var.volume_mounts : "${var.namespace}.${var.name}.${name}" => yamlencode({
+    "velero.io/exclude-from-backups"  = tostring(!config.backups_enabled)
+    "resize.topolvm.io/storage_limit" = "${config.size_limit_gb != null ? config.size_limit_gb : 10 * config.initial_size_gb}Gi"
+    "resize.topolvm.io/increase"      = "${config.increase_gb}Gi"
+    "resize.topolvm.io/threshold"     = "${config.increase_threshold_percent}%"
   }) }
 }
 

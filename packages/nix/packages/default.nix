@@ -247,6 +247,7 @@
     (util.customShellScript
       "pf-eks-reset") # script for resetting cluster during bootstrapping
     (util.customShellScript "pf-get-aws-profile-for-kube-context")
+    (util.customShellScript "pf-set-pvc-annotations")
 
     ####################################
     # BuildKit Management
