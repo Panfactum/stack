@@ -1,5 +1,5 @@
 variable "reflector_helm_version" {
-  description = "The image version of the emberstack/reflector helm chart"
+  description = "The version of the emberstack/reflector helm chart"
   type        = string
   default     = "7.1.262"
 }

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-fledged-webhook-server
+spec:
+  template:
+    spec:
+      schedulerName: "${SCHEDULER}"
+      containers:
+        - name: kube-fledged
+          volumeMounts:
+            - mountPath: "/tmp"
+              name: tmp
+            - mountPath: "/etc/webhook-certs"
+              name: certs
+              readOnly: true
+      volumes:
+        - emptyDir:
+            sizeLimit: "50Mi"
+          name: tmp
+        - secret:
+            secretName: kube-fledged-webhook
+          name: certs

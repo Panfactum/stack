@@ -584,6 +584,34 @@ resource "helm_release" "linkerd" {
   ]
 }
 
+resource "kubectl_manifest" "proxy_image_cache" {
+  count = var.node_image_cache_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kubefledged.io/v1alpha2"
+    kind       = "ImageCache"
+    metadata = {
+      name      = "linkerd-proxy"
+      namespace = local.namespace
+      labels    = module.util_proxy.labels
+    }
+    spec = {
+      cacheSpec = [
+        {
+          # These two images are needed by virtually every pod in the cluster so we should ensure they are
+          # always immediately available (don't forget to update when updating linkerd)
+          images = [
+            "${module.pull_through.github_registry}/linkerd/proxy-init:v2.4.0",
+            "${module.pull_through.github_registry}/linkerd/proxy:edge-24.5.1",
+          ]
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd]
+}
+
 /***************************************
 * Linkerd Viz
 ***************************************/

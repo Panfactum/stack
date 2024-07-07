@@ -2,11 +2,13 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Cloud Native Postgres
+# kube-fledged
 
-<ModuleHeader name="kube_cloudnative_pg" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cloudnative_pg" status="stable" type="direct" />
+<ModuleHeader name="kube_fledged" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_fledged" status="stable" type="direct" />
 
-This module provides the operator for the [cloudnative-pg](https://cloudnative-pg.io/) project.
+[kube-fledged](https://github.com/senthilrch/kube-fledged)
+is a kubernetes operator for creating and managing a cache of container images
+directly on the worker nodes of a kubernetes cluster.
 
 ## Providers
 
@@ -30,41 +32,25 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_cloudnative_pg_helm_version" /> [cloudnative\_pg\_helm\_version](#input_cloudnative_pg_helm_version)
+### <a name="input_kube_fledged_helm_version" /> [kube\_fledged\_helm\_version](#input_kube_fledged_helm_version)
 
-Description: The version of the cloudnative-pg helm chart to deploy
+Description: The version of the kube-fledged helm chart
 
 Type: `string`
 
-Default: `"v0.21.2"`
-
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
+Default: `"v0.10.0"`
 
 ### <a name="input_log_level" /> [log\_level](#input_log_level)
 
-Description: The log level for the operator pods
+Description: The log level to use for the kube-fledged pods
 
 Type: `string`
 
-Default: `"error"`
+Default: `"WARNING"`
 
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
-Description: Whether to add active monitoring to the deployed systems
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_node_image_cache_enabled" /> [node\_image\_cache\_enabled](#input_node_image_cache_enabled)
-
-Description: Whether to use kube-fledged to cache images locally for better startup performance
+Description: Whether to allow monitoring CRs to be deployed in the namespace
 
 Type: `bool`
 

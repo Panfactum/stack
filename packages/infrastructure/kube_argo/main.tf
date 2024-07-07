@@ -707,6 +707,35 @@ resource "kubectl_manifest" "pdb_server" {
   depends_on        = [helm_release.argo]
 }
 
+resource "kubectl_manifest" "workflow_image_cache" {
+  count = var.node_image_cache_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kubefledged.io/v1alpha2"
+    kind       = "ImageCache"
+    metadata = {
+      name      = "argo-workflows"
+      namespace = local.namespace
+      labels    = module.util_controller.labels
+    }
+    spec = {
+      cacheSpec = [
+        {
+          images = [
+            # This is needed by all workflows so we should ensure it is always available (don't forget to update the tag when updating argo)
+            "${module.pull_through.quay_registry}/argoproj/argoexec:v3.5.5",
+
+            # Many of our pre-built workflows use this image so we should have it ready on the nodes
+            "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+          ]
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.argo]
+}
+
 /***************************************
 * Argo Events
 ***************************************/

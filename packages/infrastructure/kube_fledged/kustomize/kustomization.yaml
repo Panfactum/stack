@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# list of Resource Config to be Applied
+resources:
+  - all.yaml
+
+patches:
+  - path: deployment-controller.yaml
+    target:
+      kind: Deployment
+      name: kube-fledged-controller
+  - path: deployment-webhook.yaml
+    target:
+      kind: Deployment
+      name: kube-fledged-webhook-server
+  - path: validating-webhook.yaml
+    target:
+      kind: ValidatingWebhookConfiguration
+      name: kube-fledged-webhook-server

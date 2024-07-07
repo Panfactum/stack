@@ -26,6 +26,16 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
     for all cluster nodes, not just the EKS node groups.
   * `all_nodes_allowed_security_groups` has been renamed to `node_security_groups` to align naming conventions
 
+### Added
+
+- Adds [kube_fledged](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_fledged) to the core stack. The
+[kube-fledged](https://github.com/senthilrch/kube-fledged/tree/master) controller adds the ability to pre-pull images
+to every node to improve pod startup times for critical or frequently used containers such as the Linkerd proxy or database
+images. We provide instructions for installing this module [here](docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches)
+
+- Adds a new [common variable](docs/edge/reference/infrastructure-modules/overview#common-variables), `node_image_cache_enabled`,
+to Panfactum modules that can be used to enable pre-pulling images to nodes via the `kube_fledged` operator.
+
 ### Fixed
 
 * Fixes handling of public ECR registries in `docker-credential-panfactum`.

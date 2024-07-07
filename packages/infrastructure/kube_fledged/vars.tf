@@ -1,7 +1,7 @@
-variable "reloader_helm_version" {
-  description = "The version of the stakater/reloader helm chart"
+variable "kube_fledged_helm_version" {
+  description = "The version of the kube-fledged helm chart"
   type        = string
-  default     = "1.0.72"
+  default     = "v0.10.0"
 }
 
 variable "pull_through_cache_enabled" {
@@ -26,4 +26,14 @@ variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
   default     = false
+}
+
+variable "log_level" {
+  description = "The log level to use for the kube-fledged pods"
+  type        = string
+  default     = "WARNING"
+  validation {
+    condition     = contains(["ERROR", "INFO", "WARNING"], var.log_level)
+    error_message = "log_level must be one of: ERROR, INFO, WARNING"
+  }
 }

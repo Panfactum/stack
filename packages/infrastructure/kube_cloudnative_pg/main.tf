@@ -223,3 +223,32 @@ resource "kubectl_manifest" "pdb" {
   server_side_apply = true
   depends_on        = [helm_release.cnpg]
 }
+
+resource "kubectl_manifest" "proxy_image_cache" {
+  count = var.node_image_cache_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kubefledged.io/v1alpha2"
+    kind       = "ImageCache"
+    metadata = {
+      name      = "cnpg"
+      namespace = local.namespace
+      labels    = module.util.labels
+    }
+    spec = {
+      cacheSpec = [
+        {
+          # We want to minimize disruption caused by databases moving across nodes so we ensure
+          # that the necessary images are always already available (don't forget to update when updating cnpg)
+          images = [
+            "${module.pull_through.github_registry}/cloudnative-pg/cloudnative-pg:1.23.1",
+            "${module.pull_through.github_registry}/cloudnative-pg/pgbouncer:1.22.1",
+            "${module.pull_through.github_registry}/cloudnative-pg/postgresql:16.2-10"
+          ]
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.cnpg]
+}
