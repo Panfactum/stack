@@ -81,7 +81,7 @@ echo "$CONFIG" | jq -c 'to_entries[]' | while read -r ENTRY; do
   fi
   RAW_LABELS=$(echo "$ENTRY" | jq -r '.value.labels')
   if [[ $RAW_LABELS != "null" ]]; then
-    LABELS=$(echo "$RAW_LABELS" | jq -r 'to_entries | map(.key + "=" + .value) | join(",")')
+    LABELS=$(echo "$RAW_LABELS" | jq -r 'to_entries | map(.key + "=" + .value) | join(" ")')
   fi
 
   if [[ $RAW_LABELS == "null" && $RAW_ANNOTATIONS == "null" ]]; then
@@ -98,7 +98,8 @@ echo "$CONFIG" | jq -c 'to_entries[]' | while read -r ENTRY; do
       kubectl annotate "$PVC" -n "$NAMESPACE" "$ANNOTATIONS" --overwrite
     fi
     if [[ $RAW_LABELS != "null" ]]; then
-      kubectl label "$PVC" -n "$NAMESPACE" "$LABELS" --overwrite
+      # shellcheck disable=SC2086
+      kubectl label "$PVC" -n "$NAMESPACE" $LABELS --overwrite
     fi
   done
 done

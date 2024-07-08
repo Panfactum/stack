@@ -260,6 +260,7 @@
     (util.customShellScript "docker-credential-panfactum")
     (util.customShellScript "pf-buildkit-tunnel")
     (util.customShellScript "pf-buildkit-build")
+    (util.customShellScript "pf-buildkit-clear-cache")
 
     ####################################
     # Hashicorp Vault
