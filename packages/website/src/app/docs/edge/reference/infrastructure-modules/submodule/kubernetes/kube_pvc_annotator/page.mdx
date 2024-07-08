@@ -1,0 +1,101 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# PVC Annotator
+
+<ModuleHeader name="kube_pvc_annotator" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pvc_annotator" status="beta" type="submodule" />
+
+The PVC Annotator is a Panfactum-created addon that periodically applies a set of labels
+and annotations to PVCs in the same PVC group.
+
+A "PVC group" is a set of PVCs in the same namespace with the same value for the
+`panfactum.com/pvc-group` label.
+
+This module exists to solve the issue of `volumeClaimTemplate` immutability in common
+controllers such as [StatefulSets](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#statefulset-v1-apps). In other words, once a controller such as a StatefulSet
+has been created, the labels and annotations for its PVCs can never be updated. This
+makes it difficult to adjust PVC settings that depend on PVC labels and annotations
+such as those for [Velero](https://velero.io/) or the
+[PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer).
+
+## Architecture
+
+This addon is very simple. It is just a CronJob that runs the `pf-set-pvc-metadata`
+command every 15 minutes. This module ensures that the appropriate arguments are passed
+to the command.
+
+## Usage Notes
+
+We make extensive use of this submodule in our core Panfactum modules such as in
+[kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+
+Most of the time you will not need to use this directly. However, we expose it in case you
+are using a controller that creates PVCs that is not included in the stack.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_config" /> [config](#input_config)
+
+Description: Configuration to pass to pf-set-pvc-metadata. The top-level keys are the panfactum.com/pvc-group label values and the values are the corresponding labels and annotations to apply to all PVCs in the group.
+
+Type:
+
+```hcl
+map(object({
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+  }))
+```
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the annotator images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+No outputs.
+
+{/* lint enable no-duplicate-headings */}

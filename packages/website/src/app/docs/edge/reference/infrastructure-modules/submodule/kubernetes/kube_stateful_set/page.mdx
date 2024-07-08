@@ -262,7 +262,7 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
 
@@ -279,6 +279,14 @@ Description: The StatefulSets pod management policy
 Type: `string`
 
 Default: `"OrderedReady"`
+
+### <a name="input_pod_version_labels_enabled" /> [pod\_version\_labels\_enabled](#input_pod_version_labels_enabled)
+
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_ports" /> [ports](#input_ports)
 
@@ -326,6 +334,14 @@ Description: The priority class to use for pods in the StatefulSet
 Type: `string`
 
 Default: `null`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the annotator images
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_replicas" /> [replicas](#input_replicas)
 

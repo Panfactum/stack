@@ -211,6 +211,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_fledged",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_ingress",
       "type": "submodule",
       "group": "kubernetes"
@@ -278,6 +283,11 @@
     {
       "module": "kube_priority_classes",
       "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pvc_annotator",
+      "type": "submodule",
       "group": "kubernetes"
     },
     {

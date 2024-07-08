@@ -66,29 +66,17 @@ Description: List of subnet names for the control plane. Must be in at least two
 
 Type: `set(string)`
 
-### <a name="input_controller_node_count" /> [controller\_node\_count](#input_controller_node_count)
-
-Description: The number of controller nodes to use
-
-Type: `number`
-
-### <a name="input_controller_node_instance_types" /> [controller\_node\_instance\_types](#input_controller_node_instance_types)
-
-Description: The allowable instance types for the controller nodes
-
-Type: `list(string)`
-
-### <a name="input_controller_node_subnets" /> [controller\_node\_subnets](#input_controller_node_subnets)
-
-Description: List of names for subnets that controller nodes should be deployed to
-
-Type: `list(string)`
-
 ### <a name="input_dns_service_ip" /> [dns\_service\_ip](#input_dns_service_ip)
 
 Description: The IP address of the cluster's DNS service. Must be inside the service\_cidr range.
 
 Type: `string`
+
+### <a name="input_node_subnets" /> [node\_subnets](#input_node_subnets)
+
+Description: List of names for subnets that controller nodes should be deployed to
+
+Type: `list(string)`
 
 ### <a name="input_service_cidr" /> [service\_cidr](#input_service_cidr)
 
@@ -114,13 +102,13 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_all_nodes_allowed_security_groups" /> [all\_nodes\_allowed\_security\_groups](#input_all_nodes_allowed_security_groups)
+### <a name="input_bootstrap_mode_enabled" /> [bootstrap\_mode\_enabled](#input_bootstrap_mode_enabled)
 
-Description: Names of security groups allowed to communicate directly with the cluster nodes.
+Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled.
 
-Type: `set(string)`
+Type: `bool`
 
-Default: `[]`
+Default: `false`
 
 ### <a name="input_control_plane_logging" /> [control\_plane\_logging](#input_control_plane_logging)
 
@@ -129,22 +117,6 @@ Description: Which log streams to turn on for the control plane (will be sent to
 Type: `set(string)`
 
 Default: `[]`
-
-### <a name="input_control_plane_version" /> [control\_plane\_version](#input_control_plane_version)
-
-Description: Desired Kubernetes master version.
-
-Type: `string`
-
-Default: `"1.29"`
-
-### <a name="input_controller_node_kube_version" /> [controller\_node\_kube\_version](#input_controller_node_kube_version)
-
-Description: The version of kubernetes to use on the nodes
-
-Type: `string`
-
-Default: `"1.29"`
 
 ### <a name="input_core_dns_addon_enabled" /> [core\_dns\_addon\_enabled](#input_core_dns_addon_enabled)
 
@@ -169,6 +141,22 @@ Description: Whether the cluster control plane should be available from the publ
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_kube_version" /> [kube\_version](#input_kube_version)
+
+Description: Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied.
+
+Type: `string`
+
+Default: `"1.29"`
+
+### <a name="input_node_security_groups" /> [node\_security\_groups](#input_node_security_groups)
+
+Description: Names of security groups allowed to communicate directly with the cluster nodes.
+
+Type: `set(string)`
+
+Default: `[]`
 
 ### <a name="input_public_access_cidrs" /> [public\_access\_cidrs](#input_public_access_cidrs)
 

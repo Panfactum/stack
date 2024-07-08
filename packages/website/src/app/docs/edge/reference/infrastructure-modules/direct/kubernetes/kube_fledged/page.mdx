@@ -2,11 +2,13 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Linkerd2 Service Mesh
+# kube-fledged
 
-<ModuleHeader name="kube_linkerd" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_linkerd" status="stable" type="direct" />
+<ModuleHeader name="kube_fledged" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_fledged" status="stable" type="direct" />
 
-This module deploys the [Linkerd2 service mesh.](https://linkerd.io/)
+[kube-fledged](https://github.com/senthilrch/kube-fledged)
+is a kubernetes operator for creating and managing a cache of container images
+directly on the worker nodes of a kubernetes cluster.
 
 ## Providers
 
@@ -20,55 +22,35 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_vault_ca_crt" /> [vault\_ca\_crt](#input_vault_ca_crt)
-
-Description: The vault certificate authority public certificate.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### <a name="input_kube_fledged_helm_version" /> [kube\_fledged\_helm\_version](#input_kube_fledged_helm_version)
 
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_linkerd_helm_version" /> [linkerd\_helm\_version](#input_linkerd_helm_version)
-
-Description: The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)
+Description: The version of the kube-fledged helm chart
 
 Type: `string`
 
-Default: `"2024.5.1"`
+Default: `"v0.10.0"`
 
 ### <a name="input_log_level" /> [log\_level](#input_log_level)
 
-Description: The log level for the Linkerd pods
+Description: The log level to use for the kube-fledged pods
 
 Type: `string`
 
-Default: `"warn"`
+Default: `"WARNING"`
 
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
-Description: Whether to add active monitoring to the deployed systems
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_node_image_cache_enabled" /> [node\_image\_cache\_enabled](#input_node_image_cache_enabled)
-
-Description: Whether to use kube-fledged to cache images locally for better startup performance
+Description: Whether to allow monitoring CRs to be deployed in the namespace
 
 Type: `bool`
 
