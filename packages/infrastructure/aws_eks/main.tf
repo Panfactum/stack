@@ -288,7 +288,7 @@ data "aws_subnet" "node_groups" {
 }
 
 resource "aws_ec2_tag" "node_subnet_tags" {
-  for_each    = toset(var.node_security_groups)
+  for_each    = toset(var.node_subnets)
   resource_id = data.aws_subnet.node_groups[each.key].id
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"

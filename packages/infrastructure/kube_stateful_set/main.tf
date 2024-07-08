@@ -19,28 +19,10 @@ terraform {
   }
 }
 
-locals {
-  pvc_annotations = { for name, config in var.volume_mounts : "${var.namespace}.${var.name}.${name}" => {
-    "velero.io/exclude-from-backups"  = tostring(!config.backups_enabled)
-    "resize.topolvm.io/storage_limit" = "${config.size_limit_gb != null ? config.size_limit_gb : 10 * config.initial_size_gb}Gi"
-    "resize.topolvm.io/increase"      = "${config.increase_gb}Gi"
-    "resize.topolvm.io/threshold"     = "${config.increase_threshold_percent}%"
-  } }
-}
-
 // This is needed b/c this can never
 // change without destroying the StatefulSet first
 resource "random_id" "sts_id" {
   byte_length = 8
-}
-
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
-module "constants" {
-  source = "../kube_constants"
 }
 
 module "pod_template" {
@@ -160,10 +142,10 @@ resource "kubectl_manifest" "stateful_set" {
           metadata = {
             name = name
             labels = {
-              pvc-group = "${var.namespace}.${var.name}.${name}"
+              "panfactum.com/pvc-group" = "${var.namespace}.${var.name}.${name}"
             }
             annotations = {
-              "resize.topolvm.io/initial-resize-group-by" = "pvc-group"
+              "resize.topolvm.io/initial-resize-group-by" = "panfactum.com/pvc-group"
             }
           }
           spec = {
@@ -188,20 +170,6 @@ resource "kubectl_manifest" "stateful_set" {
   ignore_fields = var.ignore_replica_count ? [
     "spec.replicas"
   ] : []
-}
-
-resource "kubernetes_config_map" "pvc_annotations" {
-  metadata {
-    name      = "${var.name}-pvc-config"
-    namespace = var.namespace
-    labels    = module.pod_template.labels
-  }
-  data = { for name, config in var.volume_mounts : "${var.namespace}.${var.name}.${name}" => yamlencode({
-    "velero.io/exclude-from-backups"  = tostring(!config.backups_enabled)
-    "resize.topolvm.io/storage_limit" = "${config.size_limit_gb != null ? config.size_limit_gb : 10 * config.initial_size_gb}Gi"
-    "resize.topolvm.io/increase"      = "${config.increase_gb}Gi"
-    "resize.topolvm.io/threshold"     = "${config.increase_threshold_percent}%"
-  }) }
 }
 
 resource "kubectl_manifest" "vpa" {
@@ -265,69 +233,22 @@ resource "kubectl_manifest" "pdb" {
   depends_on        = [kubectl_manifest.stateful_set]
 }
 
-/***************************************
-* PVC Annotation Provider
-*
-* This is required due to issues like this:
-* https://github.com/topolvm/pvc-autoresizer/issues/262
-***************************************/
-
-resource "kubernetes_role" "pvc_annotator" {
-  metadata {
-    name      = "pvc-annotate-${random_id.sts_id.hex}"
-    namespace = var.namespace
-    labels    = module.pvc_annotator.labels
-  }
-  rule {
-    api_groups = [""]
-    resources  = ["persistentvolumeclaims"]
-    verbs      = ["get", "update", "list"]
-  }
-}
-
-resource "kubernetes_role_binding" "pvc_annotator" {
-  metadata {
-    name      = "pvc-annotate-${random_id.sts_id.hex}"
-    namespace = var.namespace
-    labels    = module.pvc_annotator.labels
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = module.pvc_annotator.service_account_name
-    namespace = var.namespace
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "Role"
-    name      = kubernetes_role.pvc_annotator.metadata[0].name
-  }
-}
-
 module "pvc_annotator" {
-  source = "../kube_cron_job"
+  source = "../kube_pvc_annotator"
 
-  name                        = "pvc-annotate-${random_id.sts_id.hex}"
   namespace                   = var.namespace
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  spot_nodes_enabled          = true
-  arm_nodes_enabled           = true
-  burstable_nodes_enabled     = true
   vpa_enabled                 = var.vpa_enabled
-
-  cron_schedule = "*/15 * * * *"
-  containers = [{
-    name    = "pvc-annotate"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
-    command = [
-      "/bin/pf-set-pvc-annotations",
-      "--config=${jsonencode(local.pvc_annotations)}",
-      "--namespace=${var.namespace}"
-    ]
-    minimum_memory = 50
-  }]
-  starting_deadline_seconds = 60 * 5
-  active_deadline_seconds   = 60 * 5
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  config = { for name, config in var.volume_mounts : "${var.namespace}.${var.name}.${name}" => {
+    annotations = {
+      "velero.io/exclude-from-backups"  = tostring(!config.backups_enabled)
+      "resize.topolvm.io/storage_limit" = "${config.size_limit_gb != null ? config.size_limit_gb : 10 * config.initial_size_gb}Gi"
+      "resize.topolvm.io/increase"      = "${config.increase_gb}Gi"
+      "resize.topolvm.io/threshold"     = "${config.increase_threshold_percent}%"
+    }
+    labels = module.pod_template.labels
+  } }
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -335,8 +256,8 @@ module "pvc_annotator" {
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
 }
-

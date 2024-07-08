@@ -253,7 +253,7 @@ variable "controller_node_required" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "pod_management_policy" {

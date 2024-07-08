@@ -42,6 +42,7 @@ pf-buildkit-record-build --arch="$ARCH"
 ###########################################################
 ## Step 6: Build the image
 ###########################################################
+
 buildctl \
   build \
   --frontend=dockerfile.v0 \
