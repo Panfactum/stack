@@ -256,7 +256,6 @@ module "pvc_annotator" {
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate

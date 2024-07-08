@@ -192,11 +192,11 @@ module "buildkit" {
 
   volume_mounts = {
     buildkitd = {
-      initial_size_gb    = var.initial_storage_gb
-      storage_class_name = "ebs-standard"
-      access_modes       = ["ReadWriteOnce"]
-      increase_gb        = 25
-      mount_path         = "/home/user/.local/share/buildkit"
+      initial_size_gb = var.initial_storage_gb
+      storage_class   = "ebs-standard"
+      access_modes    = ["ReadWriteOnce"]
+      increase_gb     = 25
+      mount_path      = "/home/user/.local/share/buildkit"
     }
   }
 

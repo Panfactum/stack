@@ -23,6 +23,7 @@ provider "registry.opentofu.org/alekc/kubectl" {
     "zh:e8bb4c3d9f680977b560e9dec24662650f790259b2c1311ee07a72157f6492b3",
     "zh:f4772cfa0f9c73fdef008bb917cd268620009dc7ff270a4d819125c642b5acce",
   ]
+  constraints = "2.0.4"
 }
 
 provider "registry.opentofu.org/goauthentik/authentik" {
@@ -47,6 +48,7 @@ provider "registry.opentofu.org/goauthentik/authentik" {
     "zh:e298528c7c03d0e8385d5bf07586813690757e640b0693a7723e0e3ad067c8de",
     "zh:e955a3ecc443b341295b09e9fb6ca406d8107b21e1b7b8d723cba4099c7ae857",
   ]
+  constraints = "2024.4.2"
 }
 
 provider "registry.opentofu.org/hashicorp/kubernetes" {
