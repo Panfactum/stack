@@ -297,6 +297,12 @@ resource "helm_release" "vault" {
           size         = "${var.vault_storage_size_gb}Gi"
           mountPath    = "/vault/data"
           storageClass = "ebs-standard-retained"
+          labels = {
+            "panfactum.com/pvc-group" = "${local.namespace}.vault"
+          }
+          annotations = {
+            "resize.topolvm.io/initial-resize-group-by" = "panfactum.com/pvc-group"
+          }
         }
         affinity                  = module.util_server.affinity
         tolerations               = module.util_server.tolerations
@@ -350,26 +356,44 @@ resource "kubernetes_config_map" "dashboard" {
 }
 
 /***************************************
-* Vault Autoscaling
+* PVC Annotator
 ***************************************/
 
-resource "kubernetes_annotations" "vault_pvc" {
-  count       = 3
-  api_version = "v1"
-  kind        = "PersistentVolumeClaim"
-  metadata {
-    name      = "data-vault-${count.index}"
-    namespace = local.namespace
+module "pvc_annotator" {
+  source = "../kube_pvc_annotator"
+
+  namespace                   = local.namespace
+  vpa_enabled                 = var.vpa_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  config = {
+    "${local.namespace}.vault" = {
+      annotations = {
+        "resize.topolvm.io/storage_limit" = "${var.vault_storage_limit_gb != null ? var.vault_storage_limit_gb : 10 * var.vault_storage_size_gb}Gi"
+        "resize.topolvm.io/increase"      = "${var.vault_storage_increase_gb}Gi"
+        "resize.topolvm.io/threshold"     = "${var.vault_storage_increase_threshold_percent}%"
+      }
+      labels = module.util_server.labels
+    }
   }
-  annotations = {
-    "resize.topolvm.io/storage_limit" = "${var.vault_storage_limit_gb != null ? var.vault_storage_limit_gb : 10 * var.vault_storage_size_gb}Gi"
-    "resize.topolvm.io/increase"      = "${var.vault_storage_increase_gb}Gi"
-    "resize.topolvm.io/threshold"     = "${var.vault_storage_increase_threshold_percent}%"
-  }
-  force = true
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 
   depends_on = [helm_release.vault]
 }
+
+/***************************************
+* Vault Autoscaling
+***************************************/
 
 resource "kubectl_manifest" "vpa_csi" {
   count = var.vpa_enabled ? 1 : 0

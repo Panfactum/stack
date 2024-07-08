@@ -77,7 +77,7 @@ echo "$CONFIG" | jq -c 'to_entries[]' | while read -r ENTRY; do
   # Convert the annotations and labels object into the form required by the kubectl CLI
   RAW_ANNOTATIONS=$(echo "$ENTRY" | jq -r '.value.annotations')
   if [[ $RAW_ANNOTATIONS != "null" ]]; then
-    ANNOTATIONS=$(echo "$RAW_ANNOTATIONS" | jq -r 'to_entries | map(.key + "=" + .value) | join(",")')
+    ANNOTATIONS=$(echo "$RAW_ANNOTATIONS" | jq -r 'to_entries | map(.key + "=" + .value) | join(" ")')
   fi
   RAW_LABELS=$(echo "$ENTRY" | jq -r '.value.labels')
   if [[ $RAW_LABELS != "null" ]]; then
@@ -95,7 +95,8 @@ echo "$CONFIG" | jq -c 'to_entries[]' | while read -r ENTRY; do
   # Add metadata to each PVC
   for PVC in $PVCS; do
     if [[ $RAW_ANNOTATIONS != "null" ]]; then
-      kubectl annotate "$PVC" -n "$NAMESPACE" "$ANNOTATIONS" --overwrite
+      # shellcheck disable=SC2086
+      kubectl annotate "$PVC" -n "$NAMESPACE" $ANNOTATIONS --overwrite
     fi
     if [[ $RAW_LABELS != "null" ]]; then
       # shellcheck disable=SC2086

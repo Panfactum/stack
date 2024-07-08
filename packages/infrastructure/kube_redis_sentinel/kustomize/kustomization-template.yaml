@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# list of Resource Config to be Applied
+resources:
+  - all.yaml
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: "${NAME}"
+    patch: |-
+      - op: add
+        path: /spec/volumeClaimTemplates/0/metadata/labels
+        value: 
+          panfactum.com/pvc-group: ${PVC_GROUP}
+

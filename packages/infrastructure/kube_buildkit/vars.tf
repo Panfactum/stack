@@ -81,3 +81,9 @@ variable "vpa_enabled" {
   default     = false
 }
 
+variable "cache_clear_cron" {
+  description = "A cron expression for how often the BuildKit cache should be cleared."
+  type        = string
+  default     = "0 0 * * 0" # Sunday at midnight
+}
+

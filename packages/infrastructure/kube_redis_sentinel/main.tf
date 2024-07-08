@@ -23,6 +23,12 @@ terraform {
   }
 }
 
+locals {
+  customization_hash = md5(join("", [
+    for filename in sort(fileset(path.module, "kustomize/*")) : filesha256("${path.module}/${filename}")
+  ]))
+}
+
 module "pull_through" {
   source                     = "../aws_ecr_pull_through_cache_addresses"
   pull_through_cache_enabled = var.pull_through_cache_enabled
@@ -97,7 +103,7 @@ resource "kubernetes_secret" "superuser" {
 resource "helm_release" "redis" {
   namespace       = var.namespace
   name            = random_id.id.hex
-  repository      = "https://charts.bitnami.com/bitnami"
+  repository      = "oci://registry-1.docker.io/bitnamicharts"
   chart           = "redis"
   version         = var.helm_version
   recreate_pods   = false
@@ -121,6 +127,7 @@ resource "helm_release" "redis" {
         "panfactum.com/vault-mount"    = "db/${var.namespace}-${random_id.id.hex}"
         "panfactum.com/service"        = "${random_id.id.hex}-master.${var.namespace}"
         "panfactum.com/service-port"   = "6379"
+        "customization-hash"           = local.customization_hash
       }
 
       global = {
@@ -236,6 +243,12 @@ resource "helm_release" "redis" {
             whenScaled  = "Delete"
             whenDeleted = "Delete"
           }
+          labels = {
+            "panfactum.com/pvc-group" = "${var.namespace}.${random_id.id.hex}"
+          }
+          annotations = {
+            "resize.topolvm.io/initial-resize-group-by" = "panfactum.com/pvc-group"
+          }
         }
         resources = {
           requests = {
@@ -307,23 +320,15 @@ resource "helm_release" "redis" {
       }
     })
   ]
-}
 
-resource "kubernetes_annotations" "redis_pvc" {
-  count       = var.replica_count
-  api_version = "v1"
-  kind        = "PersistentVolumeClaim"
-  metadata {
-    name      = "redis-data-${random_id.id.hex}-node-${count.index}"
-    namespace = var.namespace
+  # Required due to this issue: https://github.com/bitnami/charts/issues/27479
+  postrender {
+    binary_path = "${path.module}/kustomize/kustomize.sh"
+    args = [
+      "${random_id.id.hex}-node",
+      "${var.namespace}.${random_id.id.hex}"
+    ]
   }
-  annotations = {
-    "resize.topolvm.io/storage_limit" = "${var.persistence_storage_limit_gb != null ? var.persistence_storage_limit_gb : var.persistence_size_gb * 10}Gi"
-    "resize.topolvm.io/increase"      = "${var.persistence_storage_increase_gb}Gi"
-    "resize.topolvm.io/threshold"     = "${var.persistence_storage_increase_threshold_percent}%"
-  }
-  force      = true
-  depends_on = [helm_release.redis]
 }
 
 resource "kubectl_manifest" "pdb" {
@@ -379,6 +384,36 @@ resource "kubectl_manifest" "vpa" {
   depends_on        = [helm_release.redis]
 }
 
+module "pvc_annotator" {
+  source = "../kube_pvc_annotator"
+
+  namespace                   = var.namespace
+  vpa_enabled                 = var.vpa_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  config = {
+    "${var.namespace}.${random_id.id.hex}" = {
+      annotations = {
+        "velero.io/exclude-from-backups"  = tostring(!var.persistence_backups_enabled)
+        "resize.topolvm.io/storage_limit" = "${var.persistence_storage_limit_gb != null ? var.persistence_storage_limit_gb : var.persistence_size_gb * 10}Gi"
+        "resize.topolvm.io/increase"      = "${var.persistence_storage_increase_gb}Gi"
+        "resize.topolvm.io/threshold"     = "${var.persistence_storage_increase_threshold_percent}%"
+      }
+      labels = module.util.labels
+    }
+  }
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
 
 /***************************************
 * Vault Authentication

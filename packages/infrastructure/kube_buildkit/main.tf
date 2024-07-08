@@ -25,7 +25,12 @@ locals {
 
   port = 1234
 
-  workflow_labels = merge(
+  scale_to_zero_labels = merge(
+    module.scale_to_zero.labels,
+    { "panfactum.com/module" = "kube_buildkit" }
+  )
+
+  cache_clear_labels = merge(
     module.scale_to_zero.labels,
     { "panfactum.com/module" = "kube_buildkit" }
   )
@@ -325,7 +330,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "autoscaler" {
 /***************************************
 * Buildkit Scale-To-Zero
 *
-* This workflow will periodically attempt to scale
+* This CronJob will periodically attempt to scale
 * the BuildKit StatefulSet to 0 if there are no
 * recent builds
 ***************************************/
@@ -334,7 +339,7 @@ resource "kubernetes_role_binding" "scale_to_zero" {
   metadata {
     name      = "scale-to-zero"
     namespace = local.namespace
-    labels    = local.workflow_labels
+    labels    = local.scale_to_zero_labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -368,6 +373,89 @@ module "scale_to_zero" {
       "/bin/pf-buildkit-scale-down",
       "--timeout",
       tostring(var.scale_down_delay_seconds)
+    ]
+    minimum_memory = 50
+  }]
+  starting_deadline_seconds = 60 * 5
+  active_deadline_seconds   = 60 * 5
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+/***************************************
+* Buildkit Cache Clear
+*
+* This CronJob will periodically reset the build cache
+* to remove cache items that are no longer in use
+***************************************/
+
+resource "kubernetes_role" "cache_clear" {
+  metadata {
+    name      = "cache-clear"
+    namespace = local.namespace
+    labels    = local.cache_clear_labels
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/exec"]
+    verbs      = ["create"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["persistentvolumeclaims"]
+    verbs      = ["get", "list", "delete"]
+  }
+}
+
+resource "kubernetes_role_binding" "cache_clear" {
+  metadata {
+    name      = "cache-clear"
+    namespace = local.namespace
+    labels    = local.cache_clear_labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.cache_clear.service_account_name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.cache_clear.metadata[0].name
+  }
+}
+
+module "cache_clear" {
+  source = "../kube_cron_job"
+
+  name                        = "cache-clear"
+  namespace                   = local.namespace
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  spot_nodes_enabled          = true
+  arm_nodes_enabled           = true
+  burstable_nodes_enabled     = true
+  vpa_enabled                 = var.vpa_enabled
+
+  cron_schedule = var.cache_clear_cron
+  containers = [{
+    name    = "cache-clear"
+    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
+    version = module.constants.panfactum_image_version
+    command = [
+      "/bin/pf-buildkit-clear-cache",
     ]
     minimum_memory = 50
   }]

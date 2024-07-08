@@ -39,6 +39,12 @@ variable "persistence_storage_increase_gb" {
   default     = 1
 }
 
+variable "persistence_backups_enabled" {
+  description = "Whether to enable backups of the Redis durable storage."
+  type        = bool
+  default     = true
+}
+
 variable "replica_count" {
   description = "The number of redis replicas to deploy"
   type        = number
