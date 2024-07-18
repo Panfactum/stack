@@ -101,7 +101,13 @@ locals {
 
   node_class_template = {
     amiFamily = "Bottlerocket"
-    subnetSelectorTerms = [
+    subnetSelectorTerms = length(var.node_subnets) > 0 ? [for subnetName in var.node_subnets :
+      {
+        tags = {
+          "Name" = subnetName
+        }
+      }
+      ] : [
       {
         tags = {
           "karpenter.sh/discovery" = var.cluster_name
