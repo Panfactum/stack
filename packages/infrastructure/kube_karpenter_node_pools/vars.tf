@@ -34,3 +34,9 @@ variable "node_labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "node_subnets" {
+  description = "List of subnet names to deploy karpenter nodes into."
+  type        = set(string)
+  default     = []
+}
