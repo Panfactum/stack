@@ -31,15 +31,6 @@ usage() {
   exit 1
 }
 
-# This is our hacky way to capture arguments that should be passed through to
-# buildctl. This isn't pretty but bash doesn't have many options for this.
-PASS_THRU=()
-for ARG in "$@"; do
-  if [[ ! $ARG =~ -[trcf]=.+ ]] && [[ ! $ARG =~ --(repo|tag|file|context)=.+ ]]; then
-    PASS_THRU+=("$ARG")
-  fi
-done
-
 # Parse command line arguments but don't error b/c we allow
 # arbitrary arguments as we pass them through to buildctl
 set +e
@@ -77,6 +68,8 @@ while true; do
     ;;
   esac
 done
+
+REST="$@"
 
 if [[ -z $REPO ]]; then
   echo "Error: --repo must be specified" >&2
@@ -220,7 +213,7 @@ function build() {
     --export-cache "type=s3,region=$CACHE_BUCKET_REGION,bucket=$CACHE_BUCKET,name=$REGISTRY/$REPO" \
     --import-cache "type=s3,region=$CACHE_BUCKET_REGION,bucket=$CACHE_BUCKET,name=$REGISTRY/$REPO" \
     --progress plain \
-    "${PASS_THRU[@]}" \
+    "${REST}" \
     2>&1 | sed "s/^/$1: /" 1>&2 &
 
   # Save the PID for cleanup and waiting
