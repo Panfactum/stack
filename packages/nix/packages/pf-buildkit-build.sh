@@ -69,8 +69,6 @@ while true; do
 	esac
 done
 
-REST="$@"
-
 if [[ -z $REPO ]]; then
 	echo "Error: --repo must be specified" >&2
 	exit 1
@@ -213,7 +211,7 @@ function build() {
 		--export-cache "type=s3,region=$CACHE_BUCKET_REGION,bucket=$CACHE_BUCKET,name=$REGISTRY/$REPO" \
 		--import-cache "type=s3,region=$CACHE_BUCKET_REGION,bucket=$CACHE_BUCKET,name=$REGISTRY/$REPO" \
 		--progress plain \
-		"${REST}" \
+		$@ \
 		2>&1 | sed "s/^/$1: /" 1>&2 &
 
 	# Save the PID for cleanup and waiting
