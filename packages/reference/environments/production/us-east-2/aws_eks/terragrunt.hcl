@@ -27,7 +27,7 @@ inputs = {
   service_cidr          = "172.20.0.0/16"
   dns_service_ip        = "172.20.0.10"
 
-  bootstrapping_mode_enabled = false # Set this to true when you are completing the bootstrap guide
+  bootstrap_mode_enabled = false # Set this to true when you are completing the bootstrap guide
   node_subnets = [
     "PRIVATE_A",
     "PRIVATE_B",
