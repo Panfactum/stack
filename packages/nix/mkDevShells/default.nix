@@ -57,12 +57,6 @@
       in {
         env = with panfactumResolvedPkgs.lib; {
           CI = mkOverride 1001 "false"; # true iff running in a CI environment
-          PF_AWS_DIR = mkOverride 1001 ".aws";
-          PF_SSH_DIR = mkOverride 1001 ".ssh";
-          PF_KUBE_DIR = mkOverride 1001 ".kube";
-          PF_ENVIRONMENTS_DIR = mkOverride 1001 "environments";
-          PF_IAC_DIR = mkOverride 1001 "infrastructure";
-          PF_BUILDKIT_DIR = mkOverride 1001 ".buildkit";
           LOCAL_DEV_NAMESPACE = mkOverride 1001 "@INVALID@";
         };
 

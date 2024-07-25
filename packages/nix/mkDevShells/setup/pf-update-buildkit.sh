@@ -4,10 +4,9 @@ set -eo pipefail
 
 # Purpose: Adds the BuildKit configuration files
 
-if [ -z "${PF_BUILDKIT_DIR}" ]; then
-  echo "Error: PF_BUILDKIT_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
+ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
 
 if [[ $1 == "-b" ]] || [[ $1 == "--build" ]]; then
   BUILD="1"
@@ -19,7 +18,7 @@ fi
 ## Step 1: Copy the static files
 ############################################################
 
-DESTINATION=$(realpath "$DEVENV_ROOT/$PF_BUILDKIT_DIR")
+DESTINATION=$BUILDKIT_DIR
 SOURCE=$(dirname "$(dirname "$(realpath "$0")")")/files/buildkit
 
 mkdir -p "$DESTINATION"
@@ -37,14 +36,9 @@ BUILDKIT_FILE="$DESTINATION/buildkit.json"
 if [[ $BUILD == "1" ]]; then
   if [[ -f $CONFIG_FILE ]]; then
 
-    if [[ -z ${PF_ENVIRONMENTS_DIR} ]]; then
-      echo "Error: PF_ENVIRONMENTS_DIR is not set. Add it to your devenv.nix file." >&2
-      exit 1
-    fi
-
     MODULE=$(yq -r ".module" "$CONFIG_FILE")
     BASTION=$(yq -r ".bastion" "$CONFIG_FILE")
-    MODULE_PATH="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/$MODULE"
+    MODULE_PATH="$ENVIRONMENTS_DIR/$MODULE"
 
     echo -e "Extracting buildkit configuration from $MODULE...\n" 1>&2
     MODULE_OUTPUT="$(terragrunt output --json --terragrunt-working-dir="$MODULE_PATH")"
@@ -92,7 +86,7 @@ pf-get-buildkit-user-state-hash >"$DESTINATION/state.user.lock"
 ## Step 4: Final checks
 ############################################################
 
-echo -e "BuildKit config files in $PF_BUILDKIT_DIR were updated.\n" 1>&2
+echo -e "BuildKit config files in $BUILDKIT_DIR were updated.\n" 1>&2
 
 if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
   pf-check-repo-setup

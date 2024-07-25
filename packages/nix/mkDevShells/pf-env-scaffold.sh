@@ -14,22 +14,19 @@ usage() {
   exit 1
 }
 
-if [[ -z ${PF_ENVIRONMENTS_DIR} ]]; then
-  echo "Error: PF_ENVIRONMENTS_DIR is not set. Add it to your devenv.nix file." >&2
+REPO_VARIABLES=$(pf-get-repo-variables)
+ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
+AWS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.aws_dir')
+REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
+
+AWS_CONFIG_FILE="$AWS_DIR/config"
+
+if [[ ! -f $AWS_CONFIG_FILE ]]; then
+  echo "Error: AWS CLI config file not found at $AWS_DIR/config" >&2
   exit 1
 fi
 
-if [[ -z ${PF_AWS_DIR} ]]; then
-  echo "Error: PF_AWS_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
-
-if [[ ! -f "$DEVENV_ROOT/$PF_AWS_DIR/config" ]]; then
-  echo "Error: AWS CLI config file not found at $DEVENV_ROOT/$PF_AWS_DIR/config" >&2
-  exit 1
-fi
-
-if [[ ! -d "$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR" ]]; then
+if [[ ! -d $ENVIRONMENTS_DIR ]]; then
   echo "Error: Environments directory does not exist. Run pf-update to scaffold repository." >&2
   exit 1
 fi
@@ -167,8 +164,8 @@ declare -A AWS_ACCOUNT_IDS
 declare -A AWS_PROFILES
 
 # Extracts the available AWS profiles from the config file
-if ! AVAILABLE_AWS_PROFILES=$(grep -oP '(?<=\[profile ).*?(?=\])' "$DEVENV_ROOT/$PF_AWS_DIR/config"); then
-  echo -e "No AWS profiles available in $DEVENV_ROOT/$PF_AWS_DIR/config. Please add one or validate the config file syntax.\n" >&2
+if ! AVAILABLE_AWS_PROFILES=$(grep -oP '(?<=\[profile ).*?(?=\])' "$AWS_CONFIG_FILE"); then
+  echo -e "No AWS profiles available in $AWS_CONFIG_FILE. Please add one or validate the config file syntax.\n" >&2
   exit 1
 fi
 
@@ -200,7 +197,7 @@ done
 ####################################################################
 
 # Search for the string and extract the capture group
-FLAKE_FILE="$DEVENV_ROOT/flake.nix"
+FLAKE_FILE="$REPO_ROOT/flake.nix"
 if ! PF_VERSION=$(grep -oiP 'panfactum/stack/\K([-\.0-9a-zA-Z]+)' "$FLAKE_FILE"); then
   echo "Warning: No stack version found in $FLAKE_FILE. Using 'main'" >&2
   PF_VERSION="main"
@@ -231,9 +228,9 @@ select_secondary_region() {
   echo "$SELECTED"
 }
 
-GLOBAL_FILE="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/global.yaml"
+GLOBAL_FILE="$ENVIRONMENTS_DIR/global.yaml"
 if [[ ! -f $GLOBAL_FILE ]]; then
-  cat >"$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/global.yaml" <<EOF
+  cat >"$GLOBAL_FILE" <<EOF
 # For reference, see https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables
 EOF
 fi
@@ -241,7 +238,7 @@ fi
 for ENV in "${ENVIRONMENTS[@]}"; do
 
   # Create environment folder
-  ENV_DIR="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/$ENV"
+  ENV_DIR="$ENVIRONMENTS_DIR/$ENV"
   mkdir -p "$ENV_DIR"
 
   # Generate random string for tf_state_bucket
@@ -298,4 +295,4 @@ EOF
   done
 done
 
-echo -e "Environment scaffolding complete. See configuration in $DEVENV_ROOT/$PF_ENVIRONMENTS_DIR.\n" >&2
+echo -e "Environment scaffolding complete. See configuration in $ENVIRONMENTS_DIR.\n" >&2

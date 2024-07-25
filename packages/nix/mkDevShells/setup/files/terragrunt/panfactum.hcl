@@ -63,9 +63,12 @@ locals {
   pf_stack_source              = local.pf_stack_version == "local" ? ("../../../../../infrastructure//${local.pf_stack_module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.pf_stack_module}?ref=${local.pf_stack_version_commit_hash}"
 
   # Repo metadata
-  repo_url       = get_env("PF_REPO_URL")
-  repo_name      = get_env("PF_REPO_NAME")
-  primary_branch = get_env("PF_REPO_PRIMARY_BRANCH")
+  repo_vars      = jsondecode(run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-repo-variables"))
+  repo_url       = local.repo_vars.repo_url
+  repo_name      = local.repo_vars.repo_name
+  repo_root      = local.repo_vars.repo_root
+  iac_dir        = local.repo_vars.iac_dir_from_root
+  primary_branch = local.repo_vars.repo_primary_branch
 
   # Determine the module "version" (git ref to checkout)
   # Use the following priority ordering:
@@ -78,10 +81,8 @@ locals {
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
   use_local_iac = contains(["local", local.primary_branch], local.version)
-  root_dir      = get_env("DEVENV_ROOT", get_repo_root())
-  iac_dir       = get_env("PF_IAC_DIR")
-  iac_path      = "${startswith(local.iac_dir, "/") ? local.iac_dir : "/${local.iac_dir}"}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
-  source        = local.use_local_iac ? "${local.root_dir}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
+  iac_path      = "/${local.iac_dir}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
+  source        = local.use_local_iac ? "${local.repo_root}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
 
   # Folder of shared snippets to generate
   provider_folder = "providers"

@@ -4,15 +4,9 @@ set -eo pipefail
 
 # Purpose: Sets up kubeconfig for use in connecting with kubernetes clusters
 
-if [[ -z ${PF_KUBE_DIR} ]]; then
-  echo "Error: PF_KUBE_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
-
-if [[ -z ${PF_AWS_DIR} ]]; then
-  echo "Error: PF_AWS_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+KUBE_DIR=$(echo "$REPO_VARIABLES" | jq -r '.kube_dir')
+ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
 
 if [[ $1 == "-b" ]] || [[ $1 == "--build" ]]; then
   BUILD_CONFIG="1"
@@ -24,7 +18,7 @@ fi
 ## Step 1: Copy the static files
 ############################################################
 
-destination=$(realpath "$DEVENV_ROOT/$PF_KUBE_DIR")
+destination=$KUBE_DIR
 source=$(dirname "$(dirname "$(realpath "$0")")")/files/kube
 
 mkdir -p "$destination"
@@ -34,8 +28,8 @@ rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source"/ "$destination"/
 ############################################################
 ## Step 2: Build the cluster_info file
 ############################################################
-CONFIG_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/config.yaml"
-CLUSTER_INFO_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/cluster_info"
+CONFIG_FILE="$KUBE_DIR/config.yaml"
+CLUSTER_INFO_FILE="$KUBE_DIR/cluster_info"
 
 if [[ $BUILD_CONFIG -eq 1 ]]; then
 
@@ -60,9 +54,9 @@ if [[ $BUILD_CONFIG -eq 1 ]]; then
 
       # Extract config values
       MODULE=$(yq -r ".clusters[$i].module" "$CONFIG_FILE")
-      MODULE_PATH="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/$MODULE"
+      MODULE_PATH="$ENVIRONMENTS_DIR/$MODULE"
 
-      echo "Adding cluster at $PF_ENVIRONMENTS_DIR/$MODULE... " >&2
+      echo "Adding cluster at $ENVIRONMENTS_DIR/$MODULE... " >&2
 
       if [[ ! -d $MODULE_PATH ]]; then
         echo "Error: No module at $MODULE_PATH!" >&2
@@ -77,7 +71,7 @@ if [[ $BUILD_CONFIG -eq 1 ]]; then
       CLUSTER_REGION="$(echo "$MODULE_OUTPUT" | jq -r '.cluster_region.value')"
 
       # Save the CA data
-      CA_DATA_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/$CLUSTER_NAME.crt"
+      CA_DATA_FILE="$KUBE_DIR/$CLUSTER_NAME.crt"
       echo "$CA_DATA" >"$CA_DATA_FILE"
 
       # Hash the CA data
@@ -98,17 +92,17 @@ if [[ $BUILD_CONFIG -eq 1 ]]; then
 fi
 
 # Save the state hash
-pf-get-kube-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.lock"
+pf-get-kube-state-hash >"$KUBE_DIR/state.lock"
 
 ############################################################
 ## Step 3: Dynamically configure user-specific kubeconfig
 ############################################################
 
-USER_CONFIG_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/config.user.yaml"
+USER_CONFIG_FILE="$KUBE_DIR/config.user.yaml"
 
 if [[ -f $USER_CONFIG_FILE ]]; then
   if [[ -f $CLUSTER_INFO_FILE ]]; then
-    echo -e "\nBuilding kubeconfig file at $PF_KUBE_DIR/config...\n" >&2
+    echo -e "\nBuilding kubeconfig file at $KUBE_DIR/config...\n" >&2
 
     # Count the number of clusters
     NUMBER_OF_CLUSTERS=$(yq '.clusters | length' "$USER_CONFIG_FILE")
@@ -148,7 +142,7 @@ if [[ -f $USER_CONFIG_FILE ]]; then
         exit 1
       fi
 
-      CA_DATA_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/$CLUSTER_NAME.crt"
+      CA_DATA_FILE="$KUBE_DIR/$CLUSTER_NAME.crt"
 
       if [[ ! -f $CA_DATA_FILE ]]; then
         echo "Error: No CA cert found at $CA_DATA_FILE. Have a superuser run 'pf-update-kube --build' to regenerate this file." >&2
@@ -183,11 +177,11 @@ if [[ -f $USER_CONFIG_FILE ]]; then
 fi
 
 # Save the state hash
-pf-get-kube-user-state-hash >"$DEVENV_ROOT/$PF_KUBE_DIR/state.user.lock"
+pf-get-kube-user-state-hash >"$KUBE_DIR/state.user.lock"
 
 echo -e "-----------------------------------------------------------" >&2
 
-echo -e "\nKubernetes config files in $PF_KUBE_DIR were updated.\n" 1>&2
+echo -e "\nKubernetes config files in $KUBE_DIR were updated.\n" 1>&2
 
 if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
   pf-check-repo-setup

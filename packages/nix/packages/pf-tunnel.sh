@@ -16,6 +16,9 @@ source pf-check-ssh
 # Step 1: Variable parsing
 ####################################################################
 
+REPO_VARIABLES=$(pf-get-repo-variables)
+SSH_DIR=$(echo "$REPO_VARIABLES" | jq -r '.ssh_dir')
+
 # Initialize our own variables:
 BASTION=""
 LOCAL_PORT=""
@@ -26,7 +29,7 @@ usage() {
   echo "Usage: pf-tunnel -b <bastion> -r <remote-address> [-l <local-port>]" >&2
   echo "       pf-tunnel --bastion <bastion> --remote-address <remote-address> [--local-port <local-port>]" >&2
   echo "" >&2
-  echo "<bastion>: The name of the bastion to use as listed in $PF_SSH_DIR/config.yaml." >&2
+  echo "<bastion>: The name of the bastion to use as listed in $SSH_DIR/config.yaml." >&2
   echo "" >&2
   echo "<remote-address>: The remote address to connect with. Must contain the hostname and the port. (example.com:443)" >&2
   echo "" >&2
@@ -94,7 +97,7 @@ fi
 # Step 3: Verify that the user has keyfiles in this repo
 ####################################################################
 
-KEY_FILE="$DEVENV_ROOT/$PF_SSH_DIR/id_ed25519_$BASTION"
+KEY_FILE="$SSH_DIR/id_ed25519_$BASTION"
 PUBLIC_KEY_FILE="$KEY_FILE.pub"
 SIGNED_PUBLIC_KEY_FILE="${KEY_FILE}_signed.pub"
 

@@ -11,7 +11,10 @@ if [[ -z $CONTEXT ]]; then
   exit 1
 fi
 
-KUBE_USER_CONFIG_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/config.user.yaml"
+REPO_VARIABLES=$(pf-get-repo-variables)
+KUBE_DIR=$(echo "$REPO_VARIABLES" | jq -r '.kube_dir')
+KUBE_USER_CONFIG_FILE="$KUBE_DIR/config.user.yaml"
+
 if [[ ! -f $KUBE_USER_CONFIG_FILE ]]; then
   echo "Error: $KUBE_USER_CONFIG_FILE does not exist. It is required to set this up before interacting with BuildKit." >&2
   exit 1

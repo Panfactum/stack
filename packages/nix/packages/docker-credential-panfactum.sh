@@ -14,15 +14,8 @@ REGISTRY="$(</dev/stdin)"
 # Step 1: Validation
 ####################################################################
 
-if [[ -z ${PF_BUILDKIT_DIR} ]]; then
-  echo "Error: PF_BUILDKIT_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
-
-if [[ -z ${PF_KUBE_DIR} ]]; then
-  echo "Error: PF_KUBE_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
 
 AWS_PUBLIC_ECR=0
 if [[ $REGISTRY == "public.ecr.aws" ]]; then
@@ -35,7 +28,7 @@ else
   exit 1
 fi
 
-BUILDKIT_CONFIG_FILE="$DEVENV_ROOT/$PF_BUILDKIT_DIR/buildkit.json"
+BUILDKIT_CONFIG_FILE="$BUILDKIT_DIR/buildkit.json"
 
 if [[ ! -f $BUILDKIT_CONFIG_FILE ]]; then
   echo "Error: $BUILDKIT_CONFIG_FILE does not exist. A superuser must run 'pf-update-buildkit --build' to generate."
@@ -53,7 +46,7 @@ AWS_PROFILE=$(pf-get-aws-profile-for-kube-context "$CONTEXT")
 # Step 2: Command Execution
 ####################################################################
 
-CREDS_FILE="$DEVENV_ROOT/$PF_BUILDKIT_DIR/creds.json"
+CREDS_FILE="$BUILDKIT_DIR/creds.json"
 
 if [[ $COMMAND == "get" ]]; then
 
@@ -77,8 +70,8 @@ if [[ $COMMAND == "get" ]]; then
       echo '{}' >"$CREDS_FILE"
     fi
     jq --arg registry "$REGISTRY" --arg token "$1" --arg expires "$(date -d "4 hours" +%s)" '.[$registry] = {"token": $token, "expires": $expires}' "$CREDS_FILE" \
-      >"$DEVENV_ROOT/$PF_BUILDKIT_DIR/tmp.json" &&
-      mv "$DEVENV_ROOT/$PF_BUILDKIT_DIR/tmp.json" "$CREDS_FILE"
+      >"$BUILDKIT_DIR/tmp.json" &&
+      mv "$BUILDKIT_DIR/tmp.json" "$CREDS_FILE"
   }
 
   # Attempts to retrieve a token from the filesystem cache
@@ -122,6 +115,6 @@ if [[ $COMMAND == "get" ]]; then
   output "$TOKEN"
 elif [[ $COMMAND == "erase" ]]; then
   jq --arg registry "$REGISTRY" '.[$registry] = {}' "$CREDS_FILE" \
-    >"$DEVENV_ROOT/$PF_BUILDKIT_DIR/tmp.json" &&
-    mv "$DEVENV_ROOT/$PF_BUILDKIT_DIR/tmp.json" "$CREDS_FILE"
+    >"$BUILDKIT_DIR/tmp.json" &&
+    mv "$BUILDKIT_DIR/tmp.json" "$CREDS_FILE"
 fi

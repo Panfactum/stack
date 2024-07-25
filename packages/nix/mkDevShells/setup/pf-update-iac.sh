@@ -6,10 +6,9 @@ set -eo pipefail
 #  - Applies the template snippets
 #  - Updates module refs
 
-if [[ -z ${PF_IAC_DIR} ]]; then
-  echo "Error: PF_IAC_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+IAC_DIR=$(echo "$REPO_VARIABLES" | jq -r '.iac_dir')
+REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
 
 ###########################################################
 # Step 1: Perform replacements
@@ -43,7 +42,7 @@ REPO="https://github.com/panfactum/stack.git"
 function get_panfactum_version() {
   set +eo pipefail
   if [[ -z $__PANFACTUM_VERSION_REF ]]; then
-    __PANFACTUM_VERSION_REF=$(jq -r '.nodes.panfactum.locked.rev' "$DEVENV_ROOT/flake.lock")
+    __PANFACTUM_VERSION_REF=$(jq -r '.nodes.panfactum.locked.rev' "$REPO_ROOT/flake.lock")
     if [[ $__PANFACTUM_VERSION_REF == "null" ]]; then
       local AVAILABLE_TAGS
       local GIT_REF
@@ -81,7 +80,7 @@ if [[ $PF_SKIP_IAC_REF_UPDATE != 1 && $PF_USE_LOCAL_SUBMODULES != 1 ]]; then
   get_panfactum_version
 fi
 
-for MODULE_DIR in "$PF_IAC_DIR"/*; do
+for MODULE_DIR in "$IAC_DIR"/*; do
   if [[ -d $MODULE_DIR ]]; then
     MODULE_NAME="$(basename "$MODULE_DIR")"
     for FILE_PATH in "$MODULE_DIR"/*; do

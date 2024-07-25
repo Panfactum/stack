@@ -23,7 +23,7 @@ const SIDENAV_SECTIONS = [
     path: '/configuration',
     sub: [
       {
-        text: 'Devenv Variables',
+        text: 'Repository Variables',
         path: '/repo-variables'
       },
       {

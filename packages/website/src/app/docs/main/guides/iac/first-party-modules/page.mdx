@@ -268,7 +268,7 @@ infrastructure has been deployed.
 In our experience, mistakes in managing this dependency graph causes a significant number (>25%) of all major bugs and outages
 in most software organizations. It benefits you to keep this as simple as possible.
 
-### Using `version` for Application Code
+### Using the IaC Version for Application Code
 
 By default, `version` only refers to which version of the module to source. However, you may also want
 to use this to control which version of your application code to deploy as well (for example which container image tag to
@@ -284,6 +284,8 @@ inputs = {
 ```
 
 This works especially well in a monorepo setup.
+
+*If you need the commit hash for a version, use `include.panfactum.locals.version_hash` instead*.
 
 ### Rolling Deployments in Integration Environments
 

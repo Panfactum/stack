@@ -101,7 +101,8 @@ fi
 ####################################################################
 # Step 2: Extract variables from the BuildKit configuration
 ####################################################################
-BUILDKIT_DIR="$DEVENV_ROOT/$PF_BUILDKIT_DIR"
+REPO_VARIABLES=$(pf-get-repo-variables)
+BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
 BUILDKIT_CONFIG_FILE="$BUILDKIT_DIR/buildkit.json"
 
 if ! [[ -f $BUILDKIT_CONFIG_FILE ]]; then

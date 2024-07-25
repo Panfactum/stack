@@ -9,6 +9,24 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* [Repository variables](/docs/edge/reference/configuration/repo-variables) must now be defined in a `panfactum.yaml`
+  file located at the root of your repository instead of in your `devenv.nix`. Additionally, the variables names are no longer
+  prefixed with `PF_` and are lowercase.
+
+  For example, `env.PF_REPO_NAME` in `devenv.nix` should now be defined at `repo_name` in `panfactum.yaml`.
+
+  This change was made to make it easier to reference these values outside of local development contexts such as within
+  CI pipelines where `devenv.nix` isn't loaded.
+
+### Added
+
+* Adds `pf-get-repo-variables` which prints a JSON payload of all repository configuration variables with the appropriate
+  defaults set.
+
 ## edge.24-07-08
 
 ### Breaking Changes
@@ -31,21 +49,30 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   built a workaround to this ([kube\_pvc\_annotator](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator))
   and incorporated it in various Panfactum modules. Unfortunately, incorporating this enhancement requires redeploying StatefulSets.
 
-  The following StatefulSets need to be deleted **in this order** AND **with `kubectl delete --cascade=orphan`** AND **immediately restored**
-  with a subsequent `terragrunt apply` to their defining module:
+  To complete this upgrade, perform the following steps:
 
-  * The Vault StatefulSet created by `kube_vault`
-  * The Redis cluster for Authentik created by `kube_authentik`
-  * The BuildKit StatefulSets created by `kube_buildkit`
-  * Any StatefulSets you have provisioned with [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
-  * Any Redis clusters you have provisioned with [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+  1. Create a Velero backup of the cluster by running `velero create backup -w <backup_name>` to recover in case of mistakes.
 
-  As long as you use `--cascade=orphan` and take care to minimize the time between the `kubectl delete` and `terragrunt apply`,
-  there will not be any downtime during this operation.
+  2. The following StatefulSets need to be deleted **in this order** AND **with `kubectl delete --cascade=orphan`** AND **immediately restored**
+     with a subsequent `terragrunt apply` to their defining module:
 
-  After completing this operation, you need to delete the backing PVCs from each module one at a time by deleting
-  the PVC and then deleting its bound pod. The controller will then automatically provision a new PVC with the correct labels and annotations
-  to take advantage of the new functionality. As long as you proceed one at a time, this will not cause any downtime.
+     * The Vault StatefulSet created by `kube_vault`
+     * The Redis cluster StatefulSet for Authentik created by `kube_authentik`
+     * The BuildKit StatefulSets created by `kube_buildkit`
+     * Any StatefulSets you have provisioned with [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+     * Any Redis clusters StatefulSets you have provisioned with [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+
+     As long as you use `--cascade=orphan` and take care to minimize the time between the `kubectl delete` and `terragrunt apply`,
+     there will not be any downtime during this operation.
+
+  3. After completing this operation, you need to delete the backing PVCs from each module **one at a time** by deleting
+     the PVC and then deleting its bound pod. The controller will then automatically provision a new PVC with the correct labels and annotations
+     to take advantage of the new functionality.
+
+     After deleting each pod, ensure that a new pod is automatically provisioned and becomes healthy **before** proceeding to the next.
+     As long as you proceed one at a time, this will not cause any downtime or data loss.
+
+  4. Delete the Velero backup you created in step 1 by running `velero delete backup <backup_name>`.
 
 ### Added
 

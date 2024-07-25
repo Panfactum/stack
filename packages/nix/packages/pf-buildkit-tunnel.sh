@@ -68,8 +68,9 @@ fi
 ####################################################################
 # Step 2: Get the cluster for BuildKit
 ####################################################################
-
-BUILDKIT_CONFIG_FILE="$DEVENV_ROOT/$PF_BUILDKIT_DIR/buildkit.json"
+REPO_VARIABLES=$(pf-get-repo-variables)
+BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
+BUILDKIT_CONFIG_FILE="$BUILDKIT_DIR/buildkit.json"
 
 if ! [[ -f $BUILDKIT_CONFIG_FILE ]]; then
   echo "No BuildKit configuration file exists at $BUILDKIT_CONFIG_FILE. A superuser must create one by running 'pf-update-buildkit --build'." >&2

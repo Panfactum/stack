@@ -170,7 +170,10 @@ words: [
   "kaniko",
   "kubelets",
   "buildctl",
-  "statefulset"
+  "statefulset",
+  "runbooks",
+  "dashboarding",
+  "callouts"
 ]
 languageSettings:
   - languageId: markdown,mdx

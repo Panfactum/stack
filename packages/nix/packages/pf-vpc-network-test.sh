@@ -8,12 +8,10 @@ set -eo pipefail
 # Step 0: Validation
 ####################################################################
 
-if [[ -z ${PF_AWS_DIR} ]]; then
-  echo "Error: PF_AWS_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+AWS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.aws_dir')
+AWS_CONFIG_FILE="$AWS_DIR/config"
 
-AWS_CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config"
 if ! [[ -f $AWS_CONFIG_FILE ]]; then
   echo "Error: No AWS config file found at $AWS_CONFIG_FILE." >&2
   exit 1

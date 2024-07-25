@@ -4,10 +4,9 @@ set -eo pipefail
 
 # Purpose: Adds the standard .aws configuration files
 
-if [[ -z ${PF_AWS_DIR} ]]; then
-  echo "Error: PF_AWS_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+AWS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.aws_dir')
+ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
 
 if [[ $1 == "-b" ]] || [[ $1 == "--build" ]]; then
   BUILD_AWS_CONFIG="1"
@@ -19,7 +18,7 @@ fi
 ## Step 1: Copy the static files
 ############################################################
 
-destination=$(realpath "$DEVENV_ROOT/$PF_AWS_DIR")
+destination=$AWS_DIR
 source=$(dirname "$(dirname "$(realpath "$0")")")/files/aws
 
 mkdir -p "$destination"
@@ -30,17 +29,12 @@ rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source"/ "$destination"/
 ## Step 2: Dynamically configure known_hosts
 ############################################################
 
-CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config.yaml"
-AWS_CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config"
-AWS_TMP_CONFIG_FILE="$DEVENV_ROOT/$PF_AWS_DIR/config.tmp"
+CONFIG_FILE="$AWS_DIR/config.yaml"
+AWS_CONFIG_FILE="$AWS_DIR/config"
+AWS_TMP_CONFIG_FILE="$AWS_DIR/config.tmp"
 
 if [[ $BUILD_AWS_CONFIG == "1" ]]; then
   if [[ -f $CONFIG_FILE ]]; then
-
-    if [[ -z ${PF_ENVIRONMENTS_DIR} ]]; then
-      echo "Error: PF_ENVIRONMENTS_DIR is not set. Add it to your devenv.nix file." >&2
-      exit 1
-    fi
 
     ############################################################
     ## Step 2.1: Parse the config file
@@ -116,7 +110,7 @@ if [[ $BUILD_AWS_CONFIG == "1" ]]; then
     ############################################################
 
     if [[ $MODULE != "null" ]]; then
-      MODULE_PATH="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/$MODULE"
+      MODULE_PATH="$ENVIRONMENTS_DIR/$MODULE"
       echo "Retrieving roles from $MODULE_PATH..." >&2
       MODULE_OUTPUT="$(terragrunt output --json --terragrunt-working-dir="$MODULE_PATH" | jq -r '.cli_config.value')"
       append_to_config "$MODULE_OUTPUT"
@@ -145,9 +139,9 @@ if [[ $BUILD_AWS_CONFIG == "1" ]]; then
 fi
 
 # Save the state hash
-pf-get-aws-state-hash >"$DEVENV_ROOT/$PF_AWS_DIR/state.lock"
+pf-get-aws-state-hash >"$AWS_DIR/state.lock"
 
-echo -e "AWS config files in $PF_AWS_DIR were updated.\n" 1>&2
+echo -e "AWS config files in $AWS_DIR were updated.\n" 1>&2
 
 if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
   pf-check-repo-setup

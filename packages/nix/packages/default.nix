@@ -316,6 +316,8 @@
     procps # process info
     lsof # query for open files and (and other fds like ports)
     mktemp # utility for making temporary directories and files
+    (util.customShellScript
+      "pf-get-repo-variables") # helper for getting repo variables
 
     ####################################
     # AWS Utilities

@@ -72,6 +72,9 @@ elif [[ -z $AWS_PROFILE ]]; then
   exit 1
 fi
 
+REPO_VARIABLES=$(pf-get-repo-variables)
+KUBE_DIR=$(echo "$REPO_VARIABLES" | jq -r '.kube_dir')
+
 ####################################################################
 # Step 2: Get EKS token
 ####################################################################
@@ -92,7 +95,7 @@ if [[ $? -eq 0 ]]; then
   echo -e "$RESPONSE"
 else
   # This ensures that only one sso process is running at a time
-  AWS_SSO_LOCK_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/aws.lock"
+  AWS_SSO_LOCK_FILE="$KUBE_DIR/aws.lock"
   if [[ -f $AWS_SSO_LOCK_FILE ]]; then
 
     # Wait for a bit if the lock is held by another process
@@ -104,7 +107,7 @@ else
       CURRENT_WAIT=$((CURRENT_WAIT + 1))
       if [[ CURRENT_WAIT -ge MAX_WAIT ]]; then
         break
-        rm -f "$DEVENV_ROOT/$PF_KUBE_DIR/aws.lock"
+        rm -f "$AWS_SSO_LOCK_FILE"
       fi
     done
 

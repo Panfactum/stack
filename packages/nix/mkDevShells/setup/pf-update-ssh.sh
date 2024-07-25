@@ -3,11 +3,9 @@
 set -eo pipefail
 
 # Purpose: Adds the standard .ssh configuration files
-
-if [ -z "${PF_SSH_DIR}" ]; then
-  echo "Error: PF_SSH_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+SSH_DIR=$(echo "$REPO_VARIABLES" | jq -r '.ssh_dir')
+ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
 
 if [[ $1 == "-b" ]] || [[ $1 == "--build" ]]; then
   BUILD_KNOWN_HOSTS="1"
@@ -19,7 +17,7 @@ fi
 ## Step 1: Copy the static files
 ############################################################
 
-destination=$(realpath "$DEVENV_ROOT/$PF_SSH_DIR")
+destination=$SSH_DIR
 source=$(dirname "$(dirname "$(realpath "$0")")")/files/ssh
 
 mkdir -p "$destination"
@@ -30,17 +28,12 @@ rsync -rp --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r "$source"/ "$destination"/
 ## Step 2: Dynamically configure known_hosts
 ############################################################
 
-CONFIG_FILE="$DEVENV_ROOT/$PF_SSH_DIR/config.yaml"
-KNOWN_HOSTS_FILE="$DEVENV_ROOT/$PF_SSH_DIR/known_hosts"
-CONNECTION_INFO_FILE="$DEVENV_ROOT/$PF_SSH_DIR/connection_info"
+CONFIG_FILE="$SSH_DIR/config.yaml"
+KNOWN_HOSTS_FILE="$SSH_DIR/known_hosts"
+CONNECTION_INFO_FILE="$SSH_DIR/connection_info"
 
 if [[ $BUILD_KNOWN_HOSTS == "1" ]]; then
   if [[ -f $CONFIG_FILE ]]; then
-
-    if [[ -z ${PF_ENVIRONMENTS_DIR} ]]; then
-      echo "Error: PF_ENVIRONMENTS_DIR is not set. Add it to your devenv.nix file." >&2
-      exit 1
-    fi
 
     # Remove the old known_hosts file
     if [[ -f $KNOWN_HOSTS_FILE ]]; then
@@ -61,14 +54,14 @@ if [[ $BUILD_KNOWN_HOSTS == "1" ]]; then
       # Extract module for the bastion
       MODULE=$(yq -r ".bastions[$i].module" "$CONFIG_FILE")
       NAME=$(yq -r ".bastions[$i].name" "$CONFIG_FILE")
-      MODULE_PATH="$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR/$MODULE"
+      MODULE_PATH="$ENVIRONMENTS_DIR/$MODULE"
 
       if [[ ! -d $MODULE_PATH ]]; then
         echo "Error: No module at $MODULE_PATH!" >&2
         exit 1
       fi
 
-      echo "Updating $PF_SSH_DIR/known_hosts and $PF_SSH_DIR/connection_info with values from $MODULE..." >&2
+      echo "Updating $KNOWN_HOSTS_FILE and $CONNECTION_INFO_FILE with values from $MODULE..." >&2
 
       # Extract the module outputs
       MODULE_OUTPUT="$(terragrunt output --json --terragrunt-working-dir="$MODULE_PATH")"
@@ -85,7 +78,7 @@ if [[ $BUILD_KNOWN_HOSTS == "1" ]]; then
       done
     done
 
-    echo "All hosts in $PF_SSH_DIR/known_hosts and $PF_SSH_DIR/connection_info updated." >&2
+    echo "All hosts in $KNOWN_HOSTS_FILE and $CONNECTION_INFO_FILE updated." >&2
 
   else
     echo "Warning: No configuration file exists at $CONFIG_FILE Skipping credential setup..." >&2
@@ -93,9 +86,9 @@ if [[ $BUILD_KNOWN_HOSTS == "1" ]]; then
 fi
 
 # Save the state hash
-pf-get-ssh-state-hash >"$DEVENV_ROOT/$PF_SSH_DIR/state.lock"
+pf-get-ssh-state-hash >"$SSH_DIR/state.lock"
 
-echo -e "ssh config files in $PF_SSH_DIR were updated.\n" 1>&2
+echo -e "ssh config files in $SSH_DIR were updated.\n" 1>&2
 
 if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
   pf-check-repo-setup

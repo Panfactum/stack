@@ -12,32 +12,30 @@ usage() {
   exit 1
 }
 
-if [[ -z ${PF_ENVIRONMENTS_DIR} ]]; then
-  echo "Error: PF_ENVIRONMENTS_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
+ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
 
 ####################################################################
 # Step 1: Extract the environment and perform some validation
 ####################################################################
 
 CURRENT_DIR="$(realpath "$(pwd)")"
-REAL_PATH_ENVIRONMENTS_DIR=$(realpath "$DEVENV_ROOT/$PF_ENVIRONMENTS_DIR")
 
-if ! [[ $CURRENT_DIR == "$REAL_PATH_ENVIRONMENTS_DIR"* ]]; then
+if ! [[ $CURRENT_DIR == "$ENVIRONMENTS_DIR"* ]]; then
   echo "Error: Script must run in an environment directory" >&2
   exit 1
 fi
 
-RELATIVE_PATH=$(realpath --relative-to="$REAL_PATH_ENVIRONMENTS_DIR" "$CURRENT_DIR")
+RELATIVE_PATH=$(realpath --relative-to="$ENVIRONMENTS_DIR" "$CURRENT_DIR")
 ENVIRONMENT=$(echo "$RELATIVE_PATH" | cut -d'/' -f1)
 
-if ! [[ -f "$REAL_PATH_ENVIRONMENTS_DIR/panfactum.hcl" ]]; then
+if ! [[ -f "$ENVIRONMENTS_DIR/panfactum.hcl" ]]; then
   echo "Error: No panfactum.hcl found. Run 'pf-update-terragrunt' to generate." >&2
   exit 1
 fi
 
-GLOBAL_REGION_DIR="$REAL_PATH_ENVIRONMENTS_DIR/$ENVIRONMENT/global"
+GLOBAL_REGION_DIR="$ENVIRONMENTS_DIR/$ENVIRONMENT/global"
 if ! [[ -d $GLOBAL_REGION_DIR ]]; then
   echo "Error: Global region not found in $ENVIRONMENT. Run 'pf-env-scaffold' to generate." >&2
   exit 1
@@ -153,7 +151,7 @@ MODULE_OUTPUT=$(terragrunt output --json --terragrunt-non-interactive --terragru
 ARN="$(echo "$MODULE_OUTPUT" | jq -r '.arn.value')"
 ARN2="$(echo "$MODULE_OUTPUT" | jq -r '.arn2.value')"
 
-SOPS_CONFIG="$DEVENV_ROOT/.sops.yaml"
+SOPS_CONFIG="$REPO_ROOT/.sops.yaml"
 
 if ! [[ -f $SOPS_CONFIG ]]; then
   cat >"$SOPS_CONFIG" <<EOF
@@ -161,4 +159,4 @@ creation_rules:
 EOF
 fi
 
-yq -Y -i '.creation_rules += [{"path_regex": ".*/'"$ENVIRONMENT"'/.*", "aws_profile": "'"$ENVIRONMENT"'-superuser", "kms": "'"$ARN"','"$ARN2"'"}]' "$DEVENV_ROOT/.sops.yaml"
+yq -Y -i '.creation_rules += [{"path_regex": ".*/'"$ENVIRONMENT"'/.*", "aws_profile": "'"$ENVIRONMENT"'-superuser", "kms": "'"$ARN"','"$ARN2"'"}]' "$SOPS_CONFIG"

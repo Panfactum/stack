@@ -11,18 +11,16 @@ set -eo pipefail
 # Step 0: Validation
 ####################################################################
 
-if [[ -z $PF_KUBE_DIR ]]; then
-  echo "PF_KUBE_DIR is not set. Add it to your devenv.nix file." >&2
-  exit 1
-fi
+REPO_VARIABLES=$(pf-get-repo-variables)
+KUBE_DIR=$(echo "$REPO_VARIABLES" | jq -r '.kube_dir')
 
-USER_CONFIG_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/config.user.yaml"
+USER_CONFIG_FILE="$KUBE_DIR/config.user.yaml"
 if [[ ! -f $USER_CONFIG_FILE ]]; then
   echo "Error: No configuration file found at $USER_CONFIG_FILE. Create it first!" >&2
   exit 1
 fi
 
-CLUSTER_INFO_FILE="$DEVENV_ROOT/$PF_KUBE_DIR/cluster_info"
+CLUSTER_INFO_FILE="$KUBE_DIR/cluster_info"
 if [[ ! -f $CLUSTER_INFO_FILE ]]; then
   echo "Error: No cluster_info file found at $CLUSTER_INFO_FILE. Create it with 'pf-update-kube --build' first!" >&2
   exit 1
