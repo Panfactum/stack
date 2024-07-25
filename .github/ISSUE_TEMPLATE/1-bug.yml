@@ -32,16 +32,6 @@ body:
       description: Please provide the steps necessary to reproduce the problem. If the issue is complex, example code might be necessary.
     validations:
       required: true
-  - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: What version of our software are you running?
-      options:
-        - main (development branch)
-      default: 0
-    validations:
-      required: true
   - type: textarea
     id: logs
     attributes:
