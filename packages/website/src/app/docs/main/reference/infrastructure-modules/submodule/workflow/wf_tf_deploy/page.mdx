@@ -41,15 +41,9 @@ Description: The namespace to deploy the WorkflowTemplate into
 
 Type: `string`
 
-### <a name="input_repo_name" /> [repo\_name](#input_repo_name)
-
-Description: The name of the repository (same PF\_REPO\_NAME in devenv)
-
-Type: `string`
-
 ### <a name="input_repo_url" /> [repo\_url](#input_repo_url)
 
-Description: The repository url to deploy (same as PF\_REPO\_URL in devenv)
+Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix.
 
 Type: `string`
 
@@ -63,14 +57,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_alternative_devenv_root" /> [alternative\_devenv\_root](#input_alternative_devenv_root)
-
-Description: Used to manually set the DEVENV\_ROOT environment variable in the execution context. Useful for scenarios where the DEVENV\_ROOT isn't the root of the repository.s
-
-Type: `string`
-
-Default: `null`
-
 ### <a name="input_cpu_millicores" /> [cpu\_millicores](#input_cpu_millicores)
 
 Description: The amount of CPU to allocate to pods in the workflow (in millicores)
@@ -78,22 +64,6 @@ Description: The amount of CPU to allocate to pods in the workflow (in millicore
 Type: `number`
 
 Default: `500`
-
-### <a name="input_environments_dir" /> [environments\_dir](#input_environments_dir)
-
-Description: The directory that holds configuration-as-code within the repository (same as PF\_ENVIRONMENTS\_DIR in devenv)
-
-Type: `string`
-
-Default: `"environments"`
-
-### <a name="input_iac_dir" /> [iac\_dir](#input_iac_dir)
-
-Description: The directory that holds infrastructure modules within the repository (same as PF\_IAC\_DIR in devenv)
-
-Type: `string`
-
-Default: `"infrastructure"`
 
 ### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
 
@@ -110,14 +80,6 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_repo_primary_branch" /> [repo\_primary\_branch](#input_repo_primary_branch)
-
-Description: The primary integration branch of the repository (same as PF\_REPO\_PRIMARY\_BRANCH in devenv)
-
-Type: `string`
-
-Default: `"main"`
 
 ### <a name="input_secrets" /> [secrets](#input_secrets)
 

@@ -6,12 +6,8 @@ set -eo pipefail
 # Step 1: Clone the repo
 #####################################################
 cd /code
-git clone --depth=1 "https://$PF_REPO_URL.git" repo
+git clone --depth=1 "https://$REPO_URL.git" repo
 cd repo
-if [[ -n $ALT_DEVENV_ROOT ]]; then
-  DEVENV_ROOT=$(realpath "$ALT_DEVENV_ROOT")
-  export DEVENV_ROOT
-fi
 git fetch origin "$GIT_REF"
 git checkout "$GIT_REF"
 git lfs install --local

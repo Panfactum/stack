@@ -223,7 +223,7 @@ provisioned SSO credentials and roles and stop using your static root access key
    * EKS clusters deployed with [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks)
    * Vault clusters deployed with [kube\_vaults](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vault)
 
-3. Run `pf-update-aws` to scaffold files in your `$PF_AWS_DIR` directory.
+3. Run `pf-update-aws` to scaffold files in your `aws_dir` directory.
 
 4. Copy the generated `config.example.yaml` file to `config.yaml`.
 
@@ -236,7 +236,7 @@ provisioned SSO credentials and roles and stop using your static root access key
    3. If you are using a pre-existing AWS SSO setup, you can omit `module` and instead manually
       list the roles via the `extra_roles` field. You can also use `extra_roles` in tandem with `module`.
 
-6. Run `pf-update-aws --build`. This will automatically generate your `$PF_AWS_DIR/config` file to support
+6. Run `pf-update-aws --build`. This will automatically generate your `<aws_dir>/config` file to support
    all SSO roles ([file format](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)).
 
    Profiles names are of the format `environment-role` and can be used like `aws --profile production-superuser ...`. You will
@@ -248,7 +248,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 7. Let's test the new SSO configuration with `aws --profile management-superuser sso login`. This login should
    complete successfully.
 
-8. Ensure that you adjust your `$PF_KUBE_DIR/config.user.yaml` and terragrunt variables to reflect the
+8. Ensure that you adjust your `<kube_dir>/config.user.yaml` and terragrunt variables to reflect the
    generated profile names.
 
    In general, your terragrunt variables for AWS profiles should use the `<environment>-superuser` roles as some modules
@@ -257,11 +257,11 @@ provisioned SSO credentials and roles and stop using your static root access key
    access. See [this guide](/docs/main/guides/iac/deploying-modules#local-deployments) for more information.
 
 9. Verify that you still have Kubernetes connectivity by running `kubectl cluster-info` for every cluster
-   (after running `pf-update-kube` to reflect any changes to your `$PF_KUBE_DIR/config.user.yaml`).
+   (after running `pf-update-kube` to reflect any changes to your `<kube_dir>/config.user.yaml`).
 
 10. Let's finally de-provision your static root user credentials.
 
-    1. Delete `$PF_AWS_DIR/credentials` which contains your static credentials.
+    1. Delete `<aws_dir>/credentials` which contains your static credentials.
 
     2. Using each AWS account's root user, login to the AWS web console, select the rop-right dropdown,
        select "Security credentials," and delete the AWS access key provisioned at the start of this guide series.

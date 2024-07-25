@@ -64,21 +64,21 @@ We extend that pattern with one more rule:
 This is a **critically important** concept. Again, **one** branch will define exactly what is deployed across
 **all** environments.
 
-Pick the branch you want to use and make sure it is set as the `PF_REPO_PRIMARY_BRANCH` (per the [docs](/docs/main/reference/configuration/repo-variables)).
+Pick the branch you want to use and make sure it is set as the `repo_primary_branch` (per the [docs](/docs/main/reference/configuration/repo-variables)).
 
 ### Choose Environments Folder
 
 We store all configuration-as-code for all environment in a directory in the repo we canonically call
 the "environments folder" or "environments directory."
 
-Pick the folder you want to use and make sure it is set as the `PF_ENVIRONMENTS_DIR` (per the [docs](/docs/main/reference/configuration/repo-variables)).
+Pick the folder you want to use and make sure it is set as the `environments_dir` (per the [docs](/docs/main/reference/configuration/repo-variables)).
 
 ## Configure Terragrunt Variables
 
 In order to begin deploying infrastructure modules, we must first configure Terragrunt.
 
-This is done by adding specific directories and files to your `PF_ENVIRONMENTS_DIR`. Specifically,
-`PF_ENVIRONMENTS_DIR` must be set up to follow [these conventions](/docs/main/reference/configuration/terragrunt-variables).
+This is done by adding specific directories and files to your `environments_dir`. Specifically,
+`environments_dir` must be set up to follow [these conventions](/docs/main/reference/configuration/terragrunt-variables).
 
 We provide a convenience script to perform this setup: `pf-env-scaffold -e <env1,env2,...>`.
 

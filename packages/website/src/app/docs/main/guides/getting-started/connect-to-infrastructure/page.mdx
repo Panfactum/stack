@@ -41,7 +41,7 @@ Your visible accounts and roles will vary based on your organization's settings.
 
 ### AWS CLI Access
 
-These accounts and roles are already available for use inside your local repository. They are configured under the `$PF_AWS_DIR` directory (defaults to `.aws`).
+These accounts and roles are already available for use inside your local repository. They are configured under the `aws_dir` directory (defaults to `.aws`).
 
 Access is made available via [AWS CLI/SDK profiles](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html). You
 can view all your organization's profiles by running `aws configure list-profiles`.
@@ -83,7 +83,7 @@ the Web UI: [^3]
 
    <MarkdownImage src={eksImg} alt="EKS dashboard" />
 
-[^3]: You can see what accounts and regions your clusters are deployed to by examining the `$PF_ENVIRONMENTS_DIR` folder in your
+[^3]: You can see what accounts and regions your clusters are deployed to by examining the `environments_dir` folder in your
     repository (defaults to `environments`). Search for `aws_eks` module folders. Ask an organization administrator if your need further guidance.
 
 ### Kubernetes CLI Access
@@ -93,7 +93,7 @@ This will require setting up your [kubeconfig](https://kubernetes.io/docs/concep
 
 We provide an easy way to do this by performing the following actions within your organization's repository:
 
-1. Copy the `config.user.example.yaml` file in your `$PF_KUBE_DIR` folder (defaults to `.kube`) to `config.user.yaml`.
+1. Copy the `config.user.example.yaml` file in your `kube_dir` folder (defaults to `.kube`) to `config.user.yaml`.
 
 2. Update the `config.user.yaml` to include the clusters you want to access and what AWS profile you want to use for that access. See
    the [reference docs](/docs/main/reference/configuration/kubernetes#config.user.yaml) for the specific syntax.

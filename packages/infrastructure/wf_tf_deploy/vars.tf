@@ -15,39 +15,16 @@ variable "pull_through_cache_enabled" {
 }
 
 variable "repo_url" {
-  description = "The repository url to deploy (same as PF_REPO_URL in devenv)"
+  description = "The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix."
   type        = string
-}
-
-variable "iac_dir" {
-  description = "The directory that holds infrastructure modules within the repository (same as PF_IAC_DIR in devenv)"
-  type        = string
-  default     = "infrastructure"
   validation {
-    condition     = !startswith(var.iac_dir, "/") && !startswith(var.iac_dir, ".")
-    error_message = "iac_dir should NOT start with a leading / or ./"
+    condition     = !contains(var.tf_apply_dir, "//")
+    error_message = "tf_apply_dir should NOT contain a protocol prefix such as https://"
   }
-}
-
-variable "environments_dir" {
-  description = "The directory that holds configuration-as-code within the repository (same as PF_ENVIRONMENTS_DIR in devenv)"
-  type        = string
-  default     = "environments"
   validation {
-    condition     = !startswith(var.environments_dir, "/") && !startswith(var.environments_dir, ".")
-    error_message = "environments_dir should NOT start with a leading / or ./"
+    condition     = !contains(var.tf_apply_dir, "@")
+    error_message = "tf_apply_dir should NOT contain a protocol git user prefix such as git@"
   }
-}
-
-variable "repo_primary_branch" {
-  description = "The primary integration branch of the repository (same as PF_REPO_PRIMARY_BRANCH in devenv)"
-  type        = string
-  default     = "main"
-}
-
-variable "repo_name" {
-  description = "The name of the repository (same PF_REPO_NAME in devenv)"
-  type        = string
 }
 
 variable "tf_apply_dir" {
@@ -80,10 +57,4 @@ variable "cpu_millicores" {
 variable "eks_cluster_name" {
   description = "The name of the EKS cluster that contains the service account."
   type        = string
-}
-
-variable "alternative_devenv_root" {
-  description = "Used to manually set the DEVENV_ROOT environment variable in the execution context. Useful for scenarios where the DEVENV_ROOT isn't the root of the repository.s"
-  type        = string
-  default     = null
 }

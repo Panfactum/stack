@@ -13,9 +13,9 @@ written using the OpenTofu (Terraform) [syntax](https://opentofu.org/docs/langua
 It is assumed that your infrastructure modules will live in your stack repository under a single
 directory.
 
-Set `PF_IAC_DIR` to that directory per the [reference docs](/docs/main/reference/configuration/repo-variables).
+Set `iac_dir` to that directory per the [reference docs](/docs/main/reference/configuration/repo-variables).
 
-For example, if `PF_IAC_DIR` is set to `infrastructure`, it is expected your filesystem layout
+For example, if `iac_dir` is set to `infrastructure`, it is expected your filesystem layout
 will look as follows:
 
 ```txt
@@ -136,7 +136,7 @@ Additionally, the `production/us-west-2/region.yaml` file has the `version` key 
 In this scenario, even though all three environments will use both the `module1` and `module2` modules:
 
 * The [configuration-as-code](/docs/main/concepts/iac#configuration-as-code) (e.g., module versions, module inputs, etc.) will **always** be defined
-  by the primary integration branch (set by `PF_REPO_PRIMARY_BRANCH`), in this case `main`.
+  by the primary integration branch (set by `repo_primary_branch` in `panfactum.yaml`), in this case `main`.
 * **All** modules in `development` will use the latest `infrastructure/*` code on the `main` branch (useful for ensuring the latest
   code is always deployed).
 * **All** modules in `staging` will use the `infrastructure/*` code at the `v2.0.0` git tag.
