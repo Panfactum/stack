@@ -20,4 +20,6 @@ inputs = {
 
   argo_domain  = "argo.prod.panfactum.com"
   vault_domain = dependency.vault.outputs.vault_domain
+
+  test_workflow_enabled = true
 }

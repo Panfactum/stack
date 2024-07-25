@@ -112,3 +112,9 @@ variable "panfactum_scheduler_enabled" {
   type        = bool
   default     = false
 }
+
+variable "test_workflow_enabled" {
+  description = "Whether to enable the test WorkflowTemplate"
+  type        = bool
+  default     = false
+}

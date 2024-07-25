@@ -1151,3 +1151,98 @@ resource "kubernetes_secret" "reader_token" {
   type = "kubernetes.io/service-account-token"
 }
 
+/***************************************
+* Argo Test Workflow
+***************************************/
+
+# These define our workflow scripts
+resource "kubernetes_config_map" "test_scripts" {
+  count = var.test_workflow_enabled ? 1 : 0
+  metadata {
+    name      = "test-scripts"
+    labels    = module.test_workflow[0].labels
+    namespace = local.namespace
+  }
+  data = {
+    "test.sh" = file("${path.module}/scripts/test.sh")
+  }
+}
+
+module "test_workflow" {
+  count  = var.test_workflow_enabled ? 1 : 0
+  source = "../kube_workflow_spec"
+
+  name                        = "test"
+  namespace                   = local.namespace
+  eks_cluster_name            = var.eks_cluster_name
+  burstable_nodes_enabled     = true
+  arm_nodes_enabled           = true
+  panfactum_scheduler_enabled = true
+  active_deadline_seconds     = 60 * 60
+
+  entrypoint = "test"
+  default_resources = {
+    requests = {
+      memory = "100Mi"
+      cpu    = "100m"
+    }
+    limits = {
+      memory = "100Mi"
+    }
+  }
+  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+  arguments = {
+    parameters = [
+      {
+        name        = "message"
+        description = "A message for the container to print."
+        default     = "Hello World!"
+      }
+    ]
+  }
+  templates = [
+    {
+      name        = "test"
+      tolerations = module.test_workflow[0].tolerations
+      volumes     = module.test_workflow[0].volumes
+      container = merge(module.test_workflow[0].container_defaults, {
+        command = ["/scripts/test.sh", "{{workflow.parameters.message}}"]
+      })
+    }
+  ]
+
+  config_map_mounts = {
+    "${kubernetes_config_map.test_scripts[0].metadata[0].name}" = {
+      mount_path = "/scripts"
+    }
+  }
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+resource "kubectl_manifest" "test_workflow_template" {
+  count = var.test_workflow_enabled ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "WorkflowTemplate"
+    metadata = {
+      name      = "test"
+      namespace = local.namespace
+      labels    = module.test_workflow[0].labels
+    }
+    spec = module.test_workflow[0].workflow_spec
+  })
+
+  server_side_apply = true
+  force_conflicts   = true
+}
+

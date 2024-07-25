@@ -124,6 +124,60 @@ const SIDENAV_SECTIONS = [
         path: '/overview'
       },
       {
+        text: 'Workflow Engine',
+        path: '/workflow-engine',
+        sub: [
+          {
+            text: 'Installing',
+            path: '/installing'
+          },
+          {
+            text: 'Creating Workflows',
+            path: '/creating-workflows'
+          },
+          {
+            text: 'Triggering Workflows',
+            path: '/triggering-workflows'
+          },
+          {
+            text: 'Prebuilt Workflows',
+            path: '/prebuilt-workflows',
+            sub: [
+              {
+                text: 'Overview',
+                path: '/overview'
+              },
+              {
+                text: 'IaC Deployments',
+                path: '/iac-deployments'
+              },
+              {
+                text: 'Building Images',
+                path: '/iac-deployments'
+              }
+            ]
+          },
+          {
+            text: 'Debuggging',
+            path: '/debugging'
+          }
+        ]
+      },
+      {
+        text: 'Event Bus',
+        path: '/event-bus',
+        sub: [
+          {
+            text: 'Primer',
+            path: '/primer'
+          },
+          {
+            text: 'Installing',
+            path: '/installing'
+          }
+        ]
+      },
+      {
         text: 'BuildKit',
         path: '/buildkit',
         sub: [
@@ -188,6 +242,16 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Debugging',
         path: '/debugging'
+      }
+    ]
+  },
+  {
+    text: 'CI / CD',
+    path: '/cicd',
+    sub: [
+      {
+        text: 'Getting Started',
+        path: '/getting-started'
       }
     ]
   },
