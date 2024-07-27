@@ -127,7 +127,7 @@ resource "kubernetes_config_map" "pvc_autoresizer_image_builder_containers" {
 }
 
 module "pvc_autoresizer_image_builder_workflow" {
-  source                    = "../../../../../infrastructure//kube_workflow_spec" #pf-update
+  source                    = "../../../../../infrastructure//wf_spec" #pf-update
 
   name = local.pvc_autoresizer_image_name
   namespace = local.namespace
@@ -171,11 +171,8 @@ module "pvc_autoresizer_image_builder_workflow" {
   templates = [
     {
       name = "build-images"
-     # affinity = module.pvc_autoresizer_image_builder_workflow.affinity TODO
-      tolerations = module.pvc_autoresizer_image_builder_workflow.tolerations
-      volumes = module.pvc_autoresizer_image_builder_workflow.volumes
       containerSet = {
-        containers = [for container in [
+        containers = [
           {
             name = "scale-buildkit"
             command = ["/bin/pf-buildkit-scale-up", "--wait"]
@@ -216,7 +213,7 @@ module "pvc_autoresizer_image_builder_workflow" {
             command = [ "/scripts/copy-to-public.sh"]
             dependencies = ["merge-manifests"]
           }
-        ]: merge(module.pvc_autoresizer_image_builder_workflow.container_defaults, container)]
+        ]
       }
     }
   ]

@@ -1170,7 +1170,7 @@ resource "kubernetes_config_map" "test_scripts" {
 
 module "test_workflow" {
   count  = var.test_workflow_enabled ? 1 : 0
-  source = "../kube_workflow_spec"
+  source = "../wf_spec"
 
   name                        = "test"
   namespace                   = local.namespace

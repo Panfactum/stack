@@ -37,7 +37,7 @@ variable "node_requirements" {
   default     = {}
 }
 
-variable "secrets" {
+variable "common_secrets" {
   description = "Key pair values of secrets to add to the containers as environment variables"
   type        = map(string)
   default     = {}
@@ -188,8 +188,8 @@ variable "on_exit" {
   default     = null
 }
 
-variable "task_parallelism" {
-  description = "Limits the max total parallel tasks that can execute at the same time in a workflow"
+variable "pod_parallelism" {
+  description = "Limits the max total parallel pods that can execute at the same time in a workflow"
   type        = number
   default     = null
 }
@@ -209,13 +209,13 @@ variable "priority" {
 variable "workflow_delete_seconds_after_completion" {
   description = "The number of seconds after workflow completion that the Workflow object will be deleted"
   type        = number
-  default     = 60 * 60 * 24
+  default     = 60 * 60
 }
 
 variable "workflow_delete_seconds_after_failure" {
   description = "The number of seconds after workflow failure that the Workflow object will be deleted"
   type        = number
-  default     = 60 * 60 * 24
+  default     = 60 * 60
 }
 
 variable "workflow_delete_seconds_after_success" {
@@ -317,7 +317,7 @@ variable "run_as_root" {
 }
 
 variable "volume_mounts" {
-  description = "A mapping of names to configuration for PersistentVolumeClaims used by all Pods in the Workflow"
+  description = "A mapping of names to configuration for temporary PersistentVolumeClaims used by all Pods in the Workflow"
   type = map(object({
     storage_class = optional(string, "ebs-standard")
     access_modes  = optional(list(string), ["ReadWriteOnce"])

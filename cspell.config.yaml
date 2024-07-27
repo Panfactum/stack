@@ -173,7 +173,12 @@ words: [
   "statefulset",
   "runbooks",
   "dashboarding",
-  "callouts"
+  "callouts",
+  "multistep",
+  "alekc",
+  "opentofu",
+  "overridable",
+  "Containerfile"
 ]
 languageSettings:
   - languageId: markdown,mdx

@@ -28,7 +28,7 @@ resource "random_id" "role_id" {
   byte_length = 8
 }
 
-module "util_scale_to_zero" {
+module "util" {
   source = "../kube_workload_utility"
 
   workload_name = var.service_account
@@ -49,7 +49,7 @@ resource "kubernetes_role" "role" {
   metadata {
     name      = random_id.role_id.hex
     namespace = var.service_account_namespace
-    labels    = module.util_scale_to_zero.labels
+    labels    = module.util.labels
   }
   rule {
     api_groups = ["argoproj.io"]
@@ -62,7 +62,7 @@ resource "kubernetes_role_binding" "role_binding" {
   metadata {
     name      = random_id.role_id.hex
     namespace = var.service_account_namespace
-    labels    = module.util_scale_to_zero.labels
+    labels    = module.util.labels
   }
   subject {
     kind      = "ServiceAccount"

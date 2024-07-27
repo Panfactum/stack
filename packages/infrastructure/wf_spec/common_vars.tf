@@ -8,13 +8,13 @@ variable "environment" {
 variable "pf_root_module" {
   description = "The name of the root Panfactum module in the module tree. #injected"
   type        = string
-  default     = "kube_workflow_spec"
+  default     = "wf_spec"
 }
 
 variable "pf_module" {
   description = "The name of the Panfactum module where the containing resources are directly defined. #injected"
   type        = string
-  default     = "kube_workflow_spec"
+  default     = "wf_spec"
 }
 
 variable "region" {

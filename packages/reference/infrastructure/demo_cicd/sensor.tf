@@ -136,7 +136,7 @@ module "sensor" {
     },
     {
       template = {
-        name = local.website_image_builder_name
+        name = "website-builder"
         conditions = "push-to-main"
         argoWorkflow = {
           operation = "submit"
@@ -145,13 +145,13 @@ module "sensor" {
               apiVersion = "argoproj.io/v1alpha1"
               kind = "Workflow"
               metadata = {
-                generateName = "${local.website_image_builder_name}-"
+                generateName = "website-builder-"
                 namespace = local.namespace
               }
               spec = {
-                arguments = module.website_image_builder_workflow.arguments
+                arguments = module.website_builder.arguments
                 workflowTemplateRef = {
-                  name = local.website_image_builder_name
+                  name = "website-builder"
                 }
               }
             }

@@ -149,7 +149,7 @@ resource "kubernetes_config_map" "nix_image_builder_containers" {
 }
 
 module "nix_image_builder_workflow" {
-  source                    = "../../../../../infrastructure//kube_workflow_spec" #pf-update
+  source                    = "../../../../../infrastructure//wf_spec" #pf-update
 
   name = local.nix_image_builder_name
   namespace = local.namespace
@@ -284,8 +284,6 @@ module "nix_image_builder_workflow" {
             command = [
               "/scripts/init-store.sh"
             ]
-            env = module.nix_image_builder_workflow.env
-            securityContext = module.nix_image_builder_workflow.container_security_context
             volumeMounts = concat(
               module.nix_image_builder_workflow.volume_mounts,
               [{
@@ -306,7 +304,6 @@ module "nix_image_builder_workflow" {
                 {name = "ARCH", value = "{{inputs.parameters.arch}}"}
               ]
             )
-            securityContext = module.nix_image_builder_workflow.container_security_context
             volumeMounts = concat(
               module.nix_image_builder_workflow.volume_mounts,
               [{
@@ -378,7 +375,6 @@ module "nix_image_builder_workflow" {
             {name = "COMMIT_SHA", value ="{{inputs.parameters.commit-sha}}"}
           ]
         )
-        securityContext = module.nix_image_builder_workflow.container_security_context
         volumeMounts = concat(
           module.nix_image_builder_workflow.volume_mounts,
           [{

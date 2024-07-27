@@ -27,5 +27,5 @@ output "panfactum_image" {
 }
 
 output "panfactum_image_version" {
-  value = "570f0b99af1073c599e2fab9060e53e295122c95"
+  value = "65d517d85b61394977e17e5f35bf2e6581d9f221"
 }

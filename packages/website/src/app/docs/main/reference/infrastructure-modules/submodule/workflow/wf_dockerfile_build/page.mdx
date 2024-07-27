@@ -1,0 +1,145 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+# Argo Workflow Template: Dockerfile Build Deployment
+
+<ModuleHeader name="wf_dockerfile_build" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_dockerfile_build" status="beta" type="submodule" />
+
+This module creates an Argo [WorkflowTemplate](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/)
+that will use BuildKit to build a Dockerfile from an indicated code repository and push it to
+the account's ECR registry.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_code_repo" /> [code\_repo](#input_code_repo)
+
+Description: The URL of the git repo containing the Dockerfile to build
+
+Type: `string`
+
+### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+
+Description: The name of the EKS cluster that contains the service account.
+
+Type: `string`
+
+### <a name="input_image_repo" /> [image\_repo](#input_image_repo)
+
+Description: The name of the AWS ECR repository where generated images will be pushed
+
+Type: `string`
+
+### <a name="input_name" /> [name](#input_name)
+
+Description: The name of the WorkflowTemplate
+
+Type: `string`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace to deploy the WorkflowTemplate into
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_args" /> [args](#input_args)
+
+Description: A mapping of build-time arguments to their respective values
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_build_context" /> [build\_context](#input_build_context)
+
+Description: Relative path from the root of the repository to the build context to submit to BuildKit
+
+Type: `string`
+
+Default: `"."`
+
+### <a name="input_build_timeout" /> [build\_timeout](#input_build_timeout)
+
+Description: The number of seconds after which the build will be timed out
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_code_default_git_ref" /> [code\_default\_git\_ref](#input_code_default_git_ref)
+
+Description: The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the Workflow
+
+Type: `string`
+
+Default: `"main"`
+
+### <a name="input_dockerfile_path" /> [dockerfile\_path](#input_dockerfile_path)
+
+Description: Relative path from the root of the repository to the Dockerfile / Containerfile to submit to Buildkit
+
+Type: `string`
+
+Default: `"./Dockerfile"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_push_image_enabled" /> [push\_image\_enabled](#input_push_image_enabled)
+
+Description: True iff images should be pushed to ECR in addition to being built
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_secrets" /> [secrets](#input_secrets)
+
+Description: A mapping of build-time secret ids to their respective values
+
+Type: `map(string)`
+
+Default: `{}`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_arguments" /> [arguments](#output_arguments)
+
+Description: The arguments to the WorkflowTemplate
+
+### <a name="output_aws_role_arn" /> [aws\_role\_arn](#output_aws_role_arn)
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
+
+Description: The name of the AWS role used by the Workflow's Service Account
+
+## Usage
+
+No notes
+
+{/* lint enable no-duplicate-headings */}

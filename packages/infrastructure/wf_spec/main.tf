@@ -76,7 +76,7 @@ locals {
   }]
 
   // Static env variables (secret)
-  common_static_secret_env = [for k in keys(var.secrets) : {
+  common_static_secret_env = [for k in keys(var.common_secrets) : {
     name = k
     valueFrom = {
       secretKeyRef = {
@@ -214,6 +214,24 @@ locals {
   }
 
   /************************************************
+  * Template Defaults
+  ************************************************/
+
+  templates = [for template in var.templates :
+    { for k, v in merge(
+      template,
+      {
+        # Apply container defaults to all containers in the various template types
+        container    = contains(keys(template), "container") ? merge(local.container_defaults, template["container"]) : null
+        containerSet = contains(keys(template), "containerSet") ? merge(template["containerSet"], { containers = [for container in template["containerSet"]["containers"] : merge(local.container_defaults, container)] }) : null
+
+        # Volumes are not defaulted by Argo for ContainerSet template types for some reason
+        volumes = lookup(template, "volumes", (contains(keys(template), "containerSet") ? local.common_volumes : null))
+      },
+    ) : k => v if v != null }
+  ]
+
+  /************************************************
   * Workflow Definition
   ************************************************/
   workflow_spec = { for k, v in {
@@ -227,7 +245,7 @@ locals {
     dnsPolicy   = var.dns_policy
     entrypoint  = var.entrypoint
     onExit      = var.on_exit
-    parallelism = var.task_parallelism
+    parallelism = var.pod_parallelism
     hooks       = var.hooks
     podGC = {
       labelSelector       = module.util.match_labels
@@ -274,7 +292,7 @@ locals {
         }
       }
     }
-    templates   = var.templates
+    templates   = local.templates
     tolerations = module.util.tolerations
     ttlStrategy = {
       secondsAfterCompletion = var.workflow_delete_seconds_after_completion
@@ -301,6 +319,7 @@ locals {
         }
       }
     }]
+    volumes = local.common_volumes
     workflowMetadata = {
       labels      = merge(module.util.labels, var.extra_workflow_labels)
       annotations = var.workflow_annotations
@@ -411,7 +430,7 @@ resource "kubernetes_secret" "secrets" {
     name      = random_id.workflow_id.hex
     labels    = module.util.labels
   }
-  data = var.secrets
+  data = var.common_secrets
 }
 
 resource "kubectl_manifest" "pdb" {

@@ -153,7 +153,7 @@ const SIDENAV_SECTIONS = [
               },
               {
                 text: 'Building Images',
-                path: '/iac-deployments'
+                path: '/building-images'
               }
             ]
           },

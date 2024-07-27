@@ -127,7 +127,7 @@ resource "kubernetes_config_map" "bastion_image_builder_containers" {
 }
 
 module "bastion_image_builder_workflow" {
-  source                    = "../../../../../infrastructure//kube_workflow_spec" #pf-update
+  source                    = "../../../../../infrastructure//wf_spec" #pf-update
 
   name = local.bastion_image_builder_name
   namespace = local.namespace
@@ -175,7 +175,7 @@ module "bastion_image_builder_workflow" {
       tolerations = module.bastion_image_builder_workflow.tolerations
       volumes = module.bastion_image_builder_workflow.volumes
       containerSet = {
-        containers = [for container in [
+        containers = [
           {
             name = "scale-buildkit"
             command = ["/bin/pf-buildkit-scale-up", "--wait"]
@@ -216,7 +216,7 @@ module "bastion_image_builder_workflow" {
             command = [ "/scripts/copy-to-public.sh"]
             dependencies = ["merge-manifests"]
           }
-        ]: merge(module.bastion_image_builder_workflow.container_defaults, container)]
+        ]
       }
     }
   ]

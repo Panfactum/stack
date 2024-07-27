@@ -5,7 +5,7 @@ set -eo pipefail
 ###########################################################
 ## Step 1: CD to the codebase
 ###########################################################
-cd /code/stack || exit
+cd /code/repo || exit
 
 ###########################################################
 ## Step 2: Set the image tag as the commit sha
@@ -42,13 +42,15 @@ pf-buildkit-record-build --arch="$ARCH"
 ###########################################################
 ## Step 6: Build the image
 ###########################################################
+# shellcheck disable=SC2086
 buildctl \
   build \
   --frontend=dockerfile.v0 \
   --output "type=image,name=$IMAGE_REGISTRY/$IMAGE_REPO:$TAG,push=$PUSH_IMAGE" \
-  --local context=. \
-  --local dockerfile=./packages/website \
-  --opt filename=./Containerfile \
-  --secret id=MUI_X_LICENSE_KEY,env=MUI_X_LICENSE_KEY \
+  --local context="$BUILD_CONTEXT" \
+  --local dockerfile="$(dirname "$DOCKERFILE_PATH")" \
+  --opt filename="./$(basename "$DOCKERFILE_PATH")" \
+  $SECRET_ARGS \
+  $BUILD_ARGS \
   --export-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=$IMAGE_REGISTRY/$IMAGE_REPO" \
   --import-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=$IMAGE_REGISTRY/$IMAGE_REPO"

@@ -18,12 +18,12 @@ variable "repo_url" {
   description = "The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix."
   type        = string
   validation {
-    condition     = !contains(var.tf_apply_dir, "//")
-    error_message = "tf_apply_dir should NOT contain a protocol prefix such as https://"
+    condition     = !strcontains(var.repo_url, "//")
+    error_message = "repo_url should NOT contain a protocol prefix such as https://"
   }
   validation {
-    condition     = !contains(var.tf_apply_dir, "@")
-    error_message = "tf_apply_dir should NOT contain a protocol git user prefix such as git@"
+    condition     = !strcontains(var.repo_url, "@")
+    error_message = "repo_url should NOT contain a protocol git user prefix such as git@"
   }
 }
 

@@ -67,3 +67,23 @@ Run `pf-providers-enable` to add checksums for all common systems.
 
 This uses the [providers lock](https://opentofu.org/docs/cli/commands/providers/lock/) command
 to enable the following platforms: `darwin_amd64`, `darwin_arm64`, `linux_amd64`, `linux_arm64`.
+
+### Inconsistent Final Plan
+
+```shell-session
+Error: Provider produced inconsistent final plan
+
+When expanding the plan for
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+to include new values learned so far during apply, provider
+"registry.opentofu.org/alekc/kubectl" changed the planned action from
+Update to DeleteThenCreate.
+
+This is a bug in the provider, which should be reported in the provider's
+own issue tracker.
+```
+
+Issues like this can occasionally occur when non-breaking internal refactors are completed
+on resources that use the `kubectl` provider.
+
+This is a transient error and can be resolved by simply re-running `terragrunt apply`.

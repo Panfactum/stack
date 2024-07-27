@@ -113,7 +113,7 @@ resource "kubernetes_config_map" "tf_deploy_scripts" {
 }
 
 module "tf_deploy_workflow" {
-  source = "../kube_workflow_spec"
+  source = "../wf_spec"
 
   name                        = var.name
   namespace                   = var.namespace
@@ -154,6 +154,7 @@ module "tf_deploy_workflow" {
     CI  = "true"               # Required to run the Panfactum terragrunt setup in CI mode
     WHO = "@${local.hostname}" # Use by the force-unlock program to identify locks held by this workflow
   }
+  common_secrets        = var.secrets
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {
     requests = {
@@ -195,20 +196,18 @@ module "tf_deploy_workflow" {
       podSpecPatch = yamlencode({
         hostname = local.hostname
       })
-      tolerations = module.tf_deploy_workflow.tolerations
-      volumes     = module.tf_deploy_workflow.volumes
-      container = merge(module.tf_deploy_workflow.container_defaults, {
+      volumes = module.tf_deploy_workflow.volumes
+      container = {
         command = ["/scripts/deploy.sh"]
-      })
+      }
       # We do not retry this template b/c we need to proceed to force-unlock if this fails
       # unexpectedly. Retry is done via the dag.
       retryStrategy = { limit = "0" }
     },
     {
-      name        = "force-unlock"
-      tolerations = module.tf_deploy_workflow.tolerations
-      volumes     = [for volume in module.tf_deploy_workflow.volumes : volume if !contains(["tmp", "cache"], volume.name)]
-      container = merge(module.tf_deploy_workflow.container_defaults, {
+      name    = "force-unlock"
+      volumes = [for volume in module.tf_deploy_workflow.volumes : volume if !contains(["tmp", "cache"], volume.name)]
+      container = {
         volumeMounts = [for mount in module.tf_deploy_workflow.container_defaults.volumeMounts : mount if !contains(["tmp", "cache"], mount.name)]
         command      = ["/scripts/force-unlock.sh"]
         resources = {
@@ -221,7 +220,7 @@ module "tf_deploy_workflow" {
             cpu    = "100m"
           }
         }
-      })
+      }
       retryStrategy = { limit = "0" }
     }
   ]
@@ -256,7 +255,6 @@ module "tf_deploy_workflow" {
       mount_path = "/scripts"
     }
   }
-  secrets = var.secrets
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

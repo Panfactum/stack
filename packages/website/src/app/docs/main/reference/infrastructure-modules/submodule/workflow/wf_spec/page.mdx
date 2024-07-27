@@ -2,9 +2,293 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Argo Workflow
+# Argo Workflow Specification
 
-<ModuleHeader name="kube_workflow_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_workflow_spec" status="alpha" type="submodule" />
+<ModuleHeader name="wf_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_spec" status="beta" type="submodule" />
+
+The primary purpose of this submodule is to create a Workflow spec (`workflow_spec` output) that ensures compatibility
+with the Panfactum deployment of Argo Workflows (deployed via [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo))
+and applies sensible defaults for usage in the overall Panfactum Stack.
+
+In particular, this module takes care of the following:
+
+* Assigns AWS permissions to the Workflow's ServiceAccount that allows the Workflow's templates to store
+  artifacts and logs in S3.
+* Assigns the necessary Kubernetes permissions to the Workflow's ServiceAccount that allows the Workflow to launch
+  and record its status with the Argo Workflow controller.
+* Sets up basic Workflow parallelism, timeouts, and retry configurations
+* Assigns defaults for pods created by the Workflow (affinities, tolerations, volumes, security context, scheduler, etc.)
+* Provides recommended container defaults (`container_defaults` output)
+* Disables pod disruptions (overridable)
+
+However, the core Workflow logic (defined via `templates`, `arguments`, and `entrypoint`) is left completely
+up to the user to define. For more information on the available values for these fields, see the official
+Argo documentation:
+
+* [Template](https://argo-workflows.readthedocs.io/en/latest/fields/#template)
+* [Arguments](https://argo-workflows.readthedocs.io/en/latest/fields/#arguments)
+
+## Usage
+
+For a basic introduction of how to use this module, see our [guide on creating Workflows](/docs/main/guides/addons/workflow-engine/creating-workflows).
+
+Below we cover some more advanced patterns that you will likely find useful when working with Workflows in the Panfactum Stack.
+
+### Defining the Workflow DAG
+
+Workflows are most useful when you need to define a multistep operation. Argo Workflows provides several means
+to do this, but we recommend the following for almost all use cases:
+
+* [DAG Templates](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/): For defining the execution graph across multiple other templates
+* [ContainerSet Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/): For defining an execution graph inside a *single* pod
+
+ContainerSets can be run faster as all steps will share the same execution context and can share disk space. However,
+they have a couple drawbacks:
+
+* All containers in the ContainerSet will consume Kubernetes resources (CPU and memory requests) [even when they are not running](https://argo-workflows.readthedocs.io/en/latest/container-set-template/#resource-requests).
+* They can only be used to orchestrate containers and not other types of templates.
+
+DAGs offer the most flexibility as they can define a graph of *any* set of templates, but every template in the execution graph will require creating its own Pod.
+Generally, this isn't an issue, but it does add some additional time (to create each pod) and can cause issues when trying to share large amounts of data between steps.
+
+If you do need to share large amounts of data between pods in a DAG, you can use the
+`volume_mounts` module input to create a temporary PVC that will be mounted to each pod. However, you will need to take
+care to ensure that only one Pod is running at once as a PVC can only be mounted to a single pod at once.
+
+### Overriding the Template Defaults
+
+When using the `wf_spec` module, all templates will be provided a default configuration based on the module
+inputs. For example, if you provide `config_map_mounts`, all pods in the workflow will have a `volumes` configured
+to include the specified ConfigMaps.
+
+Occasionally, you may want to override the defaults for a given template. This can be done by explicitly
+providing the relevant parameter to the template:
+
+```hcl
+module "workflow_spec" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+
+  # By default, all pods will have this ConfigMap included as a volume
+  config_map_mounts = {
+    my-config-map = {
+      mount_path = "/tmp/my-config-map"
+    }
+  }
+
+  templates = [
+    {
+      volumes   = [] # This overrides the default and ensures that the pod for this template will have no volumes
+      container = {
+        image   = "some-repo/some-image:some-tag"
+        command = [ "/bin/some-command" ]
+        volumeMounts = [] # Since the pod has no volumes, the container cannot have any volume volumes either
+      }
+    }
+  ]
+}
+```
+
+Critically, all overrides are **shallow-merged by key**. This makes it possible to drop defaults (as in the example above),
+but if you wanted to *add* a new volume, you would need to explicitly concatenate to the original defaults.
+
+```hcl
+module "workflow_spec" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  templates = [
+    {
+      volumes   = concat(
+        module.workflow_spec.volumes, # The default volumes (note the self-reference)
+        [{...}] # The new volume configurations to add
+      )
+    }
+  ]
+}
+```
+
+Note that OpenTofu supports self-references (i.e., using a module's outputs as a part of its inputs) since values
+are lazily evaluated. As a result, we have given the `wf_spec` module outputs such as `tolerations`, `volumes`, `env`, etc.,
+that can be used as building blocks for overrides.
+
+### Parameterizing Workflows and Templates
+
+Often you will want to supply inputs to workflows so to adjust how they behave. Argo calls
+inputs "parameters" and provides documentation on this functionality [here](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/).
+
+Note that *both\_ Workflows as a whole \_and* their individual templates can be parameterized
+although the syntax is slightly different:
+
+```hcl
+module "workflow_spec" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+
+  # These will show up in the the Argo web UI and you can pass them in when
+  # creating a Workflow from a WorkflowTemplate programmatically
+  arguments = {
+    parameters = [
+      {
+        name = "workflow-foo"
+        description = "Some input"
+        default = "bar"
+      }
+    ]
+  }
+
+  entrypoint = "dag"
+  templates = [
+    {
+      name        = "first"
+      inputs = {
+        parameters = [
+          {
+            name = "baz"
+          }
+        ]
+      }
+      container   = merge(module.workflow_spec.container_defaults, {
+        image   = "some-repo/some-image:some-tag"
+        command = [
+          "/bin/some-command",
+          "{{workflow.parameters.foo}}", # Will be replaced at execution time with Workflow-level parameter
+          "{{inputs.parameters.baz}}" # Will be replaced at execution time with Template-level input
+        ]
+      })
+    },
+    {
+      name = "build-image",
+      dag = {
+        tasks = [
+          # Executes the "first" template and passes in "42" for the "baz" input
+          {
+            name = "first"
+            template = "first"
+            arguments = {
+              parameters = [{
+                name = "baz"
+                value = "42"
+              }]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Conditional DAG Nodes (Tasks)
+
+When using a DAG Template, you can conditionally execute certain nodes by replaces the `dependencies` field for a particular
+task with a `depends` field that allows [enhanced depends logic](https://argo-workflows.readthedocs.io/en/latest/enhanced-depends-logic/).
+
+We recommend using this pattern instead of `coninueOn` or
+[Lifecycle hooks](https://argo-workflows.readthedocs.io/en/latest/lifecyclehook/#notification-use-case) as it is more
+powerful and less error-prone.
+
+### Retries and Timeouts
+
+By default, Workflows created by the `wf_spec` module will automatically retry template execution on failure. You can tune
+the behavior by adjusting the following inputs:
+
+* `retry_backoff_initial_duration_seconds`
+* `retry_backoff_max_duration_seconds`
+* `retry_max_attempts` (set to `0` to disable retries)
+* `retry_expression`
+* `retry_policy`
+
+Retries are done on a **per-template** basis and the above inputs set the default behavior for each
+template; the entire Workflow will never retry.
+
+Additionally, you can set a timeout for the entire workflow by tuning the `active_deadline_seconds`.
+
+Individual templates can also have timeouts by setting the `activeDeadlineSeconds` field in each template. However,
+note that the template-level timeout is **reset on every retry.**
+
+### Concurrency Controls
+
+There are three different levels of concurrency controls that you can use:
+
+* `pod_parallelism`: If set, limits how many pods in a single Workflow instance that can be running at once.
+* `workflow_parallelism`: Number of instances of this Workflow that can be running at once. See [mutexes and semaphores for Workflows](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization)
+  for more information.
+* [Template-level mutexes and semaphores](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization):
+  Allows blocking individual templates from running.
+  Can use the same mutex / semaphore across many workflows. Useful for locking access to certain resources (e.g., deploying to an environment).
+
+### Saving and Loading Artifacts
+
+Argo Workflows has a feature called [Artifacts](https://argo-workflows.readthedocs.io/en/latest/walk-through/artifacts/) for saving files
+and directories across template executions.
+
+We already set up the default artifact behavior to save artifacts to S3, so you do not need to do any setup to begin
+immediately using artifacts in your Workflows.
+
+### Adding Additional AWS Permissions
+
+Each pod that gets created in the Workflow will run with the same ServiceAccount by default. This ServiceAccount
+will be assigned AWS permissions via [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
+
+You can assign additional permissions to the ServiceAccount's IAM Role via the `extra_aws_permissions` input:
+
+```hcl
+data "aws_iam_policy_document" "permissions" {
+  statement {
+    sid       = "Admin"
+    effect    = "Allow"
+    actions   = ["*"] # Replace with your desired actions
+    resources = ["*"] # Replace with your desired permissions
+  }
+}
+
+module "workflow_spec" {
+  source  = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+
+  extra_aws_permissions = data.aws_iam_policy_document.permissions.json
+}
+```
+
+### Adding Additional Kubernetes Permissions
+
+Each pod that gets created in the Workflow will run with the same ServiceAccount by default. This ServiceAccount
+can be assigned additional Kubernetes permissions by leveraging the `service_account_name` output:
+
+```hcl
+# Can use Role instead, if desired
+resource "kubernetes_cluster_role_binding" "permissions" {
+  metadata {
+    generate_name = "extra-permissions"
+    labels        = module.workflow_spec.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.workflow_spec.service_account_name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"    # Replace with your desired ClusterRole
+  }
+}
+
+module "workflow_spec" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+}
+```
+
+### Retaining Workflows and Workflow Pods
+
+When a Workflow completes, it isn't automatically deleted. It is still
+
+Workflow objects will be automatically deleted from the Kubernetes cluster based on the following inputs:
+
+* `workflow_delete_seconds_after_completion`
+* `workflow_delete_seconds_after_failure`
+* `workflow_delete_seconds_after_success`
+
+When a Workflow is deleted, all the other Kubernetes objects that it owns are also deleted (e.g., Pods, Artifacts, etc.).
+
+If you want to delete pods earlier, you can set `pod_delete_delay_seconds` to some lower value; however, pods can never
+outlive the Workflow.
 
 ## Providers
 
@@ -119,6 +403,14 @@ Default: `null`
 ### <a name="input_common_env" /> [common\_env](#input_common_env)
 
 Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_common_secrets" /> [common\_secrets](#input_common_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
 
 Type: `map(string)`
 
@@ -349,6 +641,14 @@ Type: `number`
 
 Default: `180`
 
+### <a name="input_pod_parallelism" /> [pod\_parallelism](#input_pod_parallelism)
+
+Description: Limits the max total parallel pods that can execute at the same time in a workflow
+
+Type: `number`
+
+Default: `null`
+
 ### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
 
 Description: Whether Pods will prefer scheduling on arm64 nodes
@@ -468,14 +768,6 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_secrets" /> [secrets](#input_secrets)
-
-Description: Key pair values of secrets to add to the containers as environment variables
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
 Description: Whether to allow Pods to schedule on spot nodes
@@ -491,14 +783,6 @@ Description: Whether this workflow is suspended
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_task_parallelism" /> [task\_parallelism](#input_task_parallelism)
-
-Description: Limits the max total parallel tasks that can execute at the same time in a workflow
-
-Type: `number`
-
-Default: `null`
 
 ### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
 
@@ -526,7 +810,7 @@ Default: `1000`
 
 ### <a name="input_volume_mounts" /> [volume\_mounts](#input_volume_mounts)
 
-Description: A mapping of names to configuration for PersistentVolumeClaims used by all Pods in the Workflow
+Description: A mapping of names to configuration for temporary PersistentVolumeClaims used by all Pods in the Workflow
 
 Type:
 
@@ -555,7 +839,7 @@ Description: The number of seconds after workflow completion that the Workflow o
 
 Type: `number`
 
-Default: `86400`
+Default: `3600`
 
 ### <a name="input_workflow_delete_seconds_after_failure" /> [workflow\_delete\_seconds\_after\_failure](#input_workflow_delete_seconds_after_failure)
 
@@ -563,7 +847,7 @@ Description: The number of seconds after workflow failure that the Workflow obje
 
 Type: `number`
 
-Default: `86400`
+Default: `3600`
 
 ### <a name="input_workflow_delete_seconds_after_success" /> [workflow\_delete\_seconds\_after\_success](#input_workflow_delete_seconds_after_success)
 
@@ -584,6 +868,10 @@ Default: `1`
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_affinity" /> [affinity](#output_affinity)
+
+Description: The affinity added to each Pod by default
 
 ### <a name="output_arguments" /> [arguments](#output_arguments)
 
@@ -615,15 +903,15 @@ Description: The default labels assigned to all resources in this Workflow
 
 ### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
 
-Description: The labels unique to this deployment that can be used to select the pods in this Workflow
+Description: The labels unique to this deployment that can be used to select the Pods in this Workflow
 
 ### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
 
-Description: The default service account used for the pods
+Description: The default service account used for the Pods
 
 ### <a name="output_tolerations" /> [tolerations](#output_tolerations)
 
-Description: Tolerations added to each pod by default
+Description: Tolerations added to each Pod by default
 
 ### <a name="output_volume_mounts" /> [volume\_mounts](#output_volume_mounts)
 
@@ -637,7 +925,7 @@ Description: The volume specification to be applied to all pods generated by thi
 
 Description: The specification for the Workflow
 
-## Usage
+## Maintainer Notes
 
 No notes
 

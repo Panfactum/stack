@@ -93,6 +93,16 @@ module "cache_bucket" {
   extra_tags       = var.extra_tags
 }
 
+resource "kubernetes_config_map" "cache_bucket" {
+  metadata {
+    name      = "buildkit-cache-bucket-config"
+    namespace = local.namespace
+  }
+  data = {
+    bucket = module.cache_bucket.bucket_name
+  }
+}
+
 /***************************************
 * AWS Permissions
 ***************************************/

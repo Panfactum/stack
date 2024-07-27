@@ -11,7 +11,7 @@ ECR_PASSWORD=$(aws ecr get-login-password --region "$IMAGE_REGION")
 ###########################################################
 ## Step 2: Set the image tag as the commit sha
 ###########################################################
-cd /code/stack
+cd /code/repo
 TAG=$(git rev-parse "$GIT_REF")
 
 ###########################################################

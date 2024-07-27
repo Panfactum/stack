@@ -1,5 +1,5 @@
 output "match_labels" {
-  description = "The labels unique to this deployment that can be used to select the pods in this Workflow"
+  description = "The labels unique to this deployment that can be used to select the Pods in this Workflow"
   value       = module.util.match_labels
 }
 
@@ -9,7 +9,7 @@ output "labels" {
 }
 
 output "service_account_name" {
-  description = "The default service account used for the pods"
+  description = "The default service account used for the Pods"
   value       = kubernetes_service_account.sa.metadata[0].name
 }
 
@@ -39,8 +39,13 @@ output "env" {
 }
 
 output "tolerations" {
-  description = "Tolerations added to each pod by default"
+  description = "Tolerations added to each Pod by default"
   value       = module.util.tolerations
+}
+
+output "affinity" {
+  description = "The affinity added to each Pod by default"
+  value       = module.util.affinity
 }
 
 output "arguments" {
