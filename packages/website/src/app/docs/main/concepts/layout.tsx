@@ -40,6 +40,20 @@ const SIDENAV_SECTIONS = [
   {
     text: 'BuildKit',
     path: '/buildkit'
+  },
+  {
+    text: 'CI / CD',
+    path: '/cicd',
+    sub: [
+      {
+        text: 'Recommended Architecture',
+        path: '/recommended-architecture'
+      },
+      {
+        text: 'Argo vs GHA',
+        path: '/argo-vs-gha'
+      }
+    ]
   }
 ]
 

@@ -8,7 +8,7 @@ module "sensor" {
 
   name = "cicd"
   namespace = local.namespace
-  vpa_enabled = true
+
   dependencies = [
     {
       name = "push-to-main"
@@ -59,6 +59,7 @@ module "sensor" {
       }
     }
   ]
+
   triggers = [
     {
       template = {
@@ -92,9 +93,6 @@ module "sensor" {
             }
           ]
         }
-      },
-      retryStrategy = {
-        steps = 1
       }
     },
     {
@@ -129,9 +127,6 @@ module "sensor" {
             }
           ]
         }
-      },
-      retryStrategy = {
-        steps = 1
       }
     },
     {
@@ -166,9 +161,6 @@ module "sensor" {
             }
           ]
         }
-      },
-      retryStrategy = {
-        steps = 1
       }
     },
 #    {

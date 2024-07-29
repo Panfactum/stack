@@ -145,7 +145,7 @@ Repeat the following steps for **every account**:
    settings already present on your computer.
 
    1. In this directory, create a file called `config`. For each account you created, add a block that matches the pattern below. Replace
-      `<profile_name>` with a semantic profile name (e.g., `development-superuser`). [^6] Replace `<aws_region>` with the main [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
+      `<profile_name>` with a profile name matching the format `<environment_name>-superuser` (e.g., `development-superuser`). Replace `<aws_region>` with the main [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
       you will be interacting with (e.g., `us-east-2`).
 
       ```ini
@@ -164,18 +164,25 @@ Repeat the following steps for **every account**:
       aws_secret_access_key=<secret_access_key>
       ```
 
-   3. The `aws` CLI is already installed by the Panfactum developer environment. To instruct the CLI to use a certain
+   3. The `aws` CLI is already installed by the Panfactum developer environment.
+
+      To instruct the CLI to use a certain
       set of credentials, set the active profile by setting the `AWS_PROFILE` environment variable:
-      `export AWS_PROFILE=<profile_name>`. For each profile, verify that the credentials work by running
-      `aws sts get-caller-identity`. You should receive a result that looks as follows (with values specific to your
+      `export AWS_PROFILE=<profile_name>`. Alternatively, you can pass the `--profile` CLI flag.
+
+      For each profile, verify that the credentials work by running
+      `aws --profile=<profile> sts get-caller-identity`. You should receive a result that looks as follows (with values specific to your
       organization:
 
       ```text
       143003111016    arn:aws:iam::143003111016:root  143003111016
       ```
 
-[^6]: We recommend using the form `<environment_name>-superuser` as this will match the format that we will use for
-    roles in later parts of this guide. As an example, your `management` account would have the profile name `management-superuser`.
+<MarkdownAlert severity="warning">
+    We require naming your AWS profiles with the form `<environment_name>-superuser` as this will match the format that your
+    SSO profiles will take once enabled later in the guide. Failing to name your AWS profiles using this format will
+    cause errors later.
+</MarkdownAlert>
 
 ## Next Steps
 

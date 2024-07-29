@@ -106,13 +106,29 @@ Type: `string`
 
 Default: `"default"`
 
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether EventSource pods can be run on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ## Outputs
 

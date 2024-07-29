@@ -33,13 +33,16 @@ module "util" {
   source        = "../kube_workload_utility"
   workload_name = var.name
 
-  host_anti_affinity_required          = var.replicas > 1
-  instance_type_anti_affinity_required = var.replicas > 1
-  topology_spread_enabled              = var.replicas > 1
-  topology_spread_strict               = var.replicas > 1
+  host_anti_affinity_required           = var.replicas > 1
+  instance_type_anti_affinity_required  = var.replicas > 1 && var.enhanced_ha_enabled
+  instance_type_anti_affinity_preferred = false
+  topology_spread_enabled               = var.replicas > 1
+  topology_spread_strict                = var.replicas > 1 && var.enhanced_ha_enabled
 
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
+  burstable_nodes_enabled     = true
+  arm_nodes_enabled           = true
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -78,8 +81,9 @@ resource "kubectl_manifest" "event_source" {
         metadata = {
           labels = module.util.labels
         }
-        tolerations = module.util.tolerations
-        affinity    = module.util.affinity
+        tolerations   = module.util.tolerations
+        affinity      = module.util.affinity
+        schedulerName = module.util.scheduler_name
         container = {
           resources = local.default_resources
           securityContext = {

@@ -11,7 +11,7 @@ variable "namespace" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "event_bus_name" {
@@ -65,4 +65,16 @@ variable "dependencies" {
 variable "triggers" {
   description = "A list of actions that can be triggered by events from the EventBus"
   type        = any # Left as any b/c this can be extended by the user
+}
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = true
+}
+
+variable "spot_nodes_enabled" {
+  description = "Whether EventSource pods can be run on spot nodes"
+  type        = bool
+  default     = true
 }

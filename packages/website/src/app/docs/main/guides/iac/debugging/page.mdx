@@ -87,3 +87,30 @@ Issues like this can occasionally occur when non-breaking internal refactors are
 on resources that use the `kubectl` provider.
 
 This is a transient error and can be resolved by simply re-running `terragrunt apply`.
+
+### Backend configuration block has changed
+
+```shell-session
+Error: Backend initialization required: please run "tofu init"
+
+Reason: Backend configuration block has changed
+
+The "backend" is the interface that OpenTofu uses to store state,
+perform operations, etc. If this message is showing up, it means that the
+OpenTofu configuration you're using is using a custom configuration for
+the OpenTofu backend.
+
+Changes to backend configurations require reinitialization. This allows
+OpenTofu to set up the new configuration, copy existing state, etc. Please
+run "tofu init" with either the "-reconfigure" or "-migrate-state" flags to
+use the current configuration.
+
+If the change reason above is incorrect, please verify your configuration
+hasn't changed and try again. At this point, no changes to your existing
+configuration or state have been made.
+```
+
+This issue can occur when changing your [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables)
+in between runs of the same IaC module.
+
+To resolve, delete your terragrunt cache (`.terragrunt-cache`) and retry.

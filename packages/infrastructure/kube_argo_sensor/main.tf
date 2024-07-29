@@ -26,6 +26,18 @@ locals {
       memory = "200Mi"
     }
   }
+
+  triggers = [for trigger in var.triggers :
+    { for k, v in merge(
+      {
+        retryStrategy = {
+          steps = 1
+        },
+        atLeastOnce = true
+      },
+      trigger
+    ) : k => v if v != null }
+  ]
 }
 
 data "aws_region" "current" {}
@@ -44,6 +56,7 @@ module "util" {
 
   burstable_nodes_enabled = true
   arm_nodes_enabled       = true
+  spot_nodes_enabled      = var.spot_nodes_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -129,6 +142,7 @@ resource "kubectl_manifest" "sensor" {
         serviceAccountName = kubernetes_service_account.sensor.metadata[0].name
         tolerations        = module.util.tolerations
         affinity           = module.util.affinity
+        schedulerName      = module.util.scheduler_name
         container = {
           resources = local.default_resources
           securityContext = {
@@ -143,7 +157,7 @@ resource "kubectl_manifest" "sensor" {
       replicas     = 1
       eventBusName = var.event_bus_name
       dependencies = var.dependencies
-      triggers     = var.triggers
+      triggers     = local.triggers
     }
   })
 

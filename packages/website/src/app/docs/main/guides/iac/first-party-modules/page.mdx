@@ -13,7 +13,7 @@ written using the OpenTofu (Terraform) [syntax](https://opentofu.org/docs/langua
 It is assumed that your infrastructure modules will live in your stack repository under a single
 directory.
 
-Set `iac_dir` to that directory per the [reference docs](/docs/main/reference/configuration/repo-variables).
+Set the `iac_dir` repo variable to that directory per the [reference docs](/docs/main/reference/configuration/repo-variables).
 
 For example, if `iac_dir` is set to `infrastructure`, it is expected your filesystem layout
 will look as follows:
@@ -39,7 +39,7 @@ However, there are some additional considerations for first-party modules:
 ### Sourcing
 
 We provide convenience functionality for sourcing first-party modules in your terragrunt configuration.
-This takes care of common issues around versioning and caching that can often cause confusing results.
+This takes care of common issues around versioning and caching:
 
 In your `terragrunt.hcl`, you should source your module as follows:
 
@@ -127,19 +127,19 @@ infrastructure/
 
 Each `environment.yaml` as the following `version` keys:
 
-* `development`: `main`
-* `staging`: `v2.0.0`
-* `production`: `v1.1.0`
+* `development/environment.yaml`: `main`
+* `staging/environment.yaml`: `v2.0.0`
+* `production/environment.yaml`: `v1.1.0`
 
 Additionally, the `production/us-west-2/region.yaml` file has the `version` key set to `v1.0.0`.
 
 In this scenario, even though all three environments will use both the `module1` and `module2` modules:
 
-* The [configuration-as-code](/docs/main/concepts/iac#configuration-as-code) (e.g., module versions, module inputs, etc.) will **always** be defined
-  by the primary integration branch (set by `repo_primary_branch` in `panfactum.yaml`), in this case `main`.
+* The [configuration-as-code](/docs/main/concepts/iac#configuration-as-code) (e.g., module versions, module inputs, etc.) will for **all** module deployments will **always** be defined
+  by the values in the primary integration branch. This is set by the `repo_primary_branch` [repo variable.](/docs/main/reference/configuration/repo-variables)
 * **All** modules in `development` will use the latest `infrastructure/*` code on the `main` branch (useful for ensuring the latest
-  code is always deployed).
-* **All** modules in `staging` will use the `infrastructure/*` code at the `v2.0.0` git tag.
+  code is always deployed). This is because `development/environment.yaml` has `version` set to `main`.
+* Similarly, **all** modules in `staging` will use the `infrastructure/*` code at the `v2.0.0` git tag.
 * The modules in `production` will default to using the `infrastructure/*` code at the `v1.1.0` tag except for the modules
   in `us-west-2` which will use `v1.0.0`.
 

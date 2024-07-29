@@ -141,21 +141,7 @@ const SIDENAV_SECTIONS = [
           },
           {
             text: 'Prebuilt Workflows',
-            path: '/prebuilt-workflows',
-            sub: [
-              {
-                text: 'Overview',
-                path: '/overview'
-              },
-              {
-                text: 'IaC Deployments',
-                path: '/iac-deployments'
-              },
-              {
-                text: 'Building Images',
-                path: '/building-images'
-              }
-            ]
+            path: '/prebuilt-workflows'
           },
           {
             text: 'Debuggging',
@@ -168,12 +154,12 @@ const SIDENAV_SECTIONS = [
         path: '/event-bus',
         sub: [
           {
-            text: 'Primer',
-            path: '/primer'
-          },
-          {
             text: 'Installing',
             path: '/installing'
+          },
+          {
+            text: 'Use Cases',
+            path: '/use-cases'
           }
         ]
       },

@@ -6,7 +6,7 @@ variable "namespace" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "log_level" {
