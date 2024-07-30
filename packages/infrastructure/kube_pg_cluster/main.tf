@@ -370,7 +370,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
           max_replication_slots      = "32"
           max_worker_processes       = "32"
           # The recommended value for shared_buffers is 25% of the total memory
-          shared_buffers             = "${var.pg_memory_mb / 4}MB"
+          shared_buffers             = var.pg_shared_buffers_mb != null ? "${var.pg_shared_buffers_mb}MB" : "${var.pg_memory_mb / 4}MB"
           shared_memory_type         = "mmap"
           shared_preload_libraries   = ""
           ssl_max_protocol_version   = "TLSv1.3"

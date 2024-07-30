@@ -54,6 +54,12 @@ variable "pg_shutdown_timeout" {
   default     = null
 }
 
+variable "pg_shared_buffers_mb" {
+  type        = number
+  description = "The amount of memory in MB to allocate to the shared_buffers setting in postgresql.conf. The recommendation is 25% of the total memory allocated to the postgres pod."
+  default     = null
+}
+
 variable "backups_force_delete" {
   description = "Whether to delete backups on destroy"
   type        = bool
