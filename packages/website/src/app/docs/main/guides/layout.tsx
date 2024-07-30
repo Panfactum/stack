@@ -144,7 +144,7 @@ const SIDENAV_SECTIONS = [
             path: '/prebuilt-workflows'
           },
           {
-            text: 'Debuggging',
+            text: 'Debugging',
             path: '/debugging'
           }
         ]
@@ -178,6 +178,16 @@ const SIDENAV_SECTIONS = [
           {
             text: 'Debugging',
             path: '/debugging'
+          }
+        ]
+      },
+      {
+        text: 'GitHub Actions',
+        path: '/github-actions',
+        sub: [
+          {
+            text: 'Installing',
+            path: '/installing'
           }
         ]
       }

@@ -17,3 +17,8 @@ output "vault_role_name" {
   description = "The name of the Vault role used by the Workflow's Service Account"
   value       = module.tf_deploy_vault_role.role_name
 }
+
+output "name" {
+  description = "The name of the WorkflowTemplate"
+  value       = var.name
+}

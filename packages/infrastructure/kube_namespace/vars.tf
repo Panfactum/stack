@@ -21,12 +21,6 @@ variable "reader_groups" {
   default     = ["system:readers"]
 }
 
-variable "bot_reader_groups" {
-  description = "The names of the kubernetes groups to give elevated read access to the namespace."
-  type        = list(string)
-  default     = ["system:bot-readers"]
-}
-
 variable "loadbalancer_enabled" {
   description = "Whether the namespace is going to create LoadBalancer services"
   type        = bool

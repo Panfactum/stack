@@ -44,20 +44,6 @@ Default:
 ]
 ```
 
-### <a name="input_bot_reader_groups" /> [bot\_reader\_groups](#input_bot_reader_groups)
-
-Description: The names of the kubernetes groups to give elevated read access to the namespace.
-
-Type: `list(string)`
-
-Default:
-
-```json
-[
-  "system:bot-readers"
-]
-```
-
 ### <a name="input_linkerd_inject" /> [linkerd\_inject](#input_linkerd_inject)
 
 Description: Whether to inject linkerd sidecars into pods in this namespace.

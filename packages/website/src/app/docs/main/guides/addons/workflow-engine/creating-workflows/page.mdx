@@ -173,7 +173,6 @@ You can also use the `default_resources` input of `wf_spec` to set a sensible de
 
 Below is a set of questions that we recommend asking when you create a Workflow using `wf_spec`:
 
-* Unless you have a specific reason not to, have you defaulted every container specification in every template with `wf_spec.container_defaults`?
 * Can your pods run on `arm64` nodes? If so, did you set `arm_nodes_enabled` to `true`?
 * Can your pods tolerate a small chance of disruption? If so, set `spot_nodes_enabled` to `true` to save significant money on workflow execution.
 * Can your pods tolerate a medium chance of disruption? If so, set `disruptions_enabled` to `true` to save additional money.
@@ -197,3 +196,4 @@ Below is a set of questions that we recommend asking when you create a Workflow 
 ## Examples
 
 * The Argo project provides [100+ examples](https://github.com/argoproj/argo-workflows/tree/main/examples) of various Workflow patterns.
+* You provide many [prebuilt WorkflowTemplates](/docs/main/guides/addons/workflow-engine/prebuilt-workflows) that you can examine for best practices.

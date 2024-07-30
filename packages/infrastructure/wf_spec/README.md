@@ -74,7 +74,7 @@ module "workflow_spec" {
       container = {
         image   = "some-repo/some-image:some-tag"
         command = [ "/bin/some-command" ]
-        volumeMounts = [] # Since the pod has no volumes, the container cannot have any volume volumes either
+        volumeMounts = [] # Since the pod has no volumes, the container cannot have any volume mounts either
       }
     }
   ]
@@ -108,7 +108,7 @@ that can be used as building blocks for overrides.
 Often you will want to supply inputs to workflows so to adjust how they behave. Argo calls
 inputs "parameters" and provides documentation on this functionality [here](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/).
 
-Note that _both_ Workflows as a whole _and_ their individual templates can be parameterized
+Note that *both* Workflows as a whole *and* their individual templates can be parameterized
 although the syntax is slightly different:
 
 ```hcl

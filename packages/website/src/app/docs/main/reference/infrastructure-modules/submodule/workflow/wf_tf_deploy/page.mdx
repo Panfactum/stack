@@ -79,7 +79,7 @@ Description: Whether to use the ECR pull through cache for the deployed images
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_secrets" /> [secrets](#input_secrets)
 
@@ -104,6 +104,10 @@ Description: The name of the AWS role used by the Workflow's Service Account
 ### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
 
 Description: The name of the AWS role used by the Workflow's Service Account
+
+### <a name="output_name" /> [name](#output_name)
+
+Description: The name of the WorkflowTemplate
 
 ### <a name="output_vault_role_name" /> [vault\_role\_name](#output_vault_role_name)
 

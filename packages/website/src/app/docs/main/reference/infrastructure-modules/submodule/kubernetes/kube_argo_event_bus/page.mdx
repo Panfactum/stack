@@ -22,10 +22,6 @@ A few notes for the proper usage of an EventBus:
 * For every namespace where you want to deploy EventSources and Sensors, you must have
   an EventBus deployed.
 
-* Updates to the EventBus configuration will cause the EventBus to be destroyed and recreated
-  due to [this issue](https://github.com/argoproj/argo-events/issues/3133). This will
-  cause downtime, so plan accordingly.
-
 ## Providers
 
 The following providers are needed by this module:

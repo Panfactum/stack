@@ -14,9 +14,7 @@ module "sensor" {
       name = "push-to-main"
       eventSourceName = local.event_source_name
       eventName = "default"
-      filtersLogicalOperator = "and"
       filters = {
-        dataLogicalOperator = "and"
         data = [
           {
             path = "body.X-GitHub-Event"
@@ -163,14 +161,14 @@ module "sensor" {
         }
       }
     },
-#    {
-#      template = {
-#        name = "log"
-#        log = {
-#          intervalSeconds = 1
-#        }
-#      }
-#    }
+    {
+      template = {
+        name = "log"
+        log = {
+          intervalSeconds = 1
+        }
+      }
+    }
   ]
 
   # pf-generate: pass_vars
