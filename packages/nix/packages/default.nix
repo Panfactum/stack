@@ -320,6 +320,12 @@
       "pf-get-repo-variables") # helper for getting repo variables
 
     ####################################
+    # Workflow Utilities
+    ####################################
+    (util.customShellScript
+      "pf-wf-git-checkout") # helper for efficiently cloning repos
+
+    ####################################
     # AWS Utilities
     ####################################
     src1.awscli2 # aws CLI
