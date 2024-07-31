@@ -41,7 +41,7 @@ Description: The namespace to deploy the WorkflowTemplate into
 
 Type: `string`
 
-### <a name="input_repo_url" /> [repo\_url](#input_repo_url)
+### <a name="input_repo" /> [repo](#input_repo)
 
 Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix.
 
@@ -64,6 +64,22 @@ Description: The amount of CPU to allocate to pods in the workflow (in millicore
 Type: `number`
 
 Default: `500`
+
+### <a name="input_git_password" /> [git\_password](#input_git_password)
+
+Description: The password to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_git_username" /> [git\_username](#input_git_username)
+
+Description: The username to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
 
 ### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
 

@@ -1,4 +1,5 @@
 output "cilium_taint" {
+  description = "The taint added to every node before the Cilium pods are ready (i.e., when networking is unavailable)"
   value = {
     key    = "node.cilium.io/agent-not-ready"
     value  = "true"
@@ -6,26 +7,32 @@ output "cilium_taint" {
   }
 }
 
-output "database_priority_class_name" {
-  value = "database"
+output "default_priority_class_name" {
+  description = "The default Kubernetes Priority Class"
+  value       = "default"
 }
 
-output "default_priority_class_name" {
-  value = "default"
+output "database_priority_class_name" {
+  description = "A Kubernetes Priority Class that is higher than the default but lower than cluster-important. All stateful systems should have this priority class."
+  value       = "database"
 }
 
 output "cluster_important_priority_class_name" {
-  value = "cluster-important"
+  description = "A Kubernetes Priority Class that is higher than the database but lower than system-cluster-critical."
+  value       = "cluster-important"
 }
 
 output "panfactum_scheduler_name" {
-  value = "panfactum"
+  description = "The name to use for the 'schedulerName' pod spec field when you want to use the Panfactum bin-packing pod scheduler."
+  value       = "panfactum"
 }
 
 output "panfactum_image" {
-  value = "t8f0s7h5/panfactum"
+  description = "The repository of the Panfactum devenv image with the AWS public ECR registry (public.ecr.aws)."
+  value       = "t8f0s7h5/panfactum"
 }
 
 output "panfactum_image_version" {
-  value = "65d517d85b61394977e17e5f35bf2e6581d9f221"
+  description = "The tag of the Panfactum devenv image that is compatible with this module's version of the Panfactum stack."
+  value       = "84b4313e8c7838bba415bce0d6173aabe909c751"
 }

@@ -81,26 +81,32 @@ if [[ -n $USERNAME ]] && [[ -z $PASSWORD ]]; then
 fi
 
 ####################################################################
-# Step 2: Set up the username / password authentication (if applicable)
+# Step 3: Clone the repo
 ####################################################################
 if [[ -n $USERNAME ]]; then
-  git config --global url."https://$USERNAME:$PASSWORD@$REPO.git".InsteadOf "https://$REPO.git"
+  git clone -q --depth=1 "https://$USERNAME:$PASSWORD@$REPO.git" repo
+else
+  git clone -q --depth=1 "https://$REPO.git" repo
 fi
-
-####################################################################
-# Step 3: Enable Clone the repo
-####################################################################
-git clone -q --depth=1 "https://$REPO.git" repo
 cd repo
 
 ####################################################################
-# Step 4: Checkout the GIT_REF
+# Step 4: Persist the username / password authentication locally in the repository (if applicable)
+# This enables future git operations to not need to explicitly set the username and password for this repo
+# We do this locally to account for cases where the repository directory is mounted across containers.
+####################################################################
+if [[ -n $USERNAME ]]; then
+  git config url."https://$USERNAME:$PASSWORD@$REPO.git".InsteadOf "https://$REPO.git"
+fi
+
+####################################################################
+# Step 5: Checkout the GIT_REF
 ####################################################################
 git fetch origin "$GIT_REF"
 git checkout "$GIT_REF"
 
 ####################################################################
-# Step 5: Initialize LFS
+# Step 6: Initialize LFS
 ####################################################################
 git lfs install --local
 git lfs pull

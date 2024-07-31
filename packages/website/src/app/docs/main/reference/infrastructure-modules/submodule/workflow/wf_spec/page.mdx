@@ -275,6 +275,111 @@ module "workflow_spec" {
 }
 ```
 
+### Using the Panfactum devenv
+
+We make the Panfactum devenv available as a container image that can be run in a
+workflow. The specific image tag that is compatible with your version of the Panfactum stack can be sourced from the outputs of the
+[kube\_constants](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
+snippet shows an example:
+
+```hcl
+module "constants" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+}
+
+module "pull_through" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/aws_ecr_pull_through_cache_addresses?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  pull_through_cache_enabled = var.pull_through_cache_enabled
+}
+
+module "example_wf" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+
+  name                    = "example"
+  namespace               = var.namespace
+  eks_cluster_name        = var.eks_cluster_name
+
+  entrypoint = "example"
+  templates = [
+    {
+      name    = "example"
+      container = {
+        image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+        command = ["/some-command-here"]
+      }
+    }
+  ]
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+```
+
+### Adding Custom Scripts
+
+You do not need to build a new container image to create and run custom scripts as long as you have an image
+with a shell installed. Instead, you can mount scripts directly from your IaC.
+
+This can make it much faster to quickly iterate on workflow logic.
+
+The below snippet shows an example of mounting and running a custom script on top of the Panfactum devenv:
+
+```hcl
+# Attach the scripts to a ConfigMap so we can mount them in the workflow spec
+resource "kubernetes_config_map" "wf_scripts" {
+  metadata {
+    name      = "example-scripts"
+    namespace = var.namespace
+  }
+  data = {
+    "example.sh" = file("${path.module}/example.sh") # This assumes you have an "example.sh" script file in this module
+  }
+}
+
+module "example_wf" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+
+  name                    = "example"
+  namespace               = var.namespace
+  eks_cluster_name        = var.eks_cluster_name
+
+  entrypoint = "example"
+  templates = [
+    {
+      name    = "example"
+      container = {
+        image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+        command = ["/scripts/example.sh"] # Execute the mounted script
+      }
+    }
+  ]
+  # This will mount the ConfigMap at mount_path inside each container; all the keys of the ConfigMap are file names and the values
+  # are the file contents.
+  config_map_mounts = {
+    "${kubernetes_config_map.wf_scripts.metadata[0].name}" = {
+      mount_path = "/scripts"
+    }
+  }
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+```
+
 ### Retaining Workflows and Workflow Pods
 
 When a Workflow completes, it isn't automatically deleted. It is still

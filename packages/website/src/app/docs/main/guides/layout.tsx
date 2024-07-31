@@ -248,6 +248,10 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Getting Started',
         path: '/getting-started'
+      },
+      {
+        text: 'Checking Out Code',
+        path: '/checking-out-code'
       }
     ]
   },

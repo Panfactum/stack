@@ -26,7 +26,7 @@ The following input variables are required:
 
 ### <a name="input_code_repo" /> [code\_repo](#input_code_repo)
 
-Description: The URL of the git repo containing the Dockerfile to build
+Description: The URL of the git repo containing the Dockerfile to build. Must NOT contain a protocol prefix.
 
 Type: `string`
 
@@ -97,6 +97,22 @@ Description: Relative path from the root of the repository to the Dockerfile / C
 Type: `string`
 
 Default: `"./Dockerfile"`
+
+### <a name="input_git_password" /> [git\_password](#input_git_password)
+
+Description: The password to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_git_username" /> [git\_username](#input_git_username)
+
+Description: The username to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
 
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 

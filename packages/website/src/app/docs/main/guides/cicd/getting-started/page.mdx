@@ -115,7 +115,7 @@ module "tf_deploy_prod_us_east_2" {
   eks_cluster_name          = var.eks_cluster_name
 
   # This is the repository url for that contains your terragrunt configuration files
-  repo_url = "github.com/panfactum/stack"
+  repo = "github.com/panfactum/stack"
 
   # All modules in this directory of the repository will be deployed
   tf_apply_dir = "packages/reference/environments/production/us-east-2"

@@ -18,7 +18,7 @@ terraform {
 locals {
   # Use this as a consistent hostname so that force-unlock can work between
   # workflow runs
-  hostname = md5("${var.repo_url}${var.tf_apply_dir}")
+  hostname = md5("${var.repo}${var.tf_apply_dir}")
 }
 
 module "pull_through" {
@@ -128,14 +128,15 @@ module "tf_deploy_workflow" {
     parameters = [
       {
         name        = "git_ref"
-        description = "Which commit to check out and deploy in the ${var.repo_url} repository"
+        description = "Which commit to check out and deploy in the ${var.repo} repository"
         default     = "main"
       }
     ]
   }
   common_env = {
-    REPO_URL     = var.repo_url
+    REPO         = var.repo
     GIT_REF      = "{{workflow.parameters.git_ref}}"
+    GIT_USERNAME = var.git_username
     TF_APPLY_DIR = var.tf_apply_dir
 
     # Needed for Vault authentication
@@ -154,7 +155,12 @@ module "tf_deploy_workflow" {
     CI  = "true"               # Required to run the Panfactum terragrunt setup in CI mode
     WHO = "@${local.hostname}" # Use by the force-unlock program to identify locks held by this workflow
   }
-  common_secrets        = var.secrets
+  common_secrets = merge(
+    var.secrets,
+    {
+      GIT_PASSWORD = var.git_password
+    }
+  )
   extra_aws_permissions = data.aws_iam_policy_document.tf_deploy_ecr.json
   default_resources = {
     requests = {

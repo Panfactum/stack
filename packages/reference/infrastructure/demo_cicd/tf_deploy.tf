@@ -8,7 +8,7 @@ module "tf_deploy_prod_us_east_2" {
   eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
-  repo_url = "github.com/panfactum/stack"
+  repo = "github.com/panfactum/stack"
   tf_apply_dir = "packages/reference/environments/production/us-east-2"
   secrets = {
     AUTHENTIK_TOKEN = var.authentik_token
@@ -34,7 +34,7 @@ module "tf_deploy_prod_us_east_2_aws_vpc" {
   eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
-  repo_url = "github.com/panfactum/stack"
+  repo = "github.com/panfactum/stack"
   tf_apply_dir = "packages/reference/environments/production/us-east-2/aws_vpc"
 
   # pf-generate: pass_vars

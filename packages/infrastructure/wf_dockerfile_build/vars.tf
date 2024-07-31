@@ -15,8 +15,16 @@ variable "pull_through_cache_enabled" {
 }
 
 variable "code_repo" {
-  description = "The URL of the git repo containing the Dockerfile to build"
+  description = "The URL of the git repo containing the Dockerfile to build. Must NOT contain a protocol prefix."
   type        = string
+  validation {
+    condition     = !strcontains(var.code_repo, "//")
+    error_message = "code_repo should NOT contain a protocol prefix such as https://"
+  }
+  validation {
+    condition     = !strcontains(var.code_repo, "@")
+    error_message = "code_repo should NOT contain a protocol git user prefix such as git@"
+  }
 }
 
 variable "code_default_git_ref" {
@@ -69,4 +77,17 @@ variable "args" {
 variable "eks_cluster_name" {
   description = "The name of the EKS cluster that contains the service account."
   type        = string
+}
+
+variable "git_username" {
+  description = "The username to use when checking out the code to deploy"
+  type        = string
+  default     = ""
+}
+
+variable "git_password" {
+  description = "The password to use when checking out the code to deploy"
+  type        = string
+  default     = ""
+  sensitive   = true
 }

@@ -291,6 +291,15 @@ module "nix_image_builder_workflow" {
                 mountPath = "/nix2"
               }]
             )
+            resources = {
+              requests = {
+                memory = "250Mi"
+                cpu = "100m"
+              }
+              limits = {
+                memory = "400Mi"
+              }
+            }
           },
           {
             name = "main"

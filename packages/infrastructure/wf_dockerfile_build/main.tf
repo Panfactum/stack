@@ -140,6 +140,7 @@ module "image_builder_workflow" {
   }
   common_env = {
     GIT_REF                = "{{workflow.parameters.git_ref}}"
+    GIT_USERNAME           = var.git_username
     CODE_REPO              = var.code_repo
     IMAGE_REPO             = var.image_repo
     IMAGE_REGISTRY         = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com"
@@ -152,7 +153,12 @@ module "image_builder_workflow" {
     SECRET_ARGS            = join(" ", [for id, val in var.secrets : "--secret id=${id},env=${id}"])
     BUILD_ARGS             = join(" ", [for arg, val in var.args : "--opt build-arg:${arg}=${val}"])
   }
-  common_secrets        = var.secrets
+  common_secrets = merge(
+    var.secrets,
+    {
+      GIT_PASSWORD = var.git_password
+    }
+  )
   extra_aws_permissions = data.aws_iam_policy_document.image_builder.json
   default_resources = {
     requests = {

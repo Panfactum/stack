@@ -3,15 +3,14 @@
 set -eo pipefail
 
 #####################################################
-# Step 1: Clone the repo
+# Step 1: Checkout the repo
 #####################################################
 cd /code
-git clone --depth=1 "https://$REPO_URL.git" repo
-cd repo
-git fetch origin "$GIT_REF"
-git checkout "$GIT_REF"
-git lfs install --local
-git lfs pull
+pf-wf-git-checkout \
+  -r "$REPO" \
+  -c "$GIT_REF" \
+  -u "$GIT_USERNAME" \
+  -p "$GIT_PASSWORD"
 
 #####################################################
 # Step 2: Setup AWS profile

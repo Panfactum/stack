@@ -14,16 +14,16 @@ variable "pull_through_cache_enabled" {
   default     = true
 }
 
-variable "repo_url" {
+variable "repo" {
   description = "The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix."
   type        = string
   validation {
-    condition     = !strcontains(var.repo_url, "//")
-    error_message = "repo_url should NOT contain a protocol prefix such as https://"
+    condition     = !strcontains(var.repo, "//")
+    error_message = "repo should NOT contain a protocol prefix such as https://"
   }
   validation {
-    condition     = !strcontains(var.repo_url, "@")
-    error_message = "repo_url should NOT contain a protocol git user prefix such as git@"
+    condition     = !strcontains(var.repo, "@")
+    error_message = "repo should NOT contain a protocol git user prefix such as git@"
   }
 }
 
@@ -57,4 +57,17 @@ variable "cpu_millicores" {
 variable "eks_cluster_name" {
   description = "The name of the EKS cluster that contains the service account."
   type        = string
+}
+
+variable "git_username" {
+  description = "The username to use when checking out the code to deploy"
+  type        = string
+  default     = ""
+}
+
+variable "git_password" {
+  description = "The password to use when checking out the code to deploy"
+  type        = string
+  default     = ""
+  sensitive   = true
 }
