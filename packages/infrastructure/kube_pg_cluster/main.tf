@@ -415,7 +415,8 @@ resource "kubernetes_manifest" "postgres_cluster" {
       resources = {
         requests = {
           memory = "${var.pg_memory_mb}Mi"
-          cpu    = "${var.pg_cpu_millicores}m"
+          cpu    = var.pg_cpu_millicores > 999 ? ceil(var.pg_cpu_millicores / 1000) : "${var.pg_cpu_millicores}m"
+
         }
         limits = {
           memory = "${ceil(var.pg_memory_mb * 1.3)}Mi"
