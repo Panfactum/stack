@@ -371,11 +371,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_workflow_spec",
-      "type": "submodule",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_workload_utility",
       "type": "submodule",
       "group": "kubernetes"
@@ -404,6 +399,16 @@
       "module": "vault_core_resources",
       "type": "direct",
       "group": "vault"
+    },
+    {
+      "module": "wf_dockerfile_build",
+      "type": "submodule",
+      "group": "workflow"
+    },
+    {
+      "module": "wf_spec",
+      "type": "submodule",
+      "group": "workflow"
     },
     {
       "module": "wf_tf_deploy",

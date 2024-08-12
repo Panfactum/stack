@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Terraform / OpenTofu Bootstrap Resources
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="tf_bootstrap_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/tf_bootstrap_resources" status="stable" type="direct" />
+
+# Terraform / OpenTofu Bootstrap Resources
 
 Sets up the AWS resources necessary to begin using OpenTofu (Terraform) in an AWS account:
 
@@ -58,5 +60,7 @@ No notes
 
 * This module MUST be deployed in the ops environment. It defines its own aws provider for this reason.
   As a result, it uses its own aws profile which must be passed in as an input argument.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

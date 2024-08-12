@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Argo Event Bus
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_argo_event_bus" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo_event_bus" status="alpha" type="submodule" />
+
+# Argo Event Bus
 
 Deploys an [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/) resource as a part of
 the [Argo Events architecture](https://argoproj.github.io/argo-events/concepts/architecture/).
@@ -21,10 +23,6 @@ A few notes for the proper usage of an EventBus:
 
 * For every namespace where you want to deploy EventSources and Sensors, you must have
   an EventBus deployed.
-
-* Updates to the EventBus configuration will cause the EventBus to be destroyed and recreated
-  due to [this issue](https://github.com/argoproj/argo-events/issues/3133). This will
-  cause downtime, so plan accordingly.
 
 ## Providers
 
@@ -88,10 +86,12 @@ Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ## Outputs
 
 No outputs.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

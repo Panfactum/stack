@@ -22,7 +22,7 @@ version of the [Hashicorp Configuration Language (HCL)](https://developer.hashic
 to define each module's deployment configuration. If you are new to terragrunt, you should review the basics
 of the syntax [here](https://terragrunt.gruntwork.io/docs/getting-started/configuration/).
 
-[^1]: This folder lives in your stack repository, is defined by the environment variable `PF_ENVIRONMENTS_DIR`,
+[^1]: This folder lives in your stack repository, is defined by the repo variable `environments_dir`,
     and was created when running `pf-update-terragrunt`. For more information, see our [repository setup guide](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
 
 Terragrunt wraps `tofu` / `terraform` CLI and contains the same subcommands (e.g., `apply`, `plan`, etc.). Simply
@@ -101,7 +101,7 @@ inputs = {
 ### Versioning
 
 The Terragrunt configuration values on the primary integration branch
-(set by the `$PF_REPO_PRIMARY_BRANCH` [devenv variable](/docs/edge/reference/configuration/repo-variables)) are the values
+(set by the `repo_primary_branch` [repo variable](/docs/edge/reference/configuration/repo-variables)) are the values
 that will be deployed by CI / CD pipelines. As a result, the source-of-truth for what is running **every environment** is consolidated in this
 branch's environments folder.
 

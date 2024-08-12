@@ -67,3 +67,50 @@ Run `pf-providers-enable` to add checksums for all common systems.
 
 This uses the [providers lock](https://opentofu.org/docs/cli/commands/providers/lock/) command
 to enable the following platforms: `darwin_amd64`, `darwin_arm64`, `linux_amd64`, `linux_arm64`.
+
+### Inconsistent Final Plan
+
+```shell-session
+Error: Provider produced inconsistent final plan
+
+When expanding the plan for
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+to include new values learned so far during apply, provider
+"registry.opentofu.org/alekc/kubectl" changed the planned action from
+Update to DeleteThenCreate.
+
+This is a bug in the provider, which should be reported in the provider's
+own issue tracker.
+```
+
+Issues like this can occasionally occur when non-breaking internal refactors are completed
+on resources that use the `kubectl` provider.
+
+This is a transient error and can be resolved by simply re-running `terragrunt apply`.
+
+### Backend configuration block has changed
+
+```shell-session
+Error: Backend initialization required: please run "tofu init"
+
+Reason: Backend configuration block has changed
+
+The "backend" is the interface that OpenTofu uses to store state,
+perform operations, etc. If this message is showing up, it means that the
+OpenTofu configuration you're using is using a custom configuration for
+the OpenTofu backend.
+
+Changes to backend configurations require reinitialization. This allows
+OpenTofu to set up the new configuration, copy existing state, etc. Please
+run "tofu init" with either the "-reconfigure" or "-migrate-state" flags to
+use the current configuration.
+
+If the change reason above is incorrect, please verify your configuration
+hasn't changed and try again. At this point, no changes to your existing
+configuration or state have been made.
+```
+
+This issue can occur when changing your [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables)
+in between runs of the same IaC module.
+
+To resolve, delete your terragrunt cache (`.terragrunt-cache`) and retry.

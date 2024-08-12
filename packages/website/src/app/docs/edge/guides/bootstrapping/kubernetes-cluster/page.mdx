@@ -169,7 +169,7 @@ choose one. [^4]
 
 The subnets you choose should be **private** and should each be in a different AZ if you are using more than one.
 
-### Enable Bootstrap Mode
+### Enable Bootstrapping Mode
 
 Set `bootstrap_mode_enabled` to `true`. This will ensure your node count and type is sufficient to complete the
 bootstrapping guide. Once autoscaling is installed, this can be set to `false` to reduce resource usage.
@@ -215,7 +215,7 @@ even if they do not have permissions to interact directly with the infrastructur
 
 To download this metadata:
 
-1. Add a `config.yaml` file to your `$PF_KUBE_DIR` directory: [^20]
+1. Add a `config.yaml` file to your `kube_dir` directory: [^20]
 
    [^20]: By default, this is set to `.kube` in the root of your repository.
 
@@ -225,7 +225,7 @@ To download this metadata:
    ```
 
    Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
-   terragrunt directory under `$PF_ENVIRONMENTS_DIR`.
+   terragrunt directory under `environments_dir`.
 
 2. Replace `module` with the appropriate path for the cluster you just launched.
 
@@ -240,7 +240,7 @@ All utilities in the kubernetes ecosystem rely on
 [kubeconfig](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) files to configure
 their access to various Kubernetes clusters.
 
-In the Panfactum stack, that file is stored in your repo in the `$PF_KUBE_DIR` directory. [^9]
+In the Panfactum stack, that file is stored in your repo in the `kube_dir` directory. [^9]
 
 [^9]: We store the config file in your repo and not in the typical location (`~/.kube/config`) so that it does not
     interfere with other projects you are working on.
@@ -250,7 +250,7 @@ To generate your kubeconfig:
 1. Add a `config.user.yaml` file that looks like this: [^7]
 
    [^7]: This file is specific to every user as different users will have different access levels to the various
-       clusters. Every user will need to set up their own `$PF_KUBE_DIR/config.user.yaml`. This file is not committed to version control.
+       clusters. Every user will need to set up their own `<kube_dir>/config.user.yaml`. This file is not committed to version control.
 
    ```yaml
    clusters:

@@ -1,0 +1,124 @@
+import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
+
+import CICDImg from './cicd.svg'
+
+# Recommended CI / CD Architecture
+
+After years of working with various CI / CD systems and paradigms, we have developed strong opinions about
+how to best implement CI / CD, especially as it relates to the Panfactum Stack.
+
+Our recommended architectural approach may differ from what you have seen before, so we have developed
+this overview to explain the major moving parts and motivations behind our recommendations.
+
+## Core Axioms
+
+* **CI / CD should be driven by [GitOps](https://about.gitlab.com/topics/gitops/)**
+
+  GitOps enables confident collaboration that accelerates product development and enables automation to be
+  embedded directly in the system that almost all developers work with every day, their git repository.
+
+  All changes to your running software systems (including [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) changes)
+  should go through the *same* processes that are applied to code changes.
+  This enables a single source of truth and common foundation for adding automation and controls.
+
+* **The SDLC should apply to CI / CD code**
+
+  Your CI / CD systems are a fundamental part of your organization's ability to quickly and confidently build and ship
+  software. As a result, all the same expectations you have for your application code should apply to your CI / CD code:
+
+  * You should be able to rapidly iterate on the code locally
+  * You should be able to test your code before deploying it to production
+  * You should be able to easily collaborate on it with other engineers
+
+* **CI / CD systems should not use static credentials or run in third-party systems**
+
+  In order to work, your CI / CD systems must have privileged credentials to your live systems. This creates
+  a massive target for adversaries, and vulnerable CI / CD systems have become one of the most commonly exploited
+  components of the engineering ecosystem.
+
+  As a result, CI / CD systems should avoid using static credentials that can be easily exfiltrated by attackers. Moreover,
+  you should avoid giving third-party CI runners privileged access to your systems as (a) third-party CI runners
+  are much more likely to be attacked than your organization and (b) your organization's security is now limited by systems
+  outside your visibility and control.
+
+* **CI / CD should be fast and cheap**
+
+  Over the years, your CI / CD system will grow in scale and sophistication as you attempt to automate the many
+  tasks that help your teams ship reliable software quickly. These platform investments are often some of the highest ROI work your team
+  can do.
+
+  However, these benefits are not free. CI / CD systems tend to involve running slow, resource-intensive tasks
+  (e.g., testing, static analysis, compilation, etc.) 100x more often than any individual developer would normally do.
+  This is the unavoidable nature of CI / CD work.
+
+  More than that, the time that your (expensive) engineers wait for CI pipelines to complete is time that they are not building
+  and your products are not shipping.
+
+  In order to maximize the benefits of your CI / CD architecture, the foundational platform you choose to build must be as efficient
+  and scalable as possible.
+
+## Architecture
+
+Below is our generation recommendation for your CI / CD system architecture:
+
+<MarkdownSVGImage src={CICDImg} alt="CICD Architectural Diagram" />
+
+Here are the important notes:
+
+* This CI / CD system is driven by [Argo Events](https://argoproj.github.io/argo-events/) (receiving webhook notifications
+  from code repositories) and [Argo Workflows](https://argoproj.github.io/workflows/) (for executing CI / CD code and logic).
+
+  We recommend the Argo ecosystem because it contains the most powerful and flexible workflow engine, and we provide
+  [detailed instructions for installing and maintaining it](/docs/edge/guides/addons/workflow-engine/installing).
+
+  Moreover, both Argo Workflows and Events can be re-used in other parts of your system architecture beyond just CI / CD.
+  It is easier to maintain and invest in one system than many.
+
+* Every cluster / region *deploys its own infrastructure*. [^1] This provides many benefits:
+
+  * Unprivileged engineers may work on the CI / CD deployment code without ever needing privileged credentials.
+  * CI / CD workflows can use short-lived, dynamically generated credentials
+    (e.g., [ServiceAccounts](https://kubernetes.io/docs/concepts/security/service-accounts/), [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), etc.)
+    with permissions that *never* cross environment boundaries.
+  * You gain the ability to test and incrementally promote changes to CI / CD code across environments with limited blast
+    radius in case of errors.
+  * You have automatic redundancy in case of a system outage (e.g., misconfiguration of an environment, AWS regional outage, etc.).
+  * You no longer need to pay for and maintain a dedicated CI / CD cluster.
+
+[^1]: Note that usually one cluster will also deploy "global" resources.
+
+* Regardless of what git hosting provider you are using (GitHub, GitLab, etc.), all have webhooks that can be used
+  to notify external systems like Argo Events on code changes or other repository activity.
+
+  All events will go to each instances of Argo Events. Argo Events will then filter the webhook data
+  to only what is relevant for the particular cluster and then trigger the appropriate Argo Workflow.
+
+* While we *strongly* recommend a [monorepo](https://en.wikipedia.org/wiki/Monorepo) approach, this approach will
+  still work well with multiple repositories.
+
+  However, even if you have many repositories, you should still have a *single* repository
+  that defines all of your live infrastructure configuration. Why?
+
+  * A consolidated view of everything that is currently running and an immediate audit log of all changes that have
+    ever been made.
+  * Much easier coordination and sequencing when deploying interdependent system.
+  * Much easier access control and improved security [^2]
+
+[^2]: Since your CI / CD system can perform arbitrary changes in *any* environment, the capability to deploy and mutate
+    infrastructure should be locked down to a single repository where you can implement the appropriate controls and review
+    processes.
+
+* You will typically have a *single* cluster that performs all of your builds and CI checks for all repositories. This
+  cluster is typically located in your development environment. Why?
+
+  * Developers can share resources with the CI / CD system (e.g., shared build cache).
+  * Since CI workflows are bursty and resource-intensive in nature, running them in development limits any potential
+    disruptions or resource contention with live systems ,
+  * Since CI systems are an incredibly common threat vector for malicious code, you should run most of your CI code
+    in an environment with no access to live system.
+
+* Build artifacts are only generated a single time and then tested and promoted across environments. The only
+  CI / CD code that runs in higher environments is infrastructure deployment code (and continuous testing scripts, if applicable).
+
+* This architecture simply outlines a basic starting point. You should feel free to extend it in whatever way
+  meets your organization's needs.

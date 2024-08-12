@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Argo Event Source
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_argo_event_source" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo_event_source" status="alpha" type="submodule" />
+
+# Argo Event Source
 
 Deploys an [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/)
 resource as a part of the
@@ -50,6 +52,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_event_bus_name" /> [event\_bus\_name](#input_event_bus_name)
 
 Description: The EventBus to read from. Should almost always be 'default'.
@@ -57,6 +67,14 @@ Description: The EventBus to read from. Should almost always be 'default'.
 Type: `string`
 
 Default: `"default"`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_replicas" /> [replicas](#input_replicas)
 
@@ -66,16 +84,26 @@ Type: `number`
 
 Default: `1`
 
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether EventSource pods can be run on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ## Outputs
 
 No outputs.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

@@ -6,6 +6,7 @@
 set -eo pipefail
 
 # Extract the current version
+PF_ENVIRONMENTS_DIR=$(pf-get-repo-variables | jq -r .environments_dir)
 MODULE_DIR="$PF_ENVIRONMENTS_DIR/production/us-east-2/pf_website"
 VERSION_FILE="$MODULE_DIR/version.yaml"
 CURRENT_VERSION=$(yq -r -e '.version' "$VERSION_FILE")

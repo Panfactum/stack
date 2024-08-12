@@ -8,7 +8,7 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
   For a complete example, see [our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
 </MarkdownAlert>
 
-Your environments folder at `$PF_ENVIRONMENTS_DIR` **must** have three levels of scoping for the [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code):
+Your environments folder at `environments_dir` **must** have three levels of scoping for the [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code):
 
 * environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
 
@@ -18,7 +18,7 @@ Your environments folder at `$PF_ENVIRONMENTS_DIR` **must** have three levels of
 
 Accordingly, there are four levels of configuration for parameterizing the behavior of `panfactum.hcl`:
 
-* `global.yaml`: Found at the root of `$PF_ENVIRONMENTS_DIR`
+* `global.yaml`: Found at the root of `environments_dir`
 
 * `environment.yaml`: Found at the root of each environment subdirectory
 
@@ -99,11 +99,11 @@ Used to pass extra inputs to all modules in the scope.
 
 Used to configure the `terraform.source` [option](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#terraform) when deploying a module.
 
-| Variable           | Type   | Description                                                                                                                                                                                                                                                        | Recommended File   |
-| :----------------- | :----- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
-| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from `PF_IAC_DIR` you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`$PF_REPO_URL`).              | `environment.yaml` |
-| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack) | `environment.yaml` |
-| `module`           | string | If using `include.panfactum.locals.source`, defines which module from `PF_IAC_DIR` to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory.         | `module.yaml`      |
+| Variable           | Type   | Description                                                                                                                                                                                                                                                           | Recommended File   |
+| :----------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `version`          | string | Configures `include.panfactum.locals.source`. The version of the local modules from the `iac_dir` directory you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`repo_url`).          | `environment.yaml` |
+| `pf_stack_version` | string | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack)    | `environment.yaml` |
+| `module`           | string | If using `include.panfactum.locals.source`, defines which module from the `iac_dir` directory to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory. | `module.yaml`      |
 
 ### State Backend Setup
 

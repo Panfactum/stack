@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Argo Event Sensor
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_argo_sensor" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo_sensor" status="alpha" type="submodule" />
+
+# Argo Event Sensor
 
 Deploys a [Sensor](hhttps://argoproj.github.io/argo-events/concepts/sensor/)
 resource as a part of the
@@ -106,13 +108,29 @@ Type: `string`
 
 Default: `"default"`
 
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+
+Description: Whether EventSource pods can be run on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ## Outputs
 
@@ -121,5 +139,7 @@ The following outputs are exported:
 ### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
 
 Description: n/a
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

@@ -2,12 +2,98 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="wf_tf_deploy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/wf_tf_deploy" status="beta" type="submodule" />
+
 # Argo Workflow Template: Tofu Deployment
 
-<ModuleHeader name="wf_tf_deploy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/wf_tf_deploy" status="alpha" type="submodule" />
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module creates an Argo [WorkflowTemplate](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/)
 that will deploy Tofu code from an indicated repository that follows the Panfactum Stack IaC conventions.
+
+In particular, generated Workflows will perform the following actions:
+
+* Check out the source code indicated by `repo` using our [standard process](/docs/edge/guides/cicd/checking-out-code).
+* Automatically configure authentication for the following providers: AWS, Kubernetes, Vault
+* Update SOPS-encrypted files to use the CI's AWS profile
+* Configure the [Terragrunt provider cache](https://terragrunt.gruntwork.io/docs/features/provider-cache/).
+* Run `terragrunt run-all apply` on the directory indicated by `tf_apply_dir`.
+* Automatically retry several times in the case of transient failures and/or rate limits.
+* Unlock the state backend in case of a runtime failure.
+
+## Usage
+
+We provide several examples of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/infrastructure/demo_cicd/tf_deploy.tf).
+
+The critical configuration values are:
+
+* `repo`: The repository containing your configuration-as-code (i.e., `terragrunt.hcl` files)
+* `tf_apply_dir`: A relative path from the root of the repo in which `terragrunt run-all apply` will be run. The generated
+  Workflow will apply all modules in this subdirectory.
+* `git_ref`: The default [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking
+  out the `repo`. Can and should be overwritten when creating individual Workflows.
+
+You can create as many instances of this module as you need. Usually you will have many different instances with different
+values for `tf_apply_dir`.
+
+<MarkdownAlert severity="warning">
+  A single instance of this module can only be used for deploying modules **in a single region** as the implicit authentication
+  for the IaC providers is scoped to an individual Kubernetes cluster.
+
+  In other words, you cannot deploy this module in one Kubernetes cluster and have it read or update resources in a different cluster.
+
+  This additionally applies to [Terragrunt dependencies.](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#dependencies)
+  For example, do not allow your modules to depend on modules in other environments.
+</MarkdownAlert>
+
+### Authenticating with Private Repositories
+
+`git_username` and `git_password` can be used for authenticating with a private `repo`. See our [documentation](/docs/edge/guides/cicd/checking-out-code)
+for what values to provide. The only permissions needed by this Workflow is read access to the source code.
+
+Note that these credentials will be used for *all* git operations, so if your modules refer to many private repositories,
+please ensure that the credentials have access to all systems.
+
+### Provider Authentication
+
+The following provider authz/n is automatically provided:
+
+* Admin access to the AWS account in which the module is deployed.
+* Admin access to the Kubernetes cluster in which the module is deployed.
+* Admin access to the Vault instance running in the Kubernetes cluster in which the module is deployed.
+
+If you need to provide additional authentication, most Tofu providers can be configured via environment variables.
+You can add additional environment variables to the containers running Terragrunt via the `secrets` input object.
+Object keys are the environment variable names, and values are the secret values.
+
+### Resources
+
+We limit the number of parallel module applications in this Workflow to 5. This ensures that the running containers
+have predictable CPU and memory needs.
+
+However, if you have very large modules or use providers not provided by Panfactum, you may need to increase the CPU
+and memory settings to avoid problems like OOM errors. You can do this via the `memory_mb` and `cpu_millicores` inputs.
+
+### Skipping Modules
+
+Occasionally, you may develop modules that you do not want to deploy via a particular workflow or your CI/CD system
+in general.
+
+You can utilize the Terragrunt [skip](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#skip)
+attribute to skip over the deployment of certain modules in some circumstances.
+
+For example, the below configuration settings in a `terragrunt.hcl`
+will prevent a given module from being deployed in a CI workflow (but still allow it to be applied locally):
+
+```hcl
+terraform {
+  source = include.panfactum.locals.pf_stack_source
+}
+
+skip = include.panfactum.locals.is_ci
+```
 
 ## Providers
 
@@ -41,35 +127,21 @@ Description: The namespace to deploy the WorkflowTemplate into
 
 Type: `string`
 
-### <a name="input_repo_name" /> [repo\_name](#input_repo_name)
+### <a name="input_repo" /> [repo](#input_repo)
 
-Description: The name of the repository (same PF\_REPO\_NAME in devenv)
-
-Type: `string`
-
-### <a name="input_repo_url" /> [repo\_url](#input_repo_url)
-
-Description: The repository url to deploy (same as PF\_REPO\_URL in devenv)
+Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix.
 
 Type: `string`
 
 ### <a name="input_tf_apply_dir" /> [tf\_apply\_dir](#input_tf_apply_dir)
 
-Description: The directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root.
+Description: The default directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root.
 
 Type: `string`
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
-
-### <a name="input_alternative_devenv_root" /> [alternative\_devenv\_root](#input_alternative_devenv_root)
-
-Description: Used to manually set the DEVENV\_ROOT environment variable in the execution context. Useful for scenarios where the DEVENV\_ROOT isn't the root of the repository.s
-
-Type: `string`
-
-Default: `null`
 
 ### <a name="input_cpu_millicores" /> [cpu\_millicores](#input_cpu_millicores)
 
@@ -79,21 +151,29 @@ Type: `number`
 
 Default: `500`
 
-### <a name="input_environments_dir" /> [environments\_dir](#input_environments_dir)
+### <a name="input_git_password" /> [git\_password](#input_git_password)
 
-Description: The directory that holds configuration-as-code within the repository (same as PF\_ENVIRONMENTS\_DIR in devenv)
-
-Type: `string`
-
-Default: `"environments"`
-
-### <a name="input_iac_dir" /> [iac\_dir](#input_iac_dir)
-
-Description: The directory that holds infrastructure modules within the repository (same as PF\_IAC\_DIR in devenv)
+Description: The password to use when checking out the code to deploy
 
 Type: `string`
 
-Default: `"infrastructure"`
+Default: `""`
+
+### <a name="input_git_ref" /> [git\_ref](#input_git_ref)
+
+Description: The default git ref to use when checking out the repo. Can be overwritten on Workflow creation.
+
+Type: `string`
+
+Default: `"main"`
+
+### <a name="input_git_username" /> [git\_username](#input_git_username)
+
+Description: The username to use when checking out the code to deploy
+
+Type: `string`
+
+Default: `""`
 
 ### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
 
@@ -109,15 +189,7 @@ Description: Whether to use the ECR pull through cache for the deployed images
 
 Type: `bool`
 
-Default: `false`
-
-### <a name="input_repo_primary_branch" /> [repo\_primary\_branch](#input_repo_primary_branch)
-
-Description: The primary integration branch of the repository (same as PF\_REPO\_PRIMARY\_BRANCH in devenv)
-
-Type: `string`
-
-Default: `"main"`
+Default: `true`
 
 ### <a name="input_secrets" /> [secrets](#input_secrets)
 
@@ -143,12 +215,18 @@ Description: The name of the AWS role used by the Workflow's Service Account
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
+### <a name="output_name" /> [name](#output_name)
+
+Description: The name of the WorkflowTemplate
+
 ### <a name="output_vault_role_name" /> [vault\_role\_name](#output_vault_role_name)
 
 Description: The name of the Vault role used by the Workflow's Service Account
 
-## Usage
+## Maintainer Notes
 
 No notes
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

@@ -124,6 +124,46 @@ const SIDENAV_SECTIONS = [
         path: '/overview'
       },
       {
+        text: 'Workflow Engine',
+        path: '/workflow-engine',
+        sub: [
+          {
+            text: 'Installing',
+            path: '/installing'
+          },
+          {
+            text: 'Creating Workflows',
+            path: '/creating-workflows'
+          },
+          {
+            text: 'Triggering Workflows',
+            path: '/triggering-workflows'
+          },
+          {
+            text: 'Prebuilt Workflows',
+            path: '/prebuilt-workflows'
+          },
+          {
+            text: 'Debugging',
+            path: '/debugging'
+          }
+        ]
+      },
+      {
+        text: 'Event Bus',
+        path: '/event-bus',
+        sub: [
+          {
+            text: 'Installing',
+            path: '/installing'
+          },
+          {
+            text: 'Use Cases',
+            path: '/use-cases'
+          }
+        ]
+      },
+      {
         text: 'BuildKit',
         path: '/buildkit',
         sub: [
@@ -138,6 +178,16 @@ const SIDENAV_SECTIONS = [
           {
             text: 'Debugging',
             path: '/debugging'
+          }
+        ]
+      },
+      {
+        text: 'GitHub Actions',
+        path: '/github-actions',
+        sub: [
+          {
+            text: 'Installing',
+            path: '/installing'
           }
         ]
       }
@@ -188,6 +238,20 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Debugging',
         path: '/debugging'
+      }
+    ]
+  },
+  {
+    text: 'CI / CD',
+    path: '/cicd',
+    sub: [
+      {
+        text: 'Getting Started',
+        path: '/getting-started'
+      },
+      {
+        text: 'Checking Out Code',
+        path: '/checking-out-code'
       }
     ]
   },

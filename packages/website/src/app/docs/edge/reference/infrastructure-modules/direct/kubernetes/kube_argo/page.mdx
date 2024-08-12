@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Argo Workflows
+{/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_argo" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo" status="alpha" type="direct" />
+<ModuleHeader name="kube_argo" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo" status="beta" type="direct" />
+
+# Argo Workflows
 
 ## Providers
 
@@ -152,6 +154,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_test_workflow_enabled" /> [test\_workflow\_enabled](#input_test_workflow_enabled)
+
+Description: Whether to enable the test WorkflowTemplate
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether the VPA resources should be enabled
@@ -191,5 +201,7 @@ Description: Name of the S3 bucket holding workflow artifacts
 ## Usage
 
 No notes
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

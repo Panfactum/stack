@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Namespace
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_namespace" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_namespace" status="stable" type="submodule" />
+
+# Kubernetes Namespace
 
 Sets up a Kubernetes namespace and grants namespace-scoped permissions to specific Kubernetes user groups.
 
@@ -41,20 +43,6 @@ Default:
 ```json
 [
   "system:admins"
-]
-```
-
-### <a name="input_bot_reader_groups" /> [bot\_reader\_groups](#input_bot_reader_groups)
-
-Description: The names of the kubernetes groups to give elevated read access to the namespace.
-
-Type: `list(string)`
-
-Default:
-
-```json
-[
-  "system:bot-readers"
 ]
 ```
 
@@ -107,5 +95,7 @@ Description: n/a
 ## Usage
 
 No notes
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

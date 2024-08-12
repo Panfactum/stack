@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# AWS DNS Records
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="aws_dns_records" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_dns_records" status="stable" type="direct" />
+
+# AWS DNS Records
 
 This module is used to deploy the following DNS record types
 to the indicated hosted zones:
@@ -40,6 +42,11 @@ map(object({
       records   = list(string)
       ttl       = optional(number, 300)
     })), [])
+    cname_records = optional(list(object({
+      subdomain = string
+      record    = string
+      ttl       = optional(number, 300)
+    })), [])
   }))
 ```
 
@@ -54,5 +61,7 @@ No outputs.
 ## Usage
 
 No notes
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

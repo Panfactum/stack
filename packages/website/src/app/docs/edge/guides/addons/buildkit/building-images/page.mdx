@@ -128,7 +128,7 @@ BuildKit uses the client's credentials to authenticate with registries; it does 
 By default, we automatically authenticate your local client with AWS ECR, but you may need to pull base images from other
 private registries.
 
-`buildctl` will use the credentials at `$DOCKER_CONFIG/config.json`. We set up devenv to use a repo-local file at `$PF_BUILDKIT_DIR/config.json`,
+`buildctl` will use the credentials at `$DOCKER_CONFIG/config.json`. We set up devenv to use a repo-local file at `<buildkit_dir>/config.json`,
 and it will look something like this:
 
 {/* spellchecker: disable */}

@@ -115,17 +115,17 @@ Let's set up a test image repository, so we can demonstrate how to build images 
 ## Configuration Files
 
 To connect your local tooling to both the BuildKit servers and your ECR repositories, you must add some additional
-configuration to your repository. Specifically, you must create a `$PF_BUILDKIT_DIR/config.yaml`
+configuration to your repository. Specifically, you must create a `<buildkit_dir>/config.yaml`
 ([reference docs](/docs/edge/reference/configuration/buildkit)).
 
 Let's do this now:
 
-1. You should already have a `$PF_BUILDKIT_DIR` directory in your repository (defaults to `.buildkit`). In it, you
+1. You should already have a `buildkit_dir` directory in your repository (defaults to `.buildkit`). In it, you
    should see a `config.example.yaml`. Copy that file to `config.yaml`.
 
 2. Update `module` to the path of the `kube_buildkit` module you deployed earlier.
 
-3. Update `bastion` to the name of the bastion deployed in the Kubernetes cluster running BuildKit. See your `$PF_SSH_DIR/config.yaml`.
+3. Update `bastion` to the name of the bastion deployed in the Kubernetes cluster running BuildKit. See your `<ssh_dir>/config.yaml`.
 
 4. Run `pf-update-buildkit --build` to build the generated configuration files that will be used to connect to BuildKit and ECR.
 
