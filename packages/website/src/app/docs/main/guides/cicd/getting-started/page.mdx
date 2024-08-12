@@ -26,7 +26,7 @@ Set up a CI / CD system that deploys IaC when committing changes to your stack r
 
 <MarkdownAlert severity="info">
   Our recommended architecture uses Argo Workflows and Events as the basis for the CI / CD system. That said,
-  we do offer an alternative modules for [self-hosted GitHub Actions](/docs/main/guides/addons/github-actions/installing).
+  we do offer alternative modules for [self-hosted GitHub Actions](/docs/main/guides/addons/github-actions/installing).
 </MarkdownAlert>
 
 We will be deploying our [recommended CI / CD architecture](/docs/main/concepts/cicd/recommended-architecture). Please
@@ -55,7 +55,7 @@ do this now:
       * [GitHub](https://argoproj.github.io/argo-events/eventsources/setup/github/)
       * [GitLab](https://argoproj.github.io/argo-events/eventsources/setup/gitlab/)
       * [BitBucket](https://argoproj.github.io/argo-events/eventsources/setup/bitbucket/)
-      * [Webhook](https://argoproj.github.io/argo-events/eventsources/setup/webhook/) (for generic git provider)
+      * [Webhook](https://argoproj.github.io/argo-events/eventsources/setup/webhook/) (for generic git hosting provider)
 
       When providing an API token for your hosting provider, ensure you limit its scope to only the necessary
       permissions for the webhook configuration.
@@ -63,6 +63,12 @@ do this now:
       Additionally, ensure that you set a secret
       to protect the generated webhook endpoint. Use the [random\_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password)
       resource to generate the secret, and expose it as a sensitive module output.
+
+      <MarkdownAlert severity="warning">
+          If you do not set `deleteHookOnFinish` on the EventSource, your webhook will not be deleted
+          from your git hosting provider when the EventSource is updated / deleted. This will a conflict
+          issues if you ever recreate the webhook in the future. As a result, we recommend setting this to true.
+      </MarkdownAlert>
 
    2. In the Sensor, create a dependency with no filters (yet). Additionally, create a
       [Log trigger](https://argoproj.github.io/argo-events/sensors/triggers/log/) so that you can examine the webhook payload.

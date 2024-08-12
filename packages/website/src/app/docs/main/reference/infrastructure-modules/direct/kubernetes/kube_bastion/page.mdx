@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes Ingress Bastion
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_bastion" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_bastion" status="stable" type="direct" />
+
+# Kubernetes Ingress Bastion
 
 This launches an SSH bastion that utilizes Vault for authenticating the present SSH certificates.
 Shell sessions cannot be started directly in the bastion, but the bastion can be used as a proxy
@@ -115,5 +117,7 @@ Description: The port the SSH server is available on in each domain
 ## Usage
 
 No notes
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

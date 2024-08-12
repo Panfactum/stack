@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# AWS SSO with Authentik
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="authentik_vault_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_vault_sso" status="stable" type="direct" />
+
+# AWS SSO with Authentik
 
 ## Providers
 
@@ -122,5 +124,7 @@ Description: The redirect URIs to use for the auth/oidc auth method in Vault
 3. SCIM provisioning must be configured MANUALLY. Group assignments won't work until this step is completed.
 
 4. The user portal URL needs to be configured MANUALLY in the aws web console in the SSO settings.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

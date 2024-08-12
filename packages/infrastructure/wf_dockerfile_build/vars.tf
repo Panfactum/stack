@@ -27,7 +27,7 @@ variable "code_repo" {
   }
 }
 
-variable "code_default_git_ref" {
+variable "git_ref" {
   description = "The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the Workflow"
   type        = string
   default     = "main"

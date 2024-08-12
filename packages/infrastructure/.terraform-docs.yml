@@ -16,6 +16,8 @@ settings:
 content: |-
   {/* lint disable no-duplicate-headings */}
   
+  {/* eslint-disable import/order */}
+  
   {{ .Header }}
   
   {{ .Requirements }}
@@ -25,5 +27,7 @@ content: |-
   {{ .Outputs }}
   
   {{ .Footer }}
+  
+  {/* eslint-enable import/order */}
   
   {/* lint enable no-duplicate-headings */}

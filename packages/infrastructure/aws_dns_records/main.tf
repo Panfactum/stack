@@ -10,8 +10,9 @@ terraform {
 }
 
 locals {
-  mx_records  = flatten([for zone, config in var.zones : [for record in config.mx_records : { zone : zone, record : record }]])
-  txt_records = flatten([for zone, config in var.zones : [for record in config.txt_records : { zone : zone, record : record }]])
+  cname_records = flatten([for zone, config in var.zones : [for record in config.cname_records : { zone : zone, record : record }]])
+  mx_records    = flatten([for zone, config in var.zones : [for record in config.mx_records : { zone : zone, record : record }]])
+  txt_records   = flatten([for zone, config in var.zones : [for record in config.txt_records : { zone : zone, record : record }]])
 }
 
 ##########################################################################
@@ -30,6 +31,16 @@ resource "aws_route53_record" "mx" {
   name            = "${local.mx_records[count.index].record.subdomain}${local.mx_records[count.index].zone}"
   records         = local.mx_records[count.index].record.records
   ttl             = local.mx_records[count.index].record.ttl
+  allow_overwrite = true
+}
+
+resource "aws_route53_record" "cname" {
+  count           = length(local.cname_records)
+  type            = "CNAME"
+  zone_id         = data.aws_route53_zone.zones[local.cname_records[count.index].zone].zone_id
+  name            = "${local.cname_records[count.index].record.subdomain}${local.cname_records[count.index].zone}"
+  records         = [local.cname_records[count.index].record.record]
+  ttl             = local.cname_records[count.index].record.ttl
   allow_overwrite = true
 }
 

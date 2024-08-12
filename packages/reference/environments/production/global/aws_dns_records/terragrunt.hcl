@@ -14,10 +14,22 @@ inputs = {
         {
           subdomain = ""
           records = [
-            "10 mx.zoho.com",
-            "20 mx2.zoho.com",
-            "50 mx3.zoho.com"
+            "1 smtp.google.com"
           ]
+        }
+      ]
+      cname_records = [
+        {
+          subdomain = "gmail."
+          record    = "ghs.googlehosted.com"
+        },
+        {
+          subdomain = "drive."
+          record    = "ghs.googlehosted.com"
+        },
+        {
+          subdomain = "calendar."
+          record    = "ghs.googlehosted.com"
         }
       ]
       txt_records = [
@@ -26,11 +38,18 @@ inputs = {
           subdomain = "_dmarc."
           records   = ["v=DMARC1; p=quarantine; rua=mailto:security@panfactum.com; ruf=mailto:security@panfactum.com;"]
         },
-        // DKIM (email)
+        // DKIM (email - zoho)
         {
           subdomain = "zmail._domainkey."
           records = [
             "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCxby/gQFkDpFdPv/SeR80eFSoxZZp8e/hJ+50WP5bEONClM4U83oFbJLUuGeRvMBmKsrWd5vVJq6THjDlwPAw73T8rpDSvy4bNHeuaC3x/GxalGaVTTserDvUvGpgV07EYdWq+0IaddbNzzDkahPXnLbBhkmvJubbuTTwXKomARwIDAQAB"
+          ]
+        },
+        // DKIM (email - google)
+        {
+          subdomain = "google._domainkey."
+          records = [
+            "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyxt/FeLUEOazF2WCv+nj78WxNqpsByyiSgl0u9pGkAmyuEVhhUEp8oYWBt2pHkycCugCkW7tmk3ZaO+TrZ/sw5B/VlyUgaZKLcSngalzUYOvsNU5FREm1KE+MkcX610+h0PTdBQZ32MBg8yMcxKmt+FYHX7tTa5jzbai+5pTr5lVsU9ZYOnURHL9K1+itUwxyJz8VqaiqhR8wMV8tpWpLuDy6RFkatJgo8U1EohlhLQzjJTN4HUF/rjxoLEs18kTRR2ZzA3Esvi8FmERfAaO2chIldP60vBU78VAVHwi+pMavKb8U0pAyTVS/GjOQMjIRycCY7iGrvOWF2Yv6qRb/QIDAQAB"
           ]
         },
         // DKIM (CRM)

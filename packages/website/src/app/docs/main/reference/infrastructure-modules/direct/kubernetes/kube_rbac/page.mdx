@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Kubernetes RBAC
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_rbac" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_rbac" status="stable" type="direct" />
+
+# Kubernetes RBAC
 
 This module configures the basic scaffolding for linking AWS IAM roles to Kubernetes RBAC roles by setting up
 the `aws-auth` ConfigMap used by the [aws-iam-authenticator](https://github.com/kubernetes-sigs/aws-iam-authenticator)
@@ -122,5 +124,7 @@ against a Kubernetes cluster with all the stack resources deployed.
 
 This is required by we must explicitly enumerate permissions for all resources in order to exclude secret resources
 for the restricted-reader role.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

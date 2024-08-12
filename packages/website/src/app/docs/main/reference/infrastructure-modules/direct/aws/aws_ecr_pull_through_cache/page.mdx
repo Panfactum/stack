@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# AWS ECR Pull Through Cache
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="aws_ecr_pull_through_cache" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache" status="stable" type="direct" />
+
+# AWS ECR Pull Through Cache
 
 This module sets up [AWS ECR](https://aws.amazon.com/ecr/)
 to serve as a pull through cache for publicly available container images
@@ -81,5 +83,7 @@ for those image repositories by setting up a
 Unfortunately, AWS does not currently offer an API for that
 (tracked [here](https://github.com/hashicorp/terraform-provider-aws/issues/34503)).
 As a result, you will currently need to set this up manually after applying this module.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

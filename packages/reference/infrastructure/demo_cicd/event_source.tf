@@ -38,6 +38,7 @@ module "event_source" {
     github = {
       default = {
         active = true
+        deleteHookOnFinish = true
         repositories = [
           {
             owner = "panfactum"
@@ -54,7 +55,6 @@ module "event_source" {
         apiToken = {
           name = kubernetes_secret.github_event_source.metadata[0].name
           key = "token"
-
         }
         webhookSecret = {
           name = kubernetes_secret.github_event_source.metadata[0].name

@@ -28,12 +28,18 @@ variable "repo" {
 }
 
 variable "tf_apply_dir" {
-  description = "The directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root."
+  description = "The default directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root."
   type        = string
   validation {
     condition     = !startswith(var.tf_apply_dir, "/") && !startswith(var.tf_apply_dir, ".")
     error_message = "tf_apply_dir should NOT start with a leading / or ./"
   }
+}
+
+variable "git_ref" {
+  description = "The default git ref to use when checking out the repo. Can be overwritten on Workflow creation."
+  type        = string
+  default     = "main"
 }
 
 variable "secrets" {

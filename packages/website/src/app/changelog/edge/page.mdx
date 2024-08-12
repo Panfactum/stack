@@ -24,6 +24,20 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Added
 
+* We have provided two new addons, a [Workflow Engine](/docs/edge/guides/addons/workflow-engine/installing) (Argo Workflows)
+  and an [Event Bus](/docs/edge/guides/addons/event-bus/installing) (Argo Events).
+
+* We have created a [guide and best practices](/docs/edge/guides/cicd/getting-started) for setting up CI / CD in the Panfactum Stack.
+
+* To support the new addons, we are upgrading the following infrastructure modules to Beta status:
+  * [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo): For deploying the Argo controllers
+  * [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus): For deploying an Argo EventBus
+  * [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source): For deploying an Argo EventSource
+  * [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor): For deploying an Argo Sensor
+  * [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/wf_spec): For creating an Argo Workflow specification
+  * [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/wf_tf_deploy): For creating an Argo WorkflowTemplate that deploys IaC modules
+  * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build): For creating an Argo WorkflowTemplate that builds container images from Dockerfiles
+
 * Adds `pf-get-repo-variables` which prints a JSON payload of all repository configuration variables with the appropriate
   defaults set.
 
@@ -201,7 +215,11 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   likely sufficient for the vast majority of use cases and reduces the risk of data loss.
 
   Unfortunately, if you were previously running with `persistence_enabled` set to `false`, you will need to delete
-  the Redis StatefulSets in order to apply the new module. In particular, this impacts the `kube_authentik` module.
+  the Redis StatefulSets in order to apply the new module.
+
+  In particular, this impacts the `kube_authentik` module. Before deleting the Redis StatefulSet for Authentik,
+  ensure your Vault token is not expired as you will not be able to re-authenticate with Authentik
+  while the Redis StatefulSet is removed.
 
   Since `persistence_enabled` should only have been used in scenarios where data retention was not important,
   this should be considered a safe operation. However, it will introduce a minor
@@ -363,8 +381,11 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * [kube\_trust\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
   [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector). We are keeping the module
-  in the repo to support backwards compatibility, but it will be removed in the future. You should apply this release
-  and then run `terragrunt destroy` on the module to remove it.
+  in the repo to support backwards compatibility, but it will be removed in the future. You should perform the following steps to remove it:
+  * Apply this release.
+  * Remove any dependency blocks to it in your `terragrunt.hcl` files.
+  * Run `terragrunt destroy` on the module to remove it.
+  * Delete the `bundles` CRD.
 
 ### Added
 

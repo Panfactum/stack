@@ -2,9 +2,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* lint disable no-duplicate-headings */}
 
-# Argo Workflow Authorization for Kubernetes Service Account
+{/* eslint-disable import/order */}
 
 <ModuleHeader name="kube_sa_auth_workflow" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_workflow" status="alpha" type="submodule" />
+
+# Argo Workflow Authorization for Kubernetes Service Account
 
 Provides a Kubernetes Service Account the necessary permissions to run an Argo Workflow Pod.
 
@@ -107,5 +109,7 @@ This limits the usefulness of tokens that are extracted from the cluster by an a
 The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
 assigned in the [aws\_vpc](/docs/main/reference/infrastructure-modules/aws/aws_vpc) and [aws\_eks](/docs/main/reference/infrastructure-modules/aws/aws_eks)
 modules. If you need additional IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
+
+{/* eslint-enable import/order */}
 
 {/* lint enable no-duplicate-headings */}

@@ -35,6 +35,8 @@ in {
     # in the main repo
     ####################################
     (import ../mkDevShells/setup { inherit pkgs; })
+    (pkgs.writeShellScriptBin "pf-get-repo-variables"
+      (builtins.readFile ../packages/pf-get-repo-variables.sh))
 
     ####################################
     # Programming Langauges

@@ -11,6 +11,11 @@ variable "zones" {
       records   = list(string)
       ttl       = optional(number, 300)
     })), [])
+    cname_records = optional(list(object({
+      subdomain = string
+      record    = string
+      ttl       = optional(number, 300)
+    })), [])
   }))
 }
 

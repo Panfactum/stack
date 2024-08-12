@@ -129,7 +129,7 @@ module "tf_deploy_workflow" {
       {
         name        = "git_ref"
         description = "Which commit to check out and deploy in the ${var.repo} repository"
-        default     = "main"
+        default     = var.git_ref
       }
     ]
   }

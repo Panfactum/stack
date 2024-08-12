@@ -134,7 +134,7 @@ module "image_builder_workflow" {
       {
         name        = "git_ref"
         description = "Which commit to check out and build in the ${var.code_repo} repository"
-        default     = var.code_default_git_ref
+        default     = var.git_ref
       }
     ]
   }
@@ -248,7 +248,7 @@ module "image_builder_workflow" {
   # end-generate
 }
 
-resource "kubectl_manifest" "website_workflow_template" {
+resource "kubectl_manifest" "workflow_template" {
   yaml_body = yamlencode({
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "WorkflowTemplate"
