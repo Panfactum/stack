@@ -42,9 +42,10 @@ module "aws_core_permissions" {
 ######################### Superuser #######################################
 
 resource "aws_ssoadmin_permission_set" "superuser" {
-  name         = "Superuser"
-  description  = "Complete access to the account."
-  instance_arn = local.sso_instance_arn
+  name             = "Superuser"
+  description      = "Complete access to the account."
+  instance_arn     = local.sso_instance_arn
+  session_duration = "PT${var.session_duration_hours}H"
   tags = merge(module.tags.tags, {
     description = "Complete access to the account."
   })
@@ -59,9 +60,10 @@ resource "aws_ssoadmin_managed_policy_attachment" "superuser" {
 ######################### Admin #######################################
 
 resource "aws_ssoadmin_permission_set" "admin" {
-  name         = "Admin"
-  description  = "Read and write access to most resources."
-  instance_arn = local.sso_instance_arn
+  name             = "Admin"
+  description      = "Read and write access to most resources."
+  instance_arn     = local.sso_instance_arn
+  session_duration = "PT${var.session_duration_hours}H"
   tags = merge(module.tags.tags, {
     description = "Read and write access to most resources."
   })
@@ -76,9 +78,10 @@ resource "aws_ssoadmin_permission_set_inline_policy" "admin" {
 ######################### Reader #######################################
 
 resource "aws_ssoadmin_permission_set" "reader" {
-  name         = "Reader"
-  description  = "Read only access to all resources."
-  instance_arn = local.sso_instance_arn
+  name             = "Reader"
+  description      = "Read only access to all resources."
+  instance_arn     = local.sso_instance_arn
+  session_duration = "PT${var.session_duration_hours}H"
   tags = merge(module.tags.tags, {
     description = "Read only access to all resources."
   })
@@ -93,9 +96,10 @@ resource "aws_ssoadmin_permission_set_inline_policy" "reader" {
 ######################### Restricted Reader #######################################
 
 resource "aws_ssoadmin_permission_set" "restricted_reader" {
-  name         = "RestrictedReader"
-  description  = "Read only access to a restricted subset of resources."
-  instance_arn = local.sso_instance_arn
+  name             = "RestrictedReader"
+  description      = "Read only access to a restricted subset of resources."
+  instance_arn     = local.sso_instance_arn
+  session_duration = "PT${var.session_duration_hours}H"
   tags = merge(module.tags.tags, {
     description = "Read only access to a restricted subset of resources."
   })
@@ -110,9 +114,10 @@ resource "aws_ssoadmin_permission_set_inline_policy" "restricted_reader" {
 ######################### Billing Admin #######################################
 
 resource "aws_ssoadmin_permission_set" "billing_admin" {
-  name         = "BillingAdmin"
-  description  = "Read and write access to billing-related functionality."
-  instance_arn = local.sso_instance_arn
+  name             = "BillingAdmin"
+  description      = "Read and write access to billing-related functionality."
+  instance_arn     = local.sso_instance_arn
+  session_duration = "PT${var.session_duration_hours}H"
   tags = merge(module.tags.tags, {
     description = "Read and write access to billing-related functionality."
   })

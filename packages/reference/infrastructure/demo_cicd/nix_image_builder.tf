@@ -393,11 +393,11 @@ module "nix_image_builder_workflow" {
         )
         resources = {
           requests = {
-            memory = "250Mi"
+            memory = "500Mi"
             cpu = "100m"
           }
           limits = {
-            memory = "400Mi"
+            memory = "750Mi"
           }
         }
       }
