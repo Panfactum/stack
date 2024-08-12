@@ -25,7 +25,37 @@ variable "pg_instances" {
   default     = 2
 }
 
-variable "pg_storage_gb" {
+variable "pg_max_connections" {
+  description = "The maximum number of connections to each postgres database"
+  type        = number
+  default     = 100
+}
+
+variable "pg_shared_buffers_percent" {
+  description = "The percent of the overall memory allocation dedicated for caching data (avoiding reads to disk)"
+  type        = number
+  default     = 25
+}
+
+variable "pg_work_mem_percent" {
+  description = "The percent of the overall memory allocation available to queries for sort and hash operations (intermediate calculations during queries)"
+  type        = number
+  default     = 25
+}
+
+variable "pg_maintenance_work_mem_percent" {
+  description = "The percent of the overall memory allocation available for database maintenance operations"
+  type        = number
+  default     = 5
+}
+
+variable "pg_parameters" {
+  description = "A map of postgres parameters. See https://cloudnative-pg.io/documentation/1.23/postgresql_conf."
+  type        = map(string)
+  default     = {}
+}
+
+variable "pg_initial_storage_gb" {
   description = "The initial number of gigabytes of storage to provision for the postgres cluster"
   type        = number
 }
@@ -42,10 +72,10 @@ variable "pg_storage_increase_threshold_percent" {
   default     = 20
 }
 
-variable "pg_storage_increase_percent" {
-  description = "The percent to increase storage by if free space drops below the threshold"
+variable "pg_storage_increase_gb" {
+  description = "The number of GB to increase storage by if free space drops below the threshold"
   type        = number
-  default     = 100
+  default     = 10
 }
 
 variable "pg_shutdown_timeout" {
@@ -58,6 +88,12 @@ variable "backups_force_delete" {
   description = "Whether to delete backups on destroy"
   type        = bool
   default     = false
+}
+
+variable "backups_cron_schedule" {
+  description = "The cron schedule on which to create CNPG Backup resources"
+  type        = string
+  default     = "0 0 0 * * 0" // midnight on Sunday
 }
 
 variable "vpa_enabled" {
@@ -347,4 +383,10 @@ variable "enhanced_ha_enabled" {
   description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
   type        = bool
   default     = true
+}
+
+variable "extra_schemas" {
+  description = "Extra schemas that were created in the app database"
+  type        = list(string)
+  default     = []
 }

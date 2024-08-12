@@ -482,7 +482,7 @@ module "grafana_db" {
 
   eks_cluster_name            = var.eks_cluster_name
   pg_cluster_namespace        = local.namespace
-  pg_storage_gb               = 1
+  pg_initial_storage_gb       = 1
   pg_memory_mb                = 500
   pg_cpu_millicores           = 250
   pg_instances                = 2

@@ -6,7 +6,71 @@ import ModuleHeader from "../../../ModuleHeader";
 
 <ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule" />
 
-# Postgres Cluster on Kubernetes
+# PostgreSQL Cluster on Kubernetes
+
+## Usage
+
+### Storage
+
+You must provide an initial storage amount for the database with `pg_initial_storage_gb`. This configures the size
+of the underlying EBS volumes.
+
+Once the database is running, the PVC autoresizer
+(provided by [kube\_pvc\_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
+will automatically expand the EBS volumes once the free space
+drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
+The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
+
+Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+
+### Memory Tuning
+
+By default, we tune the PostgreSQL memory settings in accordance with
+[the EDB recommendations](https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory) since EDB
+is the original creator of CNPG.
+
+However, PostgreSQL databases can be used to run such a wide array of workloads that you may want to tune
+the settings further for your particular use case.
+
+These three settings are the most important:
+
+* `pg_work_mem_percent`: How much memory is set aside for intermediate calculations in a query (i.e., sorts, joins, etc.).
+* `pg_max_connections`: How many simultaneous connections / queries you can run in the database.
+* `pg_shared_buffers_percent`: How much of the memory given to the cluster is set aside for caching data so that
+  it does not need to be read from disk.
+
+`pg_work_mem_percent` is the most important and most likely to slow down your complex queries. This parameter
+represents the total memory set aside for all connections for their query calculations.
+
+`pg_max_connections` is important as memory is allocated and limited on a *per-connection* basis.
+As a result, the actual memory available to each query is `pg_memory_mb * pg_work_mem_percent / pg_max_connections`.
+This is true regardless of whether you are
+actually using the maximum number of connections. Therefore, if you are using the database
+to run large analytical queries, you may want to lower the `pg_max_connections` value in order to allow each query to use more
+of the working memory pool.
+
+`pg_shared_buffers_percent` will not typically be a source of issues as the linux page cache will step in if
+this value is not large enough. However, the internal PostgreSQL cache controlled by this value
+will always be more performant than the generic page cache, so tuning this can help in some circumstances.
+
+### PostgreSQL Parameters
+
+PostgreSQL comes with hundreds of parameters that can be used to customize its behavior. You
+can see the full set of available values [here](https://cloudnative-pg.io/documentation/1.23/postgresql_conf), and you
+can provide them to this module via `pg_parameters`.
+
+This can be used overwrite any default settings this module provides.
+
+### Extra Schemas
+
+When initially created, the CNPG cluster has just one [schema](https://www.postgresql.org/docs/current/ddl-schemas.html)
+(`public`) in the `app` database. However, you may choose to add more in the future.
+
+If you do, you will need to add those schemas to the `extra_schemas` input. This will ensure that users and roles
+created by the Vault auth system will have access to the objects in those schemas.
+
+Note that this will NOT create the extra schemas; you should do that in your database migration scripts.
 
 ## Providers
 
@@ -46,7 +110,7 @@ Description: The namespace to deploy to the cluster into
 
 Type: `string`
 
-### <a name="input_pg_storage_gb" /> [pg\_storage\_gb](#input_pg_storage_gb)
+### <a name="input_pg_initial_storage_gb" /> [pg\_initial\_storage\_gb](#input_pg_initial_storage_gb)
 
 Description: The initial number of gigabytes of storage to provision for the postgres cluster
 
@@ -63,6 +127,14 @@ Description: Whether the database nodes can be scheduled on arm instances
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_backups_cron_schedule" /> [backups\_cron\_schedule](#input_backups_cron_schedule)
+
+Description: The cron schedule on which to create CNPG Backup resources
+
+Type: `string`
+
+Default: `"0 0 0 * * 0"`
 
 ### <a name="input_backups_enabled" /> [backups\_enabled](#input_backups_enabled)
 
@@ -96,6 +168,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_extra_schemas" /> [extra\_schemas](#input_extra_schemas)
+
+Description: Extra schemas that were created in the app database
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
 Description: Whether to add active monitoring to the deployed systems
@@ -128,6 +208,22 @@ Type: `number`
 
 Default: `2`
 
+### <a name="input_pg_maintenance_work_mem_percent" /> [pg\_maintenance\_work\_mem\_percent](#input_pg_maintenance_work_mem_percent)
+
+Description: The percent of the overall memory allocation available for database maintenance operations
+
+Type: `number`
+
+Default: `5`
+
+### <a name="input_pg_max_connections" /> [pg\_max\_connections](#input_pg_max_connections)
+
+Description: The maximum number of connections to each postgres database
+
+Type: `number`
+
+Default: `100`
+
 ### <a name="input_pg_memory_mb" /> [pg\_memory\_mb](#input_pg_memory_mb)
 
 Description: The amount of memory to allocate to the postgres pods (in Mi)
@@ -135,6 +231,22 @@ Description: The amount of memory to allocate to the postgres pods (in Mi)
 Type: `number`
 
 Default: `1000`
+
+### <a name="input_pg_parameters" /> [pg\_parameters](#input_pg_parameters)
+
+Description: A map of postgres parameters. See [https://cloudnative-pg.io/documentation/1.23/postgresql\_conf](https://cloudnative-pg.io/documentation/1.23/postgresql_conf).
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_pg_shared_buffers_percent" /> [pg\_shared\_buffers\_percent](#input_pg_shared_buffers_percent)
+
+Description: The percent of the overall memory allocation dedicated for caching data (avoiding reads to disk)
+
+Type: `number`
+
+Default: `25`
 
 ### <a name="input_pg_shutdown_timeout" /> [pg\_shutdown\_timeout](#input_pg_shutdown_timeout)
 
@@ -144,13 +256,13 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_pg_storage_increase_percent" /> [pg\_storage\_increase\_percent](#input_pg_storage_increase_percent)
+### <a name="input_pg_storage_increase_gb" /> [pg\_storage\_increase\_gb](#input_pg_storage_increase_gb)
 
-Description: The percent to increase storage by if free space drops below the threshold
+Description: The number of GB to increase storage by if free space drops below the threshold
 
 Type: `number`
 
-Default: `100`
+Default: `10`
 
 ### <a name="input_pg_storage_increase_threshold_percent" /> [pg\_storage\_increase\_threshold\_percent](#input_pg_storage_increase_threshold_percent)
 
@@ -175,6 +287,14 @@ Description: The version of postgres to deploy
 Type: `string`
 
 Default: `"16.2-10"`
+
+### <a name="input_pg_work_mem_percent" /> [pg\_work\_mem\_percent](#input_pg_work_mem_percent)
+
+Description: The percent of the overall memory allocation available to queries for sort and hash operations (intermediate calculations during queries)
+
+Type: `number`
+
+Default: `25`
 
 ### <a name="input_pgbouncer_application_name_add_host" /> [pgbouncer\_application\_name\_add\_host](#input_pgbouncer_application_name_add_host)
 
@@ -552,7 +672,7 @@ Description: The password for root user of the database
 
 Description: The root user of the database
 
-## Usage
+## Maintenance Notes
 
 No notes
 

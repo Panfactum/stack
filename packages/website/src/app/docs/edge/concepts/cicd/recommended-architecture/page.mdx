@@ -59,7 +59,7 @@ this overview to explain the major moving parts and motivations behind our recom
 
 ## Architecture
 
-Below is our generation recommendation for your CI / CD system architecture:
+Below is our recommendation for your CI / CD system architecture:
 
 <MarkdownSVGImage src={CICDImg} alt="CICD Architectural Diagram" />
 
@@ -113,9 +113,9 @@ Here are the important notes:
 
   * Developers can share resources with the CI / CD system (e.g., shared build cache).
   * Since CI workflows are bursty and resource-intensive in nature, running them in development limits any potential
-    disruptions or resource contention with live systems ,
+    disruptions or resource contention with live systems.
   * Since CI systems are an incredibly common threat vector for malicious code, you should run most of your CI code
-    in an environment with no access to live system.
+    in an environment with no access to production systems or data.
 
 * Build artifacts are only generated a single time and then tested and promoted across environments. The only
   CI / CD code that runs in higher environments is infrastructure deployment code (and continuous testing scripts, if applicable).

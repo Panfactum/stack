@@ -311,7 +311,7 @@ module "database" {
 
   eks_cluster_name            = var.eks_cluster_name
   pg_cluster_namespace        = local.namespace
-  pg_storage_gb               = 2
+  pg_initial_storage_gb       = 2
   pg_memory_mb                = 1000
   pg_cpu_millicores           = 250
   pg_instances                = 2

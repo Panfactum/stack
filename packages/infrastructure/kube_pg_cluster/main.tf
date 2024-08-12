@@ -38,6 +38,8 @@ locals {
     var.pgbouncer_read_only_enabled ? ["r"] : [],
     var.pgbouncer_read_write_enabled ? ["rw"] : []
   ))
+
+  all_schemas = tolist(toset(concat(var.extra_schemas, ["public"])))
 }
 
 module "pull_through" {
@@ -337,8 +339,8 @@ resource "kubernetes_manifest" "postgres_cluster" {
         annotations = {
           "linkerd.io/inject"                    = "enabled"
           "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
-          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : 10 * var.pg_storage_gb}Gi"
-          "resize.topolvm.io/increase"           = "${var.pg_storage_increase_percent}%"
+          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : 10 * var.pg_initial_storage_gb}Gi"
+          "resize.topolvm.io/increase"           = "${var.pg_storage_increase_gb}Gi"
           "resize.topolvm.io/threshold"          = "${var.pg_storage_increase_threshold_percent}%"
         }
       }
@@ -351,6 +353,45 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       monitoring = {
         enablePodMonitor = var.monitoring_enabled
+      }
+
+      postgresql = {
+        parameters = merge(
+          {
+            # Defaults - Need to be provided to avoid reconciliation error
+            archive_mode               = "on"
+            archive_timeout            = "5min"
+            dynamic_shared_memory_type = "posix"
+            log_destination            = "csvlog"
+            log_directory              = "/controller/log"
+            log_filename               = "postgres"
+            log_rotation_age           = "0"
+            log_rotation_size          = "0"
+            log_truncate_on_rotation   = "false"
+            logging_collector          = "on"
+            max_parallel_workers       = "32"
+            max_replication_slots      = "32"
+            max_worker_processes       = "32"
+            shared_memory_type         = "mmap"
+            shared_preload_libraries   = ""
+            ssl_max_protocol_version   = "TLSv1.3"
+            ssl_min_protocol_version   = "TLSv1.3"
+            wal_keep_size              = "1024MB"
+            wal_level                  = "logical"
+            wal_log_hints              = "on"
+            wal_receiver_timeout       = "5s"
+            wal_sender_timeout         = "5s"
+
+            # Memory tuning - Based on guide created bhy EDB (creators of CNPG)
+            # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory
+            max_connections      = var.pg_max_connections
+            shared_buffers       = "${ceil(var.pg_memory_mb * var.pg_shared_buffers_percent / 100)}MB"
+            work_mem             = "${max(ceil(var.pg_memory_mb * var.pg_work_mem_percent / 100 / var.pg_max_connections), 4)}MB"
+            maintenance_work_mem = "${ceil(var.pg_memory_mb * var.pg_maintenance_work_mem_percent / 100)}MB"
+            effective_cache_size = "${ceil(var.pg_memory_mb * max((100 - var.pg_work_mem_percent - var.pg_maintenance_work_mem_percent - 25), var.pg_shared_buffers_percent) / 100)}MB"
+          },
+          var.pg_parameters
+        )
       }
 
       bootstrap = {
@@ -367,13 +408,12 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
             // Grant privileges to pgbouncer
             "CREATE ROLE cnpg_pooler_pgbouncer WITH LOGIN;",
-            "GRANT ALL PRIVILEGES ON SCHEMA public TO cnpg_pooler_pgbouncer;",
             "GRANT CONNECT ON DATABASE postgres TO cnpg_pooler_pgbouncer;",
             "CREATE OR REPLACE FUNCTION user_search(uname TEXT) RETURNS TABLE (usename name, passwd text) LANGUAGE sql SECURITY DEFINER AS 'SELECT usename, passwd FROM pg_shadow WHERE usename=$1;'",
             "REVOKE ALL ON FUNCTION user_search(text) FROM public;",
             "GRANT EXECUTE ON FUNCTION user_search(text) TO cnpg_pooler_pgbouncer;"
           ]
-          postInitApplicationSQL = [
+          postInitApplicationSQL = flatten([
 
             // See above
             "REVOKE ALL ON SCHEMA public FROM PUBLIC;",
@@ -381,19 +421,22 @@ resource "kubernetes_manifest" "postgres_cluster" {
             // Creates the user groups that we assign dynamic roles to
             "CREATE ROLE reader NOINHERIT;",
             "GRANT pg_read_all_data TO reader;",
-            "GRANT USAGE ON SCHEMA public TO reader;",
+            [
+              for schema in local.all_schemas : "GRANT USAGE ON SCHEMA ${schema} TO reader;"
+            ],
 
             "CREATE ROLE writer NOINHERIT;",
             "GRANT pg_write_all_data, pg_read_all_data TO writer;",
-            "GRANT ALL PRIVILEGES ON SCHEMA public TO writer;",
+            [
+              for schema in local.all_schemas : "GRANT ALL PRIVILEGES ON SCHEMA ${schema} TO writer;"
+            ],
 
             // Grant privileges to pgbouncer
             "GRANT CONNECT ON DATABASE app TO cnpg_pooler_pgbouncer;",
-            "GRANT ALL PRIVILEGES ON SCHEMA public TO cnpg_pooler_pgbouncer;",
             "CREATE OR REPLACE FUNCTION user_search(uname TEXT) RETURNS TABLE (usename name, passwd text) LANGUAGE sql SECURITY DEFINER AS 'SELECT usename, passwd FROM pg_shadow WHERE usename=$1;'",
             "REVOKE ALL ON FUNCTION user_search(text) FROM public;",
             "GRANT EXECUTE ON FUNCTION user_search(text) TO cnpg_pooler_pgbouncer;"
-          ]
+          ])
         }
       }
 
@@ -426,7 +469,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         pvcTemplate = {
           resources = {
             requests = {
-              storage = "${var.pg_storage_gb}Gi"
+              storage = "${var.pg_initial_storage_gb}Gi"
             }
           }
           storageClassName = "ebs-standard"
@@ -480,11 +523,11 @@ resource "kubectl_manifest" "scheduled_backup" {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "ScheduledBackup"
     metadata = {
-      name      = "${local.cluster_name}-weekly"
+      name      = "${local.cluster_name}-default"
       namespace = var.pg_cluster_namespace
     }
     spec = {
-      schedule             = "0 0 0 * * 0" // midnight on Sunday
+      schedule             = var.backups_cron_schedule
       backupOwnerReference = "cluster"
       cluster = {
         name = local.cluster_name
@@ -558,17 +601,19 @@ resource "vault_database_secret_backend_role" "reader" {
   backend = "db"
   name    = "reader-${var.pg_cluster_namespace}-${local.cluster_name}"
   db_name = vault_database_secret_backend_connection.postgres.name
-  creation_statements = [
+  creation_statements = flatten([
     // We have to re-run the generic grant commands
     // on every login to make sure we have picked up new objects
-    "GRANT SELECT ON ALL TABLES IN SCHEMA public TO reader;",
-    "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO reader;",
-    "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO reader;",
+    [for schema in local.all_schemas : [
+      "GRANT SELECT ON ALL TABLES IN SCHEMA ${schema} TO reader;",
+      "GRANT SELECT ON ALL SEQUENCES IN SCHEMA ${schema} TO reader;",
+      "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA ${schema} TO reader;",
+    ]],
 
     // Create the temporary role and assign them to the reader group
     "CREATE ROLE \"{{name}}\" LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
     "GRANT reader TO \"{{name}}\";"
-  ]
+  ])
   renew_statements = [
     "ALTER ROLE \"{{name}}\" VALID UNTIL '{{expiration}}'"
   ]
@@ -590,26 +635,30 @@ resource "vault_database_secret_backend_role" "admin" {
   backend = "db"
   name    = "admin-${var.pg_cluster_namespace}-${local.cluster_name}"
   db_name = vault_database_secret_backend_connection.postgres.name
-  creation_statements = [
+  creation_statements = flatten([
     // We have to re-run the generic grant commands
     // on every login to make sure we have picked up new objects
-    "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO writer;",
-    "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO writer;",
-    "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO writer;",
+    [for schema in local.all_schemas : [
+      "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ${schema} TO writer;",
+      "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA ${schema} TO writer;",
+      "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA ${schema} TO writer;"
+    ]],
 
     // Create the temporary role and assign them to the writer group
     "CREATE ROLE \"{{name}}\" LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
     "GRANT writer TO \"{{name}}\";",
 
     // Ensure that new objects this role generates propagate permissions to the other roles
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON TYPES TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT SELECT ON TABLES TO reader;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT SELECT ON SEQUENCES TO reader;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO reader;"
-  ]
+    [for schema in local.all_schemas : [
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TABLES TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON SEQUENCES TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON FUNCTIONS TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TYPES TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON TABLES TO reader;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON SEQUENCES TO reader;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT EXECUTE ON FUNCTIONS TO reader;"
+    ]],
+  ])
   renew_statements = [
     "ALTER ROLE \"{{name}}\" VALID UNTIL '{{expiration}}'"
   ]
@@ -631,17 +680,19 @@ resource "vault_database_secret_backend_role" "superuser" {
   backend = "db"
   name    = "superuser-${var.pg_cluster_namespace}-${local.cluster_name}"
   db_name = vault_database_secret_backend_connection.postgres.name
-  creation_statements = [
+  creation_statements = flatten([
     "CREATE ROLE \"{{name}}\" SUPERUSER LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
 
-    // Ensure that new objects this role generates propagate permissions to the other roles
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON FUNCTIONS TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT ALL PRIVILEGES ON TYPES TO writer;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT SELECT ON TABLES TO reader;",
-    "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA public GRANT SELECT ON SEQUENCES TO reader;",
-  ]
+    [for schema in local.all_schemas : [
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TABLES TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON SEQUENCES TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON FUNCTIONS TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT ALL PRIVILEGES ON TYPES TO writer;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON TABLES TO reader;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT SELECT ON SEQUENCES TO reader;",
+      "ALTER DEFAULT PRIVILEGES FOR ROLE \"{{name}}\" IN SCHEMA ${schema} GRANT EXECUTE ON FUNCTIONS TO reader;"
+    ]],
+  ])
   renew_statements = [
     "ALTER ROLE \"{{name}}\" VALID UNTIL '{{expiration}}'"
   ]
