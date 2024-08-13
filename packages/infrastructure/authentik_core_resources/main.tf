@@ -175,7 +175,7 @@ resource "authentik_stage_authenticator_validate" "mfa_webauthn_only" {
   not_configured_action = "configure"
   configuration_stages = var.superusers_require_webauthn ? [
     authentik_stage_authenticator_webauthn.webauthn_setup.id
-  ] : authentik_stage_authenticator_validate.mfa.configuration_stages
+  ] : sort(authentik_stage_authenticator_validate.mfa.configuration_stages)
 }
 
 ###########################################################################

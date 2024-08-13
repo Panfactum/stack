@@ -11,7 +11,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
-## Breaking Changes
+### Breaking Changes
 
 * `pg_storage_increase_percent` has been changed to `pg_storage_increase_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
   This allows for more predictable storage autoscaling and optimal resource provisioning regardless of the current storage scale.
@@ -19,13 +19,17 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * `pg_storage_gb` has been changed to `pg_initial_storage_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
   This better indicates that this value is *only used during the initial database provisioning* and has no effect thereafter.
 
-## Added
+### Added
 
 * Adds new enhancements to the [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) module:
   * Better defaults and options for memory tuning
   * Provides the ability to set arbitrary [PostgreSQL parameters](https://cloudnative-pg.io/documentation/1.23/postgresql_conf)
   * Provides the ability to set a custom backup schedule
   * Adds support for additional schemas via the `extra_schemas` input
+
+### Fixed
+
+* Added deterministic ordering to additional resources in [authentik_core_resources](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
 
 ## edge.24-08-12
 
