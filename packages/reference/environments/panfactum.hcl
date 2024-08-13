@@ -288,7 +288,8 @@ retryable_errors = local.is_ci ? [".*"] : [
   "(?si).*429 Too Many Requests.*",
   "(?si).*Client\\.Timeout exceeded while awaiting headers.*",
   "(?si).*returned error: 429.*",
-  "(?si).*inheritedMetadata.*id.*"
+  "(?si).*inheritedMetadata.*id.*",
+  "(?si).*Provider produced inconsistent final plan.*"
 ]
 retry_max_attempts       = 3
 retry_sleep_interval_sec = 30

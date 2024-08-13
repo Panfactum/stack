@@ -13,6 +13,8 @@ usage() {
 }
 
 REPO_VARIABLES=$(pf-get-repo-variables)
+TG_VARIABLES=$(pf-get-terragrunt-variables)
+AWS_PROFILE=$(echo "$TG_VARIABLES" | jq -r '.aws_profile')
 REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
 ENVIRONMENTS_DIR=$(echo "$REPO_VARIABLES" | jq -r '.environments_dir')
 
@@ -38,6 +40,11 @@ fi
 GLOBAL_REGION_DIR="$ENVIRONMENTS_DIR/$ENVIRONMENT/global"
 if ! [[ -d $GLOBAL_REGION_DIR ]]; then
   echo "Error: Global region not found in $ENVIRONMENT. Run 'pf-env-scaffold' to generate." >&2
+  exit 1
+fi
+
+if [[ $AWS_PROFILE == "null" ]]; then
+  echo "Error: No AWS profile set for environment. Run 'pf-env-scaffold' to create the necessary Terragrunt configuration files." >&2
   exit 1
 fi
 
@@ -77,10 +84,10 @@ inputs = {
 }
 EOF
 
-cat >"$MODULE_DIR/module.yaml" <<EOF
-providers:
-  - aws
-EOF
+(
+  cd "$MODULE_DIR"
+  pf-providers-enable
+)
 
 ####################################################################
 # Step 4: Setup the tf_bootstrap_resources module
@@ -131,11 +138,12 @@ inputs = {
 }
 EOF
 
-cat >"$MODULE_DIR/module.yaml" <<EOF
-providers:
-  - aws
-module: aws_kms_encrypt_key
-EOF
+(
+  cd "$MODULE_DIR"
+  pf-providers-enable
+)
+
+echo "module: aws_kms_encrypt_key" >>"$MODULE_DIR/module.yaml"
 
 ####################################################################
 # Step 8: Apply the sops module
@@ -159,4 +167,4 @@ creation_rules:
 EOF
 fi
 
-yq -Y -i '.creation_rules += [{"path_regex": ".*/'"$ENVIRONMENT"'/.*", "aws_profile": "'"$ENVIRONMENT"'-superuser", "kms": "'"$ARN"','"$ARN2"'"}]' "$SOPS_CONFIG"
+yq -Y -i '.creation_rules += [{"path_regex": ".*/'"$ENVIRONMENT"'/.*", "aws_profile": "'"$AWS_PROFILE"'", "kms": "'"$ARN"','"$ARN2"'"}]' "$SOPS_CONFIG"
