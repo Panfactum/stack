@@ -34,3 +34,18 @@ variable "node_labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "node_vpc_id" {
+  description = "The ID of the VPC to deploy Karpenter nodes into."
+  type        = string
+}
+
+variable "node_subnets" {
+  description = "List of subnet names to deploy Karpenter nodes into."
+  type        = set(string)
+}
+
+variable "node_security_group_id" {
+  description = "The id of the security group for nodes running in the EKS cluster"
+  type        = string
+}

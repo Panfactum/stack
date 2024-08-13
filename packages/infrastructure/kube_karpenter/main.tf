@@ -94,32 +94,6 @@ module "namespace" {
 }
 
 /********************************************************************************************************************
-* Subnet Tagging to enable autodiscovery
-*********************************************************************************************************************/
-
-data "aws_subnet" "node_subnets" {
-  for_each = var.node_subnets
-  vpc_id   = var.node_vpc_id
-  filter {
-    name   = "tag:Name"
-    values = [each.value]
-  }
-}
-
-resource "aws_ec2_tag" "subnet_tags" {
-  for_each    = var.node_subnets
-  resource_id = data.aws_subnet.node_subnets[each.key].id
-  key         = "karpenter.sh/discovery"
-  value       = var.cluster_name
-}
-
-resource "aws_ec2_tag" "security_group_tag" {
-  resource_id = var.node_security_group_id
-  key         = "karpenter.sh/discovery"
-  value       = var.cluster_name
-}
-
-/********************************************************************************************************************
 * AWS Termination Queue Resources
 *********************************************************************************************************************/
 

@@ -1,2 +1,4 @@
 providers:
+  - aws
   - kubernetes
+  - random

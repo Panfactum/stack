@@ -19,6 +19,10 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * `pg_storage_gb` has been changed to `pg_initial_storage_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
   This better indicates that this value is *only used during the initial database provisioning* and has no effect thereafter.
 
+* `node_vpc_id`, `node_subnets`, and `node_security_group_id` have been moved from [kube_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
+to [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) in order to simplify the logic
+of assigning nodes to subnets, VPCs, and security groups. Additionally, we have removed Karpenter auto-discovery tags as they are no longer necessary.
+
 ### Added
 
 * Adds new enhancements to the [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) module:

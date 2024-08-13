@@ -14,21 +14,6 @@ variable "node_role_arn" {
   type        = string
 }
 
-variable "node_security_group_id" {
-  description = "The id of the security group for nodes running in the EKS cluster"
-  type        = string
-}
-
-variable "node_vpc_id" {
-  description = "The ID of the VPC to deploy karpenter nodes into."
-  type        = string
-}
-
-variable "node_subnets" {
-  description = "List of subnet names to deploy karpenter nodes into."
-  type        = set(string)
-}
-
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool

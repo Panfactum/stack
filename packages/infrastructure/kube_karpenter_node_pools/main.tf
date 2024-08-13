@@ -100,22 +100,10 @@ locals {
   }
 
   node_class_template = {
-    amiFamily = "Bottlerocket"
-    subnetSelectorTerms = [
-      {
-        tags = {
-          "karpenter.sh/discovery" = var.cluster_name
-        }
-      }
-    ]
-    securityGroupSelectorTerms = [
-      {
-        tags = {
-          "karpenter.sh/discovery" = var.cluster_name
-        }
-      }
-    ]
-    instanceProfile = var.node_instance_profile
+    amiFamily                  = "Bottlerocket"
+    subnetSelectorTerms        = [for subnet in data.aws_subnet.node_subnets : { id = subnet.id }]
+    securityGroupSelectorTerms = [{ id = var.node_security_group_id }]
+    instanceProfile            = var.node_instance_profile
 
     metadataOptions = {
       httpEndpoint            = "enabled"
@@ -229,6 +217,15 @@ module "node_settings" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
+}
+
+data "aws_subnet" "node_subnets" {
+  for_each = var.node_subnets
+  vpc_id   = var.node_vpc_id
+  filter {
+    name   = "tag:Name"
+    values = [each.value]
+  }
 }
 
 /********************************************************************************************************************
