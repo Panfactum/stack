@@ -364,7 +364,10 @@ resource "aws_eks_node_group" "controllers" {
   node_role_arn          = aws_iam_role.node_group.arn
   subnet_ids             = [for subnet in var.node_subnets : data.aws_subnet.node_groups[subnet].id]
 
-  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.medium", "m6g.medium"]
+  # We use amd64 instances while bootstrapping b/c some of the test commands require it;
+  # after Karpenter is deployed (boostrapping is complete), we can switch to cheaper arm64 as Karpenter
+  # will create amd64 instances if they are ever needed.
+  instance_types = var.bootstrap_mode_enabled ? ["t3.large", "t3a.large"] : ["t4g.medium", "m6g.medium"]
 
   # Unlike Karpenter, applies of this module will fail if EKS cannot replace the nodes in the node groups
   # with updated versions due to being unable to evict modules. As a result, we enable force eviction
@@ -406,13 +409,8 @@ resource "aws_eks_node_group" "controllers" {
     key    = module.constants.cilium_taint.key
     value  = module.constants.cilium_taint.value
   }
-  taint {
-    effect = "NO_SCHEDULE"
-    key    = "arm64"
-    value  = "true"
-  }
   dynamic "taint" {
-    for_each = var.bootstrap_mode_enabled ? toset([]) : toset(["burstable", "spot"])
+    for_each = var.bootstrap_mode_enabled ? toset([]) : toset(["burstable", "spot", "arm64"])
     content {
       effect = "NO_SCHEDULE"
       key    = taint.key
