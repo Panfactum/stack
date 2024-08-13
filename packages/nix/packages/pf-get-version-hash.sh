@@ -10,9 +10,9 @@ set -eo pipefail
 git_ref=$1
 git_repo=${2:-origin}
 
-# If the git repo is local, then this isn't pinned to a particular commit
+# If the git ref is local, then this isn't pinned to a particular commit
 # so just return "local"
-if [[ $git_repo == "local" ]]; then
+if [[ $git_ref == "local" ]]; then
   echo "local"
   exit 0
 fi
