@@ -371,4 +371,6 @@
     src2.barman # barman cli for backups and restore with postgres
     (util.customShellScript
       "pf-get-db-creds") # gets database credentials from vault
+    (util.customShellScript
+      "pf-db-tunnel") # establishes a tunnel to a selected database
   ]))
