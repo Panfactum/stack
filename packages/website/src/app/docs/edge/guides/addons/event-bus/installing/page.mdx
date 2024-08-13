@@ -59,7 +59,7 @@ it. Below is a code snippet that exemplifies the deployment pattern:
 ```hcl
 
 module "event_bus" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure//kube_argo_event_bus?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_bus?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
 
   namespace = local.namespace
 
@@ -75,7 +75,7 @@ module "event_bus" {
 }
 
 module "event_source" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure//kube_argo_event_source?ref=__PANFACTUM_VERSION_EDGE__" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_source?ref=__PANFACTUM_VERSION_EDGE__" #pf-update
 
   name        = "example"
   namespace   = local.namespace
@@ -138,7 +138,7 @@ module "event_source" {
 }
 
 module "sensor" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure//infrastructure//kube_argo_sensor?ref=__PANFACTUM_VERSION_EDGE__" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=__PANFACTUM_VERSION_EDGE__" #pf-update
 
   name = "example"
   namespace = local.namespace

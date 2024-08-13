@@ -347,7 +347,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       startDelay           = 60 * 10
       stopDelay            = local.stopDelay
-      smartShutdownTimeout = local.stopDelay - 10
+      smartShutdownTimeout = max(local.stopDelay - 10, 0)
       switchoverDelay      = local.stopDelay
       failoverDelay        = 60
 

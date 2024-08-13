@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_constants" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_constants" status="stable" type="submodule" />
+<ModuleHeader name="kube_constants" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_constants" status="stable" type="submodule"/>
 
 # Kubernetes Constants
 
@@ -20,35 +19,43 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+
+
+
+
+
+
+
+
 ## Outputs
 
 The following outputs are exported:
 
-### <a name="output_cilium_taint" /> [cilium\_taint](#output_cilium_taint)
+### <a name="output_cilium_taint"></a> [cilium\_taint](#output\_cilium\_taint)
 
 Description: The taint added to every node before the Cilium pods are ready (i.e., when networking is unavailable)
 
-### <a name="output_cluster_important_priority_class_name" /> [cluster\_important\_priority\_class\_name](#output_cluster_important_priority_class_name)
+### <a name="output_cluster_important_priority_class_name"></a> [cluster\_important\_priority\_class\_name](#output\_cluster\_important\_priority\_class\_name)
 
 Description: A Kubernetes Priority Class that is higher than the database but lower than system-cluster-critical.
 
-### <a name="output_database_priority_class_name" /> [database\_priority\_class\_name](#output_database_priority_class_name)
+### <a name="output_database_priority_class_name"></a> [database\_priority\_class\_name](#output\_database\_priority\_class\_name)
 
 Description: A Kubernetes Priority Class that is higher than the default but lower than cluster-important. All stateful systems should have this priority class.
 
-### <a name="output_default_priority_class_name" /> [default\_priority\_class\_name](#output_default_priority_class_name)
+### <a name="output_default_priority_class_name"></a> [default\_priority\_class\_name](#output\_default\_priority\_class\_name)
 
 Description: The default Kubernetes Priority Class
 
-### <a name="output_panfactum_image" /> [panfactum\_image](#output_panfactum_image)
+### <a name="output_panfactum_image"></a> [panfactum\_image](#output\_panfactum\_image)
 
 Description: The repository of the Panfactum devenv image with the AWS public ECR registry (public.ecr.aws).
 
-### <a name="output_panfactum_image_version" /> [panfactum\_image\_version](#output_panfactum_image_version)
+### <a name="output_panfactum_image_version"></a> [panfactum\_image\_version](#output\_panfactum\_image\_version)
 
 Description: The tag of the Panfactum devenv image that is compatible with this module's version of the Panfactum stack.
 
-### <a name="output_panfactum_scheduler_name" /> [panfactum\_scheduler\_name](#output_panfactum_scheduler_name)
+### <a name="output_panfactum_scheduler_name"></a> [panfactum\_scheduler\_name](#output\_panfactum\_scheduler\_name)
 
 Description: The name to use for the 'schedulerName' pod spec field when you want to use the Panfactum bin-packing pod scheduler.
 

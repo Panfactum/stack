@@ -38,7 +38,7 @@ However, there are some additional considerations for first-party modules:
 
 ### Sourcing
 
-We provide convenience functionality for sourcing first-party modules in your terragrunt configuration.
+We provide convenience functionality for sourcing first-party modules in your Terragrunt configuration.
 This takes care of common issues around versioning and caching:
 
 In your `terragrunt.hcl`, you should source your module as follows:
@@ -90,7 +90,7 @@ deployed. However, this is not ideal for higher environments where you want a mo
 You likely already have some strategy for creating versioned releases in your repositories. Perhaps you use
 [semantic versioning](https://semver.org/) via git tags.
 
-You can pin terragrunt to a particular version of your module by setting the `version` key to your desired
+You can pin a module to a particular version by setting the `version` key to your desired
 [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in one of the `environment.yaml`, `region.yaml`, or `module.yaml` files.
 A git ref can be a tag, a branch name, or even a specific commit hash.
 
@@ -143,7 +143,7 @@ In this scenario, even though all three environments will use both the `module1`
 * The modules in `production` will default to using the `infrastructure/*` code at the `v1.1.0` tag except for the modules
   in `us-west-2` which will use `v1.0.0`.
 
-<MarkdownSVGImage src={VersioningImg} alt="Versioning diagram" />
+<MarkdownSVGImage src={VersioningImg} alt="Terragrunt module versioning diagram" />
 
 ## Writing Modules
 
@@ -244,13 +244,13 @@ a specific AWS profile for authentication).
 
 You can override all values in the committed version of `global.yaml`, `environment.yaml`, `region.yaml`, and `module.yaml`
 with `*.user.yaml` counterparts (e.g., `environment.user.yaml`). These files are never committed and are specific
-to **you**.
+to **you**. For all available settings, see the [reference documentation.](/docs/edge/reference/configuration/terragrunt-variables)
 
-In these files, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
+For example, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
 in a module directory.
 
-It is common that you might want to set `environments/development/environment.user.yaml` to the following if you
-are frequently testing changes to your modules in your `development` environment:
+It is common that you might want to set the `version` in `environments/development/<some-region>/region.user.yaml` if you
+are frequently testing local changes in a particular `development` region:
 
 ```yaml
 version: local
@@ -309,6 +309,8 @@ most compliance frameworks such as SOC 2.
 Often you want to know *exactly* what code is deployed in an environment at any given time. Git refs like branch
 names or even tags are not helpful as they are mutable and can change what code they point to.
 
-The Panfactum terragrunt system will automatically provide all deployed modules with an input variable
+The Panfactum Terragrunt system will automatically provide all deployed modules with an input variable
 called `version_hash` which represents the actual commit hash being deployed. You should use this to label
 and tag your infrastructure in your first-party modules; we do this automatically in the Panfactum modules.
+
+Note that if `version` is set to `local`, the `version_hash` will also be calculated as `local`.

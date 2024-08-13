@@ -201,11 +201,9 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
 
-3. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for the `controller_node_subnets` unless you have a specific reason not to.
+3. Run `pf-providers-enable` to enable the required providers.
 
-4. Run `pf-providers-enable` to enable the required providers.
-
-5. Run `terragrunt apply`.
+4. Run `terragrunt apply`.
 
 ### Deploy NodePools
 
@@ -241,9 +239,11 @@ Let's deploy the NodePools now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for `node_subnets` unless you have a specific reason not to.
 
-4. Run `terragrunt apply`.
+4. Run `pf-providers-enable` to enable the required providers.
+
+5. Run `terragrunt apply`.
 
 ### Test Cluster Autoscaling
 

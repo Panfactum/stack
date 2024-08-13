@@ -79,7 +79,7 @@ Passes the standard input variables into a submodule:
 module "workflow_perms" {
   source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_sa_auth_workflow?ref=__PANFACTUM_VERSION_MAIN__"
 
-  # generate: pass_vars
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
