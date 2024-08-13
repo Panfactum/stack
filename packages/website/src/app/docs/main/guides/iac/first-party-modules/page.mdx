@@ -244,13 +244,13 @@ a specific AWS profile for authentication).
 
 You can override all values in the committed version of `global.yaml`, `environment.yaml`, `region.yaml`, and `module.yaml`
 with `*.user.yaml` counterparts (e.g., `environment.user.yaml`). These files are never committed and are specific
-to **you**.
+to **you**. For all available settings, see the [reference documentation.](/docs/main/reference/configuration/terragrunt-variables)
 
-In these files, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
+For example, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
 in a module directory.
 
-It is common that you might want to set `environments/development/environment.user.yaml` to the following if you
-are frequently testing changes to your modules in your `development` environment:
+It is common that you might want to set the `version` in `environments/development/<some-region>/region.user.yaml` if you
+are frequently testing local changes in a particular `development` region:
 
 ```yaml
 version: local
