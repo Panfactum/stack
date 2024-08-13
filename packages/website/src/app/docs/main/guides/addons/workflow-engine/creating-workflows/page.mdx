@@ -145,7 +145,7 @@ A few critical points to notice:
    * A [Suspend Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/) (for suspending a Workflow)
 
 3. You might want to override one or more pod-level defaults for a template (example: provide certain tolerations for some
-   pods but not others).  See the `second` template above as an example.
+   pods but not others).  See the `second-template` template above as an example.
 
    Note that OpenTofu supports self-references (i.e., using a module's outputs as a part of its inputs) since values
    are lazily evaluated. As a result, we have given the `wf_spec` module outputs such as `tolerations`, `volumes`, `env`, etc.,
@@ -159,8 +159,8 @@ A few critical points to notice:
 
 5. The `entrypoint` defines which template from the `templates` array will be initially executed when the Workflow is created.
 
-   Our example above starts by executing the DAG template (`entry`) which in turns will run the `first` Container template
-   and then the `second` Container template.
+   Our example above starts by executing the DAG template (`entry`) which in turns will run the `first-template` Container template
+   and then the `second-template` Container template.
 
 ### Field Casing in Templates
 

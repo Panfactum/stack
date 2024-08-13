@@ -389,3 +389,9 @@ When a Workflow is deleted, all the other Kubernetes objects that it owns are al
 
 If you want to delete pods earlier, you can set `pod_delete_delay_seconds` to some lower value; however, pods can never
 outlive the Workflow.
+
+### Workflow of Workflows
+
+A common pattern is to compose multiple smaller Workflows into a larger Workflow. We provide
+guidance on implementing that pattern
+[here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows).

@@ -38,7 +38,7 @@ You can find a full example of this in action [here.](https://github.com/Panfact
 
 <MarkdownAlert severity="warning">
   Note that this performs a shallow clone, so if you need to interact with commits
-  other than what is supplied by `--checkout`, you will need to explicitly fetch them
+  other than what is supplied by `--checkout`, you will need to explicitly `git fetch` them
   first.
 </MarkdownAlert>
 
@@ -57,9 +57,9 @@ for `username` and `password`. Below we outline some common scenarios:
 * Using a GitHub fine-grained [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token):
   * `username`: set to `oauth2`
   * `password`: the PAT
-* Using a GitLab [Personal Access Token (PAT)](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+* Using a GitLab [Personal Access Token (PAT)](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html):
   * `username`: the account's username
   * `password`: the PAT
-* Using a Bitbucket [Repository Access Token (RAT)](https://support.atlassian.com/bitbucket-cloud/docs/using-access-tokens/)
+* Using a Bitbucket [Repository Access Token (RAT)](https://support.atlassian.com/bitbucket-cloud/docs/using-access-tokens/):
   * `username`: set to `x-token-auth`
   * `password`: the RAT
