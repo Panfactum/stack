@@ -222,10 +222,87 @@ module "sensor" {
 
 ## From Other Workflows
 
-Using a Workflow to create other Workflows is a powerful pattern that allows you to chain workflows together
-into larger execution graphs. Argo refers to this pattern as a [Workflow of Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-of-workflows/).
+Composing Workflows is a powerful pattern that allows you to reuse preexisting logic to chain workflows together
+into larger execution graphs. There are two ways to do this:
 
-Below is an example WorkflowTemplate for a Workflow of Workflows that executes the above example Workflow twice in a series:
+### Template References
+
+Argo provides a mechanism to reuse templates (nodes in a Workflow's execution graph) across multiple Workflows.
+This pattern is described in detail [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates).
+
+Technically, this does not "trigger" the existing WorkflowTemplate but rather "copies" a portion of it into your new Workflow. In
+effect, you end up with a single combined Workflow that runs all the steps in the referenced WorkflowTemplates.
+
+This new WorkflowTemplate will run the `entry` template from example WorkflowTemplate twice in a series: [^3]
+
+[^3]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
+but it is what it is. The maintainers try to explain it away [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template),
+but we personally don't buy it.
+
+```hcl
+module "composed_workflow" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+
+  name = "composed-workflow"
+  namespace = local.namespace
+  eks_cluster_name          = var.eks_cluster_name
+
+  entrypoint = "entry"
+  templates = [
+    {
+      name = "entry",
+      dag = {
+        tasks = [
+          {
+            name = "first"
+            templateRef = {
+              name = "example" # This the name of the WorkflowTemplate
+              template = "entry" # This is the name of the template on the WorkflowTemplate (yes, it is confusing)
+            }
+          },
+          {
+            name = "second"
+            templateRef = {
+              name = "example"
+              template = "entry"
+            }
+            depends = "first"
+          }
+        ]
+      }
+    }
+  ]
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+```
+
+For a real world example, see our guide on rolling deployments in your [CI / CD pipelines](/docs/edge/guides/cicd/rolling-deployments).
+
+<MarkdownAlert severity="warning">
+    Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template
+    such as `{{workflow.parameters.foo}}` will no longer work unless your combined Workflow *also* has that parameter.
+</MarkdownAlert>
+
+
+### Workflow of Workflows
+
+Rather than referencing a template from another Workflow, you can actually use one Workflow to create another.
+Argo refers to this pattern as a [Workflow of Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-of-workflows/).
+
+This provides some additional flexibility as you can override any part of the generated Workflows, but the syntax is
+significantly more verbose. We do not recommend this path unless you need this override capability.
+
+Below is an example WorkflowTemplate for a Workflow of Workflows that creates and runs a Workflow derived from the above example
+WorkflowTemplate twice in a series:
 
 {/* spellchecker: disable */}
 
@@ -325,4 +402,4 @@ functionality of a normal Argo Workflow.
 
 This is why you have to set the `successCondition` and `failureCondition` fields
 to let the top-level Workflow (`example-workflow-of-worklows`) know when the
-resources it has created (the `example` Workflows) have succeeded or failed.
+resources it has created (the `example-workflow` Workflows) have succeeded or failed.

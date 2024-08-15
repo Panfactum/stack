@@ -432,6 +432,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_unhealthy_pod_eviction_policy" /> [unhealthy\_pod\_eviction\_policy](#input_unhealthy_pod_eviction_policy)
+
+Description: Whether to allow unhealthy pods to be evicted. See [https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+
+Type: `string`
+
+Default: `"AlwaysAllow"`
+
 ### <a name="input_update_type" /> [update\_type](#input_update_type)
 
 Description: The type of update that the StatefulSEt should use

@@ -1,5 +1,5 @@
 module "event_bus" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_bus?ref=704512d8ba8e8a6464546b0fedc93720c27de1d9" # pf-update
+  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_bus?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" # pf-update
 
   namespace = local.namespace
 

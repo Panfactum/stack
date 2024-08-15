@@ -113,10 +113,10 @@ so that we can automatically deploy your infrastructure changes.
 Add an instance of the `wf_tf_deploy` submodule to the CI / CD module you created above and re-apply it:
 
 ```hcl
-module "tf_deploy_prod_us_east_2" {
+module "tf_deploy" {
   source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_tf_deploy?ref=__PANFACTUM_VERSION_EDGE__" #pf-update
 
-  name = "tf-deploy-prod-us-east-2"
+  name = "tf-deploy"
   namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
 
@@ -147,8 +147,8 @@ module "tf_deploy_prod_us_east_2" {
 
 A couple important notes:
 
-* You can and should create many instances of `wf_tf_deploy` with different deployment scopes as needed. You can set
-  up workflows to deploy many modules at once or even just a single module with any given template.
+* You can override `tf_apply_dir` when you create new Workflows from this WorkflowTemplate. As a result, you
+can re-use this one WorkflowTemplate to deploy any particular subset of your IaC.
 
 * All the credentialing for AWS, Kubernetes, and Vault are done for you. However,
   each Workflow should deploy *at most* a single environment as credentials are environment-scoped.
