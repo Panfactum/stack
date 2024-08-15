@@ -23,20 +23,24 @@ In particular, generated Workflows will perform the following actions:
 * Automatically retry several times in the case of transient failures and/or rate limits.
 * Unlock the state backend in case of a runtime failure.
 
+## Arguments for Generated Workflows
+
+| Parameter      | Default            | Order | Description                                                                                                               |
+| -------------- | ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------- |
+| `git_ref`      | `var.git_ref`      | 0     | The [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking out the `var.repo`. |
+| `tf_apply_dir` | `var.tf_apply_dir` | 1     | A relative path from the root of the `var.repo` in which `terragrunt run-all apply` will be run.                          |
+
 ## Usage
 
-We provide several examples of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/tf_deploy.tf).
+We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/tf_deploy.tf).
 
 The critical configuration values are:
 
 * `repo`: The repository containing your configuration-as-code (i.e., `terragrunt.hcl` files)
 * `tf_apply_dir`: A relative path from the root of the repo in which `terragrunt run-all apply` will be run. The generated
-  Workflow will apply all modules in this subdirectory.
+  Workflow will apply all modules in this subdirectory. Can and should be overwritten when creating individual Workflows.
 * `git_ref`: The default [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking
   out the `repo`. Can and should be overwritten when creating individual Workflows.
-
-You can create as many instances of this module as you need. Usually you will have many different instances with different
-values for `tf_apply_dir`.
 
 <MarkdownAlert severity="warning">
   A single instance of this module can only be used for deploying modules **in a single region** as the implicit authentication
@@ -214,6 +218,10 @@ Description: The name of the AWS role used by the Workflow's Service Account
 ### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
 
 Description: The name of the AWS role used by the Workflow's Service Account
+
+### <a name="output_entrypoint" /> [entrypoint](#output_entrypoint)
+
+Description: The name of the first template in the Workflow
 
 ### <a name="output_name" /> [name](#output_name)
 

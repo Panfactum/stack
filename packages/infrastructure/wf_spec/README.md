@@ -106,10 +106,13 @@ that can be used as building blocks for overrides.
 ### Parameterizing Workflows and Templates
 
 Often you will want to supply inputs to workflows so to adjust how they behave. Argo calls
-inputs "parameters" and provides documentation on this functionality [here](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/).
+inputs "parameters" and provides documentation on this functionality [here](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/). [^1]
+
+[^1]: Technically, there are two types of inputs: parameters (values) and artifacts (files), but we will
+just focus on parameters in this section.
 
 Note that *both* Workflows as a whole *and* their individual templates can be parameterized
-although the syntax is slightly different:
+although the syntax is slightly different. A Workflow has `arguments` and a template has `inputs`:
 
 ```hcl
 module "workflow_spec" {
@@ -138,14 +141,14 @@ module "workflow_spec" {
           }
         ]
       }
-      container   = merge(module.workflow_spec.container_defaults, {
+      container   = {
         image   = "some-repo/some-image:some-tag"
         command = [
           "/bin/some-command",
           "{{workflow.parameters.foo}}", # Will be replaced at execution time with Workflow-level parameter
           "{{inputs.parameters.baz}}" # Will be replaced at execution time with Template-level input
         ]
-      })
+      }
     },
     {
       name = "build-image",
@@ -168,6 +171,123 @@ module "workflow_spec" {
   ]
 }
 ```
+
+Oftentimes, you may want to set the *same* parameters on a Workflow and each of its
+templates *and* automatically pass through the values. We provide a convenience
+utility to do this via the `passthrough_parameters` input.
+
+For example:
+
+```hcl
+module "workflow_spec" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  
+  passthrough_parameters = [
+    {
+      name = "foo"
+      description = "Some input"
+      default = "bar"
+    }
+  ]
+
+  entrypoint = "dag"
+  templates = [
+    {
+      name        = "first"
+      container   = {
+        image   = "some-repo/some-image:some-tag"
+        command = [
+          "/bin/some-command",
+          "{{inputs.parameters.foo}}"
+        ]
+      }
+    },
+    {
+      name = "dag",
+      dag = {
+        tasks = [
+          {
+            name = "first"
+            template = "first"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+is equivalent to
+
+```hcl
+module "workflow_spec" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  
+  arguments = {
+    parameters = [
+      {
+        name = "foo"
+        description = "Some input"
+        default = "bar"
+      }
+    ]
+  }
+
+  entrypoint = "dag"
+  templates = [
+    {
+      name        = "first"
+      inputs = {
+        parameters = [
+          {
+            name = "foo"
+            default = "{{workflow.parameters.foo}}"
+          }
+        ]
+      }
+      container   = {
+        image   = "some-repo/some-image:some-tag"
+        command = [
+          "/bin/some-command",
+          "{{inputs.parameters.foo}}"
+        ]
+      }
+    },
+    {
+      name = "dag",
+      inputs = {
+        parameters = [
+          {
+            name = "foo"
+            default = "{{workflow.parameters.foo}}"
+          }
+        ]
+      },
+      dag = {
+        tasks = [
+          {
+            name = "first"
+            template = "first"
+            arguments = {
+              parameters =  [
+                {
+                  name = "foo"
+                  value = "{{inputs.parameters.foo}}"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+This can be helpful when you aim to reference a template defined on one Workflow from a completely separate Workflow
+as described [here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows). This ensures
+that regardless of how a template is executed, it will have the same parameterization capabilities.
+
 
 ### Conditional DAG Nodes (Tasks)
 
@@ -390,8 +510,10 @@ When a Workflow is deleted, all the other Kubernetes objects that it owns are al
 If you want to delete pods earlier, you can set `pod_delete_delay_seconds` to some lower value; however, pods can never
 outlive the Workflow.
 
-### Workflow of Workflows
+### Composing Workflows
 
 A common pattern is to compose multiple smaller Workflows into a larger Workflow. We provide
 guidance on implementing that pattern
 [here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows).
+
+

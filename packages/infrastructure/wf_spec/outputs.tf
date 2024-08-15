@@ -18,6 +18,10 @@ output "workflow_spec" {
   value       = local.workflow_spec
 }
 
+output "name" {
+  description = "The non-prefix name of the Workflow spec (should be used for naming derived resources like WorkflowTemplates)"
+  value       = var.name
+}
 output "generate_name" {
   description = "The prefix for generating Workflow names from this spec"
   value       = "${var.name}-"
@@ -71,4 +75,9 @@ output "aws_role_name" {
 output "aws_role_arn" {
   description = "The name of the AWS role used by the Workflow's Service Account"
   value       = module.workflow_perms.role_arn
+}
+
+output "template_parameters" {
+  description = "The default parameters set on each template"
+  value       = local.template_inputs_passthrough_parameters
 }

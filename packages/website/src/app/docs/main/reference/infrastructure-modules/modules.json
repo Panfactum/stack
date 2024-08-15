@@ -376,11 +376,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "pf_website",
-      "type": "live",
-      "group": "example"
-    },
-    {
       "module": "test_kube_pg_cluster",
       "type": "direct",
       "group": "example"

@@ -22,6 +22,12 @@ In particular, generated Workflows will perform the following actions:
   the result to the ECR repository indicated by `image_repo` with the image tag set to the git commit hash of the code
   that was checked out from `code_repo`.
 
+## Arguments for Generated Workflows
+
+| Parameter      | Default            | Order | Description                                                                                                                                  |
+|----------------|--------------------|-------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `git_ref`      | `var.git_ref`      | 0     | The [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References) to use when checking out the `var.code_repo` for the build. |
+
 ## Usage
 
 We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/website_image_builder.tf).

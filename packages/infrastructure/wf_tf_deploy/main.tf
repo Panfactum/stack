@@ -19,6 +19,8 @@ locals {
   # Use this as a consistent hostname so that force-unlock can work between
   # workflow runs
   hostname = md5("${var.repo}${var.tf_apply_dir}")
+
+  entrypoint = "entry"
 }
 
 module "pull_through" {
@@ -123,21 +125,24 @@ module "tf_deploy_workflow" {
   panfactum_scheduler_enabled = true
   active_deadline_seconds     = 60 * 60
 
-  entrypoint = "dag"
-  arguments = {
-    parameters = [
-      {
-        name        = "git_ref"
-        description = "Which commit to check out and deploy in the ${var.repo} repository"
-        default     = var.git_ref
-      }
-    ]
-  }
+  entrypoint = local.entrypoint
+  passthrough_parameters = [
+    {
+      name        = "git_ref"
+      description = "Which commit to check out and deploy in the ${var.repo} repository"
+      default     = var.git_ref
+    },
+    {
+      name        = "tf_apply_dir"
+      description = "Which directory to run 'terragrunt run-all apply' in inside the ${var.repo} repository"
+      default     = var.tf_apply_dir
+    }
+  ]
   common_env = {
     REPO         = var.repo
-    GIT_REF      = "{{workflow.parameters.git_ref}}"
+    GIT_REF      = "{{inputs.parameters.git_ref}}"
     GIT_USERNAME = var.git_username
-    TF_APPLY_DIR = var.tf_apply_dir
+    TF_APPLY_DIR = "{{inputs.parameters.tf_apply_dir}}"
 
     # Needed for Vault authentication
     VAULT_ROLE = module.tf_deploy_vault_role.role_name
@@ -174,7 +179,7 @@ module "tf_deploy_workflow" {
   default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
   templates = [
     {
-      name = "dag"
+      name = local.entrypoint
       dag = {
         tasks = [
           {
@@ -206,6 +211,7 @@ module "tf_deploy_workflow" {
       container = {
         command = ["/scripts/deploy.sh"]
       }
+
       # We do not retry this template b/c we need to proceed to force-unlock if this fails
       # unexpectedly. Retry is done via the dag.
       retryStrategy = { limit = "0" }

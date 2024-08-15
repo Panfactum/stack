@@ -24,11 +24,11 @@ locals {
 }
 
 module "constants" {
-  source = "../kube_constants"
+  source = "../../../../../infrastructure//kube_constants" #pf-update
 }
 
 module "namespace" {
-  source = "../kube_namespace"
+  source = "../../../../../infrastructure//kube_namespace" #pf-update
 
   namespace = local.name
 
@@ -48,13 +48,13 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source    = "../kube_deployment"
+  source = "../../../../../infrastructure//kube_deployment" #pf-update
   namespace = module.namespace.namespace
   name      = local.name
 
   replicas                             = 2
   burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = false
+  arm_nodes_enabled                    = true
   instance_type_anti_affinity_required = false
   topology_spread_enabled              = false
   topology_spread_strict               = false
@@ -118,7 +118,7 @@ resource "kubernetes_service" "service" {
 }
 
 module "ingress" {
-  source = "../kube_ingress"
+  source = "../../../../../infrastructure//kube_ingress" #pf-update
 
   name      = local.name
   namespace = local.namespace

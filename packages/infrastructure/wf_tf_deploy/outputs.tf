@@ -22,3 +22,8 @@ output "name" {
   description = "The name of the WorkflowTemplate"
   value       = var.name
 }
+
+output "entrypoint" {
+  description = "The name of the first template in the Workflow"
+  value       = local.entrypoint
+}

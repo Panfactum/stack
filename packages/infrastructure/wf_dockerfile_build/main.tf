@@ -15,6 +15,10 @@ terraform {
   }
 }
 
+locals {
+  entrypoint = "entry"
+}
+
 module "pull_through" {
   source                     = "../aws_ecr_pull_through_cache_addresses"
   pull_through_cache_enabled = var.pull_through_cache_enabled
@@ -128,18 +132,16 @@ module "image_builder_workflow" {
   panfactum_scheduler_enabled = true
   active_deadline_seconds     = var.build_timeout
 
-  entrypoint = "build-images"
-  arguments = {
-    parameters = [
-      {
-        name        = "git_ref"
-        description = "Which commit to check out and build in the ${var.code_repo} repository"
-        default     = var.git_ref
-      }
-    ]
-  }
+  entrypoint = local.entrypoint
+  passthrough_parameters = [
+    {
+      name        = "git_ref"
+      description = "Which commit to check out and build in the ${var.code_repo} repository"
+      default     = var.git_ref
+    }
+  ]
   common_env = {
-    GIT_REF                = "{{workflow.parameters.git_ref}}"
+    GIT_REF                = "{{inputs.parameters.git_ref}}"
     GIT_USERNAME           = var.git_username
     CODE_REPO              = var.code_repo
     IMAGE_REPO             = var.image_repo
@@ -172,7 +174,7 @@ module "image_builder_workflow" {
   default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
   templates = [
     {
-      name    = "build-images"
+      name    = local.entrypoint
       volumes = module.image_builder_workflow.volumes
       containerSet = {
         containers = [

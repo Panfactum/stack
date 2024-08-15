@@ -4,7 +4,7 @@ include "panfactum" {
 }
 
 terraform {
-  source = include.panfactum.locals.pf_stack_source
+  source = include.panfactum.locals.source
 }
 
 dependency "ingress" {
@@ -14,7 +14,7 @@ dependency "ingress" {
 
 inputs = {
   website_domain        = "panfactum.com"
-  website_image_version = yamldecode(file("${get_terragrunt_dir()}/version.yaml")).version
+  website_image_version = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
 }
 
 

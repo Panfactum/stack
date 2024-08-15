@@ -129,7 +129,7 @@ module "sensor" {
     },
     {
       template = {
-        name = "website-builder"
+        name = module.build_and_deploy_website_workflow.name
         conditions = "push-to-main"
         argoWorkflow = {
           operation = "submit"
@@ -138,26 +138,16 @@ module "sensor" {
               apiVersion = "argoproj.io/v1alpha1"
               kind = "Workflow"
               metadata = {
-                generateName = "website-builder-"
+                generateName = module.build_and_deploy_website_workflow.generate_name
                 namespace = local.namespace
               }
               spec = {
-                arguments = module.website_builder.arguments
                 workflowTemplateRef = {
-                  name = "website-builder"
+                  name = module.build_and_deploy_website_workflow.name
                 }
               }
             }
           }
-          parameters = [
-            {
-              dest = "spec.arguments.parameters.0.value"
-              src = {
-                dependencyName = "push-to-main"
-                dataKey = "body.after" # The git commit after the push
-              }
-            }
-          ]
         }
       }
     },

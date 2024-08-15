@@ -252,6 +252,10 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Checking Out Code',
         path: '/checking-out-code'
+      },
+      {
+        text: 'Rolling Deployments',
+        path: '/rolling-deployments'
       }
     ]
   },

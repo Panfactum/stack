@@ -287,3 +287,13 @@ variable "pod_version_labels_enabled" {
   default     = true
 }
 
+variable "unhealthy_pod_eviction_policy" {
+  description = "Whether to allow unhealthy pods to be evicted. See https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy."
+  type        = string
+  default     = "AlwaysAllow"
+  validation {
+    condition     = contains(["IfHealthyBudget", "AlwaysAllow"], var.unhealthy_pod_eviction_policy)
+    error_message = "Must be one of: IfHealthyBudget or AlwaysAllow"
+  }
+}
+

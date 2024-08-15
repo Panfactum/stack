@@ -19,6 +19,24 @@ the shutdown and failover logic has been overhauled. The new default will immedi
 a database pod is killed, but this serves to reduce the downtime from 60-120 seconds to < 5 seconds in the failover scenario.
 Please see the module documentation for more information.
 
+### Added
+
+- Adds the concept of passthrough parameters to [wf_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+
+- Makes `tf_apply_dir` a Workflow parameter in [wf_tf_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+so that you only need a single instance of this module per cluster.
+
+- Adds the ability to use `templateRef` to [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
+in [wf_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+
+### Fixed
+
+- Fixed the working directory in
+[wf_tf_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+and [wf_dockerfile_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+to be inside the cloned repository.
+
+
 ## edge.24-08-13
 
 ### Breaking Changes

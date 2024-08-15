@@ -227,9 +227,94 @@ locals {
 
         # Volumes are not defaulted by Argo for ContainerSet template types for some reason
         volumes = lookup(template, "volumes", (contains(keys(template), "containerSet") ? local.common_volumes : null))
+
+        # Passthrough parameters in dag references
+        dag = contains(keys(template), "dag") ? merge(template["dag"], {
+          tasks = [for task in lookup(template["dag"], "tasks", []) : merge(task, {
+            arguments = merge(
+              lookup(task, "arguments", {}),
+              {
+                parameters = concat(
+                  lookup(lookup(task, "arguments", {}), "parameters", []),
+                  local.template_arguments_passthrough_parameters
+                )
+              }
+            )
+            hooks = { for hook, config in lookup(task, "hooks", {}) : hook => merge(config, {
+              arguments = merge(
+                lookup(config, "arguments", {}),
+                {
+                  parameters = concat(
+                    lookup(lookup(config, "arguments", {}), "parameters", []),
+                    local.template_arguments_passthrough_parameters
+                  )
+                }
+              )
+            }) }
+          })]
+        }) : null
+
+        # Passthrough parameters in step references
+        steps = contains(keys(template), "step") ? [for step_list in template["steps"] : [for step in step_list : merge(step, {
+          arguments = merge(
+            lookup(step, "arguments", {}),
+            {
+              parameters = concat(
+                lookup(lookup(step, "arguments", {}), "parameters", []),
+                local.template_arguments_passthrough_parameters
+              )
+            }
+          )
+          hooks = { for hook, config in lookup(step, "hooks", {}) : hook => merge(config, {
+            arguments = merge(
+              lookup(config, "arguments", {}),
+              {
+                parameters = concat(
+                  lookup(lookup(config, "arguments", {}), "parameters", []),
+                  local.template_arguments_passthrough_parameters
+                )
+              }
+            )
+          }) }
+        })]] : null
+
+        # These need to be set here in order for them to show up on in a templateRef reference to the template;
+        # Defining them at the workflow level will not work in this scenario
+        affinity           = lookup(template, "affinity", module.util.affinity)
+        priorityClassName  = lookup(template, "priorityClassName", var.priority_class_name)
+        schedulerName      = lookup(template, "schedulerName", module.util.scheduler_name)
+        serviceAccountName = lookup(template, "serviceAccountName", kubernetes_service_account.sa.metadata[0].name)
+        tolerations        = lookup(template, "tolerations", module.util.tolerations)
+        inputs = merge(
+          lookup(template, "inputs", {}),
+          {
+            parameters = concat(lookup(lookup(template, "inputs", {}), "parameters", []), local.template_inputs_passthrough_parameters)
+          }
+        )
       },
     ) : k => v if v != null }
   ]
+
+  /************************************************
+  * Parameters
+  ************************************************/
+  cleansed_passthrough_paramters = [for param in var.passthrough_parameters : { for k, v in param : k => v if v != null }]
+  workflow_parameters = concat(
+    lookup(var.arguments, "parameters", []),
+    local.cleansed_passthrough_paramters
+  )
+  template_inputs_passthrough_parameters = [for param in local.cleansed_passthrough_paramters : merge(
+    param,
+    {
+      default = "{{workflow.parameters.${param.name}}}"
+    }
+  )]
+  template_arguments_passthrough_parameters = [for param in local.cleansed_passthrough_paramters : merge(
+    {
+      name  = param.name,
+      value = "{{inputs.parameters.${param.name}}}"
+    }
+  )]
 
   /************************************************
   * Workflow Definition
@@ -241,7 +326,10 @@ locals {
     artifactGC = var.delete_artifacts_on_deletion ? {
       strategy = "OnWorkflowDeletion"
     } : null
-    arguments   = var.arguments
+    arguments = {
+      artifacts  = lookup(var.arguments, "artifacts", [])
+      parameters = local.workflow_parameters
+    }
     dnsPolicy   = var.dns_policy
     entrypoint  = var.entrypoint
     onExit      = var.on_exit

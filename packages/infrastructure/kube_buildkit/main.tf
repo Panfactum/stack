@@ -159,6 +159,7 @@ module "buildkit" {
   }
   spot_nodes_enabled               = true
   termination_grace_period_seconds = 30 * 60
+  unhealthy_pod_eviction_policy    = "IfHealthyBudget"
 
   # We don't use the VPA for the builder b/c the workloads are extremely uneven
   # and we never want to disrupt the builder pods

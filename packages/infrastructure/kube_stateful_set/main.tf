@@ -225,7 +225,7 @@ resource "kubectl_manifest" "pdb" {
         matchLabels = module.pod_template.match_labels
       }
       maxUnavailable             = var.max_unavailable
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      unhealthyPodEvictionPolicy = var.unhealthy_pod_eviction_policy
     }
   })
   force_conflicts   = true

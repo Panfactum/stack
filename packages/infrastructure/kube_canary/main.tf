@@ -101,11 +101,11 @@ module "database" {
 
   eks_cluster_name            = var.eks_cluster_name
   pg_cluster_namespace        = local.namespace
-  pg_storage_gb               = 1
+  pg_initial_storage_gb       = 1
   pg_memory_mb                = 300
   pg_cpu_millicores           = 200
   pg_instances                = 2
-  pg_shutdown_timeout         = 30
+  pg_smart_shutdown_timeout   = 30
   aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_instances_enabled = true

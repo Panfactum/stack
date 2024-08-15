@@ -8,3 +8,4 @@ pf-wf-git-checkout \
   -c "$GIT_REF" \
   -u "$GIT_USERNAME" \
   -p "$GIT_PASSWORD"
+cd repo

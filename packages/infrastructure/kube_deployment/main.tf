@@ -166,12 +166,11 @@ resource "kubectl_manifest" "pdb" {
       labels    = module.pod_template.labels
     }
     spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.pod_template.match_labels
       }
       maxUnavailable             = 1
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      unhealthyPodEvictionPolicy = var.unhealthy_pod_eviction_policy
     }
   })
   force_conflicts   = true
