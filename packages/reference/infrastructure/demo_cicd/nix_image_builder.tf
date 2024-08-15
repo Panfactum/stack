@@ -149,7 +149,7 @@ resource "kubernetes_config_map" "nix_image_builder_containers" {
 }
 
 module "nix_image_builder_workflow" {
-  source                    = "../../../../../infrastructure//wf_spec" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
 
   name = local.nix_image_builder_name
   namespace = local.namespace

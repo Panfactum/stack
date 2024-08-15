@@ -4,7 +4,7 @@
 #############################################################
 
 module "sensor" {
-  source                    = "../../../../../infrastructure//kube_argo_sensor" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
 
   name = "cicd"
   namespace = local.namespace

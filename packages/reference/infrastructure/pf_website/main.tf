@@ -24,11 +24,11 @@ locals {
 }
 
 module "constants" {
-  source = "../../../../../infrastructure//kube_constants" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
 }
 
 module "namespace" {
-  source = "../../../../../infrastructure//kube_namespace" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
 
   namespace = local.name
 
@@ -48,7 +48,7 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source = "../../../../../infrastructure//kube_deployment" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
   namespace = module.namespace.namespace
   name      = local.name
 
@@ -118,7 +118,7 @@ resource "kubernetes_service" "service" {
 }
 
 module "ingress" {
-  source = "../../../../../infrastructure//kube_ingress" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
 
   name      = local.name
   namespace = local.namespace

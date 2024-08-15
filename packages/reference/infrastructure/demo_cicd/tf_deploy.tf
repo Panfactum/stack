@@ -1,7 +1,7 @@
 
 # This is an example of a workflow that deploys an entire region at once
 module "tf_deploy" {
-  source                    = "../../../../../infrastructure//wf_tf_deploy" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_tf_deploy?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
 
   name = "tf-deploy-prod-us-east-2"
   namespace = local.namespace
