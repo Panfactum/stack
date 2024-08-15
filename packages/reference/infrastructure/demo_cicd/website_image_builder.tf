@@ -2,7 +2,7 @@
 ## This is an example of simply building a Dockerfile
 ###############################################################
 module "website_builder" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_dockerfile_build?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_dockerfile_build?ref=704512d8ba8e8a6464546b0fedc93720c27de1d9" #pf-update
 
   name = "website-builder"
   namespace = local.namespace
@@ -32,7 +32,7 @@ module "website_builder" {
 ###############################################################
 
 module "build_and_deploy_website_workflow" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=704512d8ba8e8a6464546b0fedc93720c27de1d9" #pf-update
 
   name = "build-and-deploy-website"
   namespace = local.namespace

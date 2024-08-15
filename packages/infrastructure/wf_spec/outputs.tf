@@ -59,7 +59,7 @@ output "affinity" {
 
 output "arguments" {
   description = "The arguments to the workflow"
-  value       = var.arguments
+  value       = local.workflow_arguments
 }
 
 output "container_defaults" {

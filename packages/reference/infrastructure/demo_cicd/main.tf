@@ -31,12 +31,12 @@ locals {
 }
 
 module "pull_through" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/aws_ecr_pull_through_cache_addresses?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" # pf-update
+  source =   "github.com/Panfactum/stack.git//packages/infrastructure/aws_ecr_pull_through_cache_addresses?ref=704512d8ba8e8a6464546b0fedc93720c27de1d9" # pf-update
   pull_through_cache_enabled = true
 }
 
 module "namespace" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" # pf-update
+  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=704512d8ba8e8a6464546b0fedc93720c27de1d9" # pf-update
 
   namespace = "cicd"
 

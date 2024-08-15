@@ -4,7 +4,7 @@
 #############################################################
 
 module "sensor" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=b9514b523707e25eae062b7a0f0c17450e1122d1" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=704512d8ba8e8a6464546b0fedc93720c27de1d9" #pf-update
 
   name = "cicd"
   namespace = local.namespace
@@ -148,6 +148,40 @@ module "sensor" {
               }
             }
           }
+        }
+      }
+    },
+    {
+      template = {
+        name = module.resource_update_workflow.name
+        conditions = "push-to-main"
+        argoWorkflow = {
+          operation = "submit"
+          source = {
+            resource = {
+              apiVersion = "argoproj.io/v1alpha1"
+              kind = "Workflow"
+              metadata = {
+                generateName = module.resource_update_workflow.generate_name
+                namespace = local.namespace
+              }
+              spec = {
+                arguments = module.resource_update_workflow.arguments
+                workflowTemplateRef = {
+                  name = module.resource_update_workflow.name
+                }
+              }
+            }
+          }
+          parameters = [
+            {
+              dest = "spec.arguments.parameters.0.value"
+              src = {
+                dependencyName = "push-to-main"
+                dataKey = "body.after" # The git commit after the push
+              }
+            }
+          ]
         }
       }
     },

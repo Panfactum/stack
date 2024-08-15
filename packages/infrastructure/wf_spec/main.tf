@@ -278,13 +278,35 @@ locals {
           }) }
         })]] : null
 
+        # Resource templates seem to keep OOMing so we need to patch the pods to up the memory
+        podSpecPatch = lookup(template, "podSpecPatch", contains(keys(template), "resource") ? yamlencode({
+          containers = [{
+            name : "main"
+            resources = {
+              requests = {
+                cpu    = "10m"
+                memory = "150Mi"
+              }
+              limits = {
+                memory = "250Mi"
+              }
+            }
+          }]
+          }) : null
+        )
+
         # These need to be set here in order for them to show up on in a templateRef reference to the template;
         # Defining them at the workflow level will not work in this scenario
         affinity           = lookup(template, "affinity", module.util.affinity)
         priorityClassName  = lookup(template, "priorityClassName", var.priority_class_name)
         schedulerName      = lookup(template, "schedulerName", module.util.scheduler_name)
         serviceAccountName = lookup(template, "serviceAccountName", kubernetes_service_account.sa.metadata[0].name)
-        tolerations        = lookup(template, "tolerations", module.util.tolerations)
+        tolerations = lookup(template, "tolerations", contains(keys(template), "resource") ? [for key in ["spot", "arm64", "burstable"] : { # Resource templates can tolerate anything
+          key      = key
+          operator = "Equal"
+          value    = "true"
+          effect   = "NoSchedule"
+        }] : module.util.tolerations)
         inputs = merge(
           lookup(template, "inputs", {}),
           {
@@ -315,6 +337,10 @@ locals {
       value = "{{inputs.parameters.${param.name}}}"
     }
   )]
+  workflow_arguments = {
+    artifacts  = lookup(var.arguments, "artifacts", [])
+    parameters = local.workflow_parameters
+  }
 
   /************************************************
   * Workflow Definition
@@ -326,10 +352,7 @@ locals {
     artifactGC = var.delete_artifacts_on_deletion ? {
       strategy = "OnWorkflowDeletion"
     } : null
-    arguments = {
-      artifacts  = lookup(var.arguments, "artifacts", [])
-      parameters = local.workflow_parameters
-    }
+    arguments   = local.workflow_arguments
     dnsPolicy   = var.dns_policy
     entrypoint  = var.entrypoint
     onExit      = var.on_exit
