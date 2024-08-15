@@ -46,6 +46,39 @@ of the working memory pool.
 this value is not large enough. However, the internal PostgreSQL cache controlled by this value
 will always be more performant than the generic page cache, so tuning this can help in some circumstances.
 
+### Shutdowns and Failovers
+
+Postgres has [three shutdown modes](https://www.postgresql.org/docs/current/server-shutdown.html):
+
+- Smart Shutdown: Prevents new connections, but allows existing sessions to finish their work before
+shutting down.
+- Fast Shutdown: Prevents new connections and forces all existing sessions to abort safely before
+shutting down.
+- Immediate Shutdown: Immediately exits without doing normal database shutdown processing (including
+forcibly killing sessions w/ doing graceful aborts). Forces a database recovery operation on the next 
+startup.
+
+The default behavior of this module is to do a fast shutdown with a 30-second timeout (`pg_switchover_delay`)
+until an immediate shutdown is issued. 
+
+When running with a replica, this results in at most 30 seconds of downtime if the primary
+instance is terminated (the replicas are still readable); however, it will normally be around
+5 seconds.
+
+This is quite quick, but the downside is that any running queries on the primary will be immediately
+terminated and not allowed to complete. You can increase the amount of time that running queries
+are allowed to complete by increasing `pg_smart_shutdown_timeout`. However, this will increase the
+time that *new* sessions cannot be made with database proportionally (i.e., setting `pg_smart_shutdown_timeout`
+to `30` will allow 30 seconds for existing queries to complete but increase the amount of time that new
+queries cannot be made to about 35 seconds). 
+
+We generally recommend keeping
+`pg_smart_shutdown_timeout` set to the default `0` in order to minimize downtime. Instead of trying to ensure queries
+will always complete, we recommend that you implement retry logic in your database client code. This will
+not only add resilience to this particular scenario, but will also be beneficial in other failure modes.
+
+For more information about shutdowns, please see the [CNPG documentation.](https://cloudnative-pg.io/documentation/1.23/instance_manager/)
+
 ### PostgreSQL Parameters
 
 PostgreSQL comes with hundreds of parameters that can be used to customize its behavior. You

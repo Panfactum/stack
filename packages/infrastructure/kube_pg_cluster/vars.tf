@@ -78,10 +78,15 @@ variable "pg_storage_increase_gb" {
   default     = 10
 }
 
-variable "pg_shutdown_timeout" {
+variable "pg_smart_shutdown_timeout" {
   description = "The number of seconds to wait for open connections to close before shutting down postgres nodes"
   type        = number
-  default     = null
+  default     = 0
+
+  validation {
+    error_message = "Smart shutdowns should not exceed 70 seconds as they block a graceful shutdown which may be required in case of an emergency node termination (e.g., a spot interruption)."
+    condition     = var.pg_smart_shutdown_timeout <= 70
+  }
 }
 
 variable "backups_force_delete" {
@@ -389,4 +394,15 @@ variable "extra_schemas" {
   description = "Extra schemas that were created in the app database"
   type        = list(string)
   default     = []
+}
+
+variable "pg_switchover_delay" {
+  description = "Controls max amount of time that CNPG will wait for data to be synced from primary to replica before forcing the switchover"
+  type        = number
+  default     = 30
+
+  validation {
+    error_message = "Must be greater than 5 seconds to allow for _some_ time for the replica stream to synchronize. Otherwise, data loss is virtually guaranteed during switchovers."
+    condition     = var.pg_switchover_delay >= 5
+  }
 }

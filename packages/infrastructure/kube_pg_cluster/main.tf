@@ -32,7 +32,7 @@ locals {
 
   cluster_name = random_id.cluster_id.hex
 
-  stopDelay = var.pg_shutdown_timeout != null ? var.pg_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? (10 + 60) : (15 * 60 + 10))
+  smart_shutdown_timeout = var.pg_smart_shutdown_timeout != null ? var.pg_smart_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? 60 : 15 * 60)
 
   poolers_to_enable = toset(concat(
     var.pgbouncer_read_only_enabled ? ["r"] : [],
@@ -345,11 +345,22 @@ resource "kubernetes_manifest" "postgres_cluster" {
         }
       }
 
-      startDelay           = 60 * 10
-      stopDelay            = local.stopDelay
-      smartShutdownTimeout = max(local.stopDelay - 10, 0)
-      switchoverDelay      = local.stopDelay
-      failoverDelay        = 60
+      startDelay = 60 * 10
+
+      # If a shutdown exceeds this amount of time,
+      # an immediate shutdown will occur (which has the possibility for data loss)
+      stopDelay = local.smart_shutdown_timeout + var.pg_switchover_delay
+
+      # These both control the amount of time that a postgres primary may be in a terminating
+      # state until a fast shutdown is initiated
+      # A fast shutdown will immediately cancel all running queries
+      smartShutdownTimeout = local.smart_shutdown_timeout
+      failoverDelay        = local.smart_shutdown_timeout
+
+      # Controls max amount of time that CNPG will wait for data to be synced from primary to replica before forcing the switchover
+      # Note that this doesn't delay ALL switchovers by this amount; this is only the MAXIMUM delay
+      # Setting this lower reduces downtime but introduces the possibility for data loss
+      switchoverDelay = var.pg_switchover_delay
 
       monitoring = {
         enablePodMonitor = var.monitoring_enabled
