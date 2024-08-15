@@ -26,7 +26,9 @@ FROM deps AS development
 WORKDIR /code/packages/website
 COPY packages/website/ .
 RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
- NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build --no-lint
+ NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) \
+ NODE_OPTIONS=--max-old-space-size=8192 \
+ npx next build --no-lint
 
 #################################################
 ## Builder Image
@@ -39,7 +41,9 @@ COPY packages/website/ .
 RUN mkdir /code/packages/website/build
 RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
   --mount=type=cache,id=website-build,target=/code/packages/website/build/cache \
-  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) npx next build --no-lint
+  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) \
+  NODE_OPTIONS=--max-old-space-size=8192 \
+  npx next build --no-lint
 
 #################################################
 ## Production Image
