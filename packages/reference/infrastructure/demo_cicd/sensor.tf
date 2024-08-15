@@ -142,7 +142,6 @@ module "sensor" {
                 namespace = local.namespace
               }
               spec = {
-                arguments = {}
                 workflowTemplateRef = {
                   name = module.build_and_deploy_website_workflow.name
                 }

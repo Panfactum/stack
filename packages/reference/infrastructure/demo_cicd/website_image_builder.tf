@@ -42,8 +42,7 @@ module "build_and_deploy_website_workflow" {
   passthrough_parameters = [
     {
       name = "git_ref"
-      description = "Which commit to check out and build in the panfactum/stack repository"
-      default = "main"
+      value = "main"
     },
     {
       name = "tf_apply_dir"
