@@ -9,34 +9,61 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* The default behavior of [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+  was to use both [Redis AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/) for persistence.
+  Unfortunately, using AOF concurrently with RDB negates Redis' the ability to do [partial resynchronizations after restarts
+  and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers).
+  Instead, a full copy of the entire database must be transferred from the current master to replicas on every restart. This greatly increases
+  the time-to-recover as well as incurs a high network cost.
+
+  In fact, there is arguably no benefit to AOF-based persistence with our replicated
+  architecture as new Redis nodes will always pull their data from the running master, not from their local AOF. The
+  only benefit would be if *all* Redis nodes simultaneously failed with a non-graceful shutdown (an incredibly unlikely scenario).
+
+  As a result, we have switched the module to use only use RDB for persistence, and the `redis_appendfsync` input
+  has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
+  AOF if you want (though we would not advise it).
+
+### Fixed
+
+* Addressed issue where `pg_smart_shutdown_timeout` cannot be set to 0 in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  without having CNPG reset it to 180.
+
+* Fixed an issue in  [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero) where stale
+  EBS snapshots were not being deleted.
+
 ## edge.24-08-15
 
 ### Breaking Changes
 
-- `pg_shutdown_timeout` has been renamed to `pg_smart_shutdown_timeout` to better indicate its purpose
-in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). Additionally,
-the shutdown and failover logic has been overhauled. The new default will immediately terminate running queries when
-a database pod is killed, but this serves to reduce the downtime from 60-120 seconds to < 5 seconds in the failover scenario.
-Please see the module documentation for more information.
+* `pg_shutdown_timeout` has been renamed to `pg_smart_shutdown_timeout` to better indicate its purpose
+  in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). Additionally,
+  the shutdown and failover logic has been overhauled. The new default will immediately terminate running queries when
+  a database pod is killed, but this serves to reduce the downtime from 60-120 seconds to \< 5 seconds in the failover scenario.
+  Please see the module documentation for more information.
 
 ### Added
 
-- Adds the concept of passthrough parameters to [wf_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+* Adds the concept of passthrough parameters to [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
 
-- Makes `tf_apply_dir` a Workflow parameter in [wf_tf_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
-so that you only need a single instance of this module per cluster.
+* Makes `tf_apply_dir` a Workflow parameter in [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+  so that you only need a single instance of this module per cluster.
 
-- Adds the ability to use `templateRef` to [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
-in [wf_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+* Adds the ability to use `templateRef` to [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
+  in [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
 
 ### Fixed
 
-- Fixed the working directory in
-[wf_tf_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
-and [wf_dockerfile_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
-to be inside the cloned repository.
+* Fixed the working directory in
+  [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+  and [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+  to be inside the cloned repository.
 
-- Addressed OOM errors when using resource templates with [wf_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+* Addressed OOM errors when using resource templates with [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
 
 ## edge.24-08-13
 
@@ -48,9 +75,9 @@ to be inside the cloned repository.
 * `pg_storage_gb` has been changed to `pg_initial_storage_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
   This better indicates that this value is *only used during the initial database provisioning* and has no effect thereafter.
 
-* `node_vpc_id`, `node_subnets`, and `node_security_group_id` have been moved from [kube_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
-to [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) in order to simplify the logic
-of assigning nodes to subnets, VPCs, and security groups. Additionally, we have removed Karpenter auto-discovery tags as they are no longer necessary.
+* `node_vpc_id`, `node_subnets`, and `node_security_group_id` have been moved from [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
+  to [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) in order to simplify the logic
+  of assigning nodes to subnets, VPCs, and security groups. Additionally, we have removed Karpenter auto-discovery tags as they are no longer necessary.
 
 ### Added
 
@@ -72,15 +99,15 @@ of assigning nodes to subnets, VPCs, and security groups. Additionally, we have 
   * Would use a non-existent AWS profile for the `.sops.yaml` file.
   * Would not install all the platform checksums in the `.terraform.lock.hcl` files.
 
-* `amd64` nodes are now used when `bootstrapping_enabled` is `true` in [aws_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) in order
-to allow certain bootstrapping tests (e.g., Cilium) to run successfully.
+* `amd64` nodes are now used when `bootstrapping_enabled` is `true` in [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) in order
+  to allow certain bootstrapping tests (e.g., Cilium) to run successfully.
 
 * Restores the `pf-db-tunnel` command to the devenv.
 
 * `pf-get-version-hash local` now properly returns `local` without an error code.
 
-* Updates the Panfactum image version in [kube_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) to
-a version that is compatible with the latest pre-built workflows.
+* Updates the Panfactum image version in [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) to
+  a version that is compatible with the latest pre-built workflows.
 
 ## edge.24-08-12
 

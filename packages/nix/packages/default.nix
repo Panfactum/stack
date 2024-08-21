@@ -246,8 +246,14 @@
     src3.k9s # kubernetes tui
     (util.customShellScript
       "pf-eks-reset") # script for resetting cluster during bootstrapping
-    (util.customShellScript "pf-get-aws-profile-for-kube-context")
-    (util.customShellScript "pf-set-pvc-metadata")
+    (util.customShellScript
+      "pf-get-aws-profile-for-kube-context") # get the aws profile used for a kubernetes context
+    (util.customShellScript
+      "pf-set-pvc-metadata") # sets labels and annotations on a PVC
+    (util.customShellScript
+      "pf-voluntary-disruptions-enable") # enables voluntary disruptions on a PDB
+    (util.customShellScript
+      "pf-voluntary-disruptions-disable") # disables voluntary disruptions on a PDB
 
     ####################################
     # BuildKit Management

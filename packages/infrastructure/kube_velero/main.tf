@@ -181,7 +181,7 @@ resource "kubectl_manifest" "snapshot_class" {
     apiVersion = "snapshot.storage.k8s.io/v1"
     kind       = "VolumeSnapshotClass"
     metadata = {
-      name = "default"
+      name = "velero"
       labels = merge(
         module.util.labels,
         {

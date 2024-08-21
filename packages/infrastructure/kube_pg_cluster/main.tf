@@ -399,7 +399,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
             shared_buffers       = "${ceil(var.pg_memory_mb * var.pg_shared_buffers_percent / 100)}MB"
             work_mem             = "${max(ceil(var.pg_memory_mb * var.pg_work_mem_percent / 100 / var.pg_max_connections), 4)}MB"
             maintenance_work_mem = "${ceil(var.pg_memory_mb * var.pg_maintenance_work_mem_percent / 100)}MB"
-            effective_cache_size = "${ceil(var.pg_memory_mb * max((100 - var.pg_work_mem_percent - var.pg_maintenance_work_mem_percent - 25), var.pg_shared_buffers_percent) / 100)}MB"
+            effective_cache_size = "${ceil(var.pg_memory_mb * max((100 - var.pg_work_mem_percent - var.pg_maintenance_work_mem_percent - 10), var.pg_shared_buffers_percent) / 100)}MB"
           },
           var.pg_parameters
         )
@@ -575,6 +575,9 @@ resource "kubectl_manifest" "scheduled_backup" {
 #  depends_on = [kubernetes_manifest.postgres_cluster]
 #}
 
+resource "random_id" "disruption_window" {
+  byte_length = 8
+}
 
 resource "kubectl_manifest" "pdb" {
   yaml_body = yamlencode({
@@ -585,7 +588,15 @@ resource "kubectl_manifest" "pdb" {
       // as we have disabled the operator pdb functionality
       name      = "${local.cluster_name}-pf-pdb"
       namespace = var.pg_cluster_namespace
-      labels    = module.util_cluster.labels
+      labels = merge(
+        module.util_cluster.labels,
+        {
+          "panfactum.com/voluntary-disruption-window" = var.voluntary_disruption_window_enabled ? random_id.disruption_window.hex : "false"
+        }
+      )
+      annotations = {
+        "panfactum.com/max-unavailable" = "1"
+      }
     }
     spec = {
       unhealthyPodEvictionPolicy = "AlwaysAllow"

@@ -81,11 +81,16 @@ variable "pg_storage_increase_gb" {
 variable "pg_smart_shutdown_timeout" {
   description = "The number of seconds to wait for open connections to close before shutting down postgres nodes"
   type        = number
-  default     = 0
+  default     = 1
 
   validation {
     error_message = "Smart shutdowns should not exceed 70 seconds as they block a graceful shutdown which may be required in case of an emergency node termination (e.g., a spot interruption)."
     condition     = var.pg_smart_shutdown_timeout <= 70
+  }
+
+  validation {
+    error_message = "Smart shutdown must be at least 1 second (0 would invoke the CNPG default of 180)"
+    condition     = var.pg_smart_shutdown_timeout >= 1
   }
 }
 
@@ -402,7 +407,13 @@ variable "pg_switchover_delay" {
   default     = 30
 
   validation {
-    error_message = "Must be greater than 5 seconds to allow for _some_ time for the replica stream to synchronize. Otherwise, data loss is virtually guaranteed during switchovers."
-    condition     = var.pg_switchover_delay >= 5
+    error_message = "Must be greater than or equal to 10 seconds to allow for _some_ time for the replica stream to synchronize. Otherwise, data loss is virtually guaranteed during switchovers."
+    condition     = var.pg_switchover_delay >= 10
   }
+}
+
+variable "voluntary_disruption_window_enabled" {
+  description = "Whether to confine voluntary disruptions of pods in this module to specific time windows"
+  type        = bool
+  default     = false
 }

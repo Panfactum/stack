@@ -309,22 +309,23 @@ resource "kubernetes_config_map" "artifacts" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name            = var.eks_cluster_name
-  pg_cluster_namespace        = local.namespace
-  pg_initial_storage_gb       = 2
-  pg_memory_mb                = 1000
-  pg_cpu_millicores           = 250
-  pg_instances                = 2
-  pg_smart_shutdown_timeout   = 2
-  aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  burstable_instances_enabled = true
-  arm_instances_enabled       = true
-  backups_enabled             = var.workflow_archive_backups_enabled
-  backups_force_delete        = true
-  monitoring_enabled          = var.monitoring_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  enhanced_ha_enabled         = var.enhanced_ha_enabled
+  eks_cluster_name                    = var.eks_cluster_name
+  pg_cluster_namespace                = local.namespace
+  pg_initial_storage_gb               = 2
+  pg_memory_mb                        = 1000
+  pg_cpu_millicores                   = 250
+  pg_instances                        = 2
+  pg_smart_shutdown_timeout           = 2
+  aws_iam_ip_allow_list               = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled          = var.pull_through_cache_enabled
+  burstable_instances_enabled         = true
+  arm_instances_enabled               = true
+  backups_enabled                     = var.workflow_archive_backups_enabled
+  backups_force_delete                = true
+  monitoring_enabled                  = var.monitoring_enabled
+  panfactum_scheduler_enabled         = var.panfactum_scheduler_enabled
+  enhanced_ha_enabled                 = var.enhanced_ha_enabled
+  voluntary_disruption_window_enabled = true
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

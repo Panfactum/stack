@@ -73,7 +73,8 @@ to `30` will allow 30 seconds for existing queries to complete but increase the 
 queries cannot be made to about 35 seconds). 
 
 We generally recommend keeping
-`pg_smart_shutdown_timeout` set to the default `0` in order to minimize downtime. Instead of trying to ensure queries
+`pg_smart_shutdown_timeout` set to the default `1` (minimum allowed by CNPG) in order to minimize downtime. 
+Instead of trying to ensure queries
 will always complete, we recommend that you implement retry logic in your database client code. This will
 not only add resilience to this particular scenario, but will also be beneficial in other failure modes.
 

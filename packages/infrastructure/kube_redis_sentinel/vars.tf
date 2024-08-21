@@ -62,12 +62,6 @@ variable "redis_flags" {
   default     = []
 }
 
-variable "redis_appendfsync" {
-  description = "Sets the appendfsync option for AOF saving"
-  type        = string
-  default     = "everysec"
-}
-
 variable "redis_save" {
   description = "Sets the save option for periodic snapshotting"
   type        = string

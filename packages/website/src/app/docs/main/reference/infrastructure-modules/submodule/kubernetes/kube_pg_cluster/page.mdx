@@ -81,7 +81,8 @@ to `30` will allow 30 seconds for existing queries to complete but increase the 
 queries cannot be made to about 35 seconds).
 
 We generally recommend keeping
-`pg_smart_shutdown_timeout` set to the default `0` in order to minimize downtime. Instead of trying to ensure queries
+`pg_smart_shutdown_timeout` set to the default `1` (minimum allowed by CNPG) in order to minimize downtime.
+Instead of trying to ensure queries
 will always complete, we recommend that you implement retry logic in your database client code. This will
 not only add resilience to this particular scenario, but will also be beneficial in other failure modes.
 
@@ -287,7 +288,7 @@ Description: The number of seconds to wait for open connections to close before 
 
 Type: `number`
 
-Default: `0`
+Default: `1`
 
 ### <a name="input_pg_storage_increase_gb" /> [pg\_storage\_increase\_gb](#input_pg_storage_increase_gb)
 
@@ -628,6 +629,14 @@ Default: `false`
 ### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
 
 Description: Whether the database nodes can be scheduled on spot instances
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_voluntary_disruption_window_enabled" /> [voluntary\_disruption\_window\_enabled](#input_voluntary_disruption_window_enabled)
+
+Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
 Type: `bool`
 

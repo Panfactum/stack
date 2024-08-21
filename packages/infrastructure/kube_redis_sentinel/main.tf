@@ -184,9 +184,8 @@ resource "helm_release" "redis" {
             // fill the buffers
             "--maxmemory-clients", "$(( MEMORY_REQUEST * 15 / 100))",
 
-            // Append only file settings for saving data since the last snapshot
-            "--appendonly", "yes",
-            "--appendfsync", var.redis_appendfsync,
+            // Disable AOF saving
+            "--appendonly", "no",
 
             // Snapshot settings
             "--save", var.redis_save
