@@ -319,6 +319,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
     spec = merge({
       imageName             = "${module.pull_through.github_registry}/cloudnative-pg/postgresql:${var.pg_version}"
       instances             = var.pg_instances
+      minSyncReplicas       = var.pg_sync_replication_enabled ? var.pg_instances - 1 : 0
       primaryUpdateStrategy = "unsupervised"
       primaryUpdateMethod   = "switchover"
       enablePDB             = false // We perform our own PDB logic
@@ -396,11 +397,12 @@ resource "kubernetes_manifest" "postgres_cluster" {
             shared_preload_libraries   = ""
             ssl_max_protocol_version   = "TLSv1.3"
             ssl_min_protocol_version   = "TLSv1.3"
-            wal_keep_size              = "1024MB"
+            wal_keep_size              = "10GB"
             wal_level                  = "logical"
             wal_log_hints              = "on"
             wal_receiver_timeout       = "5s"
             wal_sender_timeout         = "5s"
+            max_slot_wal_keep_size     = "10GB"
 
             # Memory tuning - Based on guide created bhy EDB (creators of CNPG)
             # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory

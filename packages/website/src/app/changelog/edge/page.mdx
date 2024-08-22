@@ -38,6 +38,10 @@ which can be used to specify time-based disruption windows for disruption-sensit
 window capabilities have also been added to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
 and [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
 
+* Adds synchronous replication support to
+[kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+via `pg_sync_replication_enabled`.
+
 ### Fixed
 
 * Addressed issue where `pg_smart_shutdown_timeout` cannot be set to 0 in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)

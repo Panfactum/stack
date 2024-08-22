@@ -82,6 +82,31 @@ not only add resilience to this particular scenario, but will also be beneficial
 
 For more information about shutdowns, please see the [CNPG documentation.](https://cloudnative-pg.io/documentation/1.23/instance_manager/)
 
+### Synchronous Replication
+
+By default, this module *asynchronously* replicates data written to the primary instance to each replica. This ensures
+that writes can be completed relatively quickly and that writes can continue even if the replicas are unavailable. 
+
+Generally, this is safe. On a shutdown or failover of the primary, writes 
+are paused and replicas are given a chance to catch up with the primary before one of them is promoted.
+
+However, there are a few drawbacks:
+
+- In the case of a catastrophic instance failure on the primary (e.g., power outage), there is a possibility
+of data loss (up to roughly 5 seconds).
+
+- If you are reading from the replicas, you may be reading stale data (up to roughly 5 seconds old).
+
+- About 5 seconds of additional downtime must be accounted for on failovers in order to allow the replicas to catch-up.
+
+To avoid these drawbacks, you can set `pg_sync_replication_enabled`. However, this comes with its own tradeoffs:
+
+- Database mutations will take significantly longer because writes must be distributed across every replica before returning successfully.
+
+- Database mutations will not complete unless *all* replicas are available. This will increase the chance of downtime for write operations.
+
+We advise you to stick with the default asynchronous replication unless you have a specific, demonstrated need for synchronous replication.
+
 ### Disruptions
 
 By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically

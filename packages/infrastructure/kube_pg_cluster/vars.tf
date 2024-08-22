@@ -25,6 +25,12 @@ variable "pg_instances" {
   default     = 2
 }
 
+variable "pg_sync_replication_enabled" {
+  description = "Whether to use synchronous replication for the streaming replicas (vs async)"
+  type        = bool
+  default     = false
+}
+
 variable "pg_max_connections" {
   description = "The maximum number of connections to each postgres database"
   type        = number
