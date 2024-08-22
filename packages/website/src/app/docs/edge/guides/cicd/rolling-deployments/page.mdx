@@ -1,3 +1,5 @@
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import BuildAndDeployImg from './build-and-deploy.jpg'
@@ -23,9 +25,11 @@ A common practice in software development is to have an environment such as `dev
 the latest code on the primary integration branch of your git repository (e.g., `main`).
 We will demonstrate how to easily accomplish this using the Panfactum CI / CD system.
 
-In the below walkthrough, we will be referencing the module that deploys this website as an example. This is for
-*reference* only. You will not have access to the private website images used by this module, so you must create
-your own service code and IaC; you cannot simply copy our modules.
+<MarkdownAlert severity="warning">
+    In the below walkthrough, we will be referencing the module that deploys this website as an example. This is for
+    *reference* only. You will not have access to the private website images used by this module, so you must create
+    your own application code and IaC; you cannot simply copy our modules.
+</MarkdownAlert>
 
 ## Build and Push Image from Dockerfile
 
@@ -82,8 +86,7 @@ runs them in sequence. The `entrypoint` output of each submodule refer to the na
 of that WorkflowTemplate. [^1]
 
 [^1]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
-but it is what it is. The maintainers try to explain it away [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template),
-but we personally don't buy it.
+but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
 
 ```hcl
  templates = [

@@ -147,8 +147,8 @@ This will turn on the VPA for all modules in this cluster in the next apply.
 
    <MarkdownImage src={k9sPodMetricsProvided} alt="Resource requests and limits are set" />
 
-   * We set **requests** for both CPU and memory so that the Kubernetes scheduler  can
-     accurately decide which enough resources available for pods during the pod-to-node assignment phase.
+   * We set **requests** for both CPU and memory so that the Kubernetes scheduler can
+     accurately decide which nodes have enough resources available for pods during the pod-to-node assignment phase.
 
    * We set **memory limits** so that memory leaks in any application will not consume unbounded memory on the node
      and thus cause all other pods on the node to crash with OOM errors.

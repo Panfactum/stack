@@ -236,8 +236,7 @@ effect, you end up with a single combined Workflow that runs all the steps in th
 This new WorkflowTemplate will run the `entry` template from example WorkflowTemplate twice in a series: [^3]
 
 [^3]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
-but it is what it is. The maintainers try to explain it away [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template),
-but we personally don't buy it.
+but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
 
 ```hcl
 module "composed_workflow" {

@@ -42,6 +42,13 @@ occurs when your SSO session has expired. Login to the correct profile: `aws --p
 
 This means your secrets file was not encrypted by sops. Encrypt it via `sops -e -i <file>` to resolve.
 
+### Invalid Provider Configuration
+
+`Error: Invalid provider configuration`
+
+This likely means the module is using one or more providers that you have not enabled. Run
+`pf-providers-enable` in the module directory to automatically enable all the required providers.
+
 ### Available checksums are for packages targeting different platforms
 
 ```shell-session

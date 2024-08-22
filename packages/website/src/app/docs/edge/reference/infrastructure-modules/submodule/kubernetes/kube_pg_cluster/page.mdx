@@ -8,6 +8,8 @@ import ModuleHeader from "../../../ModuleHeader";
 
 # PostgreSQL Cluster on Kubernetes
 
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 ## Usage
 
 ### Storage
@@ -43,8 +45,8 @@ These three settings are the most important:
 `pg_work_mem_percent` is the most important and most likely to slow down your complex queries. This parameter
 represents the total memory set aside for all connections for their query calculations.
 
-`pg_max_connections` is important as memory is allocated and limited on a *per-connection* basis.
-As a result, the actual memory available to each query is `pg_memory_mb * pg_work_mem_percent / pg_max_connections`.
+`pg_max_connections` is important as memory is allocated and limited on a *per-operation* basis.
+As a result, the actual memory available to each query is roughly `pg_memory_mb * pg_work_mem_percent / pg_max_connections`.
 This is true regardless of whether you are
 actually using the maximum number of connections. Therefore, if you are using the database
 to run large analytical queries, you may want to lower the `pg_max_connections` value in order to allow each query to use more
@@ -81,11 +83,126 @@ to `30` will allow 30 seconds for existing queries to complete but increase the 
 queries cannot be made to about 35 seconds).
 
 We generally recommend keeping
-`pg_smart_shutdown_timeout` set to the default `0` in order to minimize downtime. Instead of trying to ensure queries
+`pg_smart_shutdown_timeout` set to the default `1` (minimum allowed by CNPG) in order to minimize downtime.
+Instead of trying to ensure queries
 will always complete, we recommend that you implement retry logic in your database client code. This will
 not only add resilience to this particular scenario, but will also be beneficial in other failure modes.
 
 For more information about shutdowns, please see the [CNPG documentation.](https://cloudnative-pg.io/documentation/1.23/instance_manager/)
+
+### Synchronous Replication
+
+By default, this module *asynchronously* replicates data written to the primary instance to each replica. This ensures
+that writes can be completed relatively quickly and that writes can continue even if the replicas are unavailable.
+
+Generally, this is safe. On a shutdown or failover of the primary, writes
+are paused and replicas are given a chance to catch up with the primary before one of them is promoted.
+
+However, there are a few drawbacks:
+
+* In the case of a catastrophic instance failure on the primary (e.g., power outage), there is a possibility
+  of data loss (up to roughly 5 seconds).
+
+* If you are reading from the replicas, you may be reading stale data (up to roughly 5 seconds old).
+
+* About 5 seconds of additional downtime must be accounted for on failovers in order to allow the replicas to catch-up.
+
+To avoid these drawbacks, you can set `pg_sync_replication_enabled`. However, this comes with its own tradeoffs:
+
+* Database mutations will take significantly longer because writes must be distributed across every replica before returning successfully.
+
+* Database mutations will not complete unless *all* replicas are available. This will increase the chance of downtime for write operations.
+
+We advise you to stick with the default asynchronous replication unless you have a specific, demonstrated need for synchronous replication.
+
+### Disruptions
+
+By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically
+perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a PostgreSQL pod
+is disrupted, running queries will be terminated prematurely and a short period of downtime might occur if the disrupted
+pod is the primary instance (see the Shutdowns and Failovers section).
+
+You may want to provide more control over when these failovers can occur, so we provide the following options:
+
+#### Disruption Windows
+
+Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if this is needed
+to meet your stability goals. You can enable this feature by setting `voluntary_disruption_window_enabled` to `true`.
+
+The disruption windows are scheduled via `voluntary_disruption_window_cron_schedule` and the length of time of each
+window via `voluntary_disruption_window_seconds`.
+
+If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
+
+For more information on how this works, see the
+[kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+submodule.
+
+#### Custom PDBs
+
+Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and disallowed.
+
+You can do this by managing your own [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/).
+This module provides outputs that will allow you to match certain subsets of pods for both PostgreSQL and PgBouncer.
+
+For example:
+
+```hcl
+module "database" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_cluster?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  ...
+}
+
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "custom-pdb"
+      namespace = module.database.namespace
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.database.cluster_match_labels # Selects all PostgreSQL pods
+      }
+      maxUnavailable = 0 # Prevents any disruptions
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+}
+```
+
+While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application
+logic via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
+query that you do not want disrupted and then delete it upon completion.
+
+#### Completely Disabling Voluntary Disruptions
+
+Allowing the cluster to periodically initiate failovers of PostgreSQL is critical to maintaining system health. However,
+there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of either PostgreSQL
+or PgBouncer pods.
+
+This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
+
+* Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+* Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+* Connect through PgBouncer with `pgbouncer_pool_mode` set to `transaction`
+* Set `enhanced_ha_enabled` to `true`
+
+Note that the above configuration will significantly increase the costs of running PostgreSQL (2.5-5x) versus more
+flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
+
+<MarkdownAlert severity="warning">
+  Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+  disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+  and limited by the use of PDBs.
+
+  An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+  you should still implement defensive coding practices in your client code to account for potential disruptions.
+</MarkdownAlert>
 
 ### PostgreSQL Parameters
 
@@ -287,7 +404,7 @@ Description: The number of seconds to wait for open connections to close before 
 
 Type: `number`
 
-Default: `0`
+Default: `1`
 
 ### <a name="input_pg_storage_increase_gb" /> [pg\_storage\_increase\_gb](#input_pg_storage_increase_gb)
 
@@ -320,6 +437,14 @@ Description: Controls max amount of time that CNPG will wait for data to be sync
 Type: `number`
 
 Default: `30`
+
+### <a name="input_pg_sync_replication_enabled" /> [pg\_sync\_replication\_enabled](#input_pg_sync_replication_enabled)
+
+Description: Whether to use synchronous replication for the streaming replicas (vs async)
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_pg_version" /> [pg\_version](#input_pg_version)
 
@@ -633,6 +758,38 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_voluntary_disruption_window_cron_schedule" /> [voluntary\_disruption\_window\_cron\_schedule](#input_voluntary_disruption_window_cron_schedule)
+
+Description: The times when disruption windows should start
+
+Type: `string`
+
+Default: `"0 4 * * *"`
+
+### <a name="input_voluntary_disruption_window_enabled" /> [voluntary\_disruption\_window\_enabled](#input_voluntary_disruption_window_enabled)
+
+Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_voluntary_disruption_window_seconds" /> [voluntary\_disruption\_window\_seconds](#input_voluntary_disruption_window_seconds)
+
+Description: The length of the disruption window in seconds
+
+Type: `number`
+
+Default: `3600`
+
+### <a name="input_voluntary_disruptions_enabled" /> [voluntary\_disruptions\_enabled](#input_voluntary_disruptions_enabled)
+
+Description: Whether to enable voluntary disruptions of pods in this module.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
 Description: Whether to enable the vertical pod autoscaler
@@ -645,53 +802,77 @@ Default: `true`
 
 The following outputs are exported:
 
+### <a name="output_cluster_match_labels" /> [cluster\_match\_labels](#output_cluster_match_labels)
+
+Description: Label selector that matches all PostgreSQL pods
+
+### <a name="output_cluster_ro_match_labels" /> [cluster\_ro\_match\_labels](#output_cluster_ro_match_labels)
+
+Description: Label selector that matches all read-only replica PostgreSQL pods
+
+### <a name="output_cluster_rw_match_labels" /> [cluster\_rw\_match\_labels](#output_cluster_rw_match_labels)
+
+Description: Label selector that matches the primary PostgreSQL pod (the read-write node)
+
 ### <a name="output_database" /> [database](#output_database)
 
 Description: The database to use for application data
 
 ### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
 
-Description: n/a
+Description: The Vault role used to get admin credentials for the created PostgreSQL cluster
 
 ### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
 
-Description: n/a
+Description: The Vault role used to get read-only credentials for the created PostgreSQL cluster
 
 ### <a name="output_db_superuser_role" /> [db\_superuser\_role](#output_db_superuser_role)
 
-Description: n/a
+Description: The Vault role used to get superuser credentials for the created PostgreSQL cluster
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: The Kubernetes namespace for the created resources
+
+### <a name="output_pooler_r_match_labels" /> [pooler\_r\_match\_labels](#output_pooler_r_match_labels)
+
+Description: Label selector that matches all PgBouncer pods that allows read-only access to the PostgreSQL cluster
 
 ### <a name="output_pooler_r_service_name" /> [pooler\_r\_service\_name](#output_pooler_r_service_name)
 
-Description: The service name of the pgbouncer connection pooler that allows read access
+Description: The service name of the PgBouncer connection pooler that allows read-only access
 
 ### <a name="output_pooler_r_service_port" /> [pooler\_r\_service\_port](#output_pooler_r_service_port)
 
-Description: n/a
+Description: The PostgreSQL port for this service
+
+### <a name="output_pooler_rw_match_labels" /> [pooler\_rw\_match\_labels](#output_pooler_rw_match_labels)
+
+Description: Label selector that matches all PgBouncer pods that allows read-write access to the PostgreSQL cluster
 
 ### <a name="output_pooler_rw_service_name" /> [pooler\_rw\_service\_name](#output_pooler_rw_service_name)
 
-Description: The service name of the pgbouncer connection pooler that allows read-write access
+Description: The service name of the PgBouncer connection pooler that allows read-write access
 
 ### <a name="output_pooler_rw_service_port" /> [pooler\_rw\_service\_port](#output_pooler_rw_service_port)
 
-Description: n/a
+Description: The PostgreSQL port for this service
 
 ### <a name="output_r_service_name" /> [r\_service\_name](#output_r_service_name)
 
-Description: The service name for all db instances that allow read access
+Description: The service name for all db instances that allows read access (includes read-write instances as well)
 
 ### <a name="output_r_service_port" /> [r\_service\_port](#output_r_service_port)
 
-Description: n/a
+Description: The PostgreSQL port for this service
 
 ### <a name="output_ro_service_name" /> [ro\_service\_name](#output_ro_service_name)
 
-Description: The service name for the db instances that only allow read access
+Description: The service name for the db instances that allows read-only access
 
 ### <a name="output_ro_service_port" /> [ro\_service\_port](#output_ro_service_port)
 
-Description: n/a
+Description: The PostgreSQL port for this service
 
 ### <a name="output_rw_service_name" /> [rw\_service\_name](#output_rw_service_name)
 
@@ -699,7 +880,7 @@ Description: The service name of the db node that allows read-write access
 
 ### <a name="output_rw_service_port" /> [rw\_service\_port](#output_rw_service_port)
 
-Description: n/a
+Description: The PostgreSQL port for this service
 
 ### <a name="output_server_certs_secret" /> [server\_certs\_secret](#output_server_certs_secret)
 
