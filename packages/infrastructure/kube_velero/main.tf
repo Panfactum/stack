@@ -434,3 +434,77 @@ resource "kubectl_manifest" "pdb" {
   force_conflicts   = true
   depends_on        = [helm_release.velero]
 }
+
+/***************************************
+* VolumeSnapshot Garbage Collection
+*
+* If the Velero server is ever disrupted in the middle of taking a Backup,
+* the VolumeSnapshots that were included in that Backup will be orphaned and
+* never deleted. This will cause unbounded storage growth so we provide
+* a custom mechanism to clean-up these orphaned snapshots that runs daily
+***************************************/
+
+resource "kubernetes_cluster_role" "snapshot_gc" {
+  metadata {
+    name   = "velero-snapshot-gc"
+    labels = module.snapshot_gc.labels
+  }
+  rule {
+    api_groups = ["snapshot.storage.k8s.io"]
+    resources  = ["volumesnapshotcontents", "volumesnapshots"]
+    verbs      = ["get", "update", "list", "patch", "delete"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "snapshot_gc" {
+  metadata {
+    name   = "velero-snapshot-gc"
+    labels = module.snapshot_gc.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.snapshot_gc.service_account_name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.snapshot_gc.metadata[0].name
+  }
+}
+
+module "snapshot_gc" {
+  source = "../kube_cron_job"
+
+  name                        = "velero-snapshot-gc"
+  namespace                   = local.namespace
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  spot_nodes_enabled          = true
+  arm_nodes_enabled           = true
+  burstable_nodes_enabled     = true
+  vpa_enabled                 = var.vpa_enabled
+
+  cron_schedule = "0 0 * * *"
+  containers = [{
+    name    = "garbage-collector"
+    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
+    version = module.constants.panfactum_image_version
+    command = [
+      "/bin/pf-velero-snapshot-gc"
+    ]
+    minimum_memory = 50
+  }]
+  starting_deadline_seconds = 60 * 5
+  active_deadline_seconds   = 60 * 5
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+

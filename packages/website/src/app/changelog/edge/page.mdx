@@ -28,6 +28,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
   AOF if you want (though we would not advise it).
 
+* Removed the daily backups from [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
+as they were undocumented and had no realistic use case.
+
 ### Added
 
 * Adds a new submodule, [kube_disruption_window_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
@@ -40,8 +43,11 @@ and [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/submodule/
 * Addressed issue where `pg_smart_shutdown_timeout` cannot be set to 0 in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
   without having CNPG reset it to 180.
 
-* Fixed an issue in  [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero) where stale
+* Fixed an issue in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero) where stale
   EBS snapshots were not being deleted.
+
+* Added stricter disruption prevention to the Velero server in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
+as disrupting the server in the middle of a backup operation would cause it to fail and not be resumed.
 
 ## edge.24-08-15
 
