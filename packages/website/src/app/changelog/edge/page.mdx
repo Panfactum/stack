@@ -28,6 +28,13 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
   AOF if you want (though we would not advise it).
 
+### Added
+
+* Adds a new submodule, [kube_disruption_window_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
+which can be used to specify time-based disruption windows for disruption-sensitive workloads (e.g., databases). Disruption
+window capabilities have also been added to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+and [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
+
 ### Fixed
 
 * Addressed issue where `pg_smart_shutdown_timeout` cannot be set to 0 in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)

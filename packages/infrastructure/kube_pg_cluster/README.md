@@ -1,5 +1,7 @@
 # PostgreSQL Cluster on Kubernetes
 
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 ## Usage
 
 ### Storage
@@ -35,8 +37,8 @@ it does not need to be read from disk.
 `pg_work_mem_percent` is the most important and most likely to slow down your complex queries. This parameter 
 represents the total memory set aside for all connections for their query calculations. 
 
-`pg_max_connections` is important as memory is allocated and limited on a *per-connection* basis.
-As a result, the actual memory available to each query is `pg_memory_mb * pg_work_mem_percent / pg_max_connections`. 
+`pg_max_connections` is important as memory is allocated and limited on a *per-operation* basis.
+As a result, the actual memory available to each query is roughly `pg_memory_mb * pg_work_mem_percent / pg_max_connections`. 
 This is true regardless of whether you are
 actually using the maximum number of connections. Therefore, if you are using the database
 to run large analytical queries, you may want to lower the `pg_max_connections` value in order to allow each query to use more
@@ -79,6 +81,95 @@ will always complete, we recommend that you implement retry logic in your databa
 not only add resilience to this particular scenario, but will also be beneficial in other failure modes.
 
 For more information about shutdowns, please see the [CNPG documentation.](https://cloudnative-pg.io/documentation/1.23/instance_manager/)
+
+### Disruptions
+
+By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically
+perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a PostgreSQL pod
+is disrupted, running queries will be terminated prematurely and a short period of downtime might occur if the disrupted
+pod is the primary instance (see the Shutdowns and Failovers section).
+
+You may want to provide more control over when these failovers can occur, so we provide the following options:
+
+#### Disruption Windows
+
+Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if this is needed
+to meet your stability goals. You can enable this feature by setting `voluntary_disruption_window_enabled` to `true`.
+
+The disruption windows are scheduled via `voluntary_disruption_window_cron_schedule` and the length of time of each
+window via `voluntary_disruption_window_seconds`. 
+
+If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
+
+For more information on how this works, see the 
+[kube_disruption_window_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller) 
+submodule.
+
+#### Custom PDBs
+
+Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and disallowed.
+
+You can do this by managing your own [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/).
+This module provides outputs that will allow you to match certain subsets of pods for both PostgreSQL and PgBouncer.
+
+For example: 
+
+```hcl
+module "database" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_cluster?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  ...
+}
+
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "custom-pdb"
+      namespace = module.database.namespace
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.database.cluster_match_labels # Selects all PostgreSQL pods
+      }
+      maxUnavailable = 0 # Prevents any disruptions
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+}
+```
+
+While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application
+logic via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
+query that you do not want disrupted and then delete it upon completion.
+
+#### Completely Disabling Voluntary Disruptions
+
+Allowing the cluster to periodically initiate failovers of PostgreSQL is critical to maintaining system health. However,
+there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of either PostgreSQL
+or PgBouncer pods. 
+
+This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
+
+- Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+- Connect through PgBouncer with `pgbouncer_pool_mode` set to `transaction`
+- Set `enhanced_ha_enabled` to `true`
+
+Note that the above configuration will significantly increase the costs of running PostgreSQL (2.5-5x) versus more
+flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
+
+<MarkdownAlert severity="warning">
+    Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+    disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+    and limited by the use of PDBs.
+
+    An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+    you should still implement defensive coding practices in your client code to account for potential disruptions.
+</MarkdownAlert>
 
 ### PostgreSQL Parameters
 

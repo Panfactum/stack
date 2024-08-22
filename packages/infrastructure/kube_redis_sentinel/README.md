@@ -1,19 +1,23 @@
 # Redis with Sentinel
 
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 This module deploys a highly-available set of [Redis](https://redis.io/docs/) nodes.
 
 This is deployed in a single master, many replica configuration. Failover is handled
 by [Redis Sentinel](https://redis.io/docs/management/sentinel/) which is also
 deployed by this module.
 
-## Persistence
+## Usage
+
+### Persistence
 
 Redis provides two mechanisms for persistence: 
 [AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/).
 This module uses RDB by default (tuned via `redis_save`).
 
-Using AOF concurrently with RDB negates the ability to do [partial resynchronizations after restarts
-and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers). Instead, a copy of the database must be transferred from the current master to new replicas. This greatly increases
+Using AOF (whether independently or concurrently with RDB) negates the ability to do [partial resynchronizations after restarts
+and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers). Instead, a copy of the database must be transferred from the current master to restarted or new replicas. This greatly increases
 the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence 
 at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not 
 from their local AOF. The only benefit would be if _all_ Redis nodes simultaneously failed with 
@@ -24,7 +28,97 @@ have to be transferred from the master to each replica on every Redis node resta
 data on disk is far less than the network costs associated with this transfer. Moreover, persistence should
 never impact performance as writes are completed asynchronously.
 
-## Extra Redis Configuration
+### Disruptions
+
+By default, failovers of Redis pods in this module can be initiated at any time. This enables the cluster to automatically
+perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a Redis pod
+is disrupted, a short period of downtime might occur if the disrupted
+pod is the master instance.
+
+While this can generally be mitigated when using a [Sentinel-aware client](https://redis.io/docs/latest/develop/reference/sentinel-clients/),
+you may want to provide more control over when these failovers can occur, so we provide the following options:
+
+#### Disruption Windows
+
+Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if this is needed
+to meet your stability goals. You can enable this feature by setting `voluntary_disruption_window_enabled` to `true`.
+
+The disruption windows are scheduled via `voluntary_disruption_window_cron_schedule` and the length of time of each
+window via `voluntary_disruption_window_seconds`.
+
+If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
+
+For more information on how this works, see the
+[kube_disruption_window_controller](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+submodule.
+
+#### Custom PDBs
+
+Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and disallowed.
+
+You can do this by managing your own [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/).
+This module provides outputs that will allow you to match certain subsets of Redis pods.
+
+For example:
+
+```hcl
+module "redis" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_redis_sentinel?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  ...
+}
+
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "custom-pdb"
+      namespace = module.redis.namespace
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.redis.match_labels_master # Selects only the Redis master (writable) pod
+      }
+      maxUnavailable = 0 # Prevents any disruptions
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+}
+```
+
+While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application
+logic via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
+operation that you do not want disrupted and then delete it upon completion.
+
+#### Completely Disabling Voluntary Disruptions
+
+Allowing the cluster to periodically initiate failovers of Redis is critical to maintaining system health. However,
+there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any Redis
+pod in this module.
+
+This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
+
+- Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+- Connect with a Sentinel-aware client
+- Set `enhanced_ha_enabled` to `true`
+
+Note that the above configuration will significantly increase the costs of running the Redis cluster (2.5-5x) versus more
+flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
+
+<MarkdownAlert severity="warning">
+    Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+    disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+    and limited by the use of PDBs.
+
+    An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+    you should still implement defensive coding practices in your client code to account for potential disruptions.
+</MarkdownAlert>
+
+### Extra Redis Configuration
 
 You can add extra Redis configuration flags via the `redis_flags` module variable.
 

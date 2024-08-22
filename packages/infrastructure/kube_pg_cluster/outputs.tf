@@ -14,27 +14,69 @@ output "database" {
   value       = "app"
 }
 
+output "namespace" {
+  description = "The Kubernetes namespace for the created resources"
+  value       = var.pg_cluster_namespace
+}
+
 output "server_certs_secret" {
   description = "The secret containing the server certificates for the database"
   value       = module.server_certs.secret_name
 }
 
+output "pooler_rw_match_labels" {
+  description = "Label selector that matches all PgBouncer pods that allows read-write access to the PostgreSQL cluster"
+  value       = module.util_pooler["rw"].match_labels
+}
+
 output "pooler_rw_service_name" {
-  description = "The service name of the pgbouncer connection pooler that allows read-write access"
+  description = "The service name of the PgBouncer connection pooler that allows read-write access"
   value       = "${local.cluster_name}-pooler-rw.${var.pg_cluster_namespace}"
 }
 
 output "pooler_rw_service_port" {
-  value = 5432
+  description = "The PostgreSQL port for this service"
+  value       = 5432
+}
+
+output "pooler_r_match_labels" {
+  description = "Label selector that matches all PgBouncer pods that allows read-only access to the PostgreSQL cluster"
+  value       = module.util_pooler["rw"].match_labels
 }
 
 output "pooler_r_service_name" {
-  description = "The service name of the pgbouncer connection pooler that allows read access"
+  description = "The service name of the PgBouncer connection pooler that allows read-only access"
   value       = "${local.cluster_name}-pooler-r.${var.pg_cluster_namespace}"
 }
 
 output "pooler_r_service_port" {
-  value = 5432
+  description = "The PostgreSQL port for this service"
+  value       = 5432
+}
+
+output "cluster_match_labels" {
+  description = "Label selector that matches all PostgreSQL pods"
+  value       = module.util_cluster.match_labels
+}
+
+output "cluster_rw_match_labels" {
+  description = "Label selector that matches the primary PostgreSQL pod (the read-write node)"
+  value = merge(
+    module.util_cluster.match_labels,
+    {
+      role = "primary"
+    }
+  )
+}
+
+output "cluster_ro_match_labels" {
+  description = "Label selector that matches all read-only replica PostgreSQL pods"
+  value = merge(
+    module.util_cluster.match_labels,
+    {
+      role = "replica"
+    }
+  )
 }
 
 output "rw_service_name" {
@@ -43,36 +85,44 @@ output "rw_service_name" {
 }
 
 output "rw_service_port" {
-  value = 5432
+  description = "The PostgreSQL port for this service"
+  value       = 5432
 }
 
 output "ro_service_name" {
-  description = "The service name for the db instances that only allow read access"
+  description = "The service name for the db instances that allows read-only access"
   value       = "${local.cluster_name}-ro.${var.pg_cluster_namespace}"
 }
 
 output "ro_service_port" {
-  value = 5432
+  description = "The PostgreSQL port for this service"
+  value       = 5432
 }
 
 output "r_service_name" {
-  description = "The service name for all db instances that allow read access"
+  description = "The service name for all db instances that allows read access (includes read-write instances as well)"
   value       = "${local.cluster_name}-r.${var.pg_cluster_namespace}"
 }
 
 output "r_service_port" {
-  value = 5432
+  description = "The PostgreSQL port for this service"
+  value       = 5432
 }
 
 output "db_admin_role" {
-  value = vault_database_secret_backend_role.admin.name
+  description = "The Vault role used to get admin credentials for the created PostgreSQL cluster"
+  value       = vault_database_secret_backend_role.admin.name
 }
 
 output "db_superuser_role" {
-  value = vault_database_secret_backend_role.superuser.name
+  description = "The Vault role used to get superuser credentials for the created PostgreSQL cluster"
+  value       = vault_database_secret_backend_role.superuser.name
 }
 
 output "db_reader_role" {
-  value = vault_database_secret_backend_role.reader.name
+  description = "The Vault role used to get read-only credentials for the created PostgreSQL cluster"
+  value       = vault_database_secret_backend_role.reader.name
 }
+
+
 

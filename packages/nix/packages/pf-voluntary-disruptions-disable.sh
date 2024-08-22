@@ -83,9 +83,9 @@ for PDB in $(kubectl get pdb -n argo -l "panfactum.com/voluntary-disruption-wind
   if [[ $START_TIME == "null" ]]; then
     echo -e "\tSkipping... PDB does not have 'panfactum.com/voluntary-disruption-window-start' annotation." >&2
   elif [[ $((START_TIME + LENGTH_SECONDS)) -ge $(date +%s) ]]; then
-    echo -e "Skipping.. PDB started disruption window less than $LENGTH_SECONDS seconds ago." >&2
+    echo -e "\tSkipping.. PDB started disruption window less than $LENGTH_SECONDS seconds ago." >&2
   else
-    echo "Updating '$PDB' in namespace '$NAMESPACE' with maxUnavailable=0" >&2
+    echo -e "\tUpdating '$PDB' in namespace '$NAMESPACE' with maxUnavailable=0" >&2
     kubectl patch "$PDB" -n "$NAMESPACE" --type='json' -p="[{\"op\": \"replace\", \"path\": \"/spec/maxUnavailable\", \"value\": 0}]" >/dev/null
     kubectl annotate "$PDB" -n "$NAMESPACE" "panfactum.com/voluntary-disruption-window-start-" --overwrite >/dev/null # Deletes the annotation
   fi

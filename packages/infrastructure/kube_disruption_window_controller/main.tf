@@ -35,8 +35,8 @@ resource "kubernetes_role" "controller" {
     labels    = module.disruption_window_enabler.labels
   }
   rule {
-    api_groups = ["policy/v1"]
-    resources  = ["pdbs"]
+    api_groups = ["policy"]
+    resources  = ["poddisruptionbudgets"]
     verbs      = ["get", "update", "list", "patch"]
   }
 }
@@ -125,13 +125,13 @@ module "disruption_window_disabler" {
   burstable_nodes_enabled     = true
   vpa_enabled                 = var.vpa_enabled
 
-  cron_schedule = "0 * * * *" # At the top of every hour
+  cron_schedule = "0/15 * * * *" # Every 15 minutes
   containers = [{
     name    = "disabler"
     image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
     version = module.constants.panfactum_image_version
     command = [
-      "/bin/pf-voluntary-disruptions-enable",
+      "/bin/pf-voluntary-disruptions-disable",
       "--window-id=${random_id.window_id.hex}",
       "--namespace=${var.namespace}"
     ]

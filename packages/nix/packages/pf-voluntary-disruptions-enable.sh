@@ -77,7 +77,7 @@ for PDB in $(kubectl get pdb -n argo -l "panfactum.com/voluntary-disruption-wind
   if [[ $MAX_UNAVAILABLE == "null" ]]; then
     echo -e "\tWarning: PDB does not have 'panfactum.com/voluntary-disruption-window-max-unavailable' annotation. Defaulting to 1." >&2
     MAX_UNAVAILABLE=1
-  elif [[ $MAX_UNAVAILABLE == 1 ]]; then
+  elif [[ $MAX_UNAVAILABLE == 0 ]]; then
     echo -e "\tWarning: PDB has 'panfactum.com/voluntary-disruption-window-max-unavailable' annotation set to 0 which is not allowed. Defaulting to 1." >&2
     MAX_UNAVAILABLE=1
   fi

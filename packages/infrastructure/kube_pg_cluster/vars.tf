@@ -88,6 +88,7 @@ variable "pg_smart_shutdown_timeout" {
     condition     = var.pg_smart_shutdown_timeout <= 70
   }
 
+  # Remove in CNPG 1.24
   validation {
     error_message = "Smart shutdown must be at least 1 second (0 would invoke the CNPG default of 180)"
     condition     = var.pg_smart_shutdown_timeout >= 1
@@ -412,6 +413,12 @@ variable "pg_switchover_delay" {
   }
 }
 
+variable "voluntary_disruptions_enabled" {
+  description = "Whether to enable voluntary disruptions of pods in this module."
+  type        = bool
+  default     = true
+}
+
 variable "voluntary_disruption_window_enabled" {
   description = "Whether to confine voluntary disruptions of pods in this module to specific time windows"
   type        = bool
@@ -423,8 +430,8 @@ variable "voluntary_disruption_window_seconds" {
   type        = number
   default     = 3600
   validation {
-    condition     = var.voluntary_disruption_window_seconds >= 1800
-    error_message = "The disruption window must be at least 30 minutes to be effective."
+    condition     = var.voluntary_disruption_window_seconds >= 900
+    error_message = "The disruption window must be at least 15 minutes to be effective."
   }
 }
 

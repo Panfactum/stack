@@ -330,6 +330,8 @@ resource "helm_release" "redis" {
   }
 }
 
+# This PDB allows one pod in the Redis cluster to be disrupted at a time
+# unless voluntary_disruptions_enabled is set to false
 resource "kubectl_manifest" "pdb" {
   yaml_body = yamlencode({
     apiVersion = "policy/v1"
@@ -337,19 +339,66 @@ resource "kubectl_manifest" "pdb" {
     metadata = {
       name      = random_id.id.hex
       namespace = var.namespace
-      labels    = module.util.labels
+      labels    = module.util.labels,
     }
     spec = {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util.match_labels
       }
-      maxUnavailable = 1
+      maxUnavailable = var.voluntary_disruptions_enabled ? 1 : 0
     }
   })
   server_side_apply = true
   force_conflicts   = true
   depends_on        = [helm_release.redis]
+}
+
+# This PDB optionally limits disruptions on the master pod
+# iff voluntary_disruption_window_enabled is set to true
+resource "kubectl_manifest" "pdb_master" {
+  count = var.voluntary_disruption_window_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "${random_id.id.hex}-master"
+      namespace = var.namespace
+      labels = merge(
+        module.util.labels,
+        {
+          "panfactum.com/voluntary-disruption-window-id" = var.voluntary_disruption_window_enabled ? module.disruption_window_controller[0].disruption_window_id : "false"
+        }
+      )
+      annotations = {
+        "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
+        "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
+      }
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = merge(
+          module.util.match_labels,
+          {
+            isMaster = "true"
+          }
+        )
+      }
+      maxUnavailable = 0
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.redis]
+  ignore_fields = concat(
+    [
+      "metadata.annotations.panfactum.com/voluntary-disruption-window-start"
+    ],
+    var.voluntary_disruption_window_enabled ? [
+      "spec.maxUnavailable"
+    ] : []
+  )
 }
 
 resource "kubectl_manifest" "vpa" {
@@ -466,4 +515,20 @@ resource "vault_database_secret_backend_connection" "redis" {
   verify_connection = true
 
   depends_on = [helm_release.redis]
+}
+
+/***************************************
+* Disruption Windows
+***************************************/
+
+module "disruption_window_controller" {
+  count  = var.voluntary_disruption_window_enabled ? 1 : 0
+  source = "../kube_disruption_window_controller"
+
+  namespace                   = var.namespace
+  vpa_enabled                 = var.vpa_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+
+  cron_schedule = var.voluntary_disruption_window_cron_schedule
 }

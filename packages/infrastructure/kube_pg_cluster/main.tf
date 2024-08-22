@@ -604,12 +604,20 @@ resource "kubectl_manifest" "pdb" {
       selector = {
         matchLabels = module.util_cluster.match_labels
       }
-      maxUnavailable = 1
+      maxUnavailable = var.voluntary_disruptions_enabled && !var.voluntary_disruption_window_enabled ? 1 : 0
     }
   })
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [kubernetes_manifest.postgres_cluster]
+  ignore_fields = concat(
+    [
+      "metadata.annotations.panfactum.com/voluntary-disruption-window-start"
+    ],
+    var.voluntary_disruption_window_enabled ? [
+      "spec.maxUnavailable"
+    ] : []
+  )
 }
 
 /***************************************
@@ -934,12 +942,20 @@ resource "kubectl_manifest" "pdb_pooler" {
       selector = {
         matchLabels = module.util_pooler[each.key].match_labels
       }
-      maxUnavailable = 1
+      maxUnavailable = var.voluntary_disruptions_enabled && !var.voluntary_disruption_window_enabled ? 1 : 0
     }
   })
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [kubectl_manifest.connection_pooler]
+  ignore_fields = concat(
+    [
+      "metadata.annotations.panfactum.com/voluntary-disruption-window-start"
+    ],
+    var.voluntary_disruption_window_enabled ? [
+      "spec.maxUnavailable"
+    ] : []
+  )
 }
 
 /***************************************
