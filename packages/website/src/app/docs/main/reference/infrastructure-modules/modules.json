@@ -201,6 +201,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_disruption_window_controller",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_external_dns",
       "type": "direct",
       "group": "kubernetes"

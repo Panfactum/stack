@@ -634,6 +634,14 @@ Type: `bool`
 
 Default: `false`
 
+### <a name="input_voluntary_disruption_window_cron_schedule" /> [voluntary\_disruption\_window\_cron\_schedule](#input_voluntary_disruption_window_cron_schedule)
+
+Description: The times when disruption windows should start
+
+Type: `string`
+
+Default: `"0 4 * * *"`
+
 ### <a name="input_voluntary_disruption_window_enabled" /> [voluntary\_disruption\_window\_enabled](#input_voluntary_disruption_window_enabled)
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
@@ -641,6 +649,14 @@ Description: Whether to confine voluntary disruptions of pods in this module to 
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_voluntary_disruption_window_seconds" /> [voluntary\_disruption\_window\_seconds](#input_voluntary_disruption_window_seconds)
+
+Description: The length of the disruption window in seconds
+
+Type: `number`
+
+Default: `3600`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

@@ -69,14 +69,20 @@ fi
 # Step 2: Enable disruptions on the PDBs for the given disruption window ID
 ####################################################################
 
-for PDB in $(kubectl get pdb -n argo -l "panfactum.com/voluntary-disruption-window=$WINDOW_ID" --ignore-not-found -o name); do
+for PDB in $(kubectl get pdb -n argo -l "panfactum.com/voluntary-disruption-window-id=$WINDOW_ID" --ignore-not-found -o name); do
   ANNOTATIONS=$(kubectl get "$PDB" -n "$NAMESPACE" -o jsonpath="{.metadata.annotations}")
-  MAX_UNAVAILABLE=$(echo "$ANNOTATIONS" | jq -r '.["panfactum.com/max-unavailable"]')
+  MAX_UNAVAILABLE=$(echo "$ANNOTATIONS" | jq -r '.["panfactum.com/voluntary-disruption-window-max-unavailable"]')
+  echo "Enabling disruption window for '$PDB' in namespace '$NAMESPACE':" >&2
+
   if [[ $MAX_UNAVAILABLE == "null" ]]; then
-    echo "Warning: '$PDB' in namespace '$NAMESPACE' does not have 'panfactum.com/max-unavailable' annotation. Defaulting to 1." >&2
+    echo -e "\tWarning: PDB does not have 'panfactum.com/voluntary-disruption-window-max-unavailable' annotation. Defaulting to 1." >&2
+    MAX_UNAVAILABLE=1
+  elif [[ $MAX_UNAVAILABLE == 1 ]]; then
+    echo -e "\tWarning: PDB has 'panfactum.com/voluntary-disruption-window-max-unavailable' annotation set to 0 which is not allowed. Defaulting to 1." >&2
     MAX_UNAVAILABLE=1
   fi
-  echo "Updating '$PDB' in namespace '$NAMESPACE' with maxUnavailable=$MAX_UNAVAILABLE" >&2
+
+  echo -e "\tUpdating PDB with maxUnavailable=$MAX_UNAVAILABLE" >&2
   kubectl patch "$PDB" -n "$NAMESPACE" --type='json' -p="[{\"op\": \"replace\", \"path\": \"/spec/maxUnavailable\", \"value\": $MAX_UNAVAILABLE}]" >/dev/null
   kubectl annotate "$PDB" -n "$NAMESPACE" "panfactum.com/voluntary-disruption-window-start=$(date +%s)" --overwrite >/dev/null
 done

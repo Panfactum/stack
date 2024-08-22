@@ -40,6 +40,15 @@ locals {
   ))
 
   all_schemas = tolist(toset(concat(var.extra_schemas, ["public"])))
+
+  disruption_window_labels = {
+    "panfactum.com/voluntary-disruption-window-id" = var.voluntary_disruption_window_enabled ? module.disruption_window_controller[0].disruption_window_id : "false"
+  }
+
+  disruption_window_annotations = {
+    "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
+    "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
+  }
 }
 
 module "pull_through" {
@@ -575,10 +584,6 @@ resource "kubectl_manifest" "scheduled_backup" {
 #  depends_on = [kubernetes_manifest.postgres_cluster]
 #}
 
-resource "random_id" "disruption_window" {
-  byte_length = 8
-}
-
 resource "kubectl_manifest" "pdb" {
   yaml_body = yamlencode({
     apiVersion = "policy/v1"
@@ -590,13 +595,9 @@ resource "kubectl_manifest" "pdb" {
       namespace = var.pg_cluster_namespace
       labels = merge(
         module.util_cluster.labels,
-        {
-          "panfactum.com/voluntary-disruption-window" = var.voluntary_disruption_window_enabled ? random_id.disruption_window.hex : "false"
-        }
+        local.disruption_window_labels
       )
-      annotations = {
-        "panfactum.com/max-unavailable" = "1"
-      }
+      annotations = local.disruption_window_annotations
     }
     spec = {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
@@ -923,7 +924,11 @@ resource "kubectl_manifest" "pdb_pooler" {
     metadata = {
       name      = "${local.cluster_name}-pooler-${each.key}"
       namespace = var.pg_cluster_namespace
-      labels    = module.util_pooler[each.key].labels
+      labels = merge(
+        module.util_pooler[each.key].labels,
+        local.disruption_window_labels
+      )
+      annotations = local.disruption_window_annotations
     }
     spec = {
       selector = {
@@ -935,4 +940,20 @@ resource "kubectl_manifest" "pdb_pooler" {
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [kubectl_manifest.connection_pooler]
+}
+
+/***************************************
+* Disruption Windows
+***************************************/
+
+module "disruption_window_controller" {
+  count  = var.voluntary_disruption_window_enabled ? 1 : 0
+  source = "../kube_disruption_window_controller"
+
+  namespace                   = var.pg_cluster_namespace
+  vpa_enabled                 = var.vpa_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+
+  cron_schedule = var.voluntary_disruption_window_cron_schedule
 }

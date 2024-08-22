@@ -18,6 +18,11 @@ resource "kubectl_manifest" "pvc" {
     metadata = {
       name = "nix-store-${each.key}"
       namespace = local.namespace
+      annotations = {
+        "resize.topolvm.io/inodes-threshold" = "20%"
+        "resize.topolvm.io/threshold" = "20%"
+        "resize.topolvm.io/increase" = "10Gi"
+      }
     }
     spec = {
       resources = {

@@ -417,3 +417,19 @@ variable "voluntary_disruption_window_enabled" {
   type        = bool
   default     = false
 }
+
+variable "voluntary_disruption_window_seconds" {
+  description = "The length of the disruption window in seconds"
+  type        = number
+  default     = 3600
+  validation {
+    condition     = var.voluntary_disruption_window_seconds >= 1800
+    error_message = "The disruption window must be at least 30 minutes to be effective."
+  }
+}
+
+variable "voluntary_disruption_window_cron_schedule" {
+  description = "The times when disruption windows should start"
+  type        = string
+  default     = "0 4 * * *"
+}
