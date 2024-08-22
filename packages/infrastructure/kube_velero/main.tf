@@ -42,6 +42,7 @@ module "util" {
   panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_preferred = false
   topology_spread_enabled               = false
+  controller_node_required              = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -279,7 +280,7 @@ resource "helm_release" "velero" {
         }
       }
 
-
+      affinity          = module.util.affinity
       priorityClassName = module.constants.cluster_important_priority_class_name
       tolerations       = module.util.tolerations
 
@@ -346,16 +347,13 @@ resource "helm_release" "velero" {
             snapshotVolumes = true // Only store snapshots for the last hour due to high costs
             ttl             = "1h30m0s"
             storageLocation = "s3"
-          }
-        }
-        daily = {
-          disabled = false
-          labels   = module.util.labels
-          schedule = "0 0 * * *"
-          template = {
-            snapshotVolumes = false
-            ttl             = "${24 * 7}h0m0s"
-            storageLocation = "s3"
+            excludedResources = [
+
+              // https://cert-manager.io/docs/devops-tips/backup/#example-backup-and-restore-using-velero
+              "challenges.acme.cert-manager.io",
+              "orders.acme.cert-manager.io",
+              "certificaterequests.cert-manager.io"
+            ]
           }
         }
       }
@@ -429,7 +427,7 @@ resource "kubectl_manifest" "pdb" {
       selector = {
         matchLabels = module.util.match_labels
       }
-      maxUnavailable = 1
+      maxUnavailable = 0
     }
   })
   server_side_apply = true

@@ -254,6 +254,8 @@
       "pf-voluntary-disruptions-enable") # enables voluntary disruptions on a PDB
     (util.customShellScript
       "pf-voluntary-disruptions-disable") # disables voluntary disruptions on a PDB
+    (util.customShellScript
+      "pf-velero-snapshot-gc") # cleans up orphaned pvc snapshots
 
     ####################################
     # BuildKit Management
