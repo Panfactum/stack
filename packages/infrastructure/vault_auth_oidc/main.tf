@@ -21,8 +21,8 @@ resource "vault_jwt_auth_backend" "oidc" {
   bound_issuer       = var.oidc_issuer
   default_role       = "default"
   tune {
-    max_lease_ttl      = "${var.token_lifetime_seconds}s"
-    default_lease_ttl  = "${var.token_lifetime_seconds}s"
+    max_lease_ttl      = "${var.token_lifetime_hours}h"
+    default_lease_ttl  = "${var.token_lifetime_hours}h"
     token_type         = "default-service"
     listing_visibility = "unauth"
   }
@@ -39,8 +39,8 @@ resource "vault_jwt_auth_backend_role" "default" {
     name  = "name"
   }
   allowed_redirect_uris  = var.oidc_redirect_uris
-  max_age                = var.token_lifetime_seconds
-  token_explicit_max_ttl = var.token_lifetime_seconds
+  max_age                = var.token_lifetime_hours * 60 * 60
+  token_explicit_max_ttl = var.token_lifetime_hours * 60 * 60
   verbose_oidc_logging   = true
 }
 

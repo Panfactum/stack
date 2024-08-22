@@ -28,6 +28,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
   AOF if you want (though we would not advise it).
 
+* `token_lifetime_seconds` has been changed to `token_lifetime_hours` in [vault_auth_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to avoid a perpetual diff issue
+present in the Vault provider.
+
 * Removed the daily backups from [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
 as they were undocumented and had no realistic use case.
 

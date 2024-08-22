@@ -14,10 +14,10 @@ variable "oidc_discovery_url" {
   type        = string
 }
 
-variable "token_lifetime_seconds" {
-  description = "Number of seconds before generated tokens expire"
+variable "token_lifetime_hours" {
+  description = "Number of hours before generated tokens expire"
   type        = number
-  default     = 60 * 60 * 8
+  default     = 12
 }
 
 variable "oidc_redirect_uris" {
