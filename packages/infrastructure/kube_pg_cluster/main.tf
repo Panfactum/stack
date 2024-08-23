@@ -430,10 +430,11 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
             // Grant privileges to pgbouncer
             "CREATE ROLE cnpg_pooler_pgbouncer WITH LOGIN;",
+            "GRANT USAGE ON SCHEMA public to cnpg_pooler_pgbouncer;",
             "GRANT CONNECT ON DATABASE postgres TO cnpg_pooler_pgbouncer;",
-            "CREATE OR REPLACE FUNCTION user_search(uname TEXT) RETURNS TABLE (usename name, passwd text) LANGUAGE sql SECURITY DEFINER AS 'SELECT usename, passwd FROM pg_shadow WHERE usename=$1;'",
-            "REVOKE ALL ON FUNCTION user_search(text) FROM public;",
-            "GRANT EXECUTE ON FUNCTION user_search(text) TO cnpg_pooler_pgbouncer;"
+            "CREATE OR REPLACE FUNCTION public.user_search(uname TEXT) RETURNS TABLE (usename name, passwd text) LANGUAGE sql SECURITY DEFINER AS 'SELECT usename, passwd FROM pg_catalog.pg_shadow WHERE usename=$1;'",
+            "REVOKE ALL ON FUNCTION public.user_search(text) FROM public;",
+            "GRANT EXECUTE ON FUNCTION public.user_search(text) TO cnpg_pooler_pgbouncer;"
           ]
           postInitApplicationSQL = flatten([
 
@@ -455,9 +456,10 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
             // Grant privileges to pgbouncer
             "GRANT CONNECT ON DATABASE app TO cnpg_pooler_pgbouncer;",
-            "CREATE OR REPLACE FUNCTION user_search(uname TEXT) RETURNS TABLE (usename name, passwd text) LANGUAGE sql SECURITY DEFINER AS 'SELECT usename, passwd FROM pg_shadow WHERE usename=$1;'",
-            "REVOKE ALL ON FUNCTION user_search(text) FROM public;",
-            "GRANT EXECUTE ON FUNCTION user_search(text) TO cnpg_pooler_pgbouncer;"
+            "GRANT USAGE ON SCHEMA public to cnpg_pooler_pgbouncer;",
+            "CREATE OR REPLACE FUNCTION public.user_search(uname TEXT) RETURNS TABLE (usename name, passwd text) LANGUAGE sql SECURITY DEFINER AS 'SELECT usename, passwd FROM pg_catalog.pg_shadow WHERE usename=$1;'",
+            "REVOKE ALL ON FUNCTION public.user_search(text) FROM public;",
+            "GRANT EXECUTE ON FUNCTION public.user_search(text) TO cnpg_pooler_pgbouncer;"
           ])
         }
       }
@@ -815,7 +817,7 @@ resource "kubectl_manifest" "connection_pooler" {
         authQuerySecret = {
           name = module.pooler_certs.secret_name
         }
-        authQuery = "SELECT usename, passwd FROM user_search($1)"
+        authQuery = "SELECT usename, passwd FROM public.user_search($1)"
         poolMode  = var.pgbouncer_pool_mode
         parameters = { for k, v in {
           max_client_conn           = tostring(var.pgbouncer_max_client_conn)
