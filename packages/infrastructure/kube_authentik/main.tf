@@ -90,7 +90,7 @@ module "util_worker" {
 module "namespace" {
   source = "../kube_namespace"
 
-  namespace = local.name
+  namespace = var.namespace
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -252,9 +252,6 @@ resource "helm_release" "authentik" {
         image = {
           repository = "${module.pull_through.github_registry}/goauthentik/server"
         }
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
         serviceAccount = {
           create = true
         }
@@ -362,10 +359,7 @@ resource "helm_release" "authentik" {
           enabled = false // We use our own ingress module
         }
 
-        replicas = 2
-        deploymentStrategy = {
-          type = "Recreate"
-        }
+        replicas                  = 2
         priorityClassName         = module.constants.database_priority_class_name
         affinity                  = module.util_server.affinity
         tolerations               = module.util_server.tolerations
@@ -545,8 +539,9 @@ resource "helm_release" "authentik" {
 resource "kubernetes_config_map" "dashboard" {
   count = var.monitoring_enabled ? 1 : 0
   metadata {
-    name   = "authentik-dashboard"
-    labels = merge(module.util_server.labels, { "grafana_dashboard" = "1" })
+    name      = "authentik-dashboard"
+    namespace = local.namespace
+    labels    = merge(module.util_server.labels, { "grafana_dashboard" = "1" })
   }
   data = {
     "authentik.json" = file("${path.module}/dashboard.json")

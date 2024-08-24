@@ -1,3 +1,9 @@
+variable "namespace" {
+  description = "Kubernetes namespace to deploy the resources into"
+  type        = string
+  default     = "authentik"
+}
+
 variable "authentik_helm_version" {
   description = "The version of the Authentik helm chart to deploy"
   type        = string

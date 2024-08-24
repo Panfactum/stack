@@ -9,12 +9,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## edge.24-08-24
+
+### Fixed
+
+* Addressed a couple of issues with the [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+  module:
+  * [authentik\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources) will no longer
+    fail to apply and end up in an invalid state when first created.
+  * Authentik should no longer experience any downtime during database failover events
+
 ## edge.24-08-23
 
 ### Fixed
 
-- Correctly sets PgBouncer permissions on new PostgreSQL cluster creation in
-[kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+* Correctly sets PgBouncer permissions on new PostgreSQL cluster creation in
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
 
 ## edge.24-08-22
 
@@ -35,22 +45,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
   AOF if you want (though we would not advise it).
 
-* `token_lifetime_seconds` has been changed to `token_lifetime_hours` in [vault_auth_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to avoid a perpetual diff issue
-present in the Vault provider.
+* `token_lifetime_seconds` has been changed to `token_lifetime_hours` in [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to avoid a perpetual diff issue
+  present in the Vault provider.
 
 * Removed the daily backups from [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
-as they were undocumented and had no realistic use case.
+  as they were undocumented and had no realistic use case.
 
 ### Added
 
-* Adds a new submodule, [kube_disruption_window_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
-which can be used to specify time-based disruption windows for disruption-sensitive workloads (e.g., databases). Disruption
-window capabilities have also been added to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-and [kube_redis_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
+* Adds a new submodule, [kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
+  which can be used to specify time-based disruption windows for disruption-sensitive workloads (e.g., databases). Disruption
+  window capabilities have also been added to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
 
 * Adds synchronous replication support to
-[kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-via `pg_sync_replication_enabled`.
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  via `pg_sync_replication_enabled`.
 
 ### Fixed
 
@@ -61,7 +71,7 @@ via `pg_sync_replication_enabled`.
   EBS snapshots were not being deleted.
 
 * Added stricter disruption prevention to the Velero server in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
-as disrupting the server in the middle of a backup operation would cause it to fail and not be resumed.
+  as disrupting the server in the middle of a backup operation would cause it to fail and not be resumed.
 
 ## edge.24-08-15
 
