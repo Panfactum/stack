@@ -124,6 +124,30 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_grafana_db_recovery_directory" /> [grafana\_db\_recovery\_directory](#input_grafana_db_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_grafana_db_recovery_mode_enabled" /> [grafana\_db\_recovery\_mode\_enabled](#input_grafana_db_recovery_mode_enabled)
+
+Description: Whether to enable recovery mode for the Grafana PostgreSQL database
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_grafana_db_recovery_target_time" /> [grafana\_db\_recovery\_target\_time](#input_grafana_db_recovery_target_time)
+
+Description: If provided, will recover the Grafana PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_grafana_log_level" /> [grafana\_log\_level](#input_grafana_log_level)
 
 Description: The log level for the grafana pods
@@ -359,6 +383,10 @@ Description: n/a
 ### <a name="output_grafana_admin_password" /> [grafana\_admin\_password](#output_grafana_admin_password)
 
 Description: n/a
+
+### <a name="output_grafana_db_recovery_directory" /> [grafana\_db\_recovery\_directory](#output_grafana_db_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives
 
 ### <a name="output_namespace" /> [namespace](#output_namespace)
 

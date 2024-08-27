@@ -74,6 +74,30 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_db_recovery_directory" /> [db\_recovery\_directory](#input_db_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_db_recovery_mode_enabled" /> [db\_recovery\_mode\_enabled](#input_db_recovery_mode_enabled)
+
+Description: Whether to enable recovery mode for the PostgreSQL database
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_db_recovery_target_time" /> [db\_recovery\_target\_time](#input_db_recovery_target_time)
+
+Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
@@ -170,14 +194,6 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_workflow_archive_backups_enabled" /> [workflow\_archive\_backups\_enabled](#input_workflow_archive_backups_enabled)
-
-Description: Whether to enable backups of the workflow archives
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_workflow_archive_ttl" /> [workflow\_archive\_ttl](#input_workflow_archive_ttl)
 
 Description: Length of time that previously run workflow states are stored
@@ -197,6 +213,10 @@ Description: ARN of the S3 bucket holding workflow artifacts
 ### <a name="output_artifact_bucket_name" /> [artifact\_bucket\_name](#output_artifact_bucket_name)
 
 Description: Name of the S3 bucket holding workflow artifacts
+
+### <a name="output_db_recovery_directory" /> [db\_recovery\_directory](#output_db_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
 ## Usage
 

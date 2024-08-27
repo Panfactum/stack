@@ -480,22 +480,26 @@ module "namespace" {
 module "grafana_db" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name            = var.eks_cluster_name
-  pg_cluster_namespace        = local.namespace
-  pg_initial_storage_gb       = 1
-  pg_memory_mb                = 500
-  pg_cpu_millicores           = 250
-  pg_instances                = 2
-  aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  pgbouncer_pool_mode         = "session"
-  burstable_instances_enabled = true
-  arm_instances_enabled       = true
-  backups_enabled             = false
-  backups_force_delete        = true
-  monitoring_enabled          = var.monitoring_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  enhanced_ha_enabled         = var.enhanced_ha_enabled
+  eks_cluster_name                 = var.eks_cluster_name
+  pg_cluster_namespace             = local.namespace
+  pg_initial_storage_gb            = 1
+  pg_memory_mb                     = 500
+  pg_cpu_millicores                = 250
+  pg_instances                     = 2
+  aws_iam_ip_allow_list            = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled       = var.pull_through_cache_enabled
+  pgbouncer_pool_mode              = "session"
+  burstable_instances_enabled      = true
+  arm_instances_enabled            = true
+  continuous_wal_archiving_enabled = false
+  backups_force_delete             = true
+  monitoring_enabled               = var.monitoring_enabled
+  panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
+  enhanced_ha_enabled              = var.enhanced_ha_enabled
+
+  pg_recovery_mode_enabled = var.grafana_db_recovery_mode_enabled
+  pg_recovery_directory    = var.grafana_db_recovery_directory
+  pg_recovery_target_time  = var.grafana_db_recovery_target_time
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

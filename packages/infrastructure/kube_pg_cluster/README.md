@@ -107,6 +107,43 @@ To avoid these drawbacks, you can set `pg_sync_replication_enabled`. However, th
 
 We advise you to stick with the default asynchronous replication unless you have a specific, demonstrated need for synchronous replication.
 
+### Recovery
+
+In the case of an emergency, you can recover the database from the backups and WAL archives stored in S3.
+
+Complete the following steps:
+
+1. Run `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. Verify that there exists a "First Point of
+Recoverability". 
+
+    If this is not available, that means that your logical PostgreSQL backups were not configured correctly and 
+    are not available. You will need to restore from the hourly EBS snapshots 
+    created by Velero instead.
+
+2. Retrieve the `recovery_directory` output from this module by running `terragrunt output`.
+
+3. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
+
+4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `recovery_directory`
+output you retrieved in step 2.
+
+    Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
+    timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
+    must be **after** the "First Point of Recoverability" that was reported in step 1.
+
+    If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
+    should be within 5 seconds of the last database write.
+
+5. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
+come back online.
+
+Note that the "First Point of Recoverability" is determined by the `backups_retention_days`
+input; backups older than `backups_retention_days` (default `3`) will be deleted, and you
+will no longer be able to recover to that point in time.
+
+For more information on recovery procedures, see the CNPG 
+[recovery documentation](https://cloudnative-pg.io/documentation/1.23/recovery/).
+
 ### Disruptions
 
 By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically

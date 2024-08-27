@@ -12,12 +12,12 @@
 set -eo pipefail
 
 ####################################################################
-# Step 1: Get to the repository root (or DEVENV_ROOT if set)
+# Step 1: Get to the repository root (or root of devenv if using nested devenv)
 ####################################################################
 
 ROOT="${1:-$(pwd)}"
 ROOT=$(realpath "$ROOT")
-while [[ ! -d "${ROOT}/.git" ]] && [[ ! -f "$ROOT/panfactum.yaml" ]]; do
+while [[ ! -d "${ROOT}/.git" ]] && [[ ! -d "$ROOT/.devenv" ]]; do
   ROOT=$(dirname "$ROOT")
 done
 

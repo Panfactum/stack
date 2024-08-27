@@ -320,11 +320,14 @@ module "database" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_instances_enabled = true
   arm_instances_enabled       = true
-  backups_enabled             = var.workflow_archive_backups_enabled
   backups_force_delete        = true
   monitoring_enabled          = var.monitoring_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   enhanced_ha_enabled         = var.enhanced_ha_enabled
+
+  pg_recovery_mode_enabled = var.db_recovery_mode_enabled
+  pg_recovery_directory    = var.db_recovery_directory
+  pg_recovery_target_time  = var.db_recovery_target_time
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

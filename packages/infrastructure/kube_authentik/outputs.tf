@@ -68,3 +68,8 @@ output "domain" {
 output "authentik_url" {
   value = "https://${var.domain}"
 }
+
+output "db_recovery_directory" {
+  description = "The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives"
+  value       = module.database.recovery_directory
+}

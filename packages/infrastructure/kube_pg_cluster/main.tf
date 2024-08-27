@@ -130,17 +130,28 @@ module "constants" {
 * S3 Backup
 ***************************************/
 
+resource "random_id" "recovery_directory" {
+  byte_length = 8
+  keepers = {
+    pg_recovery_mode_enabled = var.pg_recovery_mode_enabled
+    pg_recovery_target_time  = var.pg_recovery_target_time
+  }
+}
+
 resource "random_id" "bucket_name" {
-  count       = var.backups_enabled ? 1 : 0
   byte_length = 8
   prefix      = "${var.pg_cluster_namespace}-${local.cluster_name}-backup-"
 }
 
+moved {
+  from = random_id.bucket_name[0]
+  to   = random_id.bucket_name
+}
+
 module "s3_bucket" {
-  count  = var.backups_enabled ? 1 : 0
   source = "../aws_s3_private_bucket"
 
-  bucket_name                     = random_id.bucket_name[0].hex
+  bucket_name                     = random_id.bucket_name.hex
   description                     = "Backups for the ${local.cluster_name} cluster."
   versioning_enabled              = false
   audit_log_enabled               = false
@@ -158,26 +169,29 @@ module "s3_bucket" {
   # end-generate
 }
 
+moved {
+  from = module.s3_bucket[0]
+  to   = module.s3_bucket
+}
+
 data "aws_iam_policy_document" "s3_access" {
-  count = var.backups_enabled ? 1 : 0
   statement {
     effect  = "Allow"
     actions = ["s3:*"]
     resources = [
-      module.s3_bucket[0].bucket_arn,
-      "${module.s3_bucket[0].bucket_arn}/*"
+      module.s3_bucket.bucket_arn,
+      "${module.s3_bucket.bucket_arn}/*"
     ]
   }
 }
 
 module "irsa" {
-  count  = var.backups_enabled ? 1 : 0
   source = "../kube_sa_auth_aws"
 
   eks_cluster_name          = var.eks_cluster_name
   service_account           = local.cluster_name
   service_account_namespace = var.pg_cluster_namespace
-  iam_policy_json           = data.aws_iam_policy_document.s3_access[0].json
+  iam_policy_json           = data.aws_iam_policy_document.s3_access.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
   // Due to a limitation in the cluster resource api, the cluster resource is the one that creates
@@ -193,6 +207,11 @@ module "irsa" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
+}
+
+moved {
+  from = module.irsa[0]
+  to   = module.irsa
 }
 
 /***************************************
@@ -316,7 +335,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         "panfactum.com/service-port"   = "5432"
       }
     }
-    spec = merge({
+    spec = { for k, v in {
       imageName             = "${module.pull_through.github_registry}/cloudnative-pg/postgresql:${var.pg_version}"
       instances             = var.pg_instances
       minSyncReplicas       = var.pg_sync_replication_enabled ? var.pg_instances - 1 : 0
@@ -404,7 +423,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
             wal_sender_timeout         = "5s"
             max_slot_wal_keep_size     = "10GB"
 
-            # Memory tuning - Based on guide created bhy EDB (creators of CNPG)
+            # Memory tuning - Based on guide created by EDB (creators of CNPG)
             # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory
             max_connections      = var.pg_max_connections
             shared_buffers       = "${ceil(var.pg_memory_mb * var.pg_shared_buffers_percent / 100)}MB"
@@ -416,8 +435,14 @@ resource "kubernetes_manifest" "postgres_cluster" {
         )
       }
 
-      bootstrap = {
-        initdb = {
+      bootstrap = { for k, v in {
+        recovery = var.pg_recovery_mode_enabled ? { for k, v in {
+          source = local.cluster_name
+          recoveryTarget = var.pg_recovery_target_time != null ? {
+            targetTime = var.pg_recovery_target_time
+          } : null
+        } : k => v if v != null } : null
+        initdb = !var.pg_recovery_mode_enabled ? {
           postInitSQL = [
 
             // This ensures that the default users have no privileges
@@ -461,8 +486,22 @@ resource "kubernetes_manifest" "postgres_cluster" {
             "REVOKE ALL ON FUNCTION public.user_search(text) FROM public;",
             "GRANT EXECUTE ON FUNCTION public.user_search(text) TO cnpg_pooler_pgbouncer;"
           ])
+        } : null
+      } : k => v if v != null }
+
+      externalClusters = var.pg_recovery_mode_enabled ? [{
+        name = local.cluster_name
+        barmanObjectStore = {
+          destinationPath = "s3://${module.s3_bucket.bucket_name}/"
+          serverName      = var.pg_recovery_directory
+          s3Credentials = {
+            inheritFromIAMRole = true
+          }
+          wal = {
+            maxParallel = 8
+          }
         }
-      }
+      }] : null
 
       priorityClassName = module.constants.database_priority_class_name
 
@@ -499,33 +538,43 @@ resource "kubernetes_manifest" "postgres_cluster" {
           storageClassName = "ebs-standard"
         }
       }
-      }, var.backups_enabled ? {
-      // Backups
       serviceAccountTemplate = {
         metadata = {
           annotations = {
-            "eks.amazonaws.com/role-arn" = module.irsa[0].role_arn
+            "eks.amazonaws.com/role-arn" = module.irsa.role_arn
           }
         }
       }
       backup = {
+        target = "prefer-standby"
+        volumeSnapshot = {
+          className              = "cnpg"
+          snapshotOwnerReference = "backup"
+          online                 = true
+          onlineConfiguration = {
+            immediateCheckpoint = false
+            waitForArchive      = true
+          }
+        }
         barmanObjectStore = {
-          destinationPath = "s3://${module.s3_bucket[0].bucket_name}/"
+          destinationPath = "s3://${module.s3_bucket.bucket_name}/"
+          serverName      = random_id.recovery_directory.hex
           s3Credentials = {
             inheritFromIAMRole = true
+          }
+
+          data = {
+            compression = "bzip2"
+            jobs        = 8
           }
           wal = {
             compression = "bzip2"
             maxParallel = 8
           }
-          data = {
-            compression = "bzip2"
-            jobs        = 8
-          }
         }
-        retentionPolicy = "7d"
+        retentionPolicy = "${var.backups_retention_days}d"
       }
-    } : null)
+    } : k => v if v != null }
   }
 
   wait {
@@ -542,12 +591,11 @@ resource "kubernetes_manifest" "postgres_cluster" {
 }
 
 resource "kubectl_manifest" "scheduled_backup" {
-  count = var.backups_enabled ? 1 : 0
   yaml_body = yamlencode({
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "ScheduledBackup"
     metadata = {
-      name      = "${local.cluster_name}-default"
+      name      = "${local.cluster_name}-default-${random_id.recovery_directory.hex}"
       namespace = var.pg_cluster_namespace
     }
     spec = {
@@ -556,6 +604,7 @@ resource "kubectl_manifest" "scheduled_backup" {
       cluster = {
         name = local.cluster_name
       }
+      immediate = true
     }
   })
   force_conflicts   = true
@@ -604,7 +653,10 @@ resource "kubectl_manifest" "pdb" {
       annotations = local.disruption_window_annotations
     }
     spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      # If we haven't met the healthy budget, then disrupting nodes that attempting to recovery
+      # might corrupt the datastore and force a need for manual intervention; as a result, do NOT
+      # use AlwaysAllow here
+      unhealthyPodEvictionPolicy = "IfHealthyBudget"
       selector = {
         matchLabels = module.util_cluster.match_labels
       }

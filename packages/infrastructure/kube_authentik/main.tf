@@ -126,6 +126,10 @@ module "database" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   enhanced_ha_enabled         = var.enhanced_ha_enabled
 
+  pg_recovery_mode_enabled = var.db_recovery_mode_enabled
+  pg_recovery_directory    = var.db_recovery_directory
+  pg_recovery_target_time  = var.db_recovery_target_time
+
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit

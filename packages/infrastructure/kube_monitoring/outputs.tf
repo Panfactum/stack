@@ -7,6 +7,11 @@ output "grafana_admin_password" {
   sensitive = true
 }
 
+output "grafana_db_recovery_directory" {
+  description = "The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives"
+  value       = module.grafana_db.recovery_directory
+}
+
 output "thanos_query_frontend_url" {
   value = "http://thanos-query-frontend.${local.namespace}.svc.cluster.local:9090"
 }

@@ -7,3 +7,8 @@ output "artifact_bucket_name" {
   description = "Name of the S3 bucket holding workflow artifacts"
   value       = module.artifact_bucket.bucket_name
 }
+
+output "db_recovery_directory" {
+  description = "The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives"
+  value       = module.database.recovery_directory
+}

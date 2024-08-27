@@ -252,3 +252,25 @@ resource "kubectl_manifest" "proxy_image_cache" {
   server_side_apply = true
   depends_on        = [helm_release.cnpg]
 }
+
+/***************************************
+* Volume Snapshot Class (for backups)
+***************************************/
+
+resource "kubectl_manifest" "snapshot_class" {
+  yaml_body = yamlencode({
+    apiVersion = "snapshot.storage.k8s.io/v1"
+    kind       = "VolumeSnapshotClass"
+    metadata = {
+      name   = "cnpg"
+      labels = module.util.labels,
+    }
+    driver         = "ebs.csi.aws.com"
+    deletionPolicy = "Delete"
+    parameters = {
+      tagSpecification_1 = "Namespace={{ .VolumeSnapshotNamespace }}"
+      tagSpecification_2 = "Name={{ .VolumeSnapshotName }}"
+      tagSpecification_3 = "ContentName={{ .VolumeSnapshotContentName }}"
+    }
+  })
+}

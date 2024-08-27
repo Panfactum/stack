@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     aws = {

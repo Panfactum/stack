@@ -31,7 +31,7 @@ fi
 BUILDKIT_CONFIG_FILE="$BUILDKIT_DIR/buildkit.json"
 
 if [[ ! -f $BUILDKIT_CONFIG_FILE ]]; then
-  echo "Error: $BUILDKIT_CONFIG_FILE does not exist. A superuser must run 'pf-update-buildkit --build' to generate."
+  echo "Error: $BUILDKIT_CONFIG_FILE does not exist. A superuser must run 'pf-update-buildkit --build' to generate." >&2
   exit 1
 fi
 

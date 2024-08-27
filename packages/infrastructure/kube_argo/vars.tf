@@ -71,12 +71,6 @@ variable "workflow_archive_ttl" {
   default     = "60d"
 }
 
-variable "workflow_archive_backups_enabled" {
-  description = "Whether to enable backups of the workflow archives"
-  type        = bool
-  default     = false
-}
-
 variable "event_bus_nats_version" {
   description = "The version of nats to use for the event bus"
   type        = string
@@ -117,4 +111,22 @@ variable "test_workflow_enabled" {
   description = "Whether to enable the test WorkflowTemplate"
   type        = bool
   default     = false
+}
+
+variable "db_recovery_mode_enabled" {
+  description = "Whether to enable recovery mode for the PostgreSQL database"
+  type        = bool
+  default     = false
+}
+
+variable "db_recovery_directory" {
+  description = "The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives"
+  type        = string
+  default     = null
+}
+
+variable "db_recovery_target_time" {
+  description = "If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data."
+  type        = string
+  default     = null
 }

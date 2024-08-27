@@ -110,17 +110,17 @@ variable "backups_force_delete" {
 variable "backups_cron_schedule" {
   description = "The cron schedule on which to create CNPG Backup resources"
   type        = string
-  default     = "0 0 0 * * 0" // midnight on Sunday
+  default     = "0 0 0 * * *" // every day at midnight
+}
+
+variable "backups_retention_days" {
+  description = "The number of days that backups will be retained"
+  type        = number
+  default     = 3
 }
 
 variable "vpa_enabled" {
   description = "Whether to enable the vertical pod autoscaler"
-  type        = bool
-  default     = true
-}
-
-variable "backups_enabled" {
-  description = "Whether this database has backups enabled"
   type        = bool
   default     = true
 }
@@ -445,4 +445,22 @@ variable "voluntary_disruption_window_cron_schedule" {
   description = "The times when disruption windows should start"
   type        = string
   default     = "0 4 * * *"
+}
+
+variable "pg_recovery_mode_enabled" {
+  description = "If true, will attempt to recover the cluster"
+  type        = bool
+  default     = false
+}
+
+variable "pg_recovery_target_time" {
+  description = "If provided, will recover the database to the indicated target time in RFC 3339 format rather than to the latest data."
+  type        = string
+  default     = null
+}
+
+variable "pg_recovery_directory" {
+  description = "The name of the directory in the backup bucket containing the recovery files."
+  type        = string
+  default     = null
 }
