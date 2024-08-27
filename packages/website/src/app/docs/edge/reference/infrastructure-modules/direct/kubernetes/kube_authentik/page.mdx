@@ -87,6 +87,30 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_db_recovery_directory" /> [db\_recovery\_directory](#input_db_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_db_recovery_mode_enabled" /> [db\_recovery\_mode\_enabled](#input_db_recovery_mode_enabled)
+
+Description: Whether to enable recovery mode for the PostgreSQL database
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_db_recovery_target_time" /> [db\_recovery\_target\_time](#input_db_recovery_target_time)
+
+Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_domain" /> [domain](#input_domain)
 
 Description: A list of domains from which authentik will serve traffic
@@ -134,6 +158,14 @@ Description: Whether to add active monitoring to the deployed systems
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: Kubernetes namespace to deploy the resources into
+
+Type: `string`
+
+Default: `"authentik"`
 
 ### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
 
@@ -186,6 +218,10 @@ Description: n/a
 ### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
 
 Description: n/a
+
+### <a name="output_db_recovery_directory" /> [db\_recovery\_directory](#output_db_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
 ### <a name="output_db_superuser_password" /> [db\_superuser\_password](#output_db_superuser_password)
 

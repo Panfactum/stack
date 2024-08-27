@@ -115,6 +115,43 @@ To avoid these drawbacks, you can set `pg_sync_replication_enabled`. However, th
 
 We advise you to stick with the default asynchronous replication unless you have a specific, demonstrated need for synchronous replication.
 
+### Recovery
+
+In the case of an emergency, you can recover the database from the backups and WAL archives stored in S3.
+
+Complete the following steps:
+
+1. Run `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. Verify that there exists a "First Point of
+   Recoverability".
+
+   If this is not available, that means that your logical PostgreSQL backups were not configured correctly and
+   are not available. You will need to restore from the hourly EBS snapshots
+   created by Velero instead.
+
+2. Retrieve the `recovery_directory` output from this module by running `terragrunt output`.
+
+3. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
+
+4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `recovery_directory`
+   output you retrieved in step 2.
+
+   Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
+   timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
+   must be **after** the "First Point of Recoverability" that was reported in step 1.
+
+   If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
+   should be within 5 seconds of the last database write.
+
+5. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
+   come back online.
+
+Note that the "First Point of Recoverability" is determined by the `backups_retention_days`
+input; backups older than `backups_retention_days` (default `3`) will be deleted, and you
+will no longer be able to recover to that point in time.
+
+For more information on recovery procedures, see the CNPG
+[recovery documentation](https://cloudnative-pg.io/documentation/1.23/recovery/).
+
 ### Disruptions
 
 By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically
@@ -284,15 +321,7 @@ Description: The cron schedule on which to create CNPG Backup resources
 
 Type: `string`
 
-Default: `"0 0 0 * * 0"`
-
-### <a name="input_backups_enabled" /> [backups\_enabled](#input_backups_enabled)
-
-Description: Whether this database has backups enabled
-
-Type: `bool`
-
-Default: `true`
+Default: `"0 0 0 * * *"`
 
 ### <a name="input_backups_force_delete" /> [backups\_force\_delete](#input_backups_force_delete)
 
@@ -301,6 +330,14 @@ Description: Whether to delete backups on destroy
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_backups_retention_days" /> [backups\_retention\_days](#input_backups_retention_days)
+
+Description: The number of days that backups will be retained
+
+Type: `number`
+
+Default: `3`
 
 ### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
 
@@ -389,6 +426,30 @@ Description: A map of postgres parameters. See [https://cloudnative-pg.io/docume
 Type: `map(string)`
 
 Default: `{}`
+
+### <a name="input_pg_recovery_directory" /> [pg\_recovery\_directory](#input_pg_recovery_directory)
+
+Description: The name of the directory in the backup bucket containing the recovery files.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_pg_recovery_mode_enabled" /> [pg\_recovery\_mode\_enabled](#input_pg_recovery_mode_enabled)
+
+Description: If true, will attempt to recover the cluster
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_pg_recovery_target_time" /> [pg\_recovery\_target\_time](#input_pg_recovery_target_time)
+
+Description: If provided, will recover the database to the indicated target time in RFC 3339 format rather than to the latest data.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_pg_shared_buffers_percent" /> [pg\_shared\_buffers\_percent](#input_pg_shared_buffers_percent)
 
@@ -865,6 +926,10 @@ Description: The service name for all db instances that allows read access (incl
 ### <a name="output_r_service_port" /> [r\_service\_port](#output_r_service_port)
 
 Description: The PostgreSQL port for this service
+
+### <a name="output_recovery_directory" /> [recovery\_directory](#output_recovery_directory)
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
 ### <a name="output_ro_service_name" /> [ro\_service\_name](#output_ro_service_name)
 
