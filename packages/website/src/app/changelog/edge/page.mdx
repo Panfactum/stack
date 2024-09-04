@@ -92,6 +92,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * Updates Karpenter and EBS CSI Controller to prevent any remaining edge cases where nodes were terminated prior to
   EBS volumes being detached which would result in six-minute delays for rescheduling stateful pods.
+* Remove the `RemoveDuplicates` strategy in [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
+as users expect to be able to schedule multiple pods of the same controller on the same node when they set
+`host_anti_affinity_required` to `false`.
 
 ## edge.24-08-27
 
