@@ -42,7 +42,7 @@ resource "kubernetes_role_binding" "resource_updater" {
 }
 
 module "resource_update_workflow" {
-  source             = "../../../../../infrastructure//wf_spec" # pf-update
+  source             = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" # pf-update
 
   name               = "resource-update-demo"
   namespace          = local.namespace
