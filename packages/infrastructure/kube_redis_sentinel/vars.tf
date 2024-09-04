@@ -68,20 +68,26 @@ variable "redis_save" {
   default     = "300 100" # Every 5 min if at least 100 keys have changed
 }
 
-variable "spot_instances_enabled" {
-  description = "Whether the database nodes can be scheduled on spot instances"
+variable "spot_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on burstable nodes"
   type        = bool
   default     = false
 }
 
-variable "burstable_instances_enabled" {
-  description = "Whether the database nodes can be scheduled on burstable instances"
+variable "arm_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on arm64 nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "arm_instances_enabled" {
-  description = "Whether the database nodes can be scheduled on arm64 instances"
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
   default     = false
 }
@@ -95,7 +101,7 @@ variable "lfu_cache_enabled" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "minimum_memory_mb" {
@@ -118,11 +124,11 @@ variable "monitoring_enabled" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "enhanced_ha_enabled" {
-  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+variable "instance_type_spread_required" {
+  description = "Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)"
   type        = bool
   default     = true
 }

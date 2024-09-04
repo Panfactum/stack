@@ -39,12 +39,11 @@ module "pull_through" {
 }
 
 module "util" {
-  source                   = "../kube_workload_utility"
-  workload_name            = "karpenter"
-  topology_spread_enabled  = false
-  controller_node_required = true
-  arm_nodes_enabled        = true
-  burstable_nodes_enabled  = true
+  source                    = "../kube_workload_utility"
+  workload_name             = "karpenter"
+  az_spread_preferred       = false
+  controller_nodes_required = true
+  burstable_nodes_enabled   = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -251,6 +250,11 @@ data "aws_iam_policy_document" "karpenter" {
       variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
     }
     condition {
+      test     = "StringEquals"
+      values   = [var.cluster_name]
+      variable = "aws:RequestTag/eks:eks-cluster-name"
+    }
+    condition {
       test     = "StringLike"
       values   = ["*"]
       variable = "aws:RequestTag/karpenter.sh/nodepool"
@@ -277,6 +281,11 @@ data "aws_iam_policy_document" "karpenter" {
       test     = "StringEquals"
       values   = ["owned"]
       variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [var.cluster_name]
+      variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
       test = "StringEquals"
@@ -310,6 +319,11 @@ data "aws_iam_policy_document" "karpenter" {
       variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
     }
     condition {
+      test     = "StringEqualsIfExists"
+      values   = [var.cluster_name]
+      variable = "aws:RequestTag/eks:eks-cluster-name"
+    }
+    condition {
       test     = "StringLike"
       values   = ["*"]
       variable = "aws:ResourceTag/karpenter.sh/nodepool"
@@ -318,7 +332,8 @@ data "aws_iam_policy_document" "karpenter" {
       test = "ForAllValues:StringEquals"
       values = [
         "karpenter.sh/nodeclaim",
-        "Name"
+        "Name",
+        "eks:eks-cluster-name"
       ]
       variable = "aws:TagKeys"
     }
@@ -403,7 +418,7 @@ data "aws_iam_policy_document" "karpenter" {
     resources = [var.node_role_arn]
     condition {
       test     = "StringEquals"
-      values   = ["ec2.amazonaws.com"]
+      values   = ["ec2.amazonaws.com", "ec2.amazonaws.com.cn"]
       variable = "iam:PassedToService"
     }
   }
@@ -419,6 +434,11 @@ data "aws_iam_policy_document" "karpenter" {
       test     = "StringEquals"
       values   = ["owned"]
       variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [var.cluster_name]
+      variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
       test     = "StringLike"
@@ -443,6 +463,11 @@ data "aws_iam_policy_document" "karpenter" {
       test     = "StringEquals"
       values   = ["owned"]
       variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+    }
+    condition {
+      test     = "StringEquals"
+      values   = [var.cluster_name]
+      variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
       test     = "StringEquals"
@@ -591,6 +616,10 @@ resource "helm_release" "karpenter" {
             memory = "520Mi"
           }
         }
+      }
+
+      webhook = {
+        enabled = true
       }
 
       serviceMonitor = {

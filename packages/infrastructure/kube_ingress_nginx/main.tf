@@ -75,19 +75,15 @@ module "util" {
   source                      = "../kube_workload_utility"
   workload_name               = "nginx-ingress"
   burstable_nodes_enabled     = true
-  arm_nodes_enabled           = true
+  controller_nodes_enabled    = true
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   lifetime_evictions_enabled  = false
 
-  // TODO: We really just need to ensure this spread across at least 3 instance types
-  // but having instance_type_anti_affinity_required will explode costs as the count
-  // of these increases
-  // instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
   // This does need to be spread across AZs in order to not end up
   // withe constant service disruptions
-  topology_spread_enabled = true
-  topology_spread_strict  = true
+  az_spread_preferred           = true
+  instance_type_spread_required = var.enhanced_ha_enabled
 
 
   # pf-generate: set_vars

@@ -156,13 +156,13 @@ module "pull_through" {
 module "util_webhook" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "prometheus-operator-webhook"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = var.enhanced_ha_enabled
+  workload_name                 = "prometheus-operator-webhook"
+  burstable_nodes_enabled       = true
+  arm_nodes_enabled             = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -179,12 +179,12 @@ module "util_webhook" {
 module "util_operator" {
   source = "../kube_workload_utility"
 
-  workload_name                         = "prometheus-operator"
-  arm_nodes_enabled                     = true
-  burstable_nodes_enabled               = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_preferred = false // only runs one copy
-  topology_spread_enabled               = false // only runs one copy
+  workload_name                 = "prometheus-operator"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false // only runs one copy
+  az_spread_preferred           = false // only runs one copy
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -201,13 +201,12 @@ module "util_operator" {
 module "util_grafana" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "grafana"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_enabled              = var.enhanced_ha_enabled
-  topology_spread_strict               = true
+  workload_name                 = "grafana"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -224,14 +223,13 @@ module "util_grafana" {
 module "util_prometheus" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "prometheus"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = true // stateful
-  lifetime_evictions_enabled           = false
+  workload_name                 = "prometheus"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = false // Does not support custom schedulers yet
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful
+  lifetime_evictions_enabled    = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -248,11 +246,11 @@ module "util_prometheus" {
 module "util_node_exporter" {
   source = "../kube_workload_utility"
 
-  workload_name                         = "node-exporter"
-  arm_nodes_enabled                     = true
-  burstable_nodes_enabled               = true
-  topology_spread_enabled               = false // daemonset
-  instance_type_anti_affinity_preferred = false // daemonset
+  workload_name                 = "node-exporter"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  az_spread_preferred           = false // daemonset
+  instance_type_spread_required = false // daemonset
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -269,13 +267,12 @@ module "util_node_exporter" {
 module "util_ksm" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "kube-state-metrics"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = var.enhanced_ha_enabled
+  workload_name                 = "kube-state-metrics"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -292,12 +289,11 @@ module "util_ksm" {
 module "util_thanos_compactor" {
   source = "../kube_workload_utility"
 
-  workload_name                         = "thanos-compactor"
-  arm_nodes_enabled                     = true
-  burstable_nodes_enabled               = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  topology_spread_enabled               = false // single pod
-  instance_type_anti_affinity_preferred = false // single pod
+  workload_name                 = "thanos-compactor"
+  burstable_nodes_enabled       = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  az_spread_preferred           = false // single pod
+  instance_type_spread_required = false // single pod
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -312,14 +308,13 @@ module "util_thanos_compactor" {
 }
 
 module "util_thanos_store_gateway" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "thanos-store-gateway"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = true // stateful so always on
+  source                        = "../kube_workload_utility"
+  workload_name                 = "thanos-store-gateway"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful so always on
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -334,14 +329,13 @@ module "util_thanos_store_gateway" {
 }
 
 module "util_thanos_ruler" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "thanos-ruler"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = true // stateful so always on
+  source                        = "../kube_workload_utility"
+  workload_name                 = "thanos-ruler"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful so always on
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -359,13 +353,12 @@ module "util_thanos_ruler" {
 module "util_thanos_query" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "thanos-query"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = var.enhanced_ha_enabled
+  workload_name                 = "thanos-query"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -382,13 +375,12 @@ module "util_thanos_query" {
 module "util_thanos_frontend" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "thanos-frontend"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_enabled              = var.enhanced_ha_enabled
-  topology_spread_strict               = true
+  workload_name                 = "thanos-frontend"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -405,13 +397,12 @@ module "util_thanos_frontend" {
 module "util_thanos_bucket_web" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "thanos-bucket-web"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_enabled              = var.enhanced_ha_enabled
-  topology_spread_strict               = true
+  workload_name                 = "thanos-bucket-web"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -428,14 +419,13 @@ module "util_thanos_bucket_web" {
 module "util_alertmanager" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "alertmanager"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = true // stateful so always on
-  lifetime_evictions_enabled           = false
+  workload_name                 = "alertmanager"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = false // Does not support custom schedulers yet
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful so always on
+  lifetime_evictions_enabled    = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -480,22 +470,20 @@ module "namespace" {
 module "grafana_db" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name                 = var.eks_cluster_name
-  pg_cluster_namespace             = local.namespace
-  pg_initial_storage_gb            = 1
-  pg_memory_mb                     = 500
-  pg_cpu_millicores                = 250
-  pg_instances                     = 2
-  aws_iam_ip_allow_list            = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled       = var.pull_through_cache_enabled
-  pgbouncer_pool_mode              = "session"
-  burstable_instances_enabled      = true
-  arm_instances_enabled            = true
-  continuous_wal_archiving_enabled = false
-  backups_force_delete             = true
-  monitoring_enabled               = var.monitoring_enabled
-  panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
-  enhanced_ha_enabled              = var.enhanced_ha_enabled
+  eks_cluster_name              = var.eks_cluster_name
+  pg_cluster_namespace          = local.namespace
+  pg_initial_storage_gb         = 1
+  pg_memory_mb                  = 500
+  pg_cpu_millicores             = 250
+  pg_instances                  = 2
+  aws_iam_ip_allow_list         = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled    = var.pull_through_cache_enabled
+  pgbouncer_pool_mode           = "session"
+  burstable_nodes_enabled       = true
+  backups_force_delete          = true
+  monitoring_enabled            = var.monitoring_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
 
   pg_recovery_mode_enabled = var.grafana_db_recovery_mode_enabled
   pg_recovery_directory    = var.grafana_db_recovery_directory
@@ -519,16 +507,17 @@ module "grafana_db" {
 module "thanos_redis_cache" {
   source = "../kube_redis_sentinel"
 
-  namespace                   = local.namespace
-  replica_count               = 3
-  lfu_cache_enabled           = true
-  burstable_instances_enabled = true
-  arm_instances_enabled       = true
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  vpa_enabled                 = var.vpa_enabled
-  minimum_memory_mb           = 100
-  monitoring_enabled          = var.monitoring_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  namespace                     = local.namespace
+  replica_count                 = 3
+  lfu_cache_enabled             = true
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  pull_through_cache_enabled    = var.pull_through_cache_enabled
+  vpa_enabled                   = var.vpa_enabled
+  minimum_memory_mb             = 100
+  monitoring_enabled            = var.monitoring_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -2542,13 +2531,14 @@ module "authenticating_proxy" {
   count  = var.ingress_enabled && var.thanos_bucket_web_enable ? 1 : 0
   source = "../kube_vault_proxy"
 
-  namespace                   = local.namespace
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  vpa_enabled                 = var.vpa_enabled
-  domain                      = local.bucket_web_domain
-  vault_domain                = var.vault_domain
-  enhanced_ha_enabled         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  namespace                     = local.namespace
+  pull_through_cache_enabled    = var.pull_through_cache_enabled
+  vpa_enabled                   = var.vpa_enabled
+  domain                        = local.bucket_web_domain
+  vault_domain                  = var.vault_domain
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

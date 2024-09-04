@@ -18,7 +18,11 @@ The following providers are needed by this module:
 
 ## Required Inputs
 
-The following input variables are required:
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
 
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
@@ -26,9 +30,7 @@ Description: Whether to use the ECR pull through cache for the deployed images
 
 Type: `bool`
 
-## Optional Inputs
-
-The following input variables are optional (have default values):
+Default: `true`
 
 ## Outputs
 
@@ -36,23 +38,23 @@ The following outputs are exported:
 
 ### <a name="output_docker_hub_registry" /> [docker\_hub\_registry](#output_docker_hub_registry)
 
-Description: n/a
+Description: For use as the image\_registry when sourcing public images hosted at docker.io
 
 ### <a name="output_ecr_public_registry" /> [ecr\_public\_registry](#output_ecr_public_registry)
 
-Description: n/a
+Description: For use as the image\_registry when sourcing public images hosted at public.ecr.aws
 
 ### <a name="output_github_registry" /> [github\_registry](#output_github_registry)
 
-Description: n/a
+Description: For use as the image\_registry when sourcing public images hosted at ghcr.io
 
 ### <a name="output_kubernetes_registry" /> [kubernetes\_registry](#output_kubernetes_registry)
 
-Description: n/a
+Description: For use as the image\_registry when sourcing public images hosted at registry.k8s.io
 
 ### <a name="output_quay_registry" /> [quay\_registry](#output_quay_registry)
 
-Description: n/a
+Description: For use as the image\_registry when sourcing public images hosted at quay.io
 
 ## Usage
 

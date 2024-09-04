@@ -34,13 +34,13 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "cilium-operator"
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "cilium-operator"
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -55,10 +55,10 @@ module "util_controller" {
 }
 
 module "util_agent" {
-  source                  = "../kube_workload_utility"
-  workload_name           = "cilium-agent"
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
+  source                   = "../kube_workload_utility"
+  workload_name            = "cilium-agent"
+  burstable_nodes_enabled  = true
+  controller_nodes_enabled = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

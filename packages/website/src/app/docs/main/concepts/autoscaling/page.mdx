@@ -166,7 +166,7 @@ a few common misconceptions that can decrease efficiency:
   in a continuous replacement loop. Instead, Karpenter waits until it is confident that spot pricing is consistently lower
   with other instance types before it triggers replacement.
 
-  This can run into issues when using smaller instance types were 15 cheaper instances will not ever exist. As a result,
+  This can run into issues when using smaller instance types where 15 cheaper instances will not ever exist. As a result,
   we limit node lifetimes to 24 hours to force replacement of nodes and allow a chance at cheaper instances at least
   once per day.
 
@@ -218,5 +218,5 @@ Ultimately, this means you will always still be responsible for choosing an init
   for workloads that exceed the default limits. Alternatively, you can set `config.alpha.linkerd.io/proxy-enable-native-sidecar` to `false`
   in your pod annotations to run the proxy as a regular, non-init container (though be mindful of the tradeoffs).
 
-* EKS node groups are not automatically scaled. As a result, we recommend running only a single `t4g.medium` node in the node group. This is
+* EKS node groups are not automatically scaled. We provide static sizing for these groups in the `aws_eks` module. This is
   required because Karpenter cannot run on nodes that it itself provisioned.

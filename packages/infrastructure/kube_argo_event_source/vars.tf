@@ -43,8 +43,14 @@ variable "spot_nodes_enabled" {
   default     = true
 }
 
-variable "enhanced_ha_enabled" {
-  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+variable "instance_type_spread_required" {
+  description = "Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)"
+  type        = bool
+  default     = true
+}
+
+variable "az_spread_preferred" {
+  description = "Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)"
   type        = bool
   default     = true
 }

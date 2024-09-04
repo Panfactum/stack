@@ -40,16 +40,17 @@ resource "random_id" "id" {
 }
 
 module "util" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = random_id.id.hex
-  burstable_nodes_enabled              = var.burstable_instances_enabled
-  spot_nodes_enabled                   = var.spot_instances_enabled
-  arm_nodes_enabled                    = var.arm_instances_enabled
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = true // stateful
-  lifetime_evictions_enabled           = false
+  source                        = "../kube_workload_utility"
+  workload_name                 = random_id.id.hex
+  controller_nodes_enabled      = var.controller_nodes_enabled
+  burstable_nodes_enabled       = var.burstable_nodes_enabled
+  spot_nodes_enabled            = var.spot_nodes_enabled
+  arm_nodes_enabled             = var.arm_nodes_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.instance_type_spread_required
+  az_spread_required            = true
+  az_spread_preferred           = true // stateful
+  lifetime_evictions_enabled    = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -218,7 +219,7 @@ resource "helm_release" "redis" {
           enabled = false
         }
 
-        priorityClassName         = module.constants.database_priority_class_name
+        priorityClassName         = module.constants.workload_important_priority_class_name
         affinity                  = module.util.affinity
         tolerations               = module.util.tolerations
         topologySpreadConstraints = module.util.topology_spread_constraints

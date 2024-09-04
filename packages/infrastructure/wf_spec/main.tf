@@ -25,8 +25,11 @@ locals {
 
   // Always set env vars
   static_env = {
-    // Set some Node.js runtime options
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED = "1"
+
+    // TODO: We should figure out a way to add this in, but it is difficult b/c a workflow
+    // has multiple pods
+    // POD_TERMINATION_GRACE_PERIOD_SECONDS = tostring(var.termination_grace_period_seconds)
+
   }
 
   // Reflective env variables
@@ -64,6 +67,73 @@ locals {
         fieldRef = {
           apiVersion = "v1"
           fieldPath  = "metadata.namespace"
+        }
+      }
+    },
+    {
+      name = "POD_SERVICE_ACCOUNT"
+      valueFrom = {
+        fieldRef = {
+          apiVersion = "v1"
+          fieldPath  = "spec.serviceAccountName"
+        }
+      }
+    },
+    {
+      name = "NODE_NAME"
+      valueFrom = {
+        fieldRef = {
+          apiVersion = "v1"
+          fieldPath  = "spec.nodeName"
+        }
+      }
+    },
+    {
+      name = "NODE_IP"
+      valueFrom = {
+        fieldRef = {
+          apiVersion = "v1"
+          fieldPath  = "status.hostIP"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_CPU_REQUEST"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "requests.cpu"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_MEMORY_REQUEST"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "requests.memory"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_MEMORY_LIMIT"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "limits.memory"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "requests.ephemeral-storage"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_EPHEMERAL_STORAGE_LIMIT"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "limits.ephemeral-storage"
         }
       }
     }
@@ -139,16 +209,36 @@ locals {
     [for name, config in var.secret_mounts : {
       name = "secret-${name}"
       secret = {
-        secretName = name
-        optional   = config.optional
+        secretName  = name
+        defaultMode = 551 # Give all permissions so we can mount executables
+        optional    = config.optional
       }
     }],
     [for name, config in var.config_map_mounts : {
       name = "config-map-${name}"
       configMap = {
         name        = name
-        defaultMode = 511 # TODO: Make a flag -- Give all permissions so we can mount executables
+        defaultMode = 511 # Give all permissions so we can mount executables
         optional    = config.optional
+      }
+    }],
+    [{
+      name = "podinfo",
+      downwardAPI = {
+        items = [
+          {
+            path = "labels",
+            fieldRef = {
+              fieldPath = "metadata.labels"
+            }
+          },
+          {
+            path = "annotations",
+            fieldRef = {
+              fieldPath = "metadata.annotations"
+            }
+          }
+        ]
       }
     }],
     [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -189,11 +279,17 @@ locals {
     mountPath = config.mount_path
   }]
 
+  common_downward_api_mounts = [{
+    name      = "podinfo"
+    mountPath = "/etc/podinfo"
+  }]
+
   common_volume_mounts = concat(
     local.common_tmp_volume_mounts,
     local.common_secret_volume_mounts,
     local.common_config_map_volume_mounts,
-    local.common_dynamic_secret_volume_mounts
+    local.common_dynamic_secret_volume_mounts,
+    local.common_downward_api_mounts
   )
 
   /************************************************
@@ -205,7 +301,7 @@ locals {
     runAsUser                = var.run_as_root ? 0 : var.uid
     runAsNonRoot             = !var.run_as_root
     allowPrivilegeEscalation = var.run_as_root || var.privileged
-    readOnlyRootFilesystem   = var.read_only_root_fs
+    readOnlyRootFilesystem   = var.read_only
     privileged               = var.privileged
     capabilities = {
       add  = var.linux_capabilities
@@ -366,7 +462,7 @@ locals {
     podMetadata = {
       labels = merge(module.util.labels, var.extra_pod_labels)
       annotations = merge(
-        var.pod_annotations,
+        var.extra_pod_annotations,
         var.disruptions_enabled ? {} : {
           # This is required for pods that take a long time to initialize as PDB's won't protect them
           "karpenter.sh/do-not-disrupt" = "true"
@@ -467,24 +563,20 @@ module "util" {
   workload_name = var.name
 
   # Scheduling params
-  burstable_nodes_enabled               = var.burstable_nodes_enabled
-  spot_nodes_enabled                    = var.spot_nodes_enabled
-  arm_nodes_enabled                     = var.arm_nodes_enabled
-  instance_type_anti_affinity_preferred = false
-  instance_type_anti_affinity_required  = false
-  zone_anti_affinity_required           = false
-  host_anti_affinity_required           = false
-  extra_tolerations                     = var.extra_tolerations
-  controller_node_required              = var.controller_node_required
-  node_requirements                     = var.node_requirements
-  node_preferences                      = var.node_preferences
-  prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
-  prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
-  prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
-  topology_spread_enabled               = false
-  topology_spread_strict                = false
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  lifetime_evictions_enabled            = false
+  burstable_nodes_enabled       = var.burstable_nodes_enabled
+  spot_nodes_enabled            = var.spot_nodes_enabled
+  arm_nodes_enabled             = var.arm_nodes_enabled
+  instance_type_spread_required = false
+  az_anti_affinity_required     = false
+  host_anti_affinity_required   = false
+  extra_tolerations             = var.extra_tolerations
+  controller_nodes_required     = var.controller_node_required
+  node_requirements             = var.node_requirements
+  node_preferences              = var.node_preferences
+  az_spread_preferred           = false
+  az_spread_required            = false
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  lifetime_evictions_enabled    = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

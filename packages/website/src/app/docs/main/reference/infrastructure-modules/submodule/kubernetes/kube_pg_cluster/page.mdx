@@ -307,13 +307,13 @@ Type: `number`
 
 The following input variables are optional (have default values):
 
-### <a name="input_arm_instances_enabled" /> [arm\_instances\_enabled](#input_arm_instances_enabled)
+### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
 
-Description: Whether the database nodes can be scheduled on arm instances
+Description: Whether the database pods can be scheduled on arm64 nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_backups_cron_schedule" /> [backups\_cron\_schedule](#input_backups_cron_schedule)
 
@@ -339,21 +339,13 @@ Type: `number`
 
 Default: `3`
 
-### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
 
-Description: Whether the database nodes can be scheduled on burstable instances
+Description: Whether the database pods can be scheduled on burstable nodes
 
 Type: `bool`
 
 Default: `false`
-
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
 
 ### <a name="input_extra_schemas" /> [extra\_schemas](#input_extra_schemas)
 
@@ -362,6 +354,14 @@ Description: Extra schemas that were created in the app database
 Type: `list(string)`
 
 Default: `[]`
+
+### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+
+Description: Whether to prevent pods from being scheduled on the same instance types
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
 
@@ -377,7 +377,7 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_pg_cpu_millicores" /> [pg\_cpu\_millicores](#input_pg_cpu_millicores)
 
@@ -811,13 +811,13 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
-Description: Whether the database nodes can be scheduled on spot instances
+Description: Whether the database pods can be scheduled on spot nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_voluntary_disruption_window_cron_schedule" /> [voluntary\_disruption\_window\_cron\_schedule](#input_voluntary_disruption_window_cron_schedule)
 

@@ -8,7 +8,7 @@ variable "alloy_chart_version" {
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "log_level" {
@@ -24,7 +24,7 @@ variable "log_level" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "monitoring_enabled" {

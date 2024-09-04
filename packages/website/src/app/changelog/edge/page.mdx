@@ -9,6 +9,90 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace
+  must be removed (if [kube\_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed).
+
+* In preparation for our upcoming release, we cleaned up a handful of naming conventions which impact the inputs and outputs of several modules:
+  * In [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment), [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set), [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job), [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod), [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), and [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
+    * `ready_check_` prefixed fields have been changed to `readiness_probe_` to better align with the actual Kubernetes API.
+    * `liveness_check_` prefixed fields have been changed to `liveness_probe_` to better align with the actual Kubernetes API.
+    * `image` and `image_version` have been replaced with `image_registry`, `image_repository`, and `image_tag` to provide
+      a clearer description of each constituent part and better align with ecosystem conventions.
+    * `secrets` has been renamed to `common_secrets` to better align with its counterpart, `common_env`.
+    * `pod_annotations` has been renamed to `extra_pod_annotations` to better align with its counterpart, `extra_pod_labels`.
+    * `readonly` and has been renamed to `read_only` to better align with our casing conventions.
+    * `read_only_root_fs` has been renamed to `read_only` for better consistency across modules.
+    * `instance_type_anti_affinity_required` has been renamed to `instance_type_spread_required` to better reflect that the underlying mechanism
+      is a pod topology spread constraint.
+    * `topology_spread_enabled` has been renamed to `az_spread_preferred` to better reflect actual behavior.
+    * `topology_spread_required` has been renamed to `az_spread_required` to better reflect actual behavior.
+    * `zone_anti_affinity_required` has been renamed to `az_anti_affinity_required` to better align naming conventions with other settings that control scheduling
+      based on availability zone.
+  * Renamed Panfactum-provided priority classes to improve semantics (see [docs](/docs/edge/guides/deploying-workloads/basics#priority-class)).
+  * In [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel):
+    * `spot_instances_enabled`, `arm_instances_enabled`, and `burstable_instances_enabled` have been changed to
+      `spot_nodes_enabled`, `arm_nodes_enabled`, and `burstable_nodes_enabled` to better align with the inputs of other modules.
+  * In [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants), a few outputs have been updated:
+    * `panfactum_image` has been renamed to `panfactum_image_repository` to better align with naming conventions in other Panfactum modules
+    * `panfactum_image_version` has been renamed to `panfactum_image_tag` to better align with naming conventions in other Panfactum modules
+
+* We have removed a handful of options from [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment), [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set), [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job), [kube\_pod](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod), [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), and [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility) that we
+  would never recommend using:
+  * `prefer_spot_nodes_enabled`, `prefer_burstable_nodes_enabled`, `prefer_arm_nodes_enabled`: These scheduling
+    preferences are unnecessary as Karpenter will already prefer the cheapest nodes.
+  * `az_anti_affinity_preferred`: `az_spread_preferred` should be used instead.
+
+* When we introduced the concept of the `enhanced_ha_enabled` input, it was designed as a cost-saving switch for direct modules
+  where users do not need to have a deep understanding of the internals. However, it has also found its way into
+  some submodules where it has created ambiguity about module behavior, especially since its impact differs module-to-module.
+  As a result, we have replaced the `enhanced_ha_enabled` input in all *submodules* with more granular tuning knobs that have
+  clearer behavior. This impacts the following submodules: [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster),
+  [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel),
+  [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy),
+  [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus),
+  and [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source).
+
+* Nodes managed by EKS Node Groups (vs Karpenter) are now tainted with `controller=true:NoSchedule`. We have added this
+  taint as pods scheduled on these nodes might be disrupted regardless of their PDBs during EKS upgrades. For some workloads
+  this could cause a disruption. Most workload submodules have a new input, `controller_nodes_enabled`, that can be used
+  to allow your workloads to tolerate this taint if desired.
+
+* Previously we were conservative about enabling certain features by default in some of our submodules in order to ensure our modules
+  would be compatible with non-Panfactum Kubernetes clusters. However, this is a very niche use case, and we have observed
+  that this results in extra mental overhead for our normal users to avoid missing out on the core features provided by the Panfactum Stack. As a result:
+
+  * The following flags are now enabled by default in [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment), [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set), [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job), [kube\_pod](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod), [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster), [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel), and [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
+    * `spot_nodes_enabled`
+    * `arm_nodes_enabled`
+    * `vpa_enabled`
+    * `panfactum_scheduler_enabled`
+  * The following flags are now enabled by default in [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment):
+    * `az_spread_preferred`
+  * The following flags are now enabled by default in [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set):
+    * `az_spread_required`
+    * `instance_type_spread_required`
+  * The following inputs are now enabled by default in all modules:
+    * `pull_through_cache_enabled`
+  * The following inputs are now enabled by default in all direct modules deployed **after** the [autoscaling section](/docs/edge/guides/bootstrapping/autoscaling) in the bootstrapping guide:
+    * `vpa_enabled`
+    * `panfactum_scheduler_enabled`
+
+### Added
+
+* Adds built-in default [downward-api](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/)
+  integrations in all our workload submodules.
+* All mounted ConfigMaps and Secrets in our workload submodules are now mounted as executable to make
+  it easier to mount scripts.
+
+### Fixed
+
+* Updates Karpenter and EBS CSI Controller to prevent any remaining edge cases where nodes were terminated prior to
+  EBS volumes being detached which would result in six-minute delays for rescheduling stateful pods.
+
 ## edge.24-08-27
 
 ### Breaking Changes

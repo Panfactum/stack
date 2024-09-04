@@ -184,10 +184,10 @@ see the documentation for [wf\_spec](/docs/main/reference/infrastructure-modules
 
 Below is a set of questions that we recommend asking when you create a Workflow using `wf_spec`:
 
-* Can your pods run on `arm64` nodes? If so, did you set `arm_nodes_enabled` to `true`?
-* Can your pods tolerate a small chance of disruption? If so, set `spot_nodes_enabled` to `true` to save significant money on workflow execution.
-* Can your pods tolerate a medium chance of disruption? If so, set `disruptions_enabled` to `true` to save additional money.
-* Can your pods run on [burstable (T-family) instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)? If so, set `burstable_nodes_enabled` to `true` to save additional money.
+* Can your pods run on `arm64` nodes? If **not**, did you set `arm_nodes_enabled` to `false`? [^4]
+* Can your pods tolerate disruptions? If **not**, set `disruptions_enabled` to `false` to avoid all voluntary disruptions. Additionally, you
+might want to set `spot_nodes_enabled` to `false` to avoid the (small) chance of spot node preemption. [^3]
+* Are your pods a good fit for [burstable spot (T-family) instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)? If so, set `burstable_nodes_enabled` to `true` to save additional money.
 * How many times do you want each node in the workflow to retry on failure? Have you set `retry_max_attempts` to the appropriate
   value? Have you tuned the retry backoff parameters, `retry_backoff_initial_duration_seconds` and `retry_backoff_max_duration_seconds`?
 * Can multiple instances of this workflow be running at once? If so, have you increased `workflow_parallelism`?
@@ -199,10 +199,17 @@ Below is a set of questions that we recommend asking when you create a Workflow 
 * Do the pods in the workflow need to communicate with the Kubernetes API? Have you added the necessary
   permissions to the ServiceAccount (referenced via the `wf_spec.service_account_name` output)?
 * Do your workflow containers need to write to disk? If so, have you set `tmp_directories`?
-* Do your workflow containers need access to a common set of environment variables? If so, have you set `common_env` and/or `secrets`?
+* Do your workflow containers need access to a common set of environment variables? If so, have you set `common_env` and/or `common_secrets`?
 * Do your workflow containers need access to mounted Secrets or ConfigMaps? If so, have you set `config_map_mounts` and/or `secret_mounts`?
 * Can your workflows containers run as user `1000`? If not, have you explicitly set `uid`? If the containers need to run as root, have you set `run_as_root` to `true`?
 * Do you need to [parameterize the Workflow](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/)? If so, did you add `arguments`?
+
+[^3]: Note that both of these will significantly increase the cost of running this workflow. If the workflow
+runs very often, you may want to architect your workflow to be able to tolerate the occasional disruption
+so you at least keep `spot_nodes_enabled` as `true`.
+
+[^4]: Running on `arm64` nodes will save about 20% of your workflow costs, so it might be worth it to create
+a multi-platform image. See our [guide.](/docs/main/guides/addons/buildkit/building-images)
 
 ## Examples
 

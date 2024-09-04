@@ -117,13 +117,11 @@ resource "kubernetes_config_map" "tf_deploy_scripts" {
 module "tf_deploy_workflow" {
   source = "../wf_spec"
 
-  name                        = var.name
-  namespace                   = var.namespace
-  eks_cluster_name            = var.eks_cluster_name
-  burstable_nodes_enabled     = true
-  arm_nodes_enabled           = true
-  panfactum_scheduler_enabled = true
-  active_deadline_seconds     = 60 * 60
+  name                    = var.name
+  namespace               = var.namespace
+  eks_cluster_name        = var.eks_cluster_name
+  burstable_nodes_enabled = true
+  active_deadline_seconds = 60 * 60
 
   entrypoint = local.entrypoint
   passthrough_parameters = [
@@ -176,7 +174,7 @@ module "tf_deploy_workflow" {
       memory = "${var.memory_mb}Mi"
     }
   }
-  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
   templates = [
     {
       name = local.entrypoint

@@ -127,7 +127,7 @@ resource "kubernetes_config_map" "bastion_image_builder_containers" {
 }
 
 module "bastion_image_builder_workflow" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source                    = "../../../../../infrastructure//wf_spec" #pf-update
 
   name = local.bastion_image_builder_name
   namespace = local.namespace

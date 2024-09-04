@@ -125,20 +125,20 @@ variable "vpa_enabled" {
   default     = true
 }
 
-variable "spot_instances_enabled" {
-  description = "Whether the database nodes can be scheduled on spot instances"
+variable "spot_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on spot nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "arm_instances_enabled" {
-  description = "Whether the database nodes can be scheduled on arm instances"
+variable "arm_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on arm64 nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "burstable_instances_enabled" {
-  description = "Whether the database nodes can be scheduled on burstable instances"
+variable "burstable_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on burstable nodes"
   type        = bool
   default     = false
 }
@@ -393,11 +393,11 @@ variable "monitoring_enabled" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "enhanced_ha_enabled" {
-  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
+variable "instance_type_spread_required" {
+  description = "Whether to prevent pods from being scheduled on the same instance types"
   type        = bool
   default     = true
 }

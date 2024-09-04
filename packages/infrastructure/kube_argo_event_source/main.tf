@@ -33,14 +33,12 @@ module "util" {
   source        = "../kube_workload_utility"
   workload_name = var.name
 
-  host_anti_affinity_required           = var.replicas > 1
-  instance_type_anti_affinity_required  = var.replicas > 1 && var.enhanced_ha_enabled
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = var.replicas > 1
-  topology_spread_strict                = var.replicas > 1 && var.enhanced_ha_enabled
+  host_anti_affinity_required   = var.replicas > 1
+  instance_type_spread_required = var.replicas > 1 && var.instance_type_spread_required
+  az_spread_preferred           = var.replicas > 1 && var.az_spread_preferred
 
   burstable_nodes_enabled     = true
-  arm_nodes_enabled           = true
+  controller_nodes_enabled    = true
   spot_nodes_enabled          = var.spot_nodes_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
 

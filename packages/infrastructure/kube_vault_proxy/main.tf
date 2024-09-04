@@ -43,13 +43,13 @@ resource "random_id" "oauth2_proxy" {
 }
 
 module "util" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = random_id.oauth2_proxy.hex
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
+  source                        = "../kube_workload_utility"
+  workload_name                 = random_id.oauth2_proxy.hex
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.instance_type_spread_required
+  az_spread_preferred           = var.az_spread_preferred
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

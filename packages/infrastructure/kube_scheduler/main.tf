@@ -167,20 +167,20 @@ module "scheduler" {
   namespace = local.namespace
   name      = local.name
 
-  replicas                              = 1
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_strict                = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  priority_class_name                   = "system-cluster-critical" # Scheduling will break if this breaks
-  panfactum_scheduler_enabled           = false                     # Cannot schedule itself
+  replicas                      = 1
+  burstable_nodes_enabled       = true
+  controller_nodes_required     = true
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
+  priority_class_name           = "system-cluster-critical" # Scheduling will break if this breaks
+  panfactum_scheduler_enabled   = false                     # Cannot schedule itself
 
   containers = [
     {
-      name    = "scheduler"
-      image   = "${module.pull_through.kubernetes_registry}/kube-scheduler"
-      version = var.scheduler_version
+      name             = "scheduler"
+      image_registry   = module.pull_through.kubernetes_registry
+      image_repository = "kube-scheduler"
+      image_tag        = var.scheduler_version
       command = [
         "/usr/local/bin/kube-scheduler",
         "--config=/etc/kubernetes/scheduler/config.yaml",

@@ -4,9 +4,18 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pod" status="beta" type="submodule" />
+<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pod" status="stable" type="submodule" />
 
 # Kubernetes Pod Template
+
+This module does **not** create a Kubernetes Pod but rather exposes a `pod_template` output
+that is intended to by used by higher-level controllers such as Deployments and StatefulSets. This module
+is used internally by many Panfactum submodules such as
+[kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+
+## Usage
+
+This module follows most of the conventions outlined in [this guide](/docs/main/guides/deploying-workloads/basics).
 
 ## Providers
 
@@ -30,34 +39,35 @@ Type:
 
 ```hcl
 list(object({
-    name                    = string
-    init                    = optional(bool, false)
-    image                   = string
-    version                 = string
-    command                 = list(string)
-    image_pull_policy       = optional(string, "IfNotPresent")
-    working_dir             = optional(string, null)
-    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
-    minimum_memory          = optional(number, 100)        # The minimum amount of memory in megabytes
-    maximum_memory          = optional(number, null)       #The maximum amount of memory in megabytes
-    memory_limit_multiplier = optional(number, 1.3)        # memory limits = memory request x this value
-    minimum_cpu             = optional(number, 10)         # The minimum amount of cpu millicores
-    maximum_cpu             = optional(number, null)       # The maximum amount of cpu to allow (in millicores)
-    run_as_root             = optional(bool, false)        # Whether to run the container as root
-    uid                     = optional(number, 1000)       # user to use when running the container if not root
-    linux_capabilities      = optional(list(string), [])   # Default is drop ALL
-    readonly                = optional(bool, true)         # Whether to use a readonly file system
-    env                     = optional(map(string), {})    # Environment variables specific to the container
-    liveness_check_command  = optional(list(string), null) # Will run the specified command as the liveness probe if type is exec
-    liveness_check_port     = optional(number, null)       # The number of the port for the liveness_check
-    liveness_check_type     = optional(string, null)       # Either exec, HTTP, or TCP
-    liveness_check_route    = optional(string, null)       # The route if using HTTP liveness_checks
-    liveness_check_scheme   = optional(string, "HTTP")     # HTTP or HTTPS
-    ready_check_command     = optional(list(string), null) # Will run the specified command as the ready check probe if type is exec (default to liveness_check_command)
-    ready_check_port        = optional(number, null)       # The number of the port for the ready check (default to liveness_check_port)
-    ready_check_type        = optional(string, null)       # Either exec, HTTP, or TCP (default to liveness_check_type)
-    ready_check_route       = optional(string, null)       # The route if using HTTP ready checks (default to liveness_check_route)
-    ready_check_scheme      = optional(string, null)       # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
+    name                    = string                           # A unique name for the container within the pod
+    init                    = optional(bool, false)            # Iff true, the container will be an init container
+    image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
+    image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
+    image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    command                 = list(string)                     # The command to be run as the root process inside the container
+    working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
+    image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
+    minimum_memory          = optional(number, 100)            # The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    run_as_root             = optional(bool, false)            # Whether to run the container as root
+    uid                     = optional(number, 1000)           # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    read_only               = optional(bool, true)             # Whether to use a readonly file system
+    env                     = optional(map(string), {})        # Environment variables specific to the container
+    liveness_probe_command  = optional(list(string), null)     # Will run the specified command as the liveness probe if type is exec
+    liveness_probe_port     = optional(number, null)           # The number of the port for the liveness_probe
+    liveness_probe_type     = optional(string, null)           # Either exec, HTTP, or TCP
+    liveness_probe_route    = optional(string, null)           # The route if using HTTP liveness_probes
+    liveness_probe_scheme   = optional(string, "HTTP")         # HTTP or HTTPS
+    readiness_probe_command = optional(list(string), null)     # Will run the specified command as the ready check probe if type is exec (default to liveness_probe_command)
+    readiness_probe_port    = optional(number, null)           # The number of the port for the ready check (default to liveness_probe_port)
+    readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
+    readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
+    readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
   }))
 ```
 
@@ -74,6 +84,30 @@ The following input variables are optional (have default values):
 ### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
 
 Description: Whether to allow pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_az_anti_affinity_required" /> [az\_anti\_affinity\_required](#input_az_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same zone
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_az_spread_required" /> [az\_spread\_required](#input_az_spread_required)
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
 
 Type: `bool`
 
@@ -95,6 +129,14 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_common_secrets" /> [common\_secrets](#input_common_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
@@ -110,7 +152,15 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_controller_nodes_required" /> [controller\_nodes\_required](#input_controller_nodes_required)
 
 Description: Whether the pods must be scheduled on a controller node
 
@@ -141,6 +191,14 @@ list(object({             // key is the secret provider class
 ```
 
 Default: `[]`
+
+### <a name="input_extra_pod_annotations" /> [extra\_pod\_annotations](#input_extra_pod_annotations)
+
+Description: Annotations to add to the pods in the deployment
+
+Type: `map(string)`
+
+Default: `{}`
 
 ### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
 
@@ -189,15 +247,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
-
-Description: Whether to prefer preventing pods from being scheduled on the same instance types
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_instance_type_anti_affinity_required" /> [instance\_type\_anti\_affinity\_required](#input_instance_type_anti_affinity_required)
+### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
 
 Description: Whether to prevent pods from being scheduled on the same instance types
 
@@ -245,14 +295,6 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
-
-Description: Annotations to add to the pods in the deployment
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_pod_version_labels_enabled" /> [pod\_version\_labels\_enabled](#input_pod_version_labels_enabled)
 
 Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
@@ -260,30 +302,6 @@ Description: Whether to add version labels to the Pod. Useful for ensuring pods 
 Type: `bool`
 
 Default: `true`
-
-### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on arm64 nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on burstable nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on spot nodes
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
@@ -316,14 +334,6 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_secrets" /> [secrets](#input_secrets)
-
-Description: Key pair values of secrets to add to the containers as environment variables
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_service_account" /> [service\_account](#input_service_account)
 
 Description: The name of the service account to use for this deployment
@@ -338,7 +348,7 @@ Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
 
@@ -346,7 +356,7 @@ Description: The number of seconds to wait for graceful termination before forci
 
 Type: `number`
 
-Default: `30`
+Default: `90`
 
 ### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
 
@@ -364,22 +374,6 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_topology_spread_enabled" /> [topology\_spread\_enabled](#input_topology_spread_enabled)
-
-Description: Whether to enable topology spread constraints
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_topology_spread_strict" /> [topology\_spread\_strict](#input_topology_spread_strict)
-
-Description: Whether the topology spread constraint should be set to DoNotSchedule
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_workload_name" /> [workload\_name](#input_workload_name)
 
 Description: The name of the workload. Used by observability platform for grouping pods.
@@ -387,14 +381,6 @@ Description: The name of the workload. Used by observability platform for groupi
 Type: `string`
 
 Default: `null`
-
-### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
-
-Description: Whether to prevent pods from being scheduled on the same zone
-
-Type: `bool`
-
-Default: `false`
 
 ## Outputs
 
@@ -420,7 +406,7 @@ Description: n/a
 
 Description: n/a
 
-## Usage
+## Maintainer Notes
 
 No notes
 

@@ -167,14 +167,13 @@ module "bastion" {
   namespace = module.namespace.namespace
   name      = local.name
 
-  replicas                              = 2
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_strict                = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  priority_class_name                   = module.constants.cluster_important_priority_class_name
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
+  replicas                      = 2
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
+  priority_class_name           = module.constants.cluster_important_priority_class_name
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access
   // SSHD requires root to run unfortunately. However, we drop all capability except
@@ -182,9 +181,10 @@ module "bastion" {
   // I believe this is the maximum possible security if you want to use the standard unpatched sshd server
   containers = [
     {
-      name    = "bastion"
-      image   = "${module.pull_through.ecr_public_registry}/t8f0s7h5/bastion"
-      version = var.bastion_image_version
+      name             = "bastion"
+      image_registry   = module.pull_through.ecr_public_registry
+      image_repository = "t8f0s7h5/bastion"
+      image_tag        = var.bastion_image_version
       command = [
         "/usr/sbin/sshd",
         "-D", // run in foreground
@@ -197,18 +197,19 @@ module "bastion" {
       ]
       run_as_root         = true
       linux_capabilities  = ["SYS_CHROOT", "SETGID", "SETUID"]
-      liveness_check_port = var.bastion_port
-      liveness_check_type = "TCP"
+      liveness_probe_port = var.bastion_port
+      liveness_probe_type = "TCP"
       minimum_memory      = 50
     },
 
     // SSHD requires that root be the only
     // writer to /run/sshd and the private host key
     {
-      name    = "permission-init"
-      init    = true
-      image   = "${module.pull_through.ecr_public_registry}/t8f0s7h5/bastion"
-      version = var.bastion_image_version
+      name             = "permission-init"
+      init             = true
+      image_registry   = module.pull_through.ecr_public_registry
+      image_repository = "t8f0s7h5/bastion"
+      image_tag        = var.bastion_image_version
       command = [
         "/usr/bin/bash",
         "-c",

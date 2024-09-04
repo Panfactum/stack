@@ -51,10 +51,10 @@ module "pull_through" {
 }
 
 module "util" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "canary-checker"
-  instance_type_anti_affinity_required = true
-  burstable_nodes_enabled              = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "canary-checker"
+  instance_type_spread_required = true
+  burstable_nodes_enabled       = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

@@ -53,13 +53,13 @@ module "util" {
   for_each = local.config
   source   = "../kube_workload_utility"
 
-  workload_name                         = "external-dns"
-  match_labels                          = { id = random_id.ids[each.key].hex }
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = false
+  workload_name                 = "external-dns"
+  match_labels                  = { id = random_id.ids[each.key].hex }
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false
+  az_spread_preferred           = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

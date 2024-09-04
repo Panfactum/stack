@@ -30,43 +30,40 @@ module "pod_template" {
   workload_name              = var.name
   match_labels               = { id = random_id.deployment_id.hex }
   dns_policy                 = var.dns_policy
-  pod_annotations            = var.pod_annotations
+  extra_pod_annotations      = var.extra_pod_annotations
   extra_pod_labels           = var.extra_pod_labels
   pod_version_labels_enabled = var.pod_version_labels_enabled
 
   # Container configuration
-  common_env = var.common_env
-  containers = var.containers
+  common_env     = var.common_env
+  common_secrets = var.common_secrets
+  containers     = var.containers
 
   # Mount configuration
   config_map_mounts = var.config_map_mounts
   secret_mounts     = var.secret_mounts
-  secrets           = var.secrets
   dynamic_secrets   = var.dynamic_secrets
   tmp_directories   = var.tmp_directories
   mount_owner       = var.mount_owner
 
   # Scheduling params
-  priority_class_name                   = var.priority_class_name
-  burstable_nodes_enabled               = var.burstable_nodes_enabled
-  spot_nodes_enabled                    = var.spot_nodes_enabled
-  arm_nodes_enabled                     = var.arm_nodes_enabled
-  instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
-  instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
-  zone_anti_affinity_required           = var.zone_anti_affinity_required
-  host_anti_affinity_required           = var.host_anti_affinity_required
-  extra_tolerations                     = var.extra_tolerations
-  controller_node_required              = var.controller_node_required
-  node_requirements                     = var.node_requirements
-  node_preferences                      = var.node_preferences
-  prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
-  prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
-  prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
-  topology_spread_enabled               = var.topology_spread_enabled
-  topology_spread_strict                = var.topology_spread_strict
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  termination_grace_period_seconds      = var.termination_grace_period_seconds
-  restart_policy                        = var.restart_policy
+  priority_class_name              = var.priority_class_name
+  burstable_nodes_enabled          = var.burstable_nodes_enabled
+  spot_nodes_enabled               = var.spot_nodes_enabled
+  arm_nodes_enabled                = var.arm_nodes_enabled
+  controller_nodes_enabled         = var.controller_nodes_enabled
+  instance_type_spread_required    = var.instance_type_spread_required
+  az_anti_affinity_required        = var.az_anti_affinity_required
+  host_anti_affinity_required      = var.host_anti_affinity_required
+  extra_tolerations                = var.extra_tolerations
+  controller_nodes_required        = var.controller_nodes_required
+  node_requirements                = var.node_requirements
+  node_preferences                 = var.node_preferences
+  az_spread_preferred              = var.az_spread_preferred
+  az_spread_required               = var.az_spread_required
+  panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
+  termination_grace_period_seconds = var.termination_grace_period_seconds
+  restart_policy                   = var.restart_policy
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -169,7 +166,7 @@ resource "kubectl_manifest" "pdb" {
       selector = {
         matchLabels = module.pod_template.match_labels
       }
-      maxUnavailable             = 1
+      maxUnavailable             = var.max_unavailable
       unhealthyPodEvictionPolicy = var.unhealthy_pod_eviction_policy
     }
   })

@@ -612,7 +612,7 @@ Description: Whether to allow Pods to schedule on arm64 nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
 
@@ -758,6 +758,14 @@ Type: `string`
 
 Default: `"{}"`
 
+### <a name="input_extra_pod_annotations" /> [extra\_pod\_annotations](#input_extra_pod_annotations)
+
+Description: Annotations to add to the Pods in the Workflow
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
 
 Description: Extra Pod labels to use
@@ -874,14 +882,6 @@ list(object({
 
 Default: `[]`
 
-### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
-
-Description: Annotations to add to the Pods in the Workflow
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_pod_delete_delay_seconds" /> [pod\_delete\_delay\_seconds](#input_pod_delete_delay_seconds)
 
 Description: The number of seconds after Workflow completion that Pods will be deleted
@@ -897,30 +897,6 @@ Description: Limits the max total parallel pods that can execute at the same tim
 Type: `number`
 
 Default: `null`
-
-### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
-
-Description: Whether Pods will prefer scheduling on arm64 nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
-
-Description: Whether Pods will prefer scheduling on burstable nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
-
-Description: Whether Pods will prefer scheduling on spot nodes
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_priority" /> [priority](#input_priority)
 
@@ -946,7 +922,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_read_only_root_fs" /> [read\_only\_root\_fs](#input_read_only_root_fs)
+### <a name="input_read_only" /> [read\_only](#input_read_only)
 
 Description: Whether the generated containers default to read-only root filesystems
 
@@ -1023,7 +999,7 @@ Description: Whether to allow Pods to schedule on spot nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_suspend" /> [suspend](#input_suspend)
 

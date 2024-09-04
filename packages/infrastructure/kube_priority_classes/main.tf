@@ -41,12 +41,12 @@ module "constants" {
   # end-generate
 }
 
-resource "kubernetes_priority_class" "database" {
+resource "kubernetes_priority_class" "workload_important" {
   metadata {
-    name   = module.constants.database_priority_class_name
+    name   = module.constants.workload_important_priority_class_name
     labels = module.util.labels
   }
-  description = "Used for running database containers"
+  description = "A Kubernetes Priority Class that is higher than the default but lower than cluster-important. Generally, all stateful systems should have this priority class."
   value       = 10000000
 }
 
@@ -66,4 +66,13 @@ resource "kubernetes_priority_class" "cluster_important" {
   }
   description = "Used for important global cluster utilities that are not necessary for cluster bootstrapping"
   value       = 100000000
+}
+
+resource "kubernetes_priority_class" "extra" {
+  for_each = var.extra_priority_classes
+  metadata {
+    name   = each.key
+    labels = module.util.labels
+  }
+  value = each.value
 }

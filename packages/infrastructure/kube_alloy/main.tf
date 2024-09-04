@@ -52,10 +52,10 @@ resource "random_id" "alloy" {
 }
 
 module "util" {
-  source                  = "../kube_workload_utility"
-  workload_name           = "alloy"
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
+  source                   = "../kube_workload_utility"
+  workload_name            = "alloy"
+  burstable_nodes_enabled  = true
+  controller_nodes_enabled = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

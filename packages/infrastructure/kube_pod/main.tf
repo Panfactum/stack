@@ -30,8 +30,7 @@ locals {
 
   // Always set env vars
   static_env = {
-    // Set some Node.js runtime options
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED = "1"
+    POD_TERMINATION_GRACE_PERIOD_SECONDS = tostring(var.termination_grace_period_seconds)
   }
 
   // Reflective env variables
@@ -71,6 +70,73 @@ locals {
           fieldPath  = "metadata.namespace"
         }
       }
+    },
+    {
+      name = "POD_SERVICE_ACCOUNT"
+      valueFrom = {
+        fieldRef = {
+          apiVersion = "v1"
+          fieldPath  = "spec.serviceAccountName"
+        }
+      }
+    },
+    {
+      name = "NODE_NAME"
+      valueFrom = {
+        fieldRef = {
+          apiVersion = "v1"
+          fieldPath  = "spec.nodeName"
+        }
+      }
+    },
+    {
+      name = "NODE_IP"
+      valueFrom = {
+        fieldRef = {
+          apiVersion = "v1"
+          fieldPath  = "status.hostIP"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_CPU_REQUEST"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "requests.cpu"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_MEMORY_REQUEST"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "requests.memory"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_MEMORY_LIMIT"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "limits.memory"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "requests.ephemeral-storage"
+        }
+      }
+    },
+    {
+      name = "CONTAINER_EPHEMERAL_STORAGE_LIMIT"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "limits.ephemeral-storage"
+        }
+      }
     }
   ]
 
@@ -81,7 +147,7 @@ locals {
   }]
 
   // Static env variables (secret)
-  common_static_secret_env = [for k in keys(var.secrets) : {
+  common_static_secret_env = [for k in keys(var.common_secrets) : {
     name = k
     valueFrom = {
       secretKeyRef = {
@@ -148,15 +214,36 @@ locals {
     [for name, config in var.secret_mounts : {
       name = "secret-${name}"
       secret = {
-        secretName = name
-        optional   = config.optional
+        secretName  = name
+        defaultMode = 361 # 551 in octal - Give all permissions so we can mount executables
+        optional    = config.optional
       }
     }],
     [for name, config in var.config_map_mounts : {
       name = "config-map-${name}"
       configMap = {
-        name     = name
-        optional = config.optional
+        name        = name
+        defaultMode = 361 # 551 in octal - Give all permissions so we can mount executables
+        optional    = config.optional
+      }
+    }],
+    [{
+      name = "podinfo",
+      downwardAPI = {
+        items = [
+          {
+            path = "labels",
+            fieldRef = {
+              fieldPath = "metadata.labels"
+            }
+          },
+          {
+            path = "annotations",
+            fieldRef = {
+              fieldPath = "metadata.annotations"
+            }
+          }
+        ]
       }
     }],
     [for path, config in local.dynamic_env_secrets_by_provider : {
@@ -202,12 +289,18 @@ locals {
     mountPath = config.mount_path
   }]
 
+  common_downward_api_mounts = [{
+    name      = "podinfo"
+    mountPath = "/etc/podinfo"
+  }]
+
   common_volume_mounts = concat(
     local.common_tmp_volume_mounts,
     local.common_extra_volume_mounts,
     local.common_secret_volume_mounts,
     local.common_config_map_volume_mounts,
-    local.common_dynamic_secret_volume_mounts
+    local.common_dynamic_secret_volume_mounts,
+    local.common_downward_api_mounts
   )
 
   dynamic_env_secrets_by_provider = { for config in var.dynamic_secrets : config.secret_provider_class => config }
@@ -240,15 +333,15 @@ locals {
   // Note: we allow some extra permissions when running in local dev mode
   security_context = {
     for container in var.containers : container.name => {
-      runAsGroup               = container.run_as_root ? 0 : var.is_local ? 0 : container.uid
-      runAsUser                = container.run_as_root ? 0 : var.is_local ? 0 : container.uid
-      runAsNonRoot             = !container.run_as_root && !var.is_local
+      runAsGroup               = container.run_as_root ? 0 : container.uid
+      runAsUser                = container.run_as_root ? 0 : container.uid
+      runAsNonRoot             = !container.run_as_root
       allowPrivilegeEscalation = container.run_as_root || container.privileged || contains(container.linux_capabilities, "SYS_ADMIN")
-      readOnlyRootFilesystem   = !var.is_local && container.readonly
+      readOnlyRootFilesystem   = container.read_only
       privileged               = container.privileged
       capabilities = {
         add  = container.linux_capabilities
-        drop = var.is_local || container.privileged ? [] : ["ALL"]
+        drop = container.privileged ? [] : ["ALL"]
       }
     }
   }
@@ -269,7 +362,7 @@ locals {
           "panfactum.com/commit"
         ], k)
       }
-      annotations = var.pod_annotations
+      annotations = var.extra_pod_annotations
     }
     spec = {
       priorityClassName  = var.priority_class_name
@@ -300,7 +393,7 @@ locals {
       //////////////////////////////
       containers = [for container, config in local.containers : {
         name            = container
-        image           = "${config.image}:${config.version}"
+        image           = "${config.image_registry}/${config.image_repository}:${config.image_tag}"
         command         = length(config.command) == 0 ? null : config.command
         imagePullPolicy = config.image_pull_policy
         workingDir      = config.working_dir
@@ -315,34 +408,34 @@ locals {
           }]
         )
 
-        startupProbe = config.liveness_check_type != null ? {
-          httpGet = config.liveness_check_type == "HTTP" ? {
-            path   = config.liveness_check_route
-            port   = config.liveness_check_port
-            scheme = config.liveness_check_scheme
+        startupProbe = config.liveness_probe_type != null ? {
+          httpGet = config.liveness_probe_type == "HTTP" ? {
+            path   = config.liveness_probe_route
+            port   = config.liveness_probe_port
+            scheme = config.liveness_probe_scheme
           } : null
-          tcpSocket = config.liveness_check_type == "TCP" ? {
-            port = config.liveness_check_port
+          tcpSocket = config.liveness_probe_type == "TCP" ? {
+            port = config.liveness_probe_port
           } : null
-          exec = lower(config.liveness_check_type) == "exec" ? {
-            command = config.liveness_check_command
+          exec = lower(config.liveness_probe_type) == "exec" ? {
+            command = config.liveness_probe_command
           } : null
           failureThreshold = 120
           periodSeconds    = 1
           timeoutSeconds   = 3
         } : null
 
-        readinessProbe = config.liveness_check_type != null ? {
-          httpGet = lower(config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "http" ? {
-            path   = config.ready_check_route != null ? config.ready_check_route : config.liveness_check_route
-            port   = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
-            scheme = config.ready_check_scheme != null ? config.ready_check_scheme : config.liveness_check_scheme
+        readinessProbe = config.liveness_probe_type != null ? {
+          httpGet = lower(config.readiness_probe_type != null ? config.readiness_probe_type : config.liveness_probe_type) == "http" ? {
+            path   = config.readiness_probe_route != null ? config.readiness_probe_route : config.liveness_probe_route
+            port   = config.readiness_probe_port != null ? config.readiness_probe_port : config.liveness_probe_port
+            scheme = config.readiness_probe_scheme != null ? config.readiness_probe_scheme : config.liveness_probe_scheme
           } : null
-          tcpSocket = lower(config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "tcp" ? {
-            port = config.ready_check_port != null ? config.ready_check_port : config.liveness_check_port
+          tcpSocket = lower(config.readiness_probe_type != null ? config.readiness_probe_type : config.liveness_probe_type) == "tcp" ? {
+            port = config.readiness_probe_port != null ? config.readiness_probe_port : config.liveness_probe_port
           } : null
-          exec = lower(config.ready_check_type != null ? config.ready_check_type : config.liveness_check_type) == "exec" ? {
-            command = config.ready_check_command != null ? config.ready_check_command : config.liveness_check_command
+          exec = lower(config.readiness_probe_type != null ? config.readiness_probe_type : config.liveness_probe_type) == "exec" ? {
+            command = config.readiness_probe_command != null ? config.readiness_probe_command : config.liveness_probe_command
           } : null
           successThreshold = 1
           failureThreshold = 3
@@ -350,17 +443,17 @@ locals {
           timeoutSeconds   = 3
         } : null
 
-        livenessProbe = config.liveness_check_type != null ? {
-          httpGet = lower(config.liveness_check_type) == "http" ? {
-            path   = config.liveness_check_route
-            port   = config.liveness_check_port
-            scheme = config.liveness_check_scheme
+        livenessProbe = config.liveness_probe_type != null ? {
+          httpGet = lower(config.liveness_probe_type) == "http" ? {
+            path   = config.liveness_probe_route
+            port   = config.liveness_probe_port
+            scheme = config.liveness_probe_scheme
           } : null
-          tcpSocket = lower(config.liveness_check_type) == "tcp" ? {
-            port = config.liveness_check_port
+          tcpSocket = lower(config.liveness_probe_type) == "tcp" ? {
+            port = config.liveness_probe_port
           } : null
-          exec = lower(config.liveness_check_type) == "exec" ? {
-            command = config.liveness_check_command
+          exec = lower(config.liveness_probe_type) == "exec" ? {
+            command = config.liveness_probe_command
           } : null
           successThreshold = 1
           failureThreshold = 15
@@ -375,7 +468,7 @@ locals {
 
       initContainers = length(keys(local.init_containers)) == 0 ? null : [for container, config in local.init_containers : {
         name            = container
-        image           = "${config.image}:${config.version}"
+        image           = "${config.image_registry}/${config.image_repository}:${config.image_tag}"
         command         = length(config.command) == 0 ? null : config.command
         imagePullPolicy = config.image_pull_policy
         workingDir      = config.working_dir
@@ -395,26 +488,23 @@ locals {
 }
 
 module "util" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = var.workload_name
-  match_labels                          = var.match_labels
-  burstable_nodes_enabled               = var.burstable_nodes_enabled
-  spot_nodes_enabled                    = var.spot_nodes_enabled
-  arm_nodes_enabled                     = var.arm_nodes_enabled
-  instance_type_anti_affinity_preferred = var.instance_type_anti_affinity_preferred
-  instance_type_anti_affinity_required  = var.instance_type_anti_affinity_required
-  zone_anti_affinity_required           = var.zone_anti_affinity_required
-  host_anti_affinity_required           = var.host_anti_affinity_required
-  extra_tolerations                     = var.extra_tolerations
-  controller_node_required              = var.controller_node_required
-  prefer_spot_nodes_enabled             = var.prefer_spot_nodes_enabled
-  prefer_burstable_nodes_enabled        = var.prefer_burstable_nodes_enabled
-  prefer_arm_nodes_enabled              = var.prefer_arm_nodes_enabled
-  topology_spread_enabled               = var.topology_spread_enabled
-  topology_spread_strict                = var.topology_spread_strict
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  node_requirements                     = var.node_requirements
-  node_preferences                      = var.node_preferences
+  source                        = "../kube_workload_utility"
+  workload_name                 = var.workload_name
+  match_labels                  = var.match_labels
+  burstable_nodes_enabled       = var.burstable_nodes_enabled
+  spot_nodes_enabled            = var.spot_nodes_enabled
+  arm_nodes_enabled             = var.arm_nodes_enabled
+  controller_nodes_enabled      = var.controller_nodes_enabled
+  controller_nodes_required     = var.controller_nodes_required
+  instance_type_spread_required = var.instance_type_spread_required
+  az_anti_affinity_required     = var.az_anti_affinity_required
+  host_anti_affinity_required   = var.host_anti_affinity_required
+  extra_tolerations             = var.extra_tolerations
+  az_spread_preferred           = var.az_spread_preferred
+  az_spread_required            = var.az_spread_required
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  node_requirements             = var.node_requirements
+  node_preferences              = var.node_preferences
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -423,7 +513,6 @@ module "util" {
   region           = var.region
   pf_root_module   = var.pf_root_module
   pf_module        = var.pf_module
-  is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
 }
@@ -432,11 +521,50 @@ module "constants" {
   source = "../kube_constants"
 }
 
+/************************************************
+* Protects the secret config values
+************************************************/
+
 resource "kubernetes_secret" "secrets" {
   metadata {
-    namespace = var.namespace
-    name      = var.workload_name
-    labels    = module.util.labels
+    namespace     = var.namespace
+    generate_name = "${var.workload_name}-"
+    labels        = module.util.labels
   }
-  data = var.secrets
+  data = var.common_secrets
+}
+
+/************************************************
+* Allows the pod to read its own manifest
+************************************************/
+
+resource "kubernetes_role" "pod_reader" {
+  metadata {
+    namespace     = var.namespace
+    generate_name = "${var.workload_name}-"
+    labels        = module.util.labels
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["list", "get"]
+  }
+}
+
+resource "kubernetes_role_binding" "pod_reader" {
+  metadata {
+    namespace     = var.namespace
+    generate_name = "${var.workload_name}-"
+    labels        = module.util.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = var.service_account
+    namespace = var.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.pod_reader.metadata[0].name
+  }
 }

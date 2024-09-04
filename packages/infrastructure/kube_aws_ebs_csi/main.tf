@@ -45,13 +45,13 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "ebs-csi-controller"
-  burstable_nodes_enabled               = true
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  arm_nodes_enabled                     = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "ebs-csi-controller"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -248,12 +248,17 @@ resource "helm_release" "ebs_csi_driver" {
           autoMountServiceAccountToken = true
         }
         resources         = local.default_resources
-        tolerateAllTaints = false // This prevents nodes from being detached in a timely manner
+        tolerateAllTaints = false // This prevents nodes from being shutdown in a timely manner
         tolerations = concat(
           [
             // This is required b/c otherwise storage won't be detached during node shutdown
             {
               key      = "karpenter.sh/disruption"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "karpenter.sh/disrupted" // Karpenter docs are wrong; this needs to be tolerated as well
               operator = "Exists"
               effect   = "NoSchedule"
             },

@@ -83,16 +83,15 @@ module "disruption_window_enabler" {
   name                        = "disruption-window-enabler-${random_id.window_id.hex}"
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  spot_nodes_enabled          = true
-  arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = var.cron_schedule
   containers = [{
-    name    = "enabler"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
+    name             = "enabler"
+    image_registry   = module.pull_through.ecr_public_registry
+    image_repository = module.constants.panfactum_image_repository
+    image_tag        = module.constants.panfactum_image_tag
     command = [
       "/bin/pf-voluntary-disruptions-enable",
       "--window-id=${random_id.window_id.hex}",
@@ -120,16 +119,16 @@ module "disruption_window_disabler" {
   name                        = "disruption-window-disabler-${random_id.window_id.hex}"
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  spot_nodes_enabled          = true
-  arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = "0/15 * * * *" # Every 15 minutes
   containers = [{
-    name    = "disabler"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
+    name             = "disabler"
+    image_registry   = module.pull_through.ecr_public_registry
+    image_repository = module.constants.panfactum_image_repository
+    image_tag        = module.constants.panfactum_image_tag
     command = [
       "/bin/pf-voluntary-disruptions-disable",
       "--window-id=${random_id.window_id.hex}",

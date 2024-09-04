@@ -6,13 +6,13 @@ variable "namespace" {
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the annotator images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "vpa_enabled" {

@@ -107,9 +107,17 @@ Default:
 ]
 ```
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
 
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+
+Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
 Type: `bool`
 
@@ -129,7 +137,7 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_path_prefix" /> [path\_prefix](#input_path_prefix)
 
@@ -145,7 +153,7 @@ Description: Whether to use the ECR pull through cache for the deployed images
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 
@@ -153,7 +161,7 @@ Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ## Outputs
 

@@ -146,38 +146,52 @@ module "buildkit" {
   source   = "../kube_stateful_set"
   for_each = local.arch
 
-  name                        = "${local.name}-${each.key}"
-  namespace                   = local.namespace
-  pod_management_policy       = "Parallel"
-  replicas                    = 1
-  ignore_replica_count        = true
+  name                  = "${local.name}-${each.key}"
+  namespace             = local.namespace
+  pod_management_policy = "Parallel"
+
+  # Will be autoscaled
+  replicas             = 1
+  ignore_replica_count = true
+
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
-  arm_nodes_enabled           = each.key == "arm64"
+
+  # High availability is not required
+  instance_type_spread_required = false
+  az_spread_required            = false
+  az_spread_preferred           = false
+
+  # Ensure that we are using the appropriate CPU architectures
+  arm_nodes_enabled = each.key == "arm64"
   node_requirements = {
     "kubernetes.io/arch" = [each.key]
   }
-  spot_nodes_enabled               = true
+
+  # Gives 30 minutes for builds to finish before shutdown
   termination_grace_period_seconds = 30 * 60
-  unhealthy_pod_eviction_policy    = "IfHealthyBudget"
+
+  # Limit pod evictions
+  unhealthy_pod_eviction_policy = "IfHealthyBudget"
+  max_unavailable               = 0
 
   # We don't use the VPA for the builder b/c the workloads are extremely uneven
   # and we never want to disrupt the builder pods
-  vpa_enabled     = false
-  max_unavailable = 0
+  vpa_enabled = false
 
   common_env = {
     XDG_RUNTIME_DIR = "/home/user/.local/tmp"
     DOCKER_CONFIG   = "/home/user/.config/docker"
   }
-  pod_annotations = {
+  extra_pod_annotations = {
     "container.apparmor.security.beta.kubernetes.io/buildkitd" = "unconfined"
   }
   containers = [
     {
-      name    = "buildkitd"
-      image   = "${module.pull_through.docker_hub_registry}/moby/buildkit"
-      version = var.buildkit_image_version
+      name             = "buildkitd"
+      image_registry   = module.pull_through.docker_hub_registry
+      image_repository = "moby/buildkit"
+      image_tag        = var.buildkit_image_version
       command = [
         "rootlesskit",
         "buildkitd",
@@ -193,8 +207,8 @@ module "buildkit" {
         "SETUID",
         "SETGID"
       ]
-      liveness_check_type    = "exec"
-      liveness_check_command = ["buildctl", "debug", "workers"]
+      liveness_probe_type    = "exec"
+      liveness_probe_command = ["buildctl", "debug", "workers"]
       minimum_cpu            = var.cpu_millicores
       maximum_cpu            = var.cpu_millicores
       minimum_memory         = var.memory_mb
@@ -377,9 +391,10 @@ module "scale_to_zero" {
 
   cron_schedule = "*/15 * * * *"
   containers = [{
-    name    = "scale-to-zero"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
+    name             = "scale-to-zero"
+    image_registry   = module.pull_through.ecr_public_registry
+    image_repository = module.constants.panfactum_image_repository
+    image_tag        = module.constants.panfactum_image_tag
     command = [
       "/bin/pf-buildkit-scale-down",
       "--timeout",
@@ -462,9 +477,10 @@ module "cache_clear" {
 
   cron_schedule = var.cache_clear_cron
   containers = [{
-    name    = "cache-clear"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
+    name             = "cache-clear"
+    image_registry   = module.pull_through.ecr_public_registry
+    image_repository = module.constants.panfactum_image_repository
+    image_tag        = module.constants.panfactum_image_tag
     command = [
       "/bin/pf-buildkit-clear-cache",
     ]

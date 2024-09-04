@@ -60,14 +60,13 @@ module "pull_through" {
 }
 
 module "util_read" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "loki-read"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_enabled              = var.enhanced_ha_enabled
-  topology_spread_strict               = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "loki-read"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = var.enhanced_ha_enabled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -82,13 +81,13 @@ module "util_read" {
 }
 
 module "util_write" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "loki-write"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "loki-write"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -103,13 +102,13 @@ module "util_write" {
 }
 
 module "util_backend" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "loki-backend"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "loki-backend"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_required            = true // stateful
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -124,12 +123,12 @@ module "util_backend" {
 }
 
 module "util_canary" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "loki-canary"
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = false
+  source                        = "../kube_workload_utility"
+  workload_name                 = "loki-canary"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  instance_type_spread_required = false
+  az_spread_preferred           = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -174,16 +173,17 @@ module "namespace" {
 module "redis_cache" {
   source = "../kube_redis_sentinel"
 
-  namespace                   = local.namespace
-  replica_count               = 3
-  lfu_cache_enabled           = true
-  burstable_instances_enabled = true
-  arm_instances_enabled       = true
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  vpa_enabled                 = var.vpa_enabled
-  minimum_memory_mb           = 50
-  monitoring_enabled          = var.monitoring_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  namespace                     = local.namespace
+  replica_count                 = 3
+  lfu_cache_enabled             = true
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  pull_through_cache_enabled    = var.pull_through_cache_enabled
+  vpa_enabled                   = var.vpa_enabled
+  minimum_memory_mb             = 50
+  monitoring_enabled            = var.monitoring_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.enhanced_ha_enabled
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

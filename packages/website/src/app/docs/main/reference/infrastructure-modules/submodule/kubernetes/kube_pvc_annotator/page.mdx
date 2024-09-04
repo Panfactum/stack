@@ -4,7 +4,7 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_pvc_annotator" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pvc_annotator" status="beta" type="submodule" />
+<ModuleHeader name="kube_pvc_annotator" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pvc_annotator" status="stable" type="submodule" />
 
 # PVC Annotator
 
@@ -78,7 +78,7 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
 
@@ -86,7 +86,7 @@ Description: Whether to use the ECR pull through cache for the annotator images
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
 

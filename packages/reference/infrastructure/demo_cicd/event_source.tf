@@ -18,12 +18,13 @@ resource "kubernetes_secret" "github_event_source" {
 }
 
 module "event_source" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_source?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source = "../../../../../infrastructure//kube_argo_event_source" #pf-update
 
   name        = local.event_source_name
   namespace   = local.namespace
-  vpa_enabled = true
   replicas = 2
+
+  instance_type_spread_required = false // You probably want to leave this as true, but we disable this for cost savings
 
   event_source_spec = {
     service = {
@@ -76,7 +77,7 @@ module "event_source" {
 }
 
 module "ingress" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" # pf-update
+  source =   "../../../../../infrastructure//kube_ingress" # pf-update
 
   namespace = local.namespace
   name      = "${local.event_source_name}-webhook"

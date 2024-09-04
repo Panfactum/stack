@@ -43,7 +43,7 @@ variable "node_requirements" {
   default     = {}
 }
 
-variable "secrets" {
+variable "common_secrets" {
   description = "Key pair values of secrets to add to the containers as environment variables"
   type        = map(string)
   default     = {}
@@ -64,24 +64,25 @@ variable "vpa_enabled" {
 variable "containers" {
   description = "A list of container configurations for the Pod"
   type = list(object({
-    name                    = string
-    init                    = optional(bool, false)
-    image                   = string
-    version                 = string
-    command                 = list(string)
-    image_pull_policy       = optional(string, "IfNotPresent")
-    working_dir             = optional(string, null)
-    minimum_memory          = optional(number, 100)      #The minimum amount of memory in megabytes
-    maximum_memory          = optional(number, null)     #The maximum amount of memory in megabytes
-    memory_limit_multiplier = optional(number, 1.3)      # memory limits = memory request x this value
-    minimum_cpu             = optional(number, 10)       # The minimum amount of cpu millicores
-    maximum_cpu             = optional(number, null)     # The maximum amount of cpu to allow (in millicores)
-    privileged              = optional(bool, false)      # Whether to allow the container to run in privileged mode
-    run_as_root             = optional(bool, false)      # Whether to run the container as root
-    uid                     = optional(number, 1000)     # user to use when running the container if not root
-    linux_capabilities      = optional(list(string), []) # Default is drop ALL
-    readonly                = optional(bool, true)       # Whether to use a readonly file system
-    env                     = optional(map(string), {})  # Environment variables specific to the container
+    name                    = string                           # A unique name for the container within the pod
+    init                    = optional(bool, false)            # Iff true, the container will be an init container
+    image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
+    image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
+    image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    command                 = list(string)                     # The command to be run as the root process inside the container
+    working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
+    image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
+    minimum_memory          = optional(number, 100)            #The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
+    run_as_root             = optional(bool, false)            # Whether to run the container as root
+    uid                     = optional(number, 1000)           # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    readonly                = optional(bool, true)             # Whether to use a readonly file system
+    env                     = optional(map(string), {})        # Environment variables specific to the container
   }))
 }
 
@@ -125,7 +126,7 @@ variable "config_map_mounts" {
   default = {}
 }
 
-variable "pod_annotations" {
+variable "extra_pod_annotations" {
   description = "Annotations to add to the pods in the CronJob"
   type        = map(string)
   default     = {}
@@ -147,28 +148,10 @@ variable "dns_policy" {
   default     = "ClusterFirst"
 }
 
-variable "prefer_spot_nodes_enabled" {
-  description = "Whether Pods will prefer scheduling on spot nodes"
-  type        = bool
-  default     = false
-}
-
-variable "prefer_burstable_nodes_enabled" {
-  description = "Whether Pods will prefer scheduling on burstable nodes"
-  type        = bool
-  default     = false
-}
-
-variable "prefer_arm_nodes_enabled" {
-  description = "Whether Pods will prefer scheduling on arm64 nodes"
-  type        = bool
-  default     = false
-}
-
 variable "spot_nodes_enabled" {
   description = "Whether to allow Pods to schedule on spot nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "burstable_nodes_enabled" {
@@ -179,6 +162,12 @@ variable "burstable_nodes_enabled" {
 
 variable "arm_nodes_enabled" {
   description = "Whether to allow Pods to schedule on arm64 nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
   default     = false
 }

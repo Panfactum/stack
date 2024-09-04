@@ -1,0 +1,485 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
+# Deploying Workloads: The Basics
+
+## Objective
+
+Learn how to deploy your code and workloads onto the Kubernetes clusters created by the Panfactum Stack.
+
+## Prerequisites
+
+* [Guide for writing and deploying IaC modules](/docs/main/guides/iac/first-party-modules)
+
+## Overview
+
+In the Panfactum Stack, your code will run on the Kubernetes clusters you created in the
+[bootstrapping guide](/docs/main/guides/bootstrapping/overview). [^1]
+
+[^1]: The exception would be services running on edge compute. Coming soon.
+
+The basic process for running first-party code in a Kubernetes cluster is as follows:
+
+1. Build a container image containing the code your wish to deploy. We recommend using our
+   [BuildKit addon](/docs/main/guides/addons/buildkit/installing) to build from Dockerfiles. [^10]
+
+2. [Create a first-party IaC module](/docs/main/guides/iac/first-party-modules#writing-modules)
+   that defines the Kubernetes resources you wish to deploy. We provide pre-configured submodules for many
+   of the most common Kubernetes resources:
+
+   | Kubernetes Type                                                                            | Submodule                                                                                                 | Description                                                                                                             |
+   | :----------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
+   | [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) | [kube\_namespace](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_namespace)        | A logical container for Kubernetes resources. Most resources must be assigned a namespace.                              |
+   | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)        | [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)      | Orchestrates stateless workloads such as webservers.                                                                    |
+   | [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)      | [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) | Orchestrates for stateful workloads such as databases.                                                                  |
+   | [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)            | [kube\_cron\_job](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job)         | Periodically runs one-shot processes on a schedule such as system maintenance scripts.                                  |
+   | [Argo Workflow](https://argoproj.github.io/workflows/)                                     | [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflows/wf_spec)                       | An advanced pattern available through our [Workflow Engine Addon](/docs/main/guides/addons/workflow-engine/installing). |
+
+3. [Deploy the IaC module](/docs/main/guides/iac/first-party-modules#deploying-modules) by configuring it in the appropriate environment directory and running `terragrunt apply`.
+
+4. (Optional) Connect the module deployment to our [CI / CD addon.](/docs/main/guides/cicd/getting-started)
+
+<MarkdownAlert severity="info">
+  To see a basic example in action, we recommend you take a look at the IaC for this website:
+
+  * [Dockerfile](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/website/Containerfile)
+  * [IaC Module](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/pf_website)
+  * [Terragrunt Deployment](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/pf_website)
+  * [CI / CD Integration](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/website_image_builder.tf)
+</MarkdownAlert>
+
+[^10]: Alternatively, you can use a prebuilt image from a third-party.
+
+## Core Concepts
+
+Most of the controllers (e.g., Deployments, StatefulSets, etc.) create and manage
+Kubernetes [Pods.](https://kubernetes.io/docs/concepts/workloads/pods/) [^2]
+As all Pods have very similar configuration requirements, we will review the core concepts here.
+
+[^2]: In fact, our submodules utilize a shared interface for defining pods: [kube\_pod](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod).
+
+### Containers
+
+A Pod is a colocated group of [Containers](https://kubernetes.io/docs/concepts/containers/) that all share the same Kubernetes
+permissions and [linux namespaces](https://en.wikipedia.org/wiki/Linux_namespaces). [^3]
+
+[^3]: Not to be confused with Kubernetes namespaces.
+
+Most of our controller submodules have a `containers` input which allows you to configure the containers that will
+be present in the pods that the controller creates.
+
+There are a few required fields for every defined container:
+
+* `name`: A unique name for the container within the pod (example: `foo`)
+* `image_registry`: The domain name for a container image registry (example: `docker.io`)
+* `image_repository`: The image repository within the registry (example: `library/nginx`)
+* `image_tag`: The tag for a specific image within the registry (example: `1.27.1`)
+* `command`: The command in list form to execute when starting a container from the given image (example: `["/bin/bash", "-c", "tail -f /dev/null"]`)
+
+Given the above example values, a Pod would be created with a container called `foo` that uses the image from `docker.io/library/nginx:1.27.1` as
+the root file system and runs `/bin/bash -c "tail -f /dev/null"`. [^4]
+
+[^4]: `tail -f /dev/null` is used because this is a noop that prevents the command from terminating. If the container terminated, some
+    controllers like a Deployment would continually try to restart it.
+
+For public images, we strongly recommend that you use the ECR pull-through caches for the `image_registry` (setup
+as a [step in the bootstrapping guide](/docs/main/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
+We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/docs/main/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
+
+### Init Containers
+
+By default, every container in `containers` is created as a regular container. However, any container has the ability
+to be an [init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) by setting `init` to `true`
+on its specification.
+
+Init containers will run to completion *before* normal containers are started, so they can be used to do one-time
+initialization work.
+
+That said, init containers do have several drawbacks:
+
+* Init containers will block the setup of regular containers. Depending on your configuration, there
+  may be a large delay between when an init container finishes and a regular container starts.
+
+* Resources requested by init containers are never reclaimed by Kubernetes even after the init container terminates. For
+  example, if an init container used `500Mi` and the rest of containers only use `100Mi`, the pod will always have `500Mi`
+  of memory reserved throughout its lifetime even though`400Mi` is never used. For more information,
+  see this [issue](https://github.com/kubernetes/kubernetes/issues/124282).
+
+* Vertical pod autoscaling does not apply to init containers, so the resources will always need to be manually adjusted.
+  For more information, see this [issue](https://github.com/kubernetes/autoscaler/issues/6691).
+
+Because of these limitations, we do not recommend init containers for anything but the simplest use cases. Instead,
+consider:
+
+* performing any local initiation logic as a part of your main container; or
+* using a dedicated pod created through a one-shot [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/) to perform remote tasks like database migrations.
+
+### Liveness and Readiness Probes
+
+Every container has the ability to define
+[liveness and readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/).
+
+We strongly recommend configuring at least the liveness probe for every regular container. This is critical in allowing
+the cluster to self-heal if there is an issue with a pod.
+
+The readiness probe can be helpful if you need a mechanism to temporarily stop routing traffic to the container, but is unnecessary beyond that.
+
+We support multiple configuration options under `liveness_probe_` and `readiness_probe_` prefixes (see the
+[module docs](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod) for more information).
+
+We also automatically create startup probes based on the configuration for the liveness probe.
+
+### Resource Management
+
+Every container has the ability to set
+[resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) which
+aid in pod-to-node scheduling and cluster stability. The two most common resources are CPU and memory which should be
+configured for every container. In particular,
+
+* Every container should set both CPU and memory requests as this ensures that the pod will only be assigned to a node
+  that has those resources available.
+
+* Every container should also set a memory limit as this ensures that memory leaks will not have unmitigated impact
+  on the other containers colocated on the same node.
+
+* CPU limits should be **avoided** as they are almost always unnecessary. CPU is shared across all containers in an amount proportionate
+  to each container's CPU request. Setting a CPU limit will cause unnecessary throttling and reduce your overall resource
+  utilization.
+
+In Panfactum clusters, you do not need to manually manage these settings; they are taken care of for you by the vertical
+pod autoscaler. [^5] However, you *can* set minimums and maximums to the autoscaling ranges via `minimum_memory`, `maximum_memory`,
+`minimum_cpu`, and `maximum_cpu`. We generally recommend setting minimums but leaving the maximums unset.
+
+[^5]: This is only true if using a Panfactum-provided submodule and does not apply to Argo Workflows.
+
+Additionally, you can configure the `memory_limit_multiplier` which controls how much "extra" memory a container may
+use over its request before it is OOM-killed. The default multiplier is `1.3`.
+
+### Security
+
+Containers created by Panfactum submodules are secured by default in the following ways:
+
+* They are not allowed to run as root and by default run as uid `1000`. This can be disabled on a per-container
+  basis by setting `run_as_root` to `true`.
+
+* All [linux capabilities](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux_atomic_host/7/html/container_security_guide/linux_capabilities_and_seccomp#linux_capabilities_and_seccomp)
+  are dropped by default. You can add capabilities on a per-container basis through the `linux_capabilities` input.
+
+* Every container has a ready-only root filesystem. If you need to write to disk, we recommend using temporary directories (see below)
+  or a [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set). However, you
+  can override the security measure by setting `read_only` to false.
+
+* The [pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/) is set to baseline (not privileged). The
+  privileged standard can be enabled on a part-container basis by setting `privileged` to `true`.
+
+### Pod Scheduling
+
+The process of assigning pods to nodes is called pod scheduling. How your pods are scheduled will have
+a significant impact on your workload's availability and cost to run. The Panfactum controller
+submodules expose the following inputs that control scheduling behavior.
+
+#### Instance Spread
+
+In all clusters, you should be aware of how pods are spread across individual instances and instance classes.
+
+* `host_anti_affinity_required`: If `true`, pods of the same controller are prevented from being scheduled on the same
+  node. Given that we regularly terminate nodes for maintenance and scaling operations, **this is enabled by default** to avoid
+  workload disruptions. We do not recommend setting this to `false` unless termination of all pods in a controller such as a Deployment
+  would not cause a noticeable service disruption.
+
+* `instance_type_spread_required`: If true, pods of the same controller will be balanced across
+  instance types (e.g., `t4g.medium`)
+  using a [topology spread constraint](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/).
+  This provides extra resilience in the following scenarios:
+
+  * Spot disruptions: Spot disruptions often impact *all* spot nodes of a single instance type, so you would
+    want to avoid having all pods scheduled on nodes of the same type if `spot_nodes_enabled` is true.
+
+  * Instance type failure: EC2 instances in AWS are all virtualized. It is possible that an AWS software update
+    may impact the functionality of certain instance types while leaving other unscathed. Spreading pods across
+    instance types avoids this failure case.
+
+Note that enabling any of these options will increase the cost of running your workload by lowering overall
+resource utilization. As a result, we recommend `instance_type_spread_enabled`
+be enabled **only** in production environments and disabling `host_anti_affinity_required` if possible.
+See these [concept docs](/docs/main/concepts/autoscaling) for more information.
+
+#### Geographic Spread
+
+For clusters that span multiple AWS availability zones (AZs), you should be aware of how pods created by a single
+controller are spread across those AZs.
+
+* `az_spread_preferred`: If `true`, pods will have a
+  [topology spread constraint](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) that
+  balances across availability zones with a `whenUnsatifiable: ScheduleAnyway` policy. This should be used
+  for Deployments when you want to protect against a single AZ outage, but should not be used for StatefulSets as it
+  may result in a permanent zone imbalance for StatefulSet pods. [^6]
+
+[^6]: Once a numbered StatefulSet pod is scheduled in a zone, it will *always* be scheduled in that zone. `ScheduleAnyway`
+    allows for temporary imbalances to occur, but for a StatefulSet the imbalance will become permanent.
+
+* `az_spread_required`: If `true`, pods will have a
+  [topology spread constraint](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+  that balances across availability zones with a `whenUnsatifiable: DoNotSchedule` policy. This should be
+  used for StatefulSets when you want to protect against a single AZ outage. This takes precedence over `az_spread_preferred`.
+
+* `az_anti_affinity_required`: If `true`, no two pods of the same controller will ever be scheduled in the same
+  AZ. This is the most extreme scheduling constraint and should not be used unless you have fewer pods than AZs
+  and the number of pods is static.
+
+Note that enabling any of these options will increase the cost of running your workload by lowering overall
+resource utilization. As a result, we recommend `az_spread_preferred` or `az_spread_required`
+be enabled **only** in production environments. See these [concept docs](/docs/main/concepts/autoscaling) for more information.
+
+#### Node Classes
+
+We have several different node classes in the Panfactum stack. The default node class is an
+[AMD64](https://en.wikipedia.org/wiki/X86-64) (x86) [On-Demand EC2 instance](https://aws.amazon.com/ec2/pricing/on-demand/).
+This is what your pod will be scheduled on if it does not [tolerate the taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+of other node classes. However, this is also the most expensive class of nodes,
+often 10x more expensive than needed for most workloads.
+
+We provide the ability to run on cheaper node classes by enabling the following:
+
+* `spot_nodes_enabled`: If `true`, pods will be allowed to run on [Spot instances](https://aws.amazon.com/ec2/spot/)
+  which can be 50-70% cheaper than On-Demand instances. The tradeoff is that spot instances can be terminated at any time
+  with only a two-minute notice. **This is enabled by default** as most workloads can gracefully terminate in under two minutes,
+  but if your workload cannot or if it cannot tolerate arbitrary pod disruptions, you should set this to `false`.
+
+* `burstable_nodes_enabled`: If `true`, pods will be allowed to run on
+  [Burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html). Burstable
+  instances can be a good fit if the workload has low average CPU utilization with the occasional peak. In these scenarios, these instances
+  can be 10-15% cheaper than their `M`-type counterparts. However, if your average CPU utilization
+  is routinely above \~30%, these instances will actually cost more money as they are run in [unlimited mode](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html)
+  to prevent unexpected disruptions.
+
+  Note that in the Panfactum stack, Burstable instances are also Spot instances, so setting `burstable_nodes_enabled` to
+  `true` will implicitly set `spot_nodes_enabled` to `true`. This is because we assume workloads scheduled
+  on Burstable instances will not require 100% guaranteed, persistent resource allocations and which almost always
+  means they are safe for Spot instances as well.
+
+* `arm_nodes_enabled`: If `true`, pods will be allowed to run on [ARM64](https://en.wikipedia.org/wiki/AArch64) instances
+  which tend to be 20-30% cheaper than AMD64 instances. As most container images today are
+  [multi-platform](https://docs.docker.com/build/building/multi-platform/), **this is enabled by default.** If your workload
+  can only run on AMD64 CPU architectures, you should set this to `false`.
+
+We also provide one additional node class: controller nodes. These nodes are special in that they are managed by
+[AWS EKS Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) rather than by Karpenter.
+These are required because some of the core cluster utilities cannot run on nodes provisioned by Karpenter (such
+as Karpenter itself). By default, your workloads will not be allowed to run on them because they have special
+lifecycle rules that might be disruptive to your workloads.
+However, if you have the need, you can allow your workloads to run on these
+nodes by setting `controller_nodes_enabled` to `true`.
+
+<MarkdownAlert severity="info">
+  Node classes are **not** mutually exclusive. You can have multiple enabled at once to combine their benefits.
+</MarkdownAlert>
+
+#### Node Requirements
+
+Sometimes you may want to guarantee that pod is scheduled on a certain type of node. You can accomplish
+this by setting the `node_requirements` input.
+
+#### Panfactum Scheduler
+
+In the bootstrapping guide, your cluster administrator deployed the Panfactum
+[bin-packing scheduler.](/docs/main/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler) This
+enables better bin-packing of pods onto nodes, improving resource utilization and lower your cluster costs.
+
+However, if you need to opt-out of the bin-packing scheduler, you can set `panfactum_scheduler_enabled`
+to `false`.
+
+### Pod Disruptions
+
+There are two ways classes of reasons that a pod might be terminated / disrupted: involuntary and voluntary disruptions.
+
+#### Involuntary Disruptions
+
+Involuntary disruptions occur when a pod is forced to terminate. Oftentimes these disruptions cannot be predicted
+in advance, and you will have no ability to prevent or delay the pod termination. The most common involuntary disruptions are:
+
+* Hardware or network failures on the underlying node that prevent the pod from operating as expected.
+
+* Spot interruptions (if using `spot_nodes_enabled`) or other node shutdown; pods on the node will get approximately two minutes to terminate gracefully.
+
+* Node resource exhaustion; if all pods on a node do not correctly set their resource requests and limits, it
+  is possible that the resources on a node can be exhausted and pods will be evicted from the pod to make room
+  based on their [priority class.](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)
+
+* Pod preemption; if not enough resources exist in a cluster because node autoscaling is falling behind, pods
+  with a lower priority class will be terminated to make room for pods with a higher priority class.
+
+* Rollouts; when updating a pod spec in a controller such as a Deployment, the controller will terminate
+  the old pods according to its [update strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment).
+
+#### Voluntary Disruptions
+
+Voluntary disruptions occur when a pod is terminated via the
+[eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/). Voluntary disruptions
+can be prevented
+by using a [Pod Disruption Budget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets) (PDB).
+Voluntary disruptions include:
+
+* Resource rightsizing done by the Vertical Pod Autoscaler.
+* Node scale-in or restarts performed by Karpenter.
+* Evictions executed by the Descheduler according to our self-healing and re-balancing policies.
+* Any other scripts that utilize the eviction API; almost all utilities that can terminate pods use the eviction API so
+  that they respect PDBs.
+
+All of our controller submodules such as [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+will automatically create an appropriate PDB; however, there are a few configurable parameters set via module inputs:
+
+* `unhealthy_pod_eviction_policy`: Sets the [unhealthy pod eviction policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy);
+  the Panfactum default is `AlwaysAllow` in order to allow the cluster to self-heal if pods end up in a `CrashLoopBackOff` state.
+
+* `max_unavailable`: Sets the [maxUnavailable](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget) field
+  of the PDB. The Panfactum default is `1` in order to allow pods to be occasionally evicted as a part of routine
+  cluster maintenance activities. Setting this to `0` will disable voluntary evictions entirely.
+
+<MarkdownAlert severity="warning">
+  Note that PDBs will NOT protect pods that have not yet reached the `Running` state (e.g., the pod is
+  initializing). We have added custom logic that prevents most evictions for recently created pods to
+  avoid disrupting pods that have not reached a healthy state, but your pods must fully initialize within five minutes to avoid
+  potential issues.
+</MarkdownAlert>
+
+#### Graceful Termination
+
+Regardless of how a pod is terminated or disrupted, it will be given an opportunity to gracefully shutdown
+before being forcefully terminated. Containers in the pod will first receive a `SIGTERM` signal to indicate
+they must shut down which provides them the opportunity to complete any in-flight work such as responding
+to received requests or closing database connections. If the pod isn't shutdown after a short delay,
+the pod will then be forcibly killed as a `SIGKILL` signal will be sent to all running processes.
+
+The delay between the `SIGTERM` and `SIGKILL` is the `terminationGracePeriodSeconds` which can be set on our
+modules via `termination_grace_period_seconds`. The default for our modules is 90 seconds.
+
+More detailed information on the pod lifecycle can be found [here](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination).
+
+### Accessing Configuration Values at Runtime
+
+There are two common ways to pass configuration to your running contains: environment variables and files.
+
+#### Environment Variables
+
+To pass environment variables to your containers, each of our controller submodules provides
+two inputs:
+
+* `common_env`: A key-value mapping of plaintext values that will be set as environment variables.
+* `common_secrets`: A key-value mapping of secret values. The values will be stored in a Kubernetes
+  secret so as not to be exposed to cluster users who only have `restricted_reader` access (see [RBAC
+  reference](/docs/main/reference/rbac)).
+
+All containers will additionally have the following environment variables set by default:
+
+* `POD_IP`: The IP address assigned to the pod.
+* `POD_NAME`: The name of the pod.
+* `POD_NAMESPACE`: The namespace of the pod.
+* `POD_SERVICE_ACCOUNT`: The name of the pod's service account.
+* `POD_TERMINATION_GRACE_PERIOD_SECONDS`: The pod's `terminationGracePeriodSeconds` field.
+* `CONTAINER_CPU_REQUEST`: The number of CPU cores requested by the container.
+* `CONTAINER_MEMORY_REQUEST`: The number of bytes of RAM requested by the container.
+* `CONTAINER_MEMORY_LIMIT`: The number of bytes of RAM allowed to be used by the container before an OOM error.
+* `CONTAINER_EPHEMERAL_STORAGE_REQUEST`: The number of bytes of [ephemeral storage](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage) from the node requested by the container.
+* `CONTAINER_EPHEMERAL_STORAGE_LIMIT`: The number of bytes of ephemeral storage from the node that the container is allowed to use before the pod is evicted.
+* `NODE_IP`: The IP address assigned to the node the pod is scheduled on.
+* `NODE_NAME`: The name of the node the pod is scheduled on.
+
+#### Mounted Files
+
+To mount files inside your containers, each of our controller submodules providers two inputs:
+
+* `config_map_mounts`: A mapping of [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) names to their mount configuration inside each container.
+* `secret_mounts`: A mapping of [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) names to their mount configuration inside each container.
+
+Mounted Secrets and ConfigMaps need to inside the pod's namespace. [^7] The file contents inside each container will
+be automatically updated if their values change in the source resource.
+
+[^7]: If you need to copy
+    the same Secret or ConfigMap across multiple namespaces, see the [Kubernetes Reflector documentation](https://github.com/emberstack/kubernetes-reflector)
+    (already installed in cluster as a part of the bootstrapping guide).
+
+All containers created by Panfactum submodules will additionally have files mounted under `/etc/podinfo` which will contain additional
+metadata about the pod:
+
+* `labels`: The pod's labels
+* `annotations`: The pod's annotations
+
+These files will be filled with newline-delimited entries with the format `<key>="<value>"`.
+
+#### Kubernetes API
+
+In case you need to access the full pod manifest from inside one of the pod's
+containers, every container created by a Panfactum submodule is authorized to
+read its own pod manifest via Kubernetes API (e.g., `kubectl --namespace $POD_NAMESPACE get pod $POD_NAME --output yaml`).
+
+### Temporary Directories
+
+As containers are created in read-only mode, you will need to create temporary directories to be able
+to write to the local file system. [^8]
+
+[^8]: Unless you are using [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+    which adds support for persistent volumes which will retain their data across pod restarts.
+
+Our controller submodules provide an input to take care of this provisioning: `tmp_directories`.
+
+All created directories are size-limited by the `size_mb` field on each directory configuration
+object.
+
+Directories may either be node-local or EBS-backed (the default). This is controlled
+via the `node_local` boolean field. If you only need a very small amount of space, you
+can set this to `true` to improve your pod's startup time by a few seconds. Otherwise,
+we recommend you use the default EBS-backed directories to avoid exhausting a node's
+limited disk space.
+
+### Labels and Annotations
+
+Pod created by Panfactum submodules will automatically be labeled with our [standard resource tags](/docs/main/reference/resource-tags).
+You can add additional labels and annotations via the `extra_pod_labels` and `extra_pod_annotations` inputs, respectively.
+
+### Priority Class
+
+Kubernetes [priority classes](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/)
+define precedence for pod preemption. Our [kube\_priority\_classes](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_priority_classes)
+module installs a few additional priority classes in addition to the Kubernetes defaults.
+
+The following priority classes are included in the Panfactum stack (ordered by precedence):
+
+1. `system-node-critical` (`2000001000`): Pod is required for the node it is scheduled on to function.
+2. `system-cluster-critical` (`2000000000`): Pod is required for the cluster itself to function.
+3. `cluster-important` (`100000000`): Losing this pod would leave the cluster in a degraded state; some functionality would be lost.
+4. `workload-important` (`10000000`): Disrupting this pod might leave certain workloads in a degraded state.
+5. `default` (`0`): The default priority assigned to pods.
+
+You can create additional priority classes via `kube_priority_classes` as your needs require.
+
+Pods created by our controller submodules can have their priority classes set via the `priority_class_name`
+input.
+
+### Permissions
+
+Permissions in Kubernetes are assigned via a pod's [Service Account](https://kubernetes.io/docs/concepts/security/service-accounts/)
+this includes not just permissions to access the Kubernetes API but also permissions to access external
+systems such as AWS and Vault.
+
+All our controller submodules will automatically create a dedicated Service Account for the pods managed
+by the controller and provide its name via the `service_account_name` output.
+
+You can use the output to assign additional permissions to the pods by following our guides
+[here](/docs/main/guides/deploying-workloads/permissions).
+
+## Custom Workload Deployments
+
+All the above information applies specifically to the Panfactum submodules for deploying workloads
+(e.g., [kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)).
+However, nothing prevents you from deploying workloads to Kubernetes directly without using our
+modules. Using Panfactum-flavored Kubernetes does not prevent you from doing anything that you
+could not do using stock Kubernetes.
+
+A common use case is to use controllers
+that we do not provide by default such as [Argo Rollouts](https://argoproj.github.io/rollouts/).
+
+<MarkdownAlert severity="warning">
+  Keep in mind that if you roll your own modules for deploying resources on Kubernetes, you
+  will be responsible for the dozens of enhancements that are built into our submodules by default. This
+  includes everything from security to autoscaling to high availability and much more.
+</MarkdownAlert>

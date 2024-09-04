@@ -7,18 +7,27 @@ output "cilium_taint" {
   }
 }
 
+output "controller_taint" {
+  description = "The taint added to every EKS nodes"
+  value = {
+    key    = "panfactum.com/class"
+    value  = "controller"
+    effect = "NoSchedule"
+  }
+}
+
 output "default_priority_class_name" {
   description = "The default Kubernetes Priority Class"
   value       = "default"
 }
 
-output "database_priority_class_name" {
-  description = "A Kubernetes Priority Class that is higher than the default but lower than cluster-important. All stateful systems should have this priority class."
-  value       = "database"
+output "workload_important_priority_class_name" {
+  description = "A Kubernetes Priority Class that is higher than the default but lower than cluster-important. Generally, all stateful systems should have this priority class."
+  value       = "workload-important"
 }
 
 output "cluster_important_priority_class_name" {
-  description = "A Kubernetes Priority Class that is higher than the database but lower than system-cluster-critical."
+  description = "A Kubernetes Priority Class that is higher than the workload-important but lower than system-cluster-critical."
   value       = "cluster-important"
 }
 
@@ -27,12 +36,12 @@ output "panfactum_scheduler_name" {
   value       = "panfactum"
 }
 
-output "panfactum_image" {
+output "panfactum_image_repository" {
   description = "The repository of the Panfactum devenv image with the AWS public ECR registry (public.ecr.aws)."
   value       = "t8f0s7h5/panfactum"
 }
 
-output "panfactum_image_version" {
+output "panfactum_image_tag" {
   description = "The tag of the Panfactum devenv image that is compatible with this module's version of the Panfactum stack."
   value       = "a06f797c280dd78132d322dbf5dd416955857d13"
 }

@@ -154,20 +154,19 @@ resource "kubernetes_config_map" "nix_image_builder_containers" {
 }
 
 module "nix_image_builder_workflow" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source                    = "../../../../../infrastructure//wf_spec" #pf-update
 
   name = local.nix_image_builder_name
   namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   burstable_nodes_enabled = true
-  panfactum_scheduler_enabled = true
   active_deadline_seconds = 60 * 60
 
   # These are generally not advised to use
   # for security reasons but are required by nix to build
   # the flake
   run_as_root = true
-  read_only_root_fs = false
+  read_only = false
   privileged = true
 
   entrypoint = "build-image"

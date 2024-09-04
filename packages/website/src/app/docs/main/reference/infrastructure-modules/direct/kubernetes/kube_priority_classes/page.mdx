@@ -18,6 +18,9 @@ by Kubernetes:
 * `cluster-important` (`100000000`): Used for controllers that provide ancillary
   (but not critical) cluster functionality
 
+Additionally, allows you to set up arbitrary additional priority classes
+as needed.
+
 ## Providers
 
 The following providers are needed by this module:
@@ -33,6 +36,14 @@ No required inputs.
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_extra_priority_classes" /> [extra\_priority\_classes](#input_extra_priority_classes)
+
+Description: A mapping of extra priority class names to their values
+
+Type: `map(number)`
+
+Default: `{}`
 
 ## Outputs
 

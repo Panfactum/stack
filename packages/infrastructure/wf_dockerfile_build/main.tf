@@ -126,11 +126,7 @@ module "image_builder_workflow" {
   namespace               = var.namespace
   eks_cluster_name        = var.eks_cluster_name
   burstable_nodes_enabled = true
-  spot_nodes_enabled      = true
-  arm_nodes_enabled       = true
-
-  panfactum_scheduler_enabled = true
-  active_deadline_seconds     = var.build_timeout
+  active_deadline_seconds = var.build_timeout
 
   entrypoint = local.entrypoint
   passthrough_parameters = [
@@ -171,7 +167,7 @@ module "image_builder_workflow" {
       memory = "100Mi"
     }
   }
-  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
   templates = [
     {
       name    = local.entrypoint

@@ -164,29 +164,29 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_arm_instances_enabled" /> [arm\_instances\_enabled](#input_arm_instances_enabled)
+### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
 
-Description: Whether the database nodes can be scheduled on arm64 instances
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_burstable_instances_enabled" /> [burstable\_instances\_enabled](#input_burstable_instances_enabled)
-
-Description: Whether the database nodes can be scheduled on burstable instances
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+Description: Whether the database pods can be scheduled on arm64 nodes
 
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+
+Description: Whether the database pods can be scheduled on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_helm_version" /> [helm\_version](#input_helm_version)
 
@@ -195,6 +195,14 @@ Description: The version of the bitnami/redis helm chart to use
 Type: `string`
 
 Default: `"19.0.2"`
+
+### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+
+Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_lfu_cache_enabled" /> [lfu\_cache\_enabled](#input_lfu_cache_enabled)
 
@@ -226,7 +234,7 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_persistence_backups_enabled" /> [persistence\_backups\_enabled](#input_persistence_backups_enabled)
 
@@ -300,13 +308,13 @@ Type: `number`
 
 Default: `3`
 
-### <a name="input_spot_instances_enabled" /> [spot\_instances\_enabled](#input_spot_instances_enabled)
+### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
-Description: Whether the database nodes can be scheduled on spot instances
+Description: Whether the database pods can be scheduled on spot nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_voluntary_disruption_window_cron_schedule" /> [voluntary\_disruption\_window\_cron\_schedule](#input_voluntary_disruption_window_cron_schedule)
 
@@ -346,7 +354,7 @@ Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ## Outputs
 

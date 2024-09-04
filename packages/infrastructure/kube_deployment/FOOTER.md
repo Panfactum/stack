@@ -1,3 +1,3 @@
-## Usage
+## Maintainer Notes
 
-No notes
+No notes.

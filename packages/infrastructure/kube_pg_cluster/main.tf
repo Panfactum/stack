@@ -32,7 +32,7 @@ locals {
 
   cluster_name = random_id.cluster_id.hex
 
-  smart_shutdown_timeout = var.pg_smart_shutdown_timeout != null ? var.pg_smart_shutdown_timeout : (var.burstable_instances_enabled || var.spot_instances_enabled ? 60 : 15 * 60)
+  smart_shutdown_timeout = var.pg_smart_shutdown_timeout
 
   poolers_to_enable = toset(concat(
     var.pgbouncer_read_only_enabled ? ["r"] : [],
@@ -74,15 +74,15 @@ resource "random_id" "pooler_r_id" {
 module "util_cluster" {
   source = "../kube_workload_utility"
 
-  workload_name                        = "pg-${random_id.cluster_id.hex}"
-  burstable_nodes_enabled              = var.burstable_instances_enabled
-  spot_nodes_enabled                   = var.spot_instances_enabled
-  arm_nodes_enabled                    = var.arm_instances_enabled
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  topology_spread_enabled              = true // stateful so always on
-  lifetime_evictions_enabled           = false
+  workload_name                 = "pg-${random_id.cluster_id.hex}"
+  burstable_nodes_enabled       = var.burstable_nodes_enabled
+  spot_nodes_enabled            = var.spot_nodes_enabled
+  arm_nodes_enabled             = var.arm_nodes_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.instance_type_spread_required
+  az_spread_required            = true
+  az_spread_preferred           = true // stateful so always on
+  lifetime_evictions_enabled    = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -100,15 +100,14 @@ module "util_pooler" {
   for_each = toset(["r", "rw"])
   source   = "../kube_workload_utility"
 
-  workload_name                        = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  topology_spread_enabled              = var.enhanced_ha_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  topology_spread_strict               = true
-  pod_affinity_match_labels            = module.util_cluster.match_labels
-  lifetime_evictions_enabled           = false
+  workload_name                 = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
+  burstable_nodes_enabled       = true
+  arm_nodes_enabled             = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = var.instance_type_spread_required
+  az_spread_required            = true
+  pod_affinity_match_labels     = module.util_cluster.match_labels
+  lifetime_evictions_enabled    = false
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -503,7 +502,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         }
       }] : null
 
-      priorityClassName = module.constants.database_priority_class_name
+      priorityClassName = module.constants.workload_important_priority_class_name
 
       // Try to spread the instances evenly across the availability zones
       topologySpreadConstraints = module.util_cluster.topology_spread_constraints
@@ -511,7 +510,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       affinity = {
         // Ensures that the postgres cluster instances are never scheduled on the same node
         enablePodAntiAffinity = true
-        topologyKey           = (var.burstable_instances_enabled || var.spot_instances_enabled) ? "node.kubernetes.io/instance-type" : "kubernetes.io/hostname"
+        topologyKey           = (var.burstable_nodes_enabled || var.spot_nodes_enabled) ? "node.kubernetes.io/instance-type" : "kubernetes.io/hostname"
         podAntiAffinityType   = "required"
 
         // Allow the clusters to be scheduled on particular node types
@@ -942,7 +941,7 @@ resource "kubectl_manifest" "connection_pooler" {
             }
           ]
           schedulerName             = module.util_pooler[each.key].scheduler_name
-          priorityClassName         = module.constants.database_priority_class_name
+          priorityClassName         = module.constants.workload_important_priority_class_name
           topologySpreadConstraints = module.util_pooler[each.key].topology_spread_constraints
           tolerations               = module.util_pooler[each.key].tolerations
           affinity                  = module.util_pooler[each.key].affinity

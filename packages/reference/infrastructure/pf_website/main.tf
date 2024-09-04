@@ -24,11 +24,11 @@ locals {
 }
 
 module "constants" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source = "../../../../../infrastructure//kube_constants" #pf-update
 }
 
 module "namespace" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source = "../../../../../infrastructure//kube_namespace" #pf-update
 
   namespace = local.name
 
@@ -48,18 +48,11 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source = "../../../../../infrastructure//kube_deployment" #pf-update
   namespace = module.namespace.namespace
   name      = local.name
 
   replicas                             = 2
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  instance_type_anti_affinity_required = false
-  topology_spread_enabled              = false
-  topology_spread_strict               = false
-  panfactum_scheduler_enabled          = true
-
 
   common_env = {
     NODE_ENV = "production"
@@ -70,19 +63,21 @@ module "website_deployment" {
   containers = [
     {
       name    = "website"
-      image   = "891377197483.dkr.ecr.us-east-2.amazonaws.com/website"
-      version = var.website_image_version
+      image_registry   = "891377197483.dkr.ecr.us-east-2.amazonaws.com"
+      image_repository = "website"
+      image_tag = var.website_image_version
       command = [
         "node",
         "server.js"
       ]
-      liveness_check_type  = "HTTP"
-      liveness_check_port  = local.port
-      liveness_check_route = local.healthcheck_route
+      liveness_probe_type  = "HTTP"
+      liveness_probe_port  = local.port
+      liveness_probe_route = local.healthcheck_route
     }
   ]
 
   vpa_enabled = var.vpa_enabled
+  controller_nodes_enabled = true
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
@@ -118,7 +113,7 @@ resource "kubernetes_service" "service" {
 }
 
 module "ingress" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" #pf-update
+  source = "../../../../../infrastructure//kube_ingress" #pf-update
 
   name      = local.name
   namespace = local.namespace

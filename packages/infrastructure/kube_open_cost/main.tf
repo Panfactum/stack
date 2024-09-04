@@ -36,13 +36,13 @@ module "pull_through" {
 }
 
 module "util" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "open-cost"
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_preferred = false // single copy
-  topology_spread_enabled               = false // single copy
+  source                        = "../kube_workload_utility"
+  workload_name                 = "open-cost"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false // single copy
+  az_spread_preferred           = false // single copy
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -57,12 +57,12 @@ module "util" {
 }
 
 module "util_network_cost" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "network-cost"
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = false // ds
-  topology_spread_enabled               = false // ds
+  source                        = "../kube_workload_utility"
+  workload_name                 = "network-cost"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  instance_type_spread_required = false // ds
+  az_spread_preferred           = false // ds
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

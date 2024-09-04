@@ -15,48 +15,10 @@ locals {
 
   // Node Preferences
   node_affinity = {
-    preferred = {
-      spot = {
-        weight = 25
-        preference = {
-          matchExpressions = [
-            {
-              key      = "panfactum.com/class"
-              operator = "In"
-              values   = ["spot"]
-            }
-          ]
-        }
-      }
-      burstable = {
-        weight = 50
-        preference = {
-          matchExpressions = [
-            {
-              key      = "panfactum.com/class"
-              operator = "In"
-              values   = ["burstable"]
-            }
-          ]
-        }
-      }
-      arm = {
-        weight = 25
-        preference = {
-          matchExpressions = [
-            {
-              key      = "kubernetes.io/arch"
-              operator = "In"
-              values   = ["arm64"]
-            }
-          ]
-        }
-      }
-    }
     required = {
       nodeSelectorTerms = [{
         matchExpressions = concat(
-          var.controller_node_required ? [
+          var.controller_nodes_required ? [
             {
               key      = "panfactum.com/class"
               operator = "In"
@@ -82,27 +44,10 @@ locals {
           matchLabels = local.match_labels
         }
       }
-      instance_type = {
-        topologyKey = "node.kubernetes.io/instance-type"
-        labelSelector = {
-          matchLabels = local.match_labels
-        }
-      }
       zone = {
         topologyKey = "topology.kubernetes.io/zone"
         labelSelector = {
           matchLabels = local.match_labels
-        }
-      }
-    }
-    preferred = {
-      instance_type = {
-        weight = 100
-        podAffinityTerm = {
-          topologyKey = "node.kubernetes.io/instance-type"
-          labelSelector = {
-            matchLabels = local.match_labels
-          }
         }
       }
     }
@@ -112,9 +57,6 @@ locals {
   affinity = { for k, v in {
     nodeAffinity = { for k, v in {
       preferredDuringSchedulingIgnoredDuringExecution = concat(
-        (var.prefer_burstable_nodes_enabled && var.burstable_nodes_enabled) ? [local.node_affinity.preferred.burstable] : [],
-        (var.prefer_spot_nodes_enabled && var.spot_nodes_enabled) ? [local.node_affinity.preferred.spot] : [],
-        (var.prefer_arm_nodes_enabled && var.arm_nodes_enabled) ? [local.node_affinity.preferred.arm] : [],
         [for k, v in var.node_preferences : {
           weight = v.weight
           preference = {
@@ -131,13 +73,9 @@ locals {
       requiredDuringSchedulingIgnoredDuringExecution = length(local.node_affinity.required.nodeSelectorTerms[0].matchExpressions) != 0 ? local.node_affinity.required : null
     } : k => v if v != null }
     podAntiAffinity = { for k, v in {
-      requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.instance_type_anti_affinity_required) ? concat(
+      requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.az_anti_affinity_required) ? concat(
         var.host_anti_affinity_required ? [local.pod_anti_affinity.required.host] : [],
-        var.instance_type_anti_affinity_required ? [local.pod_anti_affinity.required.instance_type] : [],
-        var.zone_anti_affinity_required ? [local.pod_anti_affinity.required.zone] : []
-      ) : null
-      preferredDuringSchedulingIgnoredDuringExecution = var.instance_type_anti_affinity_preferred ? concat(
-        var.instance_type_anti_affinity_preferred ? [local.pod_anti_affinity.preferred.instance_type] : [],
+        var.az_anti_affinity_required ? [local.pod_anti_affinity.required.zone] : []
       ) : null
     } : k => v if v != null }
     podAffinity = length(keys(var.pod_affinity_match_labels)) != 0 ? {
@@ -208,9 +146,16 @@ locals {
       effect   = "NoSchedule"
     }
   ]
+  controller_node_toleration = {
+    key      = "controller"
+    operator = "Equal"
+    value    = "true"
+    effect   = "NoSchedule"
+  }
   tolerations = concat(
     var.burstable_nodes_enabled ? local.burstable_node_tolerations : var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
     var.arm_nodes_enabled ? [local.arm_node_toleration] : [],
+    var.controller_nodes_enabled || var.controller_nodes_required ? [local.controller_node_toleration] : [],
     var.extra_tolerations
   )
 
@@ -218,15 +163,25 @@ locals {
   topology_spread_zone = {
     maxSkew           = 1
     topologyKey       = "topology.kubernetes.io/zone"
-    whenUnsatisfiable = var.topology_spread_strict ? "DoNotSchedule" : "ScheduleAnyway"
+    whenUnsatisfiable = var.az_spread_required ? "DoNotSchedule" : "ScheduleAnyway"
     labelSelector = {
       matchLabels = local.match_labels
     }
   }
 
-  topology_spread_constraints = var.topology_spread_enabled ? [
-    local.topology_spread_zone
-  ] : []
+  topology_spread_instance_type = {
+    maxSkew           = 1
+    topologyKey       = "node.kubernetes.io/instance-type"
+    whenUnsatisfiable = "DoNotSchedule"
+    labelSelector = {
+      matchLabels = local.match_labels
+    }
+  }
+
+  topology_spread_constraints = concat(
+    var.az_spread_preferred || var.az_spread_required ? [local.topology_spread_zone] : [],
+    var.instance_type_spread_required ? [local.topology_spread_instance_type] : []
+  )
 }
 
 resource "random_id" "match_id" {

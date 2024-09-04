@@ -15,13 +15,13 @@ variable "pvc_autoresizer_version" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "log_verbosity" {
@@ -45,5 +45,5 @@ variable "prometheus_enabled" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = false
+  default     = true
 }

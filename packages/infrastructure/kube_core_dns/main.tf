@@ -123,45 +123,47 @@ module "core_dns" {
   source    = "../kube_deployment"
   namespace = local.namespace
   name      = local.name
-  pod_annotations = {
+  extra_pod_annotations = {
     "linkerd.io/inject" = "disabled"
   }
 
-  replicas                              = 2
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_strict                = true
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  priority_class_name                   = "system-cluster-critical"
-  dns_policy                            = "Default"
+  replicas                      = 2
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  priority_class_name           = "system-cluster-critical"
+  dns_policy                    = "Default"
   containers = concat(
     [
       {
-        name    = "coredns"
-        image   = "${module.pull_through.docker_hub_registry}/coredns/coredns"
-        version = var.core_dns_image_version
+        name             = "coredns"
+        image_registry   = module.pull_through.docker_hub_registry
+        image_repository = "coredns/coredns"
+        image_tag        = var.core_dns_image_version
         command = [
           "/coredns",
           "-conf",
           "/etc/coredns/Corefile"
         ]
-        linux_capabilities   = ["NET_BIND_SERVICE"]
-        liveness_check_port  = "8080"
-        liveness_check_type  = "HTTP"
-        liveness_check_route = "/health"
-        ready_check_type     = "HTTP"
-        ready_check_port     = "8181"
-        ready_check_route    = "/ready"
-        minimum_memory       = 30
+        linux_capabilities    = ["NET_BIND_SERVICE"]
+        liveness_probe_port   = "8080"
+        liveness_probe_type   = "HTTP"
+        liveness_probe_route  = "/health"
+        readiness_probe_type  = "HTTP"
+        readiness_probe_port  = "8181"
+        readiness_probe_route = "/ready"
+        minimum_memory        = 30
       }
     ],
     var.monitoring_enabled ? [
       {
-        name    = "proxy"
-        image   = "${module.pull_through.quay_registry}/brancz/kube-rbac-proxy"
-        version = "v0.17.1"
+        name             = "proxy"
+        image_registry   = module.pull_through.quay_registry
+        image_repository = "brancz/kube-rbac-proxy"
+        image_tag        = "v0.17.1"
+
         # Note we don't need a config because
         # prometheus is authorized to `get` the `/metrics` non-resource url
         # See https://github.com/brancz/kube-rbac-proxy/tree/master/examples/non-resource-url
@@ -174,10 +176,10 @@ module "core_dns" {
           "--tls-private-key-file=/etc/metrics-certs/tls.key",
           "--client-ca-file=/etc/internal-ca/ca.crt"
         ]
-        liveness_check_port   = "8888"
-        liveness_check_type   = "HTTP"
-        liveness_check_route  = "/healthz"
-        liveness_check_scheme = "HTTPS"
+        liveness_probe_port   = "8888"
+        liveness_probe_type   = "HTTP"
+        liveness_probe_route  = "/healthz"
+        liveness_probe_scheme = "HTTPS"
         minimum_memory        = 10
       }
     ] : []

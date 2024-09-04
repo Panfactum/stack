@@ -72,9 +72,3 @@ variable "panfactum_scheduler_enabled" {
   type        = bool
   default     = true
 }
-
-variable "spot_nodes_enabled" {
-  description = "Whether EventSource pods can be run on spot nodes"
-  type        = bool
-  default     = true
-}

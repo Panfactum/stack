@@ -75,7 +75,7 @@ Run `pf-providers-enable` to add checksums for all common systems.
 This uses the [providers lock](https://opentofu.org/docs/cli/commands/providers/lock/) command
 to enable the following platforms: `darwin_amd64`, `darwin_arm64`, `linux_amd64`, `linux_arm64`.
 
-### Inconsistent Final Plan
+### Inconsistent final plan
 
 ```shell-session
 Error: Provider produced inconsistent final plan
@@ -121,3 +121,25 @@ This issue can occur when changing your [terragrunt variables](/docs/main/refere
 in between runs of the same IaC module.
 
 To resolve, delete your terragrunt cache (`.terragrunt-cache`) and retry.
+
+### Module not installed
+
+`Error: Module not installed`
+
+OpenTofu requires that module and submodule code be stored in certain locations on disk. This is done
+via a call to `init` (i.e., `terragrunt init`).
+
+When you first apply a module, Terragrunt will ["auto-init"](https://terragrunt.gruntwork.io/docs/features/auto-init/)
+your module as a convenience.
+
+However, as the internals of modules change (such as between Panfactum releases),
+the submodules sometimes moves or new submodules are added. This requires the module be reinitialized.
+Unfortunately, Terragrunt does not have the capability
+to detect when module internals change and thus will not automatically `init` again. [^1]
+
+[^1]: You may be wondering: Why not just automatically `init` before every `apply`? The answer is that `init` is a relatively
+expensive operation and can add 5-15 seconds of execution time. This would be annoying to deal with on every `apply` when
+it is only needed occasionally.
+
+As a result, when you run into this error, you just need to run `terragrunt init` manually. Generally, this can be across
+your entire environment by at once by running `terragrunt run-all init`.

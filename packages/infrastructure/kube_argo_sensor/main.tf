@@ -48,15 +48,14 @@ module "util" {
 
   # HA not needed b/c this can be offline for a minute or two
   # without causing any major disruptions
-  host_anti_affinity_required          = false
-  instance_type_anti_affinity_required = false
-  zone_anti_affinity_required          = false
-  topology_spread_enabled              = false
-  topology_spread_strict               = false
+  host_anti_affinity_required   = false
+  instance_type_spread_required = false
+  az_anti_affinity_required     = false
+  az_spread_preferred           = false
+  az_spread_required            = false
 
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
-  spot_nodes_enabled      = var.spot_nodes_enabled
+  burstable_nodes_enabled  = true
+  controller_nodes_enabled = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

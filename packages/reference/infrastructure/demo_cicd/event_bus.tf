@@ -1,7 +1,9 @@
 module "event_bus" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_bus?ref=9c215f8b2367b3f5758d4973741f38c0b88e89f5" # pf-update
+  source =   "../../../../../infrastructure//kube_argo_event_bus" # pf-update
 
   namespace = local.namespace
+
+  instance_type_spread_required = false // You probably want to leave this as true, but we disable this for cost savings
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

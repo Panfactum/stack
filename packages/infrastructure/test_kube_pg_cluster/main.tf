@@ -45,18 +45,17 @@ module "namespace" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name            = var.eks_cluster_name
-  pg_cluster_namespace        = module.namespace.namespace
-  pg_initial_storage_gb       = 10
-  pg_memory_mb                = 1000
-  pg_cpu_millicores           = 250
-  pg_instances                = 2
-  aws_iam_ip_allow_list       = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  enhanced_ha_enabled         = false
-  burstable_instances_enabled = true
-  arm_instances_enabled       = true
-  pgbouncer_pool_mode         = "transaction"
+  eks_cluster_name              = var.eks_cluster_name
+  pg_cluster_namespace          = module.namespace.namespace
+  pg_initial_storage_gb         = 10
+  pg_memory_mb                  = 1000
+  pg_cpu_millicores             = 250
+  pg_instances                  = 2
+  aws_iam_ip_allow_list         = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled    = var.pull_through_cache_enabled
+  instance_type_spread_required = false
+  burstable_nodes_enabled       = true
+  pgbouncer_pool_mode           = "transaction"
 
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version

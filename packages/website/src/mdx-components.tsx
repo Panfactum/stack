@@ -12,7 +12,7 @@ import {
 
 import { roboto } from './app/font'
 
-const defaultTextSize = ['text-sm', 'sm:text-base']
+const defaultTextSize = ['text-sm', 'sm:text-[1.03rem]', 'sm:leading-[1.55rem]']
 
 const replaceCodeVariables = (str: string) => {
   return replaceVersionPlaceholders(str)
@@ -74,7 +74,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     h1: ({ children, className, ...props }) => (
       <h1
-        className={clsx('pt-3 text-2xl sm:text-3xl', className)}
+        className={clsx('pt-3 font-semibold text-3xl sm:text-4xl', className)}
         {...props}
       >
         {children}
@@ -83,7 +83,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     h2: ({ children, className, ...props }) => {
       return (
         <h2
-          className={clsx('pt-4 flex gap-x-2 items-baseline text-xl sm:text-2xl', className)}
+          className={clsx('pt-4 flex gap-x-2 items-baseline font-semibold text-2xl sm:text-3xl', className)}
           {...props}
         >
           {children}
@@ -94,7 +94,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     },
     h3: ({ children, className, ...props }) => (
       <h3
-        className={clsx('pt-3 flex gap-x-2 items-baseline text-base font-semibold sm:text-lg', className)}
+        className={clsx('pt-3 flex gap-x-2 items-baseline font-semibold text-xl  sm:text-2xl', className)}
         {...props}
       >
         {children}
@@ -106,7 +106,7 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     h4: ({ children, className, ...props }) => (
       <h4
-        className={clsx('pt-1 text-sm sm:text-base', className)}
+        className={clsx('pt-1 font-semibold text-lg sm:text-xl', className)}
         {...props}
       >
         {children}

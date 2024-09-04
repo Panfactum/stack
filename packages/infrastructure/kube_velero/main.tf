@@ -35,14 +35,13 @@ module "pull_through" {
 }
 
 module "util" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "velero"
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = false
-  controller_node_required              = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "velero"
+  burstable_nodes_enabled       = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false // single replica
+  az_spread_preferred           = false // single replica
+  controller_nodes_required     = true  // we disable voluntary disruptions so this should be scheduled on a node that isn't autoscaled
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -231,6 +230,9 @@ resource "helm_release" "velero" {
           ]))
         }
       )
+      podAnnotations = {
+        "karpenter.sh/do-not-disrupt" = "true"
+      }
 
       image = {
         repository = "${module.pull_through.docker_hub_registry}/velero/velero"
@@ -486,9 +488,10 @@ module "snapshot_gc" {
 
   cron_schedule = "0 0 * * *"
   containers = [{
-    name    = "garbage-collector"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
+    name             = "garbage-collector"
+    image_registry   = module.pull_through.ecr_public_registry
+    image_repository = module.constants.panfactum_image_repository
+    image_tag        = module.constants.panfactum_image_tag
     command = [
       "/bin/pf-velero-snapshot-gc"
     ]

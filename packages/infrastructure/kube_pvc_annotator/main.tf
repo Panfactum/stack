@@ -66,16 +66,16 @@ module "pvc_annotator" {
   name                        = random_id.id.hex
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  spot_nodes_enabled          = true
-  arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = "*/15 * * * *"
   containers = [{
-    name    = "pvc-annotate"
-    image   = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}"
-    version = module.constants.panfactum_image_version
+    name             = "pvc-annotate"
+    image_registry   = module.pull_through.ecr_public_registry
+    image_repository = module.constants.panfactum_image_repository
+    image_tag        = module.constants.panfactum_image_tag
     command = [
       "/bin/pf-set-pvc-metadata",
       "--config=${jsonencode(var.config)}",

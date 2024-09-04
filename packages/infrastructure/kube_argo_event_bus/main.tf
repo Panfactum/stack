@@ -30,14 +30,12 @@ locals {
 data "aws_region" "current" {}
 
 module "util" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "argo-event-bus"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  zone_anti_affinity_required          = var.enhanced_ha_enabled
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  topology_spread_enabled              = true
-  topology_spread_strict               = true // stateful workload
+  source                        = "../kube_workload_utility"
+  workload_name                 = "argo-event-bus"
+  instance_type_spread_required = var.instance_type_spread_required
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  az_spread_required            = true // stateful workload
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

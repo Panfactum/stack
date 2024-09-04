@@ -25,11 +25,11 @@ module "pull_through" {
 }
 
 module "util" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "trust-manager"
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  instance_type_anti_affinity_preferred = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "trust-manager"
+  burstable_nodes_enabled       = true
+  arm_nodes_enabled             = true
+  instance_type_spread_required = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

@@ -33,13 +33,13 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "reflector"
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_preferred = false
-  topology_spread_enabled               = false
+  source                        = "../kube_workload_utility"
+  workload_name                 = "reflector"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false // single replica
+  az_spread_preferred           = false // single replica
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

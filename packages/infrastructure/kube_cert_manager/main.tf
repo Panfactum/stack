@@ -37,13 +37,12 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "cert-manager"
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
+  source                      = "../kube_workload_utility"
+  workload_name               = "cert-manager"
+  az_spread_preferred         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -58,13 +57,13 @@ module "util_controller" {
 }
 
 module "util_webhook" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "cert-manager-webhook"
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled               = true
-  arm_nodes_enabled                     = true
+  source                        = "../kube_workload_utility"
+  workload_name                 = "cert-manager-webhook"
+  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred           = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
@@ -79,16 +78,12 @@ module "util_webhook" {
 }
 
 module "util_ca_injector" {
-  source                                = "../kube_workload_utility"
-  workload_name                         = "cert-manager-ca-injector"
-  instance_type_anti_affinity_preferred = var.enhanced_ha_enabled
-  topology_spread_enabled               = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled           = var.panfactum_scheduler_enabled
-  arm_nodes_enabled                     = true
-
-  // This _can_ be run on a spot node if necessary as a short temporary disruption
-  // will not cause cascading failures
-  burstable_nodes_enabled = true
+  source                      = "../kube_workload_utility"
+  workload_name               = "cert-manager-ca-injector"
+  az_spread_preferred         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

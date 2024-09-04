@@ -33,10 +33,10 @@ module "pull_through" {
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 module "util" {
-  source                  = "../kube_workload_utility"
-  workload_name           = "secrets-csi"
-  burstable_nodes_enabled = true
-  arm_nodes_enabled       = true
+  source                   = "../kube_workload_utility"
+  workload_name            = "secrets-csi"
+  burstable_nodes_enabled  = true
+  controller_nodes_enabled = true
 
   # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version

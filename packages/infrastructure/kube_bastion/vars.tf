@@ -19,7 +19,7 @@ variable "bastion_port" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "ssh_cert_lifetime_seconds" {
@@ -31,7 +31,7 @@ variable "ssh_cert_lifetime_seconds" {
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enhanced_ha_enabled" {
@@ -43,5 +43,5 @@ variable "enhanced_ha_enabled" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = false
+  default     = true
 }

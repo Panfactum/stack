@@ -4,9 +4,39 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_deployment" status="beta" type="submodule" />
+<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_deployment" status="stable" type="submodule" />
 
 # Kubernetes Deployment
+
+Provides a production-hardened instance of a Kubernetes [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+with the following enhancements:
+
+* Standardized resource labels
+* Pod and container security hardening
+* Temporary directory mounting
+* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+* Service account configuration with default permissions
+* Integration with the Panfactum bin-packing scheduler
+* High-availability scheduling constraints
+* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
+* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+
+## Usage
+
+### Basics
+
+This module follows the basic workload deployment patterns describe in [this guide](/docs/main/guides/deploying-workloads/basics).
+
+### Horizontal Autoscaling
+
+By default, this module does not have horizontal autoscaling built-in. If you wish
+to add horizontal autoscaling via the [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+(or similar controller), you should set `ignore_replica_count` to `true` to prevent
+this module from overriding the replica count set via horizontal autoscaling.
 
 ## Providers
 
@@ -30,34 +60,35 @@ Type:
 
 ```hcl
 list(object({
-    name                    = string
-    init                    = optional(bool, false)
-    image                   = string
-    version                 = string
-    command                 = list(string)
-    image_pull_policy       = optional(string, "IfNotPresent")
-    working_dir             = optional(string, null)
-    minimum_memory          = optional(number, 100)        #The minimum amount of memory in megabytes
-    maximum_memory          = optional(number, null)       #The maximum amount of memory in megabytes
-    memory_limit_multiplier = optional(number, 1.3)        # memory limits = memory request x this value
-    minimum_cpu             = optional(number, 10)         # The minimum amount of cpu millicores
-    maximum_cpu             = optional(number, null)       # The maximum amount of cpu to allow (in millicores)
-    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
-    run_as_root             = optional(bool, false)        # Whether to run the container as root
-    uid                     = optional(number, 1000)       # user to use when running the container if not root
-    linux_capabilities      = optional(list(string), [])   # Default is drop ALL
-    readonly                = optional(bool, true)         # Whether to use a readonly file system
-    env                     = optional(map(string), {})    # Environment variables specific to the container
-    liveness_check_command  = optional(list(string), null) # Will run the specified command as the liveness probe if type is exec
-    liveness_check_port     = optional(number, null)       # The number of the port for the liveness_check
-    liveness_check_type     = optional(string, null)       # Either exec, HTTP, or TCP
-    liveness_check_route    = optional(string, null)       # The route if using HTTP liveness_checks
-    liveness_check_scheme   = optional(string, "HTTP")     # HTTP or HTTPS
-    ready_check_command     = optional(list(string), null) # Will run the specified command as the ready check probe if type is exec (default to liveness_check_command)
-    ready_check_port        = optional(number, null)       # The number of the port for the ready check (default to liveness_check_port)
-    ready_check_type        = optional(string, null)       # Either exec, HTTP, or TCP (default to liveness_check_type)
-    ready_check_route       = optional(string, null)       # The route if using HTTP ready checks (default to liveness_check_route)
-    ready_check_scheme      = optional(string, null)       # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
+    name                    = string                           # A unique name for the container within the pod
+    init                    = optional(bool, false)            # Iff true, the container will be an init container
+    image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
+    image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
+    image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    command                 = list(string)                     # The command to be run as the root process inside the container
+    working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
+    image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
+    minimum_memory          = optional(number, 100)            #The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
+    run_as_root             = optional(bool, false)            # Whether to run the container as root
+    uid                     = optional(number, 1000)           # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    read_only               = optional(bool, true)             # Whether to use a readonly file system
+    env                     = optional(map(string), {})        # Environment variables specific to the container
+    liveness_probe_command  = optional(list(string), null)     # Will run the specified command as the liveness probe if type is exec
+    liveness_probe_port     = optional(number, null)           # The number of the port for the liveness_probe
+    liveness_probe_type     = optional(string, null)           # Either exec, HTTP, or TCP
+    liveness_probe_route    = optional(string, null)           # The route if using HTTP liveness_probes
+    liveness_probe_scheme   = optional(string, "HTTP")         # HTTP or HTTPS
+    readiness_probe_command = optional(list(string), null)     # Will run the specified command as the ready check probe if type is exec (default to liveness_probe_command)
+    readiness_probe_port    = optional(number, null)           # The number of the port for the ready check (default to liveness_probe_port)
+    readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
+    readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
+    readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
   }))
 ```
 
@@ -83,6 +114,30 @@ Description: Whether to allow pods to schedule on arm64 nodes
 
 Type: `bool`
 
+Default: `true`
+
+### <a name="input_az_anti_affinity_required" /> [az\_anti\_affinity\_required](#input_az_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled on the same availability zone
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_az_spread_required" /> [az\_spread\_required](#input_az_spread_required)
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
+
+Type: `bool`
+
 Default: `false`
 
 ### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
@@ -96,6 +151,14 @@ Default: `false`
 ### <a name="input_common_env" /> [common\_env](#input_common_env)
 
 Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_common_secrets" /> [common\_secrets](#input_common_secrets)
+
+Description: Key pair values of secrets to add to the containers as environment variables
 
 Type: `map(string)`
 
@@ -116,7 +179,15 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_controller_nodes_required" /> [controller\_nodes\_required](#input_controller_nodes_required)
 
 Description: Whether the pods must be scheduled on a controller node
 
@@ -147,6 +218,14 @@ list(object({             // key is the secret provider class
 ```
 
 Default: `[]`
+
+### <a name="input_extra_pod_annotations" /> [extra\_pod\_annotations](#input_extra_pod_annotations)
+
+Description: Annotations to add to the pods in the deployment
+
+Type: `map(string)`
+
+Default: `{}`
 
 ### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
 
@@ -189,21 +268,21 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
+### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
 
-Description: Whether to prefer preventing pods from being scheduled on the same instance types
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_instance_type_anti_affinity_required" /> [instance\_type\_anti\_affinity\_required](#input_instance_type_anti_affinity_required)
-
-Description: Whether to prevent pods from being scheduled on the same instance types
+Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_max_unavailable" /> [max\_unavailable](#input_max_unavailable)
+
+Description: Controls how many pods are allowed to be unavailable in the Deployment under the Pod Disruption Budget
+
+Type: `number`
+
+Default: `1`
 
 ### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
 
@@ -237,14 +316,6 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pod_annotations" /> [pod\_annotations](#input_pod_annotations)
-
-Description: Annotations to add to the pods in the deployment
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_pod_version_labels_enabled" /> [pod\_version\_labels\_enabled](#input_pod_version_labels_enabled)
 
 Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
@@ -267,30 +338,6 @@ map(object({
 ```
 
 Default: `{}`
-
-### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on arm64 nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on burstable nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on spot nodes
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
@@ -331,21 +378,13 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_secrets" /> [secrets](#input_secrets)
-
-Description: Key pair values of secrets to add to the containers as environment variables
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
 Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
 
@@ -370,22 +409,6 @@ map(object({
 ```
 
 Default: `{}`
-
-### <a name="input_topology_spread_enabled" /> [topology\_spread\_enabled](#input_topology_spread_enabled)
-
-Description: Whether to enable topology spread constraints
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_topology_spread_strict" /> [topology\_spread\_strict](#input_topology_spread_strict)
-
-Description: Whether the topology spread constraint should be set to DoNotSchedule
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_unhealthy_pod_eviction_policy" /> [unhealthy\_pod\_eviction\_policy](#input_unhealthy_pod_eviction_policy)
 
@@ -419,14 +442,6 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
-
-Description: Whether to prevent pods from being scheduled on the same zone
-
-Type: `bool`
-
-Default: `false`
-
 ## Outputs
 
 The following outputs are exported:
@@ -443,9 +458,9 @@ Description: The labels unique to this Deployment that can be used to select any
 
 Description: The service account used for the pods
 
-## Usage
+## Maintainer Notes
 
-No notes
+No notes.
 
 {/* eslint-enable import/order */}
 

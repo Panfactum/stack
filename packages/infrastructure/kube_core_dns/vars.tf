@@ -13,7 +13,7 @@ variable "vpa_enabled" {
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "service_ip" {

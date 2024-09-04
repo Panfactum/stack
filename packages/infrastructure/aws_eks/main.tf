@@ -417,6 +417,18 @@ resource "aws_eks_node_group" "controllers" {
       value  = "true"
     }
   }
+
+  // We only set the controller taint after bootstrapping is complete so that
+  // pods scheduled by the test commands can run
+  dynamic "taint" {
+    for_each = var.bootstrap_mode_enabled ? toset([]) : toset(["controller"])
+    content {
+      effect = "NO_SCHEDULE"
+      key    = taint.key
+      value  = "true"
+    }
+  }
+
   lifecycle {
     create_before_destroy = true
   }

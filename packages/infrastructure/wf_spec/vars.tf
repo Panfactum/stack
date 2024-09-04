@@ -83,7 +83,7 @@ variable "config_map_mounts" {
   default = {}
 }
 
-variable "pod_annotations" {
+variable "extra_pod_annotations" {
   description = "Annotations to add to the Pods in the Workflow"
   type        = map(string)
   default     = {}
@@ -99,28 +99,10 @@ variable "dynamic_secrets" {
   default = []
 }
 
-variable "prefer_spot_nodes_enabled" {
-  description = "Whether Pods will prefer scheduling on spot nodes"
-  type        = bool
-  default     = false
-}
-
-variable "prefer_burstable_nodes_enabled" {
-  description = "Whether Pods will prefer scheduling on burstable nodes"
-  type        = bool
-  default     = false
-}
-
-variable "prefer_arm_nodes_enabled" {
-  description = "Whether Pods will prefer scheduling on arm64 nodes"
-  type        = bool
-  default     = false
-}
-
 variable "spot_nodes_enabled" {
   description = "Whether to allow Pods to schedule on spot nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "burstable_nodes_enabled" {
@@ -132,7 +114,7 @@ variable "burstable_nodes_enabled" {
 variable "arm_nodes_enabled" {
   description = "Whether to allow Pods to schedule on arm64 nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "controller_node_required" {
@@ -333,7 +315,7 @@ variable "workflow_parallelism" {
   default     = 1
 }
 
-variable "read_only_root_fs" {
+variable "read_only" {
   description = "Whether the generated containers default to read-only root filesystems"
   type        = bool
   default     = true

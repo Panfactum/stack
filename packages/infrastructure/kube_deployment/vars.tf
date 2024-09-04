@@ -43,7 +43,7 @@ variable "node_requirements" {
   default     = {}
 }
 
-variable "secrets" {
+variable "common_secrets" {
   description = "Key pair values of secrets to add to the containers as environment variables"
   type        = map(string)
   default     = {}
@@ -80,34 +80,35 @@ variable "ports" {
 variable "containers" {
   description = "A list of container configurations for the pod"
   type = list(object({
-    name                    = string
-    init                    = optional(bool, false)
-    image                   = string
-    version                 = string
-    command                 = list(string)
-    image_pull_policy       = optional(string, "IfNotPresent")
-    working_dir             = optional(string, null)
-    minimum_memory          = optional(number, 100)        #The minimum amount of memory in megabytes
-    maximum_memory          = optional(number, null)       #The maximum amount of memory in megabytes
-    memory_limit_multiplier = optional(number, 1.3)        # memory limits = memory request x this value
-    minimum_cpu             = optional(number, 10)         # The minimum amount of cpu millicores
-    maximum_cpu             = optional(number, null)       # The maximum amount of cpu to allow (in millicores)
-    privileged              = optional(bool, false)        # Whether to allow the container to run in privileged mode
-    run_as_root             = optional(bool, false)        # Whether to run the container as root
-    uid                     = optional(number, 1000)       # user to use when running the container if not root
-    linux_capabilities      = optional(list(string), [])   # Default is drop ALL
-    readonly                = optional(bool, true)         # Whether to use a readonly file system
-    env                     = optional(map(string), {})    # Environment variables specific to the container
-    liveness_check_command  = optional(list(string), null) # Will run the specified command as the liveness probe if type is exec
-    liveness_check_port     = optional(number, null)       # The number of the port for the liveness_check
-    liveness_check_type     = optional(string, null)       # Either exec, HTTP, or TCP
-    liveness_check_route    = optional(string, null)       # The route if using HTTP liveness_checks
-    liveness_check_scheme   = optional(string, "HTTP")     # HTTP or HTTPS
-    ready_check_command     = optional(list(string), null) # Will run the specified command as the ready check probe if type is exec (default to liveness_check_command)
-    ready_check_port        = optional(number, null)       # The number of the port for the ready check (default to liveness_check_port)
-    ready_check_type        = optional(string, null)       # Either exec, HTTP, or TCP (default to liveness_check_type)
-    ready_check_route       = optional(string, null)       # The route if using HTTP ready checks (default to liveness_check_route)
-    ready_check_scheme      = optional(string, null)       # Whether to use HTTP or HTTPS (default to liveness_check_scheme)
+    name                    = string                           # A unique name for the container within the pod
+    init                    = optional(bool, false)            # Iff true, the container will be an init container
+    image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
+    image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
+    image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    command                 = list(string)                     # The command to be run as the root process inside the container
+    working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
+    image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
+    minimum_memory          = optional(number, 100)            #The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
+    run_as_root             = optional(bool, false)            # Whether to run the container as root
+    uid                     = optional(number, 1000)           # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    read_only               = optional(bool, true)             # Whether to use a readonly file system
+    env                     = optional(map(string), {})        # Environment variables specific to the container
+    liveness_probe_command  = optional(list(string), null)     # Will run the specified command as the liveness probe if type is exec
+    liveness_probe_port     = optional(number, null)           # The number of the port for the liveness_probe
+    liveness_probe_type     = optional(string, null)           # Either exec, HTTP, or TCP
+    liveness_probe_route    = optional(string, null)           # The route if using HTTP liveness_probes
+    liveness_probe_scheme   = optional(string, "HTTP")         # HTTP or HTTPS
+    readiness_probe_command = optional(list(string), null)     # Will run the specified command as the ready check probe if type is exec (default to liveness_probe_command)
+    readiness_probe_port    = optional(number, null)           # The number of the port for the ready check (default to liveness_probe_port)
+    readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
+    readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
+    readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
   }))
 }
 
@@ -151,7 +152,7 @@ variable "config_map_mounts" {
   default = {}
 }
 
-variable "pod_annotations" {
+variable "extra_pod_annotations" {
   description = "Annotations to add to the pods in the deployment"
   type        = map(string)
   default     = {}
@@ -173,20 +174,8 @@ variable "dns_policy" {
   default     = "ClusterFirst"
 }
 
-variable "instance_type_anti_affinity_required" {
-  description = "Whether to prevent pods from being scheduled on the same instance types"
-  type        = bool
-  default     = false
-}
-
-variable "zone_anti_affinity_required" {
-  description = "Whether to prevent pods from being scheduled on the same zone"
-  type        = bool
-  default     = false
-}
-
-variable "instance_type_anti_affinity_preferred" {
-  description = "Whether to prefer preventing pods from being scheduled on the same instance types"
+variable "instance_type_spread_required" {
+  description = "Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)"
   type        = bool
   default     = false
 }
@@ -197,28 +186,10 @@ variable "host_anti_affinity_required" {
   default     = true
 }
 
-variable "prefer_spot_nodes_enabled" {
-  description = "Whether pods will prefer scheduling on spot nodes"
-  type        = bool
-  default     = false
-}
-
-variable "prefer_burstable_nodes_enabled" {
-  description = "Whether pods will prefer scheduling on burstable nodes"
-  type        = bool
-  default     = false
-}
-
-variable "prefer_arm_nodes_enabled" {
-  description = "Whether pods will prefer scheduling on arm64 nodes"
-  type        = bool
-  default     = false
-}
-
 variable "spot_nodes_enabled" {
   description = "Whether to allow pods to schedule on spot nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "burstable_nodes_enabled" {
@@ -230,22 +201,34 @@ variable "burstable_nodes_enabled" {
 variable "arm_nodes_enabled" {
   description = "Whether to allow pods to schedule on arm64 nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "topology_spread_strict" {
-  description = "Whether the topology spread constraint should be set to DoNotSchedule"
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
   default     = false
 }
 
-variable "topology_spread_enabled" {
-  description = "Whether to enable topology spread constraints"
+variable "az_spread_preferred" {
+  description = "Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)"
   type        = bool
   default     = true
 }
 
-variable "controller_node_required" {
+variable "az_spread_required" {
+  description = "Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)"
+  type        = bool
+  default     = false
+}
+
+variable "az_anti_affinity_required" {
+  description = "Whether to prevent pods from being scheduled on the same availability zone"
+  type        = bool
+  default     = false
+}
+
+variable "controller_nodes_required" {
   description = "Whether the pods must be scheduled on a controller node"
   type        = bool
   default     = false
@@ -295,5 +278,11 @@ variable "unhealthy_pod_eviction_policy" {
     condition     = contains(["IfHealthyBudget", "AlwaysAllow"], var.unhealthy_pod_eviction_policy)
     error_message = "Must be one of: IfHealthyBudget or AlwaysAllow"
   }
+}
+
+variable "max_unavailable" {
+  description = "Controls how many pods are allowed to be unavailable in the Deployment under the Pod Disruption Budget"
+  type        = number
+  default     = 1
 }
 

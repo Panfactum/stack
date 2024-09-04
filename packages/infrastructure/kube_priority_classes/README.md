@@ -9,3 +9,6 @@ by Kubernetes:
 
 - `cluster-important` (`100000000`): Used for controllers that provide ancillary
    (but not critical) cluster functionality
+
+Additionally, allows you to set up arbitrary additional priority classes
+as needed.
