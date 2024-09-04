@@ -35,6 +35,30 @@ Description: Whether to allow pods to schedule on arm64 nodes
 
 Type: `bool`
 
+Default: `true`
+
+### <a name="input_az_anti_affinity_required" /> [az\_anti\_affinity\_required](#input_az_anti_affinity_required)
+
+Description: Whether to prevent pods from being scheduled in the same availability zone
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_az_spread_required" /> [az\_spread\_required](#input_az_spread_required)
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
+
+Type: `bool`
+
 Default: `false`
 
 ### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
@@ -45,9 +69,17 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_controller_node_required" /> [controller\_node\_required](#input_controller_node_required)
+### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
 
-Description: Whether the pods must be scheduled on a controller node
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_controller_nodes_required" /> [controller\_nodes\_required](#input_controller_nodes_required)
+
+Description: Whether the pods must be scheduled on an EKS Node Group node
 
 Type: `bool`
 
@@ -78,17 +110,9 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_instance_type_anti_affinity_preferred" /> [instance\_type\_anti\_affinity\_preferred](#input_instance_type_anti_affinity_preferred)
+### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
 
-Description: Whether to prefer preventing pods from being scheduled on the same instance types
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_instance_type_anti_affinity_required" /> [instance\_type\_anti\_affinity\_required](#input_instance_type_anti_affinity_required)
-
-Description: Whether to prevent pods from being scheduled on the same instance types
+Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
 Type: `bool`
 
@@ -96,7 +120,7 @@ Default: `false`
 
 ### <a name="input_lifetime_evictions_enabled" /> [lifetime\_evictions\_enabled](#input_lifetime_evictions_enabled)
 
-Description: Whether to allow pods to be evicted after exceeding a certain age (configured by descheduler)
+Description: Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)
 
 Type: `bool`
 
@@ -142,53 +166,13 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_prefer_arm_nodes_enabled" /> [prefer\_arm\_nodes\_enabled](#input_prefer_arm_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on arm64 nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_burstable_nodes_enabled" /> [prefer\_burstable\_nodes\_enabled](#input_prefer_burstable_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on burstable nodes
-
-Type: `bool`
-
-Default: `false`
-
-### <a name="input_prefer_spot_nodes_enabled" /> [prefer\_spot\_nodes\_enabled](#input_prefer_spot_nodes_enabled)
-
-Description: Whether pods will prefer scheduling on spot nodes
-
-Type: `bool`
-
-Default: `false`
-
 ### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 
 Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 
-Default: `false`
-
-### <a name="input_topology_spread_enabled" /> [topology\_spread\_enabled](#input_topology_spread_enabled)
-
-Description: Whether to enable topology spread constraints
-
-Type: `bool`
-
 Default: `true`
-
-### <a name="input_topology_spread_strict" /> [topology\_spread\_strict](#input_topology_spread_strict)
-
-Description: Whether the topology spread constraint should be set to DoNotSchedule
-
-Type: `bool`
-
-Default: `false`
 
 ### <a name="input_workload_name" /> [workload\_name](#input_workload_name)
 
@@ -197,14 +181,6 @@ Description: The name of the workload. Used by observability platform for groupi
 Type: `string`
 
 Default: `null`
-
-### <a name="input_zone_anti_affinity_required" /> [zone\_anti\_affinity\_required](#input_zone_anti_affinity_required)
-
-Description: Whether to prevent pods from being scheduled on the same zone
-
-Type: `bool`
-
-Default: `false`
 
 ## Outputs
 

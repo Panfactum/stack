@@ -242,6 +242,36 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
+    text: 'Deploying Workloads',
+    path: '/deploying-workloads',
+    sub: [
+      {
+        text: 'Basics',
+        path: '/basics'
+      },
+      {
+        text: 'Networking',
+        path: '/networking'
+      },
+      {
+        text: 'Persistence',
+        path: '/persistence'
+      },
+      {
+        text: 'High Availability',
+        path: '/high-availability'
+      },
+      {
+        text: 'Permissions',
+        path: '/permissions'
+      },
+      {
+        text: 'Checklist',
+        path: '/checklist'
+      }
+    ]
+  },
+  {
     text: 'CI / CD',
     path: '/cicd',
     sub: [
