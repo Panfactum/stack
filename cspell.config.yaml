@@ -181,7 +181,10 @@ words: [
   "Containerfile",
   "argoproj",
   "Rollouts",
-  "persistentvolumeclaims"
+  "persistentvolumeclaims",
+  "nodeclasses",
+  "nodepools",
+  "nodeclaims"
 ]
 languageSettings:
   - languageId: markdown,mdx

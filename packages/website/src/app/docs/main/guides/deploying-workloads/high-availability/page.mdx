@@ -1,3 +1,43 @@
 # Deploying Workloads: High Availability
 
-Documentation in progress.
+## Objective
+
+Learn how to meet various SLA levels for your deployed workloads.
+
+## SLA Levels
+
+The Panfactum stack is designed to enable you to meet extremely high uptime guarantees. However,
+high uptime naturally lead to higher costs as greater redundancy and stricter scheduling constraints
+are required.
+
+We provide the means to tune your system to choose the right balance between high availability
+and cost for each of your clusters and workloads. For example, you might prioritize cost savings
+in development / test environments while prioritizing availability in production environments.
+
+Below, we overview our recommended configuration for various SLA attainment.
+
+### Level 1: > 99.9% Uptime
+
+Achieving this level will result in less than 45 minutes of workload downtime per month. It
+will result in approximately 50-100% higher costs. [^1]
+
+[^1]: Mostly due to increased cross-AZ network charges
+
+Tuning Parameters:
+
+- You must deploy at least three subnets of each type when setting up your VPC (vs one) to ensure that you resilient to a single AZ outage ([docs](docs/main/guides/bootstrapping/aws-networking#choose-your-cidr-blocks-and-subnets))
+- You must deploy your Kubernetes cluster across three availability zones (vs one) to ensure that you are resilient to a single AZ outage ([docs](/docs/main/guides/bootstrapping/kubernetes-cluster#choose-node-subnets))
+- You must [set up liveness probes](/docs/main/guides/deploying-workloads/basics#liveness-and-readiness-probes) for your workloads to ensure that they will be restarted if they enter a failure state
+
+
+### Level 2: > 99.99% Uptime
+
+Achieving this level will result in less than 4 minutes of workload downtime per month. It
+will result in approximately 50-100% higher costs.
+
+Tuning Parameters:
+
+
+### Level 3: > 99.999% Uptime
+
+Achieving this level will result in virtually no downtime.

@@ -11,7 +11,7 @@ locals {
   image_gc_high_threshold_percent             = "85"
   image_gc_low_threshold_percent              = "80"
   shutdown_grace_period                       = var.is_spot ? "2m0s" : "60m0s"
-  shutdown_grace_period_for_critical_pods     = var.is_spot ? "1m0s" : "5m0s"
+  shutdown_grace_period_for_critical_pods     = var.is_spot ? "30s" : "30s"
   user_data = templatefile("${path.module}/user-data.toml", {
     API_SERVER_ADDR                             = var.cluster_endpoint
     CLUSTER_DNS_IP                              = var.cluster_dns_service_ip

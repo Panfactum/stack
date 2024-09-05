@@ -12,11 +12,16 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.39.1"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.0"
+    }
   }
 }
 
 locals {
-  name = "karpenter"
+  name    = "karpenter"
+  version = 2
 
   // (1) <2GB of memory is not efficient as each node requires about 1GB of memory just for the
   // base kubernetes utilities and controllers that must run on each node
@@ -99,15 +104,21 @@ locals {
   ]
 
   disruption_policy = {
-    consolidationPolicy = "WhenUnderutilized"
-    expireAfter         = "24h"
+    consolidationPolicy = "WhenEmptyOrUnderutilized"
+    consolidateAfter    = "10s"
+    budgets             = []
   }
+
+  expire_after = "24h"
 
   node_class_template = {
     amiFamily                  = "Bottlerocket"
     subnetSelectorTerms        = [for subnet in data.aws_subnet.node_subnets : { id = subnet.id }]
     securityGroupSelectorTerms = [{ id = var.node_security_group_id }]
     instanceProfile            = var.node_instance_profile
+    amiSelectorTerms = [{
+      alias = "bottlerocket@latest"
+    }]
 
     metadataOptions = {
       httpEndpoint            = "enabled"
@@ -136,12 +147,11 @@ locals {
         }
       }
     ]
-  }
-
-  # For some reason some settings have to be set in the NodePool
-  # configuration in order to take effect
-  kubelet = {
-    maxPods = 110
+    # For some reason some settings have to be set in the NodeClass
+    # configuration in order to take effect
+    kubelet = {
+      maxPods = 110
+    }
   }
 }
 
@@ -236,25 +246,49 @@ data "aws_subnet" "node_subnets" {
 * Node Class
 *********************************************************************************************************************/
 
-
-resource "kubernetes_manifest" "default_node_class" {
-  manifest = {
-    apiVersion = "karpenter.k8s.aws/v1beta1"
+resource "random_id" "default_node_class_name" {
+  byte_length = 4
+  prefix      = "default-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "default_node_class" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.k8s.aws/v1"
     kind       = "EC2NodeClass"
     metadata = {
-      name   = "default"
+      name   = random_id.default_node_class_name.hex
       labels = module.util.labels
     }
     spec = local.node_class_template
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-resource "kubernetes_manifest" "spot_node_class" {
-  manifest = {
-    apiVersion = "karpenter.k8s.aws/v1beta1"
+resource "random_id" "spot_node_class_name" {
+  byte_length = 4
+  prefix      = "spot-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "spot_node_class" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.k8s.aws/v1"
     kind       = "EC2NodeClass"
     metadata = {
-      name   = "spot"
+      name   = random_id.spot_node_class_name.hex
       labels = module.util.labels
     }
     spec = merge(
@@ -263,16 +297,30 @@ resource "kubernetes_manifest" "spot_node_class" {
         userData = module.node_settings_spot.user_data
       }
     )
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-
-resource "kubernetes_manifest" "burstable_node_class" {
-  manifest = {
-    apiVersion = "karpenter.k8s.aws/v1beta1"
+resource "random_id" "burstable_node_class_name" {
+  byte_length = 4
+  prefix      = "burstable-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "burstable_node_class" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.k8s.aws/v1"
     kind       = "EC2NodeClass"
     metadata = {
-      name   = "burstable"
+      name   = random_id.burstable_node_class_name.hex
       labels = module.util.labels
     }
     spec = merge(
@@ -281,6 +329,11 @@ resource "kubernetes_manifest" "burstable_node_class" {
         userData = module.node_settings_burstable.user_data
       }
     )
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -289,12 +342,22 @@ resource "kubernetes_manifest" "burstable_node_class" {
 * Node Pools
 *********************************************************************************************************************/
 
-resource "kubernetes_manifest" "burstable_node_pool" {
-  manifest = {
-    apiVersion = "karpenter.sh/v1beta1"
+resource "random_id" "burstable_node_pool_name" {
+  byte_length = 4
+  prefix      = "burstable-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "burstable_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
     kind       = "NodePool"
     metadata = {
-      name   = "burstable"
+      name   = random_id.burstable_node_pool_name.hex
       labels = module.util.labels
     }
     spec = {
@@ -306,15 +369,14 @@ resource "kubernetes_manifest" "burstable_node_pool" {
         }
         spec = {
           nodeClassRef = {
-            apiVersion = "karpenter.k8s.aws/v1beta1"
-            kind       = "EC2NodeClass"
-            name       = "burstable"
+            group = "karpenter.k8s.aws"
+            kind  = "EC2NodeClass"
+            name  = kubectl_manifest.burstable_node_class.name
           }
           taints = local.burstable_taints
           startupTaints = [
             module.constants.cilium_taint
           ]
-          kubelet = local.kubelet
           requirements = concat(
             local.burstable_requirements,
             [
@@ -330,23 +392,38 @@ resource "kubernetes_manifest" "burstable_node_pool" {
               },
             ]
           )
+          terminationGracePeriod = "2m0s"
+          expireAfter            = local.expire_after
         }
       }
       disruption = local.disruption_policy
 
       weight = 10
     }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
-  depends_on = [kubernetes_manifest.burstable_node_class]
 }
 
-
-resource "kubernetes_manifest" "burstable_arm_node_pool" {
-  manifest = {
-    apiVersion = "karpenter.sh/v1beta1"
+resource "random_id" "burstable_arm_node_pool_name" {
+  byte_length = 4
+  prefix      = "burstable-arm-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "burstable_arm_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
     kind       = "NodePool"
     metadata = {
-      name   = "burstable-arm"
+      name   = random_id.burstable_arm_node_pool_name.hex
       labels = module.util.labels
     }
     spec = {
@@ -358,9 +435,9 @@ resource "kubernetes_manifest" "burstable_arm_node_pool" {
         }
         spec = {
           nodeClassRef = {
-            apiVersion = "karpenter.k8s.aws/v1beta1"
-            kind       = "EC2NodeClass"
-            name       = "burstable"
+            group = "karpenter.k8s.aws"
+            kind  = "EC2NodeClass"
+            name  = kubectl_manifest.burstable_node_class.name
           }
           taints = concat(
             local.burstable_taints,
@@ -369,7 +446,6 @@ resource "kubernetes_manifest" "burstable_arm_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
-          kubelet = local.kubelet
           requirements = concat(
             local.burstable_requirements,
             [
@@ -385,23 +461,38 @@ resource "kubernetes_manifest" "burstable_arm_node_pool" {
               },
             ]
           )
+          terminationGracePeriod = "2m0s"
+          expireAfter            = local.expire_after
         }
       }
       disruption = local.disruption_policy
 
       weight = 10
     }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
-  depends_on = [kubernetes_manifest.burstable_node_class]
 }
 
-
-resource "kubernetes_manifest" "spot_node_pool" {
-  manifest = {
-    apiVersion = "karpenter.sh/v1beta1"
+resource "random_id" "spot_node_pool_name" {
+  byte_length = 4
+  prefix      = "spot-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "spot_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
     kind       = "NodePool"
     metadata = {
-      name   = "spot"
+      name   = random_id.spot_node_pool_name.hex
       labels = module.util.labels
     }
     spec = {
@@ -413,15 +504,14 @@ resource "kubernetes_manifest" "spot_node_pool" {
         }
         spec = {
           nodeClassRef = {
-            apiVersion = "karpenter.k8s.aws/v1beta1"
-            kind       = "EC2NodeClass"
-            name       = "spot"
+            group = "karpenter.k8s.aws"
+            kind  = "EC2NodeClass"
+            name  = kubectl_manifest.spot_node_class.name
           }
           taints = local.spot_taints
           startupTaints = [
             module.constants.cilium_taint
           ]
-          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -437,22 +527,38 @@ resource "kubernetes_manifest" "spot_node_pool" {
               },
             ]
           )
+          terminationGracePeriod = "2m0s"
+          expireAfter            = local.expire_after
         }
       }
       disruption = local.disruption_policy
 
       weight = 10
     }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
-  depends_on = [kubernetes_manifest.spot_node_class]
 }
 
-resource "kubernetes_manifest" "spot_arm_node_pool" {
-  manifest = {
-    apiVersion = "karpenter.sh/v1beta1"
+resource "random_id" "spot_arm_node_pool_name" {
+  byte_length = 4
+  prefix      = "spot-arm-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "spot_arm_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
     kind       = "NodePool"
     metadata = {
-      name   = "spot-arm"
+      name   = random_id.spot_arm_node_pool_name.hex
       labels = module.util.labels
     }
     spec = {
@@ -464,9 +570,9 @@ resource "kubernetes_manifest" "spot_arm_node_pool" {
         }
         spec = {
           nodeClassRef = {
-            apiVersion = "karpenter.k8s.aws/v1beta1"
-            kind       = "EC2NodeClass"
-            name       = "spot"
+            group = "karpenter.k8s.aws"
+            kind  = "EC2NodeClass"
+            name  = kubectl_manifest.spot_node_class.name
           }
           taints = concat(
             local.spot_taints,
@@ -475,7 +581,6 @@ resource "kubernetes_manifest" "spot_arm_node_pool" {
           startupTaints = [
             module.constants.cilium_taint
           ]
-          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -491,22 +596,38 @@ resource "kubernetes_manifest" "spot_arm_node_pool" {
               },
             ]
           )
+          terminationGracePeriod = "2m0s"
+          expireAfter            = local.expire_after
         }
       }
       disruption = local.disruption_policy
 
       weight = 10
     }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
-  depends_on = [kubernetes_manifest.spot_node_class]
 }
 
-resource "kubernetes_manifest" "on_demand_arm_node_pool" {
-  manifest = {
-    apiVersion = "karpenter.sh/v1beta1"
+resource "random_id" "on_demand_arm_node_pool_name" {
+  byte_length = 4
+  prefix      = "on-demand-arm-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "on_demand_arm_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
     kind       = "NodePool"
     metadata = {
-      name   = "on-demand-arm"
+      name   = random_id.on_demand_arm_node_pool_name.hex
       labels = module.util.labels
     }
     spec = {
@@ -518,15 +639,14 @@ resource "kubernetes_manifest" "on_demand_arm_node_pool" {
         }
         spec = {
           nodeClassRef = {
-            apiVersion = "karpenter.k8s.aws/v1beta1"
-            kind       = "EC2NodeClass"
-            name       = "default"
+            group = "karpenter.k8s.aws"
+            kind  = "EC2NodeClass"
+            name  = kubectl_manifest.default_node_class.name
           }
           taints = local.arm_taints
           startupTaints = [
             module.constants.cilium_taint
           ]
-          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -542,6 +662,8 @@ resource "kubernetes_manifest" "on_demand_arm_node_pool" {
               },
             ]
           )
+          terminationGracePeriod = "1h0m0s"
+          expireAfter            = local.expire_after
         }
       }
       disruption = local.disruption_policy
@@ -549,17 +671,30 @@ resource "kubernetes_manifest" "on_demand_arm_node_pool" {
       // This should have the lowest preference
       weight = 1
     }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
-  depends_on = [kubernetes_manifest.default_node_class]
 }
 
-
-resource "kubernetes_manifest" "on_demand_node_pool" {
-  manifest = {
-    apiVersion = "karpenter.sh/v1beta1"
+resource "random_id" "on_demand_node_pool_name" {
+  byte_length = 4
+  prefix      = "on-demand-"
+  keepers = {
+    version = local.version
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "kubectl_manifest" "on_demand_node_pool" {
+  yaml_body = yamlencode({
+    apiVersion = "karpenter.sh/v1"
     kind       = "NodePool"
     metadata = {
-      name   = "on-demand"
+      name   = random_id.on_demand_node_pool_name.hex
       labels = module.util.labels
     }
     spec = {
@@ -571,14 +706,13 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
         }
         spec = {
           nodeClassRef = {
-            apiVersion = "karpenter.k8s.aws/v1beta1"
-            kind       = "EC2NodeClass"
-            name       = "default"
+            group = "karpenter.k8s.aws"
+            kind  = "EC2NodeClass"
+            name  = kubectl_manifest.default_node_class.name
           }
           startupTaints = [
             module.constants.cilium_taint
           ]
-          kubelet = local.kubelet
           requirements = concat(
             local.shared_requirements,
             [
@@ -594,6 +728,8 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
               },
             ]
           )
+          terminationGracePeriod = "1h0m0s"
+          expireAfter            = local.expire_after
         }
       }
       disruption = local.disruption_policy
@@ -601,7 +737,11 @@ resource "kubernetes_manifest" "on_demand_node_pool" {
       // This should have the lowest preference
       weight = 1
     }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  lifecycle {
+    create_before_destroy = true
   }
-  depends_on = [kubernetes_manifest.default_node_class]
 }
 

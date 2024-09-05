@@ -9,6 +9,33 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* Karpenter has updated its CRD specification which unfortunately requires manual intervention during the upgrade process.
+  **After** updating the `pf_stack_version` for any deployments of the `kube_karpenter_node_pools` module,
+  run the following commands in the `kube_karpenter_node_pools` folder:
+
+  ```bash
+  pf-providers-enable
+  terragrunt state rm kubernetes_manifest.default_node_class \
+    kubernetes_manifest.spot_node_class \
+    kubernetes_manifest.burstable_node_class \
+    kubernetes_manifest.burstable_node_pool \
+    kubernetes_manifest.burstable_arm_node_pool \
+    kubernetes_manifest.spot_node_pool \
+    kubernetes_manifest.spot_arm_node_pool \
+    kubernetes_manifest.on_demand_arm_node_pool \
+    kubernetes_manifest.on_demand_node_pool
+  terragrunt apply --auto-approve
+  kubectl delete nodepools burstable burstable-arm on-demand on-demand-arm spot spot-arm
+  kubectl delete ec2nc spot burstable on-demand
+  ```
+
+  The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
+  nodes created using the old CRDs to nodes created using the new CRDs.
+
 ## edge.24-09-04
 
 ### Breaking Changes
@@ -93,8 +120,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * Updates Karpenter and EBS CSI Controller to prevent any remaining edge cases where nodes were terminated prior to
   EBS volumes being detached which would result in six-minute delays for rescheduling stateful pods.
 * Remove the `RemoveDuplicates` strategy in [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
-as users expect to be able to schedule multiple pods of the same controller on the same node when they set
-`host_anti_affinity_required` to `false`.
+  as users expect to be able to schedule multiple pods of the same controller on the same node when they set
+  `host_anti_affinity_required` to `false`.
 
 ## edge.24-08-27
 
