@@ -43,6 +43,12 @@ defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-netw
 Additionally, integrates `kube_service` into [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
 and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
 
+### Fixed
+
+- Addressed issue where our Terragrunt configuration would cause the version pinning for the `goauthentik/authentik` and
+`alekc/kubectl` infrastructure providers would be removed. This would cause issues to occur when users ran `terragrunt init -upgrade`
+to update their lockfiles.
+
 ## edge.24-09-04
 
 ### Breaking Changes

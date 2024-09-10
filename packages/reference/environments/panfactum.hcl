@@ -186,7 +186,9 @@ generate "kubectl_provider" {
 generate "kubectl_override_provider" {
   path      = "kubectl_override.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = local.enable_kubernetes ? file("${local.provider_folder}/kubectl_override.tf") : ""
+  contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl_override.tf", {
+    kubectl_version = local.enable_kubernetes ? lookup(local.vars, "kubectl_version", "2.0.4") : ""
+  }) : ""
 }
 
 generate "helm_provider" {
@@ -209,7 +211,9 @@ generate "authentik_provider" {
 generate "authentik_override_provider" {
   path      = "authentik_override.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = local.enable_authentik ? file("${local.provider_folder}/authentik_override.tf") : ""
+  contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik_override.tf", {
+    authentik_version = local.enable_authentik ? lookup(local.vars, "authentik_version", "2024.2.0") : ""
+  }) : ""
 }
 
 generate "time_provider" {

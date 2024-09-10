@@ -9,6 +9,7 @@ terraform {
   required_providers {
     kubectl = {
       source  = "alekc/kubectl"
+      version = "${kubectl_version}"
     }
   }
 }
