@@ -1,19 +1,97 @@
 # Deploying Workloads: Networking
 
+## Objective
+
+Learn how to configure networking for your workloads.
+
+## Prerequisites
+
+* [Overview guide for deploying workloads](/docs/edge/guides/deploying-workloads/basics)
+* [Kubernetes networking concept documentation](/docs/edge/concepts/networking/cluster-networking)
+
 ## Kubernetes Services
 
-Documentation in progress.
+In Kubernetes, [Services](https://kubernetes.io/docs/concepts/services-networking/service/)
+are the standard mechanism for exposing a networked workload backed by one or more pods.
+
+The following workload submodules will automatically create Services when `ports` is configured
+for any of their containers:
+
+* [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+* [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+
+The behavior of the Services for each of these modules can be configured by setting the following input
+variables:
+
+* `service_name`: The name of the Service (if not provided, will be the same name as the controller)
+* `service_type`: The [type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) of the Service
+* `service_ip`: Used to assign a static IP to the service (must be in the cluster's service CIDR block)
+
+Additionally, we provide a submodule, [kube\_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service),
+for creating Services optimized for the Panfactum Stack on an as-needed basis.
+
+## Inbound Networking
+
+While you can configure Services of type `LoadBalancer` to expose services to the public internet,
+you should prefer using [Ingresses](https://kubernetes.io/docs/concepts/services-networking/ingress/) instead. Ingresses
+are specialized routing constructs designed specifically for inbound network traffic. For
+more background information, see our [concept docs](/docs/edge/concepts/networking/cluster-networking#inbound-networking).
+
+The central ingress infrastructure is set up in the [bootstrapping guide](/docs/edge/guides/bootstrapping/inbound-networking#deploy-the-ingress-system),
+but you will still need to set up individual Ingress resources for each service that you want to expose
+to the public internet.
+
+We provide a submodule, [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
+that creates an Ingress optimized for the Panfactum Stack. See that module's documentation for more information
+on how to best manage your Ingress resources.
 
 ## Service Mesh Management
 
-Documentation in progress.
+When a new pod is created in the Panfactum Stack, our service mesh controller (Linkerd) will inject two containers
+that allow the pod be connected to the service mesh: `linkerd-init` and `linkerd-proxy`. `linkerd-init` does some
+initial setup and `linkerd-proxy` runs is the [sidecar container](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
+which generates the mesh (see [concept docs](/docs/edge/concepts/networking/cluster-networking#service-mesh)).
 
-## Public Ingress
+Generally, this will run perfectly fine without any needing any configuration on your end. However, there are a few
+configuration toggles you should be aware of:
 
-See [kube_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress).
+* As `linkerd-proxy` is a sidecar container, it's resources are not automatically scaled by the VPA (see [issue](https://github.com/kubernetes/autoscaler/issues/7229)).
+  Generally, the proxy will have plenty of headroom, but if it runs out of resources, you can raise its resources requests
+  and limits via [Linkerd pod annotations](https://linkerd.io/2.16/reference/proxy-configuration/). Specifically,
+  you may want the following:
 
-Documentation in progress.
+  * `config.linkerd.io/proxy-memory-limit`
+  * `config.linkerd.io/proxy-memory-request`
+  * `config.linkerd.io/proxy-cpu-request`
+
+* Some workloads may not be a good fit for Linkerd's mTLS, especially if the workload already uses its own network encryption
+  paradigm. This is particularly common with databases. For these workloads, you should configure [opaque ports](https://linkerd.io/2-edge/features/protocol-detection/#marking-ports-as-opaque)
+  for the proxy.
+
+* We use Linkerd's integration of [native sidecars](https://kubernetes.io/blog/2023/08/25/native-sidecar-containers/) by default in the Panfactum Stack.
+  This solves [many operational challenges](https://buoyant.io/blog/kubernetes-1-28-revenge-of-the-sidecars), but the feature is relatively
+  new so may have undiscovered failures cases. While we have not experienced any issues since
+  we enabled this in Panfactum, you can disable native sidecar support by setting
+  a pod's `config.alpha.linkerd.io/proxy-enable-native-sidecar` annotation to `false`. Keep in mind that if you do this,
+  you will be responsible for developing workarounds to the operational challenges linked above.
+
+* While we rarely recommend doing this, if a scenario arises where the Linkerd sidecar cannot be used (for example if there
+  is a breaking bug), you can disable the sidecar by setting the pod annotation `linkerd.io/inject` to `disabled`. This
+  will disconnect the pod from the service mesh and reduce your operational security, but it will allow network unrestricted
+  network traffic.
+
+* If the pods in the `linkerd` namespace go down, network communication in the cluster will begin to degrade as the
+  service mesh requires active controllers to manage and distribute network updates. This should never occur in the Panfactum
+  Stack when `enhanced_ha_enabled` is set to `true` for the `kube_linkerd` module.
 
 ## Network Policies
 
-Documentation in progress.
+[Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+are Kubernetes' mechanism for setting up firewall rules that can control what network traffic
+is allowed by your underlying workloads.
+
+We provide full support for deploying custom [Network Policies via Cilium](https://docs.cilium.io/en/latest/security/policy/index.html).
+However, we do not yet provide any out-of-the-box configuration or submodules that utilize Network Policies. [^1]
+
+[^1]: In a future release, we plan to deeply integrate Network Policies into the Panfactum Stack as a security hardening measure.
+    When that occurs, the cluster will have deny-by-default firewalls, and this guide will be expanded.

@@ -53,7 +53,7 @@ The basic process for running first-party code in a Kubernetes cluster is as fol
 
 Most of the controllers (e.g., Deployments, StatefulSets, etc.) create and manage
 Kubernetes [Pods.](https://kubernetes.io/docs/concepts/workloads/pods/) [^2]
-As all Pods have very similar configuration requirements, we will review the core concepts here.
+As all pods have very similar configuration requirements, we will review the core concepts here.
 
 [^2]: In fact, our submodules utilize a shared interface for defining pods: [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod).
 
@@ -75,15 +75,17 @@ There are a few required fields for every defined container:
 * `image_tag`: The tag for a specific image within the registry (example: `1.27.1`)
 * `command`: The command in list form to execute when starting a container from the given image (example: `["/bin/bash", "-c", "tail -f /dev/null"]`)
 
-Given the above example values, a Pod would be created with a container called `foo` that uses the image from `docker.io/library/nginx:1.27.1` as
+Given the above example values, a pod would be created with a container called `foo` that uses the image from `docker.io/library/nginx:1.27.1` as
 the root file system and runs `/bin/bash -c "tail -f /dev/null"`. [^4]
 
 [^4]: `tail -f /dev/null` is used because this is a noop that prevents the command from terminating. If the container terminated, some
     controllers like a Deployment would continually try to restart it.
 
-For public images, we strongly recommend that you use the ECR pull-through caches for the `image_registry` (setup
-as a [step in the bootstrapping guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
-We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
+<MarkdownAlert severity="info">
+    For public images, we strongly recommend that you use the ECR pull-through caches for the `image_registry` (setup
+    as a [step in the bootstrapping guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
+    We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
+</MarkdownAlert>
 
 ### Init Containers
 
@@ -201,7 +203,7 @@ In all clusters, you should be aware of how pods are spread across individual in
 Note that enabling any of these options will increase the cost of running your workload by lowering overall
 resource utilization. As a result, we recommend `instance_type_spread_enabled`
 be enabled **only** in production environments and disabling `host_anti_affinity_required` if possible.
-See these [concept docs](/docs/edge/concepts/autoscaling) for more information.
+See our [high availability guide](/docs/edge/guides/deploying-workloads/high-availability) for more information.
 
 #### Geographic Spread
 
@@ -228,7 +230,8 @@ controller are spread across those AZs.
 
 Note that enabling any of these options will increase the cost of running your workload by lowering overall
 resource utilization. As a result, we recommend `az_spread_preferred` or `az_spread_required`
-be enabled **only** in production environments. See these [concept docs](/docs/edge/concepts/autoscaling) for more information.
+be enabled **only** in production environments.
+See our [high availability guide](/docs/edge/guides/deploying-workloads/high-availability) for more information.
 
 #### Node Classes
 
@@ -299,7 +302,7 @@ in advance, and you will have no ability to prevent or delay the pod termination
 
 * Hardware or network failures on the underlying node that prevent the pod from operating as expected.
 
-* Spot interruptions (if using `spot_nodes_enabled`) or other node shutdown; pods on the node will get approximately two minutes to terminate gracefully.
+* Spot interruptions (if using `spot_nodes_enabled`) or other forced node shutdown scenarios; pods on the node will get approximately two minutes to terminate gracefully.
 
 * Node resource exhaustion; if all pods on a node do not correctly set their resource requests and limits, it
   is possible that the resources on a node can be exhausted and pods will be evicted from the pod to make room
@@ -347,13 +350,39 @@ will automatically create an appropriate PDB; however, there are a few configura
 Regardless of how a pod is terminated or disrupted, it will be given an opportunity to gracefully shutdown
 before being forcefully terminated. Containers in the pod will first receive a `SIGTERM` signal to indicate
 they must shut down which provides them the opportunity to complete any in-flight work such as responding
-to received requests or closing database connections. If the pod isn't shutdown after a short delay,
-the pod will then be forcibly killed as a `SIGKILL` signal will be sent to all running processes.
+to received requests or closing database connections. During this time the pod will not be able to *receive*
+new network traffic, but it will be able to initiate outbound requests.
 
+If the pod isn't shutdown after a short delay,
+the pod will then be forcibly killed as a `SIGKILL` signal will be sent to all running processes.
 The delay between the `SIGTERM` and `SIGKILL` is the `terminationGracePeriodSeconds` which can be set on our
 modules via `termination_grace_period_seconds`. The default for our modules is 90 seconds.
 
 More detailed information on the pod lifecycle can be found [here](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination).
+
+<MarkdownAlert severity="warning">
+    `terminationGracePeriodSeconds` is only respected when the underlying node is in a running state.
+
+    If the underlying node is terminating, there is an upper bound to how long a pod's effective graceful termination period will be.
+    That bound depends on *how* the node was terminated.
+
+    - **The node was terminated via the host operating system shutting down:** For spot instances, the upper bound
+    is 30 seconds for [critical pods](https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/#marking-pod-as-critical)
+    and 90 seconds for non-critical pods. For on-demand instances, the upper bound is 30 seconds for
+    [critical pods](https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/#marking-pod-as-critical)
+    and 59.5 minutes for non-critical pods. Additionally, non-critical pods will terminate *before* critical pods due to the [node shutdown sequencing](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/#graceful-node-shutdown).
+
+    - **The node was disrupted by Karpenter (via autoscaling or manual disruption):** For spot instances, the upper bound for all pods is 2 minutes.
+    For on-demand instances, the upper bound for all pods is 1 hour. However, all pods will begin terminating at once
+    and there will be no differentiation between critical and non-critical pods. See more [here](https://karpenter.sh/docs/concepts/disruption/#terminationgraceperiod)
+    and [here](https://github.com/kubernetes-sigs/karpenter/issues/1636).
+
+    Our overall recommendation is the following. If you are scheduling pods on spot instances, the `terminationGracePeriodSeconds`
+    should not exceed 90 seconds. If you are scheduling pods on on-demand instances, the `terminationGracePeriodSeconds` should not exceed 59.5 minutes.
+
+    Additionally, if you are adding `system-node-critical` pods to the stack, you should ensure they contain
+    the appropriate logic to delay shutdown until all non-`system-node-critical` pods have been terminated.
+</MarkdownAlert>
 
 ### Accessing Configuration Values at Runtime
 

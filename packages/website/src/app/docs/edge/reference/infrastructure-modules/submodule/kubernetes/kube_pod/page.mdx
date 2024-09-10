@@ -68,6 +68,12 @@ list(object({
     readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
     readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
     readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
+    ports = optional(map(object({                              # Keys are the port names, and the values are the port configuration.
+      port              = number                               # Port on the container that traffic should be routed to
+      protocol          = optional(string, "TCP")              # One of TCP, UDP, or SCTP
+      service_port      = optional(number, null)               # Noop (required for tf type conversion)
+      expose_on_service = optional(bool, true)                 # Noop (required for tf type conversion)
+    })), {})
   }))
 ```
 
