@@ -188,7 +188,10 @@ words: [
   "Tigera",
   "Traefik",
   "vpns",
-  "externaldns"
+  "externaldns",
+  "snapshotted",
+  "autoresizing",
+  "preconfigured"
 ]
 languageSettings:
   - languageId: markdown,mdx

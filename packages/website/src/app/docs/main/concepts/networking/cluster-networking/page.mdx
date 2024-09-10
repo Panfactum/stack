@@ -396,27 +396,34 @@ When it comes to securing Kubernetes-based networks, there are two critical tool
 
 ### Firewall Rules
 
-In a traditional datacenter setup, firewall rules are implemented in a centralized system hardware such as routers and L3 switches.
-In Kubernetes, there is no centralized router. Instead, routing rules are distributed to
-every individual node through the CNI plugins you have installed. This not only improves the efficiency of the network traffic
-but also allows for strong security to be maintained even in more diverse deployment scenarios.
+A *firewall* is any component on the network path that can drop packets based on preconfigured rules. In most datacenters,
+firewall rules are implemented in a centralized system hardware such as routers and L3 switches. This is called a *network
+firewall.* In AWS, this is implemented through [Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
+and [Network ACLs.](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html)
 
-Despite this architectural difference, setting up firewall rules is a similar process to what you might find in a traditional
-network setup. However,
-there are a few key differences:
+Kubernetes adds the concept of *host firewalls* where additional routing rules are distributed to
+every individual node through the CNI plugins you have installed. This
+allows for strong security to be maintained even in more diverse deployment scenarios.
+
+Despite this architectural difference, deploying firewall rules in Kubernetes is a similar process to what you might find in a
+network firewall. However, there are a few key differences:
 
 * Firewall rules are implemented through [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/).
   Your CNI plugins will implement these rules in the route tables they build on every node (in the Panfactum Stack, this is handled by Cilium).
 
-* In a traditional system, firewall rules can only be implemented for traffic that crosses network boundaries. [^41]
+* When using a network firewall, firewall rules can only be implemented for traffic that crosses network boundaries. [^41]
   In Kubernetes, there is no such restriction (in fact, there is no concept of network segmentation at all). Instead, network isolation can
   be implemented at arbitrary levels of granularity as desired.
+
+* As routing decisions are made by every node rather than dedicated hardware, implementing Network Policies will consume
+resources on each node. That said, the overhead is typically very minimal. See Cilium's [scalability report](https://docs.cilium.io/en/stable/operations/performance/scalability/report/)
+for more information.
 
 * By default, all traffic between all workloads on the Kubernetes network is allowed. This can be changed to
   deny-by-default if you prefer.
 
 [^41]: Due to [ARP](https://en.wikipedia.org/wiki/Address_Resolution_Protocol), traffic in the same subnet / VLAN
-    does not need to be routed through a router or L3 switch and thus cannot have firewall rules applied.
+    does not need to be routed through a router or L3 switch and thus cannot have network firewall rules applied.
 
 <MarkdownAlert severity="warning">
   The current version of the Panfactum Stack supports Network Policies but does not yet implement them in our

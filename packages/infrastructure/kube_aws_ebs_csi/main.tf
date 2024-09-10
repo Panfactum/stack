@@ -324,6 +324,8 @@ resource "kubernetes_storage_class" "standard" {
     type      = "gp3"
     encrypted = true
     tagSpecification_1 : "Name={{ .PVCNamespace }}/{{ .PVCName }}"
+    tagSpecification_2 : "kubernetes.io/storageclass=ebs-standard"
+    allowAutoIOPSPerGBIncrease = true
   }
 }
 
@@ -342,7 +344,41 @@ resource "kubernetes_storage_class" "standard_retained" {
     type      = "gp3"
     encrypted = true
     tagSpecification_1 : "Name={{ .PVCNamespace }}/{{ .PVCName }}"
+    tagSpecification_2 : "kubernetes.io/storageclass=ebs-standard-retained"
+    allowAutoIOPSPerGBIncrease = true
   }
+}
+
+
+resource "kubernetes_storage_class" "extra" {
+  for_each = var.extra_storage_classes
+  metadata {
+    name = each.key
+    annotations = {
+      "resize.topolvm.io/enabled" = "true"
+    }
+  }
+  storage_provisioner    = "ebs.csi.aws.com"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+  reclaim_policy         = each.value.reclaim_policy
+  parameters = { for k, v in {
+    type      = each.value.type
+    encrypted = true
+    tagSpecification_1 : "Name={{ .PVCNamespace }}/{{ .PVCName }}"
+    tagSpecification_2 : "kubernetes.io/storageclass=${each.key}"
+    allowAutoIOPSPerGBIncrease = true
+    iops                       = each.value.iops
+    iopsPerGB                  = each.value.iops_per_gb
+    throughput                 = each.value.throughput
+    blockExpress               = each.value.type == "io2" ? each.value.block_express : null
+    blockSize                  = each.value.block_size
+    inodeSize                  = each.value.inode_size
+    bytes_per_inode            = each.value.bytes_per_inode
+    numberOfInodes             = each.value.number_of_inodes
+    ext4BigAlloc               = each.value.big_alloc
+    ext4ClusterSize            = each.value.cluster_size
+  } : k => v if v != null }
 }
 
 /***************************************

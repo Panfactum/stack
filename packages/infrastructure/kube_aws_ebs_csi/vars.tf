@@ -45,3 +45,37 @@ variable "panfactum_scheduler_enabled" {
   type        = bool
   default     = false
 }
+
+variable "extra_storage_classes" {
+  description = "Extra EBS-backed storage classes to add to the cluster. Keys are the name of the storage class and values are their configuration."
+  type = map(object({
+    type             = optional(string, "gp3")
+    reclaim_policy   = optional(string, "Delete")
+    iops_per_gb      = optional(number, null)
+    iops             = optional(number, null)
+    throughput       = optional(number, 125)
+    block_express    = optional(bool, false)
+    block_size       = optional(number, null)
+    inode_size       = optional(number, null)
+    bytes_per_inode  = optional(number, null)
+    number_of_inodes = optional(number, null)
+    big_alloc        = optional(bool, false)
+    cluster_size     = optional(number, null)
+  }))
+
+  validation {
+    condition     = alltrue([for name, config in var.extra_storage_classes : contains(["io2", "gp3"], config.type)])
+    error_message = "type must be one of: io2, gp3"
+  }
+
+  validation {
+    condition     = alltrue([for name, config in var.extra_storage_classes : !(config.iops_per_gb != null && config.iops != null)])
+    error_message = "Only iops OR iops_per_gb may be specified"
+  }
+
+  validation {
+    condition     = alltrue([for name, config in var.extra_storage_classes : contains(["Retain", "Delete"], config.reclaim_policy)])
+    error_message = "reclaim_policy must be one of: Retain, Delete"
+  }
+
+}

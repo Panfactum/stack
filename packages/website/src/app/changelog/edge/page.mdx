@@ -36,12 +36,19 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
   nodes created using the old CRDs to nodes created using the new CRDs.
 
+- The `ports` input on [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been moved
+to a container-level field rather than a top-level field to better align with the Kubernetes API.
+
 ### Added
 
 - Adds a new submodule, [kube_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for
 defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-networking/service/) that are optimized for the Panfactum Stack.
 Additionally, integrates `kube_service` into [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
 and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
+
+- Adds `extra_storage_classes` input to the [kube_aws_ebs_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi)
+module.
 
 ### Fixed
 
