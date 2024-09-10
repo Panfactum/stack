@@ -52,6 +52,9 @@ module.
 
 ### Fixed
 
+- Addressed issue in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
+
 - Addressed issue where our Terragrunt configuration would cause the version pinning for the `goauthentik/authentik` and
 `alekc/kubectl` infrastructure providers would be removed. This would cause issues to occur when users ran `terragrunt init -upgrade`
 to update their lockfiles.

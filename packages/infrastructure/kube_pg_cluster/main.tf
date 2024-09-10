@@ -691,6 +691,7 @@ resource "vault_database_secret_backend_role" "reader" {
     // We have to re-run the generic grant commands
     // on every login to make sure we have picked up new objects
     [for schema in local.all_schemas : [
+      "GRANT USAGE ON SCHEMA ${schema} to reader;",
       "GRANT SELECT ON ALL TABLES IN SCHEMA ${schema} TO reader;",
       "GRANT SELECT ON ALL SEQUENCES IN SCHEMA ${schema} TO reader;",
       "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA ${schema} TO reader;",
@@ -725,6 +726,9 @@ resource "vault_database_secret_backend_role" "admin" {
     // We have to re-run the generic grant commands
     // on every login to make sure we have picked up new objects
     [for schema in local.all_schemas : [
+      "GRANT USAGE ON SCHEMA ${schema} to writer;",
+      "GRANT CREATE ON SCHEMA ${schema} to writer;",
+      "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ${schema} TO writer;",
       "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA ${schema} TO writer;",
       "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA ${schema} TO writer;",
       "GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA ${schema} TO writer;"
