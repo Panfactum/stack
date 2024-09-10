@@ -106,10 +106,14 @@ export function useMDXComponents (components: MDXComponents): MDXComponents {
     ),
     h4: ({ children, className, ...props }) => (
       <h4
-        className={clsx('pt-1 font-semibold text-lg sm:text-xl', className)}
+        className={clsx('pt-1 flex gap-x-2 items-baseline font-semibold text-lg sm:text-xl', className)}
         {...props}
       >
         {children}
+        <CopyHeader
+          id={makeIdFromChildren(children)}
+          size={'small'}
+        />
       </h4>
     ),
     a: ({ children, href, className, ref, ...props }) => {

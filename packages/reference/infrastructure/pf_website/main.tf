@@ -24,11 +24,11 @@ locals {
 }
 
 module "constants" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
 }
 
 module "namespace" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
 
   namespace = local.name
 
@@ -48,7 +48,7 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
   namespace = module.namespace.namespace
   name      = local.name
 
@@ -73,6 +73,12 @@ module "website_deployment" {
       liveness_probe_type  = "HTTP"
       liveness_probe_port  = local.port
       liveness_probe_route = local.healthcheck_route
+
+      ports = {
+        http ={
+          port = local.port
+        }
+      }
     }
   ]
 
@@ -90,30 +96,8 @@ module "website_deployment" {
   # end-generate
 }
 
-resource "kubernetes_service" "service" {
-  metadata {
-    name      = local.name
-    namespace = local.namespace
-    labels    = module.website_deployment.labels
-  }
-  spec {
-    internal_traffic_policy = "Cluster"
-    ip_families             = ["IPv4"]
-    ip_family_policy        = "SingleStack"
-    selector                = module.website_deployment.match_labels
-    port {
-      name        = "http"
-      port        = local.port
-      protocol    = "TCP"
-      target_port = local.port
-    }
-  }
-
-  depends_on = [module.website_deployment]
-}
-
 module "ingress" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
 
   name      = local.name
   namespace = local.namespace
@@ -141,5 +125,5 @@ module "ingress" {
   extra_tags       = var.extra_tags
   # end-generate
 
-  depends_on = [kubernetes_service.service]
+  depends_on = [module.website_deployment]
 }

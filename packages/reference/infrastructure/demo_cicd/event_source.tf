@@ -18,7 +18,7 @@ resource "kubernetes_secret" "github_event_source" {
 }
 
 module "event_source" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_source?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_source?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
 
   name        = local.event_source_name
   namespace   = local.namespace
@@ -77,7 +77,7 @@ module "event_source" {
 }
 
 module "ingress" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=c61f7564067d148447fb8cfb1c8d8e2b5a91de4d" # pf-update
+  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" # pf-update
 
   namespace = local.namespace
   name      = "${local.event_source_name}-webhook"
