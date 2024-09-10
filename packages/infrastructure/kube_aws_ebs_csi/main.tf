@@ -324,7 +324,7 @@ resource "kubernetes_storage_class" "standard" {
     type      = "gp3"
     encrypted = true
     tagSpecification_1 : "Name={{ .PVCNamespace }}/{{ .PVCName }}"
-    tagSpecification_2 : "kubernetes.io/storageclass=ebs-standard"
+    tagSpecification_2 : "panfactum.com/storageclass=ebs-standard"
     allowAutoIOPSPerGBIncrease = true
   }
 }
@@ -344,7 +344,7 @@ resource "kubernetes_storage_class" "standard_retained" {
     type      = "gp3"
     encrypted = true
     tagSpecification_1 : "Name={{ .PVCNamespace }}/{{ .PVCName }}"
-    tagSpecification_2 : "kubernetes.io/storageclass=ebs-standard-retained"
+    tagSpecification_2 : "panfactum.com/storageclass=ebs-standard-retained"
     allowAutoIOPSPerGBIncrease = true
   }
 }
@@ -366,7 +366,7 @@ resource "kubernetes_storage_class" "extra" {
     type      = each.value.type
     encrypted = true
     tagSpecification_1 : "Name={{ .PVCNamespace }}/{{ .PVCName }}"
-    tagSpecification_2 : "kubernetes.io/storageclass=${each.key}"
+    tagSpecification_2 : "panfactum.com/storageclass=${each.key}"
     allowAutoIOPSPerGBIncrease = true
     iops                       = each.value.iops
     iopsPerGB                  = each.value.iops_per_gb
