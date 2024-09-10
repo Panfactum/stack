@@ -1,0 +1,149 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_service" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_service" status="stable" type="submodule" />
+
+# Kubernetes Service
+
+Provides a pre-configured instance of a Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
+
+**This is currently only meant to be used as an internal Panfactum submodule.**
+
+We do not recommend using this directly.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### <a name="input_match_labels" /> [match\_labels](#input_match_labels)
+
+Description: The label selector to use for pods backing the Service
+
+Type: `map(string)`
+
+### <a name="input_name" /> [name](#input_name)
+
+Description: The name of this Service
+
+Type: `string`
+
+### <a name="input_namespace" /> [namespace](#input_namespace)
+
+Description: The namespace the Service will be created in.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_external_traffic_policy" /> [external\_traffic\_policy](#input_external_traffic_policy)
+
+Description: The ExternalTrafficPolicy of the Service.
+
+Type: `string`
+
+Default: `"Cluster"`
+
+### <a name="input_extra_annotations" /> [extra\_annotations](#input_extra_annotations)
+
+Description: Extra annotations to add to the Service.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_extra_labels" /> [extra\_labels](#input_extra_labels)
+
+Description: Extra labels to add to the Service.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_headless_enabled" /> [headless\_enabled](#input_headless_enabled)
+
+Description: Set to true iff setting up a StatefulSet headless service.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_internal_traffic_policy" /> [internal\_traffic\_policy](#input_internal_traffic_policy)
+
+Description: The InternalTrafficPolicy of the Service.
+
+Type: `string`
+
+Default: `"Cluster"`
+
+### <a name="input_load_balancer_class" /> [load\_balancer\_class](#input_load_balancer_class)
+
+Description: Iff type == LoadBalancer, the loadBalancerClass to use.
+
+Type: `string`
+
+Default: `"service.k8s.aws/nlb"`
+
+### <a name="input_ports" /> [ports](#input_ports)
+
+Description: The port configuration. Keys are the port names, and the values are the port configuration.
+
+Type:
+
+```hcl
+map(object({
+    pod_port     = number                  # Port on the backing pods that traffic should be routed to
+    service_port = optional(number, null)  # Port to expose on the service. defaults to pod_port
+    protocol     = optional(string, "TCP") # One of TCP, UDP, or SCTP
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_public_domain_names" /> [public\_domain\_names](#input_public_domain_names)
+
+Description: Iff type == LoadBalancer, the public domains names that this service will be accessible from.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_service_ip" /> [service\_ip](#input_service_ip)
+
+Description: If provided, the service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_type" /> [type](#input_type)
+
+Description: The type of the Service.
+
+Type: `string`
+
+Default: `"ClusterIP"`
+
+## Outputs
+
+No outputs.
+
+## Maintainer Notes
+
+No notes.
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

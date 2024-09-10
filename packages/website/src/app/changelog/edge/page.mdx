@@ -36,6 +36,13 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
   nodes created using the old CRDs to nodes created using the new CRDs.
 
+### Added
+
+- Adds a new submodule, [kube_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for
+defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-networking/service/) that are optimized for the Panfactum Stack.
+Additionally, integrates `kube_service` into [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
+
 ## edge.24-09-04
 
 ### Breaking Changes

@@ -117,22 +117,6 @@ resource "vault_ssh_secret_backend_role" "ssh" {
 * Bastion Deployment
 ************************************************/
 
-module "nlb_common" {
-  source = "../kube_nlb_common_resources"
-
-  name_prefix = "bastion-"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
 resource "kubernetes_secret" "bastion_ca" {
   metadata {
     name      = "${local.name}-ca"
@@ -200,6 +184,12 @@ module "bastion" {
       liveness_probe_port = var.bastion_port
       liveness_probe_type = "TCP"
       minimum_memory      = 50
+      ports = {
+        ssh = {
+          service_port = var.bastion_port
+          port         = var.bastion_port
+        }
+      }
     },
 
     // SSHD requires that root be the only
@@ -238,12 +228,8 @@ module "bastion" {
   }
   mount_owner = 0
 
-  ports = {
-    ssh = {
-      service_port = var.bastion_port
-      pod_port     = var.bastion_port
-    }
-  }
+  service_type                = "LoadBalancer"
+  service_public_domain_names = var.bastion_domains
 
   vpa_enabled = var.vpa_enabled
 
@@ -260,36 +246,4 @@ module "bastion" {
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
-}
-
-resource "random_id" "bastion_name" {
-  byte_length = 8
-  prefix      = "bastion-"
-}
-
-resource "kubernetes_service" "bastion" {
-  metadata {
-    name      = "${local.name}-ingress"
-    namespace = local.namespace
-    labels    = module.bastion.labels
-    annotations = merge(module.nlb_common.annotations, {
-      "external-dns.alpha.kubernetes.io/hostname" = join(",", var.bastion_domains)
-    })
-  }
-  spec {
-    type                    = "LoadBalancer"
-    load_balancer_class     = "service.k8s.aws/nlb"
-    external_traffic_policy = "Cluster"
-    internal_traffic_policy = "Cluster"
-    ip_families             = ["IPv4"]
-    ip_family_policy        = "SingleStack"
-    selector                = module.bastion.match_labels
-    port {
-      name        = "ssh"
-      port        = var.bastion_port
-      target_port = var.bastion_port
-      protocol    = "TCP"
-    }
-  }
-  depends_on = [module.bastion]
 }

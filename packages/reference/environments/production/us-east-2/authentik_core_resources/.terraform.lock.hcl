@@ -27,28 +27,25 @@ provider "registry.opentofu.org/alekc/kubectl" {
 }
 
 provider "registry.opentofu.org/goauthentik/authentik" {
-  version = "2024.4.2"
+  version = "2024.8.2"
   hashes = [
-    "h1:AIaHp4Us339atdhBGUQJJIpQ1NYNTg5xlA3zfwonpTQ=",
-    "h1:AewIzYfKQUBDAS37bpAxK5lc5PmwULYgLoltJAacpCU=",
-    "h1:S5G1kkM7VFPPXo79e/AmtZjdaQPoz9mdtw9BVwXn/ss=",
-    "h1:jj4zMBQCFrzMiu64CcCEkcuHeXvQYD2wnjMlitbDS5g=",
-    "zh:09280fe0dc65eb82a73220e7b9d1bf7f1053e9b66ab0d75406e0a59b77157ea4",
-    "zh:14d052cc1647c8196ef870851dfecd4682102a37640f333fa5f99f45ec8790ac",
-    "zh:19ef80becc65924c78372145a3de0d765f3743f2200b68ad69161366f49fe1c5",
-    "zh:318f226abefab13f73d0985e2caff0b228cc37df37a30d8cfefdc78a59a9b6d1",
-    "zh:5792741bc26ed94705ded577da1b12e7fcf1186dddfff7b32c79822246a863ef",
-    "zh:57f99544820651facb29560f598b24c1313ba1e0f15adcf594b2b3c6793a5d61",
-    "zh:7b1c814ebb9ebda432191e77e40d3f41b1df9fd6fffdf186473433de1c80e112",
-    "zh:810b5cc769c6de4747e8249cda12a1a160ee3bdf4bec6f599dc2d655fe36f22b",
-    "zh:830722fccdac4e0054ac8269891cff367b84d7f99a4c2ce25cffe6a360518295",
-    "zh:9152549b5deb5403034c1e68821a8664a93b79793e0a7db163c6a31f0fc6a345",
-    "zh:b1964a7469509222e69d86d58c3c0d84f4a0fa5c4eaa23bd0cc5529c7ade0a8e",
-    "zh:e256102f995b8c4ca3442144b3a7edb265ebbd16e784046a27e104b72917ca51",
-    "zh:e298528c7c03d0e8385d5bf07586813690757e640b0693a7723e0e3ad067c8de",
-    "zh:e955a3ecc443b341295b09e9fb6ca406d8107b21e1b7b8d723cba4099c7ae857",
+    "h1:a/zGxz5mU9L/j0s0QuhBFDNw057ZzsEhD8aaH4YTsjI=",
+    "zh:1a08cf73a35237bf84e8761eb026b4175bc34bab4c6a206110cb9a3d06c86391",
+    "zh:1f5807c2ab22e21a9f4c1d19bc64c52150ac003c6a90417315d8fafb6cbfd09d",
+    "zh:20237b247cbee340d03629f3bb4e156e8ccf65db246eeffb4cad3dabe34f26bb",
+    "zh:416ee251d684360e993ea3bdd7b9b3abb869f1d27d3bfe7c53731d444493bad3",
+    "zh:4d76186b29969509fb950ddce03b80eba9bc3409b6bbd20f8a9e7623d84b63c0",
+    "zh:588bbeb5768dc0e6d6b3e7bc67709ef7bc4a7f48eeb659801bc8511d646141ac",
+    "zh:5f95796b207c90e4dcf5d9f2945929351c5709754ce66839279e87279a04204f",
+    "zh:60263694ce7e107f3f78d5cc727d6143082e0eaa97b15727af83aaed8305d351",
+    "zh:6ecc4bd586e37987cfa057fc3a3f87bd461e3215d9efb5654fdd639a8d5318e9",
+    "zh:9e05d3d930a92f160cd788a699b3e11c80b59cb67b5f0b4a9970a1f7e9b08045",
+    "zh:c6ecaafa4176f12c8930fe2225c34a6d64eb9eb9774b50df17714d2ae338068d",
+    "zh:d781b9de7ce45a0b67b177705f755746b3afb11c4cac9171825bd9ace4017da6",
+    "zh:df6d9bc87b752c4e75f5246b32a98049a3253762389fd8476a9b4f96729f9cdd",
+    "zh:ef6c1ce79965e212929674063de6280abae5ee5c064049880ab81ca0e27b7434",
   ]
-  constraints = "2024.4.2"
+  constraints = "2024.8.2"
 }
 
 provider "registry.opentofu.org/hashicorp/kubernetes" {

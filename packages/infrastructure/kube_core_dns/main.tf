@@ -155,6 +155,27 @@ module "core_dns" {
         readiness_probe_port  = "8181"
         readiness_probe_route = "/ready"
         minimum_memory        = 30
+        ports = {
+          dns = {
+            port     = 53
+            protocol = "UDP"
+          }
+          dns-tcp = {
+            port = 53
+          }
+          raw-metrics = {
+            port              = 9153
+            expose_on_service = false
+          }
+          dns-readyz = {
+            port              = 8181
+            expose_on_service = false
+          }
+          dns-livez = {
+            port              = 8080
+            expose_on_service = false
+          }
+        }
       }
     ],
     var.monitoring_enabled ? [
@@ -181,6 +202,15 @@ module "core_dns" {
         liveness_probe_route  = "/healthz"
         liveness_probe_scheme = "HTTPS"
         minimum_memory        = 10
+        ports = {
+          metrics = {
+            port = 4353
+          }
+          rbac-healthz = {
+            port              = 8888
+            expose_on_service = false
+          }
+        }
       }
     ] : []
   )
@@ -200,6 +230,9 @@ module "core_dns" {
     }
   } : {})
 
+  service_ip   = var.service_ip
+  service_name = "kube-dns" // By convention, this must be available at kube-system/kube-dns
+
   vpa_enabled = var.vpa_enabled
 
   # pf-generate: pass_vars_no_extra_tags
@@ -216,43 +249,6 @@ module "core_dns" {
   })
 
   depends_on = [module.metrics_cert]
-}
-
-resource "kubernetes_service" "core_dns" {
-  metadata {
-    // By convention, this must be available at kube-system/kube-dns
-    name      = "kube-dns"
-    namespace = local.namespace
-    labels    = module.core_dns.labels
-  }
-  spec {
-    cluster_ip              = var.service_ip
-    cluster_ips             = [var.service_ip]
-    internal_traffic_policy = "Cluster"
-    ip_families             = ["IPv4"]
-    ip_family_policy        = "SingleStack"
-    selector                = module.core_dns.match_labels
-    port {
-      name        = "dns"
-      port        = 53
-      protocol    = "UDP"
-      target_port = 53
-    }
-    port {
-      name        = "dns-tcp"
-      port        = 53
-      protocol    = "TCP"
-      target_port = 53
-    }
-    port {
-      name        = "metrics"
-      port        = 4353
-      protocol    = "TCP"
-      target_port = 4353
-    }
-  }
-
-  depends_on = [module.core_dns]
 }
 
 resource "kubectl_manifest" "service_monitor" {
@@ -293,7 +289,7 @@ resource "kubectl_manifest" "service_monitor" {
   })
   force_conflicts   = true
   server_side_apply = true
-  depends_on        = [kubernetes_service.core_dns]
+  depends_on        = [module.core_dns]
 }
 
 resource "kubectl_manifest" "monitoring_rules" {

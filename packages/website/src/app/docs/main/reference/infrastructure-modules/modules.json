@@ -346,6 +346,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_service",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_stateful_set",
       "type": "submodule",
       "group": "kubernetes"

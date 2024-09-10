@@ -10,7 +10,7 @@ output "labels" {
 
 output "headless_service_name" {
   description = "The name of the headless service where StatefulSet pods are registered"
-  value       = kubernetes_service.headless.metadata[0].name
+  value       = "${var.name}-headless"
 }
 
 output "service_account_name" {

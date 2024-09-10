@@ -15,6 +15,15 @@ terraform {
   }
 }
 
+locals {
+  all_ports = merge([for container_name, config in var.containers : config.ports]...)
+  service_ports = { for name, config in local.all_ports : name => {
+    pod_port     = config.port
+    service_port = config.service_port
+    protocol     = config.protocol
+  } if config.expose_on_service }
+}
+
 // This is needed b/c this can never
 // change without destroying the deployment first
 resource "random_id" "deployment_id" {
@@ -114,6 +123,23 @@ resource "kubectl_manifest" "deployment" {
     "spec.replicas"
   ] : []
   wait_for_rollout = var.wait_for_rollout
+}
+
+module "service" {
+  count  = length(keys(local.service_ports)) > 0 ? 1 : 0
+  source = "../kube_service"
+
+  type                = var.service_type
+  load_balancer_class = var.service_load_balancer_class
+  public_domain_names = var.service_public_domain_names
+  name                = var.service_name == null ? var.name : var.service_name
+  namespace           = var.namespace
+  ports               = local.service_ports
+  service_ip          = var.service_ip
+  match_labels        = module.pod_template.match_labels
+  extra_labels        = module.pod_template.labels
+
+  depends_on = [kubectl_manifest.deployment]
 }
 
 resource "kubectl_manifest" "vpa" {

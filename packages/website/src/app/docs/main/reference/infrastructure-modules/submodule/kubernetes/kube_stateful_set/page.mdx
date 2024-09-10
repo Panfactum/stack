@@ -124,6 +124,12 @@ list(object({
     readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
     readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
     readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
+    ports = optional(map(object({                              # Keys are the port names, and the values are the port configuration.
+      port              = number                               # Port on the backing pods that traffic should be routed to
+      service_port      = optional(number, null)               # Port to expose on the service. defaults to port
+      protocol          = optional(string, "TCP")              # One of TCP, UDP, or SCTP
+      expose_on_service = optional(bool, true)                 # Whether this port should be listed on the StatefulSet's service
+    })), {})
   }))
 ```
 
@@ -386,21 +392,6 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_ports" /> [ports](#input_ports)
-
-Description: The port the application is listening on inside the container
-
-Type:
-
-```hcl
-map(object({
-    service_port = number
-    pod_port     = number
-  }))
-```
-
-Default: `{}`
-
 ### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
 
 Description: The priority class to use for pods in the StatefulSet
@@ -447,6 +438,46 @@ map(object({
 ```
 
 Default: `{}`
+
+### <a name="input_service_ip" /> [service\_ip](#input_service_ip)
+
+Description: If provided, the StatefulSet's service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_service_load_balancer_class" /> [service\_load\_balancer\_class](#input_service_load_balancer_class)
+
+Description: Iff service\_type == LoadBalancer, the loadBalancerClass to use.
+
+Type: `string`
+
+Default: `"service.k8s.aws/nlb"`
+
+### <a name="input_service_name" /> [service\_name](#input_service_name)
+
+Description: If provided, the StatefulSet's service will have this name. If not provided, will default to name.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_service_public_domain_names" /> [service\_public\_domain\_names](#input_service_public_domain_names)
+
+Description: Iff service\_type == LoadBalancer, the public domains names that this service will be accessible from.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### <a name="input_service_type" /> [service\_type](#input_service_type)
+
+Description: The type of the StatefulSet's Service.
+
+Type: `string`
+
+Default: `"ClusterIP"`
 
 ### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
 

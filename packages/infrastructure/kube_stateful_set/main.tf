@@ -19,6 +19,15 @@ terraform {
   }
 }
 
+locals {
+  all_ports = merge([for container_name, config in var.containers : config.ports]...)
+  service_ports = { for name, config in local.all_ports : name => {
+    pod_port     = config.port
+    service_port = config.service_port
+    protocol     = config.protocol
+  } if config.expose_on_service }
+}
+
 // This is needed b/c this can never
 // change without destroying the StatefulSet first
 resource "random_id" "sts_id" {
@@ -90,25 +99,16 @@ resource "kubernetes_service_account" "service_account" {
   }
 }
 
-resource "kubernetes_service" "headless" {
-  metadata {
-    name      = "${var.name}-headless"
-    namespace = var.namespace
-    labels    = module.pod_template.labels
-  }
-  spec {
-    type = "ClusterIP"
-    dynamic "port" {
-      for_each = var.ports
-      content {
-        port        = port.value.service_port
-        target_port = port.value.pod_port
-        protocol    = "TCP"
-        name        = port.key
-      }
-    }
-    selector = module.pod_template.match_labels
-  }
+module "service_headless" {
+  source = "../kube_service"
+
+  type             = "ClusterIP"
+  name             = "${var.name}-headless"
+  namespace        = var.namespace
+  ports            = local.service_ports
+  match_labels     = module.pod_template.match_labels
+  extra_labels     = module.pod_template.labels
+  headless_enabled = true
 }
 
 resource "kubectl_manifest" "stateful_set" {
@@ -124,7 +124,7 @@ resource "kubectl_manifest" "stateful_set" {
       }
     }
     spec = {
-      serviceName         = kubernetes_service.headless.metadata[0].name
+      serviceName         = "${var.name}-headless"
       podManagementPolicy = var.pod_management_policy
       replicas            = var.replicas
       updateStrategy = {
@@ -167,6 +167,24 @@ resource "kubectl_manifest" "stateful_set" {
   ignore_fields = var.ignore_replica_count ? [
     "spec.replicas"
   ] : []
+  depends_on = [module.service_headless]
+}
+
+module "service" {
+  count  = length(keys(local.service_ports)) > 0 ? 1 : 0
+  source = "../kube_service"
+
+  type                = var.service_type
+  load_balancer_class = var.service_load_balancer_class
+  public_domain_names = var.service_public_domain_names
+  name                = var.service_name == null ? var.name : var.service_name
+  namespace           = var.namespace
+  ports               = local.service_ports
+  service_ip          = var.service_ip
+  match_labels        = module.pod_template.match_labels
+  extra_labels        = module.pod_template.labels
+
+  depends_on = [kubectl_manifest.stateful_set]
 }
 
 resource "kubectl_manifest" "vpa" {

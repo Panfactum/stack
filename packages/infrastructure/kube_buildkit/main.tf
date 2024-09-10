@@ -212,6 +212,11 @@ module "buildkit" {
       minimum_cpu            = var.cpu_millicores
       maximum_cpu            = var.cpu_millicores
       minimum_memory         = var.memory_mb
+      ports = {
+        buildkitd = {
+          port = local.port
+        }
+      }
     }
   ]
 
@@ -250,13 +255,6 @@ module "buildkit" {
 
   volume_retention_policy = {
     when_deleted = "Delete"
-  }
-
-  ports = {
-    buildkitd = {
-      service_port = local.port
-      pod_port     = local.port
-    }
   }
 
   # pf-generate: pass_vars

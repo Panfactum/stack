@@ -408,6 +408,12 @@ locals {
           }]
         )
 
+        ports = [for name, config in config.ports : {
+          name          = name
+          protocol      = config.protocol
+          containerPort = config.port
+        }]
+
         startupProbe = config.liveness_probe_type != null ? {
           httpGet = config.liveness_probe_type == "HTTP" ? {
             path   = config.liveness_probe_route

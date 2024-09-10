@@ -1,10 +1,10 @@
 variable "namespace" {
-  description = "The namespace the cluster is in"
+  description = "The namespace the Deployment should be created in"
   type        = string
 }
 
 variable "name" {
-  description = "The name of this deployment"
+  description = "The name of this Deployment"
   type        = string
 }
 
@@ -15,7 +15,7 @@ variable "priority_class_name" {
 }
 
 variable "update_type" {
-  description = "The type of update that the deployment should use"
+  description = "The type of update that the Deployment should use"
   type        = string
   default     = "RollingUpdate"
 }
@@ -67,14 +67,38 @@ variable "vpa_enabled" {
   default     = true
 }
 
+variable "service_name" {
+  description = "If provided, the Deployment's service will have this name. If not provided, will default to name."
+  type        = string
+  default     = null
+}
 
-variable "ports" {
-  description = "The port the application is listening on inside the container"
-  type = map(object({
-    service_port = number
-    pod_port     = number
-  }))
-  default = {}
+variable "service_type" {
+  description = "The type of the Deployment's Service."
+  type        = string
+  default     = "ClusterIP"
+
+  validation {
+    condition     = contains(["ExternalName", "ClusterIP", "NodePort", "LoadBalancer"], var.service_type)
+    error_message = "Must be one of: ExternalName, ClusterIP, NodePort, LoadBalancer"
+  }
+}
+
+variable "service_load_balancer_class" {
+  description = "Iff service_type == LoadBalancer, the loadBalancerClass to use."
+  type        = string
+  default     = "service.k8s.aws/nlb"
+}
+
+variable "service_public_domain_names" {
+  description = "Iff service_type == LoadBalancer, the public domains names that this service will be accessible from."
+  type        = list(string)
+  default     = []
+}
+variable "service_ip" {
+  description = "If provided, the Deployment's service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster."
+  type        = string
+  default     = null
 }
 
 variable "containers" {
@@ -109,6 +133,12 @@ variable "containers" {
     readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
     readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
     readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
+    ports = optional(map(object({                              # Keys are the port names, and the values are the port configuration.
+      port              = number                               # Port on the backing pods that traffic should be routed to
+      service_port      = optional(number, null)               # Port to expose on the service. defaults to port
+      protocol          = optional(string, "TCP")              # One of TCP, UDP, or SCTP
+      expose_on_service = optional(bool, true)                 # Whether this port should be listed on the Deployment's service
+    })), {})
   }))
 }
 

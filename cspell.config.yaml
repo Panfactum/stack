@@ -184,7 +184,11 @@ words: [
   "persistentvolumeclaims",
   "nodeclasses",
   "nodepools",
-  "nodeclaims"
+  "nodeclaims",
+  "Tigera",
+  "Traefik",
+  "vpns",
+  "externaldns"
 ]
 languageSettings:
   - languageId: markdown,mdx
