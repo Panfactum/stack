@@ -1,11 +1,11 @@
 output "root_name" {
-  description = "The name of the superuser of the database"
+  description = "The name of the root user of the database"
   value       = "default"
 }
 
 output "root_password" {
   description = "The password for root user of the database"
-  value       = random_password.superuser_password.result
+  value       = random_password.root_password.result
   sensitive   = true
 }
 

@@ -18,7 +18,8 @@ usage() {
 ####################################################################
 
 terragrunt run-all \
-  init -upgrade
+  init -upgrade \
+  --terragrunt-ignore-external-dependencies
 
 ####################################################################
 # Step 2: Update the platform locks to include all platforms
@@ -29,4 +30,5 @@ terragrunt run-all \
   -platform=linux_amd64 \
   -platform=linux_arm64 \
   -platform=darwin_amd64 \
-  -platform=darwin_arm64
+  -platform=darwin_arm64 \
+  --terragrunt-ignore-external-dependencies

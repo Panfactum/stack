@@ -166,3 +166,9 @@ variable "vault_credential_lifetime_hours" {
   type        = number
   default     = 16
 }
+
+variable "creds_syncer_logging_enabled" {
+  description = "Whether to enable logging for the creds-syncer pods"
+  type        = bool
+  default     = false
+}

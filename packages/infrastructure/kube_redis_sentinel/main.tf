@@ -80,21 +80,31 @@ module "constants" {
 // that runs redis> CONFIG SET requirepass <your new password>
 // on each node
 // The same will likely apply to certs: https://github.com/redis/redis/issues/8756
-resource "random_password" "superuser_password" {
+resource "random_password" "root_password" {
   length  = 64
   special = false
 }
 
-resource "kubernetes_secret" "superuser" {
+moved {
+  from = random_password.superuser_password
+  to   = random_password.root_password
+}
+
+resource "kubernetes_secret" "root_creds" {
   type = "kubernetes.io/basic-auth"
   metadata {
-    name      = nonsensitive("redis-superuser-${sha256(random_password.superuser_password.result)}")
+    name      = nonsensitive("redis-superuser-${sha256(random_password.root_password.result)}")
     namespace = var.namespace
     labels    = module.util.labels
   }
   data = {
-    password = random_password.superuser_password.result
+    password = random_password.root_password.result
   }
+}
+
+moved {
+  from = kubernetes_secret.superuser
+  to   = kubernetes_secret.root_creds
 }
 
 /***************************************
@@ -148,7 +158,7 @@ resource "helm_release" "redis" {
       auth = {
         enabled                   = true
         sentinel                  = true
-        existingSecret            = kubernetes_secret.superuser.metadata[0].name
+        existingSecret            = kubernetes_secret.root_creds.metadata[0].name
         existingSecretPasswordKey = "password"
       }
 
@@ -509,7 +519,7 @@ resource "vault_database_secret_backend_connection" "redis" {
     host     = "${random_id.id.hex}-master.${var.namespace}"
     port     = 6379
     tls      = false
-    password = random_password.superuser_password.result
+    password = random_password.root_password.result
     username = "default" // This is the main superuser
   }
 
@@ -517,6 +527,116 @@ resource "vault_database_secret_backend_connection" "redis" {
 
   depends_on = [helm_release.redis]
 }
+
+/***************************************
+* Creds Syncer
+*
+* This is required because unlike redis data, redis users and ACL rules are NOT
+* automatically synchronized between nodes for some god forsaken reason.
+* Additionally, sentinel has its own, independent ACL system that needs to be synced
+* in addition to the normal redis processes :(
+***************************************/
+
+resource "kubernetes_config_map" "creds_syncer" {
+  metadata {
+    name      = "${random_id.id.hex}-creds-syncer-scripts"
+    namespace = var.namespace
+    labels    = module.secrets_sync.labels
+  }
+  data = {
+    "creds-sync.sh" = file("${path.module}/creds-sync.sh")
+  }
+}
+
+resource "kubernetes_role" "creds_syncer" {
+  metadata {
+    name      = "${random_id.id.hex}-creds-syncer"
+    namespace = var.namespace
+    labels    = module.secrets_sync.labels
+  }
+  rule {
+    api_groups     = [""]
+    resources      = ["pods"]
+    verbs          = ["get", "list"]
+    resource_names = [for i in range(3) : "${random_id.id.hex}-node-${i}"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get", "list", "delete"]
+    resource_names = [
+      "${random_id.id.hex}-superuser-creds",
+      "${random_id.id.hex}-admin-creds",
+      "${random_id.id.hex}-reader-creds"
+    ]
+  }
+}
+
+resource "kubernetes_role_binding" "creds_syncer" {
+  metadata {
+    name      = "${random_id.id.hex}-creds-syncer"
+    namespace = var.namespace
+    labels    = module.secrets_sync.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.secrets_sync.service_account_name
+    namespace = var.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.creds_syncer.metadata[0].name
+  }
+}
+
+module "secrets_sync" {
+  source = "../kube_deployment"
+
+  name      = "${random_id.id.hex}-creds-syncer"
+  namespace = var.namespace
+
+  containers = [
+    {
+      name             = "sync"
+      image_registry   = module.pull_through.ecr_public_registry
+      image_repository = module.constants.panfactum_image_repository
+      image_tag        = module.constants.panfactum_image_tag
+      command          = ["/scripts/creds-sync.sh"]
+      minimum_memory   = 20
+    }
+  ]
+
+  common_env = {
+    SRC_REDIS_HOST  = "${random_id.id.hex}-master.${var.namespace}"
+    SRC_REDIS_PORT  = 6379
+    REDIS_NAMESPACE = var.namespace
+    REDIS_ID        = module.util.labels.id
+    REDIS_STS_NAME  = random_id.id.hex
+    LOGGING_ENABLED = var.creds_syncer_logging_enabled ? 1 : 0
+  }
+
+  common_secrets = {
+    REDISCLI_AUTH = random_password.root_password.result
+  }
+
+  extra_pod_annotations = {
+    "config.linkerd.io/proxy-memory-request" = "5Mi"
+    "config.linkerd.io/proxy-memory-limit"   = "25Mi"
+  }
+
+  config_map_mounts = {
+    "${kubernetes_config_map.creds_syncer.metadata[0].name}" = {
+      mount_path = "/scripts"
+    }
+  }
+
+  vpa_enabled              = var.vpa_enabled
+  controller_nodes_enabled = true
+
+  depends_on = [helm_release.redis]
+}
+
 
 /***************************************
 * Vault Secrets

@@ -194,7 +194,8 @@ words: [
   "preconfigured",
   "yamlencode",
   "creds",
-  "strcontains"
+  "strcontains",
+  "syncer"
 ]
 languageSettings:
   - languageId: markdown,mdx
