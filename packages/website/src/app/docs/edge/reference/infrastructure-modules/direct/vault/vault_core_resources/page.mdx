@@ -12,6 +12,10 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
 * [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Required Inputs
@@ -33,6 +37,38 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level for the vault-secrets-operators pods
+
+Type: `string`
+
+Default: `"error"`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_vault_secrets_operator_helm_version" /> [vault\_secrets\_operator\_helm\_version](#input_vault_secrets_operator_helm_version)
+
+Description: The version of the vault-secrets-operator helm chart to deploy
+
+Type: `string`
+
+Default: `"0.8.1"`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 

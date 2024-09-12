@@ -121,22 +121,7 @@ and store the state for each environment inside of that environment's AWS accoun
 
 ### Providers
 
-Providers must be enabled via a `providers` key which is an array of string values. Each value represents a provider
-to enable for the module. As a result, this key is typically found in the `module.yaml`.
-
-The following provider strings are available:
-
-* `aws`
-* `helm`
-* `kubernetes`
-* `local`
-* `random`
-* `time`
-* `tls`
-* `vault`
-* `authentik`
-
-In addition, some providers have additional configuration values that must be set.
+Some providers have additional configuration values that must be set.
 
 #### `aws` Provider
 

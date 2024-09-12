@@ -9,7 +9,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
-## Unreleased
+## edge.24-09-12
 
 ### Breaking Changes
 
@@ -26,19 +26,20 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   because "superuser" implies Vault-generated credentials, which these are not.
 
 * `pf-providers-enable` has been renamed to `pf-tf-init` as it now has expanded functionality:
-    * Now influences every module in the directory tree where it is run rather than just the module in the CWD.
-    * Now runs `init -upgrade` on every module to update provider versions and download internal submodules when performing Panfactum version upgrades.
-    * The runtime speed has been improved in order to accommodate running against many modules at once.
 
-    We have updated the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) to reflect that `pf-tf-init` should
-    be run every time you upgrade the Panfactum version in an environment.
+  * Now influences every module in the directory tree where it is run rather than just the module in the CWD.
+  * Now runs `init -upgrade` on every module to update provider versions and download internal submodules when performing Panfactum version upgrades.
+  * The runtime speed has been improved in order to accommodate running against many modules at once.
+
+  We have updated the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) to reflect that `pf-tf-init` should
+  be run every time you upgrade the Panfactum version in an environment.
 
 * You now no longer need to manually enable providers via the `providers` array in each `module.yaml`. Our Terragrunt configuration now automatically
-detects which providers need to be included at runtime.
+  detects which providers need to be included at runtime.
 
-    No changes are required to take advantage of this new functionality.
-    However, the `providers` Terragrunt input no longer has any functionality and the `providers` array can be removed
-    from all `module.yaml` files. If this leaves a `module.yaml` empty, the entire `module.yaml` file can be deleted.
+  No changes are required to take advantage of this new functionality.
+  However, the `providers` Terragrunt input no longer has any functionality and the `providers` array can be removed
+  from all `module.yaml` files. If this leaves a `module.yaml` empty, the entire `module.yaml` file can be deleted.
 
 ### Added
 
@@ -52,8 +53,8 @@ detects which providers need to be included at runtime.
 ### Fixed
 
 * Adds a controller node preference to pods with `controller_nodes_enabled` set to `true`. This optimizes resource
-efficiency in the cluster as we should prefer to fill controller (EKS) nodes before Karpenter nodes as controller
-nodes are not automatically scaled.
+  efficiency in the cluster as we should prefer to fill controller (EKS) nodes before Karpenter nodes as controller
+  nodes are not automatically scaled.
 
 ## edge.24-09-10
 

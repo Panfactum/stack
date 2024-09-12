@@ -145,18 +145,8 @@ remains consistent across an entire environment.
 
 We provide ready-made configuration for many providers (see the [full list here](/docs/edge/reference/configuration/terragrunt-variables#providers)).
 
-To enable a provider, add the provider under `providers` key of the module's `module.yaml`.
-
-For example, this `module.yaml` would enable the `aws` and `kubernetes` provider for a module:
-
-```yaml
-providers:
-  - aws
-  - kubernetes
-```
-
-We provide a convenience command, `pf-providers-enable`, that will automatically inspect the sourced
-infrastructure module and add the correct values to the `providers` array. [^3]
+We also provide a convenience command, `pf-tf-init`, that will automatically inspect the sourced
+infrastructure module and add the correct providers and provider hashes to your `.terraform.lock.hcl` files. [^3]
 
 [^3]: This uses `terragrunt providers` under the hood. `terragrunt providers` can be used to provide
 more granular information about the required providers such as their versions.

@@ -116,7 +116,7 @@ Let's deploy it now:
 
    5. For `allowed_groups`, provide *all* the groups that you want to allow to access AWS (we will assign roles later).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -200,7 +200,7 @@ Let's deploy it now:
       of the roles, see this [reference document.](/docs/edge/reference/rbac)
       You must have already allowed these groups access to AWS in the `authentik_aws_sso` module above.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -315,7 +315,7 @@ Let's deploy it now:
 
    3. For `allowed_groups`, provide *all* the groups that you want to allow to access the particular Vault cluster (we will assign roles later).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. In your `module.yaml`, set the `module` to `authentik_vault_sso`.
 
@@ -344,7 +344,7 @@ Let's deploy it now:
    Additionally, note that we do not have `restricted_reader_groups` or `billing_admin_groups` as Vault contains *only* sensitive
    information.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
