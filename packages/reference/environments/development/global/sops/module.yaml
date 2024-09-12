@@ -1,4 +1,1 @@
-providers:
-  - aws
-module: aws_kms_encrypt_key
 module: aws_kms_encrypt_key

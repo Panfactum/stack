@@ -48,12 +48,16 @@ locals {
   )
 
   # Activated providers
-  providers         = lookup(local.vars, "providers", [])
-  enable_aws        = contains(local.providers, "aws")
-  enable_kubernetes = contains(local.providers, "kubernetes")
-  enable_vault      = contains(local.providers, "vault")
-  enable_helm       = contains(local.providers, "helm")
-  enable_authentik  = contains(local.providers, "authentik")
+  lockfile_contents = try(file(find_in_parent_folders("${get_terragrunt_dir()}/.terraform.lock.hcl")), "")
+  enable_aws        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/aws")
+  enable_kubernetes = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/kubernetes") || strcontains(local.lockfile_contents, "registry.opentofu.org/alekc/kubectl")
+  enable_vault      = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/vault")
+  enable_helm       = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/helm")
+  enable_authentik  = strcontains(local.lockfile_contents, "registry.opentofu.org/goauthentik/authentik")
+  enable_time       = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/time")
+  enable_local      = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/local")
+  enable_random     = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/random")
+  enable_tls        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/tls")
 
   # The version of the panfactum stack to deploy
   pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
@@ -219,25 +223,25 @@ generate "authentik_override_provider" {
 generate "time_provider" {
   path      = "time.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.providers, "time") ? file("${local.provider_folder}/time.tf") : ""
+  contents  = local.enable_time ? file("${local.provider_folder}/time.tf") : ""
 }
 
 generate "random_provider" {
   path      = "random.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.providers, "random") ? file("${local.provider_folder}/random.tf") : ""
+  contents  = local.enable_random ? file("${local.provider_folder}/random.tf") : ""
 }
 
 generate "local_provider" {
   path      = "local.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.providers, "local") ? file("${local.provider_folder}/local.tf") : ""
+  contents  = local.enable_local ? file("${local.provider_folder}/local.tf") : ""
 }
 
 generate "tls_provider" {
   path      = "tls.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = contains(local.providers, "tls") ? file("${local.provider_folder}/tls.tf") : ""
+  contents  = local.enable_tls ? file("${local.provider_folder}/tls.tf") : ""
 }
 
 generate "vault_provider" {

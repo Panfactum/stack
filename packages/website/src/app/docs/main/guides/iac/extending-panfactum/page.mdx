@@ -30,29 +30,49 @@ Until that issue is resolved, you should copy this block into your `shared.hcl`:
 
 ```hcl
 locals {
-    global_raw_vars   = try(yamldecode(file(find_in_parent_folders("global.yaml"))), null)
-    global_user_vars  = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), null)
-    global_vars       = merge({}, local.global_raw_vars, local.global_user_vars)
+  global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), {})
+  global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), {})
+  global_vars         = merge({}, local.global_raw_vars, local.global_user_vars)
+  global_extra_tags   = lookup(local.global_vars, "extra_tags", {})
+  global_extra_inputs = lookup(local.global_vars, "extra_inputs", {})
 
-    environment_raw_vars   = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), null)
-    environment_user_vars  = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), null)
-    environment_vars       = merge({}, local.environment_raw_vars, local.environment_user_vars)
+  environment_raw_vars     = try(yamldecode(file(find_in_parent_folders("environment.yaml"))), {})
+  environment_user_vars    = try(yamldecode(file(find_in_parent_folders("environment.user.yaml"))), {})
+  environment_vars         = merge({}, local.environment_raw_vars, local.environment_user_vars)
+  environment_extra_tags   = lookup(local.environment_vars, "extra_tags", {})
+  environment_extra_inputs = lookup(local.environment_vars, "extra_inputs", {})
 
-    region_raw_vars   = try(yamldecode(file(find_in_parent_folders("region.yaml"))), null)
-    region_user_vars  = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), null)
-    region_vars       = merge({}, local.region_raw_vars, local.region_user_vars)
+  region_raw_vars     = try(yamldecode(file(find_in_parent_folders("region.yaml"))), {})
+  region_user_vars    = try(yamldecode(file(find_in_parent_folders("region.user.yaml"))), {})
+  region_vars         = merge({}, local.region_raw_vars, local.region_user_vars)
+  region_extra_tags   = lookup(local.region_vars, "extra_tags", {})
+  region_extra_inputs = lookup(local.region_vars, "extra_inputs", {})
 
-    module_raw_vars   = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), null)
-    module_user_vars  = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), null)
-    module_vars       = merge({}, local.module_raw_vars, local.module_user_vars)
+  module_raw_vars     = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.yaml"))), {})
+  module_user_vars    = try(yamldecode(file(find_in_parent_folders("${get_terragrunt_dir()}/module.user.yaml"))), {})
+  module_vars         = merge({}, local.module_raw_vars, local.module_user_vars)
+  module_extra_tags   = lookup(local.module_vars, "extra_tags", {})
+  module_extra_inputs = lookup(local.module_vars, "extra_inputs", {})
 
-    # Merge all of the vars with order of precedence
-    vars = merge(
-        local.global_vars,
-        local.environment_vars,
-        local.region_vars,
-        local.module_vars
-    )
+  # Merge all of the vars with order of precedence
+  vars = merge(
+    local.global_vars,
+    local.environment_vars,
+    local.region_vars,
+    local.module_vars
+  )
+  extra_tags = merge(
+    local.global_extra_tags,
+    local.environment_extra_tags,
+    local.region_extra_tags,
+    local.module_extra_tags
+  )
+  extra_inputs = merge(
+    local.global_extra_inputs,
+    local.environment_extra_inputs,
+    local.region_extra_inputs,
+    local.module_extra_inputs
+  )
 }
 ```
 
@@ -73,31 +93,21 @@ to use the same provider settings.
 
 1. Ensure that each module has an `include` block for your custom `shared.hcl` (see above).
 
-2. Follow the "Accessing the Scoped YAML Variables" to gain access to the `local.vars.providers` array in your `shared.hcl` configuration.
-
-3. Create a new `datadog.tf` file with the following contents (example). Add it to the `environments/providers/` directory
+2. Create a new `datadog.tf` file with the following contents (example). Add it to the `environments/providers/` directory
    alongside the other provider snippets.
 
-```hcl
-provider "datadog" {
-  api_url = "https://api.datadoghq.com/"
-}
-```
+   ```hcl
+   provider "datadog" {
+     api_url = "https://api.datadoghq.com/"
+   }
+   ```
 
-4. Add the following snippet to your `shared.hcl`:
+3. Add the following snippet to your `shared.hcl`:
 
-```hcl
-generate "datadog_provider" {
-    path      = "datadog.tf"
-    if_exists = "overwrite_terragrunt"
-    contents  = contains(local.vars.providers, "datadog") ? file("${path_relative_from_include()}/providers/datadog.tf") : ""
-}
-```
-
-5. Add `datadog` to your `module.yaml` `providers` array:
-
-```yaml
-providers:
-    - aws      # Will use the built-in Panfactum aws provider config
-    - datadog  # Will use your new Datadog provider config
-```
+   ```hcl
+   generate "datadog_provider" {
+       path      = "datadog.tf"
+       if_exists = "overwrite_terragrunt"
+       contents  = strcontains(try(file(find_in_parent_folders("${get_terragrunt_dir()}/.terraform.lock.hcl")), ""), "registry.opentofu.org/DataDog/datadog") ? file("${path_relative_from_include()}/providers/datadog.tf") : ""
+   }
+   ```

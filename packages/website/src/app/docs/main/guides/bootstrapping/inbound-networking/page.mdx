@@ -37,7 +37,7 @@ Let's deploy it now:
 3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](/docs/main/guides/bootstrapping/certificate-management#deploy-issuers)
    for more information, but unless you have a specific reason not to, simply copy that input into this module.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -72,7 +72,7 @@ Let's deploy it now:
 3. Select the **public** subnets that you want AWS load balancers to be able to use. We suggest passing in **all**
    the public subnets created in your `aws_vpc` deployment.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -130,7 +130,7 @@ We provide a module to deploy it: [kube\_ingress\_nginx](/docs/main/reference/in
    4. If you need to support legacy TLSv1.2 clients, set `tls_1_2_enabled` to `true`. We recommend using
       only TLSv1.3 if possible.
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -263,7 +263,7 @@ Let's deploy the bastion now:
       Those certificates are valid for `ssh_cert_lifetime_seconds`. We recommend setting this to a fairly low value
       ($\leq$ 8 hours) as long-lived certificates would allow de-provisioned users to continue to access the private network. [^2]
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

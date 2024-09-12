@@ -30,7 +30,7 @@ information.
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -59,7 +59,7 @@ Let's deploy it now.
 3. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/main/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
    you should use a `service_ip` of `172.20.0.10` as this is the well-known DNS IP in Kubernetes.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 

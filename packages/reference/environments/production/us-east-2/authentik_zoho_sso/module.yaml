@@ -1,5 +1,0 @@
-providers:
-  - authentik
-  - tls
-  - random
-  - kubernetes

@@ -89,7 +89,7 @@ Let's deploy the module now:
 
 3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl).
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -120,7 +120,7 @@ We are now ready to deploy Authentik:
 
    3. The `akadmin_email` should be a real email address that will be used for the initial root authentik user.
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -183,7 +183,7 @@ Let's deploy this configuration now:
 
    6. `extra_groups` allows you to create arbitrary additional groups.
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

@@ -65,6 +65,7 @@ provider "registry.opentofu.org/hashicorp/helm" {
     "zh:e2a21a57031a97abd3a61c09ffa84f4aae451329e876c2cd6597e02947ca1008",
     "zh:f8d12702874a935e0e2397bdb050f4d4c0d83fb4c0a9c7dfd1b49257605149bd",
   ]
+  constraints = "2.15.0"
 }
 
 provider "registry.opentofu.org/hashicorp/kubernetes" {

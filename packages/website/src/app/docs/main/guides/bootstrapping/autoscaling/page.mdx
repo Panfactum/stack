@@ -47,7 +47,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_metrics_server/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -127,7 +127,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_vpa/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -201,7 +201,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -241,7 +241,7 @@ Let's deploy the NodePools now:
 
 3. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for `node_subnets` unless you have a specific reason not to.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -305,7 +305,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_scheduler/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

@@ -1,5 +1,0 @@
-providers:
-  - aws
-  - kubernetes
-  - random
-  - vault

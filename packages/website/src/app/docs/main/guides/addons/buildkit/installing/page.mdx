@@ -75,7 +75,7 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_buildkit/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -108,7 +108,7 @@ Let's set up a test image repository, so we can demonstrate how to build images 
 
 3. For now, set `ecr_repositories` to `{ test = {} }`. This creates a test repository that you can push images to. You can add additional repositories later.
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 

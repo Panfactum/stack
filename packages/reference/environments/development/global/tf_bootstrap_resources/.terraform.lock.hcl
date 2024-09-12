@@ -1,12 +1,12 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
+
 provider "registry.opentofu.org/hashicorp/aws" {
   version     = "5.39.1"
   constraints = "5.39.1"
   hashes = [
     "h1:1njVwDkj6MvpTOygoksA5TNk/TNwRCTRLjdBJ3/Psrw=",
-    "h1:PnMbrS3UnV5ywf9P9TDkxy+XTryjI2c7Rg3depVBnyo=",
     "h1:nmOlV0F3p+fQC9NT1qqBXeZN44UvNI0jVkzg7jf9maM=",
     "h1:qZhF5fCdxCIc51RfVjH1kMCaxykETMwshevWYfDjfME=",
     "h1:rjSduYdaseaQunozYyIwb6Nj9MzMF2CXJsFafPWs0BY=",

@@ -1,4 +1,0 @@
-providers:
-  - kubernetes
-  - random
-  - aws

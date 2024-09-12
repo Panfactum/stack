@@ -84,7 +84,7 @@ The following instructions apply for **every** environment-region combination wh
 
 3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
@@ -106,7 +106,7 @@ This ensures all modules deployed in this environment will utilize the cache.
 
 3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl).
 
-4. Run `pf-providers-enable` to enable the required providers.
+4. Run `pf-tf-init` to enable the required providers.
 
 5. Do **NOT** apply the module yet.
 
@@ -372,7 +372,7 @@ Let's deploy this module now:
    For now, you **only** need to set the `aws_node_role_arn` input. We
    will set up the other inputs when we configure SSO for your infrastructure.
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
@@ -402,7 +402,7 @@ Let's deploy this module:
 
 2. Set up a `terragunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_priority_classes/terragrunt.hcl).
 
-3. Run `pf-providers-enable` to enable the required providers.
+3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 

@@ -1,7 +1,4 @@
-providers:
-  - aws
-  - time
-aws_account_id: "471112902605"
-aws_profile: "development-superuser"
-aws_secondary_region: "us-east-2"
-module: "aws_delegated_zones"
+aws_account_id: '471112902605'
+aws_profile: development-superuser
+aws_secondary_region: us-east-2
+module: aws_delegated_zones

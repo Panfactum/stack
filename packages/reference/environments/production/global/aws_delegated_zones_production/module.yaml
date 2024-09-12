@@ -1,5 +1,2 @@
-providers:
-  - aws
-  - time
-aws_secondary_region: "us-east-2"
-module: "aws_delegated_zones"
+aws_secondary_region: us-east-2
+module: aws_delegated_zones

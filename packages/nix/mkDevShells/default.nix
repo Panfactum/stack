@@ -84,7 +84,7 @@
           (util.customShellScript
             "pf-env-bootstrap") # helper for the bootstrapping guide
           (util.customShellScript
-            "pf-providers-enable") # helper for setting up providers in module.yaml
+            "pf-tf-init") # helper for setting up modules and providers
 
           ####################################
           # Postgres Management

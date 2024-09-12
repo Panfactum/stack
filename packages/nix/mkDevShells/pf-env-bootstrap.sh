@@ -86,7 +86,7 @@ EOF
 
 (
   cd "$MODULE_DIR"
-  pf-providers-enable
+  pf-tf-init
 )
 
 ####################################################################
@@ -140,7 +140,7 @@ EOF
 
 (
   cd "$MODULE_DIR"
-  pf-providers-enable
+  pf-tf-init
 )
 
 echo "module: aws_kms_encrypt_key" >>"$MODULE_DIR/module.yaml"

@@ -13,28 +13,6 @@ locals {
     id = random_id.match_id.hex
   })
 
-  // Node Preferences
-  node_affinity = {
-    required = {
-      nodeSelectorTerms = [{
-        matchExpressions = concat(
-          var.controller_nodes_required ? [
-            {
-              key      = "panfactum.com/class"
-              operator = "In"
-              values   = ["controller"]
-            }
-          ] : [],
-          [for key, value in var.node_requirements : {
-            key      = key
-            operator = "In"
-            values   = value
-          }]
-        )
-      }]
-    }
-  }
-
   // Pod Anti-Affinity
   pod_anti_affinity = {
     required = {
@@ -54,23 +32,49 @@ locals {
   }
 
   // Affinity
+  node_preferences = merge(
+    var.node_preferences,
+    // Normally, node preferences should not be used as they are treated as requirements by Karpenter and thus
+    // decrease scheduling efficiency. However, due to interplay between the bin-packing scheduler and Karpenter,
+    // it actually improves efficiency to prefer scheduling controller-enabled workloads on controller nodes if possible.
+    // This is b/c the controller nodes are not automatically scaled.
+    var.controller_nodes_enabled ? {
+      "panfactum.com/class" = {
+        weight = 100
+        values = ["controller"]
+      }
+    } : null
+  )
+  node_requirements = merge(
+    var.node_requirements,
+    var.controller_nodes_required ? {
+      "panfactum.com/class" = ["controller"]
+    } : null
+  )
   affinity = { for k, v in {
     nodeAffinity = { for k, v in {
-      preferredDuringSchedulingIgnoredDuringExecution = concat(
-        [for k, v in var.node_preferences : {
-          weight = v.weight
-          preference = {
-            matchExpressions = [
-              {
-                key      = k
-                operator = "In"
-                values   = v.values
-              }
-            ]
-          }
+      preferredDuringSchedulingIgnoredDuringExecution = length(local.node_preferences) > 0 ? [for k, v in local.node_preferences : {
+        weight = v.weight
+        preference = {
+          matchExpressions = [
+            {
+              key      = k
+              operator = "In"
+              values   = v.values
+            }
+          ]
+        }
+        }
+      ] : null
+      requiredDuringSchedulingIgnoredDuringExecution = length(local.node_requirements) > 0 ? {
+        nodeSelectorTerms = [{
+          matchExpressions = [for key, value in local.node_requirements : {
+            key      = key
+            operator = "In"
+            values   = value
+          }]
         }]
-      )
-      requiredDuringSchedulingIgnoredDuringExecution = length(local.node_affinity.required.nodeSelectorTerms[0].matchExpressions) != 0 ? local.node_affinity.required : null
+      } : null
     } : k => v if v != null }
     podAntiAffinity = { for k, v in {
       requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.az_anti_affinity_required) ? concat(

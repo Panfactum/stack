@@ -193,7 +193,8 @@ words: [
   "autoresizing",
   "preconfigured",
   "yamlencode",
-  "creds"
+  "creds",
+  "strcontains"
 ]
 languageSettings:
   - languageId: markdown,mdx

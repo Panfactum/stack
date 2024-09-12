@@ -31,6 +31,9 @@ provider "registry.opentofu.org/goauthentik/authentik" {
   constraints = "2024.2.0"
   hashes = [
     "h1:AeyEcplt1WTQijM1d2E1pBPemcL57WC5bZr7y1XNui4=",
+    "h1:NEmGTsRBQhJIGUT/Ffcn0/6xetkr83roV/OTRq6AjFw=",
+    "h1:kxxwtM45+KNPbMfNieNTTPyce8t67wXNEswMInkNU+w=",
+    "h1:mNgQEFvPNrwF15LnwwxBh1iLu7FN1VUM5/sLVOR3crU=",
     "zh:03b13879c66d1536f250c91f61ba078cc34af2fec271ea19c838a719dd4f1baa",
     "zh:1c4d93aa3de72e4b00ac33fc0d4134fc5a641b863e9cd9afdc1105a4024fc8f0",
     "zh:50d2f5b71ea5410633dbc8b143bef6fa77a9670a07a3fd85f9921e1094ab416e",
@@ -52,6 +55,9 @@ provider "registry.opentofu.org/hashicorp/aws" {
   version     = "5.66.0"
   constraints = "5.66.0"
   hashes = [
+    "h1:+YoLhtFWy3U17eYqOxN7ousu4tjePbIS55x2dq4sg8o=",
+    "h1:NA2a77ryEyosMPiLVVb7D4Z3ly7Cw7rpENAwYqGIZqc=",
+    "h1:P2YsvH8mKvXeU1jf9aQeG3lTmLasi+BpYMtbjZZucbY=",
     "h1:ZCTMtibl5ZdRopMlmBj/qcPtp6b7426h8tQ+MITGKow=",
     "zh:03f472f0d968c21a46b1e699116f886f3aa80eb491874d389dd3d032fe26235d",
     "zh:110b13057cbede6e829bd5b5dba93d693d0c40a9027e5e57c4dd49d112f783ad",

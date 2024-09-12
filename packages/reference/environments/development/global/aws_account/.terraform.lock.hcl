@@ -41,4 +41,5 @@ provider "registry.opentofu.org/hashicorp/random" {
     "zh:d2a7945eeb691fdd2b1474da76ddc2d1655e2aedbb14b57f06d4f5123d47adf9",
     "zh:ed62351f4ad9d1469c6798b77dee5f63b18b29c473620a0046ba3d4f111b621d",
   ]
+  constraints = "3.6.2"
 }

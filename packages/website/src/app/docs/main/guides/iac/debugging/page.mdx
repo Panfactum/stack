@@ -3,7 +3,7 @@
 Unfortunately, there is no step-by-step guide that can resolve all issues with Terragrunt and OpenTofu (Terraform). However,
 most issues can be resolved through the following:
 
-* Ensure that you have the correct providers enabled by running `pf-providers-enable` in the module directory.
+* Ensure that you have the correct providers enabled by running `pf-tf-init` in the module directory.
 
 * Ensure that you are authenticated for the region / environment you are attempting to run the command in:
 
@@ -47,7 +47,7 @@ This means your secrets file was not encrypted by sops. Encrypt it via `sops -e 
 `Error: Invalid provider configuration`
 
 This likely means the module is using one or more providers that you have not enabled. Run
-`pf-providers-enable` in the module directory to automatically enable all the required providers.
+`pf-tf-init` in the module directory to automatically enable all the required providers.
 
 ### Available checksums are for packages targeting different platforms
 
@@ -70,7 +70,7 @@ Unfortunately, the list of checksums only contain hashes for your current operat
 and system architecture (e.g., `amd64`) by default. This will cause the above error to appear
 if you try to deploy the IaC from a different operating system or system architecture.
 
-Run `pf-providers-enable` to add checksums for all common systems.
+Run `pf-tf-init` to add checksums for all common systems.
 
 This uses the [providers lock](https://opentofu.org/docs/cli/commands/providers/lock/) command
 to enable the following platforms: `darwin_amd64`, `darwin_arm64`, `linux_amd64`, `linux_arm64`.

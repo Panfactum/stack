@@ -1,6 +1,0 @@
-providers:
-  - aws
-  - helm
-  - kubernetes
-  - random
-  - vault
