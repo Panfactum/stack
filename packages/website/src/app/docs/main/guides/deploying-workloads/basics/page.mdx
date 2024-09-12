@@ -391,12 +391,16 @@ There are two common ways to pass configuration to your running contains: enviro
 #### Environment Variables
 
 To pass environment variables to your containers, each of our controller submodules provides
-two inputs:
+several inputs:
 
 * `common_env`: A key-value mapping of plaintext values that will be set as environment variables.
 * `common_secrets`: A key-value mapping of secret values. The values will be stored in a Kubernetes
   secret so as not to be exposed to cluster users who only have `restricted_reader` access (see [RBAC
   reference](/docs/main/reference/rbac)).
+* `common_env_from_config_maps`: A key-configuration mapping of environment variables that will be set to a value in an existing Kubernetes ConfigMap. [^20]
+* `common_env_from_secrets`: A key-configuration mapping of environment variables that will be set to a value in an existing Kubernetes Secret. [^20]
+
+[^20]: Unlike in base Kubernetes, workloads will be automatically restarted if the referenced ConfigMap or Secret value changes.
 
 All containers will additionally have the following environment variables set by default:
 

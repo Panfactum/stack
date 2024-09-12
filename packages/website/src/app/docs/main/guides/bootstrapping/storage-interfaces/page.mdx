@@ -1,7 +1,6 @@
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import ebsCSILaunchImg from './ebs-csi-launch.jpg'
-import secretsCSILaunchImg from './secrets-csi-launch.jpg'
 import storageClassesImg from './storage-classes.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
@@ -58,26 +57,6 @@ The following classes were installed by the `kube_aws_ebs_csi` module:
   when the utilizing resource is deleted (default)
 * `ebs-standard-retained`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes but never deletes the underlying
   volumes (recommended for production databases)
-
-## Deploy the Kubernetes Secrets Store CSI Driver
-
-The [Kubernetes Secrets Store CSI driver](https://secrets-store-csi-driver.sigs.k8s.io/) allows you to mount secrets
-files from third part sources such as AWS or [Hashicorp Vault](https://www.vaultproject.io/) (which we will install in the next section).
-
-We provide the [kube\_secrets\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) module to deploy the driver.
-
-Let's deploy it now:
-
-1. Create a new directory adjacent to your `aws_eks` module called `kube_secrets_csi`.
-
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_secrets_csi/terragrunt.hcl).
-
-4. Run `pf-providers-enable` to enable the required providers.
-
-4. Run `terragrunt apply`.
-
-5. Verify the pods deployed successfully:
-   <MarkdownImage src={secretsCSILaunchImg} alt="Secrets CSI launched successfully" />
 
 ## Next Steps
 

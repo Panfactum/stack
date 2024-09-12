@@ -63,9 +63,27 @@ variable "restart_policy" {
 }
 
 variable "common_env" {
-  description = "Key pair values of the environment variables for each container"
+  description = "Key-value pairs of the environment variables for each container"
   type        = map(string)
   default     = {}
+}
+
+variable "common_env_from_secrets" {
+  description = "Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references."
+  type = map(object({
+    secret_name = string
+    key         = string
+  }))
+  default = {}
+}
+
+variable "common_env_from_config_maps" {
+  description = "Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references."
+  type = map(object({
+    config_map_name = string
+    key             = string
+  }))
+  default = {}
 }
 
 variable "extra_pod_annotations" {
@@ -126,16 +144,6 @@ variable "mount_owner" {
   description = "The ID of the group that owns the mounted volumes"
   type        = number
   default     = 1000
-}
-
-variable "dynamic_secrets" {
-  description = "Dynamic variable secrets"
-  type = list(object({             // key is the secret provider class
-    secret_provider_class = string // name of the secret provider class
-    mount_path            = string // absolute path of where to mount the secret
-    env_var               = string // name of the env var that will have a path to the secret mount
-  }))
-  default = []
 }
 
 variable "node_preferences" {

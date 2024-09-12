@@ -191,7 +191,9 @@ words: [
   "externaldns",
   "snapshotted",
   "autoresizing",
-  "preconfigured"
+  "preconfigured",
+  "yamlencode",
+  "creds"
 ]
 languageSettings:
   - languageId: markdown,mdx

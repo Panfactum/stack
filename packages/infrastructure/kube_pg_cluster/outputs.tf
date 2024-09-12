@@ -1,12 +1,27 @@
-output "superuser_username" {
+output "root_username" {
   description = "The root user of the database"
   value       = "postgres"
 }
 
-output "superuser_password" {
+output "root_password" {
   description = "The password for root user of the database"
   value       = random_password.superuser_password.result
   sensitive   = true
+}
+
+output "superuser_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the superuser role in the PostgreSQL database"
+  value       = "${local.cluster_name}-superuser-creds"
+}
+
+output "admin_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the admin role in the PostgreSQL database"
+  value       = "${local.cluster_name}-admin-creds"
+}
+
+output "reader_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the reader role in the PostgreSQL database"
+  value       = "${local.cluster_name}-reader-creds"
 }
 
 output "database" {

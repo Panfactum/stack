@@ -49,6 +49,24 @@ variable "common_env" {
   default     = {}
 }
 
+variable "common_env_from_secrets" {
+  description = "Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references."
+  type = map(object({
+    secret_name = string
+    key         = string
+  }))
+  default = {}
+}
+
+variable "common_env_from_config_maps" {
+  description = "Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references."
+  type = map(object({
+    config_map_name = string
+    key             = string
+  }))
+  default = {}
+}
+
 variable "mount_owner" {
   description = "The ID of the group that owns the mounted volumes"
   type        = number

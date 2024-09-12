@@ -95,6 +95,7 @@ resource "helm_release" "reloader" {
       reloader = {
         autoReloadAll          = true
         reloadStrategy         = "annotations"
+        reloadOnCreate         = true
         logFormat              = "json"
         readOnlyRootFilesystem = true
         matchLabels            = module.util_controller.match_labels

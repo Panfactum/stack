@@ -55,6 +55,24 @@ variable "common_env" {
   default     = {}
 }
 
+variable "common_env_from_secrets" {
+  description = "Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references."
+  type = map(object({
+    secret_name = string
+    key         = string
+  }))
+  default = {}
+}
+
+variable "common_env_from_config_maps" {
+  description = "Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references."
+  type = map(object({
+    config_map_name = string
+    key             = string
+  }))
+  default = {}
+}
+
 variable "replicas" {
   description = "The number of pods in the Deployment"
   type        = number
@@ -186,16 +204,6 @@ variable "extra_pod_annotations" {
   description = "Annotations to add to the pods in the deployment"
   type        = map(string)
   default     = {}
-}
-
-variable "dynamic_secrets" {
-  description = "Dynamic variable secrets"
-  type = list(object({             // key is the secret provider class
-    secret_provider_class = string // name of the secret provider class
-    mount_path            = string // absolute path of where to mount the secret
-    env_var               = string // name of the env var that will have a path to the secret mount
-  }))
-  default = []
 }
 
 variable "dns_policy" {

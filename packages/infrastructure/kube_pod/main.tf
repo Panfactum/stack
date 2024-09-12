@@ -158,10 +158,28 @@ locals {
     }
   }]
 
-  // Secrets mounts
-  common_secret_mounts_env = [for k, config in local.dynamic_env_secrets_by_provider : {
-    name  = config.env_var
-    value = config.mount_path
+  // Environment variables from preexisting Secrets
+  common_secret_key_ref_env = [for k, v in var.common_env_from_secrets : {
+    name = k
+    valueFrom = {
+      secretKeyRef = {
+        name     = v.secret_name
+        key      = v.key
+        optional = false
+      }
+    }
+  }]
+
+  // Environment variables from preexisting ConfigMaps
+  common_config_map_key_ref_env = [for k, v in var.common_env_from_config_maps : {
+    name = k
+    valueFrom = {
+      configMapKeyRef = {
+        name     = v.config_map_name
+        key      = v.key
+        optional = false
+      }
+    }
   }]
 
   // All common env
@@ -171,7 +189,8 @@ locals {
     local.common_reflective_env,
     local.common_static_env,
     local.common_static_secret_env,
-    local.common_secret_mounts_env
+    local.common_secret_key_ref_env,
+    local.common_config_map_key_ref_env
   )
 
 
@@ -245,16 +264,6 @@ locals {
           }
         ]
       }
-    }],
-    [for path, config in local.dynamic_env_secrets_by_provider : {
-      name = path
-      csi = {
-        driver   = "secrets-store.csi.k8s.io"
-        readOnly = true
-        volumeAttributes = {
-          secretProviderClass = path
-        }
-      }
     }]
   )
 
@@ -284,11 +293,6 @@ locals {
     readOnly  = true
   }]
 
-  common_dynamic_secret_volume_mounts = [for path, config in local.dynamic_env_secrets_by_provider : {
-    name      = path
-    mountPath = config.mount_path
-  }]
-
   common_downward_api_mounts = [{
     name      = "podinfo"
     mountPath = "/etc/podinfo"
@@ -299,11 +303,8 @@ locals {
     local.common_extra_volume_mounts,
     local.common_secret_volume_mounts,
     local.common_config_map_volume_mounts,
-    local.common_dynamic_secret_volume_mounts,
     local.common_downward_api_mounts
   )
-
-  dynamic_env_secrets_by_provider = { for config in var.dynamic_secrets : config.secret_provider_class => config }
 
   /************************************************
   * Tolerations

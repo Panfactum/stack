@@ -276,6 +276,31 @@ resource "helm_release" "authentik" {
             name  = "AUTHENTIK_REDIS__TLS"
             value = "false"
           },
+          {
+            name  = "AUTHENTIK_REDIS__HOST"
+            value = module.redis.redis_master_host
+          },
+          {
+            name = "AUTHENTIK_REDIS__USERNAME"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.redis.superuser_creds_secret
+                key      = "username"
+                optional = false
+              }
+            }
+          },
+          {
+            name = "AUTHENTIK_REDIS__PASSWORD"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.redis.superuser_creds_secret
+                key      = "password"
+                optional = false
+              }
+            }
+          },
+
 
           // Postgres Settings
           {
@@ -289,6 +314,26 @@ resource "helm_release" "authentik" {
           {
             name  = "AUTHENTIK_POSTGRESQL__SSLMODE"
             value = "verify-full"
+          },
+          {
+            name = "AUTHENTIK_POSTGRESQL__USER"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.database.superuser_creds_secret
+                key      = "username"
+                optional = false
+              }
+            }
+          },
+          {
+            name = "AUTHENTIK_POSTGRESQL__PASSWORD"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.database.superuser_creds_secret
+                key      = "password"
+                optional = false
+              }
+            }
           },
 
           // Bootstrap Settings
@@ -325,16 +370,9 @@ resource "helm_release" "authentik" {
           enabled = var.error_reporting_enabled
         }
         postgresql = {
-          name     = module.database.database
-          user     = module.database.superuser_username
-          password = module.database.superuser_password // TODO: Pass in as environment variable
-          host     = module.database.pooler_rw_service_name
-          port     = module.database.pooler_rw_service_port
-        }
-        redis = {
-          host     = module.redis.redis_master_host
-          username = module.redis.superuser_name
-          password = module.redis.superuser_password // TODO: Pass in as environment variable
+          name = module.database.database
+          host = module.database.pooler_rw_service_name
+          port = module.database.pooler_rw_service_port
         }
         email = {
           host     = var.smtp_host

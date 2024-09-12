@@ -196,16 +196,6 @@ module "redis_cache" {
   # end-generate
 }
 
-resource "kubernetes_secret" "redis_creds" {
-  metadata {
-    name      = "redis-creds"
-    namespace = local.namespace
-  }
-  data = {
-    password = module.redis_cache.superuser_password
-  }
-}
-
 /***************************************
 * Logs Storage
 ***************************************/
@@ -414,7 +404,7 @@ resource "helm_release" "loki" {
                 endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                 db         = 0
                 expiration = "1h"
-                username   = module.redis_cache.superuser_name
+                username   = "$${REDIS_USERNAME}"
                 password   = "$${REDIS_PASSWORD}"
               }
             }
@@ -440,7 +430,7 @@ resource "helm_release" "loki" {
                   endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                   db         = 1
                   expiration = "1h"
-                  username   = module.redis_cache.superuser_name
+                  username   = "$${REDIS_USERNAME}"
                   password   = "$${REDIS_PASSWORD}"
                 }
               }
@@ -455,7 +445,7 @@ resource "helm_release" "loki" {
                   endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                   db         = 2
                   expiration = "1h"
-                  username   = module.redis_cache.superuser_name
+                  username   = "$${REDIS_USERNAME}"
                   password   = "$${REDIS_PASSWORD}"
                 }
               }
@@ -470,7 +460,7 @@ resource "helm_release" "loki" {
                   endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                   db         = 3
                   expiration = "1h"
-                  username   = module.redis_cache.superuser_name
+                  username   = "$${REDIS_USERNAME}"
                   password   = "$${REDIS_PASSWORD}"
                 }
               }
@@ -486,7 +476,7 @@ resource "helm_release" "loki" {
                   endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                   db         = 4
                   expiration = "1h"
-                  username   = module.redis_cache.superuser_name
+                  username   = "$${REDIS_USERNAME}"
                   password   = "$${REDIS_PASSWORD}"
                 }
               }
@@ -501,7 +491,7 @@ resource "helm_release" "loki" {
                   endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                   db         = 5
                   expiration = "1h"
-                  username   = module.redis_cache.superuser_name
+                  username   = "$${REDIS_USERNAME}"
                   password   = "$${REDIS_PASSWORD}"
                 }
               }
@@ -516,7 +506,7 @@ resource "helm_release" "loki" {
                   endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                   db         = 6
                   expiration = "1h"
-                  username   = module.redis_cache.superuser_name
+                  username   = "$${REDIS_USERNAME}"
                   password   = "$${REDIS_PASSWORD}"
                 }
               }
@@ -580,7 +570,7 @@ resource "helm_release" "loki" {
                 endpoint   = "${module.redis_cache.redis_master_host}:${module.redis_cache.redis_port}"
                 db         = 7
                 expiration = "1h"
-                username   = module.redis_cache.superuser_name
+                username   = "$${REDIS_USERNAME}"
                 password   = "$${REDIS_PASSWORD}"
               }
             }
@@ -605,11 +595,22 @@ resource "helm_release" "loki" {
         ]
         extraEnv = [
           {
+            name = "REDIS_USERNAME"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.redis_cache.superuser_creds_secret
+                key      = "username"
+                optional = false
+              }
+            }
+          },
+          {
             name = "REDIS_PASSWORD"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.redis_creds.metadata[0].name
-                key  = "password"
+                name     = module.redis_cache.superuser_creds_secret
+                key      = "password"
+                optional = false
               }
             }
           }
@@ -642,11 +643,22 @@ resource "helm_release" "loki" {
         ]
         extraEnv = [
           {
+            name = "REDIS_USERNAME"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.redis_cache.superuser_creds_secret
+                key      = "username"
+                optional = false
+              }
+            }
+          },
+          {
             name = "REDIS_PASSWORD"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.redis_creds.metadata[0].name
-                key  = "password"
+                name     = module.redis_cache.superuser_creds_secret
+                key      = "password"
+                optional = false
               }
             }
           }
@@ -673,11 +685,22 @@ resource "helm_release" "loki" {
         ]
         extraEnv = [
           {
+            name = "REDIS_USERNAME"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.redis_cache.superuser_creds_secret
+                key      = "username"
+                optional = false
+              }
+            }
+          },
+          {
             name = "REDIS_PASSWORD"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.redis_creds.metadata[0].name
-                key  = "password"
+                name     = module.redis_cache.superuser_creds_secret
+                key      = "password"
+                optional = false
               }
             }
           }

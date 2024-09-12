@@ -638,6 +638,36 @@ Type: `map(string)`
 
 Default: `{}`
 
+### <a name="input_common_env_from_config_maps" /> [common\_env\_from\_config\_maps](#input_common_env_from_config_maps)
+
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+
+Type:
+
+```hcl
+map(object({
+    config_map_name = string
+    key             = string
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_common_env_from_secrets" /> [common\_env\_from\_secrets](#input_common_env_from_secrets)
+
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+
+Type:
+
+```hcl
+map(object({
+    secret_name = string
+    key         = string
+  }))
+```
+
+Default: `{}`
+
 ### <a name="input_common_secrets" /> [common\_secrets](#input_common_secrets)
 
 Description: Key pair values of secrets to add to the containers as environment variables

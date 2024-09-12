@@ -55,27 +55,6 @@ module "util_server" {
   # end-generate
 }
 
-module "util_csi" {
-  source                        = "../kube_workload_utility"
-  workload_name                 = "vault-csi"
-  burstable_nodes_enabled       = true
-  arm_nodes_enabled             = true
-  controller_nodes_enabled      = true
-  instance_type_spread_required = false // ds
-  az_spread_preferred           = false // ds
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -208,42 +187,7 @@ resource "helm_release" "vault" {
       }
 
       csi = {
-        enabled = true
-        image = {
-          repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault-csi-provider"
-        }
-        resources = {
-          requests = {
-            memory = "100Mi"
-          }
-          limits = {
-            memory = "130Mi"
-          }
-        }
-        agent = {
-          image = {
-            repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault"
-            tag        = var.vault_image_tag
-          }
-          resources = {
-            requests = {
-              memory = "100Mi"
-            }
-            limits = {
-              memory = "130Mi"
-            }
-          }
-        }
-        daemonSet = {
-          annotations = {
-            "reloader.stakater.com/auto" = "true"
-          }
-        }
-        pod = {
-          tolerations = module.util_csi.tolerations
-          extraLabels = module.util_csi.labels
-        }
-        priorityClassName = "system-node-critical"
+        enabled = false
       }
 
       ui = {
@@ -393,29 +337,6 @@ module "pvc_annotator" {
 /***************************************
 * Vault Autoscaling
 ***************************************/
-
-resource "kubectl_manifest" "vpa_csi" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "vault-csi-provider"
-      namespace = local.namespace
-      labels    = module.util_csi.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "apps/v1"
-        kind       = "DaemonSet"
-        name       = "vault-csi-provider"
-      }
-    }
-  })
-  server_side_apply = true
-  force_conflicts   = true
-  depends_on        = [helm_release.vault]
-}
 
 resource "kubectl_manifest" "pdb_server" {
   yaml_body = yamlencode({

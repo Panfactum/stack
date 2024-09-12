@@ -9,6 +9,31 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* The [kube\_secrets\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) has been deprecated
+  and should be removed from your clusters. It was primarily used for managing dynamically generated Vault secrets such as
+  database credentials, but we have switched to a new paradigm that uses the [Vault Secrets Operator](https://github.com/hashicorp/vault-secrets-operator).
+
+  This saves approximately 150MB of memory per node in the cluster, improves security by removing pods that needed elevated
+  host-level permissions, and provides better ergonomics for managing dynamically
+  generated secrets in our modules.
+
+* [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)'s and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)'s  `superuser_username`
+  and `superuser_password` outputs have been renamed to `root_username` and `root_password`, respectively. We made this change
+  because "superuser" implies Vault-generated credentials, which these are not.
+
+### Added
+
+* Adds `common_env_from_config_maps` and `common_env_from_secrets` inputs to all standard workload submodules to provide the
+  capability to source environment variables from existing ConfigMaps and Secrets, respectively.
+
+* [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
+  [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) now support
+  using Vault-generated credentials to authenticate from other workloads. See the module documentation for more information.
+
 ## edge.24-09-10
 
 ### Breaking Changes
@@ -36,28 +61,28 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
   nodes created using the old CRDs to nodes created using the new CRDs.
 
-- The `ports` input on [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
-and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been moved
-to a container-level field rather than a top-level field to better align with the Kubernetes API.
+- The `ports` input on [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+  and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been moved
+  to a container-level field rather than a top-level field to better align with the Kubernetes API.
 
 ### Added
 
-- Adds a new submodule, [kube_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for
-defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-networking/service/) that are optimized for the Panfactum Stack.
-Additionally, integrates `kube_service` into [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
-and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
+* Adds a new submodule, [kube\_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for
+  defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-networking/service/) that are optimized for the Panfactum Stack.
+  Additionally, integrates `kube_service` into [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+  and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
 
-- Adds `extra_storage_classes` input to the [kube_aws_ebs_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi)
-module.
+* Adds `extra_storage_classes` input to the [kube\_aws\_ebs\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi)
+  module.
 
 ### Fixed
 
-- Addressed issue in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
+* Addressed issue in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
 
-- Addressed issue where our Terragrunt configuration would cause the version pinning for the `goauthentik/authentik` and
-`alekc/kubectl` infrastructure providers would be removed. This would cause issues to occur when users ran `terragrunt init -upgrade`
-to update their lockfiles.
+* Addressed issue where our Terragrunt configuration would cause the version pinning for the `goauthentik/authentik` and
+  `alekc/kubectl` infrastructure providers would be removed. This would cause issues to occur when users ran `terragrunt init -upgrade`
+  to update their lockfiles.
 
 ## edge.24-09-04
 

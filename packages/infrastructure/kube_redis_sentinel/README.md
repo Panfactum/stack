@@ -10,6 +10,64 @@ deployed by this module.
 
 ## Usage
 
+### Credentials
+1
+For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
+
+- `superuser_creds_secret`: Complete access to the database
+- `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
+- `reader_creds_secret`: Read-only access to the database
+
+Each of the above named Secrets contains the following values:
+
+- `username`: The username to use for authentication
+- `password`: The password to use for authentication
+
+The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
+Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
+
+The credential lifetime is configured by the `vault_credential_lifetime_hours` input (defaults
+to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thus, in the worst-case,
+credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
+
+<MarkdownAlert severity="warning">
+    The module also supplies `root_username` and `root_password` outputs for the root user of the database.
+    These credentials are **unsafe** to use as they are not automatically rotated.
+</MarkdownAlert>
+
+### Connecting
+
+The below example show how to connect to the Redis master
+using dynamically rotated admin credentials by setting various
+environment variables in our [kube_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+
+```hcl
+module "redis" {
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_redis_sentinel?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  ...
+}
+
+module "deployment" {
+  "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_deployment?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  ...
+  
+  common_env_from_secrets = {
+    REDIS_USERNAME = {
+      secret_name = module.redis.admin_creds_secret
+      key = "username"
+    }
+    REDIS_PASSWORD = {
+      secret_name = module.redis.admin_creds_secret
+      key = "password"
+    }
+  }
+  common_env = {
+    REDIS_HOST = module.redis.redis_master_host
+    REDIS_PORT = module.redis.redis_port
+  }
+}
+```
+
 ### Persistence
 
 Redis provides two mechanisms for persistence: 

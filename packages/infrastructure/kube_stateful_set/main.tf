@@ -48,14 +48,15 @@ module "pod_template" {
   pod_version_labels_enabled = var.pod_version_labels_enabled
 
   # Container configuration
-  common_env     = var.common_env
-  common_secrets = var.common_secrets
-  containers     = var.containers
+  common_env                  = var.common_env
+  common_secrets              = var.common_secrets
+  common_env_from_secrets     = var.common_env_from_secrets
+  common_env_from_config_maps = var.common_env_from_config_maps
+  containers                  = var.containers
 
   # Mount configuration
   config_map_mounts   = var.config_map_mounts
   secret_mounts       = var.secret_mounts
-  dynamic_secrets     = var.dynamic_secrets
   tmp_directories     = var.tmp_directories
   mount_owner         = var.mount_owner
   extra_volume_mounts = { for name, config in var.volume_mounts : name => { mount_path : config.mount_path } }

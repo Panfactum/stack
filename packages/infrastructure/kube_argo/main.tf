@@ -371,18 +371,6 @@ resource "kubernetes_secret" "sso_info" {
   }
 }
 
-resource "kubernetes_secret" "postgres_creds" {
-  metadata {
-    name      = "argo-postgres-creds"
-    namespace = local.namespace
-    labels    = module.util_controller.labels
-  }
-  data = {
-    username = module.database.superuser_username
-    password = module.database.superuser_password
-  }
-}
-
 resource "helm_release" "argo" {
   namespace       = local.namespace
   name            = "argo"
@@ -436,15 +424,16 @@ resource "helm_release" "argo" {
           postgresql = {
             host      = module.database.pooler_rw_service_name
             port      = module.database.pooler_rw_service_port
+            database  = module.database.database
             tableName = "argo_workflows"
             ssl       = true
             sslMode   = "require"
             userNameSecret = {
-              name = kubernetes_secret.postgres_creds.metadata[0].name
+              name = module.database.superuser_creds_secret
               key  = "username"
             }
             passwordSecret = {
-              name = kubernetes_secret.postgres_creds.metadata[0].name
+              name = module.database.superuser_creds_secret
               key  = "password"
             }
           }
@@ -452,7 +441,7 @@ resource "helm_release" "argo" {
 
         deploymentAnnotations = {
           "configmap.reloader.stakater.com/reload" = local.configmap_name
-          "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${kubernetes_secret.postgres_creds.metadata[0].name}"
+          "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${module.database.superuser_creds_secret}"
         }
         image = {
           registry = module.pull_through.quay_registry
@@ -529,7 +518,7 @@ resource "helm_release" "argo" {
         }
         deploymentAnnotations = {
           "configmap.reloader.stakater.com/reload" = local.configmap_name
-          "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${kubernetes_secret.postgres_creds.metadata[0].name}"
+          "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${module.database.superuser_creds_secret}"
         }
         image = {
           registry = module.pull_through.quay_registry

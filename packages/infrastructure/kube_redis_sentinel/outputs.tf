@@ -1,13 +1,29 @@
-output "superuser_name" {
+output "root_name" {
   description = "The name of the superuser of the database"
   value       = "default"
 }
 
-output "superuser_password" {
+output "root_password" {
   description = "The password for root user of the database"
   value       = random_password.superuser_password.result
   sensitive   = true
 }
+
+output "superuser_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the superuser role in the Redis database"
+  value       = "${random_id.id.hex}-superuser-creds"
+}
+
+output "admin_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the admin role in the Redis database"
+  value       = "${random_id.id.hex}-admin-creds"
+}
+
+output "reader_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the reader role in the Redis database"
+  value       = "${random_id.id.hex}-reader-creds"
+}
+
 
 output "redis_master_host" {
   description = "A service address that points to only the writable redis master"

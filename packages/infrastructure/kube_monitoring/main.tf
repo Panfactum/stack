@@ -106,7 +106,7 @@ locals {
     type = "REDIS"
     config = {
       addr     = "${module.thanos_redis_cache.redis_master_host}:${module.thanos_redis_cache.redis_port}"
-      username = module.thanos_redis_cache.superuser_name
+      username = "$(REDIS_USERNAME)"
       password = "$(REDIS_PASSWORD)"
       # Sentinel cannot be used due to this issue: https://github.com/thanos-io/thanos/issues/6246
       # master_name = module.thanos_redis_cache.master_set
@@ -120,7 +120,7 @@ locals {
     type = "REDIS"
     config = {
       addr     = "${module.thanos_redis_cache.redis_master_host}:${module.thanos_redis_cache.redis_port}"
-      username = module.thanos_redis_cache.superuser_name
+      username = "$(REDIS_USERNAME)"
       password = "$(REDIS_PASSWORD)"
       # Sentinel cannot be used due to this issue: https://github.com/thanos-io/thanos/issues/6246
       # master_name = module.thanos_redis_cache.master_set
@@ -133,7 +133,7 @@ locals {
     type = "REDIS"
     config = {
       addr     = "${module.thanos_redis_cache.redis_master_host}:${module.thanos_redis_cache.redis_port}"
-      username = module.thanos_redis_cache.superuser_name
+      username = "$(REDIS_USERNAME)"
       password = "$(REDIS_PASSWORD)"
       # Sentinel cannot be used due to this issue: https://github.com/thanos-io/thanos/issues/6246
       # master_name = module.thanos_redis_cache.master_set
@@ -530,16 +530,6 @@ module "thanos_redis_cache" {
   # end-generate
 }
 
-resource "kubernetes_secret" "redis_creds" {
-  metadata {
-    name      = "redis-creds"
-    namespace = local.namespace
-  }
-  data = {
-    password = module.thanos_redis_cache.superuser_password
-  }
-}
-
 /***************************************
 * Metrics Storage
 ***************************************/
@@ -644,7 +634,6 @@ resource "kubernetes_secret" "grafana_creds" {
   data = {
     admin-user         = "admin"
     admin-password     = random_password.grafana_admin_pw.result
-    database-password  = module.grafana_db.superuser_password
     oidc-client-secret = vault_identity_oidc_client.oidc.client_secret
   }
 }
@@ -1224,8 +1213,14 @@ resource "helm_release" "prometheus_stack" {
         envValueFrom = {
           GF_DATABASE_PASSWORD = {
             secretKeyRef = {
-              name = kubernetes_secret.grafana_creds.metadata[0].name
-              key  = "database-password"
+              name = module.grafana_db.superuser_creds_secret
+              key  = "password"
+            }
+          }
+          GF_DATABASE_USER = {
+            secretKeyRef = {
+              name = module.grafana_db.superuser_creds_secret
+              key  = "username"
             }
           }
           GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET = {
@@ -1325,8 +1320,8 @@ resource "helm_release" "prometheus_stack" {
           database = {
             type          = "postgres"
             host          = "${module.grafana_db.pooler_rw_service_name}:${module.grafana_db.pooler_rw_service_port}"
-            name          = "app"
-            user          = module.grafana_db.superuser_username
+            name          = module.grafana_db.database
+            user          = "default"
             password      = "default"
             max_open_conn = 100
             max_idle_conn = 100
@@ -1642,8 +1637,19 @@ resource "helm_release" "thanos" {
             name = "REDIS_PASSWORD"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.redis_creds.metadata[0].name
-                key  = "password"
+                name     = module.thanos_redis_cache.superuser_creds_secret
+                key      = "password"
+                optional = false
+              }
+            }
+          },
+          {
+            name = "REDIS_USERNAME"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.thanos_redis_cache.superuser_creds_secret
+                key      = "username"
+                optional = false
               }
             }
           },
@@ -1768,8 +1774,19 @@ resource "helm_release" "thanos" {
             name = "REDIS_PASSWORD"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.redis_creds.metadata[0].name
-                key  = "password"
+                name     = module.thanos_redis_cache.superuser_creds_secret
+                key      = "password"
+                optional = false
+              }
+            }
+          },
+          {
+            name = "REDIS_USERNAME"
+            valueFrom = {
+              secretKeyRef = {
+                name     = module.thanos_redis_cache.superuser_creds_secret
+                key      = "username"
+                optional = false
               }
             }
           },

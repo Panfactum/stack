@@ -472,8 +472,8 @@ resource "vault_database_secret_backend_role" "reader" {
   name                = "reader-${var.namespace}-${random_id.id.hex}"
   db_name             = vault_database_secret_backend_connection.redis.name
   creation_statements = [jsonencode(["%R~*", "&*", "+@all", "-@write", "-@admin", "-@dangerous"])]
-  default_ttl         = 60 * 60 * 8
-  max_ttl             = 60 * 60 * 8
+  default_ttl         = 60 * 60 * var.vault_credential_lifetime_hours
+  max_ttl             = 60 * 60 * var.vault_credential_lifetime_hours
 }
 
 resource "vault_database_secret_backend_role" "admin" {
@@ -481,8 +481,8 @@ resource "vault_database_secret_backend_role" "admin" {
   name                = "admin-${var.namespace}-${random_id.id.hex}"
   db_name             = vault_database_secret_backend_connection.redis.name
   creation_statements = [jsonencode(["%RW~*", "&*", "+@all", "-@admin", "-@dangerous"])]
-  default_ttl         = 60 * 60 * 8
-  max_ttl             = 60 * 60 * 8
+  default_ttl         = 60 * 60 * var.vault_credential_lifetime_hours
+  max_ttl             = 60 * 60 * var.vault_credential_lifetime_hours
 }
 
 resource "vault_database_secret_backend_role" "superuser" {
@@ -490,8 +490,8 @@ resource "vault_database_secret_backend_role" "superuser" {
   name                = "superuser-${var.namespace}-${random_id.id.hex}"
   db_name             = vault_database_secret_backend_connection.redis.name
   creation_statements = [jsonencode(["~*", "&*", "+@all", "-acl|deluser", "-acl|genpass", "-acl|log", "-acl|setuser"])]
-  default_ttl         = 60 * 60 * 8
-  max_ttl             = 60 * 60 * 8
+  default_ttl         = 60 * 60 * var.vault_credential_lifetime_hours
+  max_ttl             = 60 * 60 * var.vault_credential_lifetime_hours
 }
 
 resource "vault_database_secret_backend_connection" "redis" {
@@ -516,6 +516,109 @@ resource "vault_database_secret_backend_connection" "redis" {
   verify_connection = true
 
   depends_on = [helm_release.redis]
+}
+
+/***************************************
+* Vault Secrets
+***************************************/
+
+data "vault_policy_document" "vault_secrets" {
+  rule {
+    path         = "db/creds/${vault_database_secret_backend_role.reader.name}"
+    capabilities = ["read", "list"]
+    description  = "Allows getting read-only database credentials"
+  }
+  rule {
+    path         = "db/creds/${vault_database_secret_backend_role.admin.name}"
+    capabilities = ["read", "list"]
+    description  = "Allows getting admin database credentials"
+  }
+  rule {
+    path         = "db/creds/${vault_database_secret_backend_role.superuser.name}"
+    capabilities = ["read", "list"]
+    description  = "Allows getting superuser database credentials"
+  }
+}
+
+module "vault_auth_vault_secrets" {
+  source                    = "../kube_sa_auth_vault"
+  service_account           = random_id.id.hex
+  service_account_namespace = var.namespace
+  vault_policy_hcl          = data.vault_policy_document.vault_secrets.hcl
+  audience                  = "vault"
+}
+
+resource "kubectl_manifest" "vault_connection" {
+  yaml_body = yamlencode({
+    apiVersion = "secrets.hashicorp.com/v1beta1"
+    kind       = "VaultConnection"
+    metadata = {
+      name      = random_id.id.hex
+      namespace = var.namespace
+      labels    = module.util.labels
+    }
+    spec = {
+      address = "http://vault-active.vault.svc.cluster.local:8200"
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+}
+
+resource "kubectl_manifest" "vault_auth" {
+  yaml_body = yamlencode({
+    apiVersion = "secrets.hashicorp.com/v1beta1"
+    kind       = "VaultAuth"
+    metadata = {
+      name      = random_id.id.hex
+      namespace = var.namespace
+      labels    = module.util.labels
+    }
+    spec = {
+      vaultConnectionRef = random_id.id.hex
+      method             = "kubernetes"
+      mount              = "kubernetes"
+      allowedNamespaces  = [var.namespace]
+      kubernetes = {
+        role           = module.vault_auth_vault_secrets.role_name
+        serviceAccount = random_id.id.hex
+        audiences      = ["vault"]
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.vault_connection]
+}
+
+resource "kubectl_manifest" "vault_secrets" {
+  for_each = {
+    admin     = "creds/${vault_database_secret_backend_role.admin.name}"
+    reader    = "creds/${vault_database_secret_backend_role.reader.name}"
+    superuser = "creds/${vault_database_secret_backend_role.superuser.name}"
+  }
+  yaml_body = yamlencode({
+    apiVersion = "secrets.hashicorp.com/v1beta1"
+    kind       = "VaultDynamicSecret"
+    metadata = {
+      name      = "${random_id.id.hex}-${each.key}-creds"
+      namespace = var.namespace
+      labels    = module.util.labels
+    }
+    spec = {
+      vaultAuthRef   = random_id.id.hex
+      mount          = "db"
+      path           = each.value
+      renewalPercent = 50
+      destination = {
+        create = true
+        name   = "${random_id.id.hex}-${each.key}-creds"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.vault_auth]
 }
 
 /***************************************

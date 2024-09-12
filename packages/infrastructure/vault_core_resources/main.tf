@@ -1,12 +1,23 @@
-// Live
-
 terraform {
   required_providers {
     vault = {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.27.0"
+    }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
   }
+}
+
+locals {
+  namespace                              = "vault"
+  vault_secrets_operator_service_account = "vault-secrets-operator-controller-manager"
 }
 
 /***************************************
@@ -42,4 +53,157 @@ resource "vault_mount" "transit" {
   max_lease_ttl_seconds     = 60 * 60 * 24
 }
 
+
+
+/***************************************
+* Vault Secrets Operator
+***************************************/
+
+module "pull_through" {
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
+}
+
+resource "vault_transit_secret_backend_key" "secrets_operator" {
+  backend          = vault_mount.transit.path
+  name             = "vault-secrets-operator"
+  exportable       = false
+  deletion_allowed = true
+  derived          = false
+}
+
+
+resource "vault_transit_secret_cache_config" "secrets_operator" {
+  backend = vault_mount.transit.path
+  size    = 500
+}
+
+data "vault_policy_document" "vault_secrets_operator" {
+  rule {
+    path         = "${vault_mount.transit.path}/encrypt/${vault_transit_secret_backend_key.secrets_operator.name}"
+    capabilities = ["create", "update"]
+    description  = "encrypt"
+  }
+  rule {
+    path         = "${vault_mount.transit.path}/decrypt/${vault_transit_secret_backend_key.secrets_operator.name}"
+    capabilities = ["create", "update"]
+    description  = "decrypt"
+  }
+}
+
+module "vault_auth_vault_secrets_operator" {
+  source                    = "../kube_sa_auth_vault"
+  service_account           = local.vault_secrets_operator_service_account
+  service_account_namespace = local.namespace
+  vault_policy_hcl          = data.vault_policy_document.vault_secrets_operator.hcl
+  audience                  = "vault"
+}
+
+module "util_secrets_operator" {
+  source                        = "../kube_workload_utility"
+  workload_name                 = "vault-secrets-operator"
+  burstable_nodes_enabled       = true
+  arm_nodes_enabled             = true
+  controller_nodes_enabled      = true
+  instance_type_spread_required = false // single replica
+  az_spread_preferred           = false // single replica
+
+  # pf-generate: set_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+resource "helm_release" "vault_secrets_operator" {
+  namespace       = local.namespace
+  name            = "vault-secrets-operator"
+  repository      = "https://helm.releases.hashicorp.com"
+  chart           = "vault-secrets-operator"
+  version         = var.vault_secrets_operator_helm_version
+  recreate_pods   = false
+  cleanup_on_fail = true
+  wait            = true
+  wait_for_jobs   = true
+  max_history     = 5
+
+  values = [
+    yamlencode({
+      controller = {
+        tolerations = module.util_secrets_operator.tolerations
+        affinity    = module.util_secrets_operator.affinity
+        kubeRbacProxy = {
+          image = {
+            repository = "${module.pull_through.quay_registry}/brancz/kube-rbac-proxy"
+          }
+        }
+        manager = {
+          image = {
+            repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault-secrets-operator"
+          }
+          logging = {
+            level = var.log_level
+          }
+          clientCache = {
+            persistenceModel = "direct-encrypted"
+            storageEncryption = {
+              enabled      = true
+              transitMount = vault_mount.transit.path
+              keyName      = vault_transit_secret_backend_key.secrets_operator.name
+              namespace    = local.namespace
+              method       = "kubernetes"
+              mount        = vault_auth_backend.kubernetes.path
+              kubernetes = {
+                role           = module.vault_auth_vault_secrets_operator.role_name
+                serviceAccount = local.vault_secrets_operator_service_account
+                tokenAudiences = ["vault"]
+              }
+            }
+          }
+          terminationGracePeriodSeconds = 90
+          preDeleteHookTimeoutSeconds   = 90
+        }
+      }
+
+      defaultAuthMethod = {
+        enabled   = true
+        namespace = local.namespace
+        method    = "kubernetes"
+        mount     = vault_auth_backend.kubernetes.path
+      }
+      defaultVaultConnection = {
+        enabled = true
+        address = "http://vault-active.vault.svc.cluster.local:8200"
+      }
+    })
+  ]
+}
+
+resource "kubectl_manifest" "vpa_secrets_operator" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "vault-secrets-operator"
+      namespace = local.namespace
+      labels    = module.util_secrets_operator.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "vault-secrets-operator-controller-manager"
+      }
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.vault_secrets_operator]
+}
 

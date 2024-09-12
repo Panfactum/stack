@@ -157,10 +157,28 @@ locals {
     }
   }]
 
-  // Secrets mounts
-  common_secret_mounts_env = [for k, config in local.dynamic_env_secrets_by_provider : {
-    name  = config.env_var
-    value = config.mount_path
+  // Environment variables from preexisting Secrets
+  common_secret_key_ref_env = [for k, v in var.common_env_from_secrets : {
+    name = k
+    valueFrom = {
+      secretKeyRef = {
+        name     = v.secret_name
+        key      = v.key
+        optional = false
+      }
+    }
+  }]
+
+  // Environment variables from preexisting ConfigMaps
+  common_config_map_key_ref_env = [for k, v in var.common_env_from_config_maps : {
+    name = k
+    valueFrom = {
+      configMapKeyRef = {
+        name     = v.config_map_name
+        key      = v.key
+        optional = false
+      }
+    }
   }]
 
   // All common env
@@ -170,7 +188,8 @@ locals {
     local.common_reflective_env,
     local.common_static_env,
     local.common_static_secret_env,
-    local.common_secret_mounts_env
+    local.common_secret_key_ref_env,
+    local.common_config_map_key_ref_env
   )
 
   /************************************************
