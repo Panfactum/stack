@@ -64,6 +64,11 @@ variable "pg_parameters" {
 variable "pg_initial_storage_gb" {
   description = "The initial number of gigabytes of storage to provision for the postgres cluster"
   type        = number
+  default     = 10
+  validation {
+    condition     = var.pg_initial_storage_gb >= 1
+    error_message = "pg_initial_storage_gb must be at least 1"
+  }
 }
 
 variable "pg_storage_limit_gb" {
@@ -76,12 +81,21 @@ variable "pg_storage_increase_threshold_percent" {
   description = "Dropping below this percent of free storage will trigger an automatic increase in storage size"
   type        = number
   default     = 20
+
+  validation {
+    condition     = var.pg_storage_increase_threshold_percent >= 10
+    error_message = "pg_storage_increase_threshold_percent must be at least 10 in order to ensure cluster health"
+  }
 }
 
 variable "pg_storage_increase_gb" {
   description = "The number of GB to increase storage by if free space drops below the threshold"
   type        = number
   default     = 10
+  validation {
+    condition     = var.pg_storage_increase_gb >= 1
+    error_message = "pg_storage_increase_gb must be at least 1 in order to ensure cluster health"
+  }
 }
 
 variable "pg_smart_shutdown_timeout" {
