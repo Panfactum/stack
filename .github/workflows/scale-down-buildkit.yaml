@@ -1,0 +1,14 @@
+name: Test
+on:
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  scale-down:
+    runs-on: default
+    steps:
+      - name: "Hello world"
+        shell: bash
+        run: 'echo "Hello World"'

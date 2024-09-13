@@ -1,3 +1,0 @@
-# Kubernetes Cronjob
-
-**Type:** Submodule
