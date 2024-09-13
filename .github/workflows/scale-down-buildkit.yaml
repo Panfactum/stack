@@ -6,8 +6,9 @@ defaults:
     shell: bash
 
 jobs:
-  scale-down:
+  test:
     runs-on: default
+    container: node:18
     steps:
       - name: "Hello world"
         shell: bash
