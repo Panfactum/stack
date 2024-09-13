@@ -9,7 +9,6 @@ jobs:
   test:
     runs-on:
       group: default
-    container: node:18
     steps:
       - name: "Hello world"
         shell: bash
