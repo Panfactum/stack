@@ -247,6 +247,10 @@
     (util.customShellScript
       "pf-eks-reset") # script for resetting cluster during bootstrapping
     (util.customShellScript
+      "pf-eks-suspend") # helper to suspending environment resources
+    (util.customShellScript
+      "pf-eks-resume") # helper to restore suspended environment resources
+    (util.customShellScript
       "pf-get-aws-profile-for-kube-context") # get the aws profile used for a kubernetes context
     (util.customShellScript
       "pf-set-pvc-metadata") # sets labels and annotations on a PVC
