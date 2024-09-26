@@ -1,4 +1,4 @@
-name: Test
+name: Example
 on:
   workflow_dispatch:
 defaults:
@@ -7,9 +7,7 @@ defaults:
 
 jobs:
   test:
-    runs-on:
-      group: default
-    container: node:18
+    runs-on: default
     steps:
       - name: "Hello world"
         shell: bash
