@@ -50,8 +50,8 @@ const SIDENAV_SECTIONS = [
         path: '/recommended-architecture'
       },
       {
-        text: 'Argo vs GHA',
-        path: '/argo-vs-gha'
+        text: 'GHA',
+        path: '/gha'
       }
     ]
   }

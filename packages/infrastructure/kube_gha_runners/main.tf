@@ -24,169 +24,133 @@ terraform {
 }
 
 locals {
+  namespace = "gha"
 
-  name      = "arc-runners"
-  namespace = module.namespace.namespace
-
-  runners = {
-    "${var.gha_runner_env_prefix}-small"  = var.small_runner_config
-    "${var.gha_runner_env_prefix}-medium" = var.medium_runner_config
-    "${var.gha_runner_env_prefix}-large"  = var.large_runner_config
-  }
+  runner_images = { for runner, config in var.runners : runner => config.action_runner_image != null ? config.action_runner_image : "${module.pull_through.github_registry}/actions/actions-runner:${config.action_runner_version}" }
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
-
-  # generate: common_vars.snippet.txt
-variable "environment" {
-  description = "The name of the environment the infrastructure is being deployed into. #injected"
-  type        = string
-  default     = null
-}
-
-variable "pf_root_module" {
-  description = "The name of the root Panfactum module in the module tree. #injected"
-  type        = string
-  default     = "kube_gha_arc_runners"
-}
-
-variable "pf_module" {
-  description = "The name of the Panfactum module where the containing resources are directly defined. #injected"
-  type        = string
-  default     = "kube_gha_arc_runners"
-}
-
-variable "region" {
-  description = "The region the infrastructure is being deployed into. #injected"
-  type        = string
-  default     = null
-}
-
-variable "extra_tags" {
-  description = "Extra tags or labels to add to the created resources. #injected"
-  type        = map(string)
-  default     = {}
-}
-
-variable "is_local" {
-  description = "Whether this module is a part of a local development deployment #injected"
-  type        = bool
-  default     = false
-}
-
-variable "pf_stack_version" {
-  description = "Which version of the Panfactum stack is being used (git ref) #injected"
-  type        = string
-  default     = "main"
-}
-
-variable "pf_stack_commit" {
-  description = "The commit hash for the version of the Panfactum stack being used #injected"
-  type        = string
-  default     = "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-}
-  # end-generate
-}
-
-module "constants" {
-  source = "../constants"
-
-  # generate: common_vars.snippet.txt
-variable "environment" {
-  description = "The name of the environment the infrastructure is being deployed into. #injected"
-  type        = string
-  default     = null
-}
-
-variable "pf_root_module" {
-  description = "The name of the root Panfactum module in the module tree. #injected"
-  type        = string
-  default     = "kube_gha_arc_runners"
-}
-
-variable "pf_module" {
-  description = "The name of the Panfactum module where the containing resources are directly defined. #injected"
-  type        = string
-  default     = "kube_gha_arc_runners"
-}
-
-variable "region" {
-  description = "The region the infrastructure is being deployed into. #injected"
-  type        = string
-  default     = null
-}
-
-variable "extra_tags" {
-  description = "Extra tags or labels to add to the created resources. #injected"
-  type        = map(string)
-  default     = {}
-}
-
-variable "is_local" {
-  description = "Whether this module is a part of a local development deployment #injected"
-  type        = bool
-  default     = false
-}
-
-variable "pf_stack_version" {
-  description = "Which version of the Panfactum stack is being used (git ref) #injected"
-  type        = string
-  default     = "main"
-}
-
-variable "pf_stack_commit" {
-  description = "The commit hash for the version of the Panfactum stack being used #injected"
-  type        = string
-  default     = "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-}
-  # end-generate
+module "pull_through" {
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 /***************************************
-* Namespace
+* Runners
 ***************************************/
 
-module "namespace" {
-  source = "../kube_namespace"
+module "util" {
+  for_each                      = var.runners
+  source                        = "../kube_workload_utility"
+  workload_name                 = each.key
+  burstable_nodes_enabled       = false
+  spot_nodes_enabled            = each.value.spot_nodes_enabled
+  arm_nodes_enabled             = each.value.arm_nodes_enabled
+  controller_nodes_enabled      = false
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false
+  az_spread_preferred           = false
 
-  namespace = local.name
-
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
   region           = var.region
   pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
   is_local         = var.is_local
   extra_tags       = var.extra_tags
   # end-generate
 }
 
-/***************************************
-* Kubernetes Permissions
-***************************************/
+module "util_listener" {
+  for_each                      = var.runners
+  source                        = "../kube_workload_utility"
+  workload_name                 = each.key
+  burstable_nodes_enabled       = true
+  spot_nodes_enabled            = true
+  arm_nodes_enabled             = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false
+  az_spread_preferred           = false
+
+  # pf-generate: set_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  pf_module        = var.pf_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
+}
+
+resource "kubernetes_secret" "creds" {
+  metadata {
+    name      = "gha-creds"
+    namespace = local.namespace
+  }
+  data = {
+    github_token = var.github_token
+  }
+}
+resource "kubernetes_secret" "secrets" {
+  metadata {
+    name      = "runner-shared-secrets"
+    namespace = local.namespace
+  }
+  data = var.extra_env_secrets
+}
 
 resource "kubernetes_service_account" "runners" {
   metadata {
-    name      = local.name
+    name      = "gha-runners"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
   }
 }
 
-
-// Runners will have full admin access to the AWS account
-// as they need to be able to deploy IaC
-resource "kubernetes_cluster_role_binding" "runners" {
+resource "kubernetes_role" "runners" {
   metadata {
-    labels = module.kube_labels.kube_labels
-    name   = kubernetes_service_account.runners.metadata[0].name
+    name      = "gha-runners"
+    namespace = local.namespace
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list", "create", "delete"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/exec"]
+    verbs      = ["get", "create"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["pods/log"]
+    verbs      = ["get", "list", "watch"]
+  }
+  rule {
+    api_groups = ["batch"]
+    resources  = ["jobs"]
+    verbs      = ["get", "list", "create", "delete"]
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get", "list", "create", "delete"]
+  }
+}
+
+resource "kubernetes_role_binding" "runners" {
+  metadata {
+    name      = "gha-runners"
+    namespace = local.namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
+    kind      = "Role"
+    name      = kubernetes_role.runners.metadata[0].name
   }
   subject {
     kind      = "ServiceAccount"
@@ -195,119 +159,37 @@ resource "kubernetes_cluster_role_binding" "runners" {
   }
 }
 
-/***************************************
-* AWS Permissions
-***************************************/
-
-// Runners will have full admin access to the AWS account
-// as they need to be able to deploy IaC
-data "aws_iam_policy_document" "runners" {
-  statement {
-    effect    = "Allow"
-    actions   = ["*"]
-    resources = ["*"]
-  }
-}
-
-module "aws_permissions" {
-  source = "../kube_sa_auth_aws"
-
-  service_account           = kubernetes_service_account.runners.metadata[0].name
-  service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
-  iam_policy_json           = data.aws_iam_policy_document.runners.json
-  ip_allow_list             = var.ip_allow_list
-
-  # generate: pass_common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
-/***************************************
-* Vault Permissions
-***************************************/
-
-// Runners will have full admin access to the Vault cluster
-// as they need to be able to deploy IaC
-data "vault_policy_document" "runners" {
-  rule {
-    path         = "*"
-    capabilities = ["create", "read", "update", "delete", "list", "sudo"]
-    description  = "superuser access over vault"
-  }
-}
-
-resource "vault_policy" "runners" {
-  name   = local.name
-  policy = data.vault_policy_document.runners.hcl
-}
-
-resource "vault_kubernetes_auth_backend_role" "runners" {
-  bound_service_account_names      = [kubernetes_service_account.runners.metadata[0].name]
-  bound_service_account_namespaces = [local.namespace]
-  role_name                        = local.name
-  token_ttl                        = 60 * 60
-  token_explicit_max_ttl           = 60 * 60 // Force it to expire after 1 hour
-  token_policies                   = [vault_policy.runners.name]
-  token_bound_cidrs                = ["10.0.0.0/16"] // Only allow this token to be used from inside the cluster
-}
-
-/***************************************
-* Runner
-***************************************/
-
-resource "kubernetes_secret" "github_app" {
-  metadata {
-    name      = "github-app"
-    namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
-  }
-  data = {
-    github_app_id              = var.github_app_id
-    github_app_installation_id = var.github_app_installation_id
-    github_app_private_key     = var.github_app_private_key
-  }
-}
-resource "kubernetes_secret" "secrets" {
-  metadata {
-    name      = "runner-secrets"
-    namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
-  }
-  data = var.extra_env_secrets
-}
-
-
 resource "helm_release" "runner" {
-  for_each        = local.runners
+  for_each        = var.runners
   namespace       = local.namespace
   name            = each.key
   repository      = "oci://ghcr.io/actions/actions-runner-controller-charts/"
   chart           = "gha-runner-scale-set"
-  version         = var.gha_runner_scale_set_version
-  recreate_pods   = true
+  version         = var.gha_runner_scale_set_helm_version
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
-      githubConfigUrl    = var.github_config_url
-      githubConfigSecret = kubernetes_secret.github_app.metadata[0].name
+      githubConfigUrl    = each.value.github_config_url
+      githubConfigSecret = kubernetes_secret.creds.metadata[0].name
       minRunners         = each.value.min_replicas
-      maxRunners         = var.gha_runner_max_replicas
+      maxRunners         = each.value.max_replicas
+      runnerScaleSetName = each.key
 
+      // Note that this does NOT work and it seems to be an issue with how GHA is trying to share
+      // files between the runner and the job container. See issue
+      // https://github.com/actions/actions-runner-controller/discussions/2438.
+      // It does not seem like GitHub is interested in prioritizing support for EKS at this time
+      // so consider this unsupported for now even though we have it configured as per GitHub's docs.
       containerMode = {
         type = "kubernetes"
         kubernetesModeWorkVolumeClaim = {
           accessModes      = ["ReadWriteOnce"]
-          storageClassName = "ebs-standard" // panfactum custom
+          storageClassName = "ebs-standard"
           resources = {
             requests = {
               storage = "${each.value.tmp_space_gb}Gi"
@@ -316,166 +198,197 @@ resource "helm_release" "runner" {
         }
       }
 
+      listenerTemplate = {
+        spec = {
+          containers = [
+            {
+              name = "listener"
+              resources = {
+                requests = {
+                  cpu    = "10m"
+                  memory = "15Mi"
+                }
+                limits = {
+                  memory = "30Mi"
+                }
+              }
+              securityContext = {
+                readOnlyRootFilesystem   = true
+                allowPrivilegeEscalation = false
+                capabilities = {
+                  drop = ["all"]
+                }
+                privileged   = false
+                runAsNonRoot = true
+              }
+            }
+          ]
+          tolerations   = module.util_listener[each.key].tolerations
+          schedulerName = module.util_listener[each.key].scheduler_name
+          affinity      = module.util_listener[each.key].affinity
+        }
+      }
+
       template = {
         metadata = {
-          labels = {
-            "azure.workload.identity/use" = "true"
-            pf_module                     = local.name
-            submodule                     = each.key
-          }
+          labels = merge(
+            module.util[each.key].labels,
+            var.extra_pod_labels
+          )
+          annotations = var.extra_pod_annotations
         }
         spec = {
-          tolerations                   = module.constants.spot_node_toleration_helm
+          schedulerName                 = module.util[each.key].scheduler_name
+          tolerations                   = module.util[each.key].tolerations
           serviceAccountName            = kubernetes_service_account.runners.metadata[0].name
-          terminationGracePeriodSeconds = 60
+          terminationGracePeriodSeconds = 90
+
 
           // Once the runner exits / finishes, it should never try to restart
           // as the lifecycle is handled by the scale set controller
           restartPolicy = "Never"
 
-          containers = [{
-            name  = "runner"
-            image = var.runner_image
-            command = [
-              "/usr/bin/bash",
-              "-c",
-              ". /home/runner/.profile && /home/runner/run.sh"
-            ]
+          securityContext = {
+            fsGroup = 1001 // Must be set in order to allow runner to access ephemeral volume
+          }
 
-            // This lifecycle hook ensures that if this runner is interrupted
-            // in the middle of a terraform operations, its locks are released
-            // prior to it terminating; this is critical to avoiding deadlocks
-            // in the CI system
-            lifecycle = {
-              preStop = {
-                exec = {
-                  command = [
-                    "/usr/bin/bash",
-                    "-c",
-                    ". /home/runner/.profile && delete-tf-locks"
-                  ]
-                }
-              }
-            }
-
-            env = concat([
-              {
-                name  = "CI",
-                value = "true"
-              },
-              {
-                name  = "DOCKER_CONFIG"
-                value = "/home/runner/.podman"
-              },
-              {
-                name  = "REGISTRY_AUTH_FILE"
-                value = "/home/runner/.podman/config.json"
-              },
-              {
-                name  = "KUBE_CONFIG_PATH"
-                value = "/home/runner/.kube/config"
-              },
-              {
-                name  = "TERRAGRUNT_DOWNLOAD"
-                value = "/home/runner/_work/.terragrunt-cache"
-              },
-              {
-                name  = "TF_PLUGIN_CACHE_DIR"
-                value = "/home/runner/_work/.tfplugins"
-              },
-              {
-                name  = "TF_LOCK_TABLE"
-                value = var.tf_lock_table
-              },
-              {
-                name  = "RUNNER_NAME"
-                value = each.key
-              },
-              {
-                name  = "VAULT_ADDR"
-                value = var.vault_internal_address
-              },
-              {
-                name  = "AZURE_CLIENT_ID",
-                value = module.aad_permissions.client_id
-              },
-              {
-                name  = "ACTIONS_RUNNER_CONTAINER_HOOKS"
-                value = "/home/runner/k8s/index.js"
-              },
-              {
-                name = "ACTIONS_RUNNER_POD_NAME"
-                valueFrom = {
-                  fieldRef = {
-                    fieldPath = "metadata.name"
+          containers = [
+            {
+              name  = "runner"
+              image = local.runner_images[each.key]
+              command = [
+                "/home/runner/run.sh",
+                "--labels=${each.key}"
+              ]
+              env = [
+                {
+                  name  = "ACTIONS_RUNNER_CONTAINER_HOOKS"
+                  value = "/home/runner/k8s/index.js"
+                },
+                {
+                  name = "ACTIONS_RUNNER_POD_NAME"
+                  valueFrom = {
+                    fieldRef = {
+                      fieldPath = "metadata.name"
+                    }
                   }
+                },
+                {
+                  name  = "ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER"
+                  value = "false"
                 }
-              },
-              {
-                name  = "ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER"
-                value = "false"
-              }
-              ],
-              [for k, v in var.extra_env_secrets : {
-                name = k
-                valueFrom = {
-                  secretKeyRef = {
-                    name     = kubernetes_secret.secrets.metadata[0].name
-                    key      = k
+              ]
+              envFrom = [
+                {
+                  secretRef = {
+                    name     = kubernetes_secret.common_env.metadata[0].name
                     optional = false
                   }
                 }
-              }]
-            )
-            resources = {
-              requests = {
-                cpu    = "${each.value.cpu_millicores}m"
-                memory = "${each.value.memory_mb}Mi"
+              ]
+              resources = {
+                requests = {
+                  cpu               = "${each.value.cpu_millicores}m"
+                  memory            = "${each.value.memory_mb}Mi"
+                  ephemeral-storage = "25Mi"
+                }
+                limits = {
+                  memory = "${floor(each.value.memory_mb * 1.3)}Mi"
+                  // we do need to limit cpu so as not to disrupt development with bursty workloads
+                  cpu               = "${each.value.cpu_millicores * 2}m"
+                  ephemeral-storage = "100Mi"
+                }
               }
-              limits = {
-                memory = "${each.value.memory_mb}Mi"
-                // we do need to limit cpu so as not to disrupt development with bursty workloads
-                cpu = "${each.value.cpu_millicores * 2}m"
+              securityContext = {
+                readOnlyRootFilesystem   = false
+                allowPrivilegeEscalation = false
+                capabilities = {
+                  drop = ["ALL"]
+                }
               }
+              volumeMounts = [
+                {
+                  name      = "work"
+                  mountPath = "/home/runner/_work"
+                }
+              ]
             }
-            volumeMounts = [{
-              name      = "work"
-              mountPath = "/home/runner/_work"
-            }]
-          }]
+          ]
           volumes = [{
             name = "work"
-            emptyDir = {
-              sizeLimit = "${each.value.tmp_space_gb}Gi"
+            ephemeral = {
+              volumeClaimTemplate = {
+                spec = {
+                  accessModes      = ["ReadWriteOnce"]
+                  storageClassName = "ebs-standard"
+                  volumeMode       = "Filesystem"
+                  resources = {
+                    requests = {
+                      storage = "${each.value.tmp_space_gb}Gi"
+                    }
+                  }
+                }
+              }
             }
           }]
         }
       }
 
       controllerServiceAccount = {
-        namespace = var.arc_controller_service_account_namespace
-        name      = var.arc_controller_service_account_name
+        namespace = local.namespace
+        name      = "gha-scale-set-controller"
       }
     })
-
   ]
 }
 
-// We never want a runner to be evicted when it is running
-resource "kubernetes_pod_disruption_budget_v1" "runners" {
-  for_each = local.runners
+resource "kubernetes_secret" "common_env" {
   metadata {
-    name      = each.key
+    name      = "common-runner-secrets"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
   }
-  spec {
-    min_available = "100%"
-    selector {
-      match_labels = {
-        pf_module = local.name
-        submodule = each.key
-      }
+  data = var.extra_env_secrets
+}
+
+resource "kubectl_manifest" "pdb" {
+  for_each = var.runners
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = each.key
+      namespace = local.namespace
+      labels    = module.util[each.key].labels
     }
-  }
+    spec = {
+      selector = {
+        matchLabels = module.util[each.key].match_labels
+      }
+      maxUnavailable = 0
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.runner]
+}
+
+resource "kubectl_manifest" "workflow_image_cache" {
+  count = var.node_image_cache_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kubefledged.io/v1alpha2"
+    kind       = "ImageCache"
+    metadata = {
+      name      = "gha-runners"
+      namespace = local.namespace
+    }
+    spec = {
+      cacheSpec = [
+        {
+          images = tolist(toset(values(local.runner_images)))
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }

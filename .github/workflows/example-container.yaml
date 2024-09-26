@@ -1,10 +1,6 @@
 name: Example (Container)
 on:
   workflow_dispatch:
-defaults:
-  run:
-    shell: bash
-
 jobs:
   test:
     runs-on: default

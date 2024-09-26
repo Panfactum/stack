@@ -1,124 +1,63 @@
-variable "gha_runner_scale_set_version" {
-  description = "The version of the arc scale set to deploy"
+variable "gha_runner_scale_set_helm_version" {
+  description = "The version of the  actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy"
   type        = string
-  default     = "0.6.1"
+  default     = "0.9.3"
 }
 
-variable "vpa_enabled" {
-  description = "Whether the VPA resources should be enabled"
+variable "github_token" {
+  description = "The GitHub token that the runners will use to register with GitHub"
+  type        = string
+  sensitive   = true
+}
+
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "scale_set_name" {
-  description = "How the scale set will be referenced in GHA workflows"
-  type        = string
-  default     = "self-hosted"
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the deployed images"
+  type        = bool
+  default     = true
 }
 
-variable "github_config_url" {
-  description = "The url for the organization that the runner will belong to"
-  type        = string
+variable "runners" {
+  description = "A mapping of runner names to their configuration values"
+  type = map(object({
+    github_config_url     = string # The url for the organization or repository that the runners will belong to
+    min_replicas          = optional(number, 0)
+    max_replicas          = optional(number, 25)
+    action_runner_image   = optional(string)
+    action_runner_version = optional(string, "latest")
+    tmp_space_gb          = optional(number, 1)   # The number of GB of disk space to allocate to the runner
+    memory_mb             = optional(number, 250) # The number of MB of memory to allocate to the runner
+    cpu_millicores        = optional(number, 100) # The number of millicores of cpu to allocate to the runner
+    arm_nodes_enabled     = optional(bool, true)  # Whether to allow this runner to run on arm64 nodes
+    spot_nodes_enabled    = optional(bool, true)  # Whether to allow this runner to run on spot nodes
+  }))
 }
 
-variable "github_app_id" {
-  description = "The app id for the GitHub app used to authenticate the runner"
-  type        = string
-}
-
-variable "github_app_installation_id" {
-  description = "The installation id for the GitHub app used to authenticate the runner"
-  type        = string
-}
-
-variable "github_app_private_key" {
-  description = "The private key for the GitHub app used to authenticate the runner"
-  type        = string
-}
-
-variable "gha_runner_max_replicas" {
-  description = "The maximum number of runners to use"
-  type        = number
-}
-
-variable "gha_runner_env_prefix" {
-  description = "The prefix to append to each runner's name"
-  type        = string
-}
-
-variable "small_runner_config" {
-  description = "Configuration for the small runner"
-  type = object({
-    min_replicas   = optional(number, 0)
-    tmp_space_gb   = number # The number of GB of disk space to allocate to the runner
-    memory_mb      = number # The number of MB of memory to allocate to the runner
-    cpu_millicores = number # The number of millicores of cpu to allocate to the runner
-  })
-}
-
-variable "medium_runner_config" {
-  description = "Configuration for the medium runner"
-  type = object({
-    min_replicas   = optional(number, 0)
-    tmp_space_gb   = number # The number of GB of disk space to allocate to the runner
-    memory_mb      = number # The number of MB of memory to allocate to the runner
-    cpu_millicores = number # The number of millicores of cpu to allocate to the runner
-  })
-}
-
-variable "large_runner_config" {
-  description = "Configuration for the large runner"
-  type = object({
-    min_replicas   = optional(number, 0)
-    tmp_space_gb   = number # The number of GB of disk space to allocate to the runner
-    memory_mb      = number # The number of MB of memory to allocate to the runner
-    cpu_millicores = number # The number of millicores of cpu to allocate to the runner
-  })
-}
-
-
-variable "arc_controller_service_account_namespace" {
-  description = "The namespace of the ARC controller"
-  type        = string
-}
-
-variable "arc_controller_service_account_name" {
-  description = "The name of the ARC controller's service account"
-  type        = string
-}
-
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
-variable "vault_internal_address" {
-  description = "The address of the vault cluster for this CI runner"
-  type        = string
-  default     = "http://vault-active.vault.svc.cluster.local:8200"
-}
-
-variable "ip_allow_list" {
-  description = "A list of IPs that can use the service account token to authenticate with AWS API"
-  type        = list(string)
-}
-
-variable "runner_image" {
-  description = "The runner image to use"
-  type        = string
-}
-
-variable "tf_lock_table" {
-  description = "The tf lock table to clear when runners are terminated"
-  type        = string
-}
-variable "aad_group" {
-  description = "The group the GHA runner service principal should join"
-  type        = string
-}
 variable "extra_env_secrets" {
   description = "A key-value mapping of extra secret environment variables for the runner pods"
   type        = map(string)
   default     = {}
 }
 
+variable "extra_pod_annotations" {
+  description = "Annotations to add to every runner pod"
+  type        = map(string)
+  default     = {}
+}
+
+variable "extra_pod_labels" {
+  description = "Labels to add to every runner pod"
+  type        = map(string)
+  default     = {}
+}
+
+variable "node_image_cache_enabled" {
+  description = "Whether to use kube-fledged to cache images locally for better startup performance"
+  type        = bool
+  default     = true
+}

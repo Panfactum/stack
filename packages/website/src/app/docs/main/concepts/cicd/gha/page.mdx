@@ -1,3 +1,56 @@
-# Argo Workflows vs GitHub Actions for CI / CD
+# GitHub Actions for CI / CD
 
-Coming Soon!
+## Summary
+
+**TLDR: We do NOT think GitHub Actions (GHA) is a suitable system for managing CI / CD pipelines at scale.**
+
+After many years of managing GHA both on community and self-hosted runners, we want to
+provide some observations and opinions about the use GitHub Actions for managing CI / CD. Additionally,
+we are often asked why we do not build and support prepackaged GitHub Actions for CI / CD on Panfactum clusters.
+
+While GitHub Actions can seem appealing at first glance due to its ease to get started, GHA often suffers
+when applied to more serious use cases. While the simplicity can be tempting, the limitations
+quickly introduce operational problems and complexity that are difficult (if not impossible) to workaround. Most projects that
+we have used in professional capacities have eventually abandoned GHA in favor of solutions that have
+higher upfront learning curves but lower overall total cost of ownership due to increased flexibility, power, and efficiency.
+
+## The Good
+
+* The ability to use off-the-shelf GHA Action code provided by third-parties makes getting started with common
+  CI / CD workflows very easy compared to other solutions. [^1]
+* GitHub Action syntax is relatively straightforward and approachable by developers of almost all skill levels.
+* Direct integration into the GitHub UI makes for a nice developer experience.
+* Paid tiers of GitHub contain the concept of environments and approval gates for CI / CD deployments.
+* Workflow logs are automatically cleansed to avoid leaking secrets.
+
+[^1]: Though when you read the logic contained in many actions you will find many prepackaged Actions contain only a few lines
+    of actual logic that could have been implemented yourself fairly easily.
+
+## The Bad
+
+* GitHub Actions is missing many features that one would expect in a workflow engine:
+  * No automatic retry mechanism
+  * No looping
+  * No built-in mechanism to pause a workflow or connect a shell to the running jobs
+  * Limitations on the number of workflow inputs
+  * No parallel steps in the same job
+  * Very limited concurrency control mechanisms
+  * Limited ability to efficiently share large artifacts between workflow jobs or different runs of the same workflow
+  * Limited cache size (10GB)
+* The limited supply chain security for prepackaged Actions combined with the frequent use privileged credentials in GHA workflows creates significant opportunity for security breaches.
+* Hardening your workflows to follow the principle of least privilege is complicated with many knobs and levers that exist outside the workflow definitions themselves (they need to be manually set up).
+* No ability to search logs across multiple runs of the same workflow or different workflows. No ability to search logs or statuses of workflows across all your repositories.
+* Making changes to workflows requires pushing new commits which adds friction to the feedback loop when developing complex workflows. The local testing tools such as [act](https://github.com/nektos/act) often have different behavior than the live workflow system or are missing features entirely.
+* Logs are often broken or very delayed further compounding the difficulty of building and testing changes on the GitHub Action platform. This is especially true for long-running workflows or workflows that generate > 1000 log lines.
+* Difficult to compose workflows together or reference standard workflows across your organization (possible, but very tedious and error-prone).
+* Requires a GitHub account in order to view workflow execution information in private repositories, making it difficult to use for non-developer stakeholders.
+* Even with self-hosted runners, workflows require constant communication with GitHub servers so the workflow engine will cease working if GitHub goes down (which is often).
+* Even with self-hosted runners, you are forced to upgrade the base environment your CI scripts run on. This can cause workflows to break and result in unnecessary maintenance work that produces no additional value.
+* Limited options for CI machine sizes, types, and configuration options when using community runners.
+* Terrible performance (especially when using container jobs). Even when using self-hosted runners,
+  the performance is still terrible compared to Kubernetes-native solutions. This is especially visible when executing short-lived
+  jobs (\< 5 minutes) wherein most of the time is spent on runner initialization, not executing your CI / CD code.
+* Terrible pricing (10-100x more expensive than raw compute when using community runners). Additionally, GitHub bills you for runner
+  initialization time which can be the vast majority of the execution time.
+* To unlock the full capabilities of GitHub Actions (environments, approval gates, etc.) in private code repositories, you must be on expensive paid
+  tiers of GitHub.

@@ -1,3 +1,4 @@
+# pf-generate: standard_vars
 variable "environment" {
   description = "The name of the environment the infrastructure is being deployed into. #injected"
   type        = string
@@ -7,13 +8,13 @@ variable "environment" {
 variable "pf_root_module" {
   description = "The name of the root Panfactum module in the module tree. #injected"
   type        = string
-  default     = "kube_gha_arc_runners"
+  default     = "kube_fledged"
 }
 
 variable "pf_module" {
   description = "The name of the Panfactum module where the containing resources are directly defined. #injected"
   type        = string
-  default     = "kube_gha_arc_runners"
+  default     = "kube_fledged"
 }
 
 variable "region" {
@@ -45,3 +46,4 @@ variable "pf_stack_commit" {
   type        = string
   default     = "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
+# end-generate

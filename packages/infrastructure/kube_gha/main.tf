@@ -4,28 +4,36 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.0.4"
+    }
     helm = {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    kubectl = {
-      source  = "alekc/kubectl"
-      version = "2.0.4"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.39.1"
     }
   }
 }
 
 locals {
-
-  name      = "arc-systems"
+  name      = "gha"
   namespace = module.namespace.namespace
-
 }
 
-module "kube_labels" {
-  source = "../kube_labels"
+module "util" {
+  source                        = "../kube_workload_utility"
+  workload_name                 = "gha-scale-set-controller"
+  burstable_nodes_enabled       = true
+  controller_nodes_enabled      = true
+  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  instance_type_spread_required = false
+  az_spread_preferred           = false
 
-  # generate: set_vars
+  # pf-generate: set_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -38,21 +46,14 @@ module "kube_labels" {
 }
 
 module "constants" {
-  source = "../constants"
-
-  matching_labels = module.kube_labels.kube_labels
-
-  # generate: common_vars.snippet.txt
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  source = "../kube_constants"
 }
+
+module "pull_through" {
+  source                     = "../aws_ecr_pull_through_cache_addresses"
+  pull_through_cache_enabled = var.pull_through_cache_enabled
+}
+
 
 /***************************************
 * Namespace
@@ -63,7 +64,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # generate: pass_common_vars.snippet.txt
+  # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
   environment      = var.environment
@@ -78,34 +79,40 @@ module "namespace" {
 * Controller
 ***************************************/
 
-resource "kubernetes_service_account" "arc" {
+resource "kubernetes_service_account" "gha_controller" {
   metadata {
-    name      = "gha-runner-scale-set-controller"
+    name      = "gha-scale-set-controller"
     namespace = local.namespace
-    labels    = module.kube_labels.kube_labels
+    labels    = module.util.labels
   }
 }
 
-resource "helm_release" "arc" {
+resource "helm_release" "gha_controller" {
   namespace       = local.namespace
   name            = "gha-runner-scale-set-controller"
   repository      = "oci://ghcr.io/actions/actions-runner-controller-charts/"
   chart           = "gha-runner-scale-set-controller"
-  version         = var.gha_runner_scale_set_controller_version
-  recreate_pods   = true
+  version         = var.gha_runner_scale_set_controller_helm_version
+  recreate_pods   = false
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
-      replicaCount = 2
-      labels       = module.kube_labels.kube_labels
-      podLabels    = module.kube_labels.kube_labels // This won't work until 0.6.2
+      fullnameOverride = "gha-controller"
+      replicaCount     = 1
+      labels           = module.util.labels
+      podLabels        = module.util.labels
+
+      image = {
+        repository = "${module.pull_through.github_registry}/actions/gha-runner-scale-set-controller"
+      }
 
       serviceAccount = {
         create = false
-        name   = kubernetes_service_account.arc.metadata[0].name
+        name   = kubernetes_service_account.gha_controller.metadata[0].name
       }
 
       securityContext = {
@@ -118,15 +125,13 @@ resource "helm_release" "arc" {
 
       priorityClassName = module.constants.cluster_important_priority_class_name
 
-      tolerations = module.constants.spot_node_toleration_helm
-      affinity = merge(
-        module.constants.controller_node_with_spot_affinity_helm,
-        module.constants.pod_anti_affinity_helm
-      )
+      tolerations = module.util.tolerations
+      affinity    = module.util.affinity
 
       flags = {
-        logLevel  = "info"
-        logFormat = "json"
+        logLevel             = var.log_level
+        logFormat            = "json"
+        watchSingleNamespace = local.namespace
       }
 
       metrics = {
@@ -136,44 +141,57 @@ resource "helm_release" "arc" {
       }
     })
   ]
+
+  dynamic "postrender" {
+    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
+    content {
+      binary_path = "${path.module}/kustomize/kustomize.sh"
+    }
+  }
 }
 
-resource "kubernetes_manifest" "vpa" {
+resource "kubectl_manifest" "vpa" {
   count = var.vpa_enabled ? 1 : 0
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = "arc-controller"
+      name      = "gha-controller"
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = "gha-runner-scale-set-controller-gha-rs-controller"
+        name       = "gha-controller"
       }
     }
-  }
-  depends_on = [helm_release.arc]
+  })
+  depends_on = [helm_release.gha_controller]
 }
 
-resource "kubernetes_manifest" "pdb_controller" {
-  manifest = {
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
       name      = local.name
       namespace = local.namespace
-      labels    = module.kube_labels.kube_labels
+      labels    = module.util.labels
     }
     spec = {
       selector = {
-        matchLabels = module.kube_labels.kube_labels
+        matchLabels = module.util.match_labels
       }
-      maxUnavailable = 1
+      maxUnavailable             = 1
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
     }
-  }
-  depends_on = [helm_release.arc]
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.gha_controller]
 }
+
+
+

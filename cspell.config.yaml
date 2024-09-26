@@ -195,7 +195,8 @@ words: [
   "yamlencode",
   "creds",
   "strcontains",
-  "syncer"
+  "syncer",
+  "TLDR"
 ]
 languageSettings:
   - languageId: markdown,mdx
