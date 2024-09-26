@@ -69,7 +69,7 @@ fi
 # Step 2: Enable disruptions on the PDBs for the given disruption window ID
 ####################################################################
 
-for PDB in $(kubectl get pdb -n argo -l "panfactum.com/voluntary-disruption-window-id=$WINDOW_ID" --ignore-not-found -o name); do
+for PDB in $(kubectl get pdb -n "$NAMESPACE" -l "panfactum.com/voluntary-disruption-window-id=$WINDOW_ID" --ignore-not-found -o name); do
   ANNOTATIONS=$(kubectl get "$PDB" -n "$NAMESPACE" -o jsonpath="{.metadata.annotations}")
   MAX_UNAVAILABLE=$(echo "$ANNOTATIONS" | jq -r '.["panfactum.com/voluntary-disruption-window-max-unavailable"]')
   echo "Enabling disruption window for '$PDB' in namespace '$NAMESPACE':" >&2

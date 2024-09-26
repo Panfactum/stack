@@ -15,6 +15,11 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * Adds a [new addon for self-hosted GitHub Action runners.](/docs/edge/guides/addons/github-actions/installing)
 
+### Fixed
+
+* Fixes an issue where voluntary disruption windows created by the [kube_disruption_window_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+would only work for the `argo` namespace. They will now work in all namespaces.
+
 ## edge.24-09-12
 
 ### Breaking Changes
