@@ -29,6 +29,7 @@ RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_K
  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) \
  NODE_OPTIONS=--max-old-space-size=8192 \
  npx next build --no-lint
+RUN npx next-sitemap
 
 #################################################
 ## Builder Image
@@ -44,6 +45,7 @@ RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_K
   NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) \
   NODE_OPTIONS=--max-old-space-size=8192 \
   npx next build --no-lint
+RUN npx next-sitemap
 
 #################################################
 ## Production Image

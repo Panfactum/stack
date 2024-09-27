@@ -4,6 +4,7 @@
 !packages/website/.eslintrc.js
 !packages/website/.remarkrc.mjs
 !packages/website/next.config.mjs
+!packages/website/next-sitemap.config.js
 !packages/website/package.json
 !packages/website/plugin.remark.mjs
 !packages/website/postcss.config.js
