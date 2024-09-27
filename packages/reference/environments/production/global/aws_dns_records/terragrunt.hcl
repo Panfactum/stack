@@ -30,6 +30,21 @@ inputs = {
         {
           subdomain = "calendar."
           record    = "ghs.googlehosted.com"
+        },
+        // Domain verification (Hubspot)
+        {
+          subdomain = "hs."
+          record    = "47029925.group25.sites.hubspot.net"
+        },
+
+        // DKIM (Hubspot)
+        {
+          subdomain = "hs1-47029925._domainkey."
+          record    = "panfactum-com.hs06a.dkim.hubspotemail.net."
+        },
+        {
+          subdomain = "hs2-47029925._domainkey."
+          record    = "panfactum-com.hs06b.dkim.hubspotemail.net."
         }
       ]
       txt_records = [
@@ -62,9 +77,9 @@ inputs = {
         {
           subdomain = ""
           records = [
-            "MS=ms89071327",                                                                 // AAD Domain Ownership
-            "v=spf1 include:one.zoho.com include:zohomail.com include:_spf.google.com ~all", // SPF record authorizing email senders
-            "zoho-verification=zb69684923.zmverify.zoho.com"                                 // Zoho Domain Ownership
+            "MS=ms89071327",                                                                                                         // AAD Domain Ownership
+            "v=spf1 include:one.zoho.com include:zohomail.com include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all", // SPF record authorizing email senders
+            "zoho-verification=zb69684923.zmverify.zoho.com"                                                                         // Zoho Domain Ownership
           ]
         }
       ]
