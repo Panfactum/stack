@@ -27,6 +27,10 @@ inputs = {
   webhook_domain         = "cicd.prod.panfactum.com"
   buildkit_bucket_name   = dependency.buildkit.outputs.cache_bucket_name
   buildkit_bucket_region = dependency.buildkit.outputs.cache_bucket_region
+  algolia_app_id         = "VJ9GF38NJX"
+  algolia_api_key        = local.secrets.algolia_api_key
+  algolia_index_name     = "docs"
+  scraper_image_version  = "684730eb4430cb0536d9874a9af908ec47f4372b"
 }
 
 skip = get_env("CI", "false") == "true"

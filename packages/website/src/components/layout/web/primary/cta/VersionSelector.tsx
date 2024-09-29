@@ -7,14 +7,11 @@ import { useCallback, useContext, useEffect } from 'react'
 import { DOCS_VERSIONS, isValidVersionSlug } from '@/lib/constants'
 import { DocsVersionContext } from '@/lib/contexts/web/DocsVersion'
 
-export default function VersionSelector () {
+export default function VersionSelector ({ docsShowing }: {docsShowing: boolean}) {
   const { version, setVersion } = useContext(DocsVersionContext)
   const path = usePathname()
   const router = useRouter()
   const pathSegments = path.split('/')
-
-  // Only show if on a docs page
-  const docsShowing = pathSegments.length >= 2 && pathSegments[1] === 'docs'
 
   const onChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value

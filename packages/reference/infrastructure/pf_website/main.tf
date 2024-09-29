@@ -58,6 +58,9 @@ module "website_deployment" {
     NODE_ENV = "production"
     PORT     = local.port
     HOSTNAME = "0.0.0.0"
+    NEXT_PUBLIC_ALGOLIA_APP_ID = var.algolia_app_id
+    NEXT_PUBLIC_ALGOLIA_INDEX_NAME = var.algolia_index_name
+    NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
   }
 
   containers = [

@@ -16,7 +16,7 @@ import type { VersionSlug } from '@/lib/constants'
 import { DOCS_VERSIONS, isValidVersionSlug } from '@/lib/constants'
 import { DocsVersionContext } from '@/lib/contexts/web/DocsVersion'
 
-export default function MobileDropdown () {
+export default function MobileDropdown ({ docsShowing }: { docsShowing: boolean }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = useCallback((event: MouseEvent<HTMLElement>) => {
@@ -38,9 +38,6 @@ export default function MobileDropdown () {
   const path = usePathname()
   const router = useRouter()
   const pathSegments = path.split('/')
-
-  // Only show if on a docs page
-  const docsShowing = pathSegments.length >= 2 && pathSegments[1] === 'docs'
 
   const onVersionClick = useCallback((slug: VersionSlug) => {
     setVersion(slug)

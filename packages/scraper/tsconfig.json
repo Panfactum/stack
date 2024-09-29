@@ -1,22 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "outDir": "./dist",
+    "target": "es2017",
     "lib": [
-      "dom",
-      "dom.iterable",
       "esnext"
     ],
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false,
     "esModuleInterop": true,
     "module": "esnext",
-    "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -31,7 +24,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -42,13 +35,7 @@
     "resolveJsonModule": true
   },
   "include": [
-    "next-env.d.ts",
-    "process-env.d.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    ".next/types/**/*.ts",
-    "build/types/**/*.ts",
-    ".lint/types/**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"

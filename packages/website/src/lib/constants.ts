@@ -30,3 +30,20 @@ export type VersionSlug = (typeof slugs)[number]
 export function isValidVersionSlug (maybeSlug: string | undefined): maybeSlug is (typeof slugs)[number] {
   return slugs.includes(maybeSlug as (typeof slugs)[number])
 }
+
+export function algoliaEnv () {
+  const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
+  const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
+  const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
+
+  if (ALGOLIA_APP_ID === undefined || ALGOLIA_SEARCH_API_KEY === undefined || ALGOLIA_INDEX_NAME === undefined) {
+    console.log('algoliaEnv', ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME)
+    throw new Error('Missing Algolia environment variables')
+  }
+
+  return {
+    ALGOLIA_APP_ID,
+    ALGOLIA_SEARCH_API_KEY,
+    ALGOLIA_INDEX_NAME
+  }
+}

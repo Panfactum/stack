@@ -1,0 +1,11 @@
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+content
+*.db*
+
+# generated files
+scraped.json
+sections.json

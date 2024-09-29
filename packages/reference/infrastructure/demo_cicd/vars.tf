@@ -41,6 +41,27 @@ variable "pull_through_cache_enabled" {
   default     = false
 }
 
+variable "scraper_image_version" {
+  description = "The version of the image to use for the scraper"
+  type        = string
+}
+
+variable "algolia_app_id" {
+  description = "The Algolia App ID for the search index"
+  type        = string
+}
+
+variable "algolia_api_key" {
+  description = "The Algolia API key for the search index"
+  type        = string
+  sensitive   = true
+}
+
+variable "algolia_index_name" {
+  description = "The name of the Algolia index to use for the search"
+  type        = string
+}
+
 # pf-generate: standard_vars
 variable "environment" {
   description = "The name of the environment the infrastructure is being deployed into. #injected"
