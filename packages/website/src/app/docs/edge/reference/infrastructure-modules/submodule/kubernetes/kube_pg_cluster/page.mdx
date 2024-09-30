@@ -355,12 +355,6 @@ Description: The namespace to deploy to the cluster into
 
 Type: `string`
 
-### <a name="input_pg_initial_storage_gb" /> [pg\_initial\_storage\_gb](#input_pg_initial_storage_gb)
-
-Description: The initial number of gigabytes of storage to provision for the postgres cluster
-
-Type: `number`
-
 ## Optional Inputs
 
 The following input variables are optional (have default values):
@@ -444,6 +438,14 @@ Description: The amount of cpu to allocate to the postgres pods (in millicores)
 Type: `number`
 
 Default: `250`
+
+### <a name="input_pg_initial_storage_gb" /> [pg\_initial\_storage\_gb](#input_pg_initial_storage_gb)
+
+Description: The initial number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+Default: `10`
 
 ### <a name="input_pg_instances" /> [pg\_instances](#input_pg_instances)
 

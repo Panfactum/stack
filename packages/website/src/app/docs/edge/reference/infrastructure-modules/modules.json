@@ -221,6 +221,16 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_gha",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_gha_runners",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_ingress",
       "type": "submodule",
       "group": "kubernetes"

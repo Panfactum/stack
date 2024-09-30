@@ -26,6 +26,11 @@ and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
     From personal experience running many bare metal clusters, when you factor in the additional time and headache
     required to manage the control plane on your own, this is an incredible deal.
 
+<MarkdownAlert severity="info">
+    To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/edge/guides/bootstrapping/suspend-kubernetes-cluster)
+    to suspend resources and resume as you are setting up your cluster.
+</MarkdownAlert>
+
 ## Configure Pull Through Cache
 
 Many of the utilities we will run on the cluster are distributed as images from public registries such as
@@ -158,8 +163,7 @@ to run in.
 More AZs will result in higher resiliency, but it will also result in increased cost as network traffic that crosses
 availability zones incurs additional charge. [^6]
 
-[^6]: In practice, this is fairly minimal unless you have very chatty applications. As a result, it is normally best to
-    run whatever you'd run in production in all environments. This allows for better testing and issue emulation.
+[^6]: For more information on costs and uptime targets, see our [high-availability guide](/docs/edge/guides/deploying-workloads/high-availability).
 
 In production, **strongly** recommend using **three** AZs, but in development or test environments it is perfectly acceptable to
 choose one. [^4]

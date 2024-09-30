@@ -1,0 +1,90 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_gha" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_gha" status="beta" type="direct" />
+
+# GHA Self-hosted Runner Controllers
+
+This module provides a deployment of the [GHA Runner Controller](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/quickstart-for-actions-runner-controller)
+project CRDs for running GitHub Action workflow jobs on your Panfactum Kubernetes Cluster.
+
+For installation instructions, see our [guide](/docs/edge/guides/addons/github-actions/installing).
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+* [kubectl](#requirement_kubectl) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### <a name="input_gha_runner_scale_set_controller_helm_version" /> [gha\_runner\_scale\_set\_controller\_helm\_version](#input_gha_runner_scale_set_controller_helm_version)
+
+Description: The version of the actions-runner-controller-charts/gha-runner-scale-set-controller helm chart to deploy
+
+Type: `string`
+
+Default: `"0.9.3"`
+
+### <a name="input_log_level" /> [log\_level](#input_log_level)
+
+Description: The log level to use for the pods
+
+Type: `string`
+
+Default: `"warn"`
+
+### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### <a name="output_namespace" /> [namespace](#output_namespace)
+
+Description: n/a
+
+## Maintainer Notes
+
+No notes.
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}
