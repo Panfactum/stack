@@ -54,3 +54,39 @@ higher upfront learning curves but lower overall total cost of ownership due to 
   initialization time which can be the vast majority of the execution time.
 * To unlock the full capabilities of GitHub Actions (environments, approval gates, etc.) in private code repositories, you must be on expensive paid
   tiers of GitHub.
+
+## Self-hosted Limitations
+
+We provide GHA runner modules ([kube\_gha](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha) and [kube\_gha\_runners](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners)) as a convenience so that you can leverage Panfactum to reduce costs and improve the speed
+of your existing GitHub Actions workflows without requiring significant refactoring. However, you should
+be aware of the following limitations:
+
+* You must use the GHA runner image for your runners, so you cannot use arbitrary containers images in your workflows.
+  If you want additional tools in your CI runtime, you will need to build your images with the GHA image as the base.
+  Note that the GHA image updates frequently, and you will need to ensure your runners are always using a recent image or your runners will
+  not be able to communicate with the GitHub control plane.
+
+* When defining your GHA workflows, you will have very little control over the per-workflow execution context.
+  For example, you cannot simply add more temporary storage or more memory to a single workflow. Instead,
+  you must update and/or create a new runner group every time you need to change configuration of the execution context.
+
+* The runners generate extremely verbose logs that will pollute your logging utilities. This is not directly configurable.
+
+Additionally, in Panfactum's implementation you cannot
+run [container jobs](https://docs.github.com/en/actions/writing-workflows/choosing-where-your-workflow-runs/running-jobs-in-a-container)
+(or third-party GitHub actions that use container jobs internally). [^2]
+While GitHub claims support for container jobs on self-hosted runners, we have found the following problems with their implementation
+that caused us to drop support for it: [^3]
+
+* Self-hosted runners require using insecure container settings for these jobs. We found this extremely concerning given that the
+  self-hosted runners open the door to running arbitrary untrusted code directly inside your clusters.
+
+* We were not able to launch container jobs on hardened host operating systems like those recommended by AWS EKS ([Bottlerocket](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami-bottlerocket.html)),
+  even when using GitHub's recommended insecure container settings. See this [issue report](https://github.com/actions/actions-runner-controller/discussions/2438) for more details.
+
+* When we experimented with dedicated, insecure nodes, the generated containers would often break for obscure reasons.
+  Even when container jobs did run successfully, there is no way to configure standard settings of the generated containers such as their resource requests and limits.
+
+[^2]: See [this list](https://github.com/neysofu/awesome-github-actions-runners) for alternative implementations of self-hosted runners that do not have this limitation.
+
+[^3]: We may revisit this in a future release given enough demand. If you want this feature, let us know [here!](https://github.com/Panfactum/stack/issues/142)

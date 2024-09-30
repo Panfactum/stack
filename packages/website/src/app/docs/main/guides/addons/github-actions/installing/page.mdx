@@ -16,48 +16,14 @@ to leverage your Panfactum clusters for executing GHA workflows.
 ## Background and Limitations
 
 <MarkdownAlert severity="warning">
-  Please ensure you have read this section thoroughly before continuing.
+  Please ensure you have read this section and the associated links thoroughly before continuing.
 </MarkdownAlert>
 
 GitHub Actions are **not** the recommended method for setting up CI / CD in Panfactum clusters. We
 provide a full set of guides for our recommended architecture [here](/docs/main/guides/cicd/getting-started).
 
 Additionally, GitHub Actions have many shortcomings compared to a more full-featured, Kubernetes-native workflow
-engine such as Argo Workflows. See our detailed analysis [here](/docs/main/concepts/cicd/gha).
-
-We provide GHA runner modules as a convenience so that you can leverage Panfactum to reduce costs and improve the speed
-of your existing GitHub Actions workflows without requiring significant refactoring. However, you should
-be aware of the following limitations:
-
-* You must use the GHA runner image for your runners, so you cannot use arbitrary containers images in your workflows.
-  If you want additional tools in your CI runtime, you will need to build your images with the GHA image as the base.
-  Note that the GHA image updates frequently, and you will need to ensure your runners are always using a recent image or your runners will
-  not be able to communicate with the GitHub control plane.
-
-* When defining your GHA workflows, you will have very little control over the per-workflow execution context.
-  For example, you cannot simply add more temporary storage or more memory to a single workflow. Instead,
-  you must update and/or create a new runner group every time you need to change configuration of the execution context.
-
-* The runners generate extremely verbose logs that will pollute your logging utilities. This is not directly configurable.
-
-Additionally, in Panfactum's implementation you cannot
-run [container jobs](https://docs.github.com/en/actions/writing-workflows/choosing-where-your-workflow-runs/running-jobs-in-a-container)
-(or third-party GitHub actions that use container jobs internally). [^1]
-While GitHub claims support for container jobs on self-hosted runners, we have found the following problems with their implementation
-that caused us to drop support for it: [^2]
-
-* Self-hosted runners require using insecure container settings for these jobs. We found this extremely concerning given that the
-  self-hosted runners open the door to running arbitrary untrusted code directly inside your clusters.
-
-* We were not able to launch container jobs on hardened host operating systems like those recommended by AWS EKS ([Bottlerocket](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami-bottlerocket.html)),
-  even when using GitHub's recommended insecure container settings. See this [issue report](https://github.com/actions/actions-runner-controller/discussions/2438) for more details.
-
-* When we experimented with dedicated, insecure nodes, the generated containers would often break for obscure reasons.
-  Even when container jobs did run successfully, there is no way to configure standard settings of the generated containers such as their resource requests and limits.
-
-[^1]: See [this list](https://github.com/neysofu/awesome-github-actions-runners) for alternative implementations of self-hosted runners that do not have this limitation.
-
-[^2]: We may revisit this in a future release given enough demand. If you want this feature, let us know [here!](https://github.com/Panfactum/stack/issues/142)
+engine such as Argo Workflows. See our detailed analysis and list of limitations [here](/docs/main/concepts/cicd/gha).
 
 ## Install the Runner Controller
 
