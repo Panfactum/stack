@@ -11,6 +11,10 @@
 !packages/website/tailwind.config.js
 !packages/website/theme.js
 !packages/website/tsconfig.json
+!packages/scraper/package.json
+!packages/scraper/src
+!packages/scraper/.eslintrc.js
+!packages/scraper/tsconfig.json
 !packages/eslint/package.json
 !packages/eslint/index.js
 !packages/bastion

@@ -1,0 +1,23 @@
+{
+  "name": "scrape",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "AGPL",
+  "devDependencies": {
+    "@panfactum/eslint-config": "workspace:*",
+    "@types/node": "18.13.0",
+    "@vercel/ncc": "0.38.2",
+    "tsx": "4.19.1",
+    "typescript": "5.6.2"
+  },
+  "dependencies": {
+    "axios": "1.7.7",
+    "node-html-parser": "6.1.13",
+    "retry-axios": "^3.1.3"
+  }
+}

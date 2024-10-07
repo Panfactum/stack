@@ -27,7 +27,7 @@ module.exports = {
         defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || [],
         safelist: {
           standard: [/html/, /body/, /tsqd-parent-container/],
-          greedy: [/katex/, /Mui/]
+          greedy: [/katex/, /Mui/, /ais/]
         },
       }
     ]

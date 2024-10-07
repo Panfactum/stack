@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server'
 export function middleware (request: NextRequest) {
   const cspHeader = `
     default-src 'self' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://crm.zoho.com https://crm.zohopublic.com;
-    script-src 'self' 'unsafe-inline' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://static.zohocdn.com https://crm.zohopublic.com ${process.env.NODE_ENV === 'production' ? '' : '\'unsafe-eval\''};
+    script-src 'self' 'unsafe-inline' https://pagesense-collect.zoho.com https://cdn.pagesense.io https://static.zohocdn.com https://crm.zohopublic.com ${process.env.NODE_ENV === 'production' ? '' : "'unsafe-eval'"};
+    connect-src https://*.algolia.net https://*.algolianet.com https://*.algolia.io http://localhost:3000 ws://localhost:3000;
     style-src 'self' 'unsafe-inline';
     img-src 'self' https://pagesense-collect.zoho.com https://crm.zohopublic.com blob: data:;
     font-src 'self' https:;
