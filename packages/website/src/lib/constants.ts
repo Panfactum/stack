@@ -32,9 +32,9 @@ export function isValidVersionSlug (maybeSlug: string | undefined): maybeSlug is
 }
 
 export function algoliaEnv () {
-  const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
-  const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
-  const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
+  const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'VJ9GF38NJX'
+  const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY || '76e7c17dae4d35f581c858ee2784b41a'
+  const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'docs'
 
   if (ALGOLIA_APP_ID === undefined || ALGOLIA_SEARCH_API_KEY === undefined || ALGOLIA_INDEX_NAME === undefined) {
     console.error('algoliaEnv', ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME)
