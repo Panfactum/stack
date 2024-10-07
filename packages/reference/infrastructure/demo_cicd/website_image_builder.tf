@@ -13,6 +13,12 @@ module "website_builder" {
   dockerfile_path = "./packages/website/Containerfile"
   image_repo = "website"
 
+  args = {
+    ALGOLIA_APP_ID = var.algolia_app_id
+    ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
+    ALGOLIA_INDEX_NAME = var.algolia_index_name
+  }
+
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit

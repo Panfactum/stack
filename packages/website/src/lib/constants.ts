@@ -37,7 +37,7 @@ export function algoliaEnv () {
   const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
 
   if (ALGOLIA_APP_ID === undefined || ALGOLIA_SEARCH_API_KEY === undefined || ALGOLIA_INDEX_NAME === undefined) {
-    console.log('algoliaEnv', ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME)
+    console.error('algoliaEnv', ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME)
     throw new Error('Missing Algolia environment variables')
   }
 
