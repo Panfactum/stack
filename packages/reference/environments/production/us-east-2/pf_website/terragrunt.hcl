@@ -14,8 +14,5 @@ dependency "ingress" {
 
 inputs = {
   website_domain         = "panfactum.com"
-  website_image_version  = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
-  algolia_app_id = "VJ9GF38NJX"
-  algolia_search_api_key = "76e7c17dae4d35f581c858ee2784b41a"
-  algolia_index_name = "docs"
+  website_image_version  = "8310b109f195236791bc72c6654e7a88c6f2802b"
 }

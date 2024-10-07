@@ -35,14 +35,18 @@ RUN npx next-sitemap
 ## Builder Image
 #################################################
 
+FROM deps AS builder
 ARG ALGOLIA_APP_ID
 ARG ALGOLIA_SEARCH_API_KEY
 ARG ALGOLIA_INDEX_NAME
 
-FROM deps AS builder
+## Validate required build arguments
+RUN test -n "$ALGOLIA_APP_ID" && test -n "$ALGOLIA_SEARCH_API_KEY" && test -n "$ALGOLIA_INDEX_NAME"
+
 ENV NODE_ENV=production
 WORKDIR /code/packages/website
 COPY packages/website/ .
+
 RUN mkdir /code/packages/website/build
 RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
   --mount=type=cache,id=website-build,target=/code/packages/website/build/cache \
