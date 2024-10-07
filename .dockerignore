@@ -10,6 +10,7 @@
 !packages/website/postcss.config.js
 !packages/website/tailwind.config.js
 !packages/website/theme.js
+!packages/website/process-env.d.ts
 !packages/website/tsconfig.json
 !packages/scraper/package.json
 !packages/scraper/src
