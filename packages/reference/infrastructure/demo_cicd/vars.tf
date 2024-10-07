@@ -57,6 +57,11 @@ variable "algolia_api_key" {
   sensitive   = true
 }
 
+variable "algolia_search_api_key" {
+  description = "The Algolia Search API key for the search index that can be publicly exposed"
+  type        = string
+}
+
 variable "algolia_index_name" {
   description = "The name of the Algolia index to use for the search"
   type        = string

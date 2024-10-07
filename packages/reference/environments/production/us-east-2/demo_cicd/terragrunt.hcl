@@ -29,6 +29,7 @@ inputs = {
   buildkit_bucket_region = dependency.buildkit.outputs.cache_bucket_region
   algolia_app_id         = "VJ9GF38NJX"
   algolia_api_key        = local.secrets.algolia_api_key
+  algolia_search_api_key = "76e7c17dae4d35f581c858ee2784b41a"
   algolia_index_name     = "docs"
   scraper_image_version  = "684730eb4430cb0536d9874a9af908ec47f4372b"
 }

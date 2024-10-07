@@ -14,19 +14,3 @@ variable "vpa_enabled" {
   type        = bool
   default     = false
 }
-
-variable "algolia_app_id" {
-  description = "The Algolia App ID for the search index"
-  type        = string
-}
-
-variable "algolia_search_api_key" {
-  description = "The Algolia Search API key for the search index"
-  type        = string
-  sensitive   = true
-}
-
-variable "algolia_index_name" {
-  description = "The name of the Algolia index to use for the search"
-  type        = string
-}
