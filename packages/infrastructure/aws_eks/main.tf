@@ -297,7 +297,7 @@ resource "aws_ec2_tag" "node_subnet_tags" {
 // Latest bottlerocket image
 // See https://docs.aws.amazon.com/eks/latest/userguide/retrieve-ami-id-bottlerocket.html
 data "aws_ssm_parameter" "controller_ami" {
-  name = "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/arm64/latest/image_id"
+  name = var.bootstrap_mode_enabled ? "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/x86_64/latest/image_id" : "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/arm64/latest/image_id"
 }
 
 resource "aws_launch_template" "controller" {
