@@ -45,6 +45,18 @@ inputs = {
         {
           subdomain = "hs2-47029925._domainkey."
           record    = "panfactum-com.hs06b.dkim.hubspotemail.net."
+        },
+
+        // Customer Portal (Hubspot)
+        {
+          subdomain = "tickets."
+          record    = "47029925.group25.sites.hubspot.net."
+        },
+
+        // Return Path (Postmark)
+        {
+          subdomain = "pm-bounces."
+          record    = "pm.mtasv.net."
         }
       ]
       txt_records = [
@@ -74,6 +86,14 @@ inputs = {
             "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCr6KMgdxxgg7oT3ulMwPJs9RXgXDrI9UWU118pHEMohl3UbL3Jwp4oxp/9N3thh/3WCJnYV134zbEVolZwqaT3JsFEq/mQ/RpW/JnOZ3rnxqJPurb2bcfJol4SDxiWVObzHX31xnANzFcXnq1/5dMK5QvW4Jh7n0fm4+4ywqiy2QIDAQAB"
           ]
         },
+        // DKIM (Postmark)
+        {
+          subdomain = "20241006160142pm._domainkey."
+          records = [
+            "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcDUm9LXBvbF0cC+jgjpiTBsAOZqitLJCAdmuHOOcMoDVmDMrLWzYAtOVUpAXoPnnflPHQxWDbXlpmI1UhEuiFCqZuyM04bVBmJSBbg2dzcqBgm5Colu0T0+Mt39w1ov54mtvIZJzqqA17T48BY0LGGd6FG2UhVCOX5FPTrjjLzQIDAQAB"
+          ]
+        },
+        // SPF
         {
           subdomain = ""
           records = [

@@ -42,6 +42,13 @@ if [[ ${#FILES[@]} -gt 0 ]]; then
 
   # Perform shallow merge using yq
   for FILE in "${FILES[@]}"; do
+
+    # Check if the file is empty, non-existent, or contains only comments
+    # shellcheck disable=SC2143
+    if [[ ! -s $FILE ]] || [[ -z "$(grep -v '^[[:space:]]*#' "$FILE" | grep -v '^[[:space:]]*$')" ]]; then
+      continue
+    fi
+
     # The merge order here is important b/c files earlier in the array should take precedence
     MERGED=$(echo "$MERGED" | yq -ys '.[1] * .[0]' - "$FILE")
   done
