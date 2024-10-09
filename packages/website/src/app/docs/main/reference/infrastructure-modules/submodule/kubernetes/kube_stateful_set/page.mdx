@@ -75,7 +75,7 @@ of the volumes through the `volume_retention_policy` input.
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -87,7 +87,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_containers" /> [containers](#input_containers)
+### containers
 
 Description: A list of container configurations for the pod
 
@@ -133,19 +133,19 @@ list(object({
   }))
 ```
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of this workload
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace the cluster is in
 
 Type: `string`
 
-### <a name="input_volume_mounts" /> [volume\_mounts](#input_volume_mounts)
+### volume\_mounts
 
 Description: A mapping of names to configuration for PersistentVolumeClaims used by the StatefulSet
 
@@ -168,7 +168,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+### arm\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on arm64 nodes
 
@@ -176,7 +176,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_az_anti_affinity_required" /> [az\_anti\_affinity\_required](#input_az_anti_affinity_required)
+### az\_anti\_affinity\_required
 
 Description: Whether to prevent pods from being scheduled on the same availability zone
 
@@ -184,7 +184,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
+### az\_spread\_preferred
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
 
@@ -192,7 +192,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_az_spread_required" /> [az\_spread\_required](#input_az_spread_required)
+### az\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
 
@@ -200,7 +200,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+### burstable\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
@@ -208,7 +208,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_common_env" /> [common\_env](#input_common_env)
+### common\_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -216,7 +216,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_common_env_from_config_maps" /> [common\_env\_from\_config\_maps](#input_common_env_from_config_maps)
+### common\_env\_from\_config\_maps
 
 Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
 
@@ -231,7 +231,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_common_env_from_secrets" /> [common\_env\_from\_secrets](#input_common_env_from_secrets)
+### common\_env\_from\_secrets
 
 Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
 
@@ -246,7 +246,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_common_secrets" /> [common\_secrets](#input_common_secrets)
+### common\_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -254,7 +254,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
+### config\_map\_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
 
@@ -269,7 +269,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
+### controller\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -277,7 +277,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_controller_nodes_required" /> [controller\_nodes\_required](#input_controller_nodes_required)
+### controller\_nodes\_required
 
 Description: Whether the pods must be scheduled on a controller node
 
@@ -285,7 +285,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
+### dns\_policy
 
 Description: The DNS policy for the pods
 
@@ -293,7 +293,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### <a name="input_extra_pod_annotations" /> [extra\_pod\_annotations](#input_extra_pod_annotations)
+### extra\_pod\_annotations
 
 Description: Annotations to add to the pods in the Pod
 
@@ -301,7 +301,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
+### extra\_pod\_labels
 
 Description: Extra pod labels to use
 
@@ -309,7 +309,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+### extra\_tolerations
 
 Description: Extra tolerations to add to the pods
 
@@ -326,7 +326,7 @@ list(object({
 
 Default: `[]`
 
-### <a name="input_host_anti_affinity_required" /> [host\_anti\_affinity\_required](#input_host_anti_affinity_required)
+### host\_anti\_affinity\_required
 
 Description: Whether to prefer preventing pods from being scheduled on the same host
 
@@ -334,7 +334,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_ignore_replica_count" /> [ignore\_replica\_count](#input_ignore_replica_count)
+### ignore\_replica\_count
 
 Description: Whether to ignore changes to the replica count. Useful when implementing horizontal autoscaling.
 
@@ -342,7 +342,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+### instance\_type\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
@@ -350,7 +350,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_max_unavailable" /> [max\_unavailable](#input_max_unavailable)
+### max\_unavailable
 
 Description: Controls how many pods are allowed to be unavailable in the StatefulSet under the Pod Disruption Budget
 
@@ -358,7 +358,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
+### mount\_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -366,7 +366,7 @@ Type: `number`
 
 Default: `1000`
 
-### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+### node\_preferences
 
 Description: Node label preferences for the pods
 
@@ -374,7 +374,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+### node\_requirements
 
 Description: Node label requirements for the pods
 
@@ -382,7 +382,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -390,7 +390,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pod_management_policy" /> [pod\_management\_policy](#input_pod_management_policy)
+### pod\_management\_policy
 
 Description: The StatefulSets pod management policy
 
@@ -398,7 +398,7 @@ Type: `string`
 
 Default: `"OrderedReady"`
 
-### <a name="input_pod_version_labels_enabled" /> [pod\_version\_labels\_enabled](#input_pod_version_labels_enabled)
+### pod\_version\_labels\_enabled
 
 Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
 
@@ -406,7 +406,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
+### priority\_class\_name
 
 Description: The priority class to use for pods in the StatefulSet
 
@@ -414,7 +414,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the annotator images
 
@@ -422,7 +422,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_replicas" /> [replicas](#input_replicas)
+### replicas
 
 Description: The desired number of pods in the StatefulSet
 
@@ -430,7 +430,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
+### restart\_policy
 
 Description: The pod restart policy
 
@@ -438,7 +438,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
+### secret\_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the Pod
 
@@ -453,7 +453,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_service_ip" /> [service\_ip](#input_service_ip)
+### service\_ip
 
 Description: If provided, the StatefulSet's service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
 
@@ -461,7 +461,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_service_load_balancer_class" /> [service\_load\_balancer\_class](#input_service_load_balancer_class)
+### service\_load\_balancer\_class
 
 Description: Iff service\_type == LoadBalancer, the loadBalancerClass to use.
 
@@ -469,7 +469,7 @@ Type: `string`
 
 Default: `"service.k8s.aws/nlb"`
 
-### <a name="input_service_name" /> [service\_name](#input_service_name)
+### service\_name
 
 Description: If provided, the StatefulSet's service will have this name. If not provided, will default to name.
 
@@ -477,7 +477,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_service_public_domain_names" /> [service\_public\_domain\_names](#input_service_public_domain_names)
+### service\_public\_domain\_names
 
 Description: Iff service\_type == LoadBalancer, the public domains names that this service will be accessible from.
 
@@ -485,7 +485,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_service_type" /> [service\_type](#input_service_type)
+### service\_type
 
 Description: The type of the StatefulSet's Service.
 
@@ -493,7 +493,7 @@ Type: `string`
 
 Default: `"ClusterIP"`
 
-### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+### spot\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on spot nodes
 
@@ -501,7 +501,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
+### termination\_grace\_period\_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -509,7 +509,7 @@ Type: `number`
 
 Default: `30`
 
-### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
+### tmp\_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -525,7 +525,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_unhealthy_pod_eviction_policy" /> [unhealthy\_pod\_eviction\_policy](#input_unhealthy_pod_eviction_policy)
+### unhealthy\_pod\_eviction\_policy
 
 Description: Whether to allow unhealthy pods to be evicted. See [https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
 
@@ -533,7 +533,7 @@ Type: `string`
 
 Default: `"AlwaysAllow"`
 
-### <a name="input_update_type" /> [update\_type](#input_update_type)
+### update\_type
 
 Description: The type of update that the StatefulSEt should use
 
@@ -541,7 +541,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### <a name="input_volume_retention_policy" /> [volume\_retention\_policy](#input_volume_retention_policy)
+### volume\_retention\_policy
 
 Description: The persistentVolumeClaimRetentionPolicy to use of the StatefulSet
 
@@ -563,7 +563,7 @@ Default:
 }
 ```
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -575,19 +575,19 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_headless_service_name" /> [headless\_service\_name](#output_headless_service_name)
+### headless\_service\_name
 
 Description: The name of the headless service where StatefulSet pods are registered
 
-### <a name="output_labels" /> [labels](#output_labels)
+### labels
 
 Description: The labels assigned to all resources in this deployment
 
-### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+### match\_labels
 
 Description: The labels unique to this deployment that can be used to select the pods in this deployment
 
-### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+### service\_account\_name
 
 Description: The service account used for the pods
 

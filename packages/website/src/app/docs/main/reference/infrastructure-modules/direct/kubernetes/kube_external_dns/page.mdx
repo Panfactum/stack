@@ -20,7 +20,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -30,7 +30,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
@@ -40,7 +40,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -48,7 +48,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_external_dns_helm_version" /> [external\_dns\_helm\_version](#input_external_dns_helm_version)
+### external\_dns\_helm\_version
 
 Description: The version of the ExternalDNS helm chart to deploy
 
@@ -56,7 +56,7 @@ Type: `string`
 
 Default: `"1.14.3"`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the ExternalDNS pods
 
@@ -64,7 +64,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -72,7 +72,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -80,7 +80,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -88,7 +88,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_route53_zones" /> [route53\_zones](#input_route53_zones)
+### route53\_zones
 
 Description: A mapping of public DNS domains managed by AWS to their configuration; external-dns uses this to set domain records
 
@@ -103,7 +103,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

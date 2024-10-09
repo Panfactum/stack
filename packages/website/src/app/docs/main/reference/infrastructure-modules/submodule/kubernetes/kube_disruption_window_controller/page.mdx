@@ -42,7 +42,7 @@ This addon is simply two CronJobs:
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -52,7 +52,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace the PDBs are in
 
@@ -62,7 +62,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_cron_schedule" /> [cron\_schedule](#input_cron_schedule)
+### cron\_schedule
 
 Description: The times when disruption windows should start
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: `"0 4 * * *"`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -78,7 +78,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the annotator images
 
@@ -86,7 +86,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -98,7 +98,7 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_disruption_window_id" /> [disruption\_window\_id](#output_disruption_window_id)
+### disruption\_window\_id
 
 Description: n/a
 

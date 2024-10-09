@@ -47,7 +47,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -57,13 +57,13 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_extra_storage_classes" /> [extra\_storage\_classes](#input_extra_storage_classes)
+### extra\_storage\_classes
 
 Description: Extra EBS-backed storage classes to add to the cluster. Keys are the name of the storage class and values are their configuration.
 
@@ -90,7 +90,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_ebs_csi_driver_helm_version" /> [aws\_ebs\_csi\_driver\_helm\_version](#input_aws_ebs_csi_driver_helm_version)
+### aws\_ebs\_csi\_driver\_helm\_version
 
 Description: The version of the aws-ebs-csi-driver helm chart to deploy
 
@@ -98,7 +98,7 @@ Type: `string`
 
 Default: `"2.34.0"`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -106,7 +106,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -114,7 +114,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -122,7 +122,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -130,7 +130,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -138,7 +138,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

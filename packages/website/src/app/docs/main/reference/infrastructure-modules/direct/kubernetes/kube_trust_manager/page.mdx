@@ -23,7 +23,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -35,7 +35,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -43,7 +43,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The name of the cert-manager namespace.
 
@@ -51,7 +51,7 @@ Type: `string`
 
 Default: `"cert-manager"`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -59,7 +59,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_trust_manager_version" /> [trust\_manager\_version](#input_trust_manager_version)
+### trust\_manager\_version
 
 Description: The version of trust-manager to deploy
 
@@ -67,7 +67,7 @@ Type: `string`
 
 Default: `"0.9.1"`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

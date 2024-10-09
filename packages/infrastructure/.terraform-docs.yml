@@ -10,7 +10,7 @@ sections:
 header-from: README.md
 footer-from: FOOTER.md
 settings:
-  anchor: true
+  anchor: false
   html: true
   read-comments: false
 content: |-

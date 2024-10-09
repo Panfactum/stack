@@ -18,7 +18,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -28,19 +28,19 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster that this is being deployed to
 
 Type: `string`
 
-### <a name="input_subnets" /> [subnets](#input_subnets)
+### subnets
 
 Description: List of subnet names to deploy load balancers into. Must be in at least two different availability zones.
 
 Type: `set(string)`
 
-### <a name="input_vpc_id" /> [vpc\_id](#input_vpc_id)
+### vpc\_id
 
 Description: The ID of the VPC to use for AWS networked resources
 
@@ -50,7 +50,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_alb_controller_helm_version" /> [alb\_controller\_helm\_version](#input_alb_controller_helm_version)
+### alb\_controller\_helm\_version
 
 Description: The version of aws-application-loadbalancer-controller helm chart to deploy
 
@@ -58,7 +58,7 @@ Type: `string`
 
 Default: `"1.8.0"`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -66,7 +66,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -74,7 +74,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the ALB controller pods
 
@@ -82,7 +82,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -90,7 +90,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -98,7 +98,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -106,7 +106,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

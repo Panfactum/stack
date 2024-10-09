@@ -16,7 +16,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -30,7 +30,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
@@ -40,7 +40,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -48,7 +48,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_backups_enabled" /> [backups\_enabled](#input_backups_enabled)
+### backups\_enabled
 
 Description: Whether this database has backups enabled
 
@@ -56,7 +56,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_backups_force_delete" /> [backups\_force\_delete](#input_backups_force_delete)
+### backups\_force\_delete
 
 Description: Whether to delete backups on destroy
 
@@ -64,7 +64,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_log_connections_enabled" /> [log\_connections\_enabled](#input_log_connections_enabled)
+### log\_connections\_enabled
 
 Description: Whether to log each connection
 
@@ -72,7 +72,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pg_cpu_millicores" /> [pg\_cpu\_millicores](#input_pg_cpu_millicores)
+### pg\_cpu\_millicores
 
 Description: The amount of cpu to allocate to the postgres pods (in millicores)
 
@@ -80,7 +80,7 @@ Type: `number`
 
 Default: `250`
 
-### <a name="input_pg_instances" /> [pg\_instances](#input_pg_instances)
+### pg\_instances
 
 Description: The number of instances to deploy in the postgres cluster
 
@@ -88,7 +88,7 @@ Type: `number`
 
 Default: `2`
 
-### <a name="input_pg_memory_mb" /> [pg\_memory\_mb](#input_pg_memory_mb)
+### pg\_memory\_mb
 
 Description: The amount of memory to allocate to the postgres pods (in Mi)
 
@@ -96,7 +96,7 @@ Type: `number`
 
 Default: `1000`
 
-### <a name="input_pg_version" /> [pg\_version](#input_pg_version)
+### pg\_version
 
 Description: The version of postgres to deploy
 
@@ -104,7 +104,7 @@ Type: `string`
 
 Default: `"16.2-10"`
 
-### <a name="input_pgbouncer_pool_mode" /> [pgbouncer\_pool\_mode](#input_pgbouncer_pool_mode)
+### pgbouncer\_pool\_mode
 
 Description: What pool\_mode to run pgbouncer in
 
@@ -112,7 +112,7 @@ Type: `string`
 
 Default: `"session"`
 
-### <a name="input_pgbouncer_version" /> [pgbouncer\_version](#input_pgbouncer_version)
+### pgbouncer\_version
 
 Description: The version of the cloudnative-pg/pgbouncer image to use
 
@@ -120,7 +120,7 @@ Type: `string`
 
 Default: `"1.22.1"`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -128,7 +128,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -140,15 +140,15 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
+### db\_admin\_role
 
 Description: n/a
 
-### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
+### db\_reader\_role
 
 Description: n/a
 
-### <a name="output_db_superuser_role" /> [db\_superuser\_role](#output_db_superuser_role)
+### db\_superuser\_role
 
 Description: n/a
 

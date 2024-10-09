@@ -44,49 +44,49 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [tls](#requirement_tls) (4.0.5)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_cluster_description" /> [cluster\_description](#input_cluster_description)
+### cluster\_description
 
 Description: The purpose of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_cluster_name" /> [cluster\_name](#input_cluster_name)
+### cluster\_name
 
 Description: The name of the EKS cluster resource.
 
 Type: `string`
 
-### <a name="input_control_plane_subnets" /> [control\_plane\_subnets](#input_control_plane_subnets)
+### control\_plane\_subnets
 
 Description: List of subnet names for the control plane. Must be in at least two different availability zones.
 
 Type: `set(string)`
 
-### <a name="input_dns_service_ip" /> [dns\_service\_ip](#input_dns_service_ip)
+### dns\_service\_ip
 
 Description: The IP address of the cluster's DNS service. Must be inside the service\_cidr range.
 
 Type: `string`
 
-### <a name="input_node_subnets" /> [node\_subnets](#input_node_subnets)
+### node\_subnets
 
 Description: List of names for subnets that controller nodes should be deployed to
 
 Type: `list(string)`
 
-### <a name="input_service_cidr" /> [service\_cidr](#input_service_cidr)
+### service\_cidr
 
 Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
 
 Type: `string`
 
-### <a name="input_vpc_id" /> [vpc\_id](#input_vpc_id)
+### vpc\_id
 
 Description: The id for the VPC that the cluster should be deployed into
 
@@ -96,7 +96,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_admin_iam_arns" /> [admin\_iam\_arns](#input_admin_iam_arns)
+### admin\_iam\_arns
 
 Description: List of IAM arns for encryption key admins.
 
@@ -104,7 +104,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_bootstrap_mode_enabled" /> [bootstrap\_mode\_enabled](#input_bootstrap_mode_enabled)
+### bootstrap\_mode\_enabled
 
 Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled.
 
@@ -112,7 +112,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_control_plane_logging" /> [control\_plane\_logging](#input_control_plane_logging)
+### control\_plane\_logging
 
 Description: Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)
 
@@ -120,7 +120,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### <a name="input_core_dns_addon_enabled" /> [core\_dns\_addon\_enabled](#input_core_dns_addon_enabled)
+### core\_dns\_addon\_enabled
 
 Description: FOR BACKWARDS COMPATIBILITY AND MIGRATIONS ONLY
 
@@ -128,7 +128,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_coredns_version" /> [coredns\_version](#input_coredns_version)
+### coredns\_version
 
 Description: The version to use for the coredns EKS add-on.
 
@@ -136,7 +136,7 @@ Type: `string`
 
 Default: `"v1.11.1-eksbuild.6"`
 
-### <a name="input_enable_public_access" /> [enable\_public\_access](#input_enable_public_access)
+### enable\_public\_access
 
 Description: Whether the cluster control plane should be available from the public internet.
 
@@ -144,7 +144,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_kube_version" /> [kube\_version](#input_kube_version)
+### kube\_version
 
 Description: Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied.
 
@@ -152,7 +152,7 @@ Type: `string`
 
 Default: `"1.29"`
 
-### <a name="input_node_security_groups" /> [node\_security\_groups](#input_node_security_groups)
+### node\_security\_groups
 
 Description: Names of security groups allowed to communicate directly with the cluster nodes.
 
@@ -160,7 +160,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### <a name="input_public_access_cidrs" /> [public\_access\_cidrs](#input_public_access_cidrs)
+### public\_access\_cidrs
 
 Description: IP address ranges that can access the public control plane API endpoint.
 
@@ -174,7 +174,7 @@ Default:
 ]
 ```
 
-### <a name="input_reader_iam_arns" /> [reader\_iam\_arns](#input_reader_iam_arns)
+### reader\_iam\_arns
 
 Description: List of IAM arns for users who can use the encryption key for encryption and decryption.
 
@@ -182,7 +182,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_restricted_reader_iam_arns" /> [restricted\_reader\_iam\_arns](#input_restricted_reader_iam_arns)
+### restricted\_reader\_iam\_arns
 
 Description: List of IAM arns for users who can only view the encryption key.
 
@@ -190,7 +190,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_superuser_iam_arns" /> [superuser\_iam\_arns](#input_superuser_iam_arns)
+### superuser\_iam\_arns
 
 Description: List of IAM arns for encryption key superusers.
 
@@ -202,39 +202,39 @@ Default: `[]`
 
 The following outputs are exported:
 
-### <a name="output_cluster_ca_data" /> [cluster\_ca\_data](#output_cluster_ca_data)
+### cluster\_ca\_data
 
 Description: The CA certificate for the Kubernetes API server
 
-### <a name="output_cluster_name" /> [cluster\_name](#output_cluster_name)
+### cluster\_name
 
 Description: The name of the EKS cluster
 
-### <a name="output_cluster_region" /> [cluster\_region](#output_cluster_region)
+### cluster\_region
 
 Description: The AWS region to which the EKS cluster is deployed
 
-### <a name="output_cluster_url" /> [cluster\_url](#output_cluster_url)
+### cluster\_url
 
 Description: The URL for the Kubernetes API server
 
-### <a name="output_dns_service_ip" /> [dns\_service\_ip](#output_dns_service_ip)
+### dns\_service\_ip
 
 Description: The IP address of the cluster's DNS service.
 
-### <a name="output_node_instance_profile" /> [node\_instance\_profile](#output_node_instance_profile)
+### node\_instance\_profile
 
 Description: The instance profile assigned to controller nodes
 
-### <a name="output_node_role_arn" /> [node\_role\_arn](#output_node_role_arn)
+### node\_role\_arn
 
 Description: The ARN of the role assigned to controller nodes
 
-### <a name="output_node_security_group_id" /> [node\_security\_group\_id](#output_node_security_group_id)
+### node\_security\_group\_id
 
 Description: ID of the security group assigned to controller nodes
 
-### <a name="output_user_data" /> [user\_data](#output_user_data)
+### user\_data
 
 Description: The user data file provided to the controller nodes
 

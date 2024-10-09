@@ -18,7 +18,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -28,13 +28,13 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_dhparam" /> [dhparam](#input_dhparam)
+### dhparam
 
 Description: The Diffie-Hellman parameter to use for establishing perfect forward secrecy with TLS
 
 Type: `string`
 
-### <a name="input_ingress_domains" /> [ingress\_domains](#input_ingress_domains)
+### ingress\_domains
 
 Description: The domains that can be used for network ingress to the cluster
 
@@ -44,7 +44,7 @@ Type: `set(string)`
 
 The following input variables are optional (have default values):
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -52,7 +52,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_ingress_timeout_seconds" /> [ingress\_timeout\_seconds](#input_ingress_timeout_seconds)
+### ingress\_timeout\_seconds
 
 Description: The maximum number of seconds that request may take.
 
@@ -60,7 +60,7 @@ Type: `number`
 
 Default: `60`
 
-### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
+### max\_replicas
 
 Description: The maximum number of nginx-ingress replicas to deploy
 
@@ -68,7 +68,7 @@ Type: `number`
 
 Default: `10`
 
-### <a name="input_min_replicas" /> [min\_replicas](#input_min_replicas)
+### min\_replicas
 
 Description: The minimum number of nginx-ingress replicas to deploy
 
@@ -76,7 +76,7 @@ Type: `number`
 
 Default: `3`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -84,7 +84,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_nginx_ingress_helm_version" /> [nginx\_ingress\_helm\_version](#input_nginx_ingress_helm_version)
+### nginx\_ingress\_helm\_version
 
 Description: The version of the nginx-ingress helm chart to deploy
 
@@ -92,7 +92,7 @@ Type: `string`
 
 Default: `"4.10.0"`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -100,7 +100,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -108,7 +108,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_tls_1_2_enabled" /> [tls\_1\_2\_enabled](#input_tls_1_2_enabled)
+### tls\_1\_2\_enabled
 
 Description: Whether to enable TLS 1.2 protocols
 
@@ -116,7 +116,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

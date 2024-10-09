@@ -130,7 +130,7 @@ they can be overridden:
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -140,7 +140,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_ingress_configs" /> [ingress\_configs](#input_ingress_configs)
+### ingress\_configs
 
 Description: A list of ingress names to the configuration to use for the ingress
 
@@ -167,13 +167,13 @@ list(object({
   }))
 ```
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of the ingresses that will get created
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace the ingress resource should be created
 
@@ -183,7 +183,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_cors_allow_credentials" /> [cors\_allow\_credentials](#input_cors_allow_credentials)
+### cors\_allow\_credentials
 
 Description: Whether to set the 'Access-Control-Allow-Credentials' header to 'true'
 
@@ -191,7 +191,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_cors_allowed_headers" /> [cors\_allowed\_headers](#input_cors_allowed_headers)
+### cors\_allowed\_headers
 
 Description: Extra headers to allow on CORS requests
 
@@ -222,7 +222,7 @@ Default:
 ]
 ```
 
-### <a name="input_cors_allowed_methods" /> [cors\_allowed\_methods](#input_cors_allowed_methods)
+### cors\_allowed\_methods
 
 Description: The methods to allow on CORS requests
 
@@ -242,7 +242,7 @@ Default:
 ]
 ```
 
-### <a name="input_cors_allowed_origins_any" /> [cors\_allowed\_origins\_any](#input_cors_allowed_origins_any)
+### cors\_allowed\_origins\_any
 
 Description: Whether to allow any origin on CORS requests
 
@@ -250,7 +250,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_cors_allowed_origins_self" /> [cors\_allowed\_origins\_self](#input_cors_allowed_origins_self)
+### cors\_allowed\_origins\_self
 
 Description: Whether the ingress domains should be allowed origins on CORS requests
 
@@ -258,7 +258,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_cors_allowed_origins_sibling_domains" /> [cors\_allowed\_origins\_sibling\_domains](#input_cors_allowed_origins_sibling_domains)
+### cors\_allowed\_origins\_sibling\_domains
 
 Description: Whether sibling domains of the ingress domains should be allowed origins on CORS requests
 
@@ -266,7 +266,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_cors_allowed_origins_subdomains" /> [cors\_allowed\_origins\_subdomains](#input_cors_allowed_origins_subdomains)
+### cors\_allowed\_origins\_subdomains
 
 Description: Whether subdomains of the ingress domains should be allowed origins on CORS requests
 
@@ -274,7 +274,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_cors_enabled" /> [cors\_enabled](#input_cors_enabled)
+### cors\_enabled
 
 Description: Whether to enable CORS response handling in NGINX
 
@@ -282,7 +282,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_cors_exposed_headers" /> [cors\_exposed\_headers](#input_cors_exposed_headers)
+### cors\_exposed\_headers
 
 Description: The extra headers to expose in CORS responses
 
@@ -308,7 +308,7 @@ Default:
 ]
 ```
 
-### <a name="input_cors_extra_allowed_origins" /> [cors\_extra\_allowed\_origins](#input_cors_extra_allowed_origins)
+### cors\_extra\_allowed\_origins
 
 Description: Extra origins allowed on CORS requests
 
@@ -316,7 +316,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_cors_max_age_seconds" /> [cors\_max\_age\_seconds](#input_cors_max_age_seconds)
+### cors\_max\_age\_seconds
 
 Description: Controls how long the CORS preflight requests are allowed to be cached
 
@@ -324,7 +324,7 @@ Type: `number`
 
 Default: `86400`
 
-### <a name="input_cors_native_handling_enabled" /> [cors\_native\_handling\_enabled](#input_cors_native_handling_enabled)
+### cors\_native\_handling\_enabled
 
 Description: Whether to use the native NGINX-ingress annotations to handle cors rather than the Panfactum logic
 
@@ -332,7 +332,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_cross_origin_embedder_policy" /> [cross\_origin\_embedder\_policy](#input_cross_origin_embedder_policy)
+### cross\_origin\_embedder\_policy
 
 Description: The value for the Cross-Origin-Embedder-Policy header
 
@@ -340,7 +340,7 @@ Type: `string`
 
 Default: `"require-corp"`
 
-### <a name="input_cross_origin_isolation_enabled" /> [cross\_origin\_isolation\_enabled](#input_cross_origin_isolation_enabled)
+### cross\_origin\_isolation\_enabled
 
 Description: Whether to enable the Cross-Origin-Opener-Policy header
 
@@ -348,7 +348,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_cross_origin_opener_policy" /> [cross\_origin\_opener\_policy](#input_cross_origin_opener_policy)
+### cross\_origin\_opener\_policy
 
 Description: The value for the Cross-Origin-Opener-Policy header
 
@@ -356,7 +356,7 @@ Type: `string`
 
 Default: `"same-origin"`
 
-### <a name="input_cross_origin_resource_policy" /> [cross\_origin\_resource\_policy](#input_cross_origin_resource_policy)
+### cross\_origin\_resource\_policy
 
 Description: The value for the Cross-Origin-Resource-Policy header
 
@@ -364,7 +364,7 @@ Type: `string`
 
 Default: `"same-site"`
 
-### <a name="input_csp_base_uri" /> [csp\_base\_uri](#input_csp_base_uri)
+### csp\_base\_uri
 
 Description: The base-uri content security policy
 
@@ -372,7 +372,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_connect_src" /> [csp\_connect\_src](#input_csp_connect_src)
+### csp\_connect\_src
 
 Description: The connect-src content security policy
 
@@ -380,7 +380,7 @@ Type: `string`
 
 Default: `"'self' ws:"`
 
-### <a name="input_csp_default_src" /> [csp\_default\_src](#input_csp_default_src)
+### csp\_default\_src
 
 Description: The default-src content security policy
 
@@ -388,7 +388,7 @@ Type: `string`
 
 Default: `"'self'"`
 
-### <a name="input_csp_enabled" /> [csp\_enabled](#input_csp_enabled)
+### csp\_enabled
 
 Description: Whether the Content-Security-Policy header should be added to responses
 
@@ -396,7 +396,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_csp_fenced_frame_src" /> [csp\_fenced\_frame\_src](#input_csp_fenced_frame_src)
+### csp\_fenced\_frame\_src
 
 Description: The fenced-frame-src content security policy
 
@@ -404,7 +404,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_font_src" /> [csp\_font\_src](#input_csp_font_src)
+### csp\_font\_src
 
 Description: The font-src content security policy
 
@@ -412,7 +412,7 @@ Type: `string`
 
 Default: `"'self' https: data:"`
 
-### <a name="input_csp_form_action" /> [csp\_form\_action](#input_csp_form_action)
+### csp\_form\_action
 
 Description: The form-action content security policy
 
@@ -420,7 +420,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_frame_ancestors" /> [csp\_frame\_ancestors](#input_csp_frame_ancestors)
+### csp\_frame\_ancestors
 
 Description: The frame-ancestors content security policy
 
@@ -428,7 +428,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_frame_src" /> [csp\_frame\_src](#input_csp_frame_src)
+### csp\_frame\_src
 
 Description: The frame-src content security policy
 
@@ -436,7 +436,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_img_src" /> [csp\_img\_src](#input_csp_img_src)
+### csp\_img\_src
 
 Description: The img-src content security policy
 
@@ -444,7 +444,7 @@ Type: `string`
 
 Default: `"'self' data:"`
 
-### <a name="input_csp_manifest_src" /> [csp\_manifest\_src](#input_csp_manifest_src)
+### csp\_manifest\_src
 
 Description: The manifest-src content security policy
 
@@ -452,7 +452,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_media_src" /> [csp\_media\_src](#input_csp_media_src)
+### csp\_media\_src
 
 Description: The media-src content security policy
 
@@ -460,7 +460,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_non_html" /> [csp\_non\_html](#input_csp_non_html)
+### csp\_non\_html
 
 Description: The full content security policy for non-HTML responses
 
@@ -468,7 +468,7 @@ Type: `string`
 
 Default: `"default-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests"`
 
-### <a name="input_csp_object_src" /> [csp\_object\_src](#input_csp_object_src)
+### csp\_object\_src
 
 Description: The object-src content security policy
 
@@ -476,7 +476,7 @@ Type: `string`
 
 Default: `"'none'"`
 
-### <a name="input_csp_override" /> [csp\_override](#input_csp_override)
+### csp\_override
 
 Description: Whether to override the Content-Security-Response header if set from the upstream server
 
@@ -484,7 +484,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_csp_report_to" /> [csp\_report\_to](#input_csp_report_to)
+### csp\_report\_to
 
 Description: The report-to content security policy
 
@@ -492,7 +492,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_report_uri" /> [csp\_report\_uri](#input_csp_report_uri)
+### csp\_report\_uri
 
 Description: The report-uri content security policy
 
@@ -500,7 +500,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_sandbox" /> [csp\_sandbox](#input_csp_sandbox)
+### csp\_sandbox
 
 Description: The sandbox content security policy
 
@@ -508,7 +508,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_script_src" /> [csp\_script\_src](#input_csp_script_src)
+### csp\_script\_src
 
 Description: The script-src content security policy
 
@@ -516,7 +516,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_script_src_elem" /> [csp\_script\_src\_elem](#input_csp_script_src_elem)
+### csp\_script\_src\_elem
 
 Description: The script-src-elem content security policy
 
@@ -524,7 +524,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_style_src" /> [csp\_style\_src](#input_csp_style_src)
+### csp\_style\_src
 
 Description: The style-src content security policy
 
@@ -532,7 +532,7 @@ Type: `string`
 
 Default: `"'self'"`
 
-### <a name="input_csp_style_src_attr" /> [csp\_style\_src\_attr](#input_csp_style_src_attr)
+### csp\_style\_src\_attr
 
 Description: The style-src-attr content security policy
 
@@ -540,7 +540,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_style_src_elem" /> [csp\_style\_src\_elem](#input_csp_style_src_elem)
+### csp\_style\_src\_elem
 
 Description: The style-src-elem content security policy
 
@@ -548,7 +548,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_csp_worker_src" /> [csp\_worker\_src](#input_csp_worker_src)
+### csp\_worker\_src
 
 Description: The worker-src content security policy
 
@@ -556,7 +556,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_extra_annotations" /> [extra\_annotations](#input_extra_annotations)
+### extra\_annotations
 
 Description: Extra annotations to add to the ingress objects
 
@@ -564,7 +564,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_configuration_snippet" /> [extra\_configuration\_snippet](#input_extra_configuration_snippet)
+### extra\_configuration\_snippet
 
 Description: An extra NGINX configuration snippet to add to the route handlers
 
@@ -572,7 +572,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_extra_response_headers" /> [extra\_response\_headers](#input_extra_response_headers)
+### extra\_response\_headers
 
 Description: A key-value mapping of extra headers to add to every response
 
@@ -580,7 +580,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_permissions_policy_accelerometer" /> [permissions\_policy\_accelerometer](#input_permissions_policy_accelerometer)
+### permissions\_policy\_accelerometer
 
 Description: The permissions policy for the accelerometer directive
 
@@ -588,7 +588,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_ambient_light_sensor" /> [permissions\_policy\_ambient\_light\_sensor](#input_permissions_policy_ambient_light_sensor)
+### permissions\_policy\_ambient\_light\_sensor
 
 Description: The permissions policy for the ambient-light-sensor directive
 
@@ -596,7 +596,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_autoplay" /> [permissions\_policy\_autoplay](#input_permissions_policy_autoplay)
+### permissions\_policy\_autoplay
 
 Description: The permissions policy for the autoplay directive
 
@@ -604,7 +604,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_battery" /> [permissions\_policy\_battery](#input_permissions_policy_battery)
+### permissions\_policy\_battery
 
 Description: The permissions policy for the battery directive
 
@@ -612,7 +612,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_bluetooth" /> [permissions\_policy\_bluetooth](#input_permissions_policy_bluetooth)
+### permissions\_policy\_bluetooth
 
 Description: The permissions policy for the bluetooth directive
 
@@ -620,7 +620,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_camera" /> [permissions\_policy\_camera](#input_permissions_policy_camera)
+### permissions\_policy\_camera
 
 Description: The permissions policy for the camera directive
 
@@ -628,7 +628,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_display_capture" /> [permissions\_policy\_display\_capture](#input_permissions_policy_display_capture)
+### permissions\_policy\_display\_capture
 
 Description: The permissions policy for the display-capture directive
 
@@ -636,7 +636,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_document_domain" /> [permissions\_policy\_document\_domain](#input_permissions_policy_document_domain)
+### permissions\_policy\_document\_domain
 
 Description: The permissions policy for the document-domain directive
 
@@ -644,7 +644,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_enabled" /> [permissions\_policy\_enabled](#input_permissions_policy_enabled)
+### permissions\_policy\_enabled
 
 Description: Whether to enable the Permissions-Policy header in HTML responses.
 
@@ -652,7 +652,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_permissions_policy_encrypted_media" /> [permissions\_policy\_encrypted\_media](#input_permissions_policy_encrypted_media)
+### permissions\_policy\_encrypted\_media
 
 Description: The permissions policy for the encrypted-media directive
 
@@ -660,7 +660,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_execution_while_not_rendered" /> [permissions\_policy\_execution\_while\_not\_rendered](#input_permissions_policy_execution_while_not_rendered)
+### permissions\_policy\_execution\_while\_not\_rendered
 
 Description: The permissions policy for the execution-while-not-rendered directive
 
@@ -668,7 +668,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_execution_while_out_of_viewport" /> [permissions\_policy\_execution\_while\_out\_of\_viewport](#input_permissions_policy_execution_while_out_of_viewport)
+### permissions\_policy\_execution\_while\_out\_of\_viewport
 
 Description: The permissions policy for the execution-while-out-of-viewport directive
 
@@ -676,7 +676,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_fullscreen" /> [permissions\_policy\_fullscreen](#input_permissions_policy_fullscreen)
+### permissions\_policy\_fullscreen
 
 Description: The permissions policy for the fullscreen directive
 
@@ -684,7 +684,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_gamepad" /> [permissions\_policy\_gamepad](#input_permissions_policy_gamepad)
+### permissions\_policy\_gamepad
 
 Description: The permissions policy for the gamepad directive
 
@@ -692,7 +692,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_geolocation" /> [permissions\_policy\_geolocation](#input_permissions_policy_geolocation)
+### permissions\_policy\_geolocation
 
 Description: The permissions policy for the geolocation directive
 
@@ -700,7 +700,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_gyroscope" /> [permissions\_policy\_gyroscope](#input_permissions_policy_gyroscope)
+### permissions\_policy\_gyroscope
 
 Description: The permissions policy for the gyroscope directive
 
@@ -708,7 +708,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_hid" /> [permissions\_policy\_hid](#input_permissions_policy_hid)
+### permissions\_policy\_hid
 
 Description: The permissions policy for the hid directive
 
@@ -716,7 +716,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_identity_credentials_get" /> [permissions\_policy\_identity\_credentials\_get](#input_permissions_policy_identity_credentials_get)
+### permissions\_policy\_identity\_credentials\_get
 
 Description: The permissions policy for the identity-credentials-get directive
 
@@ -724,7 +724,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_idle_detection" /> [permissions\_policy\_idle\_detection](#input_permissions_policy_idle_detection)
+### permissions\_policy\_idle\_detection
 
 Description: The permissions policy for the idle-detection directive
 
@@ -732,7 +732,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_local_fonts" /> [permissions\_policy\_local\_fonts](#input_permissions_policy_local_fonts)
+### permissions\_policy\_local\_fonts
 
 Description: The permissions policy for the local-fonts directive
 
@@ -740,7 +740,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_magnetometer" /> [permissions\_policy\_magnetometer](#input_permissions_policy_magnetometer)
+### permissions\_policy\_magnetometer
 
 Description: The permissions policy for the magnetometer directive
 
@@ -748,7 +748,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_microphone" /> [permissions\_policy\_microphone](#input_permissions_policy_microphone)
+### permissions\_policy\_microphone
 
 Description: The permissions policy for the microphone directive
 
@@ -756,7 +756,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_midi" /> [permissions\_policy\_midi](#input_permissions_policy_midi)
+### permissions\_policy\_midi
 
 Description: The permissions policy for the midi directive
 
@@ -764,7 +764,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_otp_credentials" /> [permissions\_policy\_otp\_credentials](#input_permissions_policy_otp_credentials)
+### permissions\_policy\_otp\_credentials
 
 Description: The permissions policy for the otp-credentials directive
 
@@ -772,7 +772,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_override" /> [permissions\_policy\_override](#input_permissions_policy_override)
+### permissions\_policy\_override
 
 Description: Whether to override the Permissions-Policy header if set from the upstream server
 
@@ -780,7 +780,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_permissions_policy_payment" /> [permissions\_policy\_payment](#input_permissions_policy_payment)
+### permissions\_policy\_payment
 
 Description: The permissions policy for the payment directive
 
@@ -788,7 +788,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_picture_in_picture" /> [permissions\_policy\_picture\_in\_picture](#input_permissions_policy_picture_in_picture)
+### permissions\_policy\_picture\_in\_picture
 
 Description: The permissions policy for the picture-in-picture directive
 
@@ -796,7 +796,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### <a name="input_permissions_policy_publickey_credentials_create" /> [permissions\_policy\_publickey\_credentials\_create](#input_permissions_policy_publickey_credentials_create)
+### permissions\_policy\_publickey\_credentials\_create
 
 Description: The permissions policy for the publickey-credentials-create directive
 
@@ -804,7 +804,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_publickey_credentials_get" /> [permissions\_policy\_publickey\_credentials\_get](#input_permissions_policy_publickey_credentials_get)
+### permissions\_policy\_publickey\_credentials\_get
 
 Description: The permissions policy for the publickey-credentials-get directive
 
@@ -812,7 +812,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_screen_wake_lock" /> [permissions\_policy\_screen\_wake\_lock](#input_permissions_policy_screen_wake_lock)
+### permissions\_policy\_screen\_wake\_lock
 
 Description: The permissions policy for the screen-wake-lock directive
 
@@ -820,7 +820,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_serial" /> [permissions\_policy\_serial](#input_permissions_policy_serial)
+### permissions\_policy\_serial
 
 Description: The permissions policy for the serial directive
 
@@ -828,7 +828,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_speaker_selection" /> [permissions\_policy\_speaker\_selection](#input_permissions_policy_speaker_selection)
+### permissions\_policy\_speaker\_selection
 
 Description: The permissions policy for the speaker-selection directive
 
@@ -836,7 +836,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_storage_access" /> [permissions\_policy\_storage\_access](#input_permissions_policy_storage_access)
+### permissions\_policy\_storage\_access
 
 Description: The permissions policy for the storage-access directive
 
@@ -844,7 +844,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_usb" /> [permissions\_policy\_usb](#input_permissions_policy_usb)
+### permissions\_policy\_usb
 
 Description: The permissions policy for the usb directive
 
@@ -852,7 +852,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_web_share" /> [permissions\_policy\_web\_share](#input_permissions_policy_web_share)
+### permissions\_policy\_web\_share
 
 Description: The permissions policy for the web-share directive
 
@@ -860,7 +860,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_window_management" /> [permissions\_policy\_window\_management](#input_permissions_policy_window_management)
+### permissions\_policy\_window\_management
 
 Description: The permissions policy for the window-management directive
 
@@ -868,7 +868,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_permissions_policy_xr_spatial_tracking" /> [permissions\_policy\_xr\_spatial\_tracking](#input_permissions_policy_xr_spatial_tracking)
+### permissions\_policy\_xr\_spatial\_tracking
 
 Description: The permissions policy for the xr-spatial-tracking directive
 
@@ -876,7 +876,7 @@ Type: `string`
 
 Default: `"()"`
 
-### <a name="input_rate_limiting_enabled" /> [rate\_limiting\_enabled](#input_rate_limiting_enabled)
+### rate\_limiting\_enabled
 
 Description: Whether to enable rate limiting
 
@@ -884,7 +884,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_referrer_policy" /> [referrer\_policy](#input_referrer_policy)
+### referrer\_policy
 
 Description: The value for Referrer-Policy header.
 
@@ -892,7 +892,7 @@ Type: `string`
 
 Default: `"no-referrer"`
 
-### <a name="input_x_content_type_options_enabled" /> [x\_content\_type\_options\_enabled](#input_x_content_type_options_enabled)
+### x\_content\_type\_options\_enabled
 
 Description: Whether X-Content-Type-Options should be set to nosniff
 
@@ -900,7 +900,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_x_frame_options" /> [x\_frame\_options](#input_x_frame_options)
+### x\_frame\_options
 
 Description: The value for the X-Frame-Options header.
 
@@ -908,7 +908,7 @@ Type: `string`
 
 Default: `"SAMEORIGIN"`
 
-### <a name="input_x_xss_protection" /> [x\_xss\_protection](#input_x_xss_protection)
+### x\_xss\_protection
 
 Description: The value for the X-XSS-Protection header.
 

@@ -122,7 +122,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -130,25 +130,25 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster that contains the service account.
 
 Type: `string`
 
-### <a name="input_iam_policy_json" /> [iam\_policy\_json](#input_iam_policy_json)
+### iam\_policy\_json
 
 Description: An IAM policy document in rendered JSON string form.
 
 Type: `string`
 
-### <a name="input_service_account" /> [service\_account](#input_service_account)
+### service\_account
 
 Description: The name of the service account that should be able to assume the AWS permissions.
 
 Type: `string`
 
-### <a name="input_service_account_namespace" /> [service\_account\_namespace](#input_service_account_namespace)
+### service\_account\_namespace
 
 Description: The namespace of the service account.
 
@@ -158,7 +158,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_annotate_service_account" /> [annotate\_service\_account](#input_annotate_service_account)
+### annotate\_service\_account
 
 Description: Whether or not to annotate the service account
 
@@ -166,7 +166,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+### ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -178,19 +178,19 @@ Default: `[]`
 
 The following outputs are exported:
 
-### <a name="output_policy_arn" /> [policy\_arn](#output_policy_arn)
+### policy\_arn
 
 Description: The ARN of the policy assigned to the role.
 
-### <a name="output_role_arn" /> [role\_arn](#output_role_arn)
+### role\_arn
 
 Description: The ARN of the role created for the service account.
 
-### <a name="output_role_name" /> [role\_name](#output_role_name)
+### role\_name
 
 Description: The name of the role created for the service account.
 
-### <a name="output_service_account_annotations" /> [service\_account\_annotations](#output_service_account_annotations)
+### service\_account\_annotations
 
 Description: The annotations to apply to the service account
 

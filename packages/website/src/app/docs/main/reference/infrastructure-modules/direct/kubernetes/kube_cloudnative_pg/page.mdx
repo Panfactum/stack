@@ -18,7 +18,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -32,7 +32,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_cloudnative_pg_helm_version" /> [cloudnative\_pg\_helm\_version](#input_cloudnative_pg_helm_version)
+### cloudnative\_pg\_helm\_version
 
 Description: The version of the cloudnative-pg helm chart to deploy
 
@@ -40,7 +40,7 @@ Type: `string`
 
 Default: `"v0.21.2"`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -48,7 +48,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the operator pods
 
@@ -56,7 +56,7 @@ Type: `string`
 
 Default: `"error"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -64,7 +64,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_node_image_cache_enabled" /> [node\_image\_cache\_enabled](#input_node_image_cache_enabled)
+### node\_image\_cache\_enabled
 
 Description: Whether to use kube-fledged to cache images locally for better startup performance
 
@@ -72,7 +72,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -80,7 +80,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -88,7 +88,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

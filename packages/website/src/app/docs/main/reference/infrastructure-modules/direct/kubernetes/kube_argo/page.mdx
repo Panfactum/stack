@@ -14,7 +14,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -28,19 +28,19 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_argo_domain" /> [argo\_domain](#input_argo_domain)
+### argo\_domain
 
 Description: The domain to use for the argo UI. Must be in a subdomain available to the environment.
 
 Type: `string`
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster that contains the service account.
 
 Type: `string`
 
-### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+### vault\_domain
 
 Description: The domain of the Vault instance running in the cluster.
 
@@ -50,7 +50,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_argo_events_helm_version" /> [argo\_events\_helm\_version](#input_argo_events_helm_version)
+### argo\_events\_helm\_version
 
 Description: The version of the argo events helm chart to deploy
 
@@ -58,7 +58,7 @@ Type: `string`
 
 Default: `"2.4.4"`
 
-### <a name="input_argo_workflows_helm_version" /> [argo\_workflows\_helm\_version](#input_argo_workflows_helm_version)
+### argo\_workflows\_helm\_version
 
 Description: The version of the argo workflows helm chart to deploy
 
@@ -66,7 +66,7 @@ Type: `string`
 
 Default: `"0.41.1"`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -74,7 +74,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_db_recovery_directory" /> [db\_recovery\_directory](#input_db_recovery_directory)
+### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
@@ -82,7 +82,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_db_recovery_mode_enabled" /> [db\_recovery\_mode\_enabled](#input_db_recovery_mode_enabled)
+### db\_recovery\_mode\_enabled
 
 Description: Whether to enable recovery mode for the PostgreSQL database
 
@@ -90,7 +90,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_db_recovery_target_time" /> [db\_recovery\_target\_time](#input_db_recovery_target_time)
+### db\_recovery\_target\_time
 
 Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
 
@@ -98,7 +98,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -106,7 +106,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_event_bus_nats_server_config_reloader_version" /> [event\_bus\_nats\_server\_config\_reloader\_version](#input_event_bus_nats_server_config_reloader_version)
+### event\_bus\_nats\_server\_config\_reloader\_version
 
 Description: The version of nats-server-config-reloader to use for the event bus
 
@@ -114,7 +114,7 @@ Type: `string`
 
 Default: `"0.14.2"`
 
-### <a name="input_event_bus_nats_version" /> [event\_bus\_nats\_version](#input_event_bus_nats_version)
+### event\_bus\_nats\_version
 
 Description: The version of nats to use for the event bus
 
@@ -122,7 +122,7 @@ Type: `string`
 
 Default: `"2.10.14"`
 
-### <a name="input_event_bus_prometheus_nats_exporter_version" /> [event\_bus\_prometheus\_nats\_exporter\_version](#input_event_bus_prometheus_nats_exporter_version)
+### event\_bus\_prometheus\_nats\_exporter\_version
 
 Description: The version of prometheus-nats-exporter to use for the event bus
 
@@ -130,7 +130,7 @@ Type: `string`
 
 Default: `"0.15.0"`
 
-### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
+### ingress\_enabled
 
 Description: Whether or not to enable the ingress for routing traffic to argo
 
@@ -138,7 +138,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the argo pods
 
@@ -146,7 +146,7 @@ Type: `string`
 
 Default: `"info"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -154,7 +154,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_node_image_cache_enabled" /> [node\_image\_cache\_enabled](#input_node_image_cache_enabled)
+### node\_image\_cache\_enabled
 
 Description: Whether to use kube-fledged to cache images locally for better startup performance
 
@@ -162,7 +162,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -170,7 +170,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -178,7 +178,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_test_workflow_enabled" /> [test\_workflow\_enabled](#input_test_workflow_enabled)
+### test\_workflow\_enabled
 
 Description: Whether to enable the test WorkflowTemplate
 
@@ -186,7 +186,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -194,7 +194,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_workflow_archive_ttl" /> [workflow\_archive\_ttl](#input_workflow_archive_ttl)
+### workflow\_archive\_ttl
 
 Description: Length of time that previously run workflow states are stored
 
@@ -206,15 +206,15 @@ Default: `"60d"`
 
 The following outputs are exported:
 
-### <a name="output_artifact_bucket_arn" /> [artifact\_bucket\_arn](#output_artifact_bucket_arn)
+### artifact\_bucket\_arn
 
 Description: ARN of the S3 bucket holding workflow artifacts
 
-### <a name="output_artifact_bucket_name" /> [artifact\_bucket\_name](#output_artifact_bucket_name)
+### artifact\_bucket\_name
 
 Description: Name of the S3 bucket holding workflow artifacts
 
-### <a name="output_db_recovery_directory" /> [db\_recovery\_directory](#output_db_recovery_directory)
+### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 

@@ -66,7 +66,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -76,13 +76,13 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_github_token" /> [github\_token](#input_github_token)
+### github\_token
 
 Description: The GitHub token that the runners will use to register with GitHub
 
 Type: `string`
 
-### <a name="input_runners" /> [runners](#input_runners)
+### runners
 
 Description: A mapping of runner names to their configuration values
 
@@ -107,7 +107,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### <a name="input_extra_env_secrets" /> [extra\_env\_secrets](#input_extra_env_secrets)
+### extra\_env\_secrets
 
 Description: A key-value mapping of extra secret environment variables for the runner pods
 
@@ -115,7 +115,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_pod_annotations" /> [extra\_pod\_annotations](#input_extra_pod_annotations)
+### extra\_pod\_annotations
 
 Description: Annotations to add to every runner pod
 
@@ -123,7 +123,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
+### extra\_pod\_labels
 
 Description: Labels to add to every runner pod
 
@@ -131,7 +131,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_gha_runner_scale_set_helm_version" /> [gha\_runner\_scale\_set\_helm\_version](#input_gha_runner_scale_set_helm_version)
+### gha\_runner\_scale\_set\_helm\_version
 
 Description: The version of the  actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
 
@@ -139,7 +139,7 @@ Type: `string`
 
 Default: `"0.9.3"`
 
-### <a name="input_node_image_cache_enabled" /> [node\_image\_cache\_enabled](#input_node_image_cache_enabled)
+### node\_image\_cache\_enabled
 
 Description: Whether to use kube-fledged to cache images locally for better startup performance
 
@@ -147,7 +147,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -155,7 +155,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 

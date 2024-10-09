@@ -14,7 +14,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -22,7 +22,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
@@ -32,7 +32,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_buildkit_image_version" /> [buildkit\_image\_version](#input_buildkit_image_version)
+### buildkit\_image\_version
 
 Description: The version of BuildKit to use
 
@@ -40,7 +40,7 @@ Type: `string`
 
 Default: `"v0.14.1-rootless"`
 
-### <a name="input_cache_clear_cron" /> [cache\_clear\_cron](#input_cache_clear_cron)
+### cache\_clear\_cron
 
 Description: A cron expression for how often the BuildKit cache should be cleared.
 
@@ -48,7 +48,7 @@ Type: `string`
 
 Default: `"0 0 * * 0"`
 
-### <a name="input_cpu_millicores" /> [cpu\_millicores](#input_cpu_millicores)
+### cpu\_millicores
 
 Description: The number of cpus millicores to request for the buildkit pod
 
@@ -56,7 +56,7 @@ Type: `number`
 
 Default: `2000`
 
-### <a name="input_initial_storage_gb" /> [initial\_storage\_gb](#input_initial_storage_gb)
+### initial\_storage\_gb
 
 Description: The initial number of GB to use for the local image temp storage
 
@@ -64,7 +64,7 @@ Type: `number`
 
 Default: `25`
 
-### <a name="input_ip_allow_list" /> [ip\_allow\_list](#input_ip_allow_list)
+### ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -72,7 +72,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_max_replicas" /> [max\_replicas](#input_max_replicas)
+### max\_replicas
 
 Description: The maximum number of replicas of buildkit to use
 
@@ -80,7 +80,7 @@ Type: `number`
 
 Default: `10`
 
-### <a name="input_max_storage_gb" /> [max\_storage\_gb](#input_max_storage_gb)
+### max\_storage\_gb
 
 Description: The maximum number of GB to use for the local image temp storage
 
@@ -88,7 +88,7 @@ Type: `number`
 
 Default: `250`
 
-### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
+### memory\_mb
 
 Description: The amount of memory in MB to request for the buildkit pod
 
@@ -96,7 +96,7 @@ Type: `number`
 
 Default: `8000`
 
-### <a name="input_min_replicas" /> [min\_replicas](#input_min_replicas)
+### min\_replicas
 
 Description: The minimum number of replicas of buildkit to use
 
@@ -104,7 +104,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_panfactum_image_version" /> [panfactum\_image\_version](#input_panfactum_image_version)
+### panfactum\_image\_version
 
 Description: The version of the Panfactum image to use for maintenance tasks
 
@@ -112,7 +112,7 @@ Type: `string`
 
 Default: `"95508e2e860c95cee40e61245c8f588b6b73a39b"`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -120,7 +120,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -128,7 +128,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_scale_down_delay_seconds" /> [scale\_down\_delay\_seconds](#input_scale_down_delay_seconds)
+### scale\_down\_delay\_seconds
 
 Description: How long since the last build was initiated that BuildKit will be automatically scaled to zero
 
@@ -136,7 +136,7 @@ Type: `number`
 
 Default: `1800`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled. Does not apply to the actual BuildKit containers.
 
@@ -148,19 +148,19 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_cache_bucket_name" /> [cache\_bucket\_name](#output_cache_bucket_name)
+### cache\_bucket\_name
 
 Description: n/a
 
-### <a name="output_cache_bucket_region" /> [cache\_bucket\_region](#output_cache_bucket_region)
+### cache\_bucket\_region
 
 Description: n/a
 
-### <a name="output_ecr_registry" /> [ecr\_registry](#output_ecr_registry)
+### ecr\_registry
 
 Description: n/a
 
-### <a name="output_eks_cluster_name" /> [eks\_cluster\_name](#output_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: n/a
 

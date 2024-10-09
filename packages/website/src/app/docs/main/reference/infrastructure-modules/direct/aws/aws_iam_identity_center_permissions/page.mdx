@@ -46,7 +46,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_account_access_configuration" /> [account\_access\_configuration](#input_account_access_configuration)
+### account\_access\_configuration
 
 Description: Configuration for assigning access to various AWS accounts via Identity Center
 
@@ -67,7 +67,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### <a name="input_session_duration_hours" /> [session\_duration\_hours](#input_session_duration_hours)
+### session\_duration\_hours
 
 Description: The number of hours that AWS sessions will last. This is NOT the time before needing to re-authenticate with your IdP, but rather the amount of time that AWS session tokens last before expiring.
 
@@ -79,7 +79,7 @@ Default: `12`
 
 The following outputs are exported:
 
-### <a name="output_cli_config" /> [cli\_config](#output_cli_config)
+### cli\_config
 
 Description: To be used by the 'pf-aws-update --build' script
 
