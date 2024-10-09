@@ -11,9 +11,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Added
+
+* Adds a new [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables), `pf_stack_local_path`, that can be used to deploy local copies of the Panfactum Stack modules. This
+can be used by developers when testing changes to Panfactum modules on personal infrastructure before submitting pull requests to the [Stack repository](https://github.com/Panfactum/stack).
+
+### Changed
+
+* Loosened the requirements for the [repo variable](/docs/edge/reference/configuration/repo-variables) `repo_url` so that we
+can now support users on arbitrary git hosting providers (not just GitHub).
+
+* `pf-env-bootstrap` is now idempotent, allowing it to be re-run if it fails in the middle of its initial execution.
+
 ### Fixed
 
 * Fixes the ami instance type mismatch when `bootstrap_mode_enabled` is enabled in the [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.
+* Fixes issues that prevented bootstrapping scripts from running with new `pf-tf-init` logic.
 
 ## edge.24-09-30
 

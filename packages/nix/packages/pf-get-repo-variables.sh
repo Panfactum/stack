@@ -52,13 +52,8 @@ if [[ $REPO_URL == "null" ]]; then
   exit 1
 fi
 
-if [[ $REPO_URL == *"@"* ]]; then
-  echo "Error: repo_url in $CONFIG_FILE must not contain a user prefix (e.g., git@)" >&2
-  exit 1
-fi
-
-if [[ $REPO_URL == *"//"* ]]; then
-  echo "Error: repo_url in $CONFIG_FILE must not contain a protocol prefix (e.g., http://)" >&2
+if ! [[ $REPO_URL == git::https://* || $REPO_URL == github.com* || $REPO_URL == bitbucket.org* ]]; then
+  echo "Error: repo_url in $CONFIG_FILE must be a valid TF module source that uses HTTPS. See https://opentofu.org/docs/language/modules/sources." >&2
   exit 1
 fi
 

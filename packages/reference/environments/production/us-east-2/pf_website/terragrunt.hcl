@@ -13,6 +13,6 @@ dependency "ingress" {
 }
 
 inputs = {
-  website_domain         = "panfactum.com"
-  website_image_version  = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
+  website_domain        = "panfactum.com"
+  website_image_version = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
 }

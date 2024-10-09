@@ -10,6 +10,13 @@ terraform {
 inputs = {
   zones = {
     "panfactum.com" = {
+      a_records = [
+        // Softr client portal
+        {
+          subdomain = "portal."
+          records   = ["35.158.87.123"]
+        }
+      ]
       mx_records = [
         {
           subdomain = ""
@@ -93,13 +100,21 @@ inputs = {
             "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCcDUm9LXBvbF0cC+jgjpiTBsAOZqitLJCAdmuHOOcMoDVmDMrLWzYAtOVUpAXoPnnflPHQxWDbXlpmI1UhEuiFCqZuyM04bVBmJSBbg2dzcqBgm5Colu0T0+Mt39w1ov54mtvIZJzqqA17T48BY0LGGd6FG2UhVCOX5FPTrjjLzQIDAQAB"
           ]
         },
-        // SPF
+        // DKIM (Softr)
+        {
+          subdomain = "20241008124742pm._domainkey."
+          records = [
+            "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDX/YXKtm+Yl3YS3TuyyeG4TBaNxm+Bear1TWitjKDU79VaYekcO+VjzHVsjD5PWz51coAH24o/4c89QE8EFYC/S/WSxU0BSG1P2y0rfoz3xP/9GVDCvZJn5KNUIH/LqPfFiW7oHcSAl2UQsSw2Gs5e79qSuRcZyOxZGLCvZvsZWQIDAQAB"
+          ]
+        },
+        // SPF and Verifications
         {
           subdomain = ""
           records = [
             "MS=ms89071327",                                                                                                         // AAD Domain Ownership
             "v=spf1 include:one.zoho.com include:zohomail.com include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all", // SPF record authorizing email senders
-            "zoho-verification=zb69684923.zmverify.zoho.com"                                                                         // Zoho Domain Ownership
+            "zoho-verification=zb69684923.zmverify.zoho.com",                                                                        // Zoho Domain Ownership
+            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ"                                                   // Panfactum.com Google Search Console
           ]
         }
       ]

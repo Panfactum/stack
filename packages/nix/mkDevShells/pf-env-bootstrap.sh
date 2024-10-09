@@ -68,7 +68,9 @@ fi
 MODULE_DIR="$GLOBAL_REGION_DIR/tf_bootstrap_resources"
 
 mkdir -p "$MODULE_DIR"
-cat >"$MODULE_DIR/terragrunt.hcl" <<EOF
+
+if ! [[ -f "$MODULE_DIR/terragrunt.hcl" && -s "$MODULE_DIR/terragrunt.hcl" ]]; then
+  cat >"$MODULE_DIR/terragrunt.hcl" <<EOF
 include "panfactum" {
   path   = find_in_parent_folders("panfactum.hcl")
   expose = true
@@ -83,6 +85,7 @@ inputs = {
   lock_table   = include.panfactum.locals.vars.tf_state_lock_table
 }
 EOF
+fi
 
 (
   cd "$MODULE_DIR"
@@ -106,8 +109,12 @@ LOCK_TABLE=$(jq -r '.inputs.lock_table' "$MODULE_DIR/terragrunt_rendered.json")
 
 rm -f "$MODULE_DIR/terragrunt_rendered.json"
 
-terragrunt import aws_s3_bucket.state "$STATE_BUCKET" --terragrunt-working-dir "$MODULE_DIR"
-terragrunt import aws_dynamodb_table.lock "$LOCK_TABLE" --terragrunt-working-dir "$MODULE_DIR"
+if ! terragrunt state show aws_s3_bucket.state --terragrunt-working-dir "$MODULE_DIR" >/dev/null 2>&1; then
+  terragrunt import aws_s3_bucket.state "$STATE_BUCKET" --terragrunt-working-dir "$MODULE_DIR"
+fi
+if ! terragrunt state show aws_dynamodb_table.lock --terragrunt-working-dir "$MODULE_DIR" >/dev/null 2>&1; then
+  terragrunt import aws_dynamodb_table.lock "$LOCK_TABLE" --terragrunt-working-dir "$MODULE_DIR"
+fi
 
 ####################################################################
 # Step 6: Apply the module
@@ -122,7 +129,9 @@ terragrunt apply --auto-approve --terragrunt-non-interactive --terragrunt-workin
 MODULE_DIR="$GLOBAL_REGION_DIR/sops"
 
 mkdir -p "$MODULE_DIR"
-cat >"$MODULE_DIR/terragrunt.hcl" <<EOF
+
+if ! [[ -f "$MODULE_DIR/terragrunt.hcl" && -s "$MODULE_DIR/terragrunt.hcl" ]]; then
+  cat >"$MODULE_DIR/terragrunt.hcl" <<EOF
 include "panfactum" {
   path   = find_in_parent_folders("panfactum.hcl")
   expose = true
@@ -137,13 +146,16 @@ inputs = {
   description = "Encryption key for sops"
 }
 EOF
+fi
+
+if ! [[ -f "$MODULE_DIR/module.yaml" && -s "$MODULE_DIR/module.yaml" ]]; then
+  echo "module: aws_kms_encrypt_key" >>"$MODULE_DIR/module.yaml"
+fi
 
 (
   cd "$MODULE_DIR"
   pf-tf-init
 )
-
-echo "module: aws_kms_encrypt_key" >>"$MODULE_DIR/module.yaml"
 
 ####################################################################
 # Step 8: Apply the sops module
@@ -161,7 +173,7 @@ ARN2="$(echo "$MODULE_OUTPUT" | jq -r '.arn2.value')"
 
 SOPS_CONFIG="$REPO_ROOT/.sops.yaml"
 
-if ! [[ -f $SOPS_CONFIG ]]; then
+if ! [[ -f $SOPS_CONFIG && -s $SOPS_CONFIG ]]; then
   cat >"$SOPS_CONFIG" <<EOF
 creation_rules:
 EOF

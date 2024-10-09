@@ -20,6 +20,7 @@ const standardRules = {
 }
 
 module.exports = {
+    ignorePatterns: ["**/node_modules/**"],
     overrides: [
         {
             files: ['*.ts', '*.tsx'],

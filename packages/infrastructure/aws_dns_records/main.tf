@@ -13,6 +13,7 @@ locals {
   cname_records = flatten([for zone, config in var.zones : [for record in config.cname_records : { zone : zone, record : record }]])
   mx_records    = flatten([for zone, config in var.zones : [for record in config.mx_records : { zone : zone, record : record }]])
   txt_records   = flatten([for zone, config in var.zones : [for record in config.txt_records : { zone : zone, record : record }]])
+  a_records     = flatten([for zone, config in var.zones : [for record in config.a_records : { zone : zone, record : record }]])
 }
 
 ##########################################################################
@@ -22,6 +23,16 @@ locals {
 data "aws_route53_zone" "zones" {
   for_each = var.zones
   name     = each.key
+}
+
+resource "aws_route53_record" "a" {
+  count           = length(local.a_records)
+  type            = "A"
+  zone_id         = data.aws_route53_zone.zones[local.a_records[count.index].zone].zone_id
+  name            = "${local.a_records[count.index].record.subdomain}${local.a_records[count.index].zone}"
+  records         = local.a_records[count.index].record.records
+  ttl             = local.a_records[count.index].record.ttl
+  allow_overwrite = true
 }
 
 resource "aws_route53_record" "mx" {
