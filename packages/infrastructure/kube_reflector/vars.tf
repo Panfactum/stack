@@ -13,7 +13,7 @@ variable "pull_through_cache_enabled" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "log_level" {
@@ -29,5 +29,5 @@ variable "log_level" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = true
+  default     = false
 }
