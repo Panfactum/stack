@@ -36,7 +36,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_subnets" /> [subnets](#input_subnets)
+### subnets
 
 Description: Subnet configuration
 
@@ -51,13 +51,13 @@ map(object({
   }))
 ```
 
-### <a name="input_vpc_cidr" /> [vpc\_cidr](#input_vpc_cidr)
+### vpc\_cidr
 
 Description: The main CIDR range for the VPC.
 
 Type: `string`
 
-### <a name="input_vpc_name" /> [vpc\_name](#input_vpc_name)
+### vpc\_name
 
 Description: The name of the VPC resource.
 
@@ -67,7 +67,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_nat_associations" /> [nat\_associations](#input_nat_associations)
+### nat\_associations
 
 Description: A mapping of NATed egress network traffic between subnets. Keys represent the source subnets. Values represent destination subnets that will contain the NAT resources.
 
@@ -75,7 +75,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_vpc_extra_tags" /> [vpc\_extra\_tags](#input_vpc_extra_tags)
+### vpc\_extra\_tags
 
 Description: Extra tags to add to the VPC resource.
 
@@ -83,7 +83,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_vpc_flow_logs_enabled" /> [vpc\_flow\_logs\_enabled](#input_vpc_flow_logs_enabled)
+### vpc\_flow\_logs\_enabled
 
 Description: Whether to enable VPC flow logs
 
@@ -91,7 +91,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpc_flow_logs_expire_after_days" /> [vpc\_flow\_logs\_expire\_after\_days](#input_vpc_flow_logs_expire_after_days)
+### vpc\_flow\_logs\_expire\_after\_days
 
 Description: How many days until VPC flow logs expire.
 
@@ -99,7 +99,7 @@ Type: `number`
 
 Default: `30`
 
-### <a name="input_vpc_peer_acceptances" /> [vpc\_peer\_acceptances](#input_vpc_peer_acceptances)
+### vpc\_peer\_acceptances
 
 Description: A list of VPC peering requests to accept. All VPC peers will be routable from all subnets.
 
@@ -119,23 +119,23 @@ Default: `{}`
 
 The following outputs are exported:
 
-### <a name="output_nat_ips" /> [nat\_ips](#output_nat_ips)
+### nat\_ips
 
 Description: n/a
 
-### <a name="output_subnet_info" /> [subnet\_info](#output_subnet_info)
+### subnet\_info
 
 Description: Outputs a map of Subnet info.
 
-### <a name="output_test_config" /> [test\_config](#output_test_config)
+### test\_config
 
 Description: Configuration for the pf-vpc-network-test command
 
-### <a name="output_vpc_cidr" /> [vpc\_cidr](#output_vpc_cidr)
+### vpc\_cidr
 
 Description: n/a
 
-### <a name="output_vpc_id" /> [vpc\_id](#output_vpc_id)
+### vpc\_id
 
 Description: n/a
 

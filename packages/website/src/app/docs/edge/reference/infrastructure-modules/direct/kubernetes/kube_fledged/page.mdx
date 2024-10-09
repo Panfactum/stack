@@ -20,7 +20,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -34,7 +34,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_kube_fledged_helm_version" /> [kube\_fledged\_helm\_version](#input_kube_fledged_helm_version)
+### kube\_fledged\_helm\_version
 
 Description: The version of the kube-fledged helm chart
 
@@ -42,7 +42,7 @@ Type: `string`
 
 Default: `"v0.10.0"`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level to use for the kube-fledged pods
 
@@ -50,7 +50,7 @@ Type: `string`
 
 Default: `"WARNING"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -58,7 +58,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -66,7 +66,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -74,7 +74,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

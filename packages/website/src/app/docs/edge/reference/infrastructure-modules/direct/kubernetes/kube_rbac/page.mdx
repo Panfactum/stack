@@ -37,7 +37,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -45,7 +45,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_aws_node_role_arn" /> [aws\_node\_role\_arn](#input_aws_node_role_arn)
+### aws\_node\_role\_arn
 
 Description: AWS IAM role that the EKS nodes use (required for node bootstrapping)..
 
@@ -55,7 +55,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_kube_admin_role_arns" /> [kube\_admin\_role\_arns](#input_kube_admin_role_arns)
+### kube\_admin\_role\_arns
 
 Description: AWS IAM role ARNs that have read and write access to most cluster resources.
 
@@ -63,7 +63,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_kube_reader_role_arns" /> [kube\_reader\_role\_arns](#input_kube_reader_role_arns)
+### kube\_reader\_role\_arns
 
 Description: AWS IAM role ARNs that have read-only access to cluster resources.
 
@@ -71,7 +71,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_kube_restricted_reader_role_arns" /> [kube\_restricted\_reader\_role\_arns](#input_kube_restricted_reader_role_arns)
+### kube\_restricted\_reader\_role\_arns
 
 Description: AWS IAM role ARNs that have restricted read-only access to cluster resources.
 
@@ -79,7 +79,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_kube_superuser_role_arns" /> [kube\_superuser\_role\_arns](#input_kube_superuser_role_arns)
+### kube\_superuser\_role\_arns
 
 Description: AWS IAM role ARNs that have 'cluster-admin' access to the cluster.
 

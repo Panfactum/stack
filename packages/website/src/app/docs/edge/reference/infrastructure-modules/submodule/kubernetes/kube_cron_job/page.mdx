@@ -39,7 +39,7 @@ This module's has inputs that map one-for-one to the [standard Kubernetes CronJo
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -49,7 +49,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_containers" /> [containers](#input_containers)
+### containers
 
 Description: A list of container configurations for the Pod
 
@@ -79,19 +79,19 @@ list(object({
   }))
 ```
 
-### <a name="input_cron_schedule" /> [cron\_schedule](#input_cron_schedule)
+### cron\_schedule
 
 Description: The cron expression to use for the CronJob
 
 Type: `string`
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of this CronJob
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace the cluster is in
 
@@ -101,7 +101,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_active_deadline_seconds" /> [active\_deadline\_seconds](#input_active_deadline_seconds)
+### active\_deadline\_seconds
 
 Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before the system tries to terminate it; value must be positive integer.
 
@@ -109,7 +109,7 @@ Type: `number`
 
 Default: `86400`
 
-### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+### arm\_nodes\_enabled
 
 Description: Whether to allow Pods to schedule on arm64 nodes
 
@@ -117,7 +117,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_backoff_limit" /> [backoff\_limit](#input_backoff_limit)
+### backoff\_limit
 
 Description: Specifies the number of retries before marking the Job failed.
 
@@ -125,7 +125,7 @@ Type: `number`
 
 Default: `6`
 
-### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+### burstable\_nodes\_enabled
 
 Description: Whether to allow Pods to schedule on burstable nodes
 
@@ -133,7 +133,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_common_env" /> [common\_env](#input_common_env)
+### common\_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -141,7 +141,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_common_env_from_config_maps" /> [common\_env\_from\_config\_maps](#input_common_env_from_config_maps)
+### common\_env\_from\_config\_maps
 
 Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
 
@@ -156,7 +156,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_common_env_from_secrets" /> [common\_env\_from\_secrets](#input_common_env_from_secrets)
+### common\_env\_from\_secrets
 
 Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
 
@@ -171,7 +171,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_common_secrets" /> [common\_secrets](#input_common_secrets)
+### common\_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -179,7 +179,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_concurrency_policy" /> [concurrency\_policy](#input_concurrency_policy)
+### concurrency\_policy
 
 Description: Specifies how to treat concurrent executions of a Job.
 
@@ -187,7 +187,7 @@ Type: `string`
 
 Default: `"Forbid"`
 
-### <a name="input_config_map_mounts" /> [config\_map\_mounts](#input_config_map_mounts)
+### config\_map\_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the CronJob
 
@@ -202,7 +202,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
+### controller\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -210,7 +210,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_cron_job_annotations" /> [cron\_job\_annotations](#input_cron_job_annotations)
+### cron\_job\_annotations
 
 Description: Annotations to add to the generated CronJob
 
@@ -218,7 +218,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_disruptions_enabled" /> [disruptions\_enabled](#input_disruptions_enabled)
+### disruptions\_enabled
 
 Description: Whether to enable disrupting the Pods in the middle of execution.
 
@@ -226,7 +226,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_dns_policy" /> [dns\_policy](#input_dns_policy)
+### dns\_policy
 
 Description: The DNS policy for the Pod
 
@@ -234,7 +234,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### <a name="input_extra_pod_annotations" /> [extra\_pod\_annotations](#input_extra_pod_annotations)
+### extra\_pod\_annotations
 
 Description: Annotations to add to the pods in the CronJob
 
@@ -242,7 +242,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_pod_labels" /> [extra\_pod\_labels](#input_extra_pod_labels)
+### extra\_pod\_labels
 
 Description: Extra pod labels to use
 
@@ -250,7 +250,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_tolerations" /> [extra\_tolerations](#input_extra_tolerations)
+### extra\_tolerations
 
 Description: Extra tolerations to add to the Pods
 
@@ -267,7 +267,7 @@ list(object({
 
 Default: `[]`
 
-### <a name="input_failed_jobs_history_limit" /> [failed\_jobs\_history\_limit](#input_failed_jobs_history_limit)
+### failed\_jobs\_history\_limit
 
 Description: The number of failed jobs to retain
 
@@ -275,7 +275,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_job_annotations" /> [job\_annotations](#input_job_annotations)
+### job\_annotations
 
 Description: Annotations to add to generated Job resources
 
@@ -283,7 +283,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_mount_owner" /> [mount\_owner](#input_mount_owner)
+### mount\_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -291,7 +291,7 @@ Type: `number`
 
 Default: `1000`
 
-### <a name="input_node_preferences" /> [node\_preferences](#input_node_preferences)
+### node\_preferences
 
 Description: Node label preferences for the Pods
 
@@ -299,7 +299,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### <a name="input_node_requirements" /> [node\_requirements](#input_node_requirements)
+### node\_requirements
 
 Description: Node label requirements for the Pods
 
@@ -307,7 +307,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
 
@@ -315,7 +315,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pod_completions" /> [pod\_completions](#input_pod_completions)
+### pod\_completions
 
 Description: Specifies the desired number of successfully finished Pods the Job should be run with.
 
@@ -323,7 +323,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_pod_parallelism" /> [pod\_parallelism](#input_pod_parallelism)
+### pod\_parallelism
 
 Description: Specifies the maximum desired number of Pods the Job should run at any given time.
 
@@ -331,7 +331,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_pod_replacement_policy" /> [pod\_replacement\_policy](#input_pod_replacement_policy)
+### pod\_replacement\_policy
 
 Description: Specifies when to create replacement Pods
 
@@ -339,7 +339,7 @@ Type: `string`
 
 Default: `"Failed"`
 
-### <a name="input_pod_version_labels_enabled" /> [pod\_version\_labels\_enabled](#input_pod_version_labels_enabled)
+### pod\_version\_labels\_enabled
 
 Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
 
@@ -347,7 +347,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_priority_class_name" /> [priority\_class\_name](#input_priority_class_name)
+### priority\_class\_name
 
 Description: The priority class to use for Pods in the CronJob
 
@@ -355,7 +355,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_restart_policy" /> [restart\_policy](#input_restart_policy)
+### restart\_policy
 
 Description: The Pod restart policy
 
@@ -363,7 +363,7 @@ Type: `string`
 
 Default: `"OnFailure"`
 
-### <a name="input_secret_mounts" /> [secret\_mounts](#input_secret_mounts)
+### secret\_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the CronJob
 
@@ -378,7 +378,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+### spot\_nodes\_enabled
 
 Description: Whether to allow Pods to schedule on spot nodes
 
@@ -386,7 +386,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_starting_deadline_seconds" /> [starting\_deadline\_seconds](#input_starting_deadline_seconds)
+### starting\_deadline\_seconds
 
 Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones.
 
@@ -394,7 +394,7 @@ Type: `number`
 
 Default: `900`
 
-### <a name="input_successful_jobs_history_limit" /> [successful\_jobs\_history\_limit](#input_successful_jobs_history_limit)
+### successful\_jobs\_history\_limit
 
 Description: The number of successful jobs to retain
 
@@ -402,7 +402,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_suspend" /> [suspend](#input_suspend)
+### suspend
 
 Description: Whether the CronJob is suspended
 
@@ -410,7 +410,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_termination_grace_period_seconds" /> [termination\_grace\_period\_seconds](#input_termination_grace_period_seconds)
+### termination\_grace\_period\_seconds
 
 Description: The number of seconds to wait for graceful termination before forcing termination
 
@@ -418,7 +418,7 @@ Type: `number`
 
 Default: `30`
 
-### <a name="input_tmp_directories" /> [tmp\_directories](#input_tmp_directories)
+### tmp\_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -434,7 +434,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_ttl_seconds_after_finished" /> [ttl\_seconds\_after\_finished](#input_ttl_seconds_after_finished)
+### ttl\_seconds\_after\_finished
 
 Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it is eligible to be automatically deleted.
 
@@ -442,7 +442,7 @@ Type: `number`
 
 Default: `600`
 
-### <a name="input_update_type" /> [update\_type](#input_update_type)
+### update\_type
 
 Description: The type of update that the CronJob should use
 
@@ -450,7 +450,7 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether to enable the Vertical Pod Autoscaler
 
@@ -462,15 +462,15 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_labels" /> [labels](#output_labels)
+### labels
 
 Description: The default labels assigned to all resources in this Workflow
 
-### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+### match\_labels
 
 Description: The labels unique to this Workflow that can be used to select any pods in this Workflow
 
-### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+### service\_account\_name
 
 Description: The service account used for the pods
 

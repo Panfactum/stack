@@ -105,7 +105,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -113,31 +113,31 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster that contains the service account.
 
 Type: `string`
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of the WorkflowTemplate
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy the WorkflowTemplate into
 
 Type: `string`
 
-### <a name="input_repo" /> [repo](#input_repo)
+### repo
 
 Description: The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix.
 
 Type: `string`
 
-### <a name="input_tf_apply_dir" /> [tf\_apply\_dir](#input_tf_apply_dir)
+### tf\_apply\_dir
 
 Description: The default directory where 'terragrunt run-all apply' should be executed. All modules in this directory tree will be deployed. Should be relative to the repository root.
 
@@ -147,7 +147,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_cpu_millicores" /> [cpu\_millicores](#input_cpu_millicores)
+### cpu\_millicores
 
 Description: The amount of CPU to allocate to pods in the workflow (in millicores)
 
@@ -155,7 +155,7 @@ Type: `number`
 
 Default: `500`
 
-### <a name="input_git_password" /> [git\_password](#input_git_password)
+### git\_password
 
 Description: The password to use when checking out the code to deploy
 
@@ -163,7 +163,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_git_ref" /> [git\_ref](#input_git_ref)
+### git\_ref
 
 Description: The default git ref to use when checking out the repo. Can be overwritten on Workflow creation.
 
@@ -171,7 +171,7 @@ Type: `string`
 
 Default: `"main"`
 
-### <a name="input_git_username" /> [git\_username](#input_git_username)
+### git\_username
 
 Description: The username to use when checking out the code to deploy
 
@@ -179,7 +179,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_memory_mb" /> [memory\_mb](#input_memory_mb)
+### memory\_mb
 
 Description: The amount of memory to allocate to pods in the workflow (in MB)
 
@@ -187,7 +187,7 @@ Type: `number`
 
 Default: `2500`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -195,7 +195,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_secrets" /> [secrets](#input_secrets)
+### secrets
 
 Description: A mapping of environment variable names to secret values
 
@@ -207,27 +207,27 @@ Default: `{}`
 
 The following outputs are exported:
 
-### <a name="output_arguments" /> [arguments](#output_arguments)
+### arguments
 
 Description: The arguments to the WorkflowTemplate
 
-### <a name="output_aws_role_arn" /> [aws\_role\_arn](#output_aws_role_arn)
+### aws\_role\_arn
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
+### aws\_role\_name
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### <a name="output_entrypoint" /> [entrypoint](#output_entrypoint)
+### entrypoint
 
 Description: The name of the first template in the Workflow
 
-### <a name="output_name" /> [name](#output_name)
+### name
 
 Description: The name of the WorkflowTemplate
 
-### <a name="output_vault_role_name" /> [vault\_role\_name](#output_vault_role_name)
+### vault\_role\_name
 
 Description: The name of the Vault role used by the Workflow's Service Account
 

@@ -19,7 +19,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -31,37 +31,37 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_akadmin_email" /> [akadmin\_email](#input_akadmin_email)
+### akadmin\_email
 
 Description: The email address to use for the root authentik administrator. Warning: must be changed manually once applied.
 
 Type: `string`
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_email_from_address" /> [email\_from\_address](#input_email_from_address)
+### email\_from\_address
 
 Description: The 'from' address to use for sent emails
 
 Type: `string`
 
-### <a name="input_smtp_host" /> [smtp\_host](#input_smtp_host)
+### smtp\_host
 
 Description: The SMTP server for email sending
 
 Type: `string`
 
-### <a name="input_smtp_password" /> [smtp\_password](#input_smtp_password)
+### smtp\_password
 
 Description: The password to use for SMTP authentication for email sending
 
 Type: `string`
 
-### <a name="input_smtp_user" /> [smtp\_user](#input_smtp_user)
+### smtp\_user
 
 Description: The user to use for SMTP authentication for email sending
 
@@ -71,7 +71,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_authentik_helm_version" /> [authentik\_helm\_version](#input_authentik_helm_version)
+### authentik\_helm\_version
 
 Description: The version of the Authentik helm chart to deploy
 
@@ -79,7 +79,7 @@ Type: `string`
 
 Default: `"2024.4.2"`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -87,7 +87,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_db_recovery_directory" /> [db\_recovery\_directory](#input_db_recovery_directory)
+### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
@@ -95,7 +95,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_db_recovery_mode_enabled" /> [db\_recovery\_mode\_enabled](#input_db_recovery_mode_enabled)
+### db\_recovery\_mode\_enabled
 
 Description: Whether to enable recovery mode for the PostgreSQL database
 
@@ -103,7 +103,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_db_recovery_target_time" /> [db\_recovery\_target\_time](#input_db_recovery_target_time)
+### db\_recovery\_target\_time
 
 Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
 
@@ -111,7 +111,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_domain" /> [domain](#input_domain)
+### domain
 
 Description: A list of domains from which authentik will serve traffic
 
@@ -119,7 +119,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -127,7 +127,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_error_reporting_enabled" /> [error\_reporting\_enabled](#input_error_reporting_enabled)
+### error\_reporting\_enabled
 
 Description: True iff errors should be reported to authentik for telemetry purposes
 
@@ -135,7 +135,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
+### ingress\_enabled
 
 Description: Whether to enable ingress to the Authentik server
 
@@ -143,7 +143,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the operator pods
 
@@ -151,7 +151,7 @@ Type: `string`
 
 Default: `"error"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -159,7 +159,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: Kubernetes namespace to deploy the resources into
 
@@ -167,7 +167,7 @@ Type: `string`
 
 Default: `"authentik"`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -175,7 +175,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -183,7 +183,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -195,63 +195,63 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_akadmin_bootstrap_password" /> [akadmin\_bootstrap\_password](#output_akadmin_bootstrap_password)
+### akadmin\_bootstrap\_password
 
 Description: The initial password for the root akadmin user. Only used on initial bootstrapping.
 
-### <a name="output_akadmin_bootstrap_token" /> [akadmin\_bootstrap\_token](#output_akadmin_bootstrap_token)
+### akadmin\_bootstrap\_token
 
 Description: The initial API token for the root akadmin user. Only used on initial bootstrapping.
 
-### <a name="output_akadmin_email" /> [akadmin\_email](#output_akadmin_email)
+### akadmin\_email
 
 Description: The email for the root akadmin user.
 
-### <a name="output_authentik_url" /> [authentik\_url](#output_authentik_url)
+### authentik\_url
 
 Description: n/a
 
-### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
+### db\_admin\_role
 
 Description: n/a
 
-### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
+### db\_reader\_role
 
 Description: n/a
 
-### <a name="output_db_recovery_directory" /> [db\_recovery\_directory](#output_db_recovery_directory)
+### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
-### <a name="output_db_superuser_role" /> [db\_superuser\_role](#output_db_superuser_role)
+### db\_superuser\_role
 
 Description: n/a
 
-### <a name="output_domain" /> [domain](#output_domain)
+### domain
 
 Description: n/a
 
-### <a name="output_email_templates_configmap" /> [email\_templates\_configmap](#output_email_templates_configmap)
+### email\_templates\_configmap
 
 Description: n/a
 
-### <a name="output_media_configmap" /> [media\_configmap](#output_media_configmap)
+### media\_configmap
 
 Description: n/a
 
-### <a name="output_namespace" /> [namespace](#output_namespace)
+### namespace
 
 Description: n/a
 
-### <a name="output_redis_admin_role" /> [redis\_admin\_role](#output_redis_admin_role)
+### redis\_admin\_role
 
 Description: n/a
 
-### <a name="output_redis_reader_role" /> [redis\_reader\_role](#output_redis_reader_role)
+### redis\_reader\_role
 
 Description: n/a
 
-### <a name="output_redis_superuser_role" /> [redis\_superuser\_role](#output_redis_superuser_role)
+### redis\_superuser\_role
 
 Description: n/a
 

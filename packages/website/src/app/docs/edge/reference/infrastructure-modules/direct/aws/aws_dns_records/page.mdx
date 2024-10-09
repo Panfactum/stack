@@ -24,7 +24,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_zones" /> [zones](#input_zones)
+### zones
 
 Description: Zone configurations. Keys are the domain names.
 
@@ -32,6 +32,11 @@ Type:
 
 ```hcl
 map(object({
+    a_records = optional(list(object({
+      subdomain = string
+      records   = list(string)
+      ttl       = optional(number, 300)
+    })))
     mx_records = optional(list(object({
       subdomain = string
       records   = list(string)

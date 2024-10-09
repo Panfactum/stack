@@ -71,7 +71,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -79,31 +79,31 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_code_repo" /> [code\_repo](#input_code_repo)
+### code\_repo
 
 Description: The URL of the git repo containing the Dockerfile to build. Must NOT contain a protocol prefix.
 
 Type: `string`
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster that contains the service account.
 
 Type: `string`
 
-### <a name="input_image_repo" /> [image\_repo](#input_image_repo)
+### image\_repo
 
 Description: The name of the AWS ECR repository where generated images will be pushed
 
 Type: `string`
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of the WorkflowTemplate
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy the WorkflowTemplate into
 
@@ -113,7 +113,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_args" /> [args](#input_args)
+### args
 
 Description: A mapping of build-time arguments to their respective values
 
@@ -121,7 +121,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_build_context" /> [build\_context](#input_build_context)
+### build\_context
 
 Description: Relative path from the root of the repository to the build context to submit to BuildKit
 
@@ -129,7 +129,7 @@ Type: `string`
 
 Default: `"."`
 
-### <a name="input_build_timeout" /> [build\_timeout](#input_build_timeout)
+### build\_timeout
 
 Description: The number of seconds after which the build will be timed out
 
@@ -137,7 +137,7 @@ Type: `number`
 
 Default: `3600`
 
-### <a name="input_dockerfile_path" /> [dockerfile\_path](#input_dockerfile_path)
+### dockerfile\_path
 
 Description: Relative path from the root of the repository to the Dockerfile / Containerfile to submit to Buildkit
 
@@ -145,7 +145,7 @@ Type: `string`
 
 Default: `"./Dockerfile"`
 
-### <a name="input_git_password" /> [git\_password](#input_git_password)
+### git\_password
 
 Description: The password to use when checking out the code to deploy
 
@@ -153,7 +153,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_git_ref" /> [git\_ref](#input_git_ref)
+### git\_ref
 
 Description: The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the Workflow
 
@@ -161,7 +161,7 @@ Type: `string`
 
 Default: `"main"`
 
-### <a name="input_git_username" /> [git\_username](#input_git_username)
+### git\_username
 
 Description: The username to use when checking out the code to deploy
 
@@ -169,7 +169,7 @@ Type: `string`
 
 Default: `""`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -177,7 +177,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_push_image_enabled" /> [push\_image\_enabled](#input_push_image_enabled)
+### push\_image\_enabled
 
 Description: True iff images should be pushed to ECR in addition to being built
 
@@ -185,7 +185,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_secrets" /> [secrets](#input_secrets)
+### secrets
 
 Description: A mapping of build-time secret ids to their respective values
 
@@ -197,23 +197,23 @@ Default: `{}`
 
 The following outputs are exported:
 
-### <a name="output_arguments" /> [arguments](#output_arguments)
+### arguments
 
 Description: The arguments to the WorkflowTemplate
 
-### <a name="output_aws_role_arn" /> [aws\_role\_arn](#output_aws_role_arn)
+### aws\_role\_arn
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### <a name="output_aws_role_name" /> [aws\_role\_name](#output_aws_role_name)
+### aws\_role\_name
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### <a name="output_entrypoint" /> [entrypoint](#output_entrypoint)
+### entrypoint
 
 Description: The name of the first template in the Workflow
 
-### <a name="output_name" /> [name](#output_name)
+### name
 
 Description: The name of the WorkflowTemplate
 

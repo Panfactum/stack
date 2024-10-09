@@ -18,7 +18,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -28,13 +28,13 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+### vault\_domain
 
 Description: The public domain for the Vault cluster
 
@@ -44,7 +44,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_admin_iam_arns" /> [admin\_iam\_arns](#input_admin_iam_arns)
+### admin\_iam\_arns
 
 Description: List of IAM arns for encryption key admins.
 
@@ -52,7 +52,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -60,7 +60,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_cors_enabled" /> [cors\_enabled](#input_cors_enabled)
+### cors\_enabled
 
 Description: Whether to enable CORS handling in the Vault ingress
 
@@ -68,7 +68,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_cors_extra_allowed_origins" /> [cors\_extra\_allowed\_origins](#input_cors_extra_allowed_origins)
+### cors\_extra\_allowed\_origins
 
 Description: Extra allowed origins for CORS handling
 
@@ -76,7 +76,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -84,7 +84,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_ingress_enabled" /> [ingress\_enabled](#input_ingress_enabled)
+### ingress\_enabled
 
 Description: Whether or not to enable the ingress for routing traffic to vault
 
@@ -92,7 +92,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -100,7 +100,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -108,7 +108,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -116,7 +116,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_reader_iam_arns" /> [reader\_iam\_arns](#input_reader_iam_arns)
+### reader\_iam\_arns
 
 Description: List of IAM arns for users who can use the encryption key for encryption and decryption.
 
@@ -124,7 +124,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_restricted_reader_iam_arns" /> [restricted\_reader\_iam\_arns](#input_restricted_reader_iam_arns)
+### restricted\_reader\_iam\_arns
 
 Description: List of IAM arns for users who can only view the encryption key.
 
@@ -132,7 +132,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_superuser_iam_arns" /> [superuser\_iam\_arns](#input_superuser_iam_arns)
+### superuser\_iam\_arns
 
 Description: List of IAM arns for encryption key superusers.
 
@@ -140,7 +140,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_vault_helm_version" /> [vault\_helm\_version](#input_vault_helm_version)
+### vault\_helm\_version
 
 Description: The version of the vault helm chart to deploy
 
@@ -148,7 +148,7 @@ Type: `string`
 
 Default: `"0.27.0"`
 
-### <a name="input_vault_image_tag" /> [vault\_image\_tag](#input_vault_image_tag)
+### vault\_image\_tag
 
 Description: The version of vault to use
 
@@ -156,7 +156,7 @@ Type: `string`
 
 Default: `"1.14.7"`
 
-### <a name="input_vault_storage_increase_gb" /> [vault\_storage\_increase\_gb](#input_vault_storage_increase_gb)
+### vault\_storage\_increase\_gb
 
 Description: The GB to increase storage by if free space drops below the threshold
 
@@ -164,7 +164,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_vault_storage_increase_threshold_percent" /> [vault\_storage\_increase\_threshold\_percent](#input_vault_storage_increase_threshold_percent)
+### vault\_storage\_increase\_threshold\_percent
 
 Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
 
@@ -172,7 +172,7 @@ Type: `number`
 
 Default: `20`
 
-### <a name="input_vault_storage_limit_gb" /> [vault\_storage\_limit\_gb](#input_vault_storage_limit_gb)
+### vault\_storage\_limit\_gb
 
 Description: The maximum number of gigabytes of storage to provision for the postgres cluster
 
@@ -180,7 +180,7 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_vault_storage_size_gb" /> [vault\_storage\_size\_gb](#input_vault_storage_size_gb)
+### vault\_storage\_size\_gb
 
 Description: The number of gigabytes to allocate to vault storage.
 
@@ -188,7 +188,7 @@ Type: `number`
 
 Default: `20`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -200,15 +200,15 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_vault_domain" /> [vault\_domain](#output_vault_domain)
+### vault\_domain
 
 Description: n/a
 
-### <a name="output_vault_internal_url" /> [vault\_internal\_url](#output_vault_internal_url)
+### vault\_internal\_url
 
 Description: n/a
 
-### <a name="output_vault_url" /> [vault\_url](#output_vault_url)
+### vault\_url
 
 Description: n/a
 

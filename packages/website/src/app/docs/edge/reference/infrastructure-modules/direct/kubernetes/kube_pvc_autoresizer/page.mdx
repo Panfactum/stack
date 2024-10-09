@@ -27,7 +27,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -41,7 +41,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+### log\_verbosity
 
 Description: The log verbosity (0-9) for the VPA pods
 
@@ -49,7 +49,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -57,7 +57,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -65,7 +65,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_prometheus_enabled" /> [prometheus\_enabled](#input_prometheus_enabled)
+### prometheus\_enabled
 
 Description: Whether to use prometheus to get volume stats
 
@@ -73,7 +73,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -81,7 +81,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pvc_autoresizer_helm_version" /> [pvc\_autoresizer\_helm\_version](#input_pvc_autoresizer_helm_version)
+### pvc\_autoresizer\_helm\_version
 
 Description: The version of the pvc-autoresizer helm chart to deploy
 
@@ -89,7 +89,7 @@ Type: `string`
 
 Default: `"0.11.3"`
 
-### <a name="input_pvc_autoresizer_version" /> [pvc\_autoresizer\_version](#input_pvc_autoresizer_version)
+### pvc\_autoresizer\_version
 
 Description: The commit sha of the pvc-autoresizer to deploy
 
@@ -97,7 +97,7 @@ Type: `string`
 
 Default: `"0723820ac895cfe86f49a2f582da59f95f02d9ae"`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

@@ -18,7 +18,7 @@ We do not recommend using this directly.
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -26,19 +26,19 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_match_labels" /> [match\_labels](#input_match_labels)
+### match\_labels
 
 Description: The label selector to use for pods backing the Service
 
 Type: `map(string)`
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of this Service
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace the Service will be created in.
 
@@ -48,7 +48,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_external_traffic_policy" /> [external\_traffic\_policy](#input_external_traffic_policy)
+### external\_traffic\_policy
 
 Description: The ExternalTrafficPolicy of the Service.
 
@@ -56,7 +56,7 @@ Type: `string`
 
 Default: `"Cluster"`
 
-### <a name="input_extra_annotations" /> [extra\_annotations](#input_extra_annotations)
+### extra\_annotations
 
 Description: Extra annotations to add to the Service.
 
@@ -64,7 +64,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_extra_labels" /> [extra\_labels](#input_extra_labels)
+### extra\_labels
 
 Description: Extra labels to add to the Service.
 
@@ -72,7 +72,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_headless_enabled" /> [headless\_enabled](#input_headless_enabled)
+### headless\_enabled
 
 Description: Set to true iff setting up a StatefulSet headless service.
 
@@ -80,7 +80,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_internal_traffic_policy" /> [internal\_traffic\_policy](#input_internal_traffic_policy)
+### internal\_traffic\_policy
 
 Description: The InternalTrafficPolicy of the Service.
 
@@ -88,7 +88,7 @@ Type: `string`
 
 Default: `"Cluster"`
 
-### <a name="input_load_balancer_class" /> [load\_balancer\_class](#input_load_balancer_class)
+### load\_balancer\_class
 
 Description: Iff type == LoadBalancer, the loadBalancerClass to use.
 
@@ -96,7 +96,7 @@ Type: `string`
 
 Default: `"service.k8s.aws/nlb"`
 
-### <a name="input_ports" /> [ports](#input_ports)
+### ports
 
 Description: The port configuration. Keys are the port names, and the values are the port configuration.
 
@@ -112,7 +112,7 @@ map(object({
 
 Default: `{}`
 
-### <a name="input_public_domain_names" /> [public\_domain\_names](#input_public_domain_names)
+### public\_domain\_names
 
 Description: Iff type == LoadBalancer, the public domains names that this service will be accessible from.
 
@@ -120,7 +120,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_service_ip" /> [service\_ip](#input_service_ip)
+### service\_ip
 
 Description: If provided, the service will be statically bound to this IP address. Must be within the Service IP CIDR range for the cluster.
 
@@ -128,7 +128,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_type" /> [type](#input_type)
+### type
 
 Description: The type of the Service.
 

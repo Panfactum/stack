@@ -14,7 +14,7 @@ Sets up a Kubernetes namespace and grants namespace-scoped permissions to specif
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -22,7 +22,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The name of the kubernetes namespace to instantiate.
 
@@ -32,7 +32,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_admin_groups" /> [admin\_groups](#input_admin_groups)
+### admin\_groups
 
 Description: The names of the kubernetes groups to give admin access to the namespace.
 
@@ -46,7 +46,7 @@ Default:
 ]
 ```
 
-### <a name="input_linkerd_inject" /> [linkerd\_inject](#input_linkerd_inject)
+### linkerd\_inject
 
 Description: Whether to inject linkerd sidecars into pods in this namespace.
 
@@ -54,7 +54,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_loadbalancer_enabled" /> [loadbalancer\_enabled](#input_loadbalancer_enabled)
+### loadbalancer\_enabled
 
 Description: Whether the namespace is going to create LoadBalancer services
 
@@ -62,7 +62,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -70,7 +70,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_reader_groups" /> [reader\_groups](#input_reader_groups)
+### reader\_groups
 
 Description: The names of the kubernetes groups to give read access to the namespace.
 
@@ -88,7 +88,7 @@ Default:
 
 The following outputs are exported:
 
-### <a name="output_namespace" /> [namespace](#output_namespace)
+### namespace
 
 Description: n/a
 

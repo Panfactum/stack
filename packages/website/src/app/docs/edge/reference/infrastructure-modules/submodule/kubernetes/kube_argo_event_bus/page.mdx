@@ -28,7 +28,7 @@ A few notes for the proper usage of an EventBus:
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -38,7 +38,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy the EventBus into.
 
@@ -48,7 +48,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_event_bus_initial_volume_size" /> [event\_bus\_initial\_volume\_size](#input_event_bus_initial_volume_size)
+### event\_bus\_initial\_volume\_size
 
 Description: The initial volume size to use for each node in the event bus
 
@@ -56,7 +56,7 @@ Type: `string`
 
 Default: `"1Gi"`
 
-### <a name="input_event_bus_storage_class_name" /> [event\_bus\_storage\_class\_name](#input_event_bus_storage_class_name)
+### event\_bus\_storage\_class\_name
 
 Description: The storage class to use for the event bus
 
@@ -64,7 +64,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
-### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+### instance\_type\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
@@ -72,7 +72,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the argo pods
 
@@ -80,7 +80,7 @@ Type: `string`
 
 Default: `"info"`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

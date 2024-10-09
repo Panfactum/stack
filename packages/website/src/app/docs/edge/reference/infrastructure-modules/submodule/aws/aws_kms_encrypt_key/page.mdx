@@ -21,13 +21,13 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_description" /> [description](#input_description)
+### description
 
 Description: The description of the KMS key.
 
 Type: `string`
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of the KMS key.
 
@@ -37,7 +37,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_admin_iam_arns" /> [admin\_iam\_arns](#input_admin_iam_arns)
+### admin\_iam\_arns
 
 Description: List of IAM arns for key admins.
 
@@ -45,7 +45,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_log_delivery_enabled" /> [log\_delivery\_enabled](#input_log_delivery_enabled)
+### log\_delivery\_enabled
 
 Description: Whether to allow the delivery.logs.amazonaws.com service to use the key
 
@@ -53,7 +53,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_reader_iam_arns" /> [reader\_iam\_arns](#input_reader_iam_arns)
+### reader\_iam\_arns
 
 Description: List of IAM arns for users who can use the key for encryption and decryption.
 
@@ -61,7 +61,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_replication_enabled" /> [replication\_enabled](#input_replication_enabled)
+### replication\_enabled
 
 Description: Whether to replicate the key to another region
 
@@ -69,7 +69,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_restricted_reader_iam_arns" /> [restricted\_reader\_iam\_arns](#input_restricted_reader_iam_arns)
+### restricted\_reader\_iam\_arns
 
 Description: List of IAM arns for users who can only view the key.
 
@@ -77,7 +77,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_superuser_iam_arns" /> [superuser\_iam\_arns](#input_superuser_iam_arns)
+### superuser\_iam\_arns
 
 Description: List of IAM arns for key superusers.
 
@@ -89,19 +89,19 @@ Default: `[]`
 
 The following outputs are exported:
 
-### <a name="output_alias_arn" /> [alias\_arn](#output_alias_arn)
+### alias\_arn
 
 Description: n/a
 
-### <a name="output_arn" /> [arn](#output_arn)
+### arn
 
 Description: The ARN of the KMS key
 
-### <a name="output_arn2" /> [arn2](#output_arn2)
+### arn2
 
 Description: The ARN of the backup key
 
-### <a name="output_id" /> [id](#output_id)
+### id
 
 Description: n/a
 

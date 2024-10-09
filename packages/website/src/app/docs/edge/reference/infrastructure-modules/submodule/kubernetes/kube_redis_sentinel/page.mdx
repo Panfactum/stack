@@ -200,7 +200,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -212,7 +212,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy to the redis instances into
 
@@ -222,7 +222,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+### arm\_nodes\_enabled
 
 Description: Whether the database pods can be scheduled on arm64 nodes
 
@@ -230,7 +230,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+### burstable\_nodes\_enabled
 
 Description: Whether the database pods can be scheduled on burstable nodes
 
@@ -238,7 +238,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_controller_nodes_enabled" /> [controller\_nodes\_enabled](#input_controller_nodes_enabled)
+### controller\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
@@ -246,7 +246,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_creds_syncer_logging_enabled" /> [creds\_syncer\_logging\_enabled](#input_creds_syncer_logging_enabled)
+### creds\_syncer\_logging\_enabled
 
 Description: Whether to enable logging for the creds-syncer pods
 
@@ -254,7 +254,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_helm_version" /> [helm\_version](#input_helm_version)
+### helm\_version
 
 Description: The version of the bitnami/redis helm chart to use
 
@@ -262,7 +262,7 @@ Type: `string`
 
 Default: `"19.0.2"`
 
-### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+### instance\_type\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
@@ -270,7 +270,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_lfu_cache_enabled" /> [lfu\_cache\_enabled](#input_lfu_cache_enabled)
+### lfu\_cache\_enabled
 
 Description: Whether redis will be deployed as an LFU cache
 
@@ -278,7 +278,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_minimum_memory_mb" /> [minimum\_memory\_mb](#input_minimum_memory_mb)
+### minimum\_memory\_mb
 
 Description: The minimum memory in Mb to use for the redis nodes
 
@@ -286,7 +286,7 @@ Type: `number`
 
 Default: `25`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -294,7 +294,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -302,7 +302,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_persistence_backups_enabled" /> [persistence\_backups\_enabled](#input_persistence_backups_enabled)
+### persistence\_backups\_enabled
 
 Description: Whether to enable backups of the Redis durable storage.
 
@@ -310,7 +310,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_persistence_size_gb" /> [persistence\_size\_gb](#input_persistence_size_gb)
+### persistence\_size\_gb
 
 Description: How many GB to initially allocate for persistent storage (will grow automatically as needed)
 
@@ -318,7 +318,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_persistence_storage_increase_gb" /> [persistence\_storage\_increase\_gb](#input_persistence_storage_increase_gb)
+### persistence\_storage\_increase\_gb
 
 Description: The amount of GB to increase storage by if free space drops below the threshold
 
@@ -326,7 +326,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_persistence_storage_increase_threshold_percent" /> [persistence\_storage\_increase\_threshold\_percent](#input_persistence_storage_increase_threshold_percent)
+### persistence\_storage\_increase\_threshold\_percent
 
 Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
 
@@ -334,7 +334,7 @@ Type: `number`
 
 Default: `20`
 
-### <a name="input_persistence_storage_limit_gb" /> [persistence\_storage\_limit\_gb](#input_persistence_storage_limit_gb)
+### persistence\_storage\_limit\_gb
 
 Description: The maximum number of gigabytes of storage to provision for each redis node
 
@@ -342,7 +342,7 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -350,7 +350,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_redis_flags" /> [redis\_flags](#input_redis_flags)
+### redis\_flags
 
 Description: Extra configuration flags to pass to each redis node
 
@@ -358,7 +358,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_redis_save" /> [redis\_save](#input_redis_save)
+### redis\_save
 
 Description: Sets the save option for periodic snapshotting
 
@@ -366,7 +366,7 @@ Type: `string`
 
 Default: `"300 100"`
 
-### <a name="input_replica_count" /> [replica\_count](#input_replica_count)
+### replica\_count
 
 Description: The number of redis replicas to deploy
 
@@ -374,7 +374,7 @@ Type: `number`
 
 Default: `3`
 
-### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+### spot\_nodes\_enabled
 
 Description: Whether the database pods can be scheduled on spot nodes
 
@@ -382,7 +382,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vault_credential_lifetime_hours" /> [vault\_credential\_lifetime\_hours](#input_vault_credential_lifetime_hours)
+### vault\_credential\_lifetime\_hours
 
 Description: The lifetime of database credentials generated by Vault
 
@@ -390,7 +390,7 @@ Type: `number`
 
 Default: `16`
 
-### <a name="input_voluntary_disruption_window_cron_schedule" /> [voluntary\_disruption\_window\_cron\_schedule](#input_voluntary_disruption_window_cron_schedule)
+### voluntary\_disruption\_window\_cron\_schedule
 
 Description: The times when disruption windows should start
 
@@ -398,7 +398,7 @@ Type: `string`
 
 Default: `"0 4 * * *"`
 
-### <a name="input_voluntary_disruption_window_enabled" /> [voluntary\_disruption\_window\_enabled](#input_voluntary_disruption_window_enabled)
+### voluntary\_disruption\_window\_enabled
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
@@ -406,7 +406,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_voluntary_disruption_window_seconds" /> [voluntary\_disruption\_window\_seconds](#input_voluntary_disruption_window_seconds)
+### voluntary\_disruption\_window\_seconds
 
 Description: The length of the disruption window in seconds
 
@@ -414,7 +414,7 @@ Type: `number`
 
 Default: `3600`
 
-### <a name="input_voluntary_disruptions_enabled" /> [voluntary\_disruptions\_enabled](#input_voluntary_disruptions_enabled)
+### voluntary\_disruptions\_enabled
 
 Description: Whether to enable voluntary disruptions of pods in this module.
 
@@ -422,7 +422,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -434,75 +434,75 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_admin_creds_secret" /> [admin\_creds\_secret](#output_admin_creds_secret)
+### admin\_creds\_secret
 
 Description: The name of the Kubernetes Secret holding credentials for the admin role in the Redis database
 
-### <a name="output_admin_role" /> [admin\_role](#output_admin_role)
+### admin\_role
 
 Description: The Vault role used to get admin credentials for the created Redis cluster
 
-### <a name="output_master_set" /> [master\_set](#output_master_set)
+### master\_set
 
 Description: The value for the master set to use when configuring Sentinel-aware Redis clients
 
-### <a name="output_match_labels" /> [match\_labels](#output_match_labels)
+### match\_labels
 
 Description: A label selector that matches all Redis pods in the cluster
 
-### <a name="output_match_labels_master" /> [match\_labels\_master](#output_match_labels_master)
+### match\_labels\_master
 
 Description: A label selector that matches only the Redis master pod in the cluster
 
-### <a name="output_namespace" /> [namespace](#output_namespace)
+### namespace
 
 Description: Kubernetes namespace where module resources are created
 
-### <a name="output_reader_creds_secret" /> [reader\_creds\_secret](#output_reader_creds_secret)
+### reader\_creds\_secret
 
 Description: The name of the Kubernetes Secret holding credentials for the reader role in the Redis database
 
-### <a name="output_reader_role" /> [reader\_role](#output_reader_role)
+### reader\_role
 
 Description: The Vault role used to get read-only credentials for the created Redis cluster
 
-### <a name="output_redis_host" /> [redis\_host](#output_redis_host)
+### redis\_host
 
 Description: A service address that points to all Redis nodes
 
-### <a name="output_redis_host_list" /> [redis\_host\_list](#output_redis_host_list)
+### redis\_host\_list
 
 Description: A list of domain names for every Redis pod in the cluster
 
-### <a name="output_redis_master_host" /> [redis\_master\_host](#output_redis_master_host)
+### redis\_master\_host
 
 Description: A service address that points to only the writable redis master
 
-### <a name="output_redis_port" /> [redis\_port](#output_redis_port)
+### redis\_port
 
 Description: The port that the Redis servers listen on
 
-### <a name="output_redis_sentinel_host" /> [redis\_sentinel\_host](#output_redis_sentinel_host)
+### redis\_sentinel\_host
 
 Description: A service address that points to the Redis Sentinels
 
-### <a name="output_redis_sentinel_port" /> [redis\_sentinel\_port](#output_redis_sentinel_port)
+### redis\_sentinel\_port
 
 Description: The port that the Sentinel servers listen on
 
-### <a name="output_root_name" /> [root\_name](#output_root_name)
+### root\_name
 
 Description: The name of the root user of the database
 
-### <a name="output_root_password" /> [root\_password](#output_root_password)
+### root\_password
 
 Description: The password for root user of the database
 
-### <a name="output_superuser_creds_secret" /> [superuser\_creds\_secret](#output_superuser_creds_secret)
+### superuser\_creds\_secret
 
 Description: The name of the Kubernetes Secret holding credentials for the superuser role in the Redis database
 
-### <a name="output_superuser_role" /> [superuser\_role](#output_superuser_role)
+### superuser\_role
 
 Description: The Vault role used to get superuser credentials for the created Redis cluster
 

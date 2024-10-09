@@ -18,7 +18,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -28,7 +28,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
@@ -38,7 +38,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -46,7 +46,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_aws_plugin_version" /> [aws\_plugin\_version](#input_aws_plugin_version)
+### aws\_plugin\_version
 
 Description: The image version of the velero/velero-plugin-for-aws image
 
@@ -54,7 +54,7 @@ Type: `string`
 
 Default: `"v1.9.0"`
 
-### <a name="input_csi_plugin_version" /> [csi\_plugin\_version](#input_csi_plugin_version)
+### csi\_plugin\_version
 
 Description: The image version of the velero/velero-plugin-for-csi image
 
@@ -62,7 +62,7 @@ Type: `string`
 
 Default: `"v0.7.0"`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the Velero pods
 
@@ -70,7 +70,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
 
@@ -78,7 +78,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -86,7 +86,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -94,7 +94,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_velero_helm_version" /> [velero\_helm\_version](#input_velero_helm_version)
+### velero\_helm\_version
 
 Description: The version of the velero helm chart
 
@@ -102,7 +102,7 @@ Type: `string`
 
 Default: `"6.0.0"`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -114,11 +114,11 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_backup_bucket" /> [backup\_bucket](#output_backup_bucket)
+### backup\_bucket
 
 Description: The name of the S3 bucket used to store cluster backups
 
-### <a name="output_backup_bucket_arn" /> [backup\_bucket\_arn](#output_backup_bucket_arn)
+### backup\_bucket\_arn
 
 Description: The ARN of the S3 bucket used to store cluster backups
 

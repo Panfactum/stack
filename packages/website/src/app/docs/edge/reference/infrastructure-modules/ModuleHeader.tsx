@@ -16,10 +16,7 @@ export default function ModuleHeader (props: {status: Status, sourceHref: string
   return (
     <div className="flex flex-wrap mt-1 mb-3 py-1 gap-x-5 gap-y-2 border-b-2 border-solid border-neutral">
       <div className="flex gap-3 items-center">
-        <code
-          data-reference={name}
-          className="code font-medium !text-sm sm:!text-base inline-block w-fit"
-        >
+        <code className="code font-medium !text-sm sm:!text-base inline-block w-fit">
           {name}
         </code>
       </div>

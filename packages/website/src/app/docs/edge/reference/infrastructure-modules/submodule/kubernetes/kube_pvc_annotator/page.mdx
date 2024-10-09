@@ -39,7 +39,7 @@ are using a controller that creates PVCs that is not included in the stack.
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -49,7 +49,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_config" /> [config](#input_config)
+### config
 
 Description: Configuration to pass to pf-set-pvc-metadata. The top-level keys are the panfactum.com/pvc-group label values and the values are the corresponding labels and annotations to apply to all PVCs in the group.
 
@@ -62,7 +62,7 @@ map(object({
   }))
 ```
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace the cluster is in
 
@@ -72,7 +72,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -80,7 +80,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the annotator images
 
@@ -88,7 +88,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 

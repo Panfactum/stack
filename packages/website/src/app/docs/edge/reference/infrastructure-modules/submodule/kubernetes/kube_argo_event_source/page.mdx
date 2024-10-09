@@ -20,7 +20,7 @@ from external sources (push and pull) and then publishes events on an
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -30,19 +30,19 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_event_source_spec" /> [event\_source\_spec](#input_event_source_spec)
+### event\_source\_spec
 
 Description: The specification of the EventSource. See [https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec)
 
 Type: `any`
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of the Sensor
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy the Sensor into.
 
@@ -52,7 +52,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
+### az\_spread\_preferred
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
 
@@ -60,7 +60,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_event_bus_name" /> [event\_bus\_name](#input_event_bus_name)
+### event\_bus\_name
 
 Description: The EventBus to read from. Should almost always be 'default'.
 
@@ -68,7 +68,7 @@ Type: `string`
 
 Default: `"default"`
 
-### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+### instance\_type\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
@@ -76,7 +76,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -84,7 +84,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_replicas" /> [replicas](#input_replicas)
+### replicas
 
 Description: The number of replicas to run in the underlying deployment. Read this before changing the defaults: [https://argoproj.github.io/argo-events/eventsources/ha/](https://argoproj.github.io/argo-events/eventsources/ha/). Do NOT mix active-active and active-passive if using more than one replica.
 
@@ -92,7 +92,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+### spot\_nodes\_enabled
 
 Description: Whether EventSource pods can be run on spot nodes
 
@@ -100,7 +100,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

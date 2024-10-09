@@ -21,7 +21,7 @@ based on events on the
 
 The following providers are needed by this module:
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -31,7 +31,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_dependencies" /> [dependencies](#input_dependencies)
+### dependencies
 
 Description: A list of events that can activate triggers on the sensor
 
@@ -78,19 +78,19 @@ list(object({
   }))
 ```
 
-### <a name="input_name" /> [name](#input_name)
+### name
 
 Description: The name of the Sensor
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy the Sensor into.
 
 Type: `string`
 
-### <a name="input_triggers" /> [triggers](#input_triggers)
+### triggers
 
 Description: A list of actions that can be triggered by events from the EventBus
 
@@ -100,7 +100,7 @@ Type: `any`
 
 The following input variables are optional (have default values):
 
-### <a name="input_event_bus_name" /> [event\_bus\_name](#input_event_bus_name)
+### event\_bus\_name
 
 Description: The EventBus to read from. Should almost always be 'default'.
 
@@ -108,7 +108,7 @@ Type: `string`
 
 Default: `"default"`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -116,7 +116,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -128,7 +128,7 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_service_account_name" /> [service\_account\_name](#output_service_account_name)
+### service\_account\_name
 
 Description: n/a
 

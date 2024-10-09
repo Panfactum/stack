@@ -20,7 +20,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -32,7 +32,7 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
@@ -42,7 +42,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -50,7 +50,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_canary_chart_version" /> [canary\_chart\_version](#input_canary_chart_version)
+### canary\_chart\_version
 
 Description: The version of the flanksource/canary-checker helm chart to deploy
 
@@ -58,7 +58,7 @@ Type: `string`
 
 Default: `"1.0.259"`
 
-### <a name="input_log_level" /> [log\_level](#input_log_level)
+### log\_level
 
 Description: The log level for the Canary pods
 
@@ -66,7 +66,7 @@ Type: `string`
 
 Default: `"warn"`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -74,7 +74,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -86,7 +86,7 @@ Default: `false`
 
 The following outputs are exported:
 
-### <a name="output_namespace" /> [namespace](#output_namespace)
+### namespace
 
 Description: n/a
 

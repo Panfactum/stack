@@ -323,7 +323,7 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -337,19 +337,19 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_aws_iam_ip_allow_list" /> [aws\_iam\_ip\_allow\_list](#input_aws_iam_ip_allow_list)
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
 Type: `list(string)`
 
-### <a name="input_eks_cluster_name" /> [eks\_cluster\_name](#input_eks_cluster_name)
+### eks\_cluster\_name
 
 Description: The name of the EKS cluster.
 
 Type: `string`
 
-### <a name="input_pg_cluster_namespace" /> [pg\_cluster\_namespace](#input_pg_cluster_namespace)
+### pg\_cluster\_namespace
 
 Description: The namespace to deploy to the cluster into
 
@@ -359,7 +359,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_arm_nodes_enabled" /> [arm\_nodes\_enabled](#input_arm_nodes_enabled)
+### arm\_nodes\_enabled
 
 Description: Whether the database pods can be scheduled on arm64 nodes
 
@@ -367,7 +367,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_backups_cron_schedule" /> [backups\_cron\_schedule](#input_backups_cron_schedule)
+### backups\_cron\_schedule
 
 Description: The cron schedule on which to create CNPG Backup resources
 
@@ -375,7 +375,7 @@ Type: `string`
 
 Default: `"0 0 0 * * *"`
 
-### <a name="input_backups_force_delete" /> [backups\_force\_delete](#input_backups_force_delete)
+### backups\_force\_delete
 
 Description: Whether to delete backups on destroy
 
@@ -383,7 +383,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_backups_retention_days" /> [backups\_retention\_days](#input_backups_retention_days)
+### backups\_retention\_days
 
 Description: The number of days that backups will be retained
 
@@ -391,7 +391,7 @@ Type: `number`
 
 Default: `3`
 
-### <a name="input_burstable_nodes_enabled" /> [burstable\_nodes\_enabled](#input_burstable_nodes_enabled)
+### burstable\_nodes\_enabled
 
 Description: Whether the database pods can be scheduled on burstable nodes
 
@@ -399,7 +399,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_extra_schemas" /> [extra\_schemas](#input_extra_schemas)
+### extra\_schemas
 
 Description: Extra schemas that were created in the app database
 
@@ -407,7 +407,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+### instance\_type\_spread\_required
 
 Description: Whether to prevent pods from being scheduled on the same instance types
 
@@ -415,7 +415,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -423,7 +423,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -431,7 +431,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pg_cpu_millicores" /> [pg\_cpu\_millicores](#input_pg_cpu_millicores)
+### pg\_cpu\_millicores
 
 Description: The amount of cpu to allocate to the postgres pods (in millicores)
 
@@ -439,7 +439,7 @@ Type: `number`
 
 Default: `250`
 
-### <a name="input_pg_initial_storage_gb" /> [pg\_initial\_storage\_gb](#input_pg_initial_storage_gb)
+### pg\_initial\_storage\_gb
 
 Description: The initial number of gigabytes of storage to provision for the postgres cluster
 
@@ -447,7 +447,7 @@ Type: `number`
 
 Default: `10`
 
-### <a name="input_pg_instances" /> [pg\_instances](#input_pg_instances)
+### pg\_instances
 
 Description: The number of instances to deploy in the postgres cluster
 
@@ -455,7 +455,7 @@ Type: `number`
 
 Default: `2`
 
-### <a name="input_pg_maintenance_work_mem_percent" /> [pg\_maintenance\_work\_mem\_percent](#input_pg_maintenance_work_mem_percent)
+### pg\_maintenance\_work\_mem\_percent
 
 Description: The percent of the overall memory allocation available for database maintenance operations
 
@@ -463,7 +463,7 @@ Type: `number`
 
 Default: `5`
 
-### <a name="input_pg_max_connections" /> [pg\_max\_connections](#input_pg_max_connections)
+### pg\_max\_connections
 
 Description: The maximum number of connections to each postgres database
 
@@ -471,7 +471,7 @@ Type: `number`
 
 Default: `100`
 
-### <a name="input_pg_memory_mb" /> [pg\_memory\_mb](#input_pg_memory_mb)
+### pg\_memory\_mb
 
 Description: The amount of memory to allocate to the postgres pods (in Mi)
 
@@ -479,7 +479,7 @@ Type: `number`
 
 Default: `1000`
 
-### <a name="input_pg_parameters" /> [pg\_parameters](#input_pg_parameters)
+### pg\_parameters
 
 Description: A map of postgres parameters. See [https://cloudnative-pg.io/documentation/1.23/postgresql\_conf](https://cloudnative-pg.io/documentation/1.23/postgresql_conf).
 
@@ -487,7 +487,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### <a name="input_pg_recovery_directory" /> [pg\_recovery\_directory](#input_pg_recovery_directory)
+### pg\_recovery\_directory
 
 Description: The name of the directory in the backup bucket containing the recovery files.
 
@@ -495,7 +495,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_pg_recovery_mode_enabled" /> [pg\_recovery\_mode\_enabled](#input_pg_recovery_mode_enabled)
+### pg\_recovery\_mode\_enabled
 
 Description: If true, will attempt to recover the cluster
 
@@ -503,7 +503,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pg_recovery_target_time" /> [pg\_recovery\_target\_time](#input_pg_recovery_target_time)
+### pg\_recovery\_target\_time
 
 Description: If provided, will recover the database to the indicated target time in RFC 3339 format rather than to the latest data.
 
@@ -511,7 +511,7 @@ Type: `string`
 
 Default: `null`
 
-### <a name="input_pg_shared_buffers_percent" /> [pg\_shared\_buffers\_percent](#input_pg_shared_buffers_percent)
+### pg\_shared\_buffers\_percent
 
 Description: The percent of the overall memory allocation dedicated for caching data (avoiding reads to disk)
 
@@ -519,7 +519,7 @@ Type: `number`
 
 Default: `25`
 
-### <a name="input_pg_smart_shutdown_timeout" /> [pg\_smart\_shutdown\_timeout](#input_pg_smart_shutdown_timeout)
+### pg\_smart\_shutdown\_timeout
 
 Description: The number of seconds to wait for open connections to close before shutting down postgres nodes
 
@@ -527,7 +527,7 @@ Type: `number`
 
 Default: `1`
 
-### <a name="input_pg_storage_increase_gb" /> [pg\_storage\_increase\_gb](#input_pg_storage_increase_gb)
+### pg\_storage\_increase\_gb
 
 Description: The number of GB to increase storage by if free space drops below the threshold
 
@@ -535,7 +535,7 @@ Type: `number`
 
 Default: `10`
 
-### <a name="input_pg_storage_increase_threshold_percent" /> [pg\_storage\_increase\_threshold\_percent](#input_pg_storage_increase_threshold_percent)
+### pg\_storage\_increase\_threshold\_percent
 
 Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
 
@@ -543,7 +543,7 @@ Type: `number`
 
 Default: `20`
 
-### <a name="input_pg_storage_limit_gb" /> [pg\_storage\_limit\_gb](#input_pg_storage_limit_gb)
+### pg\_storage\_limit\_gb
 
 Description: The maximum number of gigabytes of storage to provision for the postgres cluster
 
@@ -551,7 +551,7 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_pg_switchover_delay" /> [pg\_switchover\_delay](#input_pg_switchover_delay)
+### pg\_switchover\_delay
 
 Description: Controls max amount of time that CNPG will wait for data to be synced from primary to replica before forcing the switchover
 
@@ -559,7 +559,7 @@ Type: `number`
 
 Default: `30`
 
-### <a name="input_pg_sync_replication_enabled" /> [pg\_sync\_replication\_enabled](#input_pg_sync_replication_enabled)
+### pg\_sync\_replication\_enabled
 
 Description: Whether to use synchronous replication for the streaming replicas (vs async)
 
@@ -567,7 +567,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pg_version" /> [pg\_version](#input_pg_version)
+### pg\_version
 
 Description: The version of postgres to deploy
 
@@ -575,7 +575,7 @@ Type: `string`
 
 Default: `"16.2-10"`
 
-### <a name="input_pg_work_mem_percent" /> [pg\_work\_mem\_percent](#input_pg_work_mem_percent)
+### pg\_work\_mem\_percent
 
 Description: The percent of the overall memory allocation available to queries for sort and hash operations (intermediate calculations during queries)
 
@@ -583,7 +583,7 @@ Type: `number`
 
 Default: `25`
 
-### <a name="input_pgbouncer_application_name_add_host" /> [pgbouncer\_application\_name\_add\_host](#input_pgbouncer_application_name_add_host)
+### pgbouncer\_application\_name\_add\_host
 
 Description: Add the client host address and port to the application name setting set on connection start.
 
@@ -591,7 +591,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_autodb_idle_timeout" /> [pgbouncer\_autodb\_idle\_timeout](#input_pgbouncer_autodb_idle_timeout)
+### pgbouncer\_autodb\_idle\_timeout
 
 Description: If the automatically created (via “\*”) database pools have been unused this many seconds, they are freed.
 
@@ -599,7 +599,7 @@ Type: `number`
 
 Default: `3600`
 
-### <a name="input_pgbouncer_client_idle_timeout" /> [pgbouncer\_client\_idle\_timeout](#input_pgbouncer_client_idle_timeout)
+### pgbouncer\_client\_idle\_timeout
 
 Description: Client connections idling longer than this many seconds are closed. This should be larger than the client-side connection lifetime settings, and only used for network problems.
 
@@ -607,7 +607,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_client_login_timeout" /> [pgbouncer\_client\_login\_timeout](#input_pgbouncer_client_login_timeout)
+### pgbouncer\_client\_login\_timeout
 
 Description: If a client connects but does not manage to log in in this amount of time, it will be disconnected. Mainly needed to avoid dead connections stalling SUSPEND and thus online restart.
 
@@ -615,7 +615,7 @@ Type: `number`
 
 Default: `60`
 
-### <a name="input_pgbouncer_default_pool_size" /> [pgbouncer\_default\_pool\_size](#input_pgbouncer_default_pool_size)
+### pgbouncer\_default\_pool\_size
 
 Description: How many server connections to allow per user/database pair.
 
@@ -623,7 +623,7 @@ Type: `number`
 
 Default: `20`
 
-### <a name="input_pgbouncer_disable_pqexec" /> [pgbouncer\_disable\_pqexec](#input_pgbouncer_disable_pqexec)
+### pgbouncer\_disable\_pqexec
 
 Description: Disable the Simple Query protocol (PQexec). Unlike the Extended Query protocol, Simple Query allows multiple queries in one packet, which allows some classes of SQL-injection attacks.
 
@@ -631,7 +631,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_log_connections" /> [pgbouncer\_log\_connections](#input_pgbouncer_log_connections)
+### pgbouncer\_log\_connections
 
 Description: Whether to log each connection.
 
@@ -639,7 +639,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_log_disconnections" /> [pgbouncer\_log\_disconnections](#input_pgbouncer_log_disconnections)
+### pgbouncer\_log\_disconnections
 
 Description: Whether to log each disconnection.
 
@@ -647,7 +647,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_log_pooler_errors" /> [pgbouncer\_log\_pooler\_errors](#input_pgbouncer_log_pooler_errors)
+### pgbouncer\_log\_pooler\_errors
 
 Description: Whether to log errors the pooler sends to clients.
 
@@ -655,7 +655,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pgbouncer_max_client_conn" /> [pgbouncer\_max\_client\_conn](#input_pgbouncer_max_client_conn)
+### pgbouncer\_max\_client\_conn
 
 Description: The maximum client connections allowed by pgbouncer
 
@@ -663,7 +663,7 @@ Type: `number`
 
 Default: `10000`
 
-### <a name="input_pgbouncer_max_db_connections" /> [pgbouncer\_max\_db\_connections](#input_pgbouncer_max_db_connections)
+### pgbouncer\_max\_db\_connections
 
 Description: Do not allow more than this many server connections per database (regardless of user). This considers the PgBouncer database that the client has connected to, not the PostgreSQL database of the outgoing connection.
 
@@ -671,7 +671,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_max_prepared_statements" /> [pgbouncer\_max\_prepared\_statements](#input_pgbouncer_max_prepared_statements)
+### pgbouncer\_max\_prepared\_statements
 
 Description: When this is set to a non-zero value PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling mode. PgBouncer makes sure that any statement prepared by a client is available on the backing server connection. Even when the statement was originally prepared on another server connection.
 
@@ -679,7 +679,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_max_user_connections" /> [pgbouncer\_max\_user\_connections](#input_pgbouncer_max_user_connections)
+### pgbouncer\_max\_user\_connections
 
 Description: Do not allow more than this many server connections per user (regardless of database).
 
@@ -687,7 +687,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_min_pool_size" /> [pgbouncer\_min\_pool\_size](#input_pgbouncer_min_pool_size)
+### pgbouncer\_min\_pool\_size
 
 Description: Add more server connections to pool if below this number. Improves behavior when the normal load suddenly comes back after a period of total inactivity. The value is effectively capped at the pool size.
 
@@ -695,7 +695,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_pool_mode" /> [pgbouncer\_pool\_mode](#input_pgbouncer_pool_mode)
+### pgbouncer\_pool\_mode
 
 Description: What pool\_mode to run pgbouncer in
 
@@ -703,7 +703,7 @@ Type: `string`
 
 Default: `"session"`
 
-### <a name="input_pgbouncer_query_timeout" /> [pgbouncer\_query\_timeout](#input_pgbouncer_query_timeout)
+### pgbouncer\_query\_timeout
 
 Description: Queries running longer than this amount of seconds are canceled. This should be used only with a slightly smaller server-side statement\_timeout, to apply only for network problems.
 
@@ -711,7 +711,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_query_wait_timeout" /> [pgbouncer\_query\_wait\_timeout](#input_pgbouncer_query_wait_timeout)
+### pgbouncer\_query\_wait\_timeout
 
 Description: Maximum time queries are allowed to spend waiting for execution. If the query is not assigned to a server during that time, the client is disconnected. 0 disables. If this is disabled, clients will be queued indefinitely.
 
@@ -719,7 +719,7 @@ Type: `number`
 
 Default: `120`
 
-### <a name="input_pgbouncer_read_only_enabled" /> [pgbouncer\_read\_only\_enabled](#input_pgbouncer_read_only_enabled)
+### pgbouncer\_read\_only\_enabled
 
 Description: Whether to enable a pgbouncer deployment in read-only mode
 
@@ -727,7 +727,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_read_write_enabled" /> [pgbouncer\_read\_write\_enabled](#input_pgbouncer_read_write_enabled)
+### pgbouncer\_read\_write\_enabled
 
 Description: Whether to enable a pgbouncer deployment in read-write mode
 
@@ -735,7 +735,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pgbouncer_reserve_pool_size" /> [pgbouncer\_reserve\_pool\_size](#input_pgbouncer_reserve_pool_size)
+### pgbouncer\_reserve\_pool\_size
 
 Description: How many additional connections to allow to a pool (see reserve\_pool\_timeout). 0 disables.
 
@@ -743,7 +743,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_reserve_pool_timeout" /> [pgbouncer\_reserve\_pool\_timeout](#input_pgbouncer_reserve_pool_timeout)
+### pgbouncer\_reserve\_pool\_timeout
 
 Description: If a client has not been serviced in this amount of seconds, use additional connections from the reserve pool. 0 disables.
 
@@ -751,7 +751,7 @@ Type: `number`
 
 Default: `5`
 
-### <a name="input_pgbouncer_server_check_delay" /> [pgbouncer\_server\_check\_delay](#input_pgbouncer_server_check_delay)
+### pgbouncer\_server\_check\_delay
 
 Description: How long to keep released connections available for immediate re-use.
 
@@ -759,7 +759,7 @@ Type: `number`
 
 Default: `30`
 
-### <a name="input_pgbouncer_server_connect_timeout" /> [pgbouncer\_server\_connect\_timeout](#input_pgbouncer_server_connect_timeout)
+### pgbouncer\_server\_connect\_timeout
 
 Description: If connection and login don’t finish in this amount of seconds, the connection will be closed.
 
@@ -767,7 +767,7 @@ Type: `number`
 
 Default: `15`
 
-### <a name="input_pgbouncer_server_fast_close" /> [pgbouncer\_server\_fast\_close](#input_pgbouncer_server_fast_close)
+### pgbouncer\_server\_fast\_close
 
 Description: Disconnect a server in session pooling mode immediately or after the end of the current transaction if it is in “close\_needed” mode (set by RECONNECT, RELOAD that changes connection settings, or DNS change), rather than waiting for the session end. In statement or transaction pooling mode, this has no effect since that is the default behavior there.
 
@@ -775,7 +775,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_server_idle_timeout" /> [pgbouncer\_server\_idle\_timeout](#input_pgbouncer_server_idle_timeout)
+### pgbouncer\_server\_idle\_timeout
 
 Description: If a server connection has been idle more than this many seconds it will be closed. If 0 then this timeout is disabled.
 
@@ -783,7 +783,7 @@ Type: `number`
 
 Default: `600`
 
-### <a name="input_pgbouncer_server_lifetime" /> [pgbouncer\_server\_lifetime](#input_pgbouncer_server_lifetime)
+### pgbouncer\_server\_lifetime
 
 Description: The pooler will close an unused (not currently linked to any client connection) server connection that has been connected longer than this. Setting it to 0 means the connection is to be used only once, then closed.
 
@@ -791,7 +791,7 @@ Type: `number`
 
 Default: `3600`
 
-### <a name="input_pgbouncer_server_login_retry" /> [pgbouncer\_server\_login\_retry](#input_pgbouncer_server_login_retry)
+### pgbouncer\_server\_login\_retry
 
 Description: If login to the server failed, because of failure to connect or from authentication, the pooler waits this many seconds before retrying to connect. During the waiting interval, new clients trying to connect to the failing server will get an error immediately without another connection attempt.
 
@@ -799,7 +799,7 @@ Type: `number`
 
 Default: `15`
 
-### <a name="input_pgbouncer_stats_period" /> [pgbouncer\_stats\_period](#input_pgbouncer_stats_period)
+### pgbouncer\_stats\_period
 
 Description: Sets how often the averages shown in various SHOW commands are updated and how often aggregated statistics are written to the log.
 
@@ -807,7 +807,7 @@ Type: `number`
 
 Default: `60`
 
-### <a name="input_pgbouncer_tcp_keepalive" /> [pgbouncer\_tcp\_keepalive](#input_pgbouncer_tcp_keepalive)
+### pgbouncer\_tcp\_keepalive
 
 Description: Turns on basic keepalive with OS defaults.
 
@@ -815,7 +815,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_pgbouncer_tcp_keepcnt" /> [pgbouncer\_tcp\_keepcnt](#input_pgbouncer_tcp_keepcnt)
+### pgbouncer\_tcp\_keepcnt
 
 Description: Sets tcp\_keepcnt
 
@@ -823,7 +823,7 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_pgbouncer_tcp_keepidle" /> [pgbouncer\_tcp\_keepidle](#input_pgbouncer_tcp_keepidle)
+### pgbouncer\_tcp\_keepidle
 
 Description: Sets tcp\_keepidle
 
@@ -831,7 +831,7 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_pgbouncer_tcp_keepintvl" /> [pgbouncer\_tcp\_keepintvl](#input_pgbouncer_tcp_keepintvl)
+### pgbouncer\_tcp\_keepintvl
 
 Description: Sets tcp\_keepintvl
 
@@ -839,7 +839,7 @@ Type: `number`
 
 Default: `null`
 
-### <a name="input_pgbouncer_tcp_user_timeout" /> [pgbouncer\_tcp\_user\_timeout](#input_pgbouncer_tcp_user_timeout)
+### pgbouncer\_tcp\_user\_timeout
 
 Description: Sets the TCP\_USER\_TIMEOUT socket option. This specifies the maximum amount of time in milliseconds that transmitted data may remain unacknowledged before the TCP connection is forcibly closed. If set to 0, then operating system’s default is used.
 
@@ -847,7 +847,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pgbouncer_verbose" /> [pgbouncer\_verbose](#input_pgbouncer_verbose)
+### pgbouncer\_verbose
 
 Description: Increase verbosity. Mirrors the “-v” switch on the command line. For example, using “-v -v” on the command line is the same as verbose=2.
 
@@ -855,7 +855,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_pgbouncer_version" /> [pgbouncer\_version](#input_pgbouncer_version)
+### pgbouncer\_version
 
 Description: The version of the cloudnative-pg/pgbouncer image to use
 
@@ -863,7 +863,7 @@ Type: `string`
 
 Default: `"1.22.1"`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -871,7 +871,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_spot_nodes_enabled" /> [spot\_nodes\_enabled](#input_spot_nodes_enabled)
+### spot\_nodes\_enabled
 
 Description: Whether the database pods can be scheduled on spot nodes
 
@@ -879,7 +879,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vault_credential_lifetime_hours" /> [vault\_credential\_lifetime\_hours](#input_vault_credential_lifetime_hours)
+### vault\_credential\_lifetime\_hours
 
 Description: The lifetime of database credentials generated by Vault
 
@@ -887,7 +887,7 @@ Type: `number`
 
 Default: `16`
 
-### <a name="input_voluntary_disruption_window_cron_schedule" /> [voluntary\_disruption\_window\_cron\_schedule](#input_voluntary_disruption_window_cron_schedule)
+### voluntary\_disruption\_window\_cron\_schedule
 
 Description: The times when disruption windows should start
 
@@ -895,7 +895,7 @@ Type: `string`
 
 Default: `"0 4 * * *"`
 
-### <a name="input_voluntary_disruption_window_enabled" /> [voluntary\_disruption\_window\_enabled](#input_voluntary_disruption_window_enabled)
+### voluntary\_disruption\_window\_enabled
 
 Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
 
@@ -903,7 +903,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_voluntary_disruption_window_seconds" /> [voluntary\_disruption\_window\_seconds](#input_voluntary_disruption_window_seconds)
+### voluntary\_disruption\_window\_seconds
 
 Description: The length of the disruption window in seconds
 
@@ -911,7 +911,7 @@ Type: `number`
 
 Default: `3600`
 
-### <a name="input_voluntary_disruptions_enabled" /> [voluntary\_disruptions\_enabled](#input_voluntary_disruptions_enabled)
+### voluntary\_disruptions\_enabled
 
 Description: Whether to enable voluntary disruptions of pods in this module.
 
@@ -919,7 +919,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether to enable the vertical pod autoscaler
 
@@ -931,111 +931,111 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_admin_creds_secret" /> [admin\_creds\_secret](#output_admin_creds_secret)
+### admin\_creds\_secret
 
 Description: The name of the Kubernetes Secret holding credentials for the admin role in the PostgreSQL database
 
-### <a name="output_cluster_match_labels" /> [cluster\_match\_labels](#output_cluster_match_labels)
+### cluster\_match\_labels
 
 Description: Label selector that matches all PostgreSQL pods
 
-### <a name="output_cluster_ro_match_labels" /> [cluster\_ro\_match\_labels](#output_cluster_ro_match_labels)
+### cluster\_ro\_match\_labels
 
 Description: Label selector that matches all read-only replica PostgreSQL pods
 
-### <a name="output_cluster_rw_match_labels" /> [cluster\_rw\_match\_labels](#output_cluster_rw_match_labels)
+### cluster\_rw\_match\_labels
 
 Description: Label selector that matches the primary PostgreSQL pod (the read-write node)
 
-### <a name="output_database" /> [database](#output_database)
+### database
 
 Description: The database to use for application data
 
-### <a name="output_db_admin_role" /> [db\_admin\_role](#output_db_admin_role)
+### db\_admin\_role
 
 Description: The Vault role used to get admin credentials for the created PostgreSQL cluster
 
-### <a name="output_db_reader_role" /> [db\_reader\_role](#output_db_reader_role)
+### db\_reader\_role
 
 Description: The Vault role used to get read-only credentials for the created PostgreSQL cluster
 
-### <a name="output_db_superuser_role" /> [db\_superuser\_role](#output_db_superuser_role)
+### db\_superuser\_role
 
 Description: The Vault role used to get superuser credentials for the created PostgreSQL cluster
 
-### <a name="output_namespace" /> [namespace](#output_namespace)
+### namespace
 
 Description: The Kubernetes namespace for the created resources
 
-### <a name="output_pooler_r_match_labels" /> [pooler\_r\_match\_labels](#output_pooler_r_match_labels)
+### pooler\_r\_match\_labels
 
 Description: Label selector that matches all PgBouncer pods that allows read-only access to the PostgreSQL cluster
 
-### <a name="output_pooler_r_service_name" /> [pooler\_r\_service\_name](#output_pooler_r_service_name)
+### pooler\_r\_service\_name
 
 Description: The service name of the PgBouncer connection pooler that allows read-only access
 
-### <a name="output_pooler_r_service_port" /> [pooler\_r\_service\_port](#output_pooler_r_service_port)
+### pooler\_r\_service\_port
 
 Description: The PostgreSQL port for this service
 
-### <a name="output_pooler_rw_match_labels" /> [pooler\_rw\_match\_labels](#output_pooler_rw_match_labels)
+### pooler\_rw\_match\_labels
 
 Description: Label selector that matches all PgBouncer pods that allows read-write access to the PostgreSQL cluster
 
-### <a name="output_pooler_rw_service_name" /> [pooler\_rw\_service\_name](#output_pooler_rw_service_name)
+### pooler\_rw\_service\_name
 
 Description: The service name of the PgBouncer connection pooler that allows read-write access
 
-### <a name="output_pooler_rw_service_port" /> [pooler\_rw\_service\_port](#output_pooler_rw_service_port)
+### pooler\_rw\_service\_port
 
 Description: The PostgreSQL port for this service
 
-### <a name="output_r_service_name" /> [r\_service\_name](#output_r_service_name)
+### r\_service\_name
 
 Description: The service name for all db instances that allows read access (includes read-write instances as well)
 
-### <a name="output_r_service_port" /> [r\_service\_port](#output_r_service_port)
+### r\_service\_port
 
 Description: The PostgreSQL port for this service
 
-### <a name="output_reader_creds_secret" /> [reader\_creds\_secret](#output_reader_creds_secret)
+### reader\_creds\_secret
 
 Description: The name of the Kubernetes Secret holding credentials for the reader role in the PostgreSQL database
 
-### <a name="output_recovery_directory" /> [recovery\_directory](#output_recovery_directory)
+### recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
-### <a name="output_ro_service_name" /> [ro\_service\_name](#output_ro_service_name)
+### ro\_service\_name
 
 Description: The service name for the db instances that allows read-only access
 
-### <a name="output_ro_service_port" /> [ro\_service\_port](#output_ro_service_port)
+### ro\_service\_port
 
 Description: The PostgreSQL port for this service
 
-### <a name="output_root_password" /> [root\_password](#output_root_password)
+### root\_password
 
 Description: The password for root user of the database
 
-### <a name="output_root_username" /> [root\_username](#output_root_username)
+### root\_username
 
 Description: The root user of the database
 
-### <a name="output_rw_service_name" /> [rw\_service\_name](#output_rw_service_name)
+### rw\_service\_name
 
 Description: The service name of the db node that allows read-write access
 
-### <a name="output_rw_service_port" /> [rw\_service\_port](#output_rw_service_port)
+### rw\_service\_port
 
 Description: The PostgreSQL port for this service
 
-### <a name="output_server_certs_secret" /> [server\_certs\_secret](#output_server_certs_secret)
+### server\_certs\_secret
 
 Description: The secret containing the server certificates for the database
 
-### <a name="output_superuser_creds_secret" /> [superuser\_creds\_secret](#output_superuser_creds_secret)
+### superuser\_creds\_secret
 
 Description: The name of the Kubernetes Secret holding credentials for the superuser role in the PostgreSQL database
 

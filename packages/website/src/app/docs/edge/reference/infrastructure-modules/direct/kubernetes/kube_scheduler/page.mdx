@@ -21,7 +21,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -35,7 +35,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### <a name="input_enhanced_ha_enabled" /> [enhanced\_ha\_enabled](#input_enhanced_ha_enabled)
+### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
 
@@ -43,7 +43,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_log_verbosity" /> [log\_verbosity](#input_log_verbosity)
+### log\_verbosity
 
 Description: The log verbosity (1-9) for the scheduler pods
 
@@ -51,7 +51,7 @@ Type: `number`
 
 Default: `0`
 
-### <a name="input_monitoring_enabled" /> [monitoring\_enabled](#input_monitoring_enabled)
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -59,7 +59,7 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -67,7 +67,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_scheduler_version" /> [scheduler\_version](#input_scheduler_version)
+### scheduler\_version
 
 Description: The version of the kube-scheduler to deploy
 
@@ -75,7 +75,7 @@ Type: `string`
 
 Default: `"v1.29.6"`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

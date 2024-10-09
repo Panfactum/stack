@@ -42,7 +42,7 @@ The following providers are needed by this module:
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](#requirement_kubectl) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
@@ -54,19 +54,19 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### <a name="input_domain" /> [domain](#input_domain)
+### domain
 
 Description: The domain the proxy is served from
 
 Type: `string`
 
-### <a name="input_namespace" /> [namespace](#input_namespace)
+### namespace
 
 Description: The namespace to deploy the proxy into
 
 Type: `string`
 
-### <a name="input_vault_domain" /> [vault\_domain](#input_vault_domain)
+### vault\_domain
 
 Description: The domain of the Vault instance running in the cluster.
 
@@ -76,7 +76,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_allowed_email_domains" /> [allowed\_email\_domains](#input_allowed_email_domains)
+### allowed\_email\_domains
 
 Description: Email domains allowed to authenticate with the proxy
 
@@ -90,7 +90,7 @@ Default:
 ]
 ```
 
-### <a name="input_allowed_vault_roles" /> [allowed\_vault\_roles](#input_allowed_vault_roles)
+### allowed\_vault\_roles
 
 Description: Roles from Vault that are allowed to access the upstream resources
 
@@ -107,7 +107,7 @@ Default:
 ]
 ```
 
-### <a name="input_az_spread_preferred" /> [az\_spread\_preferred](#input_az_spread_preferred)
+### az\_spread\_preferred
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
 
@@ -115,7 +115,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_instance_type_spread_required" /> [instance\_type\_spread\_required](#input_instance_type_spread_required)
+### instance\_type\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
 
@@ -123,7 +123,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_oauth2_proxy_helm_version" /> [oauth2\_proxy\_helm\_version](#input_oauth2_proxy_helm_version)
+### oauth2\_proxy\_helm\_version
 
 Description: The version of the descheduler helm chart to deploy
 
@@ -131,7 +131,7 @@ Type: `string`
 
 Default: `"7.5.4"`
 
-### <a name="input_panfactum_scheduler_enabled" /> [panfactum\_scheduler\_enabled](#input_panfactum_scheduler_enabled)
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -139,7 +139,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_path_prefix" /> [path\_prefix](#input_path_prefix)
+### path\_prefix
 
 Description: Path prefix for the ingress resource. Should be the same path prefix used by the upstream ingress resource.
 
@@ -147,7 +147,7 @@ Type: `string`
 
 Default: `"/"`
 
-### <a name="input_pull_through_cache_enabled" /> [pull\_through\_cache\_enabled](#input_pull_through_cache_enabled)
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -155,7 +155,7 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_vpa_enabled" /> [vpa\_enabled](#input_vpa_enabled)
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -167,7 +167,7 @@ Default: `true`
 
 The following outputs are exported:
 
-### <a name="output_upstream_ingress_annotations" /> [upstream\_ingress\_annotations](#output_upstream_ingress_annotations)
+### upstream\_ingress\_annotations
 
 Description: Annotations to add to the upstream ingress
 
