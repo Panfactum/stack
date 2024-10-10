@@ -25,6 +25,40 @@ locals {
   ci_public_name      = "public"
   ci_internal_name    = "internal"
   ci_internal_ca_name = "internal-ca"
+
+  route53_solvers = [
+    for domain, config in var.route53_zones : {
+      dns01 = {
+        route53 = {
+          hostedZoneID = config.zone_id
+          region       = data.aws_region.main.name
+          role         = config.record_manager_role_arn
+        }
+      }
+      selector = {
+        dnsZones = [domain]
+      }
+    }
+  ]
+
+  cloudflare_solvers = [
+    for domain in var.cloudflare_zones : {
+      dns01 = {
+        cloudflare = {
+          email    = var.alert_email
+          apiTokenSecretRef = {
+            name = "cloudflare-api-token"
+            key  = "api-token"
+          }
+        }
+      }
+      selector = {
+        dnsZones = [domain]
+      }
+    }
+  ]
+
+  lets_encrypt_solvers = concat(local.route53_solvers, local.cloudflare_solvers)
 }
 
 module "util" {
@@ -57,6 +91,8 @@ data "aws_iam_policy_document" "permissions" {
 }
 
 module "aws_permissions" {
+  count = length(var.route53_zones) > 0 ? 1 : 0
+
   source                    = "../kube_sa_auth_aws"
   service_account           = var.service_account
   service_account_namespace = var.namespace
@@ -75,6 +111,21 @@ module "aws_permissions" {
   # end-generate
 }
 
+resource "kubernetes_secret" "cloudflare_api_token" {
+  count = var.cloudflare_api_token != null ? 1 : 0
+
+  metadata {
+    name = "cloudflare-api-token"
+    namespace = var.namespace
+  }
+
+  type = "Opaque"
+
+  data = {
+    "api-token" = var.cloudflare_api_token
+  }
+}
+
 // the default issuer for PUBLIC tls certs in the default DNS zone for the env
 resource "kubectl_manifest" "cluster_issuer" {
   yaml_body = yamlencode({
@@ -88,21 +139,11 @@ resource "kubectl_manifest" "cluster_issuer" {
       acme = {
         email  = var.alert_email
         server = "https://acme-v02.api.letsencrypt.org/directory"
+        // server = "https://acme-staging-v02.api.letsencrypt.org/directory"
         privateKeySecretRef = {
           name = "letsencrypt-cert-key"
         }
-        solvers = [for domain, config in var.route53_zones : {
-          dns01 = {
-            route53 = {
-              hostedZoneID = config.zone_id
-              region       = data.aws_region.main.name
-              role         = config.record_manager_role_arn
-            }
-          }
-          selector = {
-            dnsZones = [domain]
-          }
-        }]
+        solvers = local.lets_encrypt_solvers
       }
     }
   })

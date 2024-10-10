@@ -111,6 +111,26 @@ Type: `string`
 
 Default: `"upsert-only"`
 
+### cloudflare\_zones
+
+Description: A list of public DNS domain names managed by Cloudflare; external-dns uses this to set domain records
+
+Type:
+
+```hcl
+list(string)
+```
+
+Default: `[]`
+
+### cloudflare\_api\_token
+
+Description: Cloudflare API Token that has been given scoped access to the Cloudflare zones
+
+Type: `string`
+
+Default: `null`
+
 ### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled

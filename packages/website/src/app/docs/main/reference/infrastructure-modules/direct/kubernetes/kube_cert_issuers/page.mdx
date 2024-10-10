@@ -85,6 +85,18 @@ map(object({
 
 Default: `{}`
 
+### cloudflare\_zones
+
+Description: A list of public DNS domains managed by Cloudflare; cert-manager uses this to issue public-facing certificates.
+
+Type:
+
+```hcl
+list(string)
+```
+
+Default: `[]`
+
 ### service\_account
 
 Description: The name of the cert-manager service account.
