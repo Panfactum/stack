@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_argo_sensor" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_sensor" status="beta" type="submodule" />
+<ModuleHeader name="kube_argo_sensor" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_sensor" status="beta" type="submodule"/>
 
 # Argo Event Sensor
 
@@ -21,11 +20,11 @@ based on events on the
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -100,6 +99,7 @@ Type: `any`
 
 The following input variables are optional (have default values):
 
+
 ### event\_bus\_name
 
 Description: The EventBus to read from. Should almost always be 'default'.
@@ -108,6 +108,8 @@ Type: `string`
 
 Default: `"default"`
 
+
+
 ### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
@@ -115,6 +117,11 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 Type: `bool`
 
 Default: `true`
+
+
+
+
+
 
 ### vpa\_enabled
 
@@ -131,6 +138,8 @@ The following outputs are exported:
 ### service\_account\_name
 
 Description: n/a
+
+
 
 {/* eslint-enable import/order */}
 

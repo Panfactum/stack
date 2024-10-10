@@ -3,27 +3,26 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_deployment" status="stable" type="submodule" />
+<ModuleHeader name="kube_deployment" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_deployment" status="stable" type="submodule"/>
 
 # Kubernetes Deployment
 
 Provides a production-hardened instance of a Kubernetes [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 with the following enhancements:
 
-* Standardized resource labels
-* Pod and container security hardening
-* Temporary directory mounting
-* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
-* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
-* Service account configuration with default permissions
-* Integration with the Panfactum bin-packing scheduler
-* High-availability scheduling constraints
-* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
-* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
-* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
-* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
-* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+- Standardized resource labels
+- Pod and container security hardening
+- Temporary directory mounting
+- [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+- [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+- Service account configuration with default permissions
+- Integration with the Panfactum bin-packing scheduler
+- High-availability scheduling constraints
+- [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
+- Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+- [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+- [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+- [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
 
 ## Usage
 
@@ -42,11 +41,11 @@ this module from overriding the replica count set via horizontal autoscaling.
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -239,6 +238,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
+
 ### extra\_pod\_annotations
 
 Description: Annotations to add to the pods in the deployment
@@ -254,6 +254,7 @@ Description: Extra pod labels to use
 Type: `map(string)`
 
 Default: `{}`
+
 
 ### extra\_tolerations
 
@@ -296,6 +297,7 @@ Type: `bool`
 
 Default: `false`
 
+
 ### max\_unavailable
 
 Description: Controls how many pods are allowed to be unavailable in the Deployment under the Pod Disruption Budget
@@ -336,6 +338,10 @@ Type: `bool`
 
 Default: `true`
 
+
+
+
+
 ### pod\_version\_labels\_enabled
 
 Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
@@ -351,6 +357,7 @@ Description: The priority class to use for pods in the Deployment
 Type: `string`
 
 Default: `null`
+
 
 ### replicas
 
@@ -457,7 +464,7 @@ Default: `{}`
 
 ### unhealthy\_pod\_eviction\_policy
 
-Description: Whether to allow unhealthy pods to be evicted. See [https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+Description: Whether to allow unhealthy pods to be evicted. See https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy.
 
 Type: `string`
 

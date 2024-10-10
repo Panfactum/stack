@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_pvc_annotator" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pvc_annotator" status="stable" type="submodule" />
+<ModuleHeader name="kube_pvc_annotator" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pvc_annotator" status="stable" type="submodule"/>
 
 # PVC Annotator
 
@@ -30,7 +29,7 @@ to the command.
 ## Usage Notes
 
 We make extensive use of this submodule in our core Panfactum modules such as in
-[kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+[kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_stateful\_set).
 
 Most of the time you will not need to use this directly. However, we expose it in case you
 are using a controller that creates PVCs that is not included in the stack.
@@ -39,11 +38,11 @@ are using a controller that creates PVCs that is not included in the stack.
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -72,6 +71,9 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+
+
+
 ### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
@@ -80,6 +82,10 @@ Type: `bool`
 
 Default: `true`
 
+
+
+
+
 ### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the annotator images
@@ -87,6 +93,7 @@ Description: Whether to use the ECR pull through cache for the annotator images
 Type: `bool`
 
 Default: `true`
+
 
 ### vpa\_enabled
 
@@ -99,6 +106,8 @@ Default: `true`
 ## Outputs
 
 No outputs.
+
+
 
 {/* eslint-enable import/order */}
 

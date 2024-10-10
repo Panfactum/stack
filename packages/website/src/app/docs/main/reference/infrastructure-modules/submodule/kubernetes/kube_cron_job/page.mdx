@@ -3,27 +3,26 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_cron_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cron_job" status="stable" type="submodule" />
+<ModuleHeader name="kube_cron_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cron_job" status="stable" type="submodule"/>
 
 # Kubernetes CronJob
 
 Provides a production-hardened instance of a Kubernetes [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
 with the following enhancements:
 
-* Standardized resource labels
-* Pod and container security hardening
-* Temporary directory mounting
-* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
-* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
-* Service account configuration with default permissions
-* Integration with the Panfactum bin-packing scheduler
-* High-availability scheduling constraints
-* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
-* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
-* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
-* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
-* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+- Standardized resource labels
+- Pod and container security hardening
+- Temporary directory mounting
+- [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+- [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+- Service account configuration with default permissions
+- Integration with the Panfactum bin-packing scheduler
+- High-availability scheduling constraints
+- [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
+- Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+- [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+- [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+- [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
 
 ## Usage
 
@@ -39,11 +38,11 @@ This module's has inputs that map one-for-one to the [standard Kubernetes CronJo
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -234,6 +233,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
+
 ### extra\_pod\_annotations
 
 Description: Annotations to add to the pods in the CronJob
@@ -249,6 +249,7 @@ Description: Extra pod labels to use
 Type: `map(string)`
 
 Default: `{}`
+
 
 ### extra\_tolerations
 
@@ -274,6 +275,7 @@ Description: The number of failed jobs to retain
 Type: `number`
 
 Default: `1`
+
 
 ### job\_annotations
 
@@ -315,6 +317,10 @@ Type: `bool`
 
 Default: `true`
 
+
+
+
+
 ### pod\_completions
 
 Description: Specifies the desired number of successfully finished Pods the Job should be run with.
@@ -354,6 +360,7 @@ Description: The priority class to use for Pods in the CronJob
 Type: `string`
 
 Default: `null`
+
 
 ### restart\_policy
 

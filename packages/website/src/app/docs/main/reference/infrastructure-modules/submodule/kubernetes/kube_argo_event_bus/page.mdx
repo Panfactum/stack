@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_argo_event_bus" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_bus" status="beta" type="submodule" />
+<ModuleHeader name="kube_argo_event_bus" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_bus" status="beta" type="submodule"/>
 
 # Argo Event Bus
 
@@ -19,20 +18,20 @@ distributing them via [Sensors](https://argoproj.github.io/argo-events/concepts/
 
 A few notes for the proper usage of an EventBus:
 
-* An EventBus is a namespaced resource, and you can have **at most one** per namespace.
+- An EventBus is a namespaced resource, and you can have **at most one** per namespace.
 
-* For every namespace where you want to deploy EventSources and Sensors, you must have
-  an EventBus deployed.
+- For every namespace where you want to deploy EventSources and Sensors, you must have
+an EventBus deployed.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -47,6 +46,7 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
 
 ### event\_bus\_initial\_volume\_size
 
@@ -64,6 +64,7 @@ Type: `string`
 
 Default: `"ebs-standard"`
 
+
 ### instance\_type\_spread\_required
 
 Description: Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)
@@ -72,6 +73,7 @@ Type: `bool`
 
 Default: `true`
 
+
 ### log\_level
 
 Description: The log level for the argo pods
@@ -79,6 +81,11 @@ Description: The log level for the argo pods
 Type: `string`
 
 Default: `"info"`
+
+
+
+
+
 
 ### vpa\_enabled
 
@@ -91,6 +98,8 @@ Default: `true`
 ## Outputs
 
 No outputs.
+
+
 
 {/* eslint-enable import/order */}
 

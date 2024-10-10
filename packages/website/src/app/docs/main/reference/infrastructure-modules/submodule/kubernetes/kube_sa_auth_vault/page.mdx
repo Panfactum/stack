@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_sa_auth_vault" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_vault" status="stable" type="submodule" />
+<ModuleHeader name="kube_sa_auth_vault" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_vault" status="stable" type="submodule"/>
 
 # Vault Authentication via Kubernetes Service Account
 
@@ -16,7 +15,7 @@ This allows our Kubernetes pods to utilize the Vault API without static credenti
 
 The following providers are needed by this module:
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
 
 ## Required Inputs
 
@@ -52,6 +51,14 @@ Type: `string`
 
 Default: `null`
 
+
+
+
+
+
+
+
+
 ### token\_ttl\_seconds
 
 Description: The maximum token lifetime in seconds
@@ -78,7 +85,7 @@ inside the cluster (this also includes the cluster's public NAT IPs).
 This limits the usefulness of tokens that are extracted from the cluster by an attacker.
 
 The underlying discovery mechanism for the whitelist defaults works by searching for resource tags
-assigned in the [aws\_vpc](/docs/main/reference/infrastructure-modules/aws/aws_vpc) and [aws\_eks](/docs/main/reference/infrastructure-modules/aws/aws_eks)
+assigned in the [aws\_vpc](/docs/main/reference/infrastructure-modules/aws/aws\_vpc) and [aws\_eks](/docs/main/reference/infrastructure-modules/aws/aws\_eks)
 modules. If you need additional IPs or don't use those modules, you must manually specify those IPs via the `ip_allow_list` variable.
 
 {/* eslint-enable import/order */}
