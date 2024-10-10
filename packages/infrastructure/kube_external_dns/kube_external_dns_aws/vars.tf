@@ -9,6 +9,11 @@ variable "eks_cluster_name" {
   type        = string
 }
 
+variable "namespace" {
+  description = "The namespace to deploy the ExternalDNS resources into"
+  type        = string
+}
+
 variable "route53_zones" {
   description = "A mapping of public DNS domains managed by AWS to their configuration; external-dns uses this to set domain records"
   type = map(object({
@@ -16,19 +21,6 @@ variable "route53_zones" {
     zone_id                 = string
   }))
   default = {}
-}
-
-variable "cloudflare_zones" {
-  description = "A list of public DNS domain names managed by Cloudflare; external-dns uses this to set domain records"
-  type = list(string)
-  default = []
-}
-
-variable "cloudflare_api_token" {
-  description = "Cloudflare API Token"
-  type        = string
-  sensitive   = true
-  default     = null
 }
 
 variable "vpa_enabled" {
