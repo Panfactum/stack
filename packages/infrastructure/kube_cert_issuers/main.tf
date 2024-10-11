@@ -48,7 +48,7 @@ locals {
           email = var.alert_email
           apiTokenSecretRef = {
             name = kubernetes_secret.cloudflare_api_token.metadata[0].name
-            key  = kubernetes_secret.cloudflare_api_token.data.key
+            key  = "api-token"
           }
         }
       }
@@ -120,7 +120,6 @@ resource "kubernetes_secret" "cloudflare_api_token" {
   type = "Opaque"
 
   data = {
-    key         = "api-token"
     "api-token" = var.cloudflare_api_token
   }
 }
