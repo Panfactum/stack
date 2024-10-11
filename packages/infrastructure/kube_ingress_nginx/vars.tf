@@ -42,7 +42,7 @@ variable "vpa_enabled" {
 variable "tls_1_2_enabled" {
   description = "Whether to enable TLS 1.2 protocols"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "pull_through_cache_enabled" {

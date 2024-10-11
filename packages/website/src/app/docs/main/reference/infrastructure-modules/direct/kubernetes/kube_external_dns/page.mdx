@@ -16,7 +16,7 @@ It is only set up to work with Route53 as a part of the complete Panfactum stack
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.39.1/docs) (5.39.1)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
@@ -102,6 +102,14 @@ map(object({
 ```
 
 Default: `{}`
+
+### sync\_policy
+
+Description: How should ExternalDNS handle DNS record synchronization
+
+Type: `string`
+
+Default: `"upsert-only"`
 
 ### vpa\_enabled
 

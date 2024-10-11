@@ -10,7 +10,7 @@ terraform {
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "5.39.1"
+      version = "5.70.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -224,7 +224,7 @@ resource "helm_release" "external_dns" {
         { name = "AWS_REGION", value = data.aws_region.main.name }
       ]
       sources    = ["service", "ingress"]
-      policy     = "upsert-only"
+      policy     = var.sync_policy
       txtOwnerId = random_id.ids[each.key].hex
       txtPrefix  = "external-dns-"
     })

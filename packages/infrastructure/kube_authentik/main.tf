@@ -9,8 +9,9 @@ terraform {
       version = "2.12.1"
     }
     aws = {
-      source  = "hashicorp/aws"
-      version = "5.39.1"
+      source                = "hashicorp/aws"
+      version               = "5.70.0"
+      configuration_aliases = [aws.global]
     }
     random = {
       source  = "hashicorp/random"
@@ -708,6 +709,7 @@ module "ingress" {
     service      = "authentik-server"
     service_port = 80
   }]
+  cdn_mode_enabled               = true
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = false
   cross_origin_embedder_policy   = "credentialless" // Required to load gravatar images
@@ -737,3 +739,15 @@ module "ingress" {
 
   depends_on = [helm_release.authentik]
 }
+
+module "cdn" {
+  count  = var.ingress_enabled ? 1 : 0
+  source = "../kube_aws_cdn"
+  providers = {
+    aws.global = aws.global
+  }
+
+  name               = "authentik"
+  cdn_origin_configs = module.ingress[0].cdn_origin_configs
+}
+

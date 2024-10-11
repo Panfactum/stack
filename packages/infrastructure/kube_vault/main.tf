@@ -14,8 +14,8 @@ terraform {
     }
     aws = {
       source                = "hashicorp/aws"
-      version               = "5.39.1"
-      configuration_aliases = [aws.secondary]
+      version               = "5.70.0"
+      configuration_aliases = [aws.secondary, aws.global]
     }
     random = {
       source  = "hashicorp/random"
@@ -401,11 +401,14 @@ module "ingress" {
 
   namespace = local.namespace
   name      = "vault"
-  ingress_configs = [{
-    domains      = [var.vault_domain]
-    service      = "vault-active"
-    service_port = 8200
-  }]
+  ingress_configs = [
+    {
+      domains      = [var.vault_domain]
+      service      = "vault-active"
+      service_port = 8200
+    }
+  ]
+  cdn_mode_enabled               = true
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = false
   cross_origin_opener_policy     = "same-origin-allow-popups" // Required for SSO logins
@@ -425,6 +428,17 @@ module "ingress" {
   # end-generate
 
   depends_on = [helm_release.vault]
+}
+
+module "cdn" {
+  count  = var.ingress_enabled ? 1 : 0
+  source = "../kube_aws_cdn"
+  providers = {
+    aws.global = aws.global
+  }
+
+  name               = "vault"
+  cdn_origin_configs = module.ingress[0].cdn_origin_configs
 }
 
 

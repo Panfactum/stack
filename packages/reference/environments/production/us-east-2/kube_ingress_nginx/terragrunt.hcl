@@ -29,7 +29,6 @@ inputs = {
   ]
   dhparam                 = local.secrets.dhparam
   ingress_timeout_seconds = 60
-  tls_1_2_enabled         = false
 }
 
 

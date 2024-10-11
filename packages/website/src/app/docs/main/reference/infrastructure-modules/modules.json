@@ -41,6 +41,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_dns_zones",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
       "module": "aws_ecr_public_repos",
       "type": "direct",
       "group": "aws"
@@ -128,6 +133,11 @@
     {
       "module": "kube_authentik",
       "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_cdn",
+      "type": "submodule",
       "group": "kubernetes"
     },
     {

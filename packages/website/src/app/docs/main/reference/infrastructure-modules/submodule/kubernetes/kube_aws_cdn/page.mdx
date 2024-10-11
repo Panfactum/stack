@@ -1,0 +1,139 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_cdn" status="beta" type="submodule" />
+
+# Kubernetes CDN
+
+## Usage
+
+### Limitations
+
+1. The upstream ingresses for this module must all use the same set of domains. AWS Cloudfront provides
+   no ability to perform routing based on domain names (only HTTP paths), so you cannot have more than
+   one upstream ingress listening on any given path (even if they are on different domains). If the ingresses
+   you provide this module use different sets of domains, your routing will break in unexpected ways.
+
+2. Changing the domains of your upstream ingresses will cause the Cloudfront distribution to re-provision its certificates
+   causing a brief window of down\[time]\([https://registry.terraform.io/providers/hashicorp/time/1-2](https://registry.terraform.io/providers/hashicorp/time/1-2) minutes/docs) (1-2 minutes).
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### cdn\_origin\_configs
+
+Description: A list of configuration settings for communicating with the upstream ingress resources
+
+Type:
+
+```hcl
+list(object({
+    origin_id            = string       # A globally unique identifier for this origin
+    origin_domain        = string       # The domain name of the ingress origin
+    domains              = list(string) # The domain names to use for the CDN servers
+    path_prefix          = string       # Only traffic with this HTTP path prefix will be routed to the indicated origin
+    extra_origin_headers = map(string)  # Additional headers sent from the CDN to the origin
+
+    # The default behavior of the CDN before routing requests to this ingress
+    default_cache_behavior = object({
+      allowed_methods             = list(string) # What HTTP methods are allowed
+      cached_methods              = list(string) # What HTTP methods will be cached
+      min_ttl                     = number       # Minimum cache time
+      default_ttl                 = number       # Default cache time
+      max_ttl                     = number       # Maximum cache time
+      cookies_in_cache_key        = list(string) # Which cookies will be included in the cache key
+      headers_in_cache_key        = list(string) # Which headers will be included in the cache key
+      query_strings_in_cache_key  = list(string) # Which query strings will be included in the cache key
+      cookies_not_forwarded       = list(string) # Which cookies will NOT be forwarded to the ingress from the CDN
+      headers_not_forwarded       = list(string) # Which headers will NOT be forwarded to the ingress from CDN
+      query_strings_not_forwarded = list(string) # Which query strings will NOT be forwarded to the ingress from the CDN
+      compression_enabled         = bool         # Whether the CDN performs compression on your assets
+      viewer_protocol_policy      = string       # What should happen based on the client protocol (HTTP vs HTTPS)
+    })
+
+    # Similar to default_cache_behavior but allows you to specific specific rules for certain path patterns
+    # The keys for this map are the path patterns (e.g., "*.jpg")
+    # Path patterns will automatically be prefixed with the ingress' path_prefix value, so it can be omitted
+    path_match_behavior = optional(map(object({
+      allowed_methods             = list(string)
+      cached_methods              = list(string)
+      min_ttl                     = number
+      default_ttl                 = number
+      max_ttl                     = number
+      cookies_in_cache_key        = list(string)
+      headers_in_cache_key        = list(string)
+      query_strings_in_cache_key  = list(string)
+      cookies_not_forwarded       = list(string)
+      headers_not_forwarded       = list(string)
+      query_strings_not_forwarded = list(string)
+      compression_enabled         = bool
+      viewer_protocol_policy      = string
+    })))
+  }))
+```
+
+### name
+
+Description: The name of the CDN that will get created
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### geo\_restriction\_list
+
+Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
+
+Type: `list(string)`
+
+Default: `[]`
+
+### geo\_restriction\_type
+
+Description: What type of geographic restrictions to you want to apply to CDN clients
+
+Type: `string`
+
+Default: `"none"`
+
+### origin\_shield\_enabled
+
+Description: Whether origin shield should be enabled for the CloudFront distribution
+
+Type: `bool`
+
+Default: `false`
+
+### price\_class
+
+Description: The price class for the CDN
+
+Type: `string`
+
+Default: `"PriceClass_100"`
+
+## Outputs
+
+No outputs.
+
+## Maintainer Notes
+
+No notes.
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

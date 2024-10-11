@@ -24,6 +24,16 @@ variable "vpa_enabled" {
   default     = true
 }
 
+variable "sync_policy" {
+  description = "How should ExternalDNS handle DNS record synchronization"
+  type        = string
+  default     = "upsert-only"
+  validation {
+    condition     = contains(["sync", "upsert-only", "create-only"], var.sync_policy)
+    error_message = "sync_policy must be one of: sync, upsert-only, create-only"
+  }
+}
+
 variable "aws_iam_ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)

@@ -86,17 +86,26 @@ locals {
     xr-spatial-tracking             = var.permissions_policy_xr_spatial_tracking
   }
 
-  domains         = flatten([for config in var.ingress_configs : [for domain in config.domains : "https://${domain}"]])
-  subdomains      = flatten([for config in var.ingress_configs : [for domain in config.domains : "https://*.${domain}"]])
-  sibling_domains = flatten([for config in var.ingress_configs : [for domain in config.domains : "https://*.${join(".", slice(split(".", domain), 1, length(split(".", domain))))}"]])
+  domains         = tolist(toset(flatten([for config in var.ingress_configs : config.domains])))
+  subdomains      = [for domain in local.domains : "*.${domain}"]
+  sibling_domains = [for domain in local.domains : "*.${join(".", slice(split(".", domain), 1, length(split(".", domain))))}"]
+
+  urls                = [for domain in local.domains : "https://${domain}"]
+  subdomain_urls      = [for domain in local.subdomains : "https://${domain}"]
+  sibling_domain_urls = [for domain in local.sibling_domains : "https://${domain}"]
+
+  cdn_subdomains      = { for domain in local.domains : domain => substr(sha256(domain), 0, 12) }      // We need a random subdomain for each ingress domain to be used when the CDN is enabled
+  cdn_ingress_domains = tolist(toset([for config in local.cdn_origin_configs : config.origin_domain])) // Domains for the ingresses when the CDN is enabled
+
+  all_domains = var.cdn_mode_enabled ? concat(local.cdn_ingress_domains, local.domains) : local.domains // Includes the new domains required when CDN is enabled
 
   cors_allowed_headers = join(", ", tolist(toset(var.cors_allowed_headers)))
   cors_allowed_methods = join(", ", tolist(toset(var.cors_allowed_methods)))
   cors_exposed_headers = join(", ", tolist(toset(var.cors_exposed_headers)))
   cors_allowed_origins = tolist(toset(concat(
-    var.cors_allowed_origins_self ? local.domains : [],
-    var.cors_allowed_origins_subdomains ? local.subdomains : [],
-    var.cors_allowed_origins_sibling_domains ? local.sibling_domains : [],
+    var.cors_allowed_origins_self ? local.urls : [],
+    var.cors_allowed_origins_subdomains ? local.subdomain_urls : [],
+    var.cors_allowed_origins_sibling_domains ? local.sibling_domain_urls : [],
     var.cors_extra_allowed_origins
   )))
   cors_allowed_origin_regex_list = [for origin in local.cors_allowed_origins :
@@ -167,6 +176,78 @@ locals {
   )
 
   rewrite_configs = flatten([for config in var.ingress_configs : [for rewrite_rule in config.rewrite_rules : merge(config, rewrite_rule)]])
+
+  # This is a helper so we can transform var.ingress_configs into a map
+  ingress_config_ids = [for config in var.ingress_configs : substr(sha256("${config.path_prefix}${join("", config.domains)}${config.service}${config.service_port}"), 0, 12)]
+
+  ingress_configs = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
+    external_dns_hostnames = tolist(toset(config.domains))
+    tls_hosts              = tolist(toset(config.domains))
+    rule_hosts             = tolist(toset(config.domains))
+    path_prefix            = config.path_prefix
+    remove_prefix          = config.remove_prefix
+    service                = config.service
+    service_port           = config.service_port
+    permanent_redirect_url = config.permanent_redirect_url
+    temporary_redirect_url = config.temporary_redirect_url
+  } }
+
+  ingress_configs_with_cdn = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
+    external_dns_hostnames = toset(tolist([for domain in config.domains : "${local.cdn_subdomains[domain]}.${domain}"]))
+    tls_hosts              = tolist(toset([for domain in config.domains : "${local.cdn_subdomains[domain]}.${domain}"]))
+    rule_hosts             = tolist(toset(config.domains))
+    path_prefix            = config.path_prefix
+    remove_prefix          = config.remove_prefix
+    service                = config.service
+    service_port           = config.service_port
+    permanent_redirect_url = config.permanent_redirect_url
+    temporary_redirect_url = config.temporary_redirect_url
+  } }
+
+
+  cdn_default_allowed_methods             = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+  cdn_default_cached_methods              = ["GET", "HEAD"]
+  cdn_default_min_ttl                     = 0 // These TTL settings ensure that the origin cache headers are respected: https://github.com/hashicorp/terraform-provider-aws/issues/19382
+  cdn_default_default_ttl                 = 86400
+  cdn_default_max_ttl                     = 31536000
+  cdn_default_cookies_in_cache_key        = []
+  cdn_default_headers_in_cache_key        = []
+  cdn_default_query_strings_in_cache_key  = []
+  cdn_default_cookies_not_forwarded       = []
+  cdn_default_headers_not_forwarded       = []
+  cdn_default_query_strings_not_forwarded = []
+  cdn_default_compression_enabled         = true
+  cdn_default_viewer_protocol_policy      = "redirect-to-https"
+
+  cdn_default_cache_behavor = {
+    allowed_methods             = local.cdn_default_allowed_methods
+    cached_methods              = local.cdn_default_cached_methods
+    min_ttl                     = local.cdn_default_min_ttl
+    default_ttl                 = local.cdn_default_default_ttl
+    max_ttl                     = local.cdn_default_max_ttl
+    cookies_in_cache_key        = local.cdn_default_cookies_in_cache_key
+    headers_in_cache_key        = local.cdn_default_headers_in_cache_key
+    query_strings_in_cache_key  = local.cdn_default_query_strings_in_cache_key
+    cookies_not_forwarded       = local.cdn_default_cookies_not_forwarded
+    headers_not_forwarded       = local.cdn_default_headers_not_forwarded
+    query_strings_not_forwarded = local.cdn_default_query_strings_not_forwarded
+    compression_enabled         = local.cdn_default_compression_enabled
+    viewer_protocol_policy      = local.cdn_default_viewer_protocol_policy
+  }
+
+  cdn_path_match_behavior = {}
+
+  cdn_configs = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => config.cdn }
+
+  cdn_origin_configs = [for name, config in local.ingress_configs_with_cdn : {
+    origin_id              = substr(sha256("${join("", config.rule_hosts)}${config.service}${config.service_port}${config.path_prefix}"), 0, 12)
+    domains                = config.rule_hosts
+    path_prefix            = config.path_prefix
+    default_cache_behavior = local.cdn_configs[name] != null ? merge(local.cdn_default_cache_behavor, lookup(local.cdn_configs[name], "default_cache_behavior", {})) : local.cdn_default_cache_behavor
+    path_match_behavior    = local.cdn_configs[name] != null ? { for path, behavior in lookup(local.cdn_configs[name], "path_match_behavior", {}) : path => merge(local.cdn_default_cache_behavor, behavior) } : {}
+    origin_domain          = "${local.cdn_subdomains[config.rule_hosts[0]]}.${config.rule_hosts[0]}"
+    extra_origin_headers   = local.cdn_configs[name] != null ? merge({}, lookup(local.cdn_configs[name], "extra_origin_headers", {})) : {}
+  }]
 }
 
 module "util" {
@@ -189,12 +270,6 @@ module "util" {
 * Kubernetes Resources
 *********************************************************************************************************************/
 
-resource "random_id" "ingress_id" {
-  count       = length(var.ingress_configs)
-  prefix      = "${var.name}-"
-  byte_length = 8
-}
-
 resource "kubectl_manifest" "ingress_cert" {
   yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
@@ -206,7 +281,7 @@ resource "kubectl_manifest" "ingress_cert" {
     }
     spec = {
       secretName = "${var.name}-tls"
-      dnsNames   = tolist(toset(flatten([for config in var.ingress_configs : config.domains])))
+      dnsNames   = local.all_domains
 
       // We don't rotate this as frequently to both respect
       // the rate limits: https://letsencrypt.org/docs/rate-limits/
@@ -238,20 +313,20 @@ resource "kubectl_manifest" "ingress_cert" {
 }
 
 resource "kubectl_manifest" "ingress" {
-  count = (length(var.ingress_configs))
+  for_each = var.cdn_mode_enabled ? local.ingress_configs_with_cdn : local.ingress_configs
   yaml_body = yamlencode({
     apiVersion = "networking.k8s.io/v1"
     kind       = "Ingress"
     metadata = {
-      name      = random_id.ingress_id[count.index].hex
+      name      = each.key
       namespace = var.namespace
       labels    = module.util.labels
-      annotations = merge(
+      annotations = { for k, v in merge(
         local.common_annotations,
         {
           // https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/
-          "nginx.ingress.kubernetes.io/session-cookie-name"              = random_id.ingress_id[count.index].hex        // Each ingress will get it's own session cookie name as its value is dependent on the set of upstream hosts
-          "nginx.ingress.kubernetes.io/session-cookie-path"              = var.ingress_configs[count.index].path_prefix // Since we use regex patterns, we need to manually set this for sticky sessions to work
+          "nginx.ingress.kubernetes.io/session-cookie-name"              = each.key               // Each ingress will get it's own session cookie name as its value is dependent on the set of upstream hosts
+          "nginx.ingress.kubernetes.io/session-cookie-path"              = each.value.path_prefix // Since we use regex patterns, we need to manually set this for sticky sessions to work
           "nginx.ingress.kubernetes.io/affinity"                         = "cookie"
           "nginx.ingress.kubernetes.io/affinity-mode"                    = "balanced"
           "nginx.ingress.kubernetes.io/session-cookie-secure"            = "true"
@@ -260,28 +335,46 @@ resource "kubectl_manifest" "ingress" {
           "nginx.ingress.kubernetes.io/session-cookie-samesite"          = "Strict"
         },
 
+        // When the CDN is enabled, the `host` fields in the ingress will no longer match the user-provided domains
+        // so we need to manually configure external-dns rather than let it automatically configure itself.
+        {
+          "external-dns.alpha.kubernetes.io/ingress-hostname-source" = "annotation-only",
+          "external-dns.alpha.kubernetes.io/hostname"                = join(",", each.value.external_dns_hostnames)
+        },
+
+        // Redirects
+        {
+          "nginx.ingress.kubernetes.io/temporal-redirect"  = each.value.temporary_redirect_url
+          "nginx.ingress.kubernetes.io/permanent-redirect" = each.value.permanent_redirect_url
+        },
+
         // Strips the path_prefix (e.g., api.panfactum.com/payroll/health -> /health)
-        var.ingress_configs[count.index].remove_prefix ? { "nginx.ingress.kubernetes.io/rewrite-target" = "/$2" } : {}
-      )
+        each.value.remove_prefix ? { "nginx.ingress.kubernetes.io/rewrite-target" = "/$2" } : {}
+      ) : k => v if v != null }
     }
     spec = {
       ingressClassName = "nginx"
       tls = [{
-        hosts      = tolist(toset(var.ingress_configs[count.index].domains))
+        hosts      = each.value.tls_hosts
         secretName = "${var.name}-tls"
       }]
-      rules = [for domain in tolist(toset(var.ingress_configs[count.index].domains)) :
+      rules = [for config in [for domain in each.value.rule_hosts : {
+        domain       = domain
+        path_prefix  = each.value.path_prefix
+        service      = each.value.service
+        service_port = each.value.service_port
+        }] :
         {
-          host = domain,
+          host = config.domain,
           http = {
             paths = [{
               pathType = "Prefix"
-              path     = "${var.ingress_configs[count.index].path_prefix}(/|$)*(.*)"
+              path     = "${config.path_prefix}(/|$)*(.*)"
               backend = {
                 service = {
-                  name = var.ingress_configs[count.index].service
+                  name = config.service
                   port = {
-                    number = var.ingress_configs[count.index].service_port
+                    number = config.service_port
                   }
                 }
               }
@@ -302,6 +395,7 @@ resource "random_id" "rewrite_id" {
   byte_length = 8
 }
 
+## TODO: Update for CDN
 resource "kubectl_manifest" "ingress_rewrites" {
   count = length(local.rewrite_configs)
   yaml_body = yamlencode({

@@ -9,6 +9,15 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Changed
+
+* `tls_1_2_enabled` now defaults to `true` in [kube_ingress_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) in order
+to support CDNs like Cloudfront which do not yet support TLSv1.3.
+
+* Changes the `external-dns` policy to `sync`
+
 ## edge.24-10-09
 
 ### Added

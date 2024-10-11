@@ -24,11 +24,11 @@ locals {
 }
 
 module "constants" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
 }
 
 module "namespace" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
 
   namespace = local.name
 
@@ -48,7 +48,7 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
   namespace = module.namespace.namespace
   name      = local.name
 
@@ -97,7 +97,7 @@ module "website_deployment" {
 }
 
 module "ingress" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
+  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
 
   name      = local.name
   namespace = local.namespace

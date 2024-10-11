@@ -1,5 +1,5 @@
 module "scraper_builder" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_dockerfile_build?ref=e7bce6f03ec62851b2ca375337dd01253a84482d" #pf-update
+  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_dockerfile_build?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
 
   name = "scraper-builder"
   namespace = local.namespace
