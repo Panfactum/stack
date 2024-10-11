@@ -48,7 +48,7 @@ locals {
           email    = var.alert_email
           apiTokenSecretRef = {
             name = kubernetes_secret.cloudflare_api_token.metadata[0].name
-            key  = kubernetes_secret.cloudflare_api_token.metadata[0].key
+            key  = kubernetes_secret.cloudflare_api_token.data.key
           }
         }
       }
@@ -100,8 +100,6 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 
-  test = kubernetes_secret.cloudflare_api_token
-
   # pf-generate: pass_vars
   pf_stack_version = var.pf_stack_version
   pf_stack_commit  = var.pf_stack_commit
@@ -116,13 +114,13 @@ module "aws_permissions" {
 resource "kubernetes_secret" "cloudflare_api_token" {
   metadata {
     name = "cloudflare-api-token"
-    key = "api-token"
     namespace = var.namespace
   }
 
   type = "Opaque"
 
   data = {
+    key = "api-token"
     "api-token" = var.cloudflare_api_token
   }
 }
