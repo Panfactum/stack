@@ -31,7 +31,7 @@ locals {
   all_roles = toset([for domain, config in var.route53_zones : config.record_manager_role_arn])
 
   cloudflare_config = { for domain in var.cloudflare_zones : domain => {
-    labels = { domain : sha1(domain) }
+    labels   = { domain : sha1(domain) }
     provider = "cloudflare"
 
     included_domains = [domain]
@@ -45,7 +45,7 @@ locals {
 
 
   aws_config = { for role in local.all_roles : role => {
-    labels           = { role : sha1(role) }
+    labels   = { role : sha1(role) }
     provider = "aws"
 
     included_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn == role]
@@ -130,7 +130,7 @@ resource "kubernetes_service_account" "external_dns" {
 module "aws_permissions" {
   for_each = local.aws_config
 
-  source   = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
 
   service_account           = kubernetes_service_account.external_dns[each.key].metadata[0].name
   service_account_namespace = local.namespace
@@ -240,11 +240,11 @@ resource "helm_release" "external_dns" {
         name = each.value.provider
       }
 
-      domainFilters = each.value.included_domains
+      domainFilters  = each.value.included_domains
       excludeDomains = each.value.excluded_domains
 
       extraArgs = each.value.extra_args
-      env = each.value.env
+      env       = each.value.env
 
       sources    = ["service", "ingress"]
       policy     = var.sync_policy

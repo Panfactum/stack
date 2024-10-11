@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="authentik_core_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_core_resources" status="stable" type="direct"/>
+
+<ModuleHeader name="authentik_core_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_core_resources" status="stable" type="direct" />
 
 # Authentik Core Resources
 
@@ -11,13 +12,13 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.2.0/docs) (2024.2.0)
+* [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.2.0/docs) (2024.2.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
@@ -65,7 +66,6 @@ Type: `bool`
 
 Default: `true`
 
-
 ### extra\_groups
 
 Description: Whether to create the default Panfactum RBAC groups
@@ -81,7 +81,6 @@ map(object({
 
 Default: `{}`
 
-
 ### favicon\_ico\_b64
 
 Description: A stringified ico image for displaying on the Authentik web UI (base64 encoded)
@@ -89,7 +88,6 @@ Description: A stringified ico image for displaying on the Authentik web UI (bas
 Type: `string`
 
 Default: `null`
-
 
 ### logo\_svg\_b64
 
@@ -99,14 +97,9 @@ Type: `string`
 
 Default: `null`
 
-
-
-
-
-
 ### session\_duration
 
-Description: The session duration for user logins. See https://docs.goauthentik.io/docs/flow/stages/user_login/
+Description: The session duration for user logins. See [https://docs.goauthentik.io/docs/flow/stages/user\_login/](https://docs.goauthentik.io/docs/flow/stages/user_login/)
 
 Type: `string`
 

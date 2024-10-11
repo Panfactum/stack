@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_argo_event_source" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_source" status="beta" type="submodule"/>
+
+<ModuleHeader name="kube_argo_event_source" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_source" status="beta" type="submodule" />
 
 # Argo Event Source
 
@@ -19,11 +20,11 @@ from external sources (push and pull) and then publishes events on an
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -31,7 +32,7 @@ The following input variables are required:
 
 ### event\_source\_spec
 
-Description: The specification of the EventSource. See https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec
+Description: The specification of the EventSource. See [https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec)
 
 Type: `any`
 
@@ -59,7 +60,6 @@ Type: `bool`
 
 Default: `true`
 
-
 ### event\_bus\_name
 
 Description: The EventBus to read from. Should almost always be 'default'.
@@ -67,7 +67,6 @@ Description: The EventBus to read from. Should almost always be 'default'.
 Type: `string`
 
 Default: `"default"`
-
 
 ### instance\_type\_spread\_required
 
@@ -77,7 +76,6 @@ Type: `bool`
 
 Default: `true`
 
-
 ### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
@@ -86,14 +84,9 @@ Type: `bool`
 
 Default: `true`
 
-
-
-
-
-
 ### replicas
 
-Description: The number of replicas to run in the underlying deployment. Read this before changing the defaults: https://argoproj.github.io/argo-events/eventsources/ha/. Do NOT mix active-active and active-passive if using more than one replica.
+Description: The number of replicas to run in the underlying deployment. Read this before changing the defaults: [https://argoproj.github.io/argo-events/eventsources/ha/](https://argoproj.github.io/argo-events/eventsources/ha/). Do NOT mix active-active and active-passive if using more than one replica.
 
 Type: `number`
 
@@ -118,8 +111,6 @@ Default: `true`
 ## Outputs
 
 No outputs.
-
-
 
 {/* eslint-enable import/order */}
 

@@ -45,7 +45,7 @@ locals {
     for domain in var.cloudflare_zones : {
       dns01 = {
         cloudflare = {
-          email    = var.alert_email
+          email = var.alert_email
           apiTokenSecretRef = {
             name = kubernetes_secret.cloudflare_api_token.metadata[0].name
             key  = kubernetes_secret.cloudflare_api_token.data.key
@@ -113,14 +113,14 @@ module "aws_permissions" {
 
 resource "kubernetes_secret" "cloudflare_api_token" {
   metadata {
-    name = "cloudflare-api-token"
+    name      = "cloudflare-api-token"
     namespace = var.namespace
   }
 
   type = "Opaque"
 
   data = {
-    key = "api-token"
+    key         = "api-token"
     "api-token" = var.cloudflare_api_token
   }
 }
