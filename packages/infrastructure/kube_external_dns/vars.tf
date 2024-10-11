@@ -19,7 +19,7 @@ variable "route53_zones" {
 }
 
 variable "cloudflare_zones" {
-  description = "A list of public DNS domain names managed by Cloudflare; external-dns uses this to set domain records"
+  description = "A mapping of public DNS domains managed by Cloudflare to their configuration; external-dns uses this to set domain records"
   type = map(object({
     zone_id                 = string
   }))
