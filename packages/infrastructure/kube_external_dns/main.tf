@@ -34,23 +34,21 @@ locals {
     labels   = { domain : sha1(domain) }
     provider = "cloudflare"
 
-    // all domains [x.com, b.com, a.x.com]
-
-    included_domains = [domain] // x.com
+    included_domains = [domain]
     excluded_domains = [
       for excluded_domain in var.cloudflare_zones :
-      excluded_domain  // b.com a.x.com
-      if excluded_domain != domain && // true true
-        alltrue([
-          for included_domain in var.cloudflare_zones :
-          !endswith(included_domain, excluded_domain) || included_domain == excluded_domain
-        ])
+      excluded_domain
+      if excluded_domain != domain &&
+      alltrue([
+        for included_domain in var.cloudflare_zones :
+        !endswith(included_domain, excluded_domain) || included_domain == excluded_domain
+      ])
     ]
 
     env = [
       { name = "CF_API_TOKEN", value = var.cloudflare_api_token }
     ]
-    extra_args = ["--zone-id-filter=${config.zone_id}"]
+    extra_args = ["--zone-id-filter=${config.zone_id}", "--cloudflare-dns-records-per-page=5000"]
   } }
 
 
