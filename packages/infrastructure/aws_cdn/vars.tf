@@ -3,16 +3,25 @@ variable "name" {
   type        = string
 }
 
+variable "domains" {
+  description = "A list of domains to use for the CDN"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.domains) > 0
+    error_message = "At least one domain must be specified"
+  }
+}
+
 variable "origin_configs" {
-  description = "A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this manually. Use the outputs from kube_ingress."
+  description = "A list of configuration settings for communicating with the upstream origins"
   type = list(object({
     origin_id            = optional(string)          # A globally unique identifier for this origin (will be automatically computed if not provided)
     origin_domain        = string                    # The domain name of the ingress origin
-    domains              = list(string)              # The domains for this ingress
     path_prefix          = optional(string, "/")     # Only traffic with this HTTP path prefix will be routed to the indicated origin
     extra_origin_headers = optional(map(string), {}) # Headers sent from the CDN to the origin
 
-    # The default behavior of the CDN before routing requests to this ingress
+    # The default behavior of the CDN before routing requests to this origin
     default_cache_behavior = optional(object({
       caching_enabled      = optional(bool, true)                                                                 # Whether the CDN should cache responses from the origin (overrides all other caching settings)
       allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]) # What HTTP methods are allowed
@@ -45,7 +54,7 @@ variable "origin_configs" {
     # The keys for this map are the path patterns (e.g., "*.jpg")
     # Path patterns will automatically be prefixed with the path_prefix value, so it can be omitted
     path_match_behavior = optional(map(object({
-      caching_enabled      = optional(bool, true) # Whether the CDN should cache responses from the origin (overrides all other caching settings)
+      caching_enabled      = optional(bool, true)
       allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"])
       cached_methods       = optional(list(string), ["GET", "HEAD"])
       min_ttl              = optional(number, 0)
@@ -72,6 +81,11 @@ variable "origin_configs" {
       viewer_protocol_policy      = optional(string, "redirect-to-https")
     })), {})
   }))
+
+  validation {
+    condition     = length(var.origin_configs) > 0
+    error_message = "At least one origin_config must be specified"
+  }
 }
 
 variable "redirect_rules" {

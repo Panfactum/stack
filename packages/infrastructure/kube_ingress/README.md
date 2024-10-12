@@ -5,6 +5,29 @@ resources in a Kubernetes cluster.
 
 ## Usage
 
+### Redirect Rules
+
+You can use `redirect_rules` to perform pattern matching over the requested URLs to perform permanent or
+temporary HTTP redirects.
+
+For example, if `redirect_rules` is set to the following
+
+```hcl
+redirect_rules = [
+  {
+    source = "^https://vault.prod.panfactum.com(/.*)?$"
+    target = "https://vault.panfactum.com$1"
+    permanent = false
+  }
+]
+```
+
+then a request to `https://vault.prod.panfactum.com/some/path` would receive a `302` HTTP redirect response
+to `https://vault.panfactum.com/some/path`.
+
+Note that the `source` value can use regex capture groups (e.g., `(/.*)`) that can then be referenced in
+`target` (e.g., `$1`).
+
 ### Headers
 
 #### CORS Headers
@@ -103,7 +126,7 @@ which will break sites loading SSO pop-ups from different origins as it may
 block communication between the two windows. Change
 the value to `same-origin-allow-popups` to restore functionality.
 
-### X-Content-Type-Options
+#### X-Content-Type-Options
 
 We enforce browsers to respect the `Content-Type` header by setting
 [X-Content-Type-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options) to `nosniff`
@@ -111,13 +134,17 @@ by default.
 
 Disable this by setting `x_content_type_options_enabled` to `false`.
 
-### Legacy Headers
+#### Legacy Headers
 
 We set the following legacy headers to safe values by default, but
 they can be overridden:
 
 - [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options): `SAMEORIGIN`
 - [X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection): `1; mode=block`
+
+#### Extra Static Headers
+
+You can specify extra static headers via the `extra_response_headers` input object.
 
 
 

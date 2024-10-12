@@ -4,93 +4,26 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_cdn" status="beta" type="submodule" />
+<ModuleHeader name="aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_cdn" status="beta" type="submodule" />
 
-# AWS CDN for Kubernetes Ingresses
+# AWS CDN
 
-This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs`
-output from instances of the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
-module and forwarding them to the [aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module.
+Deploys an [AWS CloudFront distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html)
+([CDN](https://en.wikipedia.org/wiki/Content_delivery_network)) that can be used to proxy requests to your upstream origins.
 
-This module takes the same arguments as `aws_cdn`, so see it's [module documentation](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn)
-for more information.
+This module performs several functions in addition to providing sensible defaults for the CDN:
+
+* Sets up the CDN TLS certificates
+* Sets up the DNS records for the CDN
+* Provides pre-packaged edge function behaviors (e.g., URL rewrite rules)
+* Allows for request logging
 
 ## Limitations
 
-* The upstream ingresses for this module must all use the same set of domains. AWS Cloudfront provides
-  no ability to perform routing based on domain names (only HTTP paths). If the ingresses
-  you provide this module use different sets of domains, your routing will break in unexpected ways.
-
-* Changing the domains of your upstream ingresses will cause the Cloudfront distribution to re-provision its certificates
-  causing a brief window of downtime (1-2 minutes).
-
-* You cannot use the same domain name on multiple CDNs. As a result, you can only create ONE `kube_aws_cdn` resource
-  for all ingresses that use a particular domain name.
-
-* For additional limitations, see the [aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module docs.
+1. The domain names used for the CDN must be served by Route53 zones in the AWS account within which this module
+   is deployed. This is because this module automatically configures all the necessary DNS settings.
 
 ## Usage
-
-```hcl
-module "ingress_1" {
-   source = "../kube_ingress"
-
-   namespace    = local.namespace
-   name         = "example1"
-   domains      = ["example.com"]
-   
-    ...
-   
-   # CDN mode MUST be enabled if you want to use a
-   # CDN in front of an ingress
-   cdn_mode_enabled = true
-}
-
-module "ingress_2" {
-   source = "../kube_ingress"
-
-   namespace    = local.namespace
-   name         = "example2"
-   domains      = ["example.com"]
-
-   ...
-   
-   cdn_mode_enabled = true
-   ingress_configs  = [{
-      path_prefix = "/test"
-      
-      ...
-      
-      # You can configure CDN behavior on a per-ingress basis
-      # See the kube_ingress documentation for more information
-      cdn = {
-         default_cache_behavior = {
-            headers_in_cache_key = ["Authorization"]
-         }
-      }
-   }]
-
-}
-
-module "cdn" {
-   source = "../kube_aws_cdn"
-   
-   # Since the CDN operates globally, you must use the global
-   # provider as follows:
-   providers = {
-     aws.global = aws.global
-   }
-
-   name               = "example"
-   
-   # Concatenate the CDN configs provided by each
-   # ingress module and pass them to the CDN module
-   origin_configs = concat(
-     module.ingress_1.cdn_origin_configs,
-     module.ingress_2.cdn_origin_configs
-   )
-}
-```
 
 ## Providers
 
@@ -106,6 +39,12 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
+### domains
+
+Description: A list of domains to use for the CDN
+
+Type: `list(string)`
+
 ### name
 
 Description: The name of the CDN that will get created
@@ -114,7 +53,7 @@ Type: `string`
 
 ### origin\_configs
 
-Description: A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this manually. Use the outputs from kube\_ingress.
+Description: A list of configuration settings for communicating with the upstream origins
 
 Type:
 
@@ -122,11 +61,10 @@ Type:
 list(object({
     origin_id            = optional(string)          # A globally unique identifier for this origin (will be automatically computed if not provided)
     origin_domain        = string                    # The domain name of the ingress origin
-    domains              = list(string)              # The domains for this ingress
     path_prefix          = optional(string, "/")     # Only traffic with this HTTP path prefix will be routed to the indicated origin
     extra_origin_headers = optional(map(string), {}) # Headers sent from the CDN to the origin
 
-    # The default behavior of the CDN before routing requests to this ingress
+    # The default behavior of the CDN before routing requests to this origin
     default_cache_behavior = optional(object({
       caching_enabled      = optional(bool, true)                                                                 # Whether the CDN should cache responses from the origin (overrides all other caching settings)
       allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]) # What HTTP methods are allowed
@@ -159,7 +97,7 @@ list(object({
     # The keys for this map are the path patterns (e.g., "*.jpg")
     # Path patterns will automatically be prefixed with the path_prefix value, so it can be omitted
     path_match_behavior = optional(map(object({
-      caching_enabled      = optional(bool, true) # Whether the CDN should cache responses from the origin (overrides all other caching settings)
+      caching_enabled      = optional(bool, true)
       allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"])
       cached_methods       = optional(list(string), ["GET", "HEAD"])
       min_ttl              = optional(number, 0)

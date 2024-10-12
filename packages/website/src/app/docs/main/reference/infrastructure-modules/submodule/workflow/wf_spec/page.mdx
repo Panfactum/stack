@@ -51,7 +51,7 @@ they have a couple drawbacks:
 * They can only be used to orchestrate containers and not other types of templates.
 
 DAGs offer the most flexibility as they can define a graph of *any* set of templates, but every template in the execution graph will require creating its own Pod.
-Generally, this isn't an issue, but it does add some additional \[time]\([https://registry.terraform.io/providers/hashicorp/time/to](https://registry.terraform.io/providers/hashicorp/time/to) create each pod/docs) (to create each pod) and can cause issues when trying to share large amounts of data between steps.
+Generally, this isn't an issue, but it does add some additional time (to create each pod) and can cause issues when trying to share large amounts of data between steps.
 
 If you do need to share large amounts of data between pods in a DAG, you can use the
 `volume_mounts` module input to create a temporary PVC that will be mounted to each pod. However, you will need to take

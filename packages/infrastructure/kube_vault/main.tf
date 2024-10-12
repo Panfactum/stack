@@ -401,9 +401,9 @@ module "ingress" {
 
   namespace = local.namespace
   name      = "vault"
+  domains   = [var.vault_domain]
   ingress_configs = [
     {
-      domains      = [var.vault_domain]
       service      = "vault-active"
       service_port = 8200
     }
@@ -437,8 +437,18 @@ module "cdn" {
     aws.global = aws.global
   }
 
-  name               = "vault"
-  cdn_origin_configs = module.ingress[0].cdn_origin_configs
+  name           = "vault"
+  origin_configs = module.ingress[0].cdn_origin_configs
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
 

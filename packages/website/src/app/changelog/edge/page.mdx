@@ -11,24 +11,47 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Breaking Changes
+
+* [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `rewrite_rules`
+  to be specified on `ingress_configs`. Instead, there is now a top-level `redirect_rules` variables that has enhanced capabilities:
+  * Can pattern match against the entire url (`https://google.com/some/path`) instead of just the path component (`/some/path`).
+  * Can specify whether a permanent or temporary HTTP redirect should be used.
+
+* [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `domains`
+  to be specified on individual `ingress_configs`. Instead, `domains` is now a top-level variable. This provides better
+  compatibility with the new CDN option and prevents confusing behavior in several edge cases. This also better
+  matches the intent of the module: to provide routing rules for a single set of domains, not to provide routing rules
+  for *all* domains in your system.
+
+### Added
+
+* A new module, [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones), has been
+  created that allows you to create Route53 zones that have a non-AWS registrar.
+
 ### Changed
 
-* `tls_1_2_enabled` now defaults to `true` in [kube_ingress_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) in order
-to support CDNs like Cloudfront which do not yet support TLSv1.3.
+* `tls_1_2_enabled` now defaults to `true` in [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) in order
+  to support CDNs like Cloudfront which do not yet support TLSv1.3.
 
-* Changes the `external-dns` policy to `sync`
+### Fixed
+
+* The internal logic of [aws\_dns\_records](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) has been
+  updated so that each record is managed independently of the others. This fixes an issue where adding or removing
+  records would cause *all* records to be created. However, this update will cause all records to be recreated
+  one last time.
 
 ## edge.24-10-09
 
 ### Added
 
 * Adds a new [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables), `pf_stack_local_path`, that can be used to deploy local copies of the Panfactum Stack modules. This
-can be used by developers when testing changes to Panfactum modules on personal infrastructure before submitting pull requests to the [Stack repository](https://github.com/Panfactum/stack).
+  can be used by developers when testing changes to Panfactum modules on personal infrastructure before submitting pull requests to the [Stack repository](https://github.com/Panfactum/stack).
 
 ### Changed
 
 * Loosened the requirements for the [repo variable](/docs/edge/reference/configuration/repo-variables) `repo_url` so that we
-can now support users on arbitrary git hosting providers (not just GitHub).
+  can now support users on arbitrary git hosting providers (not just GitHub).
 
 * `pf-env-bootstrap` is now idempotent, allowing it to be re-run if it fails in the middle of its initial execution.
 
@@ -36,7 +59,7 @@ can now support users on arbitrary git hosting providers (not just GitHub).
 
 * Fixes the ami instance type mismatch when `bootstrap_mode_enabled` is enabled in the [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.
 * Fixes issues that prevented bootstrapping scripts from running with new `pf-tf-init` logic.
-* Adjusts the defaults for [kube_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) so that installation does not fail in the bootstrapping guide.
+* Adjusts the defaults for [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) so that installation does not fail in the bootstrapping guide.
 
 ## edge.24-09-30
 
@@ -47,8 +70,8 @@ can now support users on arbitrary git hosting providers (not just GitHub).
 
 ### Fixed
 
-* Fixes an issue where voluntary disruption windows created by the [kube_disruption_window_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
-would only work for the `argo` namespace. They will now work in all namespaces.
+* Fixes an issue where voluntary disruption windows created by the [kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+  would only work for the `argo` namespace. They will now work in all namespaces.
 
 ## edge.24-09-12
 
@@ -90,7 +113,6 @@ would only work for the `argo` namespace. They will now work in all namespaces.
 * [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
   [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) now support
   using Vault-generated credentials to authenticate from other workloads. See the module documentation for more information.
-
 
 ### Fixed
 

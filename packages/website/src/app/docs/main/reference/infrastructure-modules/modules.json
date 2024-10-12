@@ -26,6 +26,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_cdn",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
       "module": "aws_cloudwatch_log_group",
       "type": "submodule",
       "group": "aws"

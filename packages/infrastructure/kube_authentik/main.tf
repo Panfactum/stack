@@ -704,10 +704,36 @@ module "ingress" {
   source    = "../kube_ingress"
   namespace = local.namespace
   name      = "authentik"
+  domains   = [var.domain]
   ingress_configs = [{
-    domains      = [var.domain]
     service      = "authentik-server"
     service_port = 80
+
+    cdn = {
+      // By default we should not cache requests
+      // because they main contain sensitive information
+      default_cache_behavior = {
+        caching_enabled = false
+      }
+      path_match_behavior = {
+        // Static assets can be cached
+        "/static*" = {
+          caching_enabled            = true
+          cookies_in_cache_key       = []
+          query_strings_in_cache_key = []
+        }
+        "/media*" = {
+          caching_enabled            = true
+          cookies_in_cache_key       = []
+          query_strings_in_cache_key = []
+        }
+        "*.woff2" = {
+          caching_enabled            = true
+          cookies_in_cache_key       = []
+          query_strings_in_cache_key = []
+        }
+      }
+    }
   }]
   cdn_mode_enabled               = true
   rate_limiting_enabled          = true
@@ -747,7 +773,17 @@ module "cdn" {
     aws.global = aws.global
   }
 
-  name               = "authentik"
-  cdn_origin_configs = module.ingress[0].cdn_origin_configs
+  name           = "authentik"
+  origin_configs = module.ingress[0].cdn_origin_configs
+
+  # pf-generate: pass_vars
+  pf_stack_version = var.pf_stack_version
+  pf_stack_commit  = var.pf_stack_commit
+  environment      = var.environment
+  region           = var.region
+  pf_root_module   = var.pf_root_module
+  is_local         = var.is_local
+  extra_tags       = var.extra_tags
+  # end-generate
 }
 
