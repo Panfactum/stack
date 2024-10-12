@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_ingress" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_ingress" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_ingress" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_ingress" status="stable" type="submodule" />
 
 # Kubernetes Ingress
 
@@ -25,20 +26,20 @@ Variables prefixed with `cors_` control the behavior.
 
 A few important notes:
 
-- If cors handling is enabled, `OPTIONS` requests will not be forwarded to the upstream server.
+* If cors handling is enabled, `OPTIONS` requests will not be forwarded to the upstream server.
 
-- Our CORS handling this will overwrite any CORS headers returned from the upstream server.
+* Our CORS handling this will overwrite any CORS headers returned from the upstream server.
 
-- Due to [problems in the default NGINX ingress controller behavior](https://github.com/kubernetes/ingress-nginx/issues/8469),
+* Due to [problems in the default NGINX ingress controller behavior](https://github.com/kubernetes/ingress-nginx/issues/8469),
   we implement our own CORS handling logic that fixes many issues in the default behavior. If you would
   rather use the default behavior, set `cors_native_handling_enabled` to `true`.
 
-- As a convenience, by default we allow the following popular headers in `Access-Control-Allow-Headers`: `DNT`, `Keep-Alive`,
+* As a convenience, by default we allow the following popular headers in `Access-Control-Allow-Headers`: `DNT`, `Keep-Alive`,
   `User-Agent`, `X-Requested-With`, `If-Modified-Since`, `Cache-Control`, `Content-Disposition`, `Content-Type`, `Range`,
   `Authorization`, `Cookies`, `Referrer`, `Accept`, `sec-ch-ua`, `sec-ch-ua-mobile`, `sec-ch-ua-platform`, `X-Suggested-File-Name`,
   `Cookie`. You can change this via `cors_allowed_headers`.
 
-- As a convenience, by default we expose the following popular headers in `Access-Control-Expose-Headers`: `Content-Encoding`, `Date`,
+* As a convenience, by default we expose the following popular headers in `Access-Control-Expose-Headers`: `Content-Encoding`, `Date`,
   `Location`, `X-Frame-Options`, `X-Content-Type-Options`, `Permissions-Policy`, `X-XSS-Protection`, `Vary`, `Cross-Origin-Response-Policy`,
   `Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`, `Content-Security-Policy`, `Referrer-Policy`. You can change this via `cors_exposed_headers`.
 
@@ -105,9 +106,9 @@ headers and enable the `crossOriginIsolated` state in the underlying
 webpages. [^1]
 
 [^1]: The default setting for `cross_origin_opener_policy` is `same-origin`
-which will break sites loading SSO pop-ups from different origins as it may
-block communication between the two windows. Change
-the value to `same-origin-allow-popups` to restore functionality.
+    which will break sites loading SSO pop-ups from different origins as it may
+    block communication between the two windows. Change
+    the value to `same-origin-allow-popups` to restore functionality.
 
 ### X-Content-Type-Options
 
@@ -122,18 +123,18 @@ Disable this by setting `x_content_type_options_enabled` to `false`.
 We set the following legacy headers to safe values by default, but
 they can be overridden:
 
-- [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options): `SAMEORIGIN`
-- [X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection): `1; mode=block`
+* [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options): `SAMEORIGIN`
+* [X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection): `1; mode=block`
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
 
@@ -608,7 +609,6 @@ Type: `string`
 
 Default: `null`
 
-
 ### extra\_annotations
 
 Description: Extra annotations to add to the ingress objects
@@ -632,8 +632,6 @@ Description: A key-value mapping of extra headers to add to every response
 Type: `map(string)`
 
 Default: `{}`
-
-
 
 ### permissions\_policy\_accelerometer
 
@@ -931,10 +929,6 @@ Type: `string`
 
 Default: `"()"`
 
-
-
-
-
 ### rate\_limiting\_enabled
 
 Description: Whether to enable rate limiting
@@ -950,7 +944,6 @@ Description: The value for Referrer-Policy header.
 Type: `string`
 
 Default: `"no-referrer"`
-
 
 ### x\_content\_type\_options\_enabled
 

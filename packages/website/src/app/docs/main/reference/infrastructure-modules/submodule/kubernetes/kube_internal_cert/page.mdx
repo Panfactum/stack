@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_internal_cert" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_internal_cert" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_internal_cert" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_internal_cert" status="stable" type="submodule" />
 
 # Kubernetes Internal TLS Certificate
 
@@ -13,9 +14,9 @@ Provisions a TLS key-pair with the standard Panfactum settings.
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Required Inputs
 
@@ -53,8 +54,6 @@ Type: `string`
 
 Default: `"336h0m0s"`
 
-
-
 ### include\_localhost
 
 Description: Whether to include localhost in the SANs
@@ -79,7 +78,6 @@ Type: `bool`
 
 Default: `false`
 
-
 ### issuer\_name
 
 Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
@@ -87,10 +85,6 @@ Description: Name of the ClusterIssuer/Issuer to use for provisioning the cert
 Type: `string`
 
 Default: `null`
-
-
-
-
 
 ### private\_key\_encoding
 
@@ -107,7 +101,6 @@ Description: Whether to enable private key rotation.
 Type: `bool`
 
 Default: `true`
-
 
 ### renew\_before
 

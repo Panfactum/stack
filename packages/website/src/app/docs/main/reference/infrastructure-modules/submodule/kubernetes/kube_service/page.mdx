@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_service" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_service" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_service" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_service" status="stable" type="submodule" />
 
 # Kubernetes Service
 
@@ -17,9 +18,9 @@ We do not recommend using this directly.
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Required Inputs
 
@@ -47,7 +48,6 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-
 ### external\_traffic\_policy
 
 Description: The ExternalTrafficPolicy of the Service.
@@ -72,7 +72,6 @@ Type: `map(string)`
 
 Default: `{}`
 
-
 ### headless\_enabled
 
 Description: Set to true iff setting up a StatefulSet headless service.
@@ -89,7 +88,6 @@ Type: `string`
 
 Default: `"Cluster"`
 
-
 ### load\_balancer\_class
 
 Description: Iff type == LoadBalancer, the loadBalancerClass to use.
@@ -97,10 +95,6 @@ Description: Iff type == LoadBalancer, the loadBalancerClass to use.
 Type: `string`
 
 Default: `"service.k8s.aws/nlb"`
-
-
-
-
 
 ### ports
 
@@ -125,7 +119,6 @@ Description: Iff type == LoadBalancer, the public domains names that this servic
 Type: `list(string)`
 
 Default: `[]`
-
 
 ### service\_ip
 

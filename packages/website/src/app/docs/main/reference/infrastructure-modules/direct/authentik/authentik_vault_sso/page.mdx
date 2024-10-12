@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="authentik_vault_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_vault_sso" status="stable" type="direct"/>
+
+<ModuleHeader name="authentik_vault_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_vault_sso" status="stable" type="direct" />
 
 # AWS SSO with Authentik
 
@@ -11,15 +12,15 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.2.0/docs) (2024.2.0)
+* [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.2.0/docs) (2024.2.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
-- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
 
 ## Required Inputs
 
@@ -72,14 +73,6 @@ Description: Only members of these groups can access AWS
 Type: `set(string)`
 
 Default: `[]`
-
-
-
-
-
-
-
-
 
 ### ui\_description
 

@@ -3,7 +3,8 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_namespace" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_namespace" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_namespace" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_namespace" status="stable" type="submodule" />
 
 # Kubernetes Namespace
 
@@ -13,9 +14,9 @@ Sets up a Kubernetes namespace and grants namespace-scoped permissions to specif
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
 ## Required Inputs
 
@@ -45,9 +46,6 @@ Default:
 ]
 ```
 
-
-
-
 ### linkerd\_inject
 
 Description: Whether to inject linkerd sidecars into pods in this namespace.
@@ -72,10 +70,6 @@ Type: `bool`
 
 Default: `true`
 
-
-
-
-
 ### reader\_groups
 
 Description: The names of the kubernetes groups to give read access to the namespace.
@@ -89,7 +83,6 @@ Default:
   "system:readers"
 ]
 ```
-
 
 ## Outputs
 

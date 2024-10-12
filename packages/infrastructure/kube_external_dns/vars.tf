@@ -23,7 +23,7 @@ variable "cloudflare_zones" {
   type = map(object({
     zone_id = string
   }))
-  default = []
+  default = {}
 }
 
 variable "cloudflare_api_token" {
