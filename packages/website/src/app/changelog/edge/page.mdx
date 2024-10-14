@@ -94,6 +94,12 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   records would cause *all* records to be created. However, this update will cause all records to be recreated
   one last time.
 
+* `pf-wf-git-checkout` no longer automatically appends a `.git` to the end of given repo URLs as this is incompatible
+with some git hosting providers (e.g., Azure DevOps). This does mean that the `repo` variable input
+to [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) and
+[wf_dockerfile_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) should
+be updated to include the `.git` suffix if required for cloning over HTTP.
+
 ## edge.24-10-09
 
 ### Added
