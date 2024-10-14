@@ -6,7 +6,7 @@ module "scraper_builder" {
   eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
-  code_repo = "github.com/panfactum/stack"
+  code_repo = "github.com/panfactum/stack.git"
   dockerfile_path = "./packages/scraper/Containerfile"
   image_repo = "scraper"
 }
