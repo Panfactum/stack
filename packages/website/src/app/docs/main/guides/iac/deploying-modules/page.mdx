@@ -230,3 +230,27 @@ Shared inputs to groups of modules can be supplied by setting `extra_inputs` in 
 * `module.yaml`
 
 For a list of all the common input variables see this [reference list.](/docs/main/reference/infrastructure-modules/overview#common-variables)
+
+### Using a Local Copy of Panfactum Modules
+
+You may want to make modifications to Panfactum modules found in the [Stack repository](https://github.com/Panfactum/stack/tree/main/packages/infrastructure)
+and deploy them to your infrastructure.
+
+You can easily do this for any set of modules by manipulating a few [Terragrunt variables](/docs/main/reference/configuration/terragrunt-variables#module-source):
+
+1. Clone the Panfactum Stack repository to your local machine (`git clone https://github.com/Panfactum/stack.git`).
+
+2. Set `pf_stack_version` to `local`.
+
+3. Set `pf_stack_local_path` to an *absolute path* to the local copy of the Panfactum Stack repository you cloned in step 1.
+
+Now when you next run `terragrunt apply`, the local module code will be used. This applies to *both* Panfactum direct
+modules *and* submodules. [^6]
+
+[^6]: For submodules, this works via the `pf_module_source` input provided to your modules by Terragrunt. See the
+[first-party IaC development documentation for more information.](/docs/main/guides/iac/first-party-modules#using-panfactum-submodules)
+
+<MarkdownAlert severity="warning">
+    If using local modules, be sure to set `pf_stack_local_path` in your `*.user.yaml` Terragrunt variable files, *not* in the
+    configuration files that you commit to your repository. This value will be specific to your local machine.
+</MarkdownAlert>

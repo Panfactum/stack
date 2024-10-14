@@ -8,7 +8,7 @@ module "tf_deploy" {
   eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
-  repo = "github.com/panfactum/stack"
+  repo = "github.com/panfactum/stack.git"
   tf_apply_dir = "packages/reference/environments/production"
   secrets = {
     AUTHENTIK_TOKEN = var.authentik_token

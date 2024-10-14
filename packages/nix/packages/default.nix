@@ -301,6 +301,8 @@
       "pf-sops-set-profile") # helper for unifiying profile used to access sops-encrypted files
     (util.customShellScript
       "pf-get-terragrunt-variables") # helper for getting terragrunt variables that would be used by modules in the current directory
+    (util.customShellScript
+      "pf-get-local-module-hash") # helper for invalidating the terraform cache
 
     ####################################
     # Editors

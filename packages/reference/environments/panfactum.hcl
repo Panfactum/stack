@@ -64,11 +64,14 @@ locals {
   module = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
 
   # The version of the panfactum stack to deploy
-  pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
-  pf_stack_repo                = "github.com/panfactum/stack"
-  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-version-hash", local.pf_stack_version, local.pf_stack_version == "local" ? "local" : "https://${local.pf_stack_repo}")
-  pf_stack_local_path          = lookup(local.vars, "pf_stack_local_path", "../../../../../..")
-  pf_stack_source              = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.module}?ref=${local.pf_stack_version_commit_hash}"
+  pf_stack_version                       = lookup(local.vars, "pf_stack_version", "main")
+  pf_stack_repo                          = "github.com/panfactum/stack"
+  pf_stack_version_commit_hash           = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-version-hash", local.pf_stack_version, local.pf_stack_version == "local" ? "local" : "https://${local.pf_stack_repo}")
+  pf_stack_local_path                    = lookup(local.vars, "pf_stack_local_path", "../../../../../..")
+  pf_stack_local_ref                     = local.pf_stack_version == "local" ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", "${local.pf_stack_local_path}/packages/infrastructure") : ""
+  pf_stack_local_use_relative            = lookup(local.vars, "pf_stack_local_use_relative", true) == true # The redundant == is a type conversion check
+  pf_stack_local_path_relative_to_module = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "realpath", "--relative-to=${local.repo_root}", local.pf_stack_local_path)
+  pf_stack_source                        = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.module}?ref=${local.pf_stack_version_commit_hash}"
 
   # Repo metadata
   repo_vars      = jsondecode(run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-repo-variables"))
@@ -326,7 +329,7 @@ retry_sleep_interval_sec = 30
 inputs = merge(
   local.extra_inputs,
   {
-    pf_module_source = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//") : "${local.pf_stack_repo}//packages/infrastructure/"
-    pf_module_ref    = local.pf_stack_version == "local" ? "" : "?ref=${local.pf_stack_version_commit_hash}"
+    pf_module_source = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "../../../../${local.pf_stack_local_path_relative_to_module}/packages/infrastructure//" : "${local.pf_stack_local_path}/packages/infrastructure//") : "${local.pf_stack_repo}//packages/infrastructure/"
+    pf_module_ref    = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : "?ref=${local.pf_stack_version_commit_hash}"
   }
 )
