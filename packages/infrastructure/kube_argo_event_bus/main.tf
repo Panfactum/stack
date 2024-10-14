@@ -12,6 +12,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -29,6 +33,10 @@ locals {
 
 data "aws_region" "current" {}
 
+data "pf_kube_labels" "labels" {
+  module = "kube_argo_event_bus"
+}
+
 module "util" {
   source                        = "../kube_workload_utility"
   workload_name                 = "argo-event-bus"
@@ -36,23 +44,12 @@ module "util" {
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   az_spread_required            = true // stateful workload
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
   source = "../kube_constants"
 }
-
 
 // Note that ANY changes to this resource
 // will cause a full recreation cycle

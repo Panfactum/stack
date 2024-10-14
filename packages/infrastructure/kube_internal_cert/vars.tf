@@ -85,3 +85,9 @@ variable "renew_before" {
   type        = string
   default     = "168h0m0s"
 }
+
+variable "extra_labels" {
+  description = "Extra labels to add to the Certificate and Secret resources"
+  type        = map(string)
+  default     = {}
+}

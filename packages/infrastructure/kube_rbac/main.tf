@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -58,22 +62,10 @@ locals {
     resources = tolist(setsubtract(toset(split(",", row[0])), toset(local.secret_resources)))
     api_group = row[1]
   } }
-
 }
 
-module "util" {
-  source = "../kube_workload_utility"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_kube_labels" "labels" {
+  module = "kube_rbac"
 }
 
 ////////////////////////////////////////////////////////////
@@ -91,7 +83,7 @@ data "aws_iam_roles" "superuser" {
 resource "kubernetes_cluster_role_binding" "superusers" {
   metadata {
     name   = local.superusers_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -115,7 +107,7 @@ data "aws_iam_roles" "admin" {
 resource "kubernetes_cluster_role" "admins" {
   metadata {
     name   = local.admins_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   rule {
     api_groups = [""]
@@ -158,7 +150,7 @@ resource "kubernetes_cluster_role" "admins" {
 resource "kubernetes_cluster_role_binding" "admins" {
   metadata {
     name   = local.admins_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -182,7 +174,7 @@ data "aws_iam_roles" "reader" {
 resource "kubernetes_cluster_role" "readers" {
   metadata {
     name   = local.readers_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   rule {
     api_groups = ["*"]
@@ -194,7 +186,7 @@ resource "kubernetes_cluster_role" "readers" {
 resource "kubernetes_cluster_role_binding" "readers" {
   metadata {
     name   = local.readers_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -218,7 +210,7 @@ data "aws_iam_roles" "restricted_reader" {
 resource "kubernetes_cluster_role" "restricted_readers" {
   metadata {
     name   = local.restricted_readers_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   dynamic "rule" {
     for_each = local.non_secret_resources
@@ -248,7 +240,7 @@ resource "kubernetes_cluster_role" "restricted_readers" {
 resource "kubernetes_cluster_role_binding" "restricted_readers" {
   metadata {
     name   = local.restricted_readers_group
-    labels = module.util.labels
+    labels = data.pf_kube_labels.labels.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -271,7 +263,7 @@ resource "kubernetes_config_map" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   data = {
     mapRoles = yamlencode(concat(

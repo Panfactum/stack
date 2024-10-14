@@ -12,7 +12,15 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
+}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_pod"
 }
 
 locals {
@@ -495,7 +503,8 @@ locals {
 }
 
 module "util" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = var.workload_name
   match_labels                  = var.match_labels
   burstable_nodes_enabled       = var.burstable_nodes_enabled
@@ -512,16 +521,7 @@ module "util" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   node_requirements             = var.node_requirements
   node_preferences              = var.node_preferences
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = merge(data.pf_kube_labels.labels.labels, var.extra_labels) # Allow the caller to override so the module label can be set appropriately
 }
 
 module "constants" {
@@ -536,7 +536,7 @@ resource "kubernetes_secret" "secrets" {
   metadata {
     namespace     = var.namespace
     generate_name = "${var.workload_name}-"
-    labels        = module.util.labels
+    labels        = merge(module.util.labels, data.pf_kube_labels.labels.labels)
   }
   data = var.common_secrets
 }
@@ -549,7 +549,7 @@ resource "kubernetes_role" "pod_reader" {
   metadata {
     namespace     = var.namespace
     generate_name = "${var.workload_name}-"
-    labels        = module.util.labels
+    labels        = merge(module.util.labels, data.pf_kube_labels.labels.labels)
   }
   rule {
     api_groups = [""]
@@ -562,7 +562,7 @@ resource "kubernetes_role_binding" "pod_reader" {
   metadata {
     namespace     = var.namespace
     generate_name = "${var.workload_name}-"
-    labels        = module.util.labels
+    labels        = merge(module.util.labels, data.pf_kube_labels.labels.labels)
   }
   subject {
     kind      = "ServiceAccount"

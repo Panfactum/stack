@@ -18,6 +18,8 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* pf (0.0.3)
+
 ## Required Inputs
 
 The following input variables are required:
@@ -53,6 +55,14 @@ Description: How long the certificate will be valid for.
 Type: `string`
 
 Default: `"336h0m0s"`
+
+### extra\_labels
+
+Description: Extra labels to add to the Certificate and Secret resources
+
+Type: `map(string)`
+
+Default: `{}`
 
 ### include\_localhost
 

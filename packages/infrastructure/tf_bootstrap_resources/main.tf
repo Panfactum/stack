@@ -7,6 +7,10 @@ terraform {
       version               = "5.70.0"
       configuration_aliases = [aws.secondary]
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -14,35 +18,17 @@ data "aws_region" "secondary" {
   provider = aws.secondary
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "tf_bootstrap_resources"
 }
 
-module "secondary_tags" {
-  source = "../aws_tags"
+data "pf_aws_tags" "seondary_tags" {
+  module          = "tf_bootstrap_resources"
+  region_override = data.aws_region.secondary.name
+}
 
-  # pf-generate: set_vars_no_region
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-
-  region = data.aws_region.secondary.name
+locals {
+  environment = data.pf_aws_tags.tags.tags["panfactum.com/environment"]
 }
 
 ####################################################
@@ -52,8 +38,8 @@ module "secondary_tags" {
 resource "aws_s3_bucket" "state" {
   bucket              = var.state_bucket
   object_lock_enabled = false
-  tags = merge(module.tags.tags, {
-    description = "The terraform state bucket for ${var.environment}"
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    description = "The terraform state bucket for ${local.environment}"
   })
 }
 
@@ -185,8 +171,8 @@ resource "aws_dynamodb_table" "lock" {
     region_name = data.aws_region.secondary.name
   }
 
-  tags = merge(module.tags.tags, {
-    description = "The state lock table for ${var.environment}"
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    description = "The state lock table for ${local.environment}"
   })
 
   // Table class immediately drifted on 3/4 tables and would be reapplied every time
@@ -203,17 +189,17 @@ resource "aws_dynamodb_table" "lock" {
 #####################################################
 
 resource "aws_backup_vault" "terraform" {
-  name = "terraform-${var.environment}"
+  name = "terraform-${local.environment}"
   tags = merge(
-    module.tags.tags,
+    data.pf_aws_tags.tags.tags,
     {
-      description = "Backups of the terraform state for ${var.environment}"
+      description = "Backups of the terraform state for ${local.environment}"
     }
   )
 }
 
 resource "aws_backup_plan" "terraform" {
-  name = "terraform-${var.environment}"
+  name = "terraform-${local.environment}"
   rule {
     rule_name                = "continuous"
     target_vault_name        = aws_backup_vault.terraform.name
@@ -225,6 +211,7 @@ resource "aws_backup_plan" "terraform" {
       delete_after = 1 //days
     }
   }
+  tags = data.pf_aws_tags.tags.tags
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -241,6 +228,7 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_role" "terraform" {
   name_prefix        = "terraform-backups-"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  tags               = data.pf_aws_tags.tags.tags
 }
 
 data "aws_iam_policy_document" "backup" {
@@ -395,8 +383,9 @@ data "aws_iam_policy_document" "backup" {
 }
 
 resource "aws_iam_policy" "terraform" {
-  name_prefix = "terraform-${var.environment}-backup-"
+  name_prefix = "terraform-${local.environment}-backup-"
   policy      = data.aws_iam_policy_document.backup.json
+  tags        = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_iam_role_policy_attachment" "terraform" {

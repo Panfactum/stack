@@ -67,6 +67,12 @@
       rev = "325eb628b89b9a8183256f62d017bfb499b19bd9";
       sha256 = "9mZL4N+G/iAADDdR6vKDFwiweYLO8hAmjnDHvfVhYCY=";
     }) { inherit system; };
+    src9 = import (pkgs.fetchFromGitHub {
+      owner = "NixOS";
+      repo = "nixpkgs";
+      rev = "73bed75dbd3de6d4fca3f81ce25a0cc7766afff6";
+      sha256 = "IeBVJ75Bd7yWz8i3m225x5Q25O1Wk8cBWi8DI7bCgSo=";
+    }) { inherit system; };
 
     # Custom Packages
     # We need to us a later version of terragrunt than publicly available
@@ -284,7 +290,7 @@
     ####################################
     # Infrastructure-as-Code
     ####################################
-    src3.opentofu # declarative iac tool (open alternative to terraform)
+    src9.opentofu # declarative iac tool (open alternative to terraform)
     customTerragrunt # opentofu-runner
     (util.customShellScript "pf-get-version-hash") # helper for the IaC tagging
     (util.customShellScript

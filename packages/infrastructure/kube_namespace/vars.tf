@@ -32,3 +32,9 @@ variable "monitoring_enabled" {
   type        = bool
   default     = true
 }
+
+variable "extra_labels" {
+  description = "Extra labels to apply to the namespace resource"
+  type        = map(string)
+  default     = {}
+}

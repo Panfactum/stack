@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -15,21 +19,9 @@ locals {
 
 data "aws_ssoadmin_instances" "main" {}
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_iam_identity_center_permissions"
 }
-
 
 ###########################################################################
 ## AWS RBAC Core Permission Sets
@@ -46,7 +38,7 @@ resource "aws_ssoadmin_permission_set" "superuser" {
   description      = "Complete access to the account."
   instance_arn     = local.sso_instance_arn
   session_duration = "PT${var.session_duration_hours}H"
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Complete access to the account."
   })
 }
@@ -64,7 +56,7 @@ resource "aws_ssoadmin_permission_set" "admin" {
   description      = "Read and write access to most resources."
   instance_arn     = local.sso_instance_arn
   session_duration = "PT${var.session_duration_hours}H"
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Read and write access to most resources."
   })
 }
@@ -82,7 +74,7 @@ resource "aws_ssoadmin_permission_set" "reader" {
   description      = "Read only access to all resources."
   instance_arn     = local.sso_instance_arn
   session_duration = "PT${var.session_duration_hours}H"
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Read only access to all resources."
   })
 }
@@ -100,7 +92,7 @@ resource "aws_ssoadmin_permission_set" "restricted_reader" {
   description      = "Read only access to a restricted subset of resources."
   instance_arn     = local.sso_instance_arn
   session_duration = "PT${var.session_duration_hours}H"
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Read only access to a restricted subset of resources."
   })
 }
@@ -118,7 +110,7 @@ resource "aws_ssoadmin_permission_set" "billing_admin" {
   description      = "Read and write access to billing-related functionality."
   instance_arn     = local.sso_instance_arn
   session_duration = "PT${var.session_duration_hours}H"
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Read and write access to billing-related functionality."
   })
 }

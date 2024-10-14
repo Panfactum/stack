@@ -7,6 +7,10 @@ terraform {
       version               = "5.70.0"
       configuration_aliases = [aws.secondary]
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -14,7 +18,7 @@ locals {
   # We omit some tags that change frequently from node group
   # replicas b/c changing these tags take a very long time to update
   replica_tags = {
-    for k, v in module.secondary_tags.tags : k => v if !contains([
+    for k, v in data.pf_aws_tags.secondary_tags.tags : k => v if !contains([
       "panfactum.com/stack-commit",
       "panfactum.com/stack-version"
     ], k)
@@ -26,35 +30,13 @@ data "aws_region" "secondary" {
   provider = aws.secondary
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_kms_encrypt_key"
 }
 
-module "secondary_tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars_no_region
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-
-  region = data.aws_region.secondary.name
+data "pf_aws_tags" "secondary_tags" {
+  module          = "aws_kms_encrypt_key"
+  region_override = data.aws_region.secondary.name
 }
 
 ###########################################################################
@@ -208,7 +190,7 @@ resource "aws_kms_key" "key" {
   multi_region             = true
   policy                   = data.aws_iam_policy_document.key.json
 
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 
   lifecycle {
     prevent_destroy = true

@@ -25,6 +25,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -35,8 +39,13 @@ locals {
 
 data "aws_region" "current" {}
 
+data "pf_kube_labels" "labels" {
+  module = "kube_authentik"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
@@ -45,61 +54,33 @@ module "constants" {
 }
 
 module "util_server" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "authentik-server"
   instance_type_spread_required = var.enhanced_ha_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_worker" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "authentik-worker"
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "namespace" {
   source = "../kube_namespace"
 
   namespace = var.namespace
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -127,16 +108,6 @@ module "database" {
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 
@@ -156,16 +127,6 @@ module "redis" {
   monitoring_enabled            = var.monitoring_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -753,16 +714,6 @@ module "ingress" {
   permissions_policy_publickey_credentials_create = "(self \"https://*.${var.domain}\")"
   permissions_policy_publickey_credentials_get    = "(self \"https://*.${var.domain}\")"
 
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-
   depends_on = [helm_release.authentik]
 }
 
@@ -775,15 +726,5 @@ module "cdn" {
 
   name           = "authentik"
   origin_configs = module.ingress[0].cdn_origin_configs
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 

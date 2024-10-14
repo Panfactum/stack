@@ -11,22 +11,15 @@ terraform {
       source  = "hashicorp/time"
       version = "0.10.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_registered_domains"
 }
 
 data "aws_region" "current" {}
@@ -38,7 +31,7 @@ data "aws_region" "current" {}
 resource "aws_route53_zone" "zones" {
   for_each = var.domain_names
   name     = each.key
-  tags     = module.tags.tags
+  tags     = data.pf_aws_tags.tags.tags
 }
 
 ##########################################################################
@@ -108,7 +101,7 @@ resource "aws_route53domains_registered_domain" "domain" {
     country_code      = var.registrant_country_code
   }
 
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 
@@ -133,16 +126,6 @@ module "dnssec" {
   }
 
   hosted_zones = { for domain, zone in aws_route53_zone.zones : domain => zone.zone_id }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 
   depends_on = [time_sleep.wait_for_ns_update]
 }
@@ -177,15 +160,5 @@ module "iam_role" {
 
   hosted_zone_ids                           = [for zone, config in aws_route53_zone.zones : config.zone_id]
   additional_account_ids_with_record_access = var.additional_account_ids_with_record_access
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 

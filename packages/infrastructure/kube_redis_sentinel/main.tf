@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -30,7 +34,8 @@ locals {
 }
 
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
@@ -39,8 +44,13 @@ resource "random_id" "id" {
   prefix      = "redis-"
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_redis"
+}
+
 module "util" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = random_id.id.hex
   controller_nodes_enabled      = var.controller_nodes_enabled
   burstable_nodes_enabled       = var.burstable_nodes_enabled
@@ -51,17 +61,7 @@ module "util" {
   az_spread_required            = true
   az_spread_preferred           = true // stateful
   lifetime_evictions_enabled    = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -461,16 +461,6 @@ module "pvc_annotator" {
       labels = module.util.labels
     }
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************

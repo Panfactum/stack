@@ -12,7 +12,15 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
+}
+
+data "pf_kube_labels" "labels" {
+  module = "wf_spec"
 }
 
 locals {
@@ -596,50 +604,31 @@ module "util" {
   az_spread_required            = false
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   lifetime_evictions_enabled    = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
 }
 
 resource "kubernetes_service_account" "sa" {
   metadata {
     name      = random_id.workflow_id.hex
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = merge(var.extra_labels, data.pf_kube_labels.labels.labels)
   }
 }
 
 module "workflow_perms" {
-  source                    = "../kube_sa_auth_workflow"
+  source = "../kube_sa_auth_workflow"
+
   service_account           = kubernetes_service_account.sa.metadata[0].name
   service_account_namespace = var.namespace
   eks_cluster_name          = var.eks_cluster_name
   extra_aws_permissions     = var.extra_aws_permissions
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_config_map" "parallelism" {
   metadata {
     name      = "${random_id.workflow_id.hex}-sync"
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = merge(var.extra_labels, data.pf_kube_labels.labels.labels)
   }
   data = {
     workflow = tostring(var.workflow_parallelism)
@@ -650,7 +639,7 @@ resource "kubernetes_secret" "secrets" {
   metadata {
     namespace = var.namespace
     name      = random_id.workflow_id.hex
-    labels    = module.util.labels
+    labels    = merge(var.extra_labels, data.pf_kube_labels.labels.labels)
   }
   data = var.common_secrets
 }
@@ -663,7 +652,7 @@ resource "kubectl_manifest" "pdb" {
     metadata = {
       name      = random_id.workflow_id.hex
       namespace = var.namespace
-      labels    = module.util.labels
+      labels    = merge(var.extra_labels, data.pf_kube_labels.labels.labels)
     }
     spec = {
       selector = {

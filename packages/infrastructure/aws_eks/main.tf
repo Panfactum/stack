@@ -11,6 +11,10 @@ terraform {
       source  = "hashicorp/tls"
       version = "4.0.5"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -22,7 +26,7 @@ locals {
   # instances b/c changing these tags forces the nodes to roll
   # which is a disruptive and time consuming operation
   instance_tags = {
-    for k, v in module.tags.tags : k => v if !contains([
+    for k, v in data.pf_aws_tags.tags.tags : k => v if !contains([
       "panfactum.com/stack-commit",
       "panfactum.com/stack-version"
     ], k)
@@ -31,34 +35,12 @@ locals {
 
 data "aws_region" "region" {}
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_eks"
 }
 
 module "constants" {
   source = "../kube_constants"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "node_settings" {
@@ -68,16 +50,6 @@ module "node_settings" {
   cluster_dns_service_ip = var.dns_service_ip
   cluster_endpoint       = aws_eks_cluster.cluster.endpoint
   is_spot                = false
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 ##########################################################################
@@ -112,7 +84,7 @@ resource "aws_eks_cluster" "cluster" {
     resources = ["secrets"]
   }
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = var.cluster_description
   })
 
@@ -147,7 +119,7 @@ resource "aws_ec2_tag" "vpc_tags" {
 resource "aws_security_group" "control_plane" {
   description = "Security group for the ${var.cluster_name} EKS control plane."
   vpc_id      = local.vpc_id
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     Name        = var.cluster_name
     description = "Security group for the ${var.cluster_name} EKS control plane."
   })
@@ -188,7 +160,7 @@ resource "aws_iam_role" "eks_cluster_role" {
     "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
     "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   ]
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     Name        = var.cluster_name
     description = "IAM role for the ${var.cluster_name} EKS control plane."
   })
@@ -218,16 +190,6 @@ module "encrypt_key" {
   admin_iam_arns             = var.admin_iam_arns
   reader_iam_arns            = var.reader_iam_arns
   restricted_reader_iam_arns = var.restricted_reader_iam_arns
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 moved {
@@ -263,16 +225,6 @@ module "aws_cloudwatch_log_group" {
   source      = "../aws_cloudwatch_log_group"
   name        = "/aws/eks/${var.cluster_name}/cluster"
   description = "Collects logs for our AWS EKS Cluster"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 ##########################################################################
@@ -349,7 +301,7 @@ resource "aws_launch_template" "controller" {
     )
   }
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = local.controller_nodes_description
   })
 
@@ -452,7 +404,7 @@ resource "aws_security_group" "all_nodes" {
   name_prefix = "${var.cluster_name}-nodes-"
   vpc_id      = local.vpc_id
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     Name        = "${var.cluster_name}-nodes"
     description = "Security group for all nodes in the ${var.cluster_name} EKS cluster"
   })
@@ -522,7 +474,7 @@ resource "aws_security_group_rule" "egress_all" {
 resource "aws_iam_instance_profile" "node_group" {
   name_prefix = "${var.cluster_name}-node-"
   role        = aws_iam_role.node_group.name
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Instance profile for all nodes in the ${var.cluster_name} EKS cluster"
   })
   lifecycle {
@@ -546,7 +498,7 @@ resource "aws_iam_role" "node_group" {
   assume_role_policy    = data.aws_iam_policy_document.node_group_assume_role.json
   force_detach_policies = true
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "IAM role for all nodes in the ${var.cluster_name} EKS cluster"
   })
 
@@ -624,7 +576,7 @@ resource "aws_iam_openid_connect_provider" "provider" {
   thumbprint_list = [for cert in data.tls_certificate.cluster.certificates : cert.sha1_fingerprint]
   url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Gives the ${var.cluster_name} EKS cluster access to AWS roles via IRSA"
   })
 }

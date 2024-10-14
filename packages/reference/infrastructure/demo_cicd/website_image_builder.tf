@@ -2,7 +2,7 @@
 ## This is an example of simply building a Dockerfile
 ###############################################################
 module "website_builder" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_dockerfile_build?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source                    = "${var.pf_module_source}wf_dockerfile_build${var.pf_module_ref}"
 
   name = "website-builder"
   namespace = local.namespace
@@ -18,16 +18,6 @@ module "website_builder" {
     ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
     ALGOLIA_INDEX_NAME = var.algolia_index_name
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 ##############################################################
@@ -38,7 +28,7 @@ module "website_builder" {
 ###############################################################
 
 module "build_and_deploy_website_workflow" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source                    = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name = "build-and-deploy-website"
   namespace = local.namespace
@@ -81,16 +71,6 @@ module "build_and_deploy_website_workflow" {
       }
     }
   ]
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubectl_manifest" "build_and_deploy_website_workflow_template" {

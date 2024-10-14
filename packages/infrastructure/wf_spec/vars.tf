@@ -417,5 +417,11 @@ variable "passthrough_parameters" {
   default = []
 }
 
+variable "extra_labels" {
+  description = "Extra labels to assign to all resources in this workflow"
+  type        = map(string)
+  default     = {}
+}
+
 
 

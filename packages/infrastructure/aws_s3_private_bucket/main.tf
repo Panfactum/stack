@@ -4,31 +4,24 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
 data "aws_caller_identity" "main" {}
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_s3_private_bucket"
 }
 
 
 resource "aws_s3_bucket" "bucket" {
   bucket              = var.bucket_name
   object_lock_enabled = false
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = var.description
   })
   force_destroy = var.force_destroy
@@ -179,7 +172,7 @@ resource "aws_s3_bucket" "audit" {
   bucket              = "${var.bucket_name}-audit-log"
   object_lock_enabled = true
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Audit logs for the ${var.bucket_name} bucket"
   })
 }

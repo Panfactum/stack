@@ -20,81 +20,62 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
 locals {
-
   name           = "cert-manager"
   webhook_name   = "cert-manger-webhook"
   namespace      = module.namespace.namespace
   webhook_secret = "cert-manager-webhook-certs"
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_cert_manager"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
-  source                      = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name               = "cert-manager"
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                = data.pf_kube_labels.labels.labels
 }
 
 module "util_webhook" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "cert-manager-webhook"
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_ca_injector" {
-  source                      = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name               = "cert-manager-ca-injector"
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   controller_nodes_enabled    = true
   burstable_nodes_enabled     = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -109,16 +90,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -149,17 +120,6 @@ module "webhook_cert" {
   common_name   = "cert-manager-webhook.cert-manager.svc"
   secret_name   = local.webhook_secret
   namespace     = local.namespace
-
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = module.util_webhook.labels
 }
 
 
@@ -525,37 +485,6 @@ resource "kubectl_manifest" "pdb_ca_injector" {
         matchLabels = module.util_ca_injector.match_labels
       }
       maxUnavailable = 1
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.cert_manager]
-}
-
-/***************************************
-* Canary Checks
-***************************************/
-
-resource "kubectl_manifest" "canary" {
-  count = var.canary_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "canaries.flanksource.com/v1"
-    kind       = "Canary"
-    metadata = {
-      name      = "cert-manager"
-      namespace = local.namespace
-      labels    = module.util_controller.labels
-    }
-    spec = {
-      schedule   = "@every 30s"
-      http       = []
-      kubernetes = []
-      tcp = [
-        {
-          name     = "webhook service available"
-          endpoint = "cert-manager-webhook.cert-manager:443"
-        }
-      ]
     }
   })
   force_conflicts   = true

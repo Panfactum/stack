@@ -6,23 +6,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
-
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_account"
 }
 
 data "aws_region" "current" {}
@@ -85,7 +77,7 @@ resource "aws_account_alternate_contact" "billing" {
 resource "aws_iam_service_linked_role" "spot" {
   aws_service_name = "spot.amazonaws.com"
   description      = "Used by various controllers to launch spot instances"
-  tags             = module.tags.tags
+  tags             = data.pf_aws_tags.tags.tags
 }
 
 /***************************************
@@ -98,7 +90,6 @@ resource "random_id" "spot_data_feed_bucket_name" {
   prefix      = "spot-data-"
 }
 
-## TODO: Move to its own module
 module "data_feed_bucket" {
   source      = "../aws_s3_private_bucket"
   bucket_name = random_id.spot_data_feed_bucket_name.hex
@@ -108,16 +99,6 @@ module "data_feed_bucket" {
   expire_old_versions             = true
   intelligent_transitions_enabled = false
   acl_enabled                     = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "aws_spot_datafeed_subscription" "feed" {

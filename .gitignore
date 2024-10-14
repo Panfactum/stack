@@ -5,6 +5,7 @@
 .pre-commit-config.yaml
 .env
 .podman
+go
 !packages/reference/.env
 !packages/reference/.direnv
 !packages/reference/.devenv

@@ -528,6 +528,8 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
+* pf (0.0.3)
+
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
@@ -787,6 +789,14 @@ Description: Extra JSON-encoded AWS permissions to assign to the Workflow's serv
 Type: `string`
 
 Default: `"{}"`
+
+### extra\_labels
+
+Description: Extra labels to assign to all resources in this workflow
+
+Type: `map(string)`
+
+Default: `{}`
 
 ### extra\_pod\_annotations
 

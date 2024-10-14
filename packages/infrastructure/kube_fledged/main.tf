@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -31,51 +35,38 @@ locals {
   ]))
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_fledged"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "kube-fledged-controller"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = false
   az_spread_preferred           = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_webhook" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "kube-fledged-webhook"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = false
   az_spread_preferred           = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -86,16 +77,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = "kube-fledged"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -109,17 +90,6 @@ module "webhook_cert" {
   common_name   = "kube-fledged-webhook-server.${local.namespace}.svc"
   secret_name   = local.webhook_secret
   namespace     = local.namespace
-
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = module.util_webhook.labels
 }
 
 resource "helm_release" "kube_fledged" {

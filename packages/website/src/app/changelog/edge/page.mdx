@@ -13,6 +13,59 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Breaking Changes
 
+* This release integrates the new [Panfactum provider](https://registry.terraform.io/providers/Panfactum/pf/latest) and
+  removes the need to pass many different variables through the module tree.
+
+  Additionally, we have upgraded [OpenTofu to v1.8](https://opentofu.org/blog/opentofu-1-8-0/) which now supports variables in module `source` fields. To take advantage
+  of this, we now pass two new inputs to every module by default: `pf_module_source` and `pf_module_ref`.
+
+  This greatly simplifies developer experience for first-party modules by removing boilerplate with no loss of functionality.
+
+  Original:
+
+  ```hcl
+  module "namespace" {
+    source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+
+    namespace = "example"
+
+    # pf-generate: pass_vars
+    pf_stack_version = var.pf_stack_version
+    pf_stack_commit  = var.pf_stack_commit
+    environment      = var.environment
+    region           = var.region
+    pf_root_module   = var.pf_root_module
+    is_local         = var.is_local
+    extra_tags       = var.extra_tags
+    # end-generate
+  }
+  ```
+
+  Simplified:
+
+  ```hcl
+  module "namespace" {
+    source = "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
+
+    namespace = "example"
+  }
+  ```
+
+  For more information, see the [updated first-party IaC development documentation.](/docs/edge/guides/iac/first-party-modules#writing-modules)
+
+  This does come with a couple breaking changes:
+
+  1. Terragrunt no longer passes the following inputs to modules by default as they can be accessed via the Panfactum provider:
+
+     * `pf_stack_version`
+     * `pf_stack_commit`
+     * `environment`
+     * `region`
+     * `pf_root_module`
+     * `is_local`
+
+  2. The templating system and `pf-update-iac` have been removed as they are no longer necessary.
+
 * [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `rewrite_rules`
   to be specified on `ingress_configs`. Instead, there is now a top-level `redirect_rules` variables that has enhanced capabilities:
   * Can pattern match against the entire url (`https://google.com/some/path`) instead of just the path component (`/some/path`).
