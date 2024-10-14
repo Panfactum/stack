@@ -36,11 +36,11 @@ locals {
 
     included_domains = [domain]
     excluded_domains = [
-      for excluded_domain in var.cloudflare_zones :
+      for excluded_domain, config in var.cloudflare_zones :
       excluded_domain
       if excluded_domain != domain &&
       alltrue([
-        for included_domain in var.cloudflare_zones :
+        for included_domain, config in var.cloudflare_zones :
         !endswith(included_domain, excluded_domain) || included_domain == excluded_domain
       ])
     ]
