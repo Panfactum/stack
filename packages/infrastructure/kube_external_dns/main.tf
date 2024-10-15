@@ -30,17 +30,22 @@ locals {
 
   all_roles = toset([for domain, config in var.route53_zones : config.record_manager_role_arn])
 
+  all_domains = concat(
+    keys(var.cloudflare_zones),
+    keys(var.route53_zones)
+  )
+
   cloudflare_config = { for domain, config in var.cloudflare_zones : domain => {
     labels   = { domain : sha1(domain) }
     provider = "cloudflare"
 
     included_domains = [domain]
     excluded_domains = [
-      for excluded_domain, config in var.cloudflare_zones :
+      for excluded_domain, config in local.all_domains :
       excluded_domain
       if excluded_domain != domain &&
       alltrue([
-        for included_domain, config in var.cloudflare_zones :
+        for included_domain, config in local.all_domains :
         !endswith(included_domain, excluded_domain) || included_domain == excluded_domain
       ])
     ]
