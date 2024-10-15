@@ -196,7 +196,8 @@ words: [
   "creds",
   "strcontains",
   "syncer",
-  "TLDR"
+  "TLDR",
+  "awslogsdelivery"
 ]
 languageSettings:
   - languageId: markdown,mdx

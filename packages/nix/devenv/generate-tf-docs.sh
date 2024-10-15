@@ -37,9 +37,10 @@ function skip_injected_variables() {
 }
 
 function add_provider_links() {
-  sed -E 's@- (helm|kubernetes|aws|time|local|vault|time|random|tls) \((.*)\)@- [\1](https://registry.terraform.io/providers/hashicorp/\1/\2/docs) (\2)@g' |
+  sed -E 's@- (helm|kubernetes|aws|time|local|vault|time|random|tls|archive) \((.*)\)@- [\1](https://registry.terraform.io/providers/hashicorp/\1/\2/docs) (\2)@g' |
     sed -E 's@- kubectl \((.*)\)@- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/\1/docs) (\1)@g' |
-    sed -E 's@- authentik \((.*)\)@- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/\1/docs) (\1)@g'
+    sed -E 's@- authentik \((.*)\)@- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/\1/docs) (\1)@g' |
+    sed -E 's@- pf \((.*)\)@- [pf](https://registry.terraform.io/providers/panfactum/pf/\1/docs) (\1)@g'
 }
 
 function rename_provider_header() {

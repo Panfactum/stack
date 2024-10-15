@@ -5,6 +5,16 @@ resources in a Kubernetes cluster.
 
 ## Usage
 
+### CDN
+
+If you want to provide a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network) in front of the created Ingresses
+for performance and security improvements, see the [kube_aws_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
+
+**Additionally, this module must be deployed with `cdn_mode_enabled` set to `true`.**
+
+CDN configuration can be supplied via the `cdn` configuration field on each element of `ingress_configs`. The individual
+settings are described in more detail [here](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
+
 ### Redirect Rules
 
 You can use `redirect_rules` to perform pattern matching over the requested URLs to perform permanent or

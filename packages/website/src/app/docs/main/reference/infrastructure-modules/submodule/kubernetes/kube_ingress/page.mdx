@@ -13,6 +13,16 @@ resources in a Kubernetes cluster.
 
 ## Usage
 
+### CDN
+
+If you want to provide a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network) in front of the created Ingresses
+for performance and security improvements, see the [kube\_aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
+
+**Additionally, this module must be deployed with `cdn_mode_enabled` set to `true`.**
+
+CDN configuration can be supplied via the `cdn` configuration field on each element of `ingress_configs`. The individual
+settings are described in more detail [here](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
+
 ### Redirect Rules
 
 You can use `redirect_rules` to perform pattern matching over the requested URLs to perform permanent or
@@ -161,7 +171,7 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
 
-* pf (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
@@ -222,7 +232,7 @@ list(object({
         headers_not_forwarded       = optional(list(string), [])            # Which headers will NOT be forwarded to the ingress from CDN
         query_strings_not_forwarded = optional(list(string), [])            # Which query strings will NOT be forwarded to the ingress from the CDN
         compression_enabled         = optional(bool, true)                  # Whether the CDN performs compression on your assets
-        viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS)
+        viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS). One of: allow-all, https-only, redirect-to-https
       }))
 
       # Similar to default_cache_behavior but allows you to specific specific rules for certain path patterns

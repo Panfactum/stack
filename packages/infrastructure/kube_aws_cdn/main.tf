@@ -13,6 +13,10 @@ terraform {
       source  = "hashicorp/archive"
       version = "2.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -22,8 +26,9 @@ module "cdn" {
     aws.global = aws.global
   }
 
-  name    = var.name
-  domains = tolist(toset(flatten([for config in var.origin_configs : config.domains])))
+  name        = var.name
+  description = var.description
+  domains     = tolist(toset(flatten([for config in var.origin_configs : config.domains])))
   origin_configs = [for config in var.origin_configs : {
     origin_id              = config.origin_id
     origin_domain          = config.origin_domain
@@ -32,9 +37,12 @@ module "cdn" {
     default_cache_behavior = lookup(config, "default_cache_behavior", {})
     path_match_behavior    = lookup(config, "path_match_behavior", {})
   }]
-  redirect_rules        = var.redirect_rules
-  price_class           = var.price_class
-  geo_restriction_type  = var.geo_restriction_type
-  geo_restriction_list  = var.geo_restriction_list
-  origin_shield_enabled = var.origin_shield_enabled
+  redirect_rules            = var.redirect_rules
+  price_class               = var.price_class
+  geo_restriction_type      = var.geo_restriction_type
+  geo_restriction_list      = var.geo_restriction_list
+  origin_shield_enabled     = var.origin_shield_enabled
+  logging_enabled           = var.logging_enabled
+  logging_cookies_enabled   = var.logging_cookies_enabled
+  logging_expire_after_days = var.logging_expire_after_days
 }

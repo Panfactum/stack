@@ -55,7 +55,7 @@ variable "ingress_configs" {
         headers_not_forwarded       = optional(list(string), [])            # Which headers will NOT be forwarded to the ingress from CDN
         query_strings_not_forwarded = optional(list(string), [])            # Which query strings will NOT be forwarded to the ingress from the CDN
         compression_enabled         = optional(bool, true)                  # Whether the CDN performs compression on your assets
-        viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS)
+        viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS). One of: allow-all, https-only, redirect-to-https
       }))
 
       # Similar to default_cache_behavior but allows you to specific specific rules for certain path patterns

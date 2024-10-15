@@ -3,6 +3,12 @@ variable "name" {
   type        = string
 }
 
+variable "description" {
+  description = "A description for this CDN"
+  type        = string
+  default     = null
+}
+
 variable "domains" {
   description = "A list of domains to use for the CDN"
   type        = list(string)
@@ -47,7 +53,7 @@ variable "origin_configs" {
       headers_not_forwarded       = optional(list(string), [])            # Which headers will NOT be forwarded to the ingress from CDN
       query_strings_not_forwarded = optional(list(string), [])            # Which query strings will NOT be forwarded to the ingress from the CDN
       compression_enabled         = optional(bool, true)                  # Whether the CDN performs compression on your assets
-      viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS)
+      viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS). One of: allow-all, https-only, redirect-to-https
     }))
 
     # Similar to default_cache_behavior but allows you to specific specific rules for certain path patterns
@@ -100,7 +106,7 @@ variable "redirect_rules" {
 
 
 variable "price_class" {
-  description = "The price class for the CDN"
+  description = "The price class for the CDN. Must be one of: PriceClass_All, PriceClass_200, PriceClass_100."
   type        = string
   default     = "PriceClass_100"
   validation {
@@ -111,7 +117,7 @@ variable "price_class" {
 
 
 variable "geo_restriction_type" {
-  description = "What type of geographic restrictions to you want to apply to CDN clients"
+  description = "What type of geographic restrictions to you want to apply to CDN clients. Must be one of: none, blacklist, whitelist."
   type        = string
   default     = "none"
   validation {
@@ -130,4 +136,22 @@ variable "origin_shield_enabled" {
   description = "Whether origin shield should be enabled for the CloudFront distribution"
   type        = bool
   default     = false
+}
+
+variable "logging_enabled" {
+  description = "Whether request logging should be enabled for the CloudFront distribution"
+  type        = bool
+  default     = false
+}
+
+variable "logging_cookies_enabled" {
+  description = "Whether cookies should be included in the request logs"
+  type        = bool
+  default     = false
+}
+
+variable "logging_expire_after_days" {
+  description = "The number of days after which logs will be deleted. (0 to disable)"
+  type        = number
+  default     = 0
 }

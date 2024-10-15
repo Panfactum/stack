@@ -25,7 +25,7 @@ for more information.
 
 ```hcl
 module "ingress_1" {
-   source = "../kube_ingress"
+   source = "${var.pf_module_source}kube_ingress${var.pf_module_ref}"
 
    namespace    = local.namespace
    name         = "example1"
@@ -66,7 +66,7 @@ module "ingress_2" {
 }
 
 module "cdn" {
-   source = "../kube_aws_cdn"
+   source = "${var.pf_module_source}kube_aws_cdn${var.pf_module_ref}"
    
    # Since the CDN operates globally, you must use the global
    # provider as follows:

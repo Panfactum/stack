@@ -13,7 +13,15 @@ terraform {
       source  = "hashicorp/archive"
       version = "2.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
+}
+
+data "pf_aws_tags" "tags" {
+  module = "aws_cdn"
 }
 
 locals {
@@ -136,6 +144,11 @@ resource "aws_acm_certificate" "cdn" {
   domain_name               = var.domains[0]
   subject_alternative_names = slice(var.domains, 1, length(var.domains))
   validation_method         = "DNS"
+
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    Name        = var.name
+    description = "Certificate for the ${var.name} CDN"
+  })
 
   lifecycle {
     create_before_destroy = true
@@ -382,6 +395,10 @@ data "aws_iam_policy_document" "lambda_assume_role_policy" {
 resource "aws_iam_role" "lambda_edge_role" {
   name_prefix        = "cdn-${var.name}-lambda-"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role_policy.json
+
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    description = "Role for Lambda@Edge functions created for the ${var.name} CDN"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_edge_policy" {
@@ -414,6 +431,11 @@ resource "aws_lambda_function" "edge_function_404" {
   publish          = true
   memory_size      = 128
   timeout          = 5
+
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    description = "Default 404 response for the ${var.name} CDN"
+  })
+
 }
 
 resource "aws_lambda_permission" "edge_function_404" {
@@ -466,6 +488,10 @@ resource "aws_lambda_function" "edge_function_page_rules" {
   publish          = true
   memory_size      = 128
   timeout          = 5
+
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    description = "Page rules for the ${var.name} CDN"
+  })
 }
 
 resource "aws_lambda_permission" "edge_function_page_rules" {
@@ -483,12 +509,34 @@ resource "aws_lambda_permission" "edge_function_page_rules" {
   }
 }
 
+resource "random_id" "log_bucket_name" {
+  count = var.logging_enabled ? 1 : 0
+
+  byte_length = 4
+  prefix      = "${lower(var.name)}-logs-"
+}
+
+module "log_bucket" {
+  count  = var.logging_enabled ? 1 : 0
+  source = "../aws_s3_private_bucket"
+
+  bucket_name = random_id.log_bucket_name[0].hex
+  description = "Logs for ${var.name} CDN"
+
+  acl_aws_logs_delivery_enabled = true
+  expire_after_days             = var.logging_expire_after_days
+}
+
 ///////////////////////////////////////////////////
 /// Step 3: Create the distribution
 ///////////////////////////////////////////////////
 
 resource "aws_cloudfront_distribution" "cdn" {
-  aliases = var.domains
+  enabled         = true
+  is_ipv6_enabled = true
+  comment         = var.name
+  price_class     = var.price_class
+  aliases         = var.domains
 
   dynamic "origin" {
     for_each = local.origin_configs
@@ -525,13 +573,6 @@ resource "aws_cloudfront_distribution" "cdn" {
       }
     }
   }
-
-  enabled         = true
-  is_ipv6_enabled = true
-  comment         = var.name
-  price_class     = var.price_class
-
-  # TODO: Logging
 
   // This should never be hit
   default_cache_behavior {
@@ -605,16 +646,32 @@ resource "aws_cloudfront_distribution" "cdn" {
     ssl_support_method       = "sni-only"
   }
 
+  dynamic "logging_config" {
+    for_each = var.logging_enabled ? ["enabled"] : []
+    content {
+      bucket          = "${module.log_bucket[0].bucket_name}.s3.amazonaws.com"
+      include_cookies = var.logging_cookies_enabled
+    }
+  }
+
   # We set this to false, because otherwise there is a significant delay in setting
   # up DNS which can lead to unnecessary downtime when enabling the CDN as a part of
   # an automated deployment
   wait_for_deployment = false
 
-  depends_on = [aws_acm_certificate_validation.cert]
+  tags = merge(data.pf_aws_tags.tags.tags, {
+    Name        = var.name
+    description = var.description == null ? var.name : var.description
+  })
 
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    aws_acm_certificate_validation.cert,
+    module.log_bucket
+  ]
 }
 
 ///////////////////////////////////////////////////

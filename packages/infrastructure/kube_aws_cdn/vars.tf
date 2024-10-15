@@ -3,6 +3,12 @@ variable "name" {
   type        = string
 }
 
+variable "description" {
+  description = "A description for this CDN"
+  type        = string
+  default     = null
+}
+
 variable "origin_configs" {
   description = "A list of configuration settings for communicating with the upstream ingress resources. Do NOT set this manually. Use the outputs from kube_ingress."
   type = list(object({
@@ -116,4 +122,23 @@ variable "origin_shield_enabled" {
   description = "Whether origin shield should be enabled for the CloudFront distribution"
   type        = bool
   default     = false
+}
+
+
+variable "logging_enabled" {
+  description = "Whether request logging should be enabled for the CloudFront distribution"
+  type        = bool
+  default     = false
+}
+
+variable "logging_cookies_enabled" {
+  description = "Whether cookies should be included in the request logs"
+  type        = bool
+  default     = false
+}
+
+variable "logging_expire_after_days" {
+  description = "The number of days after which logs will be deleted. (0 to disable)"
+  type        = number
+  default     = 0
 }

@@ -11,10 +11,6 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
-### Fixed
-
-* Pinned helm version for `kube_redis_sentinel` sub module
-
 ### Breaking Changes
 
 * This release integrates the new [Panfactum provider](https://registry.terraform.io/providers/Panfactum/pf/latest) and
@@ -83,8 +79,19 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Added
 
+* A new module, [kube_aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn), has been
+created that enables setting up a CloudFront distribution (CDN) in front of Ingress resources for improved performance and security
+as well as reduced server costs. [kube_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+has been updated to support CDN settings.
+
+Additionally, a non-Kubernetes CDN module, [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
+has also been created.
+
 * A new module, [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones), has been
   created that allows you to create Route53 zones that have a non-AWS registrar.
+
+* Added the `acl_aws_logs_delivery_enabled` input to [aws_s3_private_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
+which makes it easier to use the bucket for AWS log delivery purposes.
 
 ### Changed
 
@@ -103,6 +110,8 @@ with some git hosting providers (e.g., Azure DevOps). This does mean that the `r
 to [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) and
 [wf_dockerfile_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) should
 be updated to include the `.git` suffix if required for cloning over HTTP.
+
+* Pinned helm provider version for `kube_redis_sentinel` submodule.
 
 ## edge.24-10-09
 

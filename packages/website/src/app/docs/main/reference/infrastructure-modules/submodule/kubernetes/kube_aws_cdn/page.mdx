@@ -33,7 +33,7 @@ for more information.
 
 ```hcl
 module "ingress_1" {
-   source = "../kube_ingress"
+   source = "${var.pf_module_source}kube_ingress${var.pf_module_ref}"
 
    namespace    = local.namespace
    name         = "example1"
@@ -73,7 +73,7 @@ module "ingress_2" {
 }
 
 module "cdn" {
-   source = "../kube_aws_cdn"
+   source = "${var.pf_module_source}kube_aws_cdn${var.pf_module_ref}"
    
    # Since the CDN operates globally, you must use the global
    # provider as follows:
@@ -99,6 +99,8 @@ The following providers are needed by this module:
 * archive (2.6.0)
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
@@ -192,6 +194,14 @@ list(object({
 
 The following input variables are optional (have default values):
 
+### description
+
+Description: A description for this CDN
+
+Type: `string`
+
+Default: `null`
+
 ### geo\_restriction\_list
 
 Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
@@ -207,6 +217,30 @@ Description: What type of geographic restrictions to you want to apply to CDN cl
 Type: `string`
 
 Default: `"none"`
+
+### logging\_cookies\_enabled
+
+Description: Whether cookies should be included in the request logs
+
+Type: `bool`
+
+Default: `false`
+
+### logging\_enabled
+
+Description: Whether request logging should be enabled for the CloudFront distribution
+
+Type: `bool`
+
+Default: `false`
+
+### logging\_expire\_after\_days
+
+Description: The number of days after which logs will be deleted. (0 to disable)
+
+Type: `number`
+
+Default: `0`
 
 ### origin\_shield\_enabled
 
@@ -242,7 +276,15 @@ Default: `[]`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### distribution\_id
+
+Description: The ID of the CloudFront distribution
+
+### logging\_bucket\_name
+
+Description: The name of the log bucket for CloudFront access logs
 
 ## Maintainer Notes
 
