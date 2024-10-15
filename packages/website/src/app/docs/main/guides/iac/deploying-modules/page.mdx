@@ -111,11 +111,11 @@ field.
 
 We provide two [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables) for setting the module version:
 
-- `pf_stack_version`: the [Panfactum module](/docs/main/reference/infrastructure-modules/overview) version to use; used
-by `include.panfactum.locals.pf_stack_source`. (See below)
+* `pf_stack_version`: the [Panfactum module](/docs/main/reference/infrastructure-modules/overview) version to use; used
+  by `include.panfactum.locals.pf_stack_source`. (See below)
 
-- `version`: the [first-party module](/docs/main/guides/iac/first-party-modules) version to use; used by
-`include.panfactum.locals.source`.
+* `version`: the [first-party module](/docs/main/guides/iac/first-party-modules) version to use; used by
+  `include.panfactum.locals.source`.
 
 ### Deploying Panfactum Modules
 
@@ -134,8 +134,8 @@ terraform {
 We use the following [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables) to construct `include.panfactum.locals.pf_stack_source`:
 
 * `pf_stack_version`: Check [here](/docs/main/reference/releases) for the full list of available releases. This should
-be the same version as used for the Panfactum devenv. We recommend setting this in your `environment.yaml` so that functionality
-remains consistent across an entire environment.
+  be the same version as used for the Panfactum devenv. We recommend setting this in your `environment.yaml` so that functionality
+  remains consistent across an entire environment.
 
 * `module`: The name of the module to deploy. Defaults to the directory name if not provided. Should be set in the `module.yaml`.
 
@@ -149,7 +149,7 @@ We also provide a convenience command, `pf-tf-init`, that will automatically ins
 infrastructure module and add the correct providers and provider hashes to your `.terraform.lock.hcl` files. [^3]
 
 [^3]: This uses `terragrunt providers` under the hood. `terragrunt providers` can be used to provide
-more granular information about the required providers such as their versions.
+    more granular information about the required providers such as their versions.
 
 Some providers require extra configuration variables. To view each provider's required
 configuration variables, see the [reference docs](/docs/main/reference/configuration/terragrunt-variables#providers).
@@ -248,9 +248,9 @@ Now when you next run `terragrunt apply`, the local module code will be used. Th
 modules *and* submodules. [^6]
 
 [^6]: For submodules, this works via the `pf_module_source` input provided to your modules by Terragrunt. See the
-[first-party IaC development documentation for more information.](/docs/main/guides/iac/first-party-modules#using-panfactum-submodules)
+    [first-party IaC development documentation for more information.](/docs/main/guides/iac/first-party-modules#using-panfactum-submodules)
 
 <MarkdownAlert severity="warning">
-    If using local modules, be sure to set `pf_stack_local_path` in your `*.user.yaml` Terragrunt variable files, *not* in the
-    configuration files that you commit to your repository. This value will be specific to your local machine.
+  If using local modules, be sure to set `pf_stack_local_path` in your `*.user.yaml` Terragrunt variable files, *not* in the
+  configuration files that you commit to your repository. This value will be specific to your local machine.
 </MarkdownAlert>

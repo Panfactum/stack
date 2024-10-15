@@ -226,7 +226,7 @@ effect, you end up with a single combined Workflow that runs all the steps in th
 This new WorkflowTemplate will run the `entry` template from example WorkflowTemplate twice in a series: [^3]
 
 [^3]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
-but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
+    but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
 
 ```hcl
 module "composed_workflow" {
@@ -267,10 +267,9 @@ module "composed_workflow" {
 For a real world example, see our guide on rolling deployments in your [CI / CD pipelines](/docs/main/guides/cicd/rolling-deployments).
 
 <MarkdownAlert severity="warning">
-    Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template
-    such as `{{workflow.parameters.foo}}` will no longer work unless your combined Workflow *also* has that parameter.
+  Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template
+  such as `{{workflow.parameters.foo}}` will no longer work unless your combined Workflow *also* has that parameter.
 </MarkdownAlert>
-
 
 ### Workflow of Workflows
 

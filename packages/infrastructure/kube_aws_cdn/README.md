@@ -1,5 +1,7 @@
 # AWS CDN for Kubernetes Ingresses
 
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs`
 output from instances of the [kube_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
 module and forwarding them to the [aws_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module.
@@ -23,7 +25,24 @@ for more information.
 
 ## Usage
 
+<MarkdownAlert severity="warning">
+   Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
+   are deployed globally.
+</MarkdownAlert>
+
 ```hcl
+terraform {
+   required_providers {
+      ...
+      aws = {
+         source                = "hashicorp/aws"
+         version               = "5.70.0"
+         configuration_aliases = [aws.global]
+      }
+      ...
+   }
+}
+
 module "ingress_1" {
    source = "${var.pf_module_source}kube_ingress${var.pf_module_ref}"
 

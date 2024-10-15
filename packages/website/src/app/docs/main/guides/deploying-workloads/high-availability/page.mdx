@@ -17,16 +17,16 @@ in development / test environments while prioritizing availability in production
 Below, we overview our recommended configuration for various uptime level attainment. [^1]
 
 [^1]: These recommendations are based on [AWS's SLAs](https://aws.amazon.com/compute/sla) and assume that
-Amazon will achieve their SLA targets. Ultimately, if AWS itself suffers a complete failure, it is impossible to mitigate all
-the associated impacts.
+    Amazon will achieve their SLA targets. Ultimately, if AWS itself suffers a complete failure, it is impossible to mitigate all
+    the associated impacts.
 
 ### Level 1: > 99.9% Uptime
 
 Achieving this level will result in *on average* less than 45 minutes of workload downtime per month. [^7]
 
 [^7]: This is an *average* metric. If you deploy to a single AZ, an AZ outage might knock your system offline for several
-hours. This is extremely rare, but certainly can and does happen. Additionally, even at Level 1, for most months you can expect to have
-about 99.99% uptime.
+    hours. This is extremely rare, but certainly can and does happen. Additionally, even at Level 1, for most months you can expect to have
+    about 99.99% uptime.
 
 The Panfactum Stack
 is designed to achieve this level of availability regardless of how workloads are deployed; however,
@@ -35,12 +35,12 @@ always be done as a best practice.
 
 Required Tuning:
 
-- You must [set up liveness probes](/docs/main/guides/deploying-workloads/basics#liveness-and-readiness-probes) for your workloads to ensure that they will be restarted if they enter a failure state.
-- Ensure that all workloads implement request draining. [^3]
-- Ensure that all workloads can gracefully terminate in < 90 seconds.
+* You must [set up liveness probes](/docs/main/guides/deploying-workloads/basics#liveness-and-readiness-probes) for your workloads to ensure that they will be restarted if they enter a failure state.
+* Ensure that all workloads implement request draining. [^3]
+* Ensure that all workloads can gracefully terminate in \< 90 seconds.
 
 [^3]: When workload receives a `SIGTERM`, it should aim to finish processing requests it has already received rather
-than dropping them.
+    than dropping them.
 
 ### Level 2: > 99.99% Uptime
 
@@ -48,37 +48,37 @@ Achieving this level will result in less than 4 minutes of workload downtime per
 will result in approximately 50-150% higher costs than Level 1. [^2]
 
 [^2]: This is highly variable and depends on the specific mix of resources that you are deploying on the cluster. Generally,
-the more databases that you are running, the higher the cost differential will be as data will need to be replicated
-across multiple AZs for resiliency. This means not only doubling the storage costs but also typically results in
-significant inter-AZ network fees.
+    the more databases that you are running, the higher the cost differential will be as data will need to be replicated
+    across multiple AZs for resiliency. This means not only doubling the storage costs but also typically results in
+    significant inter-AZ network fees.
 
 Required Tuning:
 
-- Everything in Level 1.
-- You must deploy at least three subnets of each type when setting up your VPC (vs one) to ensure that you resilient to a single AZ outage ([docs](docs/main/guides/bootstrapping/aws-networking#choose-your-cidr-blocks-and-subnets)).
-- You must deploy your Kubernetes cluster across three availability zones (vs one) to ensure that you are resilient to a single AZ outage ([docs](/docs/main/guides/bootstrapping/kubernetes-cluster#choose-node-subnets)).
-- Set `enhanced_ha_enabled` to `true` for all direct modules ([docs](/docs/main/reference/infrastructure-modules/overview#common-variables)).
-- For any module that deploys *stateful* workloads such as [kube_stateful_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) or [kube_pg_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to Kubernetes,
-ensure > 1 replica is deployed and `az_spread_required` is enabled (if applicable; see the documentation for the specific module for details).
+* Everything in Level 1.
+* You must deploy at least three subnets of each type when setting up your VPC (vs one) to ensure that you resilient to a single AZ outage ([docs](docs/main/guides/bootstrapping/aws-networking#choose-your-cidr-blocks-and-subnets)).
+* You must deploy your Kubernetes cluster across three availability zones (vs one) to ensure that you are resilient to a single AZ outage ([docs](/docs/main/guides/bootstrapping/kubernetes-cluster#choose-node-subnets)).
+* Set `enhanced_ha_enabled` to `true` for all direct modules ([docs](/docs/main/reference/infrastructure-modules/overview#common-variables)).
+* For any module that deploys *stateful* workloads such as [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) or [kube\_pg\_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to Kubernetes,
+  ensure > 1 replica is deployed and `az_spread_required` is enabled (if applicable; see the documentation for the specific module for details).
 
 ### Level 3: > 99.999% Uptime
 
 Achieving this level will result in virtually no downtime (excepting a full regional AWS outage [^4]). It will result in approximately 30% higher costs than Level 2.
 
 [^4]: The general advice here is to avoid setting up your core systems in `us-east-1` as this is the only region with a history
-of full regional outages.
+    of full regional outages.
 
 Required Tuning:
 
-- Everything in Level 2.
-- For *all* modules that deploy workloads to Kubernetes, ensure that > 1 replica is deployed and either `az_spread_preferred` or
-`az_spread_required` is `true`.
-- For *all* modules that deploy workloads to Kubernetes, set `instance_type_spread_required` to `true` to prevent mass
-disruptions impacting a single instance type (e.g., mass spot interruptions).
-- Ensure that all workloads that connect to databases connect via their corresponding HA mechanism (e.g., for PostgreSQL use PgBouncer, for
-Redis use Sentinel, etc.).
-- Implement client-side retries for *all* network requests [^5] or use Linkerd to implement [automatic retries in the service-mesh
-layer.](https://linkerd.io/2-edge/features/retries-and-timeouts/)
+* Everything in Level 2.
+* For *all* modules that deploy workloads to Kubernetes, ensure that > 1 replica is deployed and either `az_spread_preferred` or
+  `az_spread_required` is `true`.
+* For *all* modules that deploy workloads to Kubernetes, set `instance_type_spread_required` to `true` to prevent mass
+  disruptions impacting a single instance type (e.g., mass spot interruptions).
+* Ensure that all workloads that connect to databases connect via their corresponding HA mechanism (e.g., for PostgreSQL use PgBouncer, for
+  Redis use Sentinel, etc.).
+* Implement client-side retries for *all* network requests [^5] or use Linkerd to implement [automatic retries in the service-mesh
+  layer.](https://linkerd.io/2-edge/features/retries-and-timeouts/)
 
 [^5]: Ensure you implement an exponential backoff algorithm to avoid [thundering herd issues.](https://en.wikipedia.org/wiki/Thundering_herd_problem)
 
@@ -96,4 +96,3 @@ we have been able to successfully run some spot instances for multiple weeks wit
 
 Ultimately, we only recommend using on-demand instances for workloads that cannot gracefully terminate in under 90 seconds. In practice,
 this scenario tends to be exceptionally rare.
-

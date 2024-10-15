@@ -1,4 +1,3 @@
-
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
@@ -12,12 +11,12 @@ Create a service deployment that automatically updates with a newly built image 
 
 ## Prerequisites
 
-- Review: [Developing a First-party IaC Module](/docs/main/guides/iac/first-party-modules)
+* Review: [Developing a First-party IaC Module](/docs/main/guides/iac/first-party-modules)
 
-- Complete: [CI / CD Getting Started Guide](/docs/main/guides/cicd/getting-started)
+* Complete: [CI / CD Getting Started Guide](/docs/main/guides/cicd/getting-started)
 
-- This guide assumes that you already have application code and a corresponding Dockerfile committed and pushed to your
-version control system.
+* This guide assumes that you already have application code and a corresponding Dockerfile committed and pushed to your
+  version control system.
 
 ## Background
 
@@ -26,15 +25,15 @@ the latest code on the primary integration branch of your git repository (e.g., 
 We will demonstrate how to easily accomplish this using the Panfactum CI / CD system.
 
 <MarkdownAlert severity="warning">
-    In the below walkthrough, we will be referencing the module that deploys this website as an example. This is for
-    *reference* only. You will not have access to the private website images used by this module, so you must create
-    your own application code and IaC; you cannot simply copy our modules.
+  In the below walkthrough, we will be referencing the module that deploys this website as an example. This is for
+  *reference* only. You will not have access to the private website images used by this module, so you must create
+  your own application code and IaC; you cannot simply copy our modules.
 </MarkdownAlert>
 
 ## Build and Push Image from Dockerfile
 
 First, you need to build and push an image based on the Dockerfile in your repository. We provide a submodule that will
-create a WorkflowTemplate that does this for you: [wf_dockerfile_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+create a WorkflowTemplate that does this for you: [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
 
 Add this submodule to your CI / CD module that you created in the [Getting Started guide](/docs/main/guides/cicd/getting-started).
 As an example of how this might look, you can reference
@@ -56,7 +55,7 @@ Notice that our module has an input called `website_image_version` which is set 
 website_image_version = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
 ```
 
-The [run_cmd](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/#run_cmd) function is a Terragrunt
+The [run\_cmd](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/#run_cmd) function is a Terragrunt
 feature that allows you to call an external command as your Terragrunt code is evaluated. The stdout from this
 call is then returned by the function.
 
@@ -86,7 +85,7 @@ runs them in sequence. The `entrypoint` output of each submodule refer to the na
 of that WorkflowTemplate. [^1]
 
 [^1]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
-but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
+    but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
 
 ```hcl
  templates = [
@@ -137,7 +136,7 @@ Once you have created an analogous WorkflowTemplate in your IaC, deploy it. You 
 web dashboard. If you create a new Workflow from the WorkflowTemplate, it should successfully run a combined
 execution graph of both the build and deploy Workflow:
 
-<MarkdownImage src={BuildAndDeployImg} alt="Example of a composed Workflow that both builds and deploys a container image"/>
+<MarkdownImage src={BuildAndDeployImg} alt="Example of a composed Workflow that both builds and deploys a container image" />
 
 ## Connect to CI / CD Webhooks
 
@@ -146,5 +145,3 @@ will allow you to trigger a new Workflow from this WorkflowTemplate whenever you
 branch you want to use to automatically trigger deployments).
 
 [Here is an example of how we do this for our website.](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/sensor.tf)
-
-

@@ -6,7 +6,9 @@ import ModuleHeader from "../../../ModuleHeader";
 
 <ModuleHeader name="aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_cdn" status="beta" type="submodule" />
 
-# AWS CDN
+# AWS CloudFront CDN
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 Deploys an [AWS CloudFront distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html)
 ([CDN](https://en.wikipedia.org/wiki/Content_delivery_network)) that can be used to proxy requests to your upstream origins.
@@ -44,6 +46,42 @@ to the nearest PoP.
 
 The set of domains that get routed this way is defined by the `domains` input to this module. How traffic gets
 routed from the PoP to your origin servers is configured by `origin_configs`.
+
+### Using the Global Provider
+
+<MarkdownAlert severity="warning">
+  Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
+  are deployed globally.
+</MarkdownAlert>
+
+```hcl
+terraform {
+   required_providers {
+     ...
+     aws = {
+       source                = "hashicorp/aws"
+       version               = "5.70.0"
+       configuration_aliases = [aws.global]
+     }
+     ...
+  }
+}
+
+module "cdn" {
+  source = "${var.pf_module_source}aws_cdn${var.pf_module_ref}"
+
+  # Since the CDN operates globally, you must use the global
+  # provider as follows:
+  providers = {
+    aws.global = aws.global
+  }
+
+  name            = "example"
+  domains         = [...]
+  origin_configs  = [...]
+}
+
+```
 
 ### Configuring Origin Routing
 

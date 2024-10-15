@@ -13,16 +13,15 @@ by the controller and provide its name via the `service_account_name` output.
 
 We provide several submodules that allow you to easily assign permissions to service accounts:
 
-| Control Plane System | Submodule | Description |
-|:---- | :---- | :--- |
-| Kubernetes API | None (see below) | No module needed as very simple to setup with basic Kubernetes resources  |
-| AWS | [kube_sa_auth_aws](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws) | Sets up [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) |
-| Vault | [kube_sa_auth_vault](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_vault) | Sets up the [Kubernetes auth method with Hashicorp Vault](https://developer.hashicorp.com/vault/docs/auth/kubernetes)  |
-| Argo | [kube_sa_auth_workflow](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_workflow) | Provides the necessary permissions for the service account to be used in an Argo workflow pod |
+| Control Plane System | Submodule                                                                                                          | Description                                                                                                                           |
+| :------------------- | :----------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| Kubernetes API       | None (see below)                                                                                                   | No module needed as very simple to setup with basic Kubernetes resources                                                              |
+| AWS                  | [kube\_sa\_auth\_aws](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)           | Sets up [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) |
+| Vault                | [kube\_sa\_auth\_vault](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_vault)       | Sets up the [Kubernetes auth method with Hashicorp Vault](https://developer.hashicorp.com/vault/docs/auth/kubernetes)                 |
+| Argo                 | [kube\_sa\_auth\_workflow](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_workflow) | Provides the necessary permissions for the service account to be used in an Argo workflow pod                                         |
 
 Multiple of these submodules may be used with a single service account in order to grant a single workload access
 to multiple control plane systems.
-
 
 ## Kubernetes Permissions
 
@@ -36,15 +35,15 @@ curl -H "Authorization: Bearer $TOKEN" https://$KUBERNETES_API/api/v1/namespaces
 ```
 
 [^1]: Note this behavior automatically completed by most Kubernetes clients such as `kubectl` so you do not
-need to manually specify the token as in the below example.
+    need to manually specify the token as in the below example.
 
 This token is bound to the lifetime of the pod and will no longer work once the pod is removed from
 the cluster. Additionally, the token will be rotated every hour while the pod is still alive. [^2]
 
 [^2]: When the token is rotated, the old token will continue to work for up to 90 days (see [docs](https://docs.aws.amazon.com/eks/latest/userguide/service-accounts.html)).
-However, this is an EKS-specific quirk to aid in migrating to time-bound tokens. In the future, tokens will
-stop working after they are rotated, so you should endeavor to update your client code to be aware of this rotation
-logic.
+    However, this is an EKS-specific quirk to aid in migrating to time-bound tokens. In the future, tokens will
+    stop working after they are rotated, so you should endeavor to update your client code to be aware of this rotation
+    logic.
 
 While the token "authenticates" the workloads (e.g., provides an identity), it does not "authorize" the
 workload to access specific API endpoints, so you will receive 403 error codes.
@@ -55,8 +54,8 @@ by creating Roles and RoleBindings. [^3]
 For example, this code snippet gives a Deployment's service account permissions to get, list, and update PVCs in its namespace:
 
 [^3]: Roles and RoleBindings are scoped to a specific namespace. Use ClusterRoles and ClusterRoleBindings if you
-need to give a service account permissions to access objects across all namespaces in a cluster. This is not
-recommended for most workloads due to the security impact.
+    need to give a service account permissions to access objects across all namespaces in a cluster. This is not
+    recommended for most workloads due to the security impact.
 
 ```hcl
 module "example_deployment" {

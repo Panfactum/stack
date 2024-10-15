@@ -5,7 +5,7 @@ Every resource deployed by a Panfactum module contains the following tags [^1].
 [^1]: For Kubernetes resources, these are [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
 
 | Variable                      | Description                                                                                                                                                   |
-|:------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `panfactum.com/environment`   | The environment this resource is deployed in                                                                                                                  |
 | `panfactum.com/region`        | The region this resource is deployed in                                                                                                                       |
 | `panfactum.com/module`        | The Panfactum module directly defining this resource                                                                                                          |
@@ -14,7 +14,6 @@ Every resource deployed by a Panfactum module contains the following tags [^1].
 | `panfactum.com/stack-commit`  | The specific commit hash of the module deploying this resource                                                                                                |
 | `panfactum.com/local`         | `true` iff the resource is part of a local development environment                                                                                            |
 | `panfactum.com/workload`      | (Kubernetes-only) For replicated workloads (e.g., Deployments, StatefulSets, etc.), the name of the group of pods. Used for aggregation in monitoring system. |
-
 
 ## Internal Tags
 

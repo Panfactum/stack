@@ -82,9 +82,9 @@ the root file system and runs `/bin/bash -c "tail -f /dev/null"`. [^4]
     controllers like a Deployment would continually try to restart it.
 
 <MarkdownAlert severity="info">
-    For public images, we strongly recommend that you use the ECR pull-through caches for the `image_registry` (setup
-    as a [step in the bootstrapping guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
-    We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
+  For public images, we strongly recommend that you use the ECR pull-through caches for the `image_registry` (setup
+  as a [step in the bootstrapping guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache)).
+  We provide a submodule for easily referencing the various registry addresses: [aws\_ecr\_pull\_through\_cache\_addresses](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses).
 </MarkdownAlert>
 
 ### Init Containers
@@ -361,27 +361,27 @@ modules via `termination_grace_period_seconds`. The default for our modules is 9
 More detailed information on the pod lifecycle can be found [here](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination).
 
 <MarkdownAlert severity="warning">
-    `terminationGracePeriodSeconds` is only respected when the underlying node is in a running state.
+  `terminationGracePeriodSeconds` is only respected when the underlying node is in a running state.
 
-    If the underlying node is terminating, there is an upper bound to how long a pod's effective graceful termination period will be.
-    That bound depends on *how* the node was terminated.
+  If the underlying node is terminating, there is an upper bound to how long a pod's effective graceful termination period will be.
+  That bound depends on *how* the node was terminated.
 
-    - **The node was terminated via the host operating system shutting down:** For spot instances, the upper bound
+  * **The node was terminated via the host operating system shutting down:** For spot instances, the upper bound
     is 30 seconds for [critical pods](https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/#marking-pod-as-critical)
     and 90 seconds for non-critical pods. For on-demand instances, the upper bound is 30 seconds for
     [critical pods](https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/#marking-pod-as-critical)
     and 59.5 minutes for non-critical pods. Additionally, non-critical pods will terminate *before* critical pods due to the [node shutdown sequencing](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/#graceful-node-shutdown).
 
-    - **The node was disrupted by Karpenter (via autoscaling or manual disruption):** For spot instances, the upper bound for all pods is 2 minutes.
+  * **The node was disrupted by Karpenter (via autoscaling or manual disruption):** For spot instances, the upper bound for all pods is 2 minutes.
     For on-demand instances, the upper bound for all pods is 1 hour. However, all pods will begin terminating at once
     and there will be no differentiation between critical and non-critical pods. See more [here](https://karpenter.sh/docs/concepts/disruption/#terminationgraceperiod)
     and [here](https://github.com/kubernetes-sigs/karpenter/issues/1636).
 
-    Our overall recommendation is the following. If you are scheduling pods on spot instances, the `terminationGracePeriodSeconds`
-    should not exceed 90 seconds. If you are scheduling pods on on-demand instances, the `terminationGracePeriodSeconds` should not exceed 59.5 minutes.
+  Our overall recommendation is the following. If you are scheduling pods on spot instances, the `terminationGracePeriodSeconds`
+  should not exceed 90 seconds. If you are scheduling pods on on-demand instances, the `terminationGracePeriodSeconds` should not exceed 59.5 minutes.
 
-    Additionally, if you are adding `system-node-critical` pods to the stack, you should ensure they contain
-    the appropriate logic to delay shutdown until all non-`system-node-critical` pods have been terminated.
+  Additionally, if you are adding `system-node-critical` pods to the stack, you should ensure they contain
+  the appropriate logic to delay shutdown until all non-`system-node-critical` pods have been terminated.
 </MarkdownAlert>
 
 ### Accessing Configuration Values at Runtime

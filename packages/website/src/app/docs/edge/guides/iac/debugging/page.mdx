@@ -138,8 +138,8 @@ Unfortunately, Terragrunt does not have the capability
 to detect when module internals change and thus will not automatically `init` again. [^1]
 
 [^1]: You may be wondering: Why not just automatically `init` before every `apply`? The answer is that `init` is a relatively
-expensive operation and can add 5-15 seconds of execution time. This would be annoying to deal with on every `apply` when
-it is only needed occasionally.
+    expensive operation and can add 5-15 seconds of execution time. This would be annoying to deal with on every `apply` when
+    it is only needed occasionally.
 
 As a result, when you run into this error, you just need to run `terragrunt init` manually. Generally, this can be across
 your entire environment by at once by running `terragrunt run-all init`.

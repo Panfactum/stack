@@ -79,6 +79,7 @@
     "remark-lint-fenced-code-flag": "^3.1.2",
     "remark-lint-heading-increment": "^3.1.2",
     "remark-lint-list-item-indent": "^3.1.2",
+    "remark-lint-unordered-list-marker-style": "^3.1.2",
     "remark-lint-no-dead-urls": "^1.1.0",
     "remark-lint-no-duplicate-headings": "^3.1.2",
     "remark-lint-no-empty-url": "^3.1.2",

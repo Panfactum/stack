@@ -7,7 +7,7 @@ specific system / environment.** They are not global and a user can (and will) h
 in different environment.
 
 | Role                | Access Description                                                                                                                                                |
-|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `superuser`         | Complete, unmitigated, root access.                                                                                                                               |
 | `admin`             | Read and write access to most resources. Prevented from some actions that could cause irrecoverable data loss and/or persistent security vulnerabilities.         |
 | `reader`            | Read access to all resources (including secrets).                                                                                                                 |
@@ -34,7 +34,7 @@ on your environment configuration. [^1]
 |                        |                                      |                     |
 | `engineers`            | management                           | `restricted_reader` |
 |                        | production                           | `reader`            |
-|                        | testing and integration environments | `admin`         |
+|                        | testing and integration environments | `admin`             |
 |                        |                                      |                     |
 | `restricted_engineers` | management                           | None                |
 |                        | production                           | `restricted_reader` |

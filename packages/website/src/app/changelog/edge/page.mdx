@@ -79,19 +79,19 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Added
 
-* A new module, [kube_aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn), has been
-created that enables setting up a CloudFront distribution (CDN) in front of Ingress resources for improved performance and security
-as well as reduced server costs. [kube_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
-has been updated to support CDN settings.
+* A new module, [kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn), has been
+  created that enables setting up a CloudFront distribution (CDN) in front of Ingress resources for improved performance and security
+  as well as reduced server costs. [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+  has been updated to support CDN settings.
 
-Additionally, a non-Kubernetes CDN module, [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
+Additionally, a non-Kubernetes CDN module, [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
 has also been created.
 
 * A new module, [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones), has been
   created that allows you to create Route53 zones that have a non-AWS registrar.
 
-* Added the `acl_aws_logs_delivery_enabled` input to [aws_s3_private_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
-which makes it easier to use the bucket for AWS log delivery purposes.
+* Added the `acl_aws_logs_delivery_enabled` input to [aws\_s3\_private\_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
+  which makes it easier to use the bucket for AWS log delivery purposes.
 
 ### Changed
 
@@ -106,10 +106,10 @@ which makes it easier to use the bucket for AWS log delivery purposes.
   one last time.
 
 * `pf-wf-git-checkout` no longer automatically appends a `.git` to the end of given repo URLs as this is incompatible
-with some git hosting providers (e.g., Azure DevOps). This does mean that the `repo` variable input
-to [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) and
-[wf_dockerfile_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) should
-be updated to include the `.git` suffix if required for cloning over HTTP.
+  with some git hosting providers (e.g., Azure DevOps). This does mean that the `repo` variable input
+  to [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) and
+  [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) should
+  be updated to include the `.git` suffix if required for cloning over HTTP.
 
 * Pinned helm provider version for `kube_redis_sentinel` submodule.
 
@@ -219,7 +219,7 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
   nodes created using the old CRDs to nodes created using the new CRDs.
 
-- The `ports` input on [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+* The `ports` input on [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
   and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been moved
   to a container-level field rather than a top-level field to better align with the Kubernetes API.
 
@@ -631,28 +631,28 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   can be used to extend the behavior of the core stack. Installation and usage instructions can be found
   [here](/docs/edge/guides/addons/buildkit/installing).
 
-- [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now supports custom image
+* [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now supports custom image
   expirations rules and both pull and push permissions.
 
-- [aws\_ecr\_public\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) has been added
+* [aws\_ecr\_public\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) has been added
   to support created public ECR repositories.
 
-- Adds ARM support in [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) and
+* Adds ARM support in [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) and
   [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_resizer). All core cluster
   components can now be run on both amd64 and arm64 nodes allow for optimal cost savings.
 
-- Changes the default `securityContext.fsGroupChangePolicy` to `OnRootMismatch` for Pods created by Panfactum submodules
+* Changes the default `securityContext.fsGroupChangePolicy` to `OnRootMismatch` for Pods created by Panfactum submodules
   in order to improve PVC mounting performance.
 
-- `pf-providers-enable` now ensures that `.terraform.lock.hcl` files have all common platform checksums.
+* `pf-providers-enable` now ensures that `.terraform.lock.hcl` files have all common platform checksums.
 
-- Adds `pf-get-terragrunt-variables` which can be used to derive the
+* Adds `pf-get-terragrunt-variables` which can be used to derive the
   [Terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables) that would be used if Terragrunt were
   run in the given directory.
 
-- Adds `pf-tf-delete-locks` which can be used to bulk-release Tofu state locks.
+* Adds `pf-tf-delete-locks` which can be used to bulk-release Tofu state locks.
 
-- Adds `pf-sops-set-profile` which will update all sops-encrypted files in the given directory to use the indicated AWS
+* Adds `pf-sops-set-profile` which will update all sops-encrypted files in the given directory to use the indicated AWS
   profile for KMS operations. This can be used in CI pipelines to allow the CI user to access sops-encrypted files.
 
 * (Alpha) Adds [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor) and
@@ -725,10 +725,10 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   and [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod) have graduated to Beta status. They
   are now safe to use.
 
-- Adds the `pf-providers-enable` command that will automatically inspect the source infrastructure module
+* Adds the `pf-providers-enable` command that will automatically inspect the source infrastructure module
   and enable the required providers in a module's `module.yaml`.
 
-- Adds the `pf-update-iac` command that will update [first-party infrastructure modules](/docs/edge/guides/iac/first-party-modules)
+* Adds the `pf-update-iac` command that will update [first-party infrastructure modules](/docs/edge/guides/iac/first-party-modules)
   in the following ways:
 
   * Executes the [templating directives](/docs/edge/reference/iac-templating).
@@ -736,9 +736,9 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   * Updates the `ref` in sourced Panfactum submodules to the commit hash of the devenv if the `# pf-update` annotation
     is provided. See the [documentation](/docs/edge/guides/iac/first-party-modules#using-panfactum-submodules) for more details.
 
-- Adds phone number validation in [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account).
+* Adds phone number validation in [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account).
 
-- Adds `cors_enabled` (default: `false`) input variable to [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+* Adds `cors_enabled` (default: `false`) input variable to [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
   that can enabled [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) handling.
 
   This can be useful
@@ -962,7 +962,7 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
 * Updated [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) to automatically
   limit client buffer size to prevent OOM issues when processing very bursty traffic.
 
-- Added `pf-update` command that runs all the repository scaffolding commands at once.
+* Added `pf-update` command that runs all the repository scaffolding commands at once.
 
 ### Fixed
 
@@ -1010,7 +1010,7 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   to automatically expand EBS volumes as they fill up. We provide the guide for deploying it
   [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
 
-- Added validation for phone number format in
+* Added validation for phone number format in
   [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
 
 ### Fixed
@@ -1050,7 +1050,7 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   of [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) to fail (and any first-party modules that rely on [kube\_deployment](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_deployment)).
   To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_deployment)).
 
-- [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has two
+* [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has two
   new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`), which will enable
   the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
   to have idle resources. This is a *breaking* change as `pgbouncer_read_only_enabled` is set to `false` by default.
@@ -1081,7 +1081,7 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   serve as the basis for the future, integrated CI / CD systems and can also be used to process
   arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](https://github.com/jlevydev))
 
-- A new module, [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy), that
+* A new module, [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy), that
   can be used to add SSO to web assets that do not have integrated SSO. The module SSO is configured out-of-the-box
   to work with the cluster's Vault instance.
 
@@ -1095,7 +1095,7 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   `lfu_cache_enabled`, that will configure the Redis cluster automatically evict records under memory pressure
   based on an approximated Least Frequently Used algorithm.
 
-- [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) now takes an `extra_configuration_snippet`
+* [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) now takes an `extra_configuration_snippet`
   variable which allows for additional commands in the [NGINX configuration snippet](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#configuration-snippet).
 
 ### Changed
@@ -1105,30 +1105,30 @@ be updated to include the `.git` suffix if required for cloning over HTTP.
   via Vault, this allows restricted readers to access additional cluster resources such as Grafana and Argo Workflows
   (albeit, in a locked-down read-only mode).
 
-- Disabled evictions of database pods based on max lifetimes. This improves
+* Disabled evictions of database pods based on max lifetimes. This improves
   the stability of databases deployed by Panfactum modules.
 
-- After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
+* After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
   modules to have `controller_node_count` set to `1` and `controller_node_instance_types` set to `["t3a.medium"]`.
   This will decrease the costs of the base cluster by about 40% without impacting cluster availability or resiliency.
   The single remaining node is used primarily as a place for Karpenter to run (Karpenter cannot run on instances that it itself
   provisions).
 
-- [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) now only deploys
+* [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) now only deploys
   a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall
   resource utilization of this fairly heavyweight controller.
 
 * Kubernetes labels applied via the `extra_tags` terragrunt input are now sanitized for valid characters automatically (invalid characters
   are replaced with `.`). ([@mschnee](https://github.com/mschnee))
 
-- Added scheduling constraints to prevent critical workloads from scheduling all pods on the same
+* Added scheduling constraints to prevent critical workloads from scheduling all pods on the same
   instance type in order to minimize the possibility of disruption on events that only affect one
   instance type (e.g., spot node preemption).
 
-- Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
+* Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
   in order to reduce resource utilization in the Stack.
 
-- Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
+* Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
   deployment strategy to improve timing and efficiency of applying Panfactum upgrades.
 
 * [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) has a new `history_length_hours` (default `24`)

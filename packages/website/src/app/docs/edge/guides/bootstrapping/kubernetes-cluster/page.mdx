@@ -27,8 +27,8 @@ and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
     required to manage the control plane on your own, this is an incredible deal.
 
 <MarkdownAlert severity="info">
-    To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/edge/guides/bootstrapping/suspend-kubernetes-cluster)
-    to suspend resources and resume as you are setting up your cluster.
+  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/edge/guides/bootstrapping/suspend-kubernetes-cluster)
+  to suspend resources and resume as you are setting up your cluster.
 </MarkdownAlert>
 
 ## Configure Pull Through Cache
@@ -94,7 +94,7 @@ The following instructions apply for **every** environment-region combination wh
 5. Run `terragrunt apply`.
 
 6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
-This ensures all modules deployed in this environment will utilize the cache.
+   This ensures all modules deployed in this environment will utilize the cache.
 
 <MarkdownAlert severity="warning">
   This should only be deployed *once* per environment-region combination. If you have multiple clusters
@@ -154,7 +154,7 @@ You will also need to choose a `dns_service_ip` which **must** be in the `servic
 ### Choose Node Subnets
 
 <MarkdownAlert severity="warning">
-    Your node subnets **cannot** be changed without downtime in the future.
+  Your node subnets **cannot** be changed without downtime in the future.
 </MarkdownAlert>
 
 For `node_subnets`, you have an important decision to make: how many availability zones do you want your nodes
@@ -185,7 +185,7 @@ By default, all cluster components are deployed with very strong availability gu
 However, this comes at additional cost that is not necessary in all environments and deployment scenarios.
 
 The uptime guarantees can be slightly weakened to 99.9% by setting `extra_inputs.enhanced_ha_enabled` to `false` in your `region.yaml`
-like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml). This can save about $50 / month.
+like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml). This can save about \$50 / month.
 
 ### Deploy the Cluster
 
@@ -323,7 +323,7 @@ Note that this will temporarily prevent EC2 nodes from joining the cluster until
 the `kube_rbac` module is deployed (below). [^12]
 
 [^12]: Just like human users, EC2 nodes use AWS IAM roles to authenticate with the EKS Kubernetes API server. These roles
-must be authorized which we do in the `kube_rbac` module.
+    must be authorized which we do in the `kube_rbac` module.
 
 ## Deploy Kubernetes Modules
 

@@ -65,9 +65,9 @@ do this now:
       resource to generate the secret, and expose it as a sensitive module output.
 
       <MarkdownAlert severity="warning">
-          If you do not set `deleteHookOnFinish` on the EventSource, your webhook will not be deleted
-          from your git hosting provider when the EventSource is updated / deleted. This will a conflict
-          issues if you ever recreate the webhook in the future. As a result, we recommend setting this to true.
+        If you do not set `deleteHookOnFinish` on the EventSource, your webhook will not be deleted
+        from your git hosting provider when the EventSource is updated / deleted. This will a conflict
+        issues if you ever recreate the webhook in the future. As a result, we recommend setting this to true.
       </MarkdownAlert>
 
    2. In the Sensor, create a dependency with no filters (yet). Additionally, create a
@@ -148,7 +148,7 @@ module "tf_deploy" {
 A couple important notes:
 
 * You can override `tf_apply_dir` when you create new Workflows from this WorkflowTemplate. As a result, you
-can re-use this one WorkflowTemplate to deploy any particular subset of your IaC.
+  can re-use this one WorkflowTemplate to deploy any particular subset of your IaC.
 
 * All the credentialing for AWS, Kubernetes, and Vault are done for you. However,
   each Workflow should deploy *at most* a single environment as credentials are environment-scoped.

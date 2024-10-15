@@ -23,6 +23,7 @@ const remarkConfig = {
         ['remark-lint-no-empty-url', ['error']],
         ['remark-lint-fenced-code-flag', ['error']],
         ['remark-lint-heading-increment', ['error']],
+        ['remark-lint-unordered-list-marker-style', "*"],
         'remark-mdx',
         'remark-gfm',
         'remark-math'

@@ -2,7 +2,6 @@ import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
 
 import EventBusImg from './event-bus.svg'
 
-
 # Installing an Event Bus
 
 ## Objective
@@ -11,11 +10,11 @@ Deploy an instance of the [Argo Events](https://argoproj.github.io/argo-events/)
 
 ## Prerequisites
 
-- Deploying the components of the Event Bus requires that the Argo Events controller is running. This is done
-via deploying the [Workflow Engine Stack Addon.](/docs/main/guides/addons/workflow-engine/installing)
+* Deploying the components of the Event Bus requires that the Argo Events controller is running. This is done
+  via deploying the [Workflow Engine Stack Addon.](/docs/main/guides/addons/workflow-engine/installing)
 
-- Deploying an Event Bus requires writing your own IaC. Be sure you have reviewed [our guide on how to do this in
-the Panfactum stack.](/docs/main/guides/iac/first-party-modules)
+* Deploying an Event Bus requires writing your own IaC. Be sure you have reviewed [our guide on how to do this in
+  the Panfactum stack.](/docs/main/guides/iac/first-party-modules)
 
 ## Background
 
@@ -26,30 +25,31 @@ so we refer to the collection as a unit: the Event Bus.
 More specifically, Argo Events has three independent components in
 its [architecture](https://argoproj.github.io/argo-events/concepts/architecture/):
 
-- **One or more instances of an [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/):** Every
-EventSource creates a Kubernetes Deployment that either receives or polls for events from external systems and
-deposits them on the EventBus.
-- **One or more instances of a [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/):** Every Sensor creates
-a Kubernetes Deployment that consumes events from the EventBus and triggers some predefined action, called a
-[Trigger](https://argoproj.github.io/argo-events/concepts/trigger/).
-- **An [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/):** The EventBus stores events that have
-been created by EventSources until they are consumed by Sensors. Under the hood, it is a [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream)
-cluster.
+* **One or more instances of an [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/):** Every
+  EventSource creates a Kubernetes Deployment that either receives or polls for events from external systems and
+  deposits them on the EventBus.
+* **One or more instances of a [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/):** Every Sensor creates
+  a Kubernetes Deployment that consumes events from the EventBus and triggers some predefined action, called a
+  [Trigger](https://argoproj.github.io/argo-events/concepts/trigger/).
+* **An [EventBus](https://argoproj.github.io/argo-events/concepts/eventbus/):** The EventBus stores events that have
+  been created by EventSources until they are consumed by Sensors. Under the hood, it is a [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream)
+  cluster.
 
 <MarkdownSVGImage src={EventBusImg} alt="Argo Events architecture" />
 
 We offer three submodules for deploying these components:
-- [kube_argo_event_source](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
-- [kube_argo_sensor](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
-- [kube_argo_event_bus](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+
+* [kube\_argo\_event\_source](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+* [kube\_argo\_sensor](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+* [kube\_argo\_event\_bus](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
 
 This particular addon has a few peculiarities:
 
-- You can have many instances of this architecture running independently in your cluster at once.
-- Due to its flexible nature, we provide submodules for the components rather than modules to deploy directly
-from terragrunt.
-- All the above resources are namespace-scoped. In other words, an EventSource can only publish events to an EventBus
-running in the same namespace, and a Sensor can only read events from an EventBus in the same namespace.
+* You can have many instances of this architecture running independently in your cluster at once.
+* Due to its flexible nature, we provide submodules for the components rather than modules to deploy directly
+  from terragrunt.
+* All the above resources are namespace-scoped. In other words, an EventSource can only publish events to an EventBus
+  running in the same namespace, and a Sensor can only read events from an EventBus in the same namespace.
 
 ## Installing
 
@@ -177,9 +177,9 @@ module "sensor" {
 
 For more advanced patterns, see the documentation for each of the modules:
 
-- [kube_argo_event_source](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
-- [kube_argo_sensor](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
-- [kube_argo_event_bus](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+* [kube\_argo\_event\_source](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+* [kube\_argo\_sensor](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor)
+* [kube\_argo\_event\_bus](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
 
 ## Sensor Utilities
 

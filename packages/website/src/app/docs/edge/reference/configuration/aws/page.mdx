@@ -25,13 +25,13 @@ extra_roles = optional(list(object({
 
 ### Top-level Keys
 
-| Value                | Description                                                                                                   | Example                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `sso_start_url`      | The sign-in url to your IAM Identity Center instance                                                          | `https://panfactum.awsapps.com/start`                   |
-| `sso_region`         | The region of your IAM Identity center instance                                                               | `us-east-2`                                             |
-| `default_aws_region` | (Optional) The default region for all configured profiles                                                     | `us-east-2`                                             |
+| Value                | Description                                                                                                 | Example                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `sso_start_url`      | The sign-in url to your IAM Identity Center instance                                                        | `https://panfactum.awsapps.com/start`                   |
+| `sso_region`         | The region of your IAM Identity center instance                                                             | `us-east-2`                                             |
+| `default_aws_region` | (Optional) The default region for all configured profiles                                                   | `us-east-2`                                             |
 | `module`             | (Optional) A path from `<environments_dir>` to your `aws_iam_identity_center_permissions` module (if using) | `management/global/aws_iam_identity_center_permissions` |
-| `extra_roles`        | (Optional) Additional statically configured extra roles to use                                                | See below                                               |
+| `extra_roles`        | (Optional) Additional statically configured extra roles to use                                              | See below                                               |
 
 ### extra\_roles
 

@@ -41,7 +41,7 @@ When this does occur, you just need to resubmit the build job.
 If you have configured your ECR repo to have [image immutability](https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html),
 that means that new images cannot be pushed to a tag that has already been used. [^1]
 
-[^1]: Note that you can continue to push the _same_ image to the same tag without error.
+[^1]: Note that you can continue to push the *same* image to the same tag without error.
 
 You may see an error like this if you attempt to do so:
 
@@ -55,7 +55,7 @@ Generally, this error is desirable; you should avoid accidentally changing build
 images once they are created. This can impact the behavior of live systems that depend on these
 artifacts.
 
-If you _really_ need to replace the image, a superuser can use the AWS API (either via the web console
+If you *really* need to replace the image, a superuser can use the AWS API (either via the web console
 or CLI) to delete the image.
 
 ### Errors on the BuildKit server
