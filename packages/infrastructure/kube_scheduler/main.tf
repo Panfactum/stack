@@ -22,16 +22,20 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
 locals {
   name      = "scheduler"
   namespace = module.namespace.namespace
+}
 
-  labels = merge(module.scheduler.labels, {
-    "panfactum.com/module" = "kube_scheduler"
-  })
+data "pf_kube_labels" "labels" {
+  module = "kube_scheduler"
 }
 
 module "pull_through" {
@@ -47,16 +51,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -67,7 +61,7 @@ module "namespace" {
 resource "kubernetes_cluster_role_binding" "scheduler" {
   metadata {
     name   = "panfactum-scheduler"
-    labels = local.labels
+    labels = merge(module.scheduler.labels, data.pf_kube_labels.labels.labels)
   }
   subject {
     kind      = "ServiceAccount"
@@ -84,7 +78,7 @@ resource "kubernetes_cluster_role_binding" "scheduler" {
 resource "kubernetes_cluster_role_binding" "volume_scheduler" {
   metadata {
     name   = "panfactum-volume-scheduler"
-    labels = local.labels
+    labels = merge(module.scheduler.labels, data.pf_kube_labels.labels.labels)
   }
   subject {
     kind      = "ServiceAccount"
@@ -101,7 +95,7 @@ resource "kubernetes_cluster_role_binding" "volume_scheduler" {
 resource "kubernetes_role_binding" "scheduler_extension" {
   metadata {
     name      = "panfactum-scheduler-extension"
-    labels    = local.labels
+    labels    = merge(module.scheduler.labels, data.pf_kube_labels.labels.labels)
     namespace = "kube-system"
   }
   subject {
@@ -120,7 +114,7 @@ resource "kubernetes_config_map" "scheduler" {
   metadata {
     name      = "scheduler"
     namespace = local.namespace
-    labels    = local.labels
+    labels    = merge(module.scheduler.labels, data.pf_kube_labels.labels.labels)
   }
   data = {
     "config.yaml" = yamlencode({
@@ -198,14 +192,4 @@ module "scheduler" {
   }
 
   vpa_enabled = var.vpa_enabled
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

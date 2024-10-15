@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -155,19 +159,8 @@ locals {
   }
 }
 
-module "util" {
-  source = "../kube_workload_utility"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_kube_labels" "labels" {
+  module = "kube_karpenter_node_pools"
 }
 
 module "constants" {
@@ -181,16 +174,6 @@ module "node_settings_burstable" {
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
   is_spot                = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "node_settings_spot" {
@@ -201,16 +184,6 @@ module "node_settings_spot" {
   cluster_dns_service_ip = var.cluster_dns_service_ip
   cluster_ca_data        = var.cluster_ca_data
   is_spot                = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "node_settings" {
@@ -221,16 +194,6 @@ module "node_settings" {
   cluster_dns_service_ip = var.cluster_dns_service_ip
   cluster_ca_data        = var.cluster_ca_data
   is_spot                = false
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 data "aws_subnet" "node_subnets" {
@@ -262,7 +225,7 @@ resource "kubectl_manifest" "default_node_class" {
     kind       = "EC2NodeClass"
     metadata = {
       name   = random_id.default_node_class_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = local.node_class_template
   })
@@ -289,7 +252,7 @@ resource "kubectl_manifest" "spot_node_class" {
     kind       = "EC2NodeClass"
     metadata = {
       name   = random_id.spot_node_class_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = merge(
       local.node_class_template,
@@ -321,7 +284,7 @@ resource "kubectl_manifest" "burstable_node_class" {
     kind       = "EC2NodeClass"
     metadata = {
       name   = random_id.burstable_node_class_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = merge(
       local.node_class_template,
@@ -358,7 +321,7 @@ resource "kubectl_manifest" "burstable_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = random_id.burstable_node_pool_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       template = {
@@ -424,7 +387,7 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = random_id.burstable_arm_node_pool_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       template = {
@@ -493,7 +456,7 @@ resource "kubectl_manifest" "spot_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = random_id.spot_node_pool_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       template = {
@@ -559,7 +522,7 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = random_id.spot_arm_node_pool_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       template = {
@@ -628,7 +591,7 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = random_id.on_demand_arm_node_pool_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       template = {
@@ -695,7 +658,7 @@ resource "kubectl_manifest" "on_demand_node_pool" {
     kind       = "NodePool"
     metadata = {
       name   = random_id.on_demand_node_pool_name.hex
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       template = {

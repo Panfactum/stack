@@ -14,3 +14,13 @@ variable "vpa_enabled" {
   type        = bool
   default     = false
 }
+
+variable "pf_module_source" {
+  description = "The source for Panfactum submodules"
+  type = string
+}
+
+variable "pf_module_ref" {
+  description = "The git ref for Panfactum submodules"
+  type = string
+}

@@ -60,22 +60,13 @@ recommended for most workloads due to the security impact.
 
 ```hcl
 module "example_deployment" {
-  source     = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source     = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
 
   name       = "example"
   namespace  = var.namespace
 
   ...
 
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_role" "example" {

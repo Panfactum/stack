@@ -12,12 +12,20 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
 locals {
   namespace                              = "vault"
   vault_secrets_operator_service_account = "vault-secrets-operator-controller-manager"
+}
+
+data "pf_kube_labels" "labels" {
+  module = "vault_core_resources"
 }
 
 /***************************************
@@ -60,7 +68,8 @@ resource "vault_mount" "transit" {
 ***************************************/
 
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
@@ -92,7 +101,8 @@ data "vault_policy_document" "vault_secrets_operator" {
 }
 
 module "vault_auth_vault_secrets_operator" {
-  source                    = "../kube_sa_auth_vault"
+  source = "../kube_sa_auth_vault"
+
   service_account           = local.vault_secrets_operator_service_account
   service_account_namespace = local.namespace
   vault_policy_hcl          = data.vault_policy_document.vault_secrets_operator.hcl
@@ -100,24 +110,15 @@ module "vault_auth_vault_secrets_operator" {
 }
 
 module "util_secrets_operator" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "vault-secrets-operator"
   burstable_nodes_enabled       = true
   arm_nodes_enabled             = true
   controller_nodes_enabled      = true
   instance_type_spread_required = false // single replica
   az_spread_preferred           = false // single replica
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 resource "helm_release" "vault_secrets_operator" {

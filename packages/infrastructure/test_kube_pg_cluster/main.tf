@@ -24,22 +24,16 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 module "namespace" {
   source = "../kube_namespace"
 
   namespace = "test-pg"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "database" {
@@ -56,14 +50,4 @@ module "database" {
   instance_type_spread_required = false
   burstable_nodes_enabled       = true
   pgbouncer_pool_mode           = "transaction"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

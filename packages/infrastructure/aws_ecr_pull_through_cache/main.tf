@@ -4,22 +4,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_ecr_pull_through_cache"
 }
 
 
@@ -46,7 +39,7 @@ resource "aws_ecr_pull_through_cache_rule" "ecr_public" {
 resource "aws_secretsmanager_secret" "docker" {
   name_prefix = "ecr-pullthroughcache/docker-hub-"
   description = "Used for authenticating with Docker Hub by the ECR pull through cache"
-  tags        = module.tags.tags
+  tags        = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_secretsmanager_secret_version" "docker" {
@@ -67,7 +60,7 @@ resource "aws_ecr_pull_through_cache_rule" "docker" {
 resource "aws_secretsmanager_secret" "github" {
   name_prefix = "ecr-pullthroughcache/github-"
   description = "Used for authenticating with GitHub by the ECR pull through cache"
-  tags        = module.tags.tags
+  tags        = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_secretsmanager_secret_version" "github" {

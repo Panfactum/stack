@@ -52,17 +52,15 @@ echo >&2 "Finished Nix linting!"
 ## Shell
 #######################################
 echo >&2 "Starting shell linting..."
-shfmt -w "$DEVENV_ROOT"
+shfmt -w "$DEVENV_ROOT/packages/nix"
+shfmt -w "$DEVENV_ROOT/packages/infrastructure"
 echo >&2 "Finished shell linting!"
 
 #######################################
 ## Spell Check
 #######################################
 echo >&2 "Starting spellcheck linting..."
-(
-  cd "$DEVENV_ROOT"
-  cspell lint --no-cache --no-progress '**/*.mdx' '**/*.md'
-)
+precommit-spellcheck
 echo >&2 "Finished spellcheck linting!"
 
 #######################################

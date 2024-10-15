@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -21,7 +25,7 @@ locals {
   # instances b/c changing these tags forces the nodes to roll
   # which is a disruptive and time consuming operation
   instance_tags = {
-    for k, v in module.tags.tags : k => v if !contains([
+    for k, v in data.pf_aws_tags.tags.tags : k => v if !contains([
       "panfactum.com/stack-commit",
       "panfactum.com/stack-version"
     ], k)
@@ -31,20 +35,10 @@ locals {
 data "aws_region" "region" {}
 data "aws_caller_identity" "current" {}
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_vpc"
 }
+
 
 ##########################################################################
 ## Main VPC
@@ -53,12 +47,12 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-  tags                 = merge(module.tags.tags, var.vpc_extra_tags, { Name = var.vpc_name })
+  tags                 = merge(data.pf_aws_tags.tags.tags, var.vpc_extra_tags, { Name = var.vpc_name })
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
-  tags   = merge(module.tags.tags, { Name = var.vpc_name })
+  tags   = merge(data.pf_aws_tags.tags.tags, { Name = var.vpc_name })
 }
 
 ##########################################################################
@@ -69,7 +63,7 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id          = aws_vpc.main.id
   service_name    = "com.amazonaws.${data.aws_region.region.name}.s3"
   route_table_ids = [for table in aws_route_table.tables : table.id]
-  tags            = merge(module.tags.tags, { Name = "S3-endpoint-${aws_vpc.main.id}}" })
+  tags            = merge(data.pf_aws_tags.tags.tags, { Name = "S3-endpoint-${aws_vpc.main.id}}" })
 }
 
 ##########################################################################
@@ -82,7 +76,7 @@ resource "aws_subnet" "subnets" {
   cidr_block              = each.value.cidr_block
   availability_zone       = lower(length(each.value.az) == 1 ? "${data.aws_region.region.name}${each.value.az}" : each.value.az) ## Allows the user to input either 'a' or 'us-east-2a'
   map_public_ip_on_launch = each.value.public
-  tags = merge(module.tags.tags, each.value.extra_tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, each.value.extra_tags, {
     Name                 = each.key
     "panfactum.com/type" = each.value.public ? "public" : contains(keys(var.nat_associations), each.key) ? "private" : "isolated"
   })
@@ -134,7 +128,7 @@ resource "aws_iam_role" "nat" {
   name_prefix        = "fck-nat-"
   assume_role_policy = data.aws_iam_policy_document.nat_assume_role_policy.json
   description        = "Role for fck-nat (self-hosted NAT) instances"
-  tags               = module.tags.tags
+  tags               = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_iam_policy" "nat" {
@@ -150,14 +144,14 @@ resource "aws_iam_role_policy_attachment" "nat" {
 
 resource "aws_iam_instance_profile" "nat" {
   role = aws_iam_role.nat.name
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_eip" "nat_ips" {
   for_each = local.nat_subnets
 
   depends_on = [aws_internet_gateway.main]
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     Name                   = "NAT_${each.key}"
     "panfactum.com/for"    = each.value
     "panfactum.com/vpc-id" = aws_vpc.main.id
@@ -178,7 +172,7 @@ resource "aws_network_interface" "nats" {
   source_dest_check = false
   security_groups   = [aws_security_group.nats[each.key].id]
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     Name = each.key
   })
 }
@@ -203,7 +197,7 @@ resource "aws_security_group" "nats" {
     protocol    = "-1"
   }
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Security group for NAT nodes in ${each.key}"
   })
 }
@@ -269,7 +263,7 @@ resource "aws_launch_template" "nats" {
     instance_metadata_tags      = "enabled"
   }
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Launch template for NAT nodes in ${each.key}"
   })
 
@@ -321,7 +315,7 @@ resource "aws_iam_role" "test" {
   name_prefix        = "network-test-"
   assume_role_policy = data.aws_iam_policy_document.test_assume_role_policy.json
   description        = "Role for network test instances"
-  tags               = module.tags.tags
+  tags               = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_iam_role_policy_attachment" "node_group_ssm" {
@@ -331,7 +325,7 @@ resource "aws_iam_role_policy_attachment" "node_group_ssm" {
 
 resource "aws_iam_instance_profile" "test" {
   role = aws_iam_role.test.name
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_security_group" "test" {
@@ -354,7 +348,7 @@ resource "aws_security_group" "test" {
     protocol    = "-1"
   }
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Security group for network test nodes in ${each.key}"
   })
 }
@@ -383,7 +377,7 @@ resource "aws_launch_template" "test" {
   vpc_security_group_ids = [aws_security_group.test[each.key].id]
   tag_specifications {
     resource_type = "instance"
-    tags          = { for k, v in module.tags.tags : replace(k, "/", ":") => v } // For some reason, "/" is now disallowed here?
+    tags          = { for k, v in data.pf_aws_tags.tags.tags : replace(k, "/", ":") => v } // For some reason, "/" is now disallowed here?
   }
   block_device_mappings {
     device_name = "/dev/xvda"
@@ -401,7 +395,7 @@ resource "aws_launch_template" "test" {
     instance_metadata_tags      = "enabled"
   }
 
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Launch template for network test nodes in ${each.key}"
   })
 
@@ -442,7 +436,7 @@ resource "aws_route_table" "tables" {
   for_each = var.subnets
 
   vpc_id = aws_vpc.main.id
-  tags   = merge(module.tags.tags, { Name = "RT_${each.key}" })
+  tags   = merge(data.pf_aws_tags.tags.tags, { Name = "RT_${each.key}" })
 }
 
 resource "aws_route" "igw" {
@@ -485,7 +479,7 @@ resource "aws_vpc_peering_connection_accepter" "accepters" {
 
   vpc_peering_connection_id = each.value.vpc_peering_connection_id
   auto_accept               = true
-  tags                      = merge(module.tags.tags, { Name = each.key })
+  tags                      = merge(data.pf_aws_tags.tags.tags, { Name = each.key })
 }
 
 resource "aws_vpc_peering_connection_options" "accepters" {
@@ -565,16 +559,6 @@ module "log_bucket" {
   intelligent_transitions_enabled = false
 
   access_policy = data.aws_iam_policy_document.log_delivery.json
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 moved {
@@ -595,5 +579,5 @@ resource "aws_flow_log" "flow_logs" {
   max_aggregation_interval = 600
   vpc_id                   = aws_vpc.main.id
   traffic_type             = "ALL"
-  tags                     = module.tags.tags
+  tags                     = data.pf_aws_tags.tags.tags
 }

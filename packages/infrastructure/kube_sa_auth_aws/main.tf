@@ -12,6 +12,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -27,19 +31,8 @@ locals {
 data "aws_caller_identity" "main" {}
 data "aws_region" "main" {}
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "kube_sa_auth_aws"
 }
 
 # ################################################################################
@@ -66,7 +59,7 @@ resource "aws_iam_policy" "service_account" {
   name_prefix = "${substr(var.service_account, 0, 37)}-"
   description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   policy      = var.iam_policy_json
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   })
 }
@@ -95,7 +88,7 @@ resource "aws_iam_role" "service_account" {
   name_prefix        = "${substr(var.service_account, 0, 37)}-"
   description        = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   assume_role_policy = data.aws_iam_policy_document.service_account_assume.json
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
   })
   max_session_duration = 43200
@@ -141,7 +134,7 @@ resource "aws_iam_policy" "ip_blocks" {
   name_prefix = "${substr(var.service_account, 0, 26)}-ip-blocks-"
   description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
   policy      = data.aws_iam_policy_document.ip_blocks.json
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
   })
 }

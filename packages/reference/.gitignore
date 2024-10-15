@@ -3,3 +3,5 @@
 .env
 .terragrunt-cache
 .direnv
+.terraformrc
+.terraformrc.dev

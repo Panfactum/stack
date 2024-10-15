@@ -8,27 +8,17 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
 locals {
   namespace = kubernetes_namespace.main.metadata[0].name // shorthand for forcing the dependency graph
-}
 
-module "util" {
-  source = "../kube_workload_utility"
-
-  # pf-generate: set_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, {
+  extra_labels = merge(var.extra_labels, {
     // https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/deploy/pod_readiness_gate/
     "elbv2.k8s.aws/pod-readiness-gate-inject" = "enabled"
     "loadbalancer/enabled"                    = var.loadbalancer_enabled ? "true" : "false"
@@ -37,12 +27,16 @@ module "util" {
   })
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_namespace"
+}
+
 ######################### Namespace #######################################
 
 resource "kubernetes_namespace" "main" {
   metadata {
     name   = var.namespace
-    labels = module.util.labels
+    labels = merge(data.pf_kube_labels.labels.labels, local.extra_labels)
     annotations = merge({},
       var.linkerd_inject ? { "linkerd.io/inject" = "enabled" } : {}
     )
@@ -60,7 +54,7 @@ resource "kubernetes_role" "admins" {
   metadata {
     name      = "namespace:admin"
     namespace = local.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   rule {
     api_groups = ["", "*"]
@@ -75,7 +69,7 @@ resource "kubernetes_role_binding" "admins" {
   metadata {
     name      = "namespace:admins"
     namespace = local.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -98,7 +92,7 @@ resource "kubernetes_role" "readers" {
   metadata {
     name      = "namespace:reader"
     namespace = local.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
 
   rule {
@@ -205,7 +199,7 @@ resource "kubernetes_role_binding" "readers" {
   metadata {
     name      = "namespace:readers"
     namespace = local.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"

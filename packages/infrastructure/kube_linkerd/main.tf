@@ -18,7 +18,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
+}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_linkerd"
 }
 
 locals {
@@ -35,107 +43,63 @@ locals {
 }
 
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_destination" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "linkerd-destination"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_identity" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "linkerd-identity"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_proxy_injector" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "linkerd-proxy-injector"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_proxy" {
-  source                   = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name            = "linkerd-proxy"
   burstable_nodes_enabled  = true
   controller_nodes_enabled = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels             = data.pf_kube_labels.labels.labels
 }
 
 module "util_viz" {
-  source                   = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name            = "linkerd-viz"
   burstable_nodes_enabled  = true
   controller_nodes_enabled = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels             = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -151,21 +115,7 @@ module "namespace" {
 
   namespace = local.name
 
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(
-    var.extra_tags,
-    var.monitoring_enabled ? {
-      "linkerd.io/extension" = "viz"
-    } : null
-  )
+  extra_labels = var.monitoring_enabled ? { "linkerd.io/extension" = "viz" } : {}
 }
 
 
@@ -195,16 +145,6 @@ module "linkerd_identity_issuer" {
   ]
   duration     = "2160h0m0s"
   renew_before = "1680h0m0s"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 ///////////////////////////////////////////
@@ -245,16 +185,6 @@ module "linkerd_policy_validator" {
   private_key_encoding = "PKCS8" // It must be this encoding
   duration             = "2160h0m0s"
   renew_before         = "1680h0m0s"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 
@@ -267,16 +197,6 @@ module "linkerd_proxy_injector" {
   namespace     = local.namespace
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 
@@ -288,16 +208,6 @@ module "linkerd_profile_validator" {
   namespace     = local.namespace
   duration      = "2160h0m0s"
   renew_before  = "1680h0m0s"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 

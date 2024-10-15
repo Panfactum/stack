@@ -28,6 +28,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -148,6 +152,10 @@ locals {
   scheduler = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_monitoring"
+}
+
 module "pull_through" {
   source                     = "../aws_ecr_pull_through_cache_addresses"
   pull_through_cache_enabled = var.pull_through_cache_enabled
@@ -163,17 +171,7 @@ module "util_webhook" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_operator" {
@@ -185,17 +183,7 @@ module "util_operator" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = false // only runs one copy
   az_spread_preferred           = false // only runs one copy
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_grafana" {
@@ -207,17 +195,7 @@ module "util_grafana" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_required            = true // stateful
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_prometheus" {
@@ -230,17 +208,7 @@ module "util_prometheus" {
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_required            = true // stateful
   lifetime_evictions_enabled    = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_node_exporter" {
@@ -251,17 +219,7 @@ module "util_node_exporter" {
   controller_nodes_enabled      = true
   az_spread_preferred           = false // daemonset
   instance_type_spread_required = false // daemonset
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_ksm" {
@@ -273,17 +231,7 @@ module "util_ksm" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_compactor" {
@@ -294,59 +242,31 @@ module "util_thanos_compactor" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   az_spread_preferred           = false // single pod
   instance_type_spread_required = false // single pod
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_store_gateway" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "thanos-store-gateway"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_required            = true // stateful so always on
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_ruler" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "thanos-ruler"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_required            = true // stateful so always on
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 
@@ -359,17 +279,7 @@ module "util_thanos_query" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_frontend" {
@@ -381,17 +291,7 @@ module "util_thanos_frontend" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_bucket_web" {
@@ -403,17 +303,7 @@ module "util_thanos_bucket_web" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_alertmanager" {
@@ -426,17 +316,7 @@ module "util_alertmanager" {
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_required            = true // stateful so always on
   lifetime_evictions_enabled    = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -451,16 +331,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -488,16 +358,6 @@ module "grafana_db" {
   pg_recovery_mode_enabled = var.grafana_db_recovery_mode_enabled
   pg_recovery_directory    = var.grafana_db_recovery_directory
   pg_recovery_target_time  = var.grafana_db_recovery_target_time
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -518,16 +378,6 @@ module "thanos_redis_cache" {
   monitoring_enabled            = var.monitoring_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -544,16 +394,6 @@ module "metrics_bucket" {
   description = "Long term metrics storage"
 
   intelligent_transitions_enabled = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 data "aws_iam_policy_document" "prometheus" {
@@ -614,16 +454,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_secret" "grafana_creds" {
@@ -645,16 +475,6 @@ module "prometheus_cert" {
   service_names = ["prometheus"]
   secret_name   = "prometheus-identity-cert"
   namespace     = local.namespace
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "helm_release" "prometheus_stack" {
@@ -1476,16 +1296,6 @@ module "aws_permissions_thanos_compactor" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_service_account" "thanos_store_gateway" {
@@ -1504,16 +1314,6 @@ module "aws_permissions_thanos_store_gateway" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_service_account" "thanos_ruler" {
@@ -1532,16 +1332,6 @@ module "aws_permissions_thanos_ruler" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_service_account" "thanos_bucket_web" {
@@ -1560,16 +1350,6 @@ module "aws_permissions_thanos_bucket_web" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 
@@ -2564,16 +2344,6 @@ module "authenticating_proxy" {
   instance_type_spread_required = var.enhanced_ha_enabled
   az_spread_preferred           = var.enhanced_ha_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "bucket_web_ingress" {
@@ -2582,8 +2352,8 @@ module "bucket_web_ingress" {
 
   namespace = local.namespace
   name      = "bucket-web"
+  domains   = [local.bucket_web_domain]
   ingress_configs = [{
-    domains      = [local.bucket_web_domain]
     service      = "thanos-bucketweb"
     service_port = 8080
   }]
@@ -2595,16 +2365,6 @@ module "bucket_web_ingress" {
   csp_default_src                = "'self' 'unsafe-inline'"
   extra_annotations              = module.authenticating_proxy[0].upstream_ingress_annotations
   extra_configuration_snippet    = file("${path.module}/bucket_configuration_snippet.txt") # Blocks mutating requests
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 
@@ -2614,8 +2374,8 @@ module "ingress" {
 
   namespace = local.namespace
   name      = "grafana"
+  domains   = [var.grafana_domain]
   ingress_configs = [{
-    domains      = [var.grafana_domain]
     service      = "prometheus-grafana"
     service_port = 80
   }]
@@ -2624,14 +2384,4 @@ module "ingress" {
   cross_origin_isolation_enabled = true
   permissions_policy_enabled     = true
   csp_enabled                    = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

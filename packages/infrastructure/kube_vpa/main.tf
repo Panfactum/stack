@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -30,13 +34,19 @@ locals {
   }
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_vpa"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_admission_controller" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "vpa-admission-controller"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
@@ -47,21 +57,12 @@ module "util_admission_controller" {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "admission-controller"
   }
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels = data.pf_kube_labels.labels.labels
 }
 
 module "util_recommender" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "vpa-recommender"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
@@ -72,20 +73,12 @@ module "util_recommender" {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "recommender"
   }
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels = data.pf_kube_labels.labels.labels
 }
 
 module "util_updater" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "vpa-updater"
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
@@ -96,17 +89,7 @@ module "util_updater" {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "updater"
   }
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -121,16 +104,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 # ################################################################################
@@ -143,16 +116,6 @@ module "webhook_cert" {
   service_names = ["vpa-webhook"]
   secret_name   = "vpa-webhook-certs"
   namespace     = local.namespace
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "helm_release" "vpa" {

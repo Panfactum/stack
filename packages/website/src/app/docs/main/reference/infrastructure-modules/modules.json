@@ -101,11 +101,6 @@
       "group": "aws"
     },
     {
-      "module": "aws_tags",
-      "type": "submodule",
-      "group": "aws"
-    },
-    {
       "module": "aws_vpc",
       "type": "direct",
       "group": "aws"
@@ -162,11 +157,6 @@
     },
     {
       "module": "kube_buildkit",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_canary",
       "type": "direct",
       "group": "kubernetes"
     },
@@ -366,11 +356,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_secrets_csi",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_service",
       "type": "submodule",
       "group": "kubernetes"
@@ -378,11 +363,6 @@
     {
       "module": "kube_stateful_set",
       "type": "submodule",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_trust_manager",
-      "type": "direct",
       "group": "kubernetes"
     },
     {

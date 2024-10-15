@@ -22,6 +22,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -31,7 +35,8 @@ locals {
 }
 
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
@@ -107,16 +112,6 @@ module "metrics_cert" {
   service_names = ["core-dns"]
   secret_name   = "core-dns-metrics-certs"
   namespace     = local.namespace
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "core_dns" {
@@ -235,18 +230,10 @@ module "core_dns" {
 
   vpa_enabled = var.vpa_enabled
 
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
 
-  extra_tags = merge(var.extra_tags, {
+  extra_pod_labels = {
     "k8s-app" = "kube-dns"
-  })
+  }
 
   depends_on = [module.metrics_cert]
 }

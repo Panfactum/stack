@@ -12,6 +12,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -216,21 +220,10 @@ locals {
   }]
 }
 
-module "util" {
-  source        = "../kube_workload_utility"
-  workload_name = var.name
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_kube_labels" "labels" {
+  module = "kube_ingress"
 }
+
 
 /********************************************************************************************************************
 * Kubernetes Resources
@@ -243,7 +236,7 @@ resource "kubectl_manifest" "ingress_cert" {
     metadata = {
       name      = var.name
       namespace = var.namespace
-      labels    = module.util.labels
+      labels    = data.pf_kube_labels.labels.labels
     }
     spec = {
       secretName = "${var.name}-tls"
@@ -286,7 +279,7 @@ resource "kubectl_manifest" "ingress" {
     metadata = {
       name      = each.key
       namespace = var.namespace
-      labels    = module.util.labels
+      labels    = data.pf_kube_labels.labels.labels
       annotations = { for k, v in merge(
         local.common_annotations,
         {

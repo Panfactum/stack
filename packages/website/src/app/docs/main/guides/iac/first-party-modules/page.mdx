@@ -1,3 +1,4 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
 
 import VersioningImg from './versioning.svg'
@@ -147,29 +148,6 @@ In this scenario, even though all three environments will use both the `module1`
 
 ## Writing Modules
 
-### Standard Inputs
-
-When deploying modules, the Panfactum Terragrunt setup will automatically provide the
-[standard inputs](/docs/main/reference/infrastructure-modules/overview#standard-variables)
-to your module during deployment. However, you must define [variables](https://opentofu.org/docs/language/values/variables/)
-for these inputs in each module in order to be able to reference them.
-
-We provide a [templating system](/docs/main/reference/iac-templating#standard-vars) to make maintaining these
-variables easier.
-
-1. In your `vars.tf`, add the following lines:
-
-   ```hcl
-   # pf-generate: standard_vars
-   # end-generate
-   ```
-
-2. Run `pf-update-iac`.
-
-3. Notice that this block has expanded to include the standard variables. Additionally,
-   if new standard variables are ever added in the future, they will be automatically added when
-   you next run `pf-update-iac`.
-
 ### Using Panfactum Submodules
 
 In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/docs/main/reference/infrastructure-modules/overview)
@@ -185,42 +163,51 @@ module "pod" {
 }
 ```
 
-When using Panfactum modules, you will want to pass in the
-[standard inputs](/docs/main/reference/infrastructure-modules/overview#standard-variables). We
-use [templating system](/docs/main/reference/iac-templating#standard-vars) to make maintaining
-these calling conventions easier:
+However, the above syntax has a major downside: your module sources will not automatically align to the version
+of the Panfactum Stack to which you are deploying the module. As a particular submodule version
+is always meant to be running on the same version of the Panfactum Stack, this is a problem. [^1]
 
-1. Add a [template directive](/docs/main/reference/iac-templating#directives) to the module:
+[^1]: For example, you should not run a submodule version `edge.24-10-09` when the cluster is running
+    `edge.24-11-24`.
+
+Fortunately, we provide a convenient way to automatically align your submodule versions:
+
+1. Add the following variables to your module:
 
    ```hcl
-   module "pod" {
-     source       = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pod?ref=__PANFACTUM_VERSION_MAIN__"
-     # pf-generate: pass_vars
-     # end-generate
+   variable "pf_module_source" {
+     description = "The source for Panfactum submodules"
+     type = string
+   }
+
+   variable "pf_module_ref" {
+     description = "The git ref for Panfactum submodules"
+     type = string
    }
    ```
 
-2. Run `pf-update-iac`.
-
-3. Notice that this block has expanded to include the variables defined be the chosen directive. If new standard variables are ever added in the future, they will be automatically added when
-   you next run `pf-update-iac`.
-
-Additionally, you will generally want to ensure that all Panfactum modules in your ecosystem are pinned
-to the same version as your development environment. We provide an annotation that will automatically
-synchronize your versions:
-
-1. Append `# pf-update` to the `module.source` line:
+2. You can now source Panfactum submodules as follows:
 
    ```hcl
    module "pod" {
-     source       = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pod?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+     source       = "${var.pf_module_source}kube_pod${var.pf_module_ref}"
    }
    ```
 
-2. Run `pf-update-iac`.
+Our Terragrunt configuration automatically takes care of passing in the appropriate values for `pf_module_source`
+and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#module-source), these variables will
+automatically update.
 
-3. Notice that the `ref` has been updated to the commit hash of git version that your devenv is pinned to. If you
-   wish to prevent this automatic updating behavior, simply omit the `# pf-update` comment.
+<MarkdownAlert severity="warning">
+    If you are [using a local copy of the Panfactum submodules](/docs/main/guides/iac/deploying-modules#using-a-local-copy-of-panfactum-modules),
+    `pf_module_source` will be a relative path. Unlike absolute paths, [relative paths provide performance improvements and automatic updates.](https://opentofu.org/docs/language/modules/sources/#local-paths)
+    However, the relative path cannot always be used such as from within nested folders inside your modules.
+
+    You can use absolute paths instead
+    by setting the `pf_stack_local_use_relative` [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#module-source) to `false`.
+    However, this will force you to re-init any time you change the local Panfactum module code.
+</MarkdownAlert>
+
 
 ### Using First-Party Submodules
 
@@ -235,6 +222,7 @@ module "utility" {
 
 This ensures that you do not need to keep track of version dependencies across modules and reduces
 your deployment runtimes by avoiding unnecessary network calls.
+
 
 ## Local Development
 
