@@ -84,14 +84,17 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   as well as reduced server costs. [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
   has been updated to support CDN settings.
 
-Additionally, a non-Kubernetes CDN module, [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
-has also been created.
+  Additionally, a non-Kubernetes CDN module, [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
+  has also been created.
 
 * A new module, [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones), has been
   created that allows you to create Route53 zones that have a non-AWS registrar.
 
-* Added the `acl_aws_logs_delivery_enabled` input to [aws\_s3\_private\_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
+* Adds the `acl_aws_logs_delivery_enabled` input to [aws\_s3\_private\_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
   which makes it easier to use the bucket for AWS log delivery purposes.
+
+* Adds support for Cloudflare in [kube_external_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) and [kube_cert_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+
 
 ### Changed
 

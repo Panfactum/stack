@@ -33,13 +33,52 @@ locals {
   namespace = module.namespace.namespace
 
   all_roles = toset([for domain, config in var.route53_zones : config.record_manager_role_arn])
-  config = { for role in local.all_roles : role => {
-    labels           = { role : sha1(role) }
-    zone_ids         = [for domain, config in var.route53_zones : config.zone_id if config.record_manager_role_arn == role]
-    included_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn == role]
-    excluded_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn != role && alltrue([for includedDomain, config in var.route53_zones : !endswith(includedDomain, domain) if config.record_manager_role_arn == role])] // never exclude an ancestor of an included domain
+
+  all_domains = concat(
+    keys(var.cloudflare_zones),
+    keys(var.route53_zones)
+  )
+
+  cloudflare_config = { for domain, config in var.cloudflare_zones : domain => {
+    labels   = { domain : sha1(domain) }
+    provider = "cloudflare"
+
+    included_domains = [domain]
+    excluded_domains = [
+      for excluded_domain, config in local.all_domains :
+      excluded_domain
+      if excluded_domain != domain &&
+      alltrue([
+        for included_domain, config in local.all_domains :
+        !endswith(included_domain, excluded_domain) || included_domain == excluded_domain
+      ])
+    ]
+
+    env = [
+      { name = "CF_API_TOKEN", value = var.cloudflare_api_token }
+    ]
+    extra_args = ["--zone-id-filter=${config.zone_id}", "--cloudflare-dns-records-per-page=5000"]
   } }
 
+
+  aws_config = { for role in local.all_roles : role => {
+    labels   = { role : sha1(role) }
+    provider = "aws"
+
+    included_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn == role]
+    excluded_domains = [for domain, config in var.route53_zones : domain if config.record_manager_role_arn != role && alltrue([for includedDomain, config in var.route53_zones : !endswith(includedDomain, domain) if config.record_manager_role_arn == role])] // never exclude an ancestor of an included domain
+    env = [
+      { name = "AWS_REGION", value = data.aws_region.main.name }
+    ]
+    extra_args = concat(
+      [
+        "--aws-assume-role=${role}"
+      ],
+      [for zone_id in [for domain, config in var.route53_zones : config.zone_id if config.record_manager_role_arn == role] : "--zone-id-filter=${zone_id}"]
+    )
+  } }
+
+  config = merge(local.cloudflare_config, local.aws_config)
 }
 
 data "pf_kube_labels" "labels" {
@@ -82,7 +121,7 @@ module "constants" {
 data "aws_region" "main" {}
 
 data "aws_iam_policy_document" "permissions" {
-  for_each = local.config
+  for_each = local.aws_config
   statement {
     effect    = "Allow"
     actions   = ["sts:AssumeRole"]
@@ -100,8 +139,9 @@ resource "kubernetes_service_account" "external_dns" {
 }
 
 module "aws_permissions" {
-  for_each = local.config
-  source   = "../kube_sa_auth_aws"
+  for_each = local.aws_config
+
+  source = "../kube_sa_auth_aws"
 
   service_account           = kubernetes_service_account.external_dns[each.key].metadata[0].name
   service_account_namespace = local.namespace
@@ -188,19 +228,15 @@ resource "helm_release" "external_dns" {
 
       // Provider configuration
       provider = {
-        name = "aws"
+        name = each.value.provider
       }
-      extraArgs = concat(
-        [
-          "--aws-assume-role=${each.key}"
-        ],
-        [for domain in each.value.included_domains : "--domain-filter=${domain}"],
-        [for domain in each.value.excluded_domains : "--exclude-domains=${domain}"],
-        [for zone_id in each.value.zone_ids : "--zone-id-filter=${zone_id}"]
-      )
-      env = [
-        { name = "AWS_REGION", value = data.aws_region.main.name }
-      ]
+
+      domainFilters  = each.value.included_domains
+      excludeDomains = each.value.excluded_domains
+
+      extraArgs = each.value.extra_args
+      env       = each.value.env
+
       sources    = ["service", "ingress"]
       policy     = var.sync_policy
       txtOwnerId = random_id.ids[each.key].hex

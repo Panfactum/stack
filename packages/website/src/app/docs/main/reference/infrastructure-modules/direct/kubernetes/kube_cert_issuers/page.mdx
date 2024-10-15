@@ -64,6 +64,22 @@ Type: `list(string)`
 
 Default: `[]`
 
+### cloudflare\_api\_token
+
+Description: Cloudflare API Token
+
+Type: `string`
+
+Default: `null`
+
+### cloudflare\_zones
+
+Description: A list of public DNS domains managed by Cloudflare; cert-manager uses this to issue public-facing certificates.
+
+Type: `list(string)`
+
+Default: `[]`
+
 ### namespace
 
 Description: The name of the cert-manager namespace.
@@ -98,6 +114,10 @@ Default: `"cert-manager"`
 ## Outputs
 
 The following outputs are exported:
+
+### cloudflare\_zones
+
+Description: The cloudflare DNS names provided as an input
 
 ### route53\_zones
 

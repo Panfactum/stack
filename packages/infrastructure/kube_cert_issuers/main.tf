@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -29,6 +27,40 @@ locals {
   ci_public_name      = "public"
   ci_internal_name    = "internal"
   ci_internal_ca_name = "internal-ca"
+
+  route53_solvers = [
+    for domain, config in var.route53_zones : {
+      dns01 = {
+        route53 = {
+          hostedZoneID = config.zone_id
+          region       = data.aws_region.main.name
+          role         = config.record_manager_role_arn
+        }
+      }
+      selector = {
+        dnsZones = [domain]
+      }
+    }
+  ]
+
+  cloudflare_solvers = [
+    for domain in var.cloudflare_zones : {
+      dns01 = {
+        cloudflare = {
+          email = var.alert_email
+          apiTokenSecretRef = {
+            name = kubernetes_secret.cloudflare_api_token.metadata[0].name
+            key  = "api-token"
+          }
+        }
+      }
+      selector = {
+        dnsZones = [domain]
+      }
+    }
+  ]
+
+  lets_encrypt_solvers = concat(local.route53_solvers, local.cloudflare_solvers)
 }
 
 data "aws_region" "main" {}
@@ -50,13 +82,28 @@ data "aws_iam_policy_document" "permissions" {
 }
 
 module "aws_permissions" {
-  source = "../kube_sa_auth_aws"
+  count = length(var.route53_zones) > 0 ? 1 : 0
+
+  source                    = "../kube_sa_auth_aws"
 
   service_account           = var.service_account
   service_account_namespace = var.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.aws_iam_ip_allow_list
+}
+
+resource "kubernetes_secret" "cloudflare_api_token" {
+  metadata {
+    name      = "cloudflare-api-token"
+    namespace = var.namespace
+  }
+
+  type = "Opaque"
+
+  data = {
+    "api-token" = var.cloudflare_api_token
+  }
 }
 
 // the default issuer for PUBLIC tls certs in the default DNS zone for the env
@@ -75,18 +122,7 @@ resource "kubectl_manifest" "cluster_issuer" {
         privateKeySecretRef = {
           name = "letsencrypt-cert-key"
         }
-        solvers = [for domain, config in var.route53_zones : {
-          dns01 = {
-            route53 = {
-              hostedZoneID = config.zone_id
-              region       = data.aws_region.main.name
-              role         = config.record_manager_role_arn
-            }
-          }
-          selector = {
-            dnsZones = [domain]
-          }
-        }]
+        solvers = local.lets_encrypt_solvers
       }
     }
   })
