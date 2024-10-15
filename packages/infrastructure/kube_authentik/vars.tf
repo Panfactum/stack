@@ -56,6 +56,12 @@ variable "ingress_enabled" {
   default     = false
 }
 
+variable "cdn_mode_enabled" {
+  description = "Whether to enable CDN mode for the Vault ingress"
+  type        = bool
+  default     = true
+}
+
 variable "domain" {
   description = "A list of domains from which authentik will serve traffic"
   type        = string

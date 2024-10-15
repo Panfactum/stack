@@ -366,7 +366,7 @@ module "ingress" {
       service_port = 8200
     }
   ]
-  cdn_mode_enabled               = true
+  cdn_mode_enabled               = var.cdn_mode_enabled
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = false
   cross_origin_opener_policy     = "same-origin-allow-popups" // Required for SSO logins
@@ -379,7 +379,7 @@ module "ingress" {
 }
 
 module "cdn" {
-  count  = var.ingress_enabled ? 1 : 0
+  count  = var.ingress_enabled && var.cdn_mode_enabled ? 1 : 0
   source = "../kube_aws_cdn"
   providers = {
     aws.global = aws.global

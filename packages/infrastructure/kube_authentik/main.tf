@@ -696,7 +696,7 @@ module "ingress" {
       }
     }
   }]
-  cdn_mode_enabled               = true
+  cdn_mode_enabled               = var.cdn_mode_enabled
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = false
   cross_origin_embedder_policy   = "credentialless" // Required to load gravatar images
@@ -718,7 +718,7 @@ module "ingress" {
 }
 
 module "cdn" {
-  count  = var.ingress_enabled ? 1 : 0
+  count  = var.ingress_enabled && var.cdn_mode_enabled ? 1 : 0
   source = "../kube_aws_cdn"
   providers = {
     aws.global = aws.global

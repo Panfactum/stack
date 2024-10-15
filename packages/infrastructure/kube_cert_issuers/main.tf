@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "permissions" {
 module "aws_permissions" {
   count = length(var.route53_zones) > 0 ? 1 : 0
 
-  source                    = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
 
   service_account           = var.service_account
   service_account_namespace = var.namespace
