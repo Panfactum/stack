@@ -14,22 +14,15 @@ terraform {
       source  = "hashicorp/time"
       version = "0.10.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_ses_domain"
 }
 
 data "aws_region" "current" {}
@@ -117,7 +110,7 @@ resource "random_id" "sender_id" {
 
 resource "aws_iam_user" "mail_sender" {
   name = random_id.sender_id.hex
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Used for SMTP authentication for sending email via SES for ${var.domain}"
   })
 }

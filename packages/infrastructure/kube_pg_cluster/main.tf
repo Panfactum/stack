@@ -24,6 +24,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -49,6 +53,10 @@ locals {
     "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
     "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
   }
+}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_pg_cluster"
 }
 
 module "pull_through" {
@@ -83,17 +91,7 @@ module "util_cluster" {
   az_spread_required            = true
   az_spread_preferred           = true // stateful so always on
   lifetime_evictions_enabled    = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_pooler" {
@@ -108,17 +106,7 @@ module "util_pooler" {
   az_spread_required            = true
   pod_affinity_match_labels     = module.util_cluster.match_labels
   lifetime_evictions_enabled    = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -156,16 +144,6 @@ module "s3_bucket" {
   audit_log_enabled               = false
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 moved {
@@ -196,16 +174,6 @@ module "irsa" {
   // Due to a limitation in the cluster resource api, the cluster resource is the one that creates
   // the service account for us, so we let it to the annotations
   annotate_service_account = false
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 moved {
@@ -235,18 +203,9 @@ module "server_certs" {
     "${local.cluster_name}-pooler-rw"
   ]
 
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, {
+  extra_labels = {
     "cnpg.io/reload" = ""
-  })
+  }
 }
 
 resource "random_id" "client_certs_secret" {
@@ -261,18 +220,9 @@ module "client_certs" {
   usages      = ["client auth"]
   common_name = "streaming_replica"
 
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, {
+  extra_labels = {
     "cnpg.io/reload" = ""
-  })
+  }
 }
 
 /***************************************
@@ -935,24 +885,15 @@ resource "random_id" "pooler_secret" {
 // pgbouncer will authenticate with a rotating client
 // cert rather than a static password
 module "pooler_certs" {
-  source      = "../kube_internal_cert"
+  source = "../kube_internal_cert"
+
   secret_name = random_id.pooler_secret.hex
   namespace   = var.pg_cluster_namespace
   usages      = ["client auth"]
   common_name = "cnpg_pooler_pgbouncer"
-
-  # pf-generate: pass_vars_no_extra_tags
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  # end-generate
-
-  extra_tags = merge(var.extra_tags, {
+  extra_labels = {
     "cnpg.io/reload" = ""
-  })
+  }
 }
 
 

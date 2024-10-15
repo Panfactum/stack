@@ -50,9 +50,6 @@ pkgs.stdenv.mkDerivation rec {
     cp ${src}/pf-check-repo-setup.sh $out/bin/pf-check-repo-setup
     chmod +x $out/bin/pf-check-repo-setup
 
-    cp ${src}/pf-update-iac.sh $out/bin/pf-update-iac
-    chmod +x $out/bin/pf-update-iac
-
     cp ${src}/pf-get-buildkit-state-hash.sh $out/bin/pf-get-buildkit-state-hash
     chmod +x $out/bin/pf-get-buildkit-state-hash
 

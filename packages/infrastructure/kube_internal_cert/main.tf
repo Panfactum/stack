@@ -8,6 +8,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -15,19 +19,8 @@ locals {
   localhost_sans = var.include_localhost ? ["localhost"] : []
 }
 
-module "util" {
-  source = "../kube_workload_utility"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_kube_labels" "labels" {
+  module = "kube_internal_cert"
 }
 
 resource "kubectl_manifest" "cert" {
@@ -37,7 +30,7 @@ resource "kubectl_manifest" "cert" {
     metadata = {
       name      = var.secret_name
       namespace = var.namespace
-      labels    = module.util.labels
+      labels    = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
     }
     spec = {
       secretName = var.secret_name
@@ -46,7 +39,7 @@ resource "kubectl_manifest" "cert" {
           // This allows for the secret to have its ca data directly injected into webhooks
           "cert-manager.io/allow-direct-injection" = "true"
         }
-        labels = module.util.labels
+        labels = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
       }
       commonName = var.common_name == null ? (length(var.service_names) == 0 ? "default" : "${var.service_names[0]}.${var.namespace}.svc") : var.common_name
       dnsNames = length(var.service_names) == 0 ? concat(["default"], local.localhost_sans) : concat(

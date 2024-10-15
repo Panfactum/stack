@@ -8,12 +8,16 @@ variable "name" {
   type        = string
 }
 
+variable "domains" {
+  description = "Which domains the generated ingresses will listen on"
+  type        = list(string)
+}
+
 variable "ingress_configs" {
   description = "A list of ingress names to the configuration to use for the ingress"
   type = list(object({
 
     # This ingress matches all incoming requests on the indicated domains that have the indicated path prefixes
-    domains       = list(string)
     path_prefix   = optional(string, "/")
     remove_prefix = optional(bool, false) # True iff the the path_prefix should be stripped before forwarding on to upstream service
 
@@ -21,56 +25,69 @@ variable "ingress_configs" {
     service      = string
     service_port = number
 
-    # Allows redirecting a subset of traffic to a different service;
-    # For use in migrating functionality between services
-    rewrite_rules = optional(list(object({
-      path_regex   = string # A regex to match against incoming paths
-      path_rewrite = string # The new path to use
-    })), [])
-
-    # HTTP Redirects
-    permanent_redirect_url = optional(string)
-    temporary_redirect_url = optional(string)
-
     # CDN Configuration
     cdn = optional(object({
       extra_origin_headers = optional(map(string), {}) # Headers sent from the CDN to the origin
 
       # The default behavior of the CDN before routing requests to this ingress
       default_cache_behavior = optional(object({
-        allowed_methods             = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]) # What HTTP methods are allowed
-        cached_methods              = optional(list(string), ["GET", "HEAD"])                                              # What HTTP methods will be cached
-        min_ttl                     = optional(number, 0)                                                                  # Minimum cache time
-        default_ttl                 = optional(number, 86400)                                                              # Default cache time
-        max_ttl                     = optional(number, 31536000)                                                           # Maximum cache time
-        cookies_in_cache_key        = optional(list(string), [])                                                           # Which cookies will be included in the cache key
-        headers_in_cache_key        = optional(list(string), [])                                                           # Which headers will be included in the cache key
-        query_strings_in_cache_key  = optional(list(string), [])                                                           # Which query strings will be included in the cache key
-        cookies_not_forwarded       = optional(list(string), [])                                                           # Which cookies will NOT be forwarded to the ingress from the CDN
-        headers_not_forwarded       = optional(list(string), [])                                                           # Which headers will NOT be forwarded to the ingress from CDN
-        query_strings_not_forwarded = optional(list(string), [])                                                           # Which query strings will NOT be forwarded to the ingress from the CDN
-        compression_enabled         = optional(bool, true)                                                                 # Whether the CDN performs compression on your assets
-        viewer_protocol_policy      = optional(string, "redirect-to-https")                                                # What should happen based on the client protocol (HTTP vs HTTPS)
+        caching_enabled      = optional(bool, true)                                                                 # Whether the CDN should cache responses from the origin (overrides all other caching settings)
+        allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]) # What HTTP methods are allowed
+        cached_methods       = optional(list(string), ["GET", "HEAD"])                                              # What HTTP methods will be cached
+        min_ttl              = optional(number, 0)                                                                  # Minimum cache time
+        default_ttl          = optional(number, 86400)                                                              # Default cache time
+        max_ttl              = optional(number, 31536000)                                                           # Maximum cache time
+        cookies_in_cache_key = optional(list(string), ["*"])                                                        # Which cookies will be included in the cache key (Providing "*" means ALL cookies)
+        headers_in_cache_key = optional(list(string), [                                                             # Which headers will be included in the cache key
+          "Authorization",
+          "Origin",
+          "x-http-method-override",
+          "x-http-method",
+          "x-method-override",
+          "x-forwarded-host",
+          "x-host",
+          "x-original-url",
+          "x-rewrite-url",
+          "forwarded"
+        ])
+        query_strings_in_cache_key  = optional(list(string), ["*"])         # Which query strings will be included in the cache key (Providing "*" means ALL query strings)
+        cookies_not_forwarded       = optional(list(string), [])            # Which cookies will NOT be forwarded to the ingress from the CDN
+        headers_not_forwarded       = optional(list(string), [])            # Which headers will NOT be forwarded to the ingress from CDN
+        query_strings_not_forwarded = optional(list(string), [])            # Which query strings will NOT be forwarded to the ingress from the CDN
+        compression_enabled         = optional(bool, true)                  # Whether the CDN performs compression on your assets
+        viewer_protocol_policy      = optional(string, "redirect-to-https") # What should happen based on the client protocol (HTTP vs HTTPS). One of: allow-all, https-only, redirect-to-https
       }))
 
       # Similar to default_cache_behavior but allows you to specific specific rules for certain path patterns
       # The keys for this map are the path patterns (e.g., "*.jpg")
-      # Path patterns will automatically be prefixed with the ingress' path_prefix value, so it can be omitted
+      # Path patterns will automatically be prefixed with the path_prefix value, so it can be omitted
       path_match_behavior = optional(map(object({
-        allowed_methods             = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"])
-        cached_methods              = optional(list(string), ["GET", "HEAD"])
-        min_ttl                     = optional(number, 0)
-        default_ttl                 = optional(number, 86400)
-        max_ttl                     = optional(number, 31536000)
-        cookies_in_cache_key        = optional(list(string), [])
-        headers_in_cache_key        = optional(list(string), [])
-        query_strings_in_cache_key  = optional(list(string), [])
+        caching_enabled      = optional(bool, true) # Whether the CDN should cache responses from the origin (overrides all other caching settings)
+        allowed_methods      = optional(list(string), ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"])
+        cached_methods       = optional(list(string), ["GET", "HEAD"])
+        min_ttl              = optional(number, 0)
+        default_ttl          = optional(number, 86400)
+        max_ttl              = optional(number, 31536000)
+        cookies_in_cache_key = optional(list(string), ["*"])
+        headers_in_cache_key = optional(list(string), [
+          "Authorization",
+          "Origin",
+          "x-http-method-override",
+          "x-http-method",
+          "x-method-override",
+          "x-forwarded-host",
+          "x-host",
+          "x-original-url",
+          "x-rewrite-url",
+          "forwarded"
+        ])
+        query_strings_in_cache_key  = optional(list(string), ["*"])
         cookies_not_forwarded       = optional(list(string), [])
         headers_not_forwarded       = optional(list(string), [])
         query_strings_not_forwarded = optional(list(string), [])
         compression_enabled         = optional(bool, true)
         viewer_protocol_policy      = optional(string, "redirect-to-https")
-      })))
+      })), {})
     }))
   }))
 }
@@ -643,4 +660,14 @@ variable "extra_configuration_snippet" {
   description = "An extra NGINX configuration snippet to add to the route handlers"
   type        = string
   default     = ""
+}
+
+variable "redirect_rules" {
+  description = "A list of redirect rules that the ingress will match against before sending requests to the upstreams"
+  type = list(object({
+    source    = string                # A regex string for matching the entire request url (^https://domain.com(/.*)?$)
+    target    = string                # The redirect target (can use numbered capture groups from the source - https://domain2.com/$1)
+    permanent = optional(bool, false) # If true will issue a 301 redirect; otherwise, will use 302
+  }))
+  default = []
 }

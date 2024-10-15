@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -50,30 +54,26 @@ locals {
   }
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_descheduler"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = "descheduler"
   instance_type_spread_required = false
   az_spread_preferred           = false
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -84,16 +84,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************

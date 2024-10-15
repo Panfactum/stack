@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/time"
       version = "0.10.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -34,6 +38,10 @@ resource "random_id" "sts_id" {
   byte_length = 8
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_stateful_set"
+}
+
 module "pod_template" {
   source = "../kube_pod"
 
@@ -46,6 +54,7 @@ module "pod_template" {
   extra_pod_annotations      = var.extra_pod_annotations
   extra_pod_labels           = var.extra_pod_labels
   pod_version_labels_enabled = var.pod_version_labels_enabled
+  extra_labels               = data.pf_kube_labels.labels.labels
 
   # Container configuration
   common_env                  = var.common_env
@@ -79,17 +88,6 @@ module "pod_template" {
   panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
   termination_grace_period_seconds = var.termination_grace_period_seconds
   restart_policy                   = var.restart_policy
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_service_account" "service_account" {
@@ -265,14 +263,4 @@ module "pvc_annotator" {
     }
     labels = module.pod_template.labels
   } }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

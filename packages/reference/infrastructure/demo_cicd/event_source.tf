@@ -18,7 +18,7 @@ resource "kubernetes_secret" "github_event_source" {
 }
 
 module "event_source" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_event_source?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source = "${var.pf_module_source}kube_argo_event_source${var.pf_module_ref}"
 
   name        = local.event_source_name
   namespace   = local.namespace
@@ -64,42 +64,24 @@ module "event_source" {
       }
     }
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "ingress" {
-  source =   "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" # pf-update
+  source = "${var.pf_module_source}kube_ingress${var.pf_module_ref}"
 
   namespace = local.namespace
   name      = "${local.event_source_name}-webhook"
-  ingress_configs = [{
-    domains      = [var.webhook_domain]
-    service      = "${local.event_source_name}-eventsource-svc"
-    service_port = 12000
-  }]
-  rate_limiting_enabled          = true
+  domains = [var.webhook_domain]
+  ingress_configs = [
+    {
+      service      = "${local.event_source_name}-eventsource-svc"
+      service_port = 12000
+    }
+  ]
+  rate_limiting_enabled = true
 
   # These are unnecessary here b/c no browser access
   cross_origin_isolation_enabled = false
   permissions_policy_enabled     = false
   csp_enabled                    = false
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

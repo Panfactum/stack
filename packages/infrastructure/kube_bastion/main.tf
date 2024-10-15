@@ -24,6 +24,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -53,16 +57,6 @@ module "namespace" {
   namespace            = local.name
   linkerd_inject       = false
   loadbalancer_enabled = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -236,14 +230,4 @@ module "bastion" {
   # Changing the version labels on the pods will cause a disruption to any running tunnels
   # which can be disruptive in local development
   pod_version_labels_enabled = false
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

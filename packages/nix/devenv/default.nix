@@ -22,11 +22,19 @@ let
     rev = "9a9dae8f6319600fa9aebde37f340975cab4b8c0";
     sha256 = "hL7N/ut2Xu0NaDxDMsw2HagAjgDskToGiyZOWriiLYM=";
   }) { inherit system; };
+  src9 = import (pkgs.fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "73bed75dbd3de6d4fca3f81ce25a0cc7766afff6";
+    sha256 = "IeBVJ75Bd7yWz8i3m225x5Q25O1Wk8cBWi8DI7bCgSo=";
+  }) { inherit system; };
 in {
   env = {
     TERRAFORM_MODULES_DIR = "${config.env.DEVENV_ROOT}/packages/infrastructure";
     PF_SKIP_IAC_REF_UPDATE = "1";
     PF_IAC_DIR = "${config.env.DEVENV_ROOT}/packages/infrastructure";
+    GOBIN = "${config.env.DEVENV_ROOT}/go/bin";
+    GOPATH = "${config.env.DEVENV_ROOT}/go";
   };
   packages = with pkgs; [
 
@@ -43,6 +51,7 @@ in {
     ####################################
     nodejs_20
     nodePackages_latest.pnpm # nodejs package manager
+    go
 
     ####################################
     # Version Control
@@ -61,7 +70,7 @@ in {
     #########################################
     # IaC Tools
     #########################################
-    src3.opentofu
+    src9.opentofu
     src7.terragrunt
     src5.kubectl
     terraform-docs

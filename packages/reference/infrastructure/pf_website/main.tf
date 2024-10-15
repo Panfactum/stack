@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -24,23 +28,13 @@ locals {
 }
 
 module "constants" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source = "${var.pf_module_source}kube_constants${var.pf_module_ref}"
 }
 
 module "namespace" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source = "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***********************************************
@@ -48,7 +42,7 @@ module "namespace" {
 ************************************************/
 
 module "website_deployment" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   namespace = module.namespace.namespace
   name      = local.name
 
@@ -84,26 +78,16 @@ module "website_deployment" {
 
   vpa_enabled = var.vpa_enabled
   controller_nodes_enabled = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 module "ingress" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_ingress?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source = "${var.pf_module_source}kube_ingress${var.pf_module_ref}"
 
   name      = local.name
   namespace = local.namespace
 
+  domains      = [var.website_domain]
   ingress_configs = [{
-    domains      = [var.website_domain]
     service      = local.name
     service_port = local.port
   }]
@@ -114,16 +98,6 @@ module "ingress" {
   cross_origin_isolation_enabled = true
   rate_limiting_enabled          = true
   permissions_policy_enabled     = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 
   depends_on = [module.website_deployment]
 }

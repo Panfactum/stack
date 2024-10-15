@@ -7,23 +7,16 @@ terraform {
       version               = "5.70.0"
       configuration_aliases = [aws.global]
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars_no_region
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-
-  region = "us-east-1"
+data "pf_aws_tags" "tags" {
+  module          = "aws_dnssec"
+  region_override = "us-east-1"
 }
 
 ##########################################################################
@@ -94,7 +87,7 @@ resource "aws_kms_key" "key" {
   deletion_window_in_days  = 7
   key_usage                = "SIGN_VERIFY"
   policy                   = data.aws_iam_policy_document.key.json
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Key used to sign records for DNSSEC"
   })
 }

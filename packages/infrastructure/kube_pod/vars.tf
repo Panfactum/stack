@@ -266,3 +266,9 @@ variable "pod_version_labels_enabled" {
   default     = true
 }
 
+variable "extra_labels" {
+  description = "Extra labels to apply to all resources created by this module."
+  type        = map(string)
+  default     = {}
+}
+

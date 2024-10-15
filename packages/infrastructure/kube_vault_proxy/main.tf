@@ -24,6 +24,10 @@ terraform {
       source  = "hashicorp/vault"
       version = "3.25.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -32,8 +36,13 @@ locals {
   proxy_path  = replace("${var.path_prefix}/oauth2", "////", "/")
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_vault_proxy"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
@@ -43,24 +52,15 @@ resource "random_id" "oauth2_proxy" {
 }
 
 module "util" {
-  source                        = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name                 = random_id.oauth2_proxy.hex
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.instance_type_spread_required
   az_spread_preferred           = var.az_spread_preferred
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -267,8 +267,8 @@ module "ingress" {
 
   namespace = var.namespace
   name      = "oauth2-proxy"
+  domains   = [var.domain]
   ingress_configs = [{
-    domains      = [var.domain]
     service      = random_id.oauth2_proxy.hex
     service_port = 80
     path_prefix  = local.proxy_path
@@ -279,16 +279,6 @@ module "ingress" {
   permissions_policy_enabled     = true
   csp_enabled                    = true
   csp_style_src                  = "'self' 'unsafe-inline'"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 
   depends_on = [
     helm_release.oauth2_proxy

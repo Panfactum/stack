@@ -20,6 +20,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 

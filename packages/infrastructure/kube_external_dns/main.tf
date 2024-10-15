@@ -20,6 +20,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -77,6 +81,10 @@ locals {
   config = merge(local.cloudflare_config, local.aws_config)
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_external_dns"
+}
+
 resource "random_id" "ids" {
   for_each    = local.config
   prefix      = "${local.name}-"
@@ -99,17 +107,7 @@ module "util" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = false
   az_spread_preferred           = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -150,16 +148,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.permissions[each.key].json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 
@@ -171,16 +159,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "helm_release" "external_dns" {

@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 

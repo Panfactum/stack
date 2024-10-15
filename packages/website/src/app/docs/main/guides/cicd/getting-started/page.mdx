@@ -65,9 +65,9 @@ do this now:
       resource to generate the secret, and expose it as a sensitive module output.
 
       <MarkdownAlert severity="warning">
-          If you do not set `deleteHookOnFinish` on the EventSource, your webhook will not be deleted
-          from your git hosting provider when the EventSource is updated / deleted. This will a conflict
-          issues if you ever recreate the webhook in the future. As a result, we recommend setting this to true.
+        If you do not set `deleteHookOnFinish` on the EventSource, your webhook will not be deleted
+        from your git hosting provider when the EventSource is updated / deleted. This will a conflict
+        issues if you ever recreate the webhook in the future. As a result, we recommend setting this to true.
       </MarkdownAlert>
 
    2. In the Sensor, create a dependency with no filters (yet). Additionally, create a
@@ -114,7 +114,7 @@ Add an instance of the `wf_tf_deploy` submodule to the CI / CD module you create
 
 ```hcl
 module "tf_deploy" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_tf_deploy?ref=__PANFACTUM_VERSION_MAIN__" #pf-update
+  source = "${var.pf_module_source}wf_tf_deploy${var.pf_module_ref}"
 
   name = "tf-deploy"
   namespace = local.namespace
@@ -132,23 +132,13 @@ module "tf_deploy" {
   secrets = {
     AUTHENTIK_TOKEN = var.authentik_token
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
 A couple important notes:
 
 * You can override `tf_apply_dir` when you create new Workflows from this WorkflowTemplate. As a result, you
-can re-use this one WorkflowTemplate to deploy any particular subset of your IaC.
+  can re-use this one WorkflowTemplate to deploy any particular subset of your IaC.
 
 * All the credentialing for AWS, Kubernetes, and Vault are done for you. However,
   each Workflow should deploy *at most* a single environment as credentials are environment-scoped.
@@ -174,7 +164,7 @@ Let's do this now:
 
    ```hcl
    module "sensor" {
-     source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=__PANFACTUM_VERSION_MAIN__" #pf-update  ...
+     source = "${var.pf_module_source}kube_argo_sensor${var.pf_module_ref}"
      ...
      dependencies = [
        {
@@ -210,7 +200,7 @@ Let's do this now:
 
    ```hcl
    module "sensor" {
-     source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=__PANFACTUM_VERSION_MAIN__" #pf-update  ...
+     source = "${var.pf_module_source}kube_argo_sensor${var.pf_module_ref}"
      ...
      dependencies = [
        ...

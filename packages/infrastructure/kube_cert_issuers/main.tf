@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -17,6 +15,10 @@ terraform {
     kubectl = {
       source  = "alekc/kubectl"
       version = "2.0.4"
+    }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
     }
   }
 }
@@ -61,26 +63,15 @@ locals {
   lets_encrypt_solvers = concat(local.route53_solvers, local.cloudflare_solvers)
 }
 
-module "util" {
-  source = "../kube_workload_utility"
+data "aws_region" "main" {}
 
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_kube_labels" "labels" {
+  module = "kube_cert_issuers"
 }
 
 /***************************************
 * Cluster Issuer - Public
 ***************************************/
-
-data "aws_region" "main" {}
 
 data "aws_iam_policy_document" "permissions" {
   statement {
@@ -94,21 +85,12 @@ module "aws_permissions" {
   count = length(var.route53_zones) > 0 ? 1 : 0
 
   source                    = "../kube_sa_auth_aws"
+
   service_account           = var.service_account
   service_account_namespace = var.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_secret" "cloudflare_api_token" {
@@ -131,7 +113,7 @@ resource "kubectl_manifest" "cluster_issuer" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.ci_public_name
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       acme = {
@@ -192,7 +174,7 @@ resource "kubernetes_service_account" "vault_issuer" {
   metadata {
     name      = "vault-issuer"
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
 }
 
@@ -200,7 +182,7 @@ resource "kubernetes_role" "vault_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   rule {
     verbs          = ["create"]
@@ -214,7 +196,7 @@ resource "kubernetes_role_binding" "vault_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -269,7 +251,7 @@ resource "kubectl_manifest" "internal_ci" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.ci_internal_name
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       vault = {
@@ -295,7 +277,7 @@ resource "kubectl_manifest" "internal_ci" {
 resource "kubernetes_config_map" "ca_bundle" {
   metadata {
     name      = "internal-ca"
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
     namespace = var.namespace
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
@@ -315,7 +297,7 @@ resource "kubernetes_service_account" "vault_ca_issuer" {
   metadata {
     name      = "vault-ca-issuer"
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
 }
 
@@ -323,7 +305,7 @@ resource "kubernetes_role" "vault_ca_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   rule {
     verbs          = ["create"]
@@ -337,7 +319,7 @@ resource "kubernetes_role_binding" "vault_ca_issuer" {
   metadata {
     name      = kubernetes_service_account.vault_ca_issuer.metadata[0].name
     namespace = var.namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -392,7 +374,7 @@ resource "kubectl_manifest" "internal_ca_ci" {
     kind       = "ClusterIssuer"
     metadata = {
       name   = local.ci_internal_ca_name
-      labels = module.util.labels
+      labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       vault = {

@@ -12,12 +12,21 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
+}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_pvc_annotator"
 }
 
 module "constants" {
@@ -33,7 +42,7 @@ resource "kubernetes_role" "pvc_annotator" {
   metadata {
     name      = random_id.id.hex
     namespace = var.namespace
-    labels    = module.pvc_annotator.labels
+    labels    = merge(module.pvc_annotator.labels, data.pf_kube_labels.labels.labels)
   }
   rule {
     api_groups = [""]
@@ -46,7 +55,7 @@ resource "kubernetes_role_binding" "pvc_annotator" {
   metadata {
     name      = random_id.id.hex
     namespace = var.namespace
-    labels    = module.pvc_annotator.labels
+    labels    = merge(module.pvc_annotator.labels, data.pf_kube_labels.labels.labels)
   }
   subject {
     kind      = "ServiceAccount"
@@ -85,14 +94,4 @@ module "pvc_annotator" {
   }]
   starting_deadline_seconds = 60 * 5
   active_deadline_seconds   = 60 * 5
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

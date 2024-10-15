@@ -30,6 +30,8 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
 
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
 ## Required Inputs
 
 The following input variables are required:
@@ -57,6 +59,14 @@ Description: AWS access policy for the bucket.
 Type: `string`
 
 Default: `null`
+
+### acl\_aws\_logs\_delivery\_enabled
+
+Description: Whether the ACL for awslogsdelivery is enabled
+
+Type: `bool`
+
+Default: `false`
 
 ### acl\_enabled
 

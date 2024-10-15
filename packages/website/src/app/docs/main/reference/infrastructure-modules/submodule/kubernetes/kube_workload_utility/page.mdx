@@ -19,6 +19,8 @@ This module is used to construct standard values for the following fields:
 
 The following providers are needed by this module:
 
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
 ## Required Inputs
@@ -84,6 +86,14 @@ Description: Whether the pods must be scheduled on an EKS Node Group node
 Type: `bool`
 
 Default: `false`
+
+### extra\_labels
+
+Description: Extra labels to add to the workload
+
+Type: `map(string)`
+
+Default: `{}`
 
 ### extra\_tolerations
 

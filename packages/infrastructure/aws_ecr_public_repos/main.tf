@@ -6,22 +6,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.70.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+data "pf_aws_tags" "tags" {
+  module = "aws_ecr_public_repos"
 }
 
 ##########################################################################
@@ -98,7 +91,7 @@ resource "aws_ecrpublic_repository" "repo" {
     operating_systems = each.value.operating_systems
     usage_text        = each.value.usage_text
   }
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_ecrpublic_repository_policy" "delegated_access" {

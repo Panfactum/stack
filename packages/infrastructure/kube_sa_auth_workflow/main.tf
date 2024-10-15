@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -23,33 +27,20 @@ locals {
   bucket = yamldecode(data.kubernetes_config_map.artifact_config.data.s3).s3.bucket
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_sa_auth_workflow"
+}
+
 resource "random_id" "role_id" {
   prefix      = "${var.service_account}-"
   byte_length = 8
-}
-
-module "util" {
-  source = "../kube_workload_utility"
-
-  workload_name = var.service_account
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_role" "role" {
   metadata {
     name      = random_id.role_id.hex
     namespace = var.service_account_namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   rule {
     api_groups = ["argoproj.io"]
@@ -62,7 +53,7 @@ resource "kubernetes_role_binding" "role_binding" {
   metadata {
     name      = random_id.role_id.hex
     namespace = var.service_account_namespace
-    labels    = module.util.labels
+    labels    = data.pf_kube_labels.labels.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -104,15 +95,4 @@ module "aws_permissions" {
   iam_policy_json           = data.aws_iam_policy_document.aws_access.json
   ip_allow_list             = var.ip_allow_list
   annotate_service_account  = var.annotate_service_account
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

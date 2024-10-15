@@ -20,7 +20,7 @@ When the script is executed, the following resources are suspended:
 3. EC2 NAT Nodes
 4. Load Balancers and IP Addresses
 
-These resources are considered non-essential during periods when the cluster is not actively in use and can be safely suspended to reduce AWS charges to ~$3 a day.
+These resources are considered non-essential during periods when the cluster is not actively in use and can be safely suspended to reduce AWS charges to \~\$3 a day.
 
 ## Prerequisites
 
@@ -33,9 +33,9 @@ Before running the suspend or resume script, the following must be completed:
 ## Suspending a Cluster
 
 <MarkdownAlert severity="warning">
-    You are about to suspend the cluster. Please note that the cluster's certificates will expire in 90 days. If the cluster is not resumed before then, the certificates will not be renewed automatically, and the cluster may require manual intervention to recover.
+  You are about to suspend the cluster. Please note that the cluster's certificates will expire in 90 days. If the cluster is not resumed before then, the certificates will not be renewed automatically, and the cluster may require manual intervention to recover.
 
-    To avoid this, ensure that you run the resume script before the 90-day limit to allow the cluster to gracefully renew its certificates and restore its normal operation.
+  To avoid this, ensure that you run the resume script before the 90-day limit to allow the cluster to gracefully renew its certificates and restore its normal operation.
 </MarkdownAlert>
 
 To suspend the AWS resources:

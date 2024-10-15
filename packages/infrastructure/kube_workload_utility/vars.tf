@@ -111,3 +111,9 @@ variable "panfactum_scheduler_enabled" {
   type        = bool
   default     = false
 }
+
+variable "extra_labels" {
+  description = "Extra labels to add to the workload"
+  type        = map(string)
+  default     = {}
+}

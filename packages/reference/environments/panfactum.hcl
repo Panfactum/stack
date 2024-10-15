@@ -58,14 +58,20 @@ locals {
   enable_local      = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/local")
   enable_random     = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/random")
   enable_tls        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/tls")
+  enable_pf         = strcontains(local.lockfile_contents, "registry.opentofu.org/panfactum/pf")
+
+  # The module to deploy
+  module = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
 
   # The version of the panfactum stack to deploy
-  pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
-  pf_stack_repo                = "github.com/panfactum/stack"
-  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-version-hash", local.pf_stack_version, local.pf_stack_version == "local" ? "local" : "https://${local.pf_stack_repo}")
-  pf_stack_module              = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
-  pf_stack_local_path          = lookup(local.vars, "pf_stack_local_path", "../../../../../..")
-  pf_stack_source              = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.pf_stack_module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.pf_stack_module}?ref=${local.pf_stack_version_commit_hash}"
+  pf_stack_version                       = lookup(local.vars, "pf_stack_version", "main")
+  pf_stack_repo                          = "github.com/panfactum/stack"
+  pf_stack_version_commit_hash           = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-version-hash", local.pf_stack_version, local.pf_stack_version == "local" ? "local" : "https://${local.pf_stack_repo}")
+  pf_stack_local_path                    = lookup(local.vars, "pf_stack_local_path", "../../../../../..")
+  pf_stack_local_ref                     = local.pf_stack_version == "local" ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", "${local.pf_stack_local_path}/packages/infrastructure") : ""
+  pf_stack_local_use_relative            = lookup(local.vars, "pf_stack_local_use_relative", true) == true # The redundant == is a type conversion check
+  pf_stack_local_path_relative_to_module = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "realpath", "--relative-to=${local.repo_root}", local.pf_stack_local_path)
+  pf_stack_source                        = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.module}?ref=${local.pf_stack_version_commit_hash}"
 
   # Repo metadata
   repo_vars      = jsondecode(run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-repo-variables"))
@@ -86,7 +92,7 @@ locals {
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
   use_local_iac = contains(["local", local.primary_branch], local.version)
-  iac_path      = "/${local.iac_dir}//${lookup(local.vars, "module", basename(get_original_terragrunt_dir()))}"
+  iac_path      = "/${local.iac_dir}//${local.module}"
   source        = local.use_local_iac ? "${local.repo_root}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
 
   # Folder of shared snippets to generate
@@ -138,6 +144,20 @@ terraform {
 ################################################################
 ### Provider Configurations
 ################################################################
+
+generate "pf_provider" {
+  path      = "pf.tf"
+  if_exists = "overwrite_terragrunt"
+  contents = local.enable_pf ? templatefile("${local.provider_folder}/pf.tftpl", {
+    is_local      = local.enable_pf ? local.is_local : false
+    environment   = local.enable_pf ? local.vars.environment : ""
+    region        = local.enable_pf ? local.vars.region : ""
+    stack_version = local.enable_pf ? local.pf_stack_version : ""
+    stack_commit  = local.enable_pf ? local.pf_stack_version_commit_hash : ""
+    root_module   = local.enable_pf ? local.module : ""
+    extra_tags    = local.enable_pf ? local.extra_tags : {}
+  }) : ""
+}
 
 generate "aws_provider" {
   path      = "aws.tf"
@@ -309,11 +329,7 @@ retry_sleep_interval_sec = 30
 inputs = merge(
   local.extra_inputs,
   {
-    is_local         = local.is_local
-    environment      = local.vars.environment
-    region           = local.vars.region
-    pf_stack_version = local.pf_stack_version
-    pf_stack_commit  = local.pf_stack_version_commit_hash
-    extra_tags       = local.extra_tags
+    pf_module_source = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "../../../../${local.pf_stack_local_path_relative_to_module}/packages/infrastructure//" : "${local.pf_stack_local_path}/packages/infrastructure//") : "${local.pf_stack_repo}//packages/infrastructure/"
+    pf_module_ref    = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : "?ref=${local.pf_stack_version_commit_hash}"
   }
 )

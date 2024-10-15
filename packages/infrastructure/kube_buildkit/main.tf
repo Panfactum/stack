@@ -14,6 +14,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -24,16 +28,10 @@ locals {
   arch      = toset(["amd64", "arm64"])
 
   port = 1234
+}
 
-  scale_to_zero_labels = merge(
-    module.scale_to_zero.labels,
-    { "panfactum.com/module" = "kube_buildkit" }
-  )
-
-  cache_clear_labels = merge(
-    module.scale_to_zero.labels,
-    { "panfactum.com/module" = "kube_buildkit" }
-  )
+data "pf_kube_labels" "labels" {
+  module = "kube_buildkit"
 }
 
 module "pull_through" {
@@ -56,14 +54,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -83,20 +73,13 @@ module "cache_bucket" {
   expire_after_days  = 7
   versioning_enabled = false
   force_destroy      = true
-
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
 }
 
 resource "kubernetes_config_map" "cache_bucket" {
   metadata {
     name      = "buildkit-cache-bucket-config"
     namespace = local.namespace
+    labels    = data.pf_kube_labels.labels.labels
   }
   data = {
     bucket = module.cache_bucket.bucket_name
@@ -128,14 +111,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.buildkit.json
   ip_allow_list             = var.ip_allow_list
-
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
 }
 
 /***************************************
@@ -256,22 +231,13 @@ module "buildkit" {
   volume_retention_policy = {
     when_deleted = "Delete"
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_role" "buildkit_user" {
   metadata {
     name      = "buildkit-user"
     namespace = local.namespace
+    labels    = data.pf_kube_labels.labels.labels
   }
   rule {
     api_groups     = ["apps"]
@@ -362,7 +328,7 @@ resource "kubernetes_role_binding" "scale_to_zero" {
   metadata {
     name      = "scale-to-zero"
     namespace = local.namespace
-    labels    = local.scale_to_zero_labels
+    labels    = module.scale_to_zero.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -402,16 +368,6 @@ module "scale_to_zero" {
   }]
   starting_deadline_seconds = 60 * 5
   active_deadline_seconds   = 60 * 5
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -425,7 +381,7 @@ resource "kubernetes_role" "cache_clear" {
   metadata {
     name      = "cache-clear"
     namespace = local.namespace
-    labels    = local.cache_clear_labels
+    labels    = module.cache_clear.labels
   }
   rule {
     api_groups = [""]
@@ -448,7 +404,7 @@ resource "kubernetes_role_binding" "cache_clear" {
   metadata {
     name      = "cache-clear"
     namespace = local.namespace
-    labels    = local.cache_clear_labels
+    labels    = module.cache_clear.labels
   }
   subject {
     kind      = "ServiceAccount"
@@ -486,14 +442,4 @@ module "cache_clear" {
   }]
   starting_deadline_seconds = 60 * 5
   active_deadline_seconds   = 60 * 5
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }

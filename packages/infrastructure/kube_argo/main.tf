@@ -26,16 +26,24 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
-
-data "aws_region" "current" {}
 
 locals {
   name      = "argo"
   namespace = module.namespace.namespace
 
   configmap_name = "argo-controller"
+}
+
+data "aws_region" "current" {}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_argo"
 }
 
 module "pull_through" {
@@ -52,17 +60,7 @@ module "util_controller" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_server" {
@@ -74,17 +72,7 @@ module "util_server" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_events_controller" {
@@ -96,17 +84,7 @@ module "util_events_controller" {
   az_spread_required            = var.enhanced_ha_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_webhook" {
@@ -118,17 +96,7 @@ module "util_webhook" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   burstable_nodes_enabled       = true
   controller_nodes_enabled      = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -143,16 +111,6 @@ module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -222,16 +180,6 @@ module "artifact_bucket" {
   description = "Artifact repository for Argo"
 
   intelligent_transitions_enabled = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 data "aws_iam_policy_document" "argo" {
@@ -268,16 +216,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.argo.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubernetes_config_map" "artifacts" {
@@ -327,16 +265,6 @@ module "database" {
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /***************************************
@@ -567,8 +495,9 @@ module "ingress" {
 
   namespace = local.namespace
   name      = "argo-server"
+
+  domains = [var.argo_domain]
   ingress_configs = [{
-    domains      = [var.argo_domain]
     service      = "argo-server"
     service_port = 2746
   }]
@@ -577,16 +506,6 @@ module "ingress" {
   cross_origin_isolation_enabled = true
   permissions_policy_enabled     = true
   csp_enabled                    = true
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 
   depends_on = [helm_release.argo]
 }
@@ -1207,16 +1126,6 @@ module "test_workflow" {
       mount_path = "/scripts"
     }
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubectl_manifest" "test_workflow_template" {

@@ -20,6 +20,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -29,8 +33,13 @@ locals {
   runner_images = { for runner, config in var.runners : runner => config.action_runner_image != null ? config.action_runner_image : "${module.pull_through.github_registry}/actions/actions-runner:${config.action_runner_version}" }
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_gha_runners"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
@@ -39,8 +48,9 @@ module "pull_through" {
 ***************************************/
 
 module "util" {
-  for_each                      = var.runners
-  source                        = "../kube_workload_utility"
+  for_each = var.runners
+  source   = "../kube_workload_utility"
+
   workload_name                 = each.key
   burstable_nodes_enabled       = false
   spot_nodes_enabled            = each.value.spot_nodes_enabled
@@ -49,22 +59,13 @@ module "util" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = false
   az_spread_preferred           = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 module "util_listener" {
-  for_each                      = var.runners
-  source                        = "../kube_workload_utility"
+  for_each = var.runners
+  source   = "../kube_workload_utility"
+
   workload_name                 = each.key
   burstable_nodes_enabled       = true
   spot_nodes_enabled            = true
@@ -73,17 +74,7 @@ module "util_listener" {
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = false
   az_spread_preferred           = false
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                  = data.pf_kube_labels.labels.labels
 }
 
 resource "kubernetes_secret" "creds" {

@@ -8,7 +8,15 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
+}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_service"
 }
 
 module "nlb_common" {
@@ -16,16 +24,6 @@ module "nlb_common" {
   source = "../kube_nlb_common_resources"
 
   name_prefix = "${var.name}-"
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubectl_manifest" "service" {
@@ -36,10 +34,8 @@ resource "kubectl_manifest" "service" {
       name      = var.name
       namespace = var.namespace
       labels = merge(
+        data.pf_kube_labels.labels.labels,
         var.extra_labels,
-        {
-          "panfactum.com/module" = var.pf_module
-        }
       )
       annotations = merge(
         length(var.public_domain_names) > 0 ? {

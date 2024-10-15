@@ -84,9 +84,9 @@ fi
 # Step 3: Clone the repo
 ####################################################################
 if [[ -n $USERNAME ]]; then
-  git clone -q --depth=1 "https://$USERNAME:$PASSWORD@$REPO.git" repo
+  git clone -q --depth=1 "https://$USERNAME:$PASSWORD@$REPO" repo
 else
-  git clone -q --depth=1 "https://$REPO.git" repo
+  git clone -q --depth=1 "https://$REPO" repo
 fi
 cd repo
 
@@ -96,7 +96,7 @@ cd repo
 # We do this locally to account for cases where the repository directory is mounted across containers.
 ####################################################################
 if [[ -n $USERNAME ]]; then
-  git config url."https://$USERNAME:$PASSWORD@$REPO.git".InsteadOf "https://$REPO.git"
+  git config url."https://$USERNAME:$PASSWORD@$REPO".InsteadOf "https://$REPO"
 fi
 
 ####################################################################

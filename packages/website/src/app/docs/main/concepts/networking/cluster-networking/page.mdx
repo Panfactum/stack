@@ -416,8 +416,8 @@ network firewall. However, there are a few key differences:
   be implemented at arbitrary levels of granularity as desired.
 
 * As routing decisions are made by every node rather than dedicated hardware, implementing Network Policies will consume
-resources on each node. That said, the overhead is typically very minimal. See Cilium's [scalability report](https://docs.cilium.io/en/stable/operations/performance/scalability/report/)
-for more information.
+  resources on each node. That said, the overhead is typically very minimal. See Cilium's [scalability report](https://docs.cilium.io/en/stable/operations/performance/scalability/report/)
+  for more information.
 
 * By default, all traffic between all workloads on the Kubernetes network is allowed. This can be changed to
   deny-by-default if you prefer.

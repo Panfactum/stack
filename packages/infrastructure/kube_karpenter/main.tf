@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -33,63 +37,38 @@ locals {
   namespace = module.namespace.namespace
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_karpenter"
+}
+
+data "pf_aws_tags" "tags" {
+  module = "kube_karpenter"
+}
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
-  source                    = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name             = "karpenter"
   az_spread_preferred       = false
   controller_nodes_required = true
   burstable_nodes_enabled   = true
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels              = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
   source = "../kube_constants"
 }
 
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
 module "namespace" {
   source = "../kube_namespace"
 
   namespace = local.name
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /********************************************************************************************************************
@@ -100,7 +79,7 @@ resource "aws_sqs_queue" "karpenter" {
   name_prefix               = "${var.cluster_name}-"
   message_retention_seconds = 300
   sqs_managed_sse_enabled   = true
-  tags = merge(module.tags.tags, {
+  tags = merge(data.pf_aws_tags.tags.tags, {
     description = "Used by Karpenter to detect node termination events in advance"
   })
 }
@@ -129,7 +108,7 @@ resource "aws_cloudwatch_event_rule" "scheduled_change" {
     source      = ["aws.health"]
     detail-type = ["AWS Health Event"]
   })
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "scheduled_change" {
@@ -144,7 +123,7 @@ resource "aws_cloudwatch_event_rule" "spot_interruption" {
     source      = ["aws.ec2"]
     detail-type = ["EC2 Spot Instance Interruption Warning"]
   })
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "spot_interruption" {
@@ -159,7 +138,7 @@ resource "aws_cloudwatch_event_rule" "rebalance" {
     source      = ["aws.ec2"]
     detail-type = ["EC2 Instance Rebalance Recommendation"]
   })
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "rebalance" {
@@ -174,7 +153,7 @@ resource "aws_cloudwatch_event_rule" "instance_state_change" {
     source      = ["aws.ec2"]
     detail-type = ["EC2 Instance State-change Notification"]
   })
-  tags = module.tags.tags
+  tags = data.pf_aws_tags.tags.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_state_change" {
@@ -555,16 +534,6 @@ module "aws_permissions" {
   eks_cluster_name          = var.cluster_name
   iam_policy_json           = data.aws_iam_policy_document.karpenter.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "helm_release" "karpenter_crds" {

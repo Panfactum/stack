@@ -2,7 +2,6 @@ locals {
   bastion_image_builder_name = "bastion-builder"
 }
 
-
 #############################################################
 # Kubernetes Permissions
 #
@@ -127,7 +126,7 @@ resource "kubernetes_config_map" "bastion_image_builder_containers" {
 }
 
 module "bastion_image_builder_workflow" {
-  source                    = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+  source                    = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name = local.bastion_image_builder_name
   namespace = local.namespace
@@ -244,16 +243,6 @@ module "bastion_image_builder_workflow" {
       mount_path = "/etc/containers"
     }
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubectl_manifest" "bastion_workflow_template" {

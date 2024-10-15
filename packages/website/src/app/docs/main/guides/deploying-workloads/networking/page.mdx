@@ -45,6 +45,10 @@ We provide a submodule, [kube\_ingress](/docs/main/reference/infrastructure-modu
 that creates an Ingress optimized for the Panfactum Stack. See that module's documentation for more information
 on how to best manage your Ingress resources.
 
+In addition, we provide a submodule [kube\_aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
+that integrates with `kube_ingress` to provision a [CloudFront CDN](https://aws.amazon.com/cloudfront/) in front of your Ingress resources
+for improved performance and security as well as reduced server costs.
+
 ## Service Mesh Management
 
 When a new pod is created in the Panfactum Stack, our service mesh controller (Linkerd) will inject two containers

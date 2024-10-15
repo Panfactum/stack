@@ -43,5 +43,5 @@ output "panfactum_image_repository" {
 
 output "panfactum_image_tag" {
   description = "The tag of the Panfactum devenv image that is compatible with this module's version of the Panfactum stack."
-  value       = "c817073e165fd67a5f9af5ac2d997962b7c20367"
+  value       = "d12d9621f1cb067170c26d8e3989cd13382dad0b"
 }

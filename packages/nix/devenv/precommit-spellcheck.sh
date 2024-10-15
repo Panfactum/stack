@@ -4,5 +4,5 @@ set -eo pipefail
 
 (
   cd "$DEVENV_ROOT"
-  cspell lint --no-cache --no-progress '**/*.mdx' '**/*.md'
+  cspell lint --no-cache --no-progress --gitignore '**/*.mdx' '**/*.md'
 )

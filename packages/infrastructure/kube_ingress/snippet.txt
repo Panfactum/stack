@@ -35,4 +35,13 @@ set $pf_cors_allow_credentials "${cors_allow_credentials}";
 set $pf_cors_origin_regex "${cors_origin_regex}";
 %{ endif }
 
+%{ if redirects_enabled }
+set $full_url "$scheme://$host$request_uri";
+%{ for config in redirect_rules }
+if ($full_url ~* "${config.source}") {
+  return ${config.code} ${config.target};
+}
+%{ endfor }
+%{ endif }
+
 ${extra_configuration_snippet}

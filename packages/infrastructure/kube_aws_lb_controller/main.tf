@@ -22,6 +22,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.3"
+    }
   }
 }
 
@@ -30,44 +34,30 @@ locals {
   namespace = module.namespace.namespace
 }
 
+data "pf_kube_labels" "labels" {
+  module = "kube_aws_lb_controller"
+}
+
+data "pf_aws_tags" "tags" {
+  module = "kube_aws_lb_controller"
+}
+
+
 module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
+  source = "../aws_ecr_pull_through_cache_addresses"
+
   pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
-  source                      = "../kube_workload_utility"
+  source = "../kube_workload_utility"
+
   workload_name               = "alb-controller"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
-}
-
-module "tags" {
-  source = "../aws_tags"
-
-  # pf-generate: set_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  pf_module        = var.pf_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
+  extra_labels                = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -79,16 +69,6 @@ module "namespace" {
 
   namespace      = local.name
   linkerd_inject = false
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 /********************************************************************************************************************
@@ -326,27 +306,20 @@ resource "kubernetes_service_account" "alb_controller" {
 }
 
 module "aws_permissions" {
-  source                    = "../kube_sa_auth_aws"
+  source = "../kube_sa_auth_aws"
+
   service_account           = kubernetes_service_account.alb_controller.metadata[0].name
   service_account_namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.alb.json
   ip_allow_list             = var.aws_iam_ip_allow_list
-
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  pf_root_module   = var.pf_root_module
-  region           = var.region
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
 }
 
 resource "aws_security_group" "backend" {
   vpc_id      = var.vpc_id
   name_prefix = "alb-controller-backend-"
   description = "The backend security group for the ALB ingress controller"
-  tags        = module.tags.tags
+  tags        = data.pf_aws_tags.tags.tags
 }
 
 resource "helm_release" "alb_controller" {

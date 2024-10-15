@@ -132,7 +132,7 @@ Let's deploy it now:
 4. Run `terragrunt apply`.
 
 5. In your `region.yaml`, set `extra_inputs.vpa_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
-This will turn on the VPA for all modules in this cluster in the next apply.
+   This will turn on the VPA for all modules in this cluster in the next apply.
 
 6. Navigate up to the directory containing all your modules (this should be the parent of `kube_vpa`). Run
    `terragrunt run-all apply` to re-apply all the modules at once. Note that this might cause your Vault proxy
@@ -215,19 +215,19 @@ the [kube\_karpenter\_node\_pools](/docs/main/reference/infrastructure-modules/d
 
 * `burstable`
   * [burstable, T-family instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
-  - [spot nodes](https://aws.amazon.com/ec2/spot/)
+  * [spot nodes](https://aws.amazon.com/ec2/spot/)
   * highest scheduling preference
-  - assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
+  * assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
     * `{ key = "burstable", value = "true", effect = "NoSchedule" }`
     * `{ key = "spot", value = "true", effect = "NoSchedule" }`
 * `spot`
   * general purpose [spot nodes](https://aws.amazon.com/ec2/spot/)
-  - highest scheduling preference
+  * highest scheduling preference
   * assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
     * `{ key = "spot", value = "true", effect = "NoSchedule" }`
 * `worker`
   * standard on-demand instance types
-  - base scheduling preference
+  * base scheduling preference
 
 All nodes are labeled with their class via `panfactum.com/class`. [^1]
 
@@ -294,9 +294,9 @@ them on as few nodes as possible. This hinders Karpenter's ability to efficientl
 wasted resources. [^6]
 
 [^6]: [This article](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money) provides a
-great real world example of how this impacted a company running Kubernetes clusters in AWS.
+    great real world example of how this impacted a company running Kubernetes clusters in AWS.
 
-We provide an alternative scheduler in [kube_scheduler](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+We provide an alternative scheduler in [kube\_scheduler](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
 (`panfactum`) that implements the bin-packing scheduling algorithm. Typically, this results in a 25-33% cost reduction.
 
 Let's deploy it now:
@@ -310,10 +310,9 @@ Let's deploy it now:
 4. Run `terragrunt apply`.
 
 5. In your `region.yaml`, set `extra_inputs.panfactum_scheduler_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
-This will instruct all modules in this cluster to use this new scheduler instead of the default EKS one.
+   This will instruct all modules in this cluster to use this new scheduler instead of the default EKS one.
 
 6. Re-deploy all Kubernetes modules.
-
 
 ## Next Steps
 

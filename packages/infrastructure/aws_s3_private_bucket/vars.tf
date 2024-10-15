@@ -68,3 +68,9 @@ variable "acl_enabled" {
   default     = false
 }
 
+variable "acl_aws_logs_delivery_enabled" {
+  description = "Whether the ACL for awslogsdelivery is enabled"
+  type        = bool
+  default     = false
+}
+

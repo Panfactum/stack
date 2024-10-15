@@ -17,7 +17,7 @@ The below examples assume that a WorkflowTemplate has already been created that 
 
 ```hcl
 module "workflow_spec" {
-  source             = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source             = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name               = "example"
   namespace          = "example-namespace"
@@ -37,16 +37,6 @@ module "workflow_spec" {
   templates = [
     ...
   ]
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubectl_manifest" "workflow_template" {
@@ -157,7 +147,7 @@ As an example:
 
 ```hcl
 module "sensor" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=__PANFACTUM_VERSION_MAIN__" #pf-update
+  source = "${var.pf_module_source}kube_argo_sensor${var.pf_module_ref}"
   ...
   dependencies = [
     ...
@@ -236,11 +226,11 @@ effect, you end up with a single combined Workflow that runs all the steps in th
 This new WorkflowTemplate will run the `entry` template from example WorkflowTemplate twice in a series: [^3]
 
 [^3]: Yes, this is confusing. It is unclear why Argo would choose the word "template" to name the steps of WorkflowTemplates,
-but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
+    but it is what it is. The maintainers offer some more explanation [here](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#workflowtemplate-vs-template).
 
 ```hcl
 module "composed_workflow" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name = "composed-workflow"
   namespace = local.namespace
@@ -271,26 +261,15 @@ module "composed_workflow" {
       }
     }
   ]
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
 For a real world example, see our guide on rolling deployments in your [CI / CD pipelines](/docs/main/guides/cicd/rolling-deployments).
 
 <MarkdownAlert severity="warning">
-    Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template
-    such as `{{workflow.parameters.foo}}` will no longer work unless your combined Workflow *also* has that parameter.
+  Note that this method literally copies the referenced templates verbatim, so Workflow parameters on the template
+  such as `{{workflow.parameters.foo}}` will no longer work unless your combined Workflow *also* has that parameter.
 </MarkdownAlert>
-
 
 ### Workflow of Workflows
 
@@ -307,7 +286,7 @@ WorkflowTemplate twice in a series:
 
 ```hcl
 module "workflow_of_workflows_spec" {
-  source             = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source             = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name               = "example-workflow-of-workflows"
   namespace          = "example-namespace"
@@ -363,16 +342,6 @@ module "workflow_of_workflows_spec" {
       }
     }
   ]
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 resource "kubectl_manifest" "workflow_of_workflows_template" {

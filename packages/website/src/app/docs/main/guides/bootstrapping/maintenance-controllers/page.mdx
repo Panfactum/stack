@@ -56,7 +56,7 @@ Fortunately, the [kube-fledged](https://github.com/senthilrch/kube-fledged) oper
 This controller allows you to define `ImageCache` resources containing lists of images. kube-fledged will automatically ensure
 the specified images are pre-pulled to every node, so that they will already be available if a pod needs the image in the future.
 
-We provide a module for deploying this operator: [kube_fledged](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_fledged).
+We provide a module for deploying this operator: [kube\_fledged](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_fledged).
 
 Let's deploy it now:
 
@@ -69,7 +69,7 @@ Let's deploy it now:
 4. Run `terragrunt apply`
 
 5. In your `region.yaml`, set `extra_inputs.node_image_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
-This will instruct modules that would benefit from pre-pulled images to set up `ImageCache` resources.
+   This will instruct modules that would benefit from pre-pulled images to set up `ImageCache` resources.
 
 6. Re-deploy all Kubernetes modules.
 
