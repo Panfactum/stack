@@ -53,10 +53,6 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
-    text: 'IaC Templating',
-    path: '/iac-templating'
-  },
-  {
     text: 'Infrastructure Modules',
     path: '/infrastructure-modules',
     sub: [

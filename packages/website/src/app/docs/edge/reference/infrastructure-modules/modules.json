@@ -26,6 +26,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_cdn",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
       "module": "aws_cloudwatch_log_group",
       "type": "submodule",
       "group": "aws"
@@ -37,6 +42,11 @@
     },
     {
       "module": "aws_dns_records",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_dns_zones",
       "type": "direct",
       "group": "aws"
     },
@@ -91,11 +101,6 @@
       "group": "aws"
     },
     {
-      "module": "aws_tags",
-      "type": "submodule",
-      "group": "aws"
-    },
-    {
       "module": "aws_vpc",
       "type": "direct",
       "group": "aws"
@@ -131,6 +136,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_aws_cdn",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_aws_ebs_csi",
       "type": "direct",
       "group": "kubernetes"
@@ -147,11 +157,6 @@
     },
     {
       "module": "kube_buildkit",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_canary",
       "type": "direct",
       "group": "kubernetes"
     },
@@ -351,11 +356,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_secrets_csi",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_service",
       "type": "submodule",
       "group": "kubernetes"
@@ -363,11 +363,6 @@
     {
       "module": "kube_stateful_set",
       "type": "submodule",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_trust_manager",
-      "type": "direct",
       "group": "kubernetes"
     },
     {

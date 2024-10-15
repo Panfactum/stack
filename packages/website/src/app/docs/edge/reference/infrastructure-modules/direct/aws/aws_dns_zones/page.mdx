@@ -4,9 +4,9 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="aws_delegated_zones" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_delegated_zones" status="stable" type="direct" />
+<ModuleHeader name="aws_dns_zones" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_dns_zones" status="stable" type="direct" />
 
-# AWS Delegated Zones
+# AWS Zones
 
 ## Providers
 
@@ -22,21 +22,23 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### root\_domain\_names
+### domain\_names
 
-Description: Root domain names that need to be delegated.
-
-Type: `set(string)`
-
-### subdomain\_identifiers
-
-Description: The subdomain path segments
+Description: Domain names for the zones.
 
 Type: `set(string)`
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### dnssec\_enabled
+
+Description: True iff DNSSEC should be enabled for the zones.
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 

@@ -114,7 +114,7 @@ Add an instance of the `wf_tf_deploy` submodule to the CI / CD module you create
 
 ```hcl
 module "tf_deploy" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_tf_deploy?ref=__PANFACTUM_VERSION_EDGE__" #pf-update
+  source = "${var.pf_module_source}wf_tf_deploy${var.pf_module_ref}"
 
   name = "tf-deploy"
   namespace = local.namespace
@@ -132,16 +132,6 @@ module "tf_deploy" {
   secrets = {
     AUTHENTIK_TOKEN = var.authentik_token
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
@@ -174,7 +164,7 @@ Let's do this now:
 
    ```hcl
    module "sensor" {
-     source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=__PANFACTUM_VERSION_EDGE__" #pf-update  ...
+     source = "${var.pf_module_source}kube_argo_sensor${var.pf_module_ref}"
      ...
      dependencies = [
        {
@@ -210,7 +200,7 @@ Let's do this now:
 
    ```hcl
    module "sensor" {
-     source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_argo_sensor?ref=__PANFACTUM_VERSION_EDGE__" #pf-update  ...
+     source = "${var.pf_module_source}kube_argo_sensor${var.pf_module_ref}"
      ...
      dependencies = [
        ...

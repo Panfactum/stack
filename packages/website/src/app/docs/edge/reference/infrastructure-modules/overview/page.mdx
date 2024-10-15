@@ -10,24 +10,6 @@ We categorize each module into one of the following types:
 * **Direct:** Intended to be deployed directly into your system via Terragrunt.
 * **Submodule:** Intended to be used as [child module](https://opentofu.org/docs/language/modules/) in your own OpenTofu modules.
 
-## Standard Variables
-
-All Panfactum modules comes with the following common variables. These are automatically injected
-if you are using our Terragrunt scaffolding.
-
-These are **not** documented on each module's individual reference page as they are simply used for tagging.
-
-| Value              | Type          | Description                                                                           |
-| ------------------ | ------------- | ------------------------------------------------------------------------------------- |
-| `environment`      | `string`      | The name of the environment the infrastructure is being deployed into                 |
-| `region`           | `string`      | The region the infrastructure is being deployed into.                                 |
-| `extra_trags`      | `map(string)` | Extra tags or labels to add to the created resources.                                 |
-| `pf_root_module`   | `string`      | The name of the root Panfactum module in the module tree.                             |
-| `pf_module`        | `string`      | The name of the Panfactum module where the containing resources are directly defined. |
-| `pf_stack_version` | `string`      | Which version of the Panfactum stack is being used (git ref).                         |
-| `pf_stack_commit`  | `string`      | The commit hash for the version of the Panfactum stack being used.                    |
-| `is_local`         | `bool`        | Whether this module is a part of a local development deployment.                      |
-
 ## Common Variables
 
 Many (not all) modules share these variables which mutate module behavior in a standard way. These are **not**
