@@ -72,6 +72,12 @@ let
     rev = "73bed75dbd3de6d4fca3f81ce25a0cc7766afff6";
     sha256 = "IeBVJ75Bd7yWz8i3m225x5Q25O1Wk8cBWi8DI7bCgSo=";
   }) { inherit system; };
+  src10 = import (pkgs.fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "294eb5975def0caa718fca92dc5a9d656ae392a9";
+    sha256 = "WO6Lmbn37PlamY2fDg3B187THkSKU/W01z8SxoIqJd0=";
+  }) { inherit system; };
 
   # Custom Packages
   # We need to us a later version of terragrunt than publicly available
@@ -226,7 +232,7 @@ in with pkgs; [
   ####################################
   # Nix
   ####################################
-  nix
+  src10.nix
 
   ####################################
   # Kubernetes

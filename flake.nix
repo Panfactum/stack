@@ -4,7 +4,7 @@
 
   inputs = {
     nixpkgs.url =
-      "github:NixOS/nixpkgs/599b4a1abd630f6a280cb9fe5ad8aae94ffe5655";
+      "github:NixOS/nixpkgs/c0b1da36f7c34a7146501f684e9ebdf15d2bebf8";
     systems.url = "github:nix-systems/default";
     flake-utils.url = "github:numtide/flake-utils";
   };
