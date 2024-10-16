@@ -86,12 +86,13 @@ module "ingress" {
   name      = local.name
   namespace = local.namespace
 
-  domains      = [var.website_domain]
+  domains      = [var.website_domain, "www.${var.website_domain}"]
   ingress_configs = [{
     service      = local.name
     service_port = local.port
   }]
 
+  cdn_mode_enabled = true
   cors_enabled                   = true
   cross_origin_embedder_policy   = "credentialless"
   csp_enabled                    = true
@@ -101,3 +102,21 @@ module "ingress" {
 
   depends_on = [module.website_deployment]
 }
+
+module "cdn" {
+  source = "${var.pf_module_source}kube_aws_cdn${var.pf_module_ref}"
+  providers = {
+    aws.global = aws.global
+  }
+
+  name           = "website"
+  origin_shield_enabled = true
+  origin_configs = module.ingress.cdn_origin_configs
+
+  redirect_rules = [{
+    source = "https?://www.panfactum.com(/.*)"
+    target = "https://panfactum.com$1"
+    permanent = true
+  }]
+}
+
