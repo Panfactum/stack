@@ -25,8 +25,8 @@ you have reviewed the changes and understand what steps you need to take.
    {
        inputs = {
            pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-   -       panfactum.url = "github:NixOS/nixpkgs/old-version";
-   +       panfactum.url = "github:NixOS/nixpkgs/new-version";
+   -       panfactum.url = github:panfactum/stack/edge.24-10-09
+   +       panfactum.url = "github:panfactum/stack/edge.24-10-15";
        };
 
        outputs = { self, panfactum, pkgs, ... }@inputs: {

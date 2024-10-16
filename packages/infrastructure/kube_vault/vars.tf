@@ -62,6 +62,12 @@ variable "ingress_enabled" {
   default     = false
 }
 
+variable "cdn_mode_enabled" {
+  description = "Whether to enable CDN mode for the Vault ingress"
+  type        = bool
+  default     = true
+}
+
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
