@@ -409,6 +409,16 @@ resource "kubectl_manifest" "vpa_node" {
       labels    = module.util_agent.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "cilium-agent"
+          minAllowed = {
+            # Sometimes on initial install, this goes too low and causes issues during the bootstrapping guide
+            # so we set a floor
+            memory = "200Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "DaemonSet"
