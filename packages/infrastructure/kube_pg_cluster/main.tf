@@ -98,7 +98,7 @@ module "util_pooler" {
   for_each = toset(["r", "rw"])
   source   = "../kube_workload_utility"
 
-  workload_name                 = "pg-rooler-${each.key}-${random_id.cluster_id.hex}"
+  workload_name                 = "pg-pooler-${each.key}-${random_id.cluster_id.hex}"
   burstable_nodes_enabled       = true
   arm_nodes_enabled             = true
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
