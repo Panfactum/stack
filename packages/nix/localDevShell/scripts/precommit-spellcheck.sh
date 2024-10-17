@@ -3,6 +3,6 @@
 set -eo pipefail
 
 (
-  cd "$DEVENV_ROOT"
+  cd "$REPO_ROOT"
   cspell lint --no-cache --no-progress --gitignore '**/*.mdx' '**/*.md'
 )

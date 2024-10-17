@@ -13,8 +13,8 @@ export LINT="true"
 ## Install node modules
 #######################################
 (
-  cd "$DEVENV_ROOT"
-  npm i
+  cd "$REPO_ROOT"
+  pnpm i
 )
 
 #######################################
@@ -32,11 +32,11 @@ echo >&2 "Finished Terraform linting!"
 #######################################
 echo >&2 "Starting Terragrunt linting..."
 (
-  cd "$DEVENV_ROOT/packages/nix/mkDevShells/setup/files/terragrunt"
+  cd "$REPO_ROOT/packages/nix/packages/scripts/files/terragrunt"
   terragrunt hclfmt
 )
 (
-  cd "$DEVENV_ROOT/packages/reference/environments"
+  cd "$REPO_ROOT/packages/reference/environments"
   terragrunt hclfmt
 )
 echo >&2 "Finished Terragrunt linting!"
@@ -45,15 +45,15 @@ echo >&2 "Finished Terragrunt linting!"
 ## Nix
 #######################################
 echo >&2 "Starting Nix linting..."
-find "$DEVENV_ROOT" -type f -name '*.nix' -exec nixfmt {} \;
+find "$REPO_ROOT" -type f -name '*.nix' -exec nixfmt {} \;
 echo >&2 "Finished Nix linting!"
 
 #######################################
 ## Shell
 #######################################
 echo >&2 "Starting shell linting..."
-shfmt -w "$DEVENV_ROOT/packages/nix"
-shfmt -w "$DEVENV_ROOT/packages/infrastructure"
+shfmt -w "$REPO_ROOT/packages/nix"
+shfmt -w "$REPO_ROOT/packages/infrastructure"
 echo >&2 "Finished shell linting!"
 
 #######################################
@@ -68,7 +68,7 @@ echo >&2 "Finished spellcheck linting!"
 #######################################
 echo >&2 "Starting website linting..."
 (
-  cd "$DEVENV_ROOT/packages/website"
+  cd "$REPO_ROOT/packages/website"
   export NODE_OPTIONS=--max-old-space-size=8192
   export LINT=true
   ./node_modules/.bin/eslint --fix src

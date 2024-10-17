@@ -5,6 +5,9 @@
 
 set -eo pipefail
 
+# shellcheck disable=SC2034
 BUILDKIT_STATEFULSET_NAME_PREFIX="buildkit-"
+# shellcheck disable=SC2034
 BUILDKIT_LAST_BUILD_ANNOTATION_KEY="panfactum.com/last-build"
+# shellcheck disable=SC2034
 BUILDKIT_NAMESPACE="buildkit"

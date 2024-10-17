@@ -16,6 +16,11 @@ REPO_ROOT=$(echo "$REPO_VARIABLES" | jq -r '.repo_root')
 BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
 
 #############################################
+## General Metadata
+#############################################
+export CI="false"
+
+#############################################
 ## Kubernetes
 #############################################
 
