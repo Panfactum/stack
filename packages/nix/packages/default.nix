@@ -137,5 +137,5 @@ in with pkgs; [
   ####################################
   redisPkgs.redis # redis-cli
   postgresPkgs.postgresql_16 # psql, cli for working with postgres
-  postgresPkgs.barman # barman cli for backups and restore with postgres
+  # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
 ]
