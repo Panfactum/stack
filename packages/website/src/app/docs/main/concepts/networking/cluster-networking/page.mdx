@@ -369,7 +369,7 @@ we provide SSH bastions in the Panfactum Stack that can be leveraged for [SSH tu
 [kube\_bastion](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
 
 These SSH bastions are integrated with the Vault clusters running in each cluster to provide out-of-the-box SSO. The Panfactum
-devenv provides a convenience command, `pf-tunnel`, that will automatically create the necessary SSH certificates
+devShell provides a convenience command, `pf-tunnel`, that will automatically create the necessary SSH certificates
 and build a tunnel that routes traffic through the bastion. [^33]
 
 [^33]: This command is a building block used inside some of other commands such as `pf-db-tunnel`.

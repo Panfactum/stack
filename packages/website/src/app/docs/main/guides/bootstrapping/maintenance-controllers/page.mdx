@@ -211,7 +211,7 @@ Let's deploy the Velero controller now:
 
 Let's verify that backup functionality is working as expected by simulating an emergency.
 
-1. Velero has a companion CLI for managing backups called `velero`. This comes bundled with the Panfactum devenv. Use
+1. Velero has a companion CLI for managing backups called `velero`. This comes bundled with the Panfactum devShell. Use
    it to create a backup now: `velero create backup test --wait`
 
 2. In k9s, notice that this created a new Backup resource (`:backup`):

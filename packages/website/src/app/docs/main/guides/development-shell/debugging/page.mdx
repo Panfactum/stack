@@ -5,7 +5,10 @@ Below are some common steps to take when facing issues with the developer enviro
 ## Reload the Developer Environment
 
 If your developer environment either fails to launch or does not pick up a desired change,
-simply run `direnv reload` to trigger a reload.
+simply run `nix-direnv-reload` to trigger a reload.
+
+Sometimes, the caching provided by `nix-direnv` might prevent your changes from appearing. For
+a hard reload, run `direnv reload`.
 
 ## Nested Shells
 
@@ -23,13 +26,6 @@ This can manifest as an error that looks like:
 ```shell-session
 error: getting status of '<file>': No such file or directory
 ```
-
-## Hash Mismatch
-
-When you are fetching files or archives remotely, you generally need to provide a SHA for checksum purposes.
-If the hash is mismatched, you will receive an error. This can occur if you are updating source urls
-or commit hashes. The error message should print the correct hash. Simply replace the outdated hash
-in your code to resolve this issue.
 
 ## No Column Named Domain
 

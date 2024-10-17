@@ -24,23 +24,17 @@ you have reviewed the changes and understand what steps you need to take.
    ```diff-nix[class="diff-highlight"]
    {
        inputs = {
-           pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+           flake-utils.url = "github:numtide/flake-utils";
    -       panfactum.url = "github:NixOS/nixpkgs/old-version";
    +       panfactum.url = "github:NixOS/nixpkgs/new-version";
        };
-
-       outputs = { self, panfactum, pkgs, ... }@inputs: {
-           devShells = panfactum.lib.mkDevShells {
-               inherit pkgs;
-               modules = [ (import ./devenv.nix) ];
-           };
-       };
+       ...
    }
    ```
 
 2. Run `nix flake update`. This will update your lockfile and then download the new versions of all utilities.
 
-3. If you receive some warnings when your `devenv` reloads, run the recommended commands to update your repo files.
+3. If you receive some warnings when your devShell reloads, run the recommended commands to update your repo files.
 
 ## Update your Infrastructure
 

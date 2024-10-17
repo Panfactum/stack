@@ -19,6 +19,7 @@ BUILDKIT_DIR=$(echo "$REPO_VARIABLES" | jq -r '.buildkit_dir')
 ## General Metadata
 #############################################
 export CI="false"
+export PF_DEVSHELL=1
 
 #############################################
 ## Kubernetes

@@ -128,7 +128,7 @@ BuildKit uses the client's credentials to authenticate with registries; it does 
 By default, we automatically authenticate your local client with AWS ECR, but you may need to pull base images from other
 private registries.
 
-`buildctl` will use the credentials at `$DOCKER_CONFIG/config.json`. We set up devenv to use a repo-local file at `<buildkit_dir>/config.json`,
+`buildctl` will use the credentials at `$DOCKER_CONFIG/config.json`. We set up the devShell to use a repo-local file at `<buildkit_dir>/config.json`,
 and it will look something like this:
 
 {/* spellchecker: disable */}
@@ -162,7 +162,7 @@ Here are some helpful starter tips:
 * Use `pf-buildkit-tunnel` to establish a remote tunnel to a BuildKit instance of the specified CPU architecture.
 * Set `BUILDKIT_HOST` to the `tcp://127.0.0.1:<local-tunnel-port>`.
 * Use [manifest-tool](https://github.com/estesp/manifest-tool) to create the multi-platform manifest if desired. This comes
-  included in the devenv.
+  included in the devShell.
 
 ### Clearing the Cache
 

@@ -59,7 +59,7 @@ The [run\_cmd](https://terragrunt.gruntwork.io/docs/reference/built-in-functions
 feature that allows you to call an external command as your Terragrunt code is evaluated. The stdout from this
 call is then returned by the function.
 
-We provide a command in the devenv
+We provide a command in the devShell
 called `pf-get-version-hash` that takes a [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References)
 and a repository URL (using `https://`) and returns the commit hash that reference points to.
 By choosing `main`, our module will deploy the image corresponding to the latest commit on the `main` branch.

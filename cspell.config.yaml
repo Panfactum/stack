@@ -197,7 +197,10 @@ words: [
   "strcontains",
   "syncer",
   "TLDR",
-  "awslogsdelivery"
+  "awslogsdelivery",
+  "numtide",
+  "DEVSHELL",
+  "devshell"
 ]
 languageSettings:
   - languageId: markdown,mdx

@@ -37,11 +37,11 @@ output "panfactum_scheduler_name" {
 }
 
 output "panfactum_image_repository" {
-  description = "The repository of the Panfactum devenv image with the AWS public ECR registry (public.ecr.aws)."
+  description = "The repository of the Panfactum devShell image with the AWS public ECR registry (public.ecr.aws)."
   value       = "t8f0s7h5/panfactum"
 }
 
 output "panfactum_image_tag" {
-  description = "The tag of the Panfactum devenv image that is compatible with this module's version of the Panfactum stack."
+  description = "The tag of the Panfactum devShell image that is compatible with this module's version of the Panfactum stack."
   value       = "d12d9621f1cb067170c26d8e3989cd13382dad0b"
 }

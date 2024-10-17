@@ -1,5 +1,14 @@
-{ pkgs, kubeUtilsPkgs, awsUtilsPkgs, tfUtilsPkgs, buildkitPkgs, redisPkgs
-, postgresPkgs, vaultPkgs, linkerdPkgs, }:
+{
+  pkgs,
+  kubeUtilsPkgs,
+  awsUtilsPkgs,
+  tfUtilsPkgs,
+  buildkitPkgs,
+  redisPkgs,
+  postgresPkgs,
+  vaultPkgs,
+  linkerdPkgs,
+}:
 let
   # Custom Packages
   customTerragrunt = pkgs.writeShellScriptBin "terragrunt" ''
@@ -26,7 +35,9 @@ let
         --add-flags "-n cilium"
     '';
   };
-in with pkgs; [
+in
+with pkgs;
+[
 
   ####################################
   # Custom Panfactum Scripts

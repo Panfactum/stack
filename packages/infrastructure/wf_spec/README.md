@@ -389,9 +389,9 @@ module "workflow_spec" {
 }
 ```
 
-### Using the Panfactum devenv
+### Using the Panfactum devShell
 
-We make the Panfactum devenv available as a container image that can be run in a
+We make the Panfactum devShell available as a container image that can be run in a
 workflow. The specific image tag that is compatible with your version of the Panfactum stack can be sourced from the outputs of the
 [kube_constants](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
 snippet shows an example:
@@ -443,7 +443,7 @@ with a shell installed. Instead, you can mount scripts directly from your IaC.
 
 This can make it much faster to quickly iterate on workflow logic.
 
-The below snippet shows an example of mounting and running a custom script on top of the Panfactum devenv:
+The below snippet shows an example of mounting and running a custom script on top of the Panfactum devShell:
 
 ```hcl
 # Attach the scripts to a ConfigMap so we can mount them in the workflow spec

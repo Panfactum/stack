@@ -13,7 +13,71 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Added
 
-* added `cdn_mode_enabled` boolean to the [kube_vault](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault) & [kube_authentik](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_authentik) module to enable CDN for Vault.
+* Adds `cdn_mode_enabled` boolean to the [kube_vault](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault) & [kube_authentik](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_authentik) module to enable CDN for Vault.
+
+### Breaking Changes
+
+* We have removed [devenv](https://devenv.sh/) from the Panfactum Stack and now use plain [nix flakes](https://nixos.wiki/wiki/Flakes) to manage the local
+  development shell (aka the "devShell"). We did not use the vast majority of the features in devenv, and its removal comes with a couple key improvements:
+
+  * Greatly increased performance on macOS. Initial installation should now take \~ 5 minutes (down from 45+). Additionally,
+    opening the devShell after initial installation should now be instant.
+
+  * More control and flexibility of the Panfactum setup which will allow us to better implement future Panfactum features.
+
+  However, this does come with a few key changes that you must perform manually:
+
+  1. The syntax for your `flake.nix` has changed.
+
+     **Before:**
+
+     ```nix
+     {
+         inputs = {
+             # Change 'nixos-23.11' to whichever cut of the nixpkgs repository
+             # you want to use in your project. This will NOT impact the Panfactum stack at all.
+             # For available versions, see https://github.com/NixOS/nixpkgs
+             # We recommend using the version that is supported here:
+             # https://search.nixos.org/packages (updated every 6 mo)
+             pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+
+             # Change '__PANFACTUM_VERSION_MAIN__' to be the release version that you desire
+             # Ensure that this matches the version you use for your infrastructure modules
+             panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_MAIN__";
+         };
+
+         outputs = { self, panfactum, pkgs, ... } @ inputs: {
+             devShells = panfactum.lib.mkDevShells {
+                 inherit pkgs;
+                 modules = [ (import ./devenv.nix )];
+             };
+         };
+     }
+     ```
+
+     **After:**
+
+     ```nix
+     {
+       inputs = {
+         flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+         panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+       };
+
+       outputs = { panfactum, flake-utils, ... }@inputs:
+         flake-utils.lib.eachDefaultSystem
+         (system:
+           {
+             devShell = panfactum.lib.${system}.mkDevShell { };
+           }
+         );
+     }
+     ```
+
+  2. We no longer support `devenv` syntax, so your `devenv.nix` file  and the `.devenv` directory can be removed.
+
+  For alternatives to all the functionality included in devenv using our new devShell paradigm, please
+  see [our documentation.](/docs/main/guides/development-shell/customizing)
 
 ## edge.24-10-15
 
@@ -27,7 +91,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
   This greatly simplifies developer experience for first-party modules by removing boilerplate with no loss of functionality.
 
-  Original:
+  **Original:**
 
   ```hcl
   module "namespace" {
@@ -47,7 +111,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   }
   ```
 
-  Simplified:
+  **Simplified:**
 
   ```hcl
   module "namespace" {
@@ -99,7 +163,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * Adds the `acl_aws_logs_delivery_enabled` input to [aws\_s3\_private\_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
   which makes it easier to use the bucket for AWS log delivery purposes.
 
-* Adds support for Cloudflare in [kube_external_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) and [kube_cert_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+* Adds support for Cloudflare in [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) and [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
 
 ### Changed
 
