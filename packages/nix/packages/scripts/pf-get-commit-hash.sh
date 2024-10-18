@@ -112,6 +112,12 @@ elif [[ $GIT_REF =~ ^[0-9a-f]{40}$ ]]; then
 
 # Otherwise, we can simply fetch the hash from the remote
 else
-  # TODO: Need to handle case where git_repo is not specified
-  git ls-remote --exit-code "$GIT_REPO" "$GIT_REF" | awk '{print $1}'
+
+  if [[ $GIT_REPO == "origin" ]]; then
+    git rev-parse "$GIT_REF"
+    exit 0
+  else
+    git ls-remote --exit-code "$GIT_REPO" "$GIT_REF" | awk '{print $1}'
+    exit 0
+  fi
 fi
