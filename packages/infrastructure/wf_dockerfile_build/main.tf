@@ -193,7 +193,8 @@ module "image_builder_workflow" {
             env = concat(
               module.image_builder_workflow.env,
               [
-                { name = "ARCH", value = "amd64" }
+                { name = "ARCH", value = "amd64" },
+                { name = "IMAGE_TAG_PREFIX", value = var.image_tag_prefix }
               ]
             )
             dependencies = ["scale-buildkit", "clone"]
@@ -204,7 +205,8 @@ module "image_builder_workflow" {
             env = concat(
               module.image_builder_workflow.env,
               [
-                { name = "ARCH", value = "arm64" }
+                { name = "ARCH", value = "arm64" },
+                { name = "IMAGE_TAG_PREFIX", value = var.image_tag_prefix }
               ]
             )
             dependencies = ["scale-buildkit", "clone"]
