@@ -56,6 +56,12 @@ variable "image_repo" {
   type        = string
 }
 
+variable "image_tag_prefix" {
+  description = "The prefix to prepend to the image tag"
+  type        = string
+  default     = ""
+}
+
 variable "push_image_enabled" {
   description = "True iff images should be pushed to ECR in addition to being built"
   type        = bool

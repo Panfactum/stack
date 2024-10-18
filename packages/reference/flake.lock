@@ -131,7 +131,11 @@
       },
       "locked": {
         "lastModified": 0,
+<<<<<<< Updated upstream
         "narHash": "sha256-xK+hwE6de9d4mtlKXh7URgMvADj5MAc2+QgMfJiiMt8=",
+=======
+        "narHash": "sha256-iQmvPy16kzRTbVWZHN/XeEq7lQpcPtjC0D/NdOqIkSg=",
+>>>>>>> Stashed changes
         "path": "../..",
         "type": "path"
       },
