@@ -131,6 +131,7 @@ module "image_builder_workflow" {
   eks_cluster_name        = var.eks_cluster_name
   burstable_nodes_enabled = true
   active_deadline_seconds = var.build_timeout
+  workflow_parallelism    = 10
 
   entrypoint = local.entrypoint
   passthrough_parameters = [
