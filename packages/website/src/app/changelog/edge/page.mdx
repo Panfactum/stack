@@ -75,6 +75,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   For alternatives to all the functionality included in devenv using our new devShell paradigm, please
   see [our documentation.](/docs/main/guides/development-shell/customizing)
 
+* Removes `padmin4` from the devShell as it significantly increased build times and was not useful to all users. Users
+should have an option to pick their favorite DB clients rather than us be prescriptive.
+
 ### Added
 
 * Adds `cdn_mode_enabled` boolean to the [kube_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) & [kube_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) module to enable CDN for Vault.
