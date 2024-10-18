@@ -215,6 +215,13 @@ module "image_builder_workflow" {
             name         = "merge-manifests"
             command      = ["/scripts/merge-manifests.sh"]
             dependencies = ["build-arm64", "build-amd64"]
+            env = concat(
+              module.image_builder_workflow.env,
+              [
+                { name = "ARCH", value = "arm64" },
+                { name = "IMAGE_TAG_PREFIX", value = var.image_tag_prefix }
+              ]
+            )
           }
         ]
       }

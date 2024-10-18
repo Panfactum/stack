@@ -12,7 +12,7 @@ ECR_PASSWORD=$(aws ecr get-login-password --region "$IMAGE_REGION")
 ## Step 2: Set the image tag as the commit sha
 ###########################################################
 cd /code/repo
-TAG=$(git rev-parse "$GIT_REF")
+TAG="${IMAGE_TAG_PREFIX:+$IMAGE_TAG_PREFIX-}$(git rev-parse "$GIT_REF")"
 
 ###########################################################
 ## Step 3: Push the merged manifest
