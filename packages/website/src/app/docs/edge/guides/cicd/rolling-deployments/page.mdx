@@ -52,7 +52,7 @@ as well as [the `terragrunt.hcl` that we use to deploy it](https://github.com/Pa
 Notice that our module has an input called `website_image_version` which is set in `terragrunt.hcl` as follows:
 
 ```hcl
-website_image_version = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
+website_image_version = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")
 ```
 
 The [run\_cmd](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/#run_cmd) function is a Terragrunt

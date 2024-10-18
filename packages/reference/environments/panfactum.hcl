@@ -66,7 +66,7 @@ locals {
   # The version of the panfactum stack to deploy
   pf_stack_version             = lookup(local.vars, "pf_stack_version", "main")
   pf_stack_repo                = "github.com/panfactum/stack"
-  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-version-hash", local.pf_stack_version, local.pf_stack_version == "local" ? "local" : "https://${local.pf_stack_repo}")
+  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
   pf_stack_local_path          = lookup(local.vars, "pf_stack_local_path", "../../../../../..")
   pf_stack_source              = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.module}?ref=${local.pf_stack_version_commit_hash}"
 
@@ -85,7 +85,7 @@ locals {
   version = lookup(local.vars, "version", local.primary_branch)
 
   # The version_tag needs to be a commit sha
-  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-version-hash", local.version)
+  version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.version}")
 
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
   use_local_iac = contains(["local", local.primary_branch], local.version)

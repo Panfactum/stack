@@ -22,6 +22,7 @@ resource "kubectl_manifest" "pvc" {
         "resize.topolvm.io/inodes-threshold" = "20%"
         "resize.topolvm.io/threshold" = "20%"
         "resize.topolvm.io/increase" = "10Gi"
+        "resize.topolvm.io/storage_limit" = "100Gi"
       }
     }
     spec = {
@@ -36,6 +37,8 @@ resource "kubectl_manifest" "pvc" {
   })
   server_side_apply = true
   force_conflicts   = true
+
+  ignore_fields = ["spec.resources"]
 }
 
 #############################################################
@@ -161,6 +164,8 @@ module "nix_image_builder_workflow" {
   eks_cluster_name          = var.eks_cluster_name
   burstable_nodes_enabled = true
   active_deadline_seconds = 60 * 60
+  retry_backoff_max_duration_seconds = 60 * 5
+  retry_max_attempts = 3
 
   # These are generally not advised to use
   # for security reasons but are required by nix to build

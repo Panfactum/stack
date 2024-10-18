@@ -52,7 +52,7 @@ as well as [the `terragrunt.hcl` that we use to deploy it](https://github.com/Pa
 Notice that our module has an input called `website_image_version` which is set in `terragrunt.hcl` as follows:
 
 ```hcl
-website_image_version = run_cmd("--terragrunt-quiet", "pf-get-version-hash", "main", "https://github.com/panfactum/stack")
+website_image_version = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")
 ```
 
 The [run\_cmd](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/#run_cmd) function is a Terragrunt
@@ -60,8 +60,8 @@ feature that allows you to call an external command as your Terragrunt code is e
 call is then returned by the function.
 
 We provide a command in the devShell
-called `pf-get-version-hash` that takes a [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References)
-and a repository URL (using `https://`) and returns the commit hash that reference points to.
+called `pf-get-commit-hash` that takes a [git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References)
+and a repository URL and returns the commit hash that reference points to.
 By choosing `main`, our module will deploy the image corresponding to the latest commit on the `main` branch.
 
 Before proceeding, ensure you can successfully deploy and run your service. Commit and push this new IaC so that

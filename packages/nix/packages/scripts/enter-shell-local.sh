@@ -48,6 +48,9 @@ export TERRAGRUNT_DOWNLOAD="$REPO_ROOT/.terragrunt-cache"
 # See https://terragrunt.gruntwork.io/docs/reference/cli-options/#terragrunt-fetch-dependency-output-from-state
 export TERRAGRUNT_FETCH_DEPENDENCY_OUTPUT_FROM_STATE="true"
 
+# Ensure that tofu output is not wrapped in the terragrunt logger
+export TERRAGRUNT_FORWARD_TF_STDOUT=1
+
 # Enables the local provider cache so that the provider binaries to significantly
 # reduce the amount of times that we need to download provider binaries
 export TF_PLUGIN_CACHE_DIR="$REPO_ROOT/.terraform"

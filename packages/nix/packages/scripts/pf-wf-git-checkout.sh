@@ -80,6 +80,11 @@ if [[ -n $USERNAME ]] && [[ -z $PASSWORD ]]; then
   exit 1
 fi
 
+# We don't need protection b/c this is happening inside an isolated
+# container image. The clone protection simply hinders some
+# users' ability to get this to work out of the box
+export GIT_CLONE_PROTECTION_ACTIVE=false
+
 ####################################################################
 # Step 3: Clone the repo
 ####################################################################
@@ -100,10 +105,16 @@ if [[ -n $USERNAME ]]; then
 fi
 
 ####################################################################
+# Step 4: Resolve the GIT_REF to a commit hash
+####################################################################
+
+GIT_COMMIT_SHA=$(pf-get-commit-hash --ref="$GIT_REF")
+
+####################################################################
 # Step 5: Checkout the GIT_REF
 ####################################################################
-git fetch origin "$GIT_REF"
-git checkout "$GIT_REF"
+git fetch origin "$GIT_COMMIT_SHA"
+git checkout "$GIT_COMMIT_SHA"
 
 ####################################################################
 # Step 6: Initialize LFS
