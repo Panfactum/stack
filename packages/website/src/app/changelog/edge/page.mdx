@@ -82,6 +82,14 @@ Finally, we have fixed several bugs in the script to make it more resilient to v
 * Removes `padmin4` from the devShell as it significantly increased build times and was not useful to all users. Users
 should have an option to pick their favorite DB clients rather than us be prescriptive.
 
+### Changes
+
+* Upgrades [kube_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3. This change
+brings [new Cilium features](https://isovalent.com/blog/post/cilium-1-16), reduces the per-node memory usage by 50-75MB,
+and reduces the amount of errors that users can encounter during the bootstrapping guide.
+
+* Upgrades [kube_aws_ebs_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
+to support Karpenter v1 disruption taints and improve node shutdown performance.
 
 ### Added
 
@@ -91,9 +99,6 @@ should have an option to pick their favorite DB clients rather than us be prescr
 
 * Fixed a handful of scheduling constraint bugs that resulting in less than optimal resource utilization. These improvements
 should result in a significant improvement to resource utilization in tiny clusters and a minor improvement in larger clusters.
-
-* Upgrades [kube_aws_ebs_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
-to support Karpenter v1 disruption taints and improve node shutdown performance.
 
 * Fixed an issue where `pf_stack_version` could not be a commit hash. It can now be any valid [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References).
 

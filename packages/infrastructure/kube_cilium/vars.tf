@@ -1,7 +1,7 @@
 variable "cilium_helm_version" {
-  description = "The version of the metrics-server helm chart to deploy"
+  description = "The version of the cilium helm chart to deploy"
   type        = string
-  default     = "1.15.2"
+  default     = "1.16.3"
 }
 
 variable "eks_cluster_name" {

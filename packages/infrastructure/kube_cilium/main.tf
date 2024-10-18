@@ -366,6 +366,14 @@ resource "helm_release" "cilium" {
           }
         }
       }
+
+      envoy = {
+        enabled = false
+      }
+
+      gatewayAPI = {
+        enabled = false
+      }
     })
   ]
 
