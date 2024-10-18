@@ -24,30 +24,21 @@ you have reviewed the changes and understand what steps you need to take.
    ```diff-nix[class="diff-highlight"]
    {
        inputs = {
-           pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-   -       panfactum.url = github:panfactum/stack/edge.24-10-09
-   +       panfactum.url = "github:panfactum/stack/edge.24-10-15";
+           flake-utils.url = "github:numtide/flake-utils";
+   -       panfactum.url = "github:NixOS/nixpkgs/old-version";
+   +       panfactum.url = "github:NixOS/nixpkgs/new-version";
        };
-
-       outputs = { self, panfactum, pkgs, ... }@inputs: {
-           devShells = panfactum.lib.mkDevShells {
-               inherit pkgs;
-               modules = [ (import ./devenv.nix) ];
-           };
-       };
+       ...
    }
    ```
 
 2. Run `nix flake update`. This will update your lockfile and then download the new versions of all utilities.
 
-3. If you receive some warnings when your `devenv` reloads, run the recommended commands to update your repo files.
+3. If you receive some warnings when your devShell reloads, run the recommended commands to update your repo files.
 
 ## Update your Infrastructure
 
-1. **After** updating your development environment, run `pf-update-iac` to upgrade the versions of all Panfactum
-   submodules in your [first-party infrastructure code](/docs/edge/guides/iac/first-party-modules).
-
-2. Update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
+1. Update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
    in **only** your lowest environment level: [^1]
 
    ```diff-yaml[class="diff-highlight"]
@@ -56,22 +47,24 @@ you have reviewed the changes and understand what steps you need to take.
    + pf_stack_version: "new-version"
    ```
 
-3. Ensure that the terragrunt `version` for that environment is set to `local` in order
+2. Ensure that the terragrunt `version` for that environment is set to `local` in order
    to deploy the local changes from step 1 (review [these docs](/docs/edge/guides/iac/first-party-modules)). [^2]
 
-4. Run `pf-tf-init` in the module directory to automatically upgrade your `module.yaml` and `.terraform.lock.hcl` files
+3. Run `pf-tf-init` in the environment's Terragrunt directory to automatically upgrade your `module.yaml` and `.terraform.lock.hcl` files
    for every module.
 
-5. On your local machine, run `terragrunt apply` across **all** modules in that environment. You can run
-   `terragrunt run-all apply` to update all modules at once.
+4. On your local machine, run `terragrunt apply` across **all** modules in that environment. You can run
+   `terragrunt run-all apply` to update all modules at once. [^3]
 
-6. Check to ensure that the environment is functioning as expected.
+5. Check to ensure that the environment is functioning as expected.
 
-7. Once you are satisfied, cut a new release of your stack repository indicating you have updated the Panfactum version.
+6. Once you are satisfied, cut a new release of your stack repository indicating you have updated the Panfactum version.
 
-8. Repeat step 2-5 for **all** environments **in sequence**, testing each environment before moving on to the next.
+7. Repeat step 2-5 for **all** environments **in sequence**, testing each environment before moving on to the next.
    For step 3, set the `version` to the release ref that you created in step 6.
 
 [^1]: Typically your "integration" environment which is frequently named `development`
 
 [^2]: Ideally in your `environment.user.yaml`
+
+[^3]: We strongly recommend doing this locally rather than relying on CI / CD as upgrades are sensitive operations.

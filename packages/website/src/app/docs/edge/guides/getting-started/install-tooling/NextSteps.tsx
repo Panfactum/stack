@@ -19,7 +19,7 @@ export default function NextSteps () {
           Now that you have the core tooling installed, you can
           {' '}
           <Link
-            href="/docs/edge/guides/bootstrapping/installing-devenv#install-prerequisite-tooling"
+            href="/docs/edge/guides/bootstrapping/installing-devshell#install-prerequisite-tooling"
             className="text-primary underline hover:cursor-pointer"
           >
             return to the bootstrapping guide.

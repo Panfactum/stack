@@ -7,7 +7,7 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 Oftentimes in CI / CD pipelines, you will want to checkout code from a private
 repository in order to execute your CI / CD logic against it.
 
-We provide a utility command in the devenv called `pf-wf-git-checkout` that
+We provide a utility command in the devShell called `pf-wf-git-checkout` that
 efficiently checks out a given repository to a given [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References)
 using provided credentials.
 
@@ -30,8 +30,8 @@ In addition to checking out the repo, this command does the following:
 
 * Changes the current working directory to the local repository directory.
 
-You can use the Panfactum devenv and scripts like this in your workflows by following
-[this guide section](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec#using-the-panfactum-devenv).
+You can use the Panfactum devShell and scripts like this in your workflows by following
+[this guide section](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec#using-the-panfactum-devshell).
 
 We recommend running this script as one of the first parts [ContainerSet template.](https://argo-workflows.readthedocs.io/en/latest/container-set-template/)
 You can find a full example of this in action [here.](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/wf_dockerfile_build)

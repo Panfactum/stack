@@ -38,8 +38,8 @@ const SIDENAV_SECTIONS = [
         path: '/overview'
       },
       {
-        text: 'Installing the Developer Environment',
-        path: '/installing-devenv'
+        text: 'Installing the Development Shell',
+        path: '/installing-devshell'
       },
       {
         text: 'Preparing AWS',
@@ -194,8 +194,8 @@ const SIDENAV_SECTIONS = [
     ]
   },
   {
-    text: 'Developer Environment',
-    path: '/developer-environment',
+    text: 'Development Shell',
+    path: '/development-shell',
     sub: [
       {
         text: 'Customizing',
@@ -204,10 +204,6 @@ const SIDENAV_SECTIONS = [
       {
         text: 'Debugging',
         path: '/debugging'
-      },
-      {
-        text: 'Editor Setup',
-        path: '/editor-setup'
       }
     ]
   },

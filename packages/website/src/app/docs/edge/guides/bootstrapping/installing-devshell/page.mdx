@@ -2,12 +2,12 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
-# Installing the Developer Environment
+# Installing the Development Shell
 
 ## Objective
 
-Configure a `git` repository in your organization to use the Panfactum [devenv](https://devenv.sh/)
-which includes all the necessary tooling to launch and work with the stack.
+Configure a `git` repository in your organization to use the Panfactum "devShell"
+which automatically installs all the necessary tooling to launch and work with the stack.
 
 ## Install Prerequisite Tooling
 
@@ -38,65 +38,49 @@ This repository will contain the following pieces of functionality:
   We provide a [reference repository setup](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/reference) that you can benchmark against as you progress through the setup documentation.
 </MarkdownAlert>
 
-## Integrate the Panfactum devenv
+## Integrate the Panfactum devShell
 
-Two fundamental tools codify your local developer environment:
+We use [Nix](https://nix.dev/index.html), a package manager and programming language, to codify your local developer environment.
 
-1. [nix](https://nix.dev/index.html): A package manager and programming language that works on all operating systems
-2. [devenv](https://devenv.sh/): A set of utilities built upon nix for creating developer environments
-
-We provide a foundational `devenv` that automatically installs all tooling that you need to work on
+Using Nix, we provide a foundational devShell that automatically installs all tooling that you need to work on
 the Panfactum stack. These tools are versioned in tandem with the live infrastructure to ensure compatibility. They are installed in
 an isolated directory that won't interfere with other tooling on your local system.
 
 The following steps will integrate the Panfactum tooling into your repository:
 
-1. Create a `devenv.nix` file in the root of your repo. We recommend starting with the below template and expanding it
-   as needed. You can read more about the available syntax and options for devenv [here](https://devenv.sh/basics/). We also
-   provide a [dedicated guide](/docs/edge/guides/developer-environment/customizing) for customizing your devenv.
-
-   ```nix
-   {config, pkgs, ...}: { }
-   ```
-
-2. Create a nix flake in the root of your repo by generating a `flake.nix` file
+1. Create a [Nix flake](https://zero-to-nix.com/concepts/flakes) in the root of your repo by creating a `flake.nix` file
    with the following content:
 
    ```nix
-   {
-       inputs = {
-           # Change 'nixos-23.11' to whichever cut of the nixpkgs repository
-           # you want to use in your project. This will NOT impact the Panfactum stack at all.
-           # For available versions, see https://github.com/NixOS/nixpkgs
-           # We recommend using the version that is supported here:
-           # https://search.nixos.org/packages (updated every 6 mo)
-           pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    {
+    inputs = {
+      flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+      panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+    };
 
-           # Change '__PANFACTUM_VERSION_EDGE__' to be the release version that you desire
-           # Ensure that this matches the version you use for your infrastructure modules
-           panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
-       };
-
-       outputs = { self, panfactum, pkgs, ... } @ inputs: {
-           devShells = panfactum.lib.mkDevShells {
-               inherit pkgs;
-               modules = [ (import ./devenv.nix )];
-           };
-       };
-   }
+    outputs = { panfactum, flake-utils, ... }@inputs:
+      flake-utils.lib.eachDefaultSystem
+      (system:
+        {
+          devShell = panfactum.lib.${system}.mkDevShell { };
+        }
+      );
+    }
    ```
 
-3. Run `git add flake.nix devenv.nix` to register the flake and devenv file.
+2. Run `git add flake.nix` to register the flake.
 
-4. Run `nix flake update`. A `flake.lock` lockfile should be generated. This should be committed to version control
+3. Run `nix flake update`. A `flake.lock` lockfile should be generated. This should be committed to version control
    alongside the `flake.nix`.
 
-5. Test that you are able to instantiate the development environment via `nix develop --impure`. If everything is working,
-   you should see multiple environment variables when you run `printenv | grep DEVENV`. You may see several warnings which we will resolve in subsequent setup steps.
+4. Test that you are able to instantiate the development environment via `nix develop`. If everything is working,
+   you should see `PF_DEVSHELL=1` when you run `printenv | grep PF_DEVSHELL`.
+
+   You may also see several warnings which we will resolve in subsequent setup steps.
 
 <MarkdownAlert severity="warning">
-  On the first install, this can take a very long time to build the entire local development environment as it contains
-  over 10GB of tools. This is especially slow on macOS and can take up to 30 minutes to complete.
+  On the first install, this can take a few minutes to build the entire devShell as it contains
+  multiple gigabytes of tooling. This is especially slow on macOS and can take up to 10 minutes to complete.
 </MarkdownAlert>
 
 ## Setting Repository Configuration Variables
@@ -114,7 +98,7 @@ For the full list of available values and their behavior, please refer to [these
 ### Personal Configuration
 
 Each developer has settings that are specific to them. These should be set in a `.env` file using the [dotenv](https://www.dotenv.org/docs/)
-syntax. This file will control what values get set as environment variables when the devenv launches.
+syntax. This file will control what values get set as environment variables when the devShell launches.
 
 For the full list of Panfactum-specific environment variables, please refer to [these reference docs](/docs/edge/reference/configuration/dotenv).
 
@@ -133,8 +117,8 @@ these credentials.
 
 ## Integrate direnv
 
-[direnv](https://direnv.net/) provides a set of shell hooks that will automatically activate your devenv
-when you navigate to the repo in your terminal. Additionally, it will automatically reload if there are any changes to the devenv
+[direnv](https://direnv.net/) provides a set of shell hooks that will automatically activate your devShell
+when you navigate to the repo in your terminal. Additionally, it will automatically reload if there are any changes to the devShell
 definition and unload when you leave the repo directory.
 
 This is controlled via a `.envrc` file that should exist in the root of your repository. When you instantiated

@@ -34,6 +34,7 @@ module "build_and_deploy_website_workflow" {
   namespace = local.namespace
   eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 60
+  workflow_parallelism = 10
 
   passthrough_parameters = [
     {
