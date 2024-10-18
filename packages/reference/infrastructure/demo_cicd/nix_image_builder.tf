@@ -345,19 +345,6 @@ module "nix_image_builder_workflow" {
     },
     {
       name = "merge-and-copy"
-      affinity = {
-        nodeAffinity = {
-          requiredDuringSchedulingIgnoredDuringExecution = {
-            nodeSelectorTerms = [{
-              matchExpressions = [{
-                key = "kubernetes.io/arch"
-                operator = "In"
-                values = ["arm64"]
-              }]
-            }]
-          }
-        }
-      }
       tolerations = concat(
         module.nix_image_builder_workflow.tolerations,
         [{
@@ -383,7 +370,7 @@ module "nix_image_builder_workflow" {
       }
       container = {
         name = "merge-and-copy"
-        image = "${module.pull_through.docker_hub_registry}/nixos/nix"
+        image = local.ci_image
         command = [
           "/scripts/merge-and-copy.sh"
         ]
@@ -394,11 +381,7 @@ module "nix_image_builder_workflow" {
           ]
         )
         volumeMounts = concat(
-          module.nix_image_builder_workflow.volume_mounts,
-          [{
-            name = "nix-store"
-            mountPath = "/nix"
-          }]
+          module.nix_image_builder_workflow.volume_mounts
         )
         resources = {
           requests = {
