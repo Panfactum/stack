@@ -34,16 +34,45 @@ locals {
   // efficiency
   min_instance_memory = var.monitoring_enabled ? 2500 : 2500 // TODO: For now keep it low as we experiment
 
+  // Explicitly listing allows us to expand
+  // the number of instance families allowed in each node pool
+  // which improves overall cluster efficiency
+  base_instance_families = [
+    "m8g",
+    "m7g",
+    "m7i",
+    "m7i-flex",
+    "m7a",
+    "m6g",
+    "m6i",
+    "m6a",
+    "c8g",
+    "c7g",
+    "c7i",
+    "c7i-flex",
+    "c7a",
+    "c6g",
+    "c6gn",
+    "c6i",
+    "c6a",
+    "r8g",
+    "r7g",
+    "r7i",
+    "r7iz",
+    "r7a",
+    "r6g",
+    "r6i",
+    "r6a",
+    "x8g",
+    "x2gd",
+    "x2iedn"
+  ]
+
   shared_requirements = [
     {
-      key      = "karpenter.k8s.aws/instance-category"
+      key      = "karpenter.k8s.aws/instance-family"
       operator = "In"
-      values   = ["c", "m", "r"]
-    },
-    {
-      key      = "karpenter.k8s.aws/instance-generation"
-      operator = "Gt"
-      values   = ["5"]
+      values   = local.base_instance_families
     },
     {
       key      = "kubernetes.io/os"
@@ -59,14 +88,16 @@ locals {
 
   burstable_requirements = [
     {
-      key      = "karpenter.k8s.aws/instance-category"
+      key      = "karpenter.k8s.aws/instance-family"
       operator = "In"
-      values   = ["t"]
-    },
-    {
-      key      = "karpenter.k8s.aws/instance-generation"
-      operator = "Gt"
-      values   = ["2"]
+      values = concat(
+        local.base_instance_families,
+        [
+          "t4g",
+          "t3",
+          "t3a"
+        ]
+      )
     },
     {
       key      = "kubernetes.io/os"
@@ -346,7 +377,7 @@ resource "kubectl_manifest" "burstable_node_pool" {
               {
                 key = "karpenter.sh/capacity-type"
                 operator : "In"
-                values : ["spot"]
+                values : ["spot", "on-demand"]
               },
               {
                 key      = "kubernetes.io/arch"
@@ -415,12 +446,12 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
               {
                 key = "karpenter.sh/capacity-type"
                 operator : "In"
-                values : ["spot"]
+                values : ["spot", "on-demand"]
               },
               {
                 key      = "kubernetes.io/arch"
                 operator = "In"
-                values   = ["arm64"]
+                values   = ["arm64", "amd64"]
               },
             ]
           )
@@ -481,7 +512,7 @@ resource "kubectl_manifest" "spot_node_pool" {
               {
                 key = "karpenter.sh/capacity-type"
                 operator : "In"
-                values : ["spot"]
+                values : ["spot", "on-demand"]
               },
               {
                 key      = "kubernetes.io/arch"
@@ -550,12 +581,12 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
               {
                 key = "karpenter.sh/capacity-type"
                 operator : "In"
-                values : ["spot"]
+                values : ["spot", "on-demand"]
               },
               {
                 key      = "kubernetes.io/arch"
                 operator = "In"
-                values   = ["arm64"]
+                values   = ["arm64", "amd64"]
               },
             ]
           )

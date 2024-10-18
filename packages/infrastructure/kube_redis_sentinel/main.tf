@@ -222,8 +222,7 @@ resource "helm_release" "redis" {
 
         podLabels = module.util.labels
         podAnnotations = {
-          "config.linkerd.io/opaque-ports"                      = "6379,26379"
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
+          "config.linkerd.io/opaque-ports" = "6379,26379"
         }
 
         // For whatever reason the kubelet has trouble

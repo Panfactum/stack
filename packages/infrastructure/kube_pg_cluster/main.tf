@@ -86,8 +86,9 @@ module "util_cluster" {
   burstable_nodes_enabled       = var.burstable_nodes_enabled
   spot_nodes_enabled            = var.spot_nodes_enabled
   arm_nodes_enabled             = var.arm_nodes_enabled
+  controller_nodes_enabled      = var.controller_nodes_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.instance_type_spread_required
+  instance_type_spread_required = var.instance_type_spread_required || (var.burstable_nodes_enabled || var.spot_nodes_enabled)
   az_spread_required            = true
   az_spread_preferred           = true // stateful so always on
   lifetime_evictions_enabled    = false
@@ -101,6 +102,7 @@ module "util_pooler" {
   workload_name                 = "pg-pooler-${each.key}-${random_id.cluster_id.hex}"
   burstable_nodes_enabled       = true
   arm_nodes_enabled             = true
+  controller_nodes_enabled      = var.controller_nodes_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.instance_type_spread_required
   az_spread_required            = true
@@ -457,15 +459,17 @@ resource "kubernetes_manifest" "postgres_cluster" {
       // Try to spread the instances evenly across the availability zones
       topologySpreadConstraints = module.util_cluster.topology_spread_constraints
 
-      affinity = {
-        // Ensures that the postgres cluster instances are never scheduled on the same node
-        enablePodAntiAffinity = true
-        topologyKey           = (var.burstable_nodes_enabled || var.spot_nodes_enabled) ? "node.kubernetes.io/instance-type" : "kubernetes.io/hostname"
-        podAntiAffinityType   = "required"
+      affinity = { for k, v in {
+        // The default affinity rules are broken as they result in anti-affinity with the poolers
+        enablePodAntiAffinity = false
+
+        // These still work even if 'enablePodAntiAffinity' is false
+        additionalPodAntiAffinity = lookup(module.util_cluster.affinity, "podAntiAffinity", null)
+        additionalPodAffinity     = lookup(module.util_cluster.affinity, "podAffinity", null)
 
         // Allow the clusters to be scheduled on particular node types
         tolerations = module.util_cluster.tolerations
-      }
+      } : k => v if v != null }
 
       resources = {
         requests = {

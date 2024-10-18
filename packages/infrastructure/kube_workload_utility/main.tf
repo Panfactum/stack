@@ -149,7 +149,7 @@ locals {
   tolerations = concat(
     var.burstable_nodes_enabled ? local.burstable_node_tolerations : var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
     var.arm_nodes_enabled ? [local.arm_node_toleration] : [],
-    var.controller_nodes_enabled || var.controller_nodes_required ? [local.controller_node_toleration] : [],
+    var.controller_nodes_enabled || var.controller_nodes_required ? concat([local.controller_node_toleration, local.arm_node_toleration], local.burstable_node_tolerations) : [],
     var.extra_tolerations
   )
 

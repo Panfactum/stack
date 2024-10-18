@@ -127,7 +127,7 @@ resource "kubernetes_config_map" "scheduler" {
             enabled = [
               {
                 name   = "NodeResourcesFit"
-                weight = 1
+                weight = 2
               }
             ]
           }

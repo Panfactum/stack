@@ -31,7 +31,7 @@ variable "enhanced_ha_enabled" {
 variable "log_verbosity" {
   description = "The log verbosity (1-9) for the scheduler pods"
   type        = number
-  default     = 0
+  default     = 13
 
   validation {
     condition     = var.log_verbosity >= 0
@@ -39,7 +39,7 @@ variable "log_verbosity" {
   }
 
   validation {
-    condition     = var.log_verbosity <= 9
+    condition     = var.log_verbosity <= 13
     error_message = "Log verbosity must be less than or equal to 9"
   }
 }

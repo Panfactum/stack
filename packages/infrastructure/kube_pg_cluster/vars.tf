@@ -484,3 +484,9 @@ variable "vault_credential_lifetime_hours" {
   type        = number
   default     = 16
 }
+
+variable "controller_nodes_enabled" {
+  description = "Whether the database pods can be scheduled on controller nodes"
+  type        = bool
+  default     = false
+}

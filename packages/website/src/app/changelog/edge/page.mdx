@@ -11,10 +11,6 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
-### Added
-
-* Adds `cdn_mode_enabled` boolean to the [kube_vault](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault) & [kube_authentik](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_authentik) module to enable CDN for Vault.
-
 ### Breaking Changes
 
 * We have removed [devenv](https://devenv.sh/) from the Panfactum Stack and now use plain [nix flakes](https://nixos.wiki/wiki/Flakes) to manage the local
@@ -78,6 +74,18 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
   For alternatives to all the functionality included in devenv using our new devShell paradigm, please
   see [our documentation.](/docs/main/guides/development-shell/customizing)
+
+### Added
+
+* Adds `cdn_mode_enabled` boolean to the [kube_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) & [kube_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) module to enable CDN for Vault.
+
+### Fixed
+
+* Fixed a handful of scheduling constraint bugs that resulting in less than optimal resource utilization. These improvements
+should result in a significant improvement to resource utilization in tiny clusters and a minor improvement in larger clusters.
+
+* Upgrades [kube_aws_ebs_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
+to support Karpenter v1 disruption taints and improve node shutdown performance.
 
 ## edge.24-10-15
 
