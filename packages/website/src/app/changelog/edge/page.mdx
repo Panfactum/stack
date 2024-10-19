@@ -15,6 +15,24 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * Prevents Karpenter from scheduling instances on bare metal instances which we have observed issues with.
 
+* Upgrades [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_nginx_ingress) so that it can run on nodes with a large number of CPU cores.
+
+* EBS-backed PVs with many large files took a long time to mount due to [this issue](https://github.com/bottlerocket-os/bottlerocket/issues/3151)
+  with Bottlerocket OS (our underlying node OS). We have added the recommended remediation and now PVs should mount
+  nearly instantly. Note that this fix will **not** apply to existing PVs, only new ones.
+
+  To apply the fix to existing PVs, you will need to manually add the following mount option to their manifests:
+
+  ```yaml
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+      name: XXXX
+  spec:
+      mountOptions:
+        - context="system_u:object_r:local_t:s0"
+  ```
+
 ## edge.24-10-18
 
 ### Breaking Changes
@@ -82,39 +100,39 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   see [our documentation.](/docs/main/guides/development-shell/customizing)
 
 * `pf-get-version-hash` has been renamed to `pf-get-commit-hash` to better reflect what it does (get a commit hash given an arbitrary repo and [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References)).
-In addition, it has been updated to take named rather than positioned arguments in order to align with other Panfactum scripts.
-Finally, we have fixed several bugs in the script to make it more resilient to various inputs.
+  In addition, it has been updated to take named rather than positional arguments in order to align with other Panfactum scripts.
+  Finally, we have fixed several bugs in the script to make it more resilient to various inputs.
 
 * Removes `pgadmin4` from the devShell as it significantly increased build times and was not useful to all users. Users
-should have an option to pick their favorite DB clients rather than us be prescriptive.
+  should have an option to pick their favorite DB clients rather than us be prescriptive.
 
 ### Changes
 
-* Upgrades [kube_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3. This change
-brings [new Cilium features](https://isovalent.com/blog/post/cilium-1-16), reduces the per-node memory usage by 75MB,
-and reduces the amount of errors that users can encounter during the bootstrapping guide.
+* Upgrades [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3. This change
+  brings [new Cilium features](https://isovalent.com/blog/post/cilium-1-16), reduces the per-node memory usage by 75MB,
+  and reduces the amount of errors that users can encounter during the bootstrapping guide.
 
-* Upgrades [kube_aws_ebs_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
-to support Karpenter v1 disruption taints and improve node shutdown performance.
+* Upgrades [kube\_aws\_ebs\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
+  to support Karpenter v1 disruption taints and improve node shutdown performance.
 
-* Updates [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) to support 10 concurrent image builds per module
-rather than just one.
+* Updates [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) to support 10 concurrent image builds per module
+  rather than just one.
 
 ### Added
 
-* Adds `cdn_mode_enabled` boolean to the [kube_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) & [kube_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) module to enable CDN for Vault.
-* Adds `image_tag_prefix` string to the [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+* Adds `cdn_mode_enabled` boolean to the [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) & [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) module to enable CDN for Vault.
+* Adds `image_tag_prefix` string to the [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
 
 ### Fixed
 
-* Fixed a handful of scheduling constraint bugs that resulting in less than optimal resource utilization. These improvements
-should result in a significant improvement to resource utilization in tiny clusters and a minor improvement in larger clusters.
+* Fixed a handful of scheduling constraint bugs that resulted in less-than-optimal resource utilization. These improvements
+  should result in a significant improvement to resource utilization in tiny clusters and a minor improvement in larger clusters.
 
 * Fixed an issue where `pf_stack_version` could not be a commit hash. It can now be any valid [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References).
 
 * Fixed an issue where `pf-wf-git-checkout` would fail when given a branch name as a git ref. This impact both
-[wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
-and [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+  [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+  and [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
 
 ## edge.24-10-15
 

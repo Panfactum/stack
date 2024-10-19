@@ -1,7 +1,7 @@
 variable "nginx_ingress_helm_version" {
   description = "The version of the nginx-ingress helm chart to deploy"
   type        = string
-  default     = "4.10.0"
+  default     = "4.11.3"
 }
 
 variable "max_replicas" {

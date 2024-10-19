@@ -35,7 +35,7 @@ variable "pull_through_cache_enabled" {
 variable "log_level" {
   description = "The log level for the karpenter pods"
   type        = string
-  default     = "warn"
+  default     = "info"
   validation {
     condition     = contains(["info", "error", "warn", "debug"], var.log_level)
     error_message = "Invalid log_level provided."

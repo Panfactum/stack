@@ -629,7 +629,7 @@ resource "helm_release" "karpenter" {
         // during its sizing calculations by bumping vmMemoryOverheadPercent significantly.
         // This ensures that new nodes can run the dynamically sized daemonsets
         // as well as the other pods.
-        vmMemoryOverheadPercent = "0.3"
+        vmMemoryOverheadPercent = "0.2"
       }
 
       logConfig = {

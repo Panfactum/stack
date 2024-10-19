@@ -60,10 +60,7 @@ locals {
     "r7a",
     "r6g",
     "r6i",
-    "r6a",
-    "x8g",
-    "x2gd",
-    "x2iedn"
+    "r6a"
   ]
 
   // Blacklisted sizes
@@ -411,7 +408,7 @@ resource "kubectl_manifest" "burstable_node_pool" {
       }
       disruption = local.disruption_policy
 
-      weight = 10
+      weight = 25
     }
   })
   server_side_apply = true
@@ -480,7 +477,7 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
       }
       disruption = local.disruption_policy
 
-      weight = 10
+      weight = 30
     }
   })
   server_side_apply = true
@@ -546,7 +543,7 @@ resource "kubectl_manifest" "spot_node_pool" {
       }
       disruption = local.disruption_policy
 
-      weight = 10
+      weight = 15
     }
   })
   server_side_apply = true
@@ -615,7 +612,7 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
       }
       disruption = local.disruption_policy
 
-      weight = 10
+      weight = 20
     }
   })
   server_side_apply = true
@@ -681,8 +678,7 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
       }
       disruption = local.disruption_policy
 
-      // This should have the lowest preference
-      weight = 1
+      weight = 10
     }
   })
   server_side_apply = true
@@ -748,7 +744,7 @@ resource "kubectl_manifest" "on_demand_node_pool" {
       disruption = local.disruption_policy
 
       // This should have the lowest preference
-      weight = 1
+      weight = 5
     }
   })
   server_side_apply = true

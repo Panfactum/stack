@@ -266,6 +266,32 @@ resource "helm_release" "ebs_csi_driver" {
           ],
           module.util_controller.tolerations
         )
+        volumes = [
+          {
+            name = "selinuxfs"
+            hostPath = {
+              path = "/sys/fs/selinux"
+              type = "Directory"
+            }
+          },
+          {
+            name = "selinux-config"
+            hostPath = {
+              path = "/etc/selinux/config"
+              type = "FileOrCreate"
+            }
+          }
+        ]
+        volumeMounts = [
+          {
+            name      = "selinuxfs"
+            mountPath = "/sys/fs/selinux"
+          },
+          {
+            name      = "selinux-config"
+            mountPath = "/etc/selinux/config"
+          },
+        ]
       }
     })
   ]
@@ -306,6 +332,10 @@ resource "kubernetes_storage_class" "standard" {
     tagSpecification_2 : "panfactum.com/storageclass=ebs-standard"
     allowAutoIOPSPerGBIncrease = true
   }
+
+  mount_options = [
+    "context=\"system_u:object_r:local_t:s0\""
+  ]
 }
 
 resource "kubernetes_storage_class" "standard_retained" {
@@ -326,6 +356,10 @@ resource "kubernetes_storage_class" "standard_retained" {
     tagSpecification_2 : "panfactum.com/storageclass=ebs-standard-retained"
     allowAutoIOPSPerGBIncrease = true
   }
+
+  mount_options = [
+    "context=\"system_u:object_r:local_t:s0\""
+  ]
 }
 
 
@@ -358,6 +392,10 @@ resource "kubernetes_storage_class" "extra" {
     ext4BigAlloc               = each.value.big_alloc
     ext4ClusterSize            = each.value.cluster_size
   } : k => v if v != null }
+
+  mount_options = [
+    "context=\"system_u:object_r:local_t:s0\""
+  ]
 }
 
 /***************************************

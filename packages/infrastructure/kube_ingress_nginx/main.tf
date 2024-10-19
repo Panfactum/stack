@@ -461,6 +461,14 @@ resource "kubectl_manifest" "vpa_nginx" {
       labels    = module.util.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "controller"
+          minAllowed = {
+            memory = "150Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
