@@ -41,7 +41,6 @@ locals {
     "m8g",
     "m7g",
     "m7i",
-    "m7i-flex",
     "m7a",
     "m6g",
     "m6i",
@@ -49,7 +48,6 @@ locals {
     "c8g",
     "c7g",
     "c7i",
-    "c7i-flex",
     "c7a",
     "c6g",
     "c6gn",
@@ -68,11 +66,25 @@ locals {
     "x2iedn"
   ]
 
+  // Blacklisted sizes
+  // These sizes are not allowed as bare metals instances are incompatible
+  // with our base AMI
+  blacklisted_sizes = [
+    "metal",
+    "metal-24xl",
+    "metal-48xl"
+  ]
+
   shared_requirements = [
     {
       key      = "karpenter.k8s.aws/instance-family"
       operator = "In"
       values   = local.base_instance_families
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-size"
+      operator = "NotIn"
+      values   = local.blacklisted_sizes
     },
     {
       key      = "kubernetes.io/os"
@@ -95,9 +107,16 @@ locals {
         [
           "t4g",
           "t3",
-          "t3a"
+          "t3a",
+          "c7i-flex",
+          "m7i-flex"
         ]
       )
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-size"
+      operator = "NotIn"
+      values   = local.blacklisted_sizes
     },
     {
       key      = "kubernetes.io/os"
