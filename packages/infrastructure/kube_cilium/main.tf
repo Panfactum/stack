@@ -211,7 +211,11 @@ resource "helm_release" "cilium" {
           memory = "400Mi" // Needs to be a bit higher before the VPA is enabled
         }
         limits = {
-          memory = "520Mi"
+          // Allow a 2x burstable limit b/c the node agent needs a burst of memory when starting up
+          // and if the agent doesn't initialize successfully the node will be perpetually stuck in
+          // and initializing phase. This will cause Karpenter to never de-provision it and essentially
+          // result in a resource leak.
+          memory = "800Mi"
         }
       }
 
