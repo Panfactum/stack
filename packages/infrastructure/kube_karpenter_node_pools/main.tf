@@ -68,6 +68,7 @@ locals {
   // with our base AMI
   blacklisted_sizes = [
     "metal",
+    "metal-16xl",
     "metal-24xl",
     "metal-48xl"
   ]
