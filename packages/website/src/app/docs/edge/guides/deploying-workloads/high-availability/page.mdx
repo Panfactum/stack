@@ -73,7 +73,7 @@ Required Tuning:
 * Everything in Level 2.
 * For *all* modules that deploy workloads to Kubernetes, ensure that > 1 replica is deployed and either `az_spread_preferred` or
   `az_spread_required` is `true`.
-* For *all* modules that deploy workloads to Kubernetes, set `instance_type_spread_required` to `true` to prevent mass
+* For *all* modules that deploy workloads to Kubernetes, set `instance_type_anti_affinity_required` to `true` to prevent mass
   disruptions impacting a single instance type (e.g., mass spot interruptions).
 * Ensure that all workloads that connect to databases connect via their corresponding HA mechanism (e.g., for PostgreSQL use PgBouncer, for
   Redis use Sentinel, etc.).

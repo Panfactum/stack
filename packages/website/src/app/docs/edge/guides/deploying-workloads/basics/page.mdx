@@ -188,9 +188,9 @@ In all clusters, you should be aware of how pods are spread across individual in
   workload disruptions. We do not recommend setting this to `false` unless termination of all pods in a controller such as a Deployment
   would not cause a noticeable service disruption.
 
-* `instance_type_spread_required`: If true, pods of the same controller will be balanced across
-  instance types (e.g., `t4g.medium`)
-  using a [topology spread constraint](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/).
+* `instance_type_anti_affinity_required`: If true, pods of the same controller will be prevented from running on the same
+  instance type (e.g., `t4g.medium`).
+
   This provides extra resilience in the following scenarios:
 
   * Spot disruptions: Spot disruptions often impact *all* spot nodes of a single instance type, so you would
@@ -201,7 +201,7 @@ In all clusters, you should be aware of how pods are spread across individual in
     instance types avoids this failure case.
 
 Note that enabling any of these options will increase the cost of running your workload by lowering overall
-resource utilization. As a result, we recommend `instance_type_spread_enabled`
+resource utilization. As a result, we recommend `instance_type_anti_affinity_required`
 be enabled **only** in production environments and disabling `host_anti_affinity_required` if possible.
 See our [high availability guide](/docs/edge/guides/deploying-workloads/high-availability) for more information.
 
