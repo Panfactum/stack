@@ -87,7 +87,7 @@ module "util" {
 
   // This does need to be spread across AZs in order to not end up
   // withe constant service disruptions
-  az_spread_preferred                  = true
+  az_spread_required                   = true
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
   extra_labels = data.pf_kube_labels.labels.labels
@@ -355,10 +355,12 @@ resource "helm_release" "nginx_ingress" {
         }
         resources = {
           requests = {
+            cpu    = "250m"
             memory = "200Mi"
           }
           limits = {
             memory = "260Mi"
+            cpu    = "250m" // We need to set a limit in order for the worker_process NGINX configuration setting to be automatically assigned
           }
         }
         extraVolumeMounts = [
@@ -466,6 +468,10 @@ resource "kubectl_manifest" "vpa_nginx" {
           containerName = "controller"
           minAllowed = {
             memory = "150Mi"
+            cpu    = "200m"
+          }
+          maxAllowed = {
+            cpu = "8000m" // Anything larger than 8 cores will cause the NGINX container to fail to start for some reason
           }
         }]
       }
