@@ -74,14 +74,19 @@ locals {
 
   shared_requirements = [
     {
-      key      = "karpenter.k8s.aws/instance-family"
-      operator = "In"
-      values   = local.base_instance_families
+      key      = "karpenter.k8s.aws/instance-memory"
+      operator = "Lt"
+      values   = [tostring(var.max_node_memory_mb + 1)]
     },
     {
-      key      = "karpenter.k8s.aws/instance-size"
-      operator = "NotIn"
-      values   = local.blacklisted_sizes
+      key      = "karpenter.k8s.aws/instance-cpu"
+      operator = "Lt"
+      values   = [tostring(var.max_node_cpu + 1)]
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-memory"
+      operator = "Gt"
+      values   = [tostring(local.min_instance_memory)]
     },
     {
       key      = "kubernetes.io/os"
@@ -89,43 +94,42 @@ locals {
       values   = ["linux"]
     },
     {
-      key      = "karpenter.k8s.aws/instance-memory"
-      operator = "Gt"
-      values   = [tostring(local.min_instance_memory)]
+      key      = "karpenter.k8s.aws/instance-size"
+      operator = "NotIn"
+      values   = local.blacklisted_sizes
     }
   ]
 
-  burstable_requirements = [
-    {
-      key      = "karpenter.k8s.aws/instance-family"
-      operator = "In"
-      values = concat(
-        local.base_instance_families,
-        [
-          "t4g",
-          "t3",
-          "t3a",
-          "c7i-flex",
-          "m7i-flex"
-        ]
-      )
-    },
-    {
-      key      = "karpenter.k8s.aws/instance-size"
-      operator = "NotIn"
-      values   = local.blacklisted_sizes
-    },
-    {
-      key      = "kubernetes.io/os"
-      operator = "In"
-      values   = ["linux"]
-    },
-    {
-      key      = "karpenter.k8s.aws/instance-memory"
-      operator = "Gt"
-      values   = [tostring(local.min_instance_memory)]
-    }
-  ]
+  non_burstable_requirements = concat(
+    local.shared_requirements,
+    [
+      {
+        key      = "karpenter.k8s.aws/instance-family"
+        operator = "In"
+        values   = local.base_instance_families
+      }
+    ]
+  )
+
+  burstable_requirements = concat(
+    local.shared_requirements,
+    [
+      {
+        key      = "karpenter.k8s.aws/instance-family"
+        operator = "In"
+        values = concat(
+          local.base_instance_families,
+          [
+            "t4g",
+            "t3",
+            "t3a",
+            "c7i-flex",
+            "m7i-flex"
+          ]
+        )
+      }
+    ]
+  )
 
   spot_taints = [
     {
@@ -523,7 +527,7 @@ resource "kubectl_manifest" "spot_node_pool" {
             module.constants.cilium_taint
           ]
           requirements = concat(
-            local.shared_requirements,
+            local.non_burstable_requirements,
             [
               {
                 key = "karpenter.sh/capacity-type"
@@ -592,7 +596,7 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
             module.constants.cilium_taint
           ]
           requirements = concat(
-            local.shared_requirements,
+            local.non_burstable_requirements,
             [
               {
                 key = "karpenter.sh/capacity-type"
@@ -658,7 +662,7 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
             module.constants.cilium_taint
           ]
           requirements = concat(
-            local.shared_requirements,
+            local.non_burstable_requirements,
             [
               {
                 key = "karpenter.sh/capacity-type"
@@ -723,7 +727,7 @@ resource "kubectl_manifest" "on_demand_node_pool" {
             module.constants.cilium_taint
           ]
           requirements = concat(
-            local.shared_requirements,
+            local.non_burstable_requirements,
             [
               {
                 key = "karpenter.sh/capacity-type"

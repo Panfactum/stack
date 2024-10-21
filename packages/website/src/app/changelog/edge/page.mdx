@@ -11,9 +11,22 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Breaking Changes
+
+* Due to [this issue](https://github.com/aws/karpenter-provider-aws/issues/7254) with Karpenter, we have observed that Karpenter
+  will occasionally provision extremely large nodes for no apparent reason. As a mitigation, we have
+  two variables for [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools), `max_node_memory_mb` and `max_node_cpu`,
+  that limit the maximum size of nodes that can be provisioned.
+
+  The default limits are 64GB of memory and 32 CPUs. If you require nodes larger than these limits, you will need to adjust these new inputs.
+
 ### Fixed
 
 * Prevents Karpenter from scheduling instances on bare metal instances which we have observed issues with.
+
+* Removes memory limits on the Cilium node agent in [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) as
+  these limits can cause Cilium to fail to launch on larger node sizes. This is due to the fact that Cilium's memory requirements increase proportionally
+  to the size of the node, but the VPA does not take this into account when assigning limits.
 
 * Upgrades [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_nginx_ingress) so that it can run on nodes with a large number of CPU cores.
 

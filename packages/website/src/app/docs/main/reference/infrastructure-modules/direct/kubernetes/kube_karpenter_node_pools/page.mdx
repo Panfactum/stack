@@ -8,6 +8,19 @@ import ModuleHeader from "../../../ModuleHeader";
 
 # Karpenter NodePools
 
+This module provisions Karpenter [NodePools](https://karpenter.sh/docs/concepts/nodepools/) and [NodeClasses](https://karpenter.sh/docs/concepts/nodeclasses/)
+that allow Karpenter to manage EC2 instances.
+
+## Usage
+
+### Limiting Maximum Node Size
+
+Due to [this issue](https://github.com/aws/karpenter-provider-aws/issues/7254), we have observed that Karpenter
+will occasionally provision extremely large nodes for no apparent reason. As a mitigation, we have
+two variables, `max_node_memory_mb` and `max_node_cpu`, that limit the maximum size of nodes that can be provisioned.
+
+If you need larger nodes than the default set by this module, you will need to adjust those limits.
+
 ## Providers
 
 The following providers are needed by this module:
@@ -77,6 +90,22 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### max\_node\_cpu
+
+Description: The maximum number of CPUs for any single provisioned node (in MB)
+
+Type: `number`
+
+Default: `32`
+
+### max\_node\_memory\_mb
+
+Description: The maximum memory for any single provisioned node (in MB)
+
+Type: `number`
+
+Default: `65536`
 
 ### monitoring\_enabled
 

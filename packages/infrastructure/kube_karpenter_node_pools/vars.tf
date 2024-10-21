@@ -49,3 +49,15 @@ variable "node_security_group_id" {
   description = "The id of the security group for nodes running in the EKS cluster"
   type        = string
 }
+
+variable "max_node_memory_mb" {
+  description = "The maximum memory for any single provisioned node (in MB)"
+  type        = number
+  default     = 65536
+}
+
+variable "max_node_cpu" {
+  description = "The maximum number of CPUs for any single provisioned node (in MB)"
+  type        = number
+  default     = 32
+}
