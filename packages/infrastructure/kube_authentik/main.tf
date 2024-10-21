@@ -101,7 +101,6 @@ module "database" {
   pull_through_cache_enabled    = var.pull_through_cache_enabled
   pgbouncer_pool_mode           = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
   burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
   monitoring_enabled            = var.monitoring_enabled
   panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
   instance_type_spread_required = var.enhanced_ha_enabled
