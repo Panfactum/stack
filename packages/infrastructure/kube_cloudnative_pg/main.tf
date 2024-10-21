@@ -47,13 +47,13 @@ module "pull_through" {
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "cnpg-operator"
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "cnpg-operator"
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {

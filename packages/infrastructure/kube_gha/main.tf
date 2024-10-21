@@ -45,13 +45,13 @@ module "pull_through" {
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "gha-scale-set-controller"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = false
-  az_spread_preferred           = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "gha-scale-set-controller"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = false
+  az_spread_preferred                  = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 /***************************************

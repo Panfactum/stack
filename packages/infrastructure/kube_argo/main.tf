@@ -52,51 +52,51 @@ module "pull_through" {
 }
 
 module "util_controller" {
-  source                        = "../kube_workload_utility"
-  workload_name                 = "argo-controller"
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  az_spread_required            = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-controller"
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  az_spread_required                   = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_server" {
-  source                        = "../kube_workload_utility"
-  workload_name                 = "argo-server"
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  az_spread_required            = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-server"
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  az_spread_required                   = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_events_controller" {
-  source                        = "../kube_workload_utility"
-  workload_name                 = "argo-events-controller"
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  az_spread_required            = var.enhanced_ha_enabled
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-events-controller"
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  az_spread_required                   = var.enhanced_ha_enabled
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_webhook" {
-  source                        = "../kube_workload_utility"
-  workload_name                 = "argo-webhook"
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  az_spread_required            = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-webhook"
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  az_spread_required                   = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -247,20 +247,20 @@ resource "kubernetes_config_map" "artifacts" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name              = var.eks_cluster_name
-  pg_cluster_namespace          = local.namespace
-  pg_initial_storage_gb         = 2
-  pg_memory_mb                  = 1000
-  pg_cpu_millicores             = 250
-  pg_instances                  = 2
-  pg_smart_shutdown_timeout     = 2
-  aws_iam_ip_allow_list         = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled    = var.pull_through_cache_enabled
-  burstable_nodes_enabled       = true
-  backups_force_delete          = true
-  monitoring_enabled            = var.monitoring_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
+  eks_cluster_name                     = var.eks_cluster_name
+  pg_cluster_namespace                 = local.namespace
+  pg_initial_storage_gb                = 2
+  pg_memory_mb                         = 1000
+  pg_cpu_millicores                    = 250
+  pg_instances                         = 2
+  pg_smart_shutdown_timeout            = 2
+  aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  burstable_nodes_enabled              = true
+  backups_force_delete                 = true
+  monitoring_enabled                   = var.monitoring_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory

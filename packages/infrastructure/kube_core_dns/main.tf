@@ -122,14 +122,14 @@ module "core_dns" {
     "linkerd.io/inject" = "disabled"
   }
 
-  replicas                      = 2
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  priority_class_name           = "system-cluster-critical"
-  dns_policy                    = "Default"
+  replicas                             = 2
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  priority_class_name                  = "system-cluster-critical"
+  dns_policy                           = "Default"
   containers = concat(
     [
       {

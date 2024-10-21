@@ -51,30 +51,30 @@ module "util" {
   for_each = var.runners
   source   = "../kube_workload_utility"
 
-  workload_name                 = each.key
-  burstable_nodes_enabled       = false
-  spot_nodes_enabled            = each.value.spot_nodes_enabled
-  arm_nodes_enabled             = each.value.arm_nodes_enabled
-  controller_nodes_enabled      = false
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = false
-  az_spread_preferred           = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = each.key
+  burstable_nodes_enabled              = false
+  spot_nodes_enabled                   = each.value.spot_nodes_enabled
+  arm_nodes_enabled                    = each.value.arm_nodes_enabled
+  controller_nodes_enabled             = false
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = false
+  az_spread_preferred                  = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_listener" {
   for_each = var.runners
   source   = "../kube_workload_utility"
 
-  workload_name                 = each.key
-  burstable_nodes_enabled       = true
-  spot_nodes_enabled            = true
-  arm_nodes_enabled             = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = false
-  az_spread_preferred           = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = each.key
+  burstable_nodes_enabled              = true
+  spot_nodes_enabled                   = true
+  arm_nodes_enabled                    = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = false
+  az_spread_preferred                  = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 resource "kubernetes_secret" "creds" {

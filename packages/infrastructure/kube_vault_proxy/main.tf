@@ -54,13 +54,13 @@ resource "random_id" "oauth2_proxy" {
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name                 = random_id.oauth2_proxy.hex
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.instance_type_spread_required
-  az_spread_preferred           = var.az_spread_preferred
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = random_id.oauth2_proxy.hex
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  az_spread_preferred                  = var.az_spread_preferred
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {

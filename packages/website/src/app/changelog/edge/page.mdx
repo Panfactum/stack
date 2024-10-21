@@ -13,8 +13,12 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Breaking Changes
 
-* Due to [this issue](https://github.com/aws/karpenter-provider-aws/issues/7254) with Karpenter, we have observed that Karpenter
-  will occasionally provision extremely large nodes for no apparent reason. As a mitigation, we have
+* In all Panfactum submodules, `instance_type_spread_required` has been renamed to `instance_type_anti_affinity_required`
+  as we have had to replace TopologySpreadConstraints with AntiAffinity rules to work around [this issue with Karpenter.](https://github.com/kubernetes-sigs/karpenter/issues/1762)
+
+  This change will ensure that Karpenter will not randomly create massive nodes.
+
+* To add further protection against Karpenter provisioning extremely large nodes, we have
   two variables for [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools), `max_node_memory_mb` and `max_node_cpu`,
   that limit the maximum size of nodes that can be provisioned.
 

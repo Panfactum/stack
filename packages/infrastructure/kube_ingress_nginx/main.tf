@@ -87,8 +87,8 @@ module "util" {
 
   // This does need to be spread across AZs in order to not end up
   // withe constant service disruptions
-  az_spread_preferred           = true
-  instance_type_spread_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
   extra_labels = data.pf_kube_labels.labels.labels
 }

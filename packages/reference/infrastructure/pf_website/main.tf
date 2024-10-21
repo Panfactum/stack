@@ -78,6 +78,7 @@ module "website_deployment" {
 
   vpa_enabled = var.vpa_enabled
   controller_nodes_enabled = true
+  instance_type_spread_required = true
 }
 
 module "ingress" {

@@ -161,13 +161,13 @@ module "scheduler" {
   namespace = local.namespace
   name      = local.name
 
-  replicas                      = 1
-  burstable_nodes_enabled       = true
-  controller_nodes_required     = true
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  priority_class_name           = "system-cluster-critical" # Scheduling will break if this breaks
-  panfactum_scheduler_enabled   = false                     # Cannot schedule itself
+  replicas                             = 1
+  burstable_nodes_enabled              = true
+  controller_nodes_required            = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  priority_class_name                  = "system-cluster-critical" # Scheduling will break if this breaks
+  panfactum_scheduler_enabled          = false                     # Cannot schedule itself
 
   containers = [
     {

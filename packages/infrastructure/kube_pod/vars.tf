@@ -230,8 +230,8 @@ variable "az_spread_required" {
   default     = false
 }
 
-variable "instance_type_spread_required" {
-  description = "Whether to prevent pods from being scheduled on the same instance types"
+variable "instance_type_anti_affinity_required" {
+  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type"
   type        = bool
   default     = false
 }

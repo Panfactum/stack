@@ -32,6 +32,12 @@ locals {
           matchLabels = local.match_labels
         }
       }
+      instance_type = {
+        topologyKey = "node.kubernetes.io/instance-type"
+        labelSelector = {
+          matchLabels = local.match_labels
+        }
+      }
     }
   }
 
@@ -81,9 +87,10 @@ locals {
       } : null
     } : k => v if v != null }
     podAntiAffinity = { for k, v in {
-      requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.az_anti_affinity_required) ? concat(
+      requiredDuringSchedulingIgnoredDuringExecution = (var.host_anti_affinity_required || var.az_anti_affinity_required || var.instance_type_anti_affinity_required) ? concat(
         var.host_anti_affinity_required ? [local.pod_anti_affinity.required.host] : [],
-        var.az_anti_affinity_required ? [local.pod_anti_affinity.required.zone] : []
+        var.az_anti_affinity_required ? [local.pod_anti_affinity.required.zone] : [],
+        var.instance_type_anti_affinity_required ? [local.pod_anti_affinity.required.instance_type] : []
       ) : null
     } : k => v if v != null }
     podAffinity = length(keys(var.pod_affinity_match_labels)) != 0 ? {
@@ -163,18 +170,8 @@ locals {
     }
   }
 
-  topology_spread_instance_type = {
-    maxSkew           = 1
-    topologyKey       = "node.kubernetes.io/instance-type"
-    whenUnsatisfiable = "DoNotSchedule"
-    labelSelector = {
-      matchLabels = local.match_labels
-    }
-  }
-
   topology_spread_constraints = concat(
     var.az_spread_preferred || var.az_spread_required ? [local.topology_spread_zone] : [],
-    var.instance_type_spread_required ? [local.topology_spread_instance_type] : []
   )
 }
 

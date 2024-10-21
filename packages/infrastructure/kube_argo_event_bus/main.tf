@@ -38,13 +38,13 @@ data "pf_kube_labels" "labels" {
 }
 
 module "util" {
-  source                        = "../kube_workload_utility"
-  workload_name                 = "argo-event-bus"
-  instance_type_spread_required = var.instance_type_spread_required
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  az_spread_required            = true // stateful workload
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  source                               = "../kube_workload_utility"
+  workload_name                        = "argo-event-bus"
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  az_spread_required                   = true // stateful workload
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {

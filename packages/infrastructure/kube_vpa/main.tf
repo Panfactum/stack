@@ -47,12 +47,12 @@ module "pull_through" {
 module "util_admission_controller" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "vpa-admission-controller"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
+  workload_name                        = "vpa-admission-controller"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "admission-controller"
@@ -63,12 +63,12 @@ module "util_admission_controller" {
 module "util_recommender" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "vpa-recommender"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
+  workload_name                        = "vpa-recommender"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "recommender"
@@ -79,12 +79,12 @@ module "util_recommender" {
 module "util_updater" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "vpa-updater"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
+  workload_name                        = "vpa-updater"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "updater"

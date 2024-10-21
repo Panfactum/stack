@@ -41,9 +41,9 @@ module "util" {
   source        = "../kube_workload_utility"
   workload_name = var.name
 
-  host_anti_affinity_required   = var.replicas > 1
-  instance_type_spread_required = var.replicas > 1 && var.instance_type_spread_required
-  az_spread_preferred           = var.replicas > 1 && var.az_spread_preferred
+  host_anti_affinity_required          = var.replicas > 1
+  instance_type_anti_affinity_required = var.replicas > 1 && var.instance_type_anti_affinity_required
+  az_spread_preferred                  = var.replicas > 1 && var.az_spread_preferred
 
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true

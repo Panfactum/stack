@@ -47,24 +47,24 @@ module "pull_through" {
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "open-cost"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = false // single copy
-  az_spread_preferred           = false // single copy
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "open-cost"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = false // single copy
+  az_spread_preferred                  = false // single copy
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_network_cost" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "network-cost"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  instance_type_spread_required = false // ds
-  az_spread_preferred           = false // ds
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "network-cost"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  instance_type_anti_affinity_required = false // ds
+  az_spread_preferred                  = false // ds
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 

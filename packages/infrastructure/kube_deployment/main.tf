@@ -66,23 +66,23 @@ module "pod_template" {
   mount_owner       = var.mount_owner
 
   # Scheduling params
-  priority_class_name              = var.priority_class_name
-  burstable_nodes_enabled          = var.burstable_nodes_enabled
-  spot_nodes_enabled               = var.spot_nodes_enabled
-  arm_nodes_enabled                = var.arm_nodes_enabled
-  controller_nodes_enabled         = var.controller_nodes_enabled
-  instance_type_spread_required    = var.instance_type_spread_required
-  az_anti_affinity_required        = var.az_anti_affinity_required
-  host_anti_affinity_required      = var.host_anti_affinity_required
-  extra_tolerations                = var.extra_tolerations
-  controller_nodes_required        = var.controller_nodes_required
-  node_requirements                = var.node_requirements
-  node_preferences                 = var.node_preferences
-  az_spread_preferred              = var.az_spread_preferred
-  az_spread_required               = var.az_spread_required
-  panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
-  termination_grace_period_seconds = var.termination_grace_period_seconds
-  restart_policy                   = var.restart_policy
+  priority_class_name                  = var.priority_class_name
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  az_anti_affinity_required            = var.az_anti_affinity_required
+  host_anti_affinity_required          = var.host_anti_affinity_required
+  extra_tolerations                    = var.extra_tolerations
+  controller_nodes_required            = var.controller_nodes_required
+  node_requirements                    = var.node_requirements
+  node_preferences                     = var.node_preferences
+  az_spread_preferred                  = var.az_spread_preferred
+  az_spread_required                   = var.az_spread_required
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  termination_grace_period_seconds     = var.termination_grace_period_seconds
+  restart_policy                       = var.restart_policy
 }
 
 resource "kubernetes_service_account" "service_account" {

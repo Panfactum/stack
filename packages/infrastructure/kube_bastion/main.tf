@@ -145,13 +145,13 @@ module "bastion" {
   namespace = module.namespace.namespace
   name      = local.name
 
-  replicas                      = 2
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  priority_class_name           = module.constants.cluster_important_priority_class_name
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  replicas                             = 2
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  priority_class_name                  = module.constants.cluster_important_priority_class_name
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access
   // SSHD requires root to run unfortunately. However, we drop all capability except

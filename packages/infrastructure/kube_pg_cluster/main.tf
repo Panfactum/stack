@@ -82,33 +82,33 @@ resource "random_id" "pooler_r_id" {
 module "util_cluster" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "pg-${random_id.cluster_id.hex}"
-  burstable_nodes_enabled       = var.burstable_nodes_enabled
-  spot_nodes_enabled            = var.spot_nodes_enabled
-  arm_nodes_enabled             = var.arm_nodes_enabled
-  controller_nodes_enabled      = var.controller_nodes_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.instance_type_spread_required || (var.burstable_nodes_enabled || var.spot_nodes_enabled)
-  az_spread_required            = true
-  az_spread_preferred           = true // stateful so always on
-  lifetime_evictions_enabled    = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "pg-${random_id.cluster_id.hex}"
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required || (var.burstable_nodes_enabled || var.spot_nodes_enabled)
+  az_spread_required                   = true
+  az_spread_preferred                  = true // stateful so always on
+  lifetime_evictions_enabled           = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_pooler" {
   for_each = toset(["r", "rw"])
   source   = "../kube_workload_utility"
 
-  workload_name                 = "pg-pooler-${each.key}-${random_id.cluster_id.hex}"
-  burstable_nodes_enabled       = true
-  arm_nodes_enabled             = true
-  controller_nodes_enabled      = var.controller_nodes_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.instance_type_spread_required
-  az_spread_required            = true
-  pod_affinity_match_labels     = module.util_cluster.match_labels
-  lifetime_evictions_enabled    = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "pg-pooler-${each.key}-${random_id.cluster_id.hex}"
+  burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  az_spread_required                   = true
+  pod_affinity_match_labels            = module.util_cluster.match_labels
+  lifetime_evictions_enabled           = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {

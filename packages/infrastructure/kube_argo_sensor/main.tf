@@ -56,11 +56,11 @@ module "util" {
 
   # HA not needed b/c this can be offline for a minute or two
   # without causing any major disruptions
-  host_anti_affinity_required   = false
-  instance_type_spread_required = false
-  az_anti_affinity_required     = false
-  az_spread_preferred           = false
-  az_spread_required            = false
+  host_anti_affinity_required          = false
+  instance_type_anti_affinity_required = false
+  az_anti_affinity_required            = false
+  az_spread_preferred                  = false
+  az_spread_required                   = false
 
   burstable_nodes_enabled  = true
   controller_nodes_enabled = true

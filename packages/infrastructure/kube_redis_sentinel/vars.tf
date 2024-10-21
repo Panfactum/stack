@@ -127,8 +127,8 @@ variable "panfactum_scheduler_enabled" {
   default     = true
 }
 
-variable "instance_type_spread_required" {
-  description = "Whether to enable topology spread constraints to spread pods across instance types (with DoNotSchedule)"
+variable "instance_type_anti_affinity_required" {
+  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type"
   type        = bool
   default     = true
 }

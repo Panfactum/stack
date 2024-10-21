@@ -57,23 +57,23 @@ module "pod_template" {
   mount_owner       = var.mount_owner
 
   # Scheduling params
-  priority_class_name              = var.priority_class_name
-  burstable_nodes_enabled          = var.burstable_nodes_enabled
-  spot_nodes_enabled               = var.spot_nodes_enabled
-  arm_nodes_enabled                = var.arm_nodes_enabled
-  controller_nodes_enabled         = var.controller_nodes_enabled
-  instance_type_spread_required    = false
-  az_anti_affinity_required        = false
-  host_anti_affinity_required      = false
-  extra_tolerations                = var.extra_tolerations
-  controller_nodes_required        = false
-  node_requirements                = var.node_requirements
-  node_preferences                 = var.node_preferences
-  az_spread_preferred              = false
-  az_spread_required               = false
-  panfactum_scheduler_enabled      = var.panfactum_scheduler_enabled
-  termination_grace_period_seconds = var.termination_grace_period_seconds
-  restart_policy                   = var.restart_policy
+  priority_class_name                  = var.priority_class_name
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  instance_type_anti_affinity_required = false
+  az_anti_affinity_required            = false
+  host_anti_affinity_required          = false
+  extra_tolerations                    = var.extra_tolerations
+  controller_nodes_required            = false
+  node_requirements                    = var.node_requirements
+  node_preferences                     = var.node_preferences
+  az_spread_preferred                  = false
+  az_spread_required                   = false
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  termination_grace_period_seconds     = var.termination_grace_period_seconds
+  restart_policy                       = var.restart_policy
 }
 
 resource "kubernetes_service_account" "service_account" {

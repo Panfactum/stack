@@ -590,21 +590,21 @@ module "util" {
   workload_name = var.name
 
   # Scheduling params
-  burstable_nodes_enabled       = var.burstable_nodes_enabled
-  spot_nodes_enabled            = var.spot_nodes_enabled
-  arm_nodes_enabled             = var.arm_nodes_enabled
-  instance_type_spread_required = false
-  az_anti_affinity_required     = false
-  host_anti_affinity_required   = false
-  extra_tolerations             = var.extra_tolerations
-  controller_nodes_required     = var.controller_node_required
-  node_requirements             = var.node_requirements
-  node_preferences              = var.node_preferences
-  az_spread_preferred           = false
-  az_spread_required            = false
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  lifetime_evictions_enabled    = false
-  extra_labels                  = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  instance_type_anti_affinity_required = false
+  az_anti_affinity_required            = false
+  host_anti_affinity_required          = false
+  extra_tolerations                    = var.extra_tolerations
+  controller_nodes_required            = var.controller_node_required
+  node_requirements                    = var.node_requirements
+  node_preferences                     = var.node_preferences
+  az_spread_preferred                  = false
+  az_spread_required                   = false
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  lifetime_evictions_enabled           = false
+  extra_labels                         = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
 }
 
 resource "kubernetes_service_account" "sa" {

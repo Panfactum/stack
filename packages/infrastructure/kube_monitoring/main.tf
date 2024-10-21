@@ -164,159 +164,159 @@ module "pull_through" {
 module "util_webhook" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "prometheus-operator-webhook"
-  burstable_nodes_enabled       = true
-  arm_nodes_enabled             = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "prometheus-operator-webhook"
+  burstable_nodes_enabled              = true
+  arm_nodes_enabled                    = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_operator" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "prometheus-operator"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = false // only runs one copy
-  az_spread_preferred           = false // only runs one copy
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "prometheus-operator"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = false // only runs one copy
+  az_spread_preferred                  = false // only runs one copy
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_grafana" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "grafana"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_required            = true // stateful
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "grafana"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_required                   = true // stateful
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_prometheus" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "prometheus"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = false // Does not support custom schedulers yet
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_required            = true // stateful
-  lifetime_evictions_enabled    = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "prometheus"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_required                   = true // stateful
+  lifetime_evictions_enabled           = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_node_exporter" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "node-exporter"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  az_spread_preferred           = false // daemonset
-  instance_type_spread_required = false // daemonset
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "node-exporter"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  az_spread_preferred                  = false // daemonset
+  instance_type_anti_affinity_required = false // daemonset
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_ksm" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "kube-state-metrics"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "kube-state-metrics"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_compactor" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "thanos-compactor"
-  burstable_nodes_enabled       = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  az_spread_preferred           = false // single pod
-  instance_type_spread_required = false // single pod
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "thanos-compactor"
+  burstable_nodes_enabled              = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  az_spread_preferred                  = false // single pod
+  instance_type_anti_affinity_required = false // single pod
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_store_gateway" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "thanos-store-gateway"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_required            = true // stateful so always on
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "thanos-store-gateway"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_required                   = true // stateful so always on
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_ruler" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "thanos-ruler"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_required            = true // stateful so always on
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "thanos-ruler"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_required                   = true // stateful so always on
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 
 module "util_thanos_query" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "thanos-query"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "thanos-query"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_frontend" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "thanos-frontend"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "thanos-frontend"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_thanos_bucket_web" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "thanos-bucket-web"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "thanos-bucket-web"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_alertmanager" {
   source = "../kube_workload_utility"
 
-  workload_name                 = "alertmanager"
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  panfactum_scheduler_enabled   = false // Does not support custom schedulers yet
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_required            = true // stateful so always on
-  lifetime_evictions_enabled    = false
-  extra_labels                  = data.pf_kube_labels.labels.labels
+  workload_name                        = "alertmanager"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_required                   = true // stateful so always on
+  lifetime_evictions_enabled           = false
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -340,20 +340,20 @@ module "namespace" {
 module "grafana_db" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name              = var.eks_cluster_name
-  pg_cluster_namespace          = local.namespace
-  pg_initial_storage_gb         = 1
-  pg_memory_mb                  = 500
-  pg_cpu_millicores             = 250
-  pg_instances                  = 2
-  aws_iam_ip_allow_list         = var.aws_iam_ip_allow_list
-  pull_through_cache_enabled    = var.pull_through_cache_enabled
-  pgbouncer_pool_mode           = "session"
-  burstable_nodes_enabled       = true
-  backups_force_delete          = true
-  monitoring_enabled            = var.monitoring_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
+  eks_cluster_name                     = var.eks_cluster_name
+  pg_cluster_namespace                 = local.namespace
+  pg_initial_storage_gb                = 1
+  pg_memory_mb                         = 500
+  pg_cpu_millicores                    = 250
+  pg_instances                         = 2
+  aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  pgbouncer_pool_mode                  = "session"
+  burstable_nodes_enabled              = true
+  backups_force_delete                 = true
+  monitoring_enabled                   = var.monitoring_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
   pg_recovery_mode_enabled = var.grafana_db_recovery_mode_enabled
   pg_recovery_directory    = var.grafana_db_recovery_directory
@@ -367,17 +367,17 @@ module "grafana_db" {
 module "thanos_redis_cache" {
   source = "../kube_redis_sentinel"
 
-  namespace                     = local.namespace
-  replica_count                 = 3
-  lfu_cache_enabled             = true
-  burstable_nodes_enabled       = true
-  controller_nodes_enabled      = true
-  pull_through_cache_enabled    = var.pull_through_cache_enabled
-  vpa_enabled                   = var.vpa_enabled
-  minimum_memory_mb             = 1000
-  monitoring_enabled            = var.monitoring_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
-  instance_type_spread_required = var.enhanced_ha_enabled
+  namespace                            = local.namespace
+  replica_count                        = 3
+  lfu_cache_enabled                    = true
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  vpa_enabled                          = var.vpa_enabled
+  minimum_memory_mb                    = 1000
+  monitoring_enabled                   = var.monitoring_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
 }
 
 /***************************************
@@ -2336,14 +2336,14 @@ module "authenticating_proxy" {
   count  = var.ingress_enabled && var.thanos_bucket_web_enable ? 1 : 0
   source = "../kube_vault_proxy"
 
-  namespace                     = local.namespace
-  pull_through_cache_enabled    = var.pull_through_cache_enabled
-  vpa_enabled                   = var.vpa_enabled
-  domain                        = local.bucket_web_domain
-  vault_domain                  = var.vault_domain
-  instance_type_spread_required = var.enhanced_ha_enabled
-  az_spread_preferred           = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled   = var.panfactum_scheduler_enabled
+  namespace                            = local.namespace
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  vpa_enabled                          = var.vpa_enabled
+  domain                               = local.bucket_web_domain
+  vault_domain                         = var.vault_domain
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
 }
 
 module "bucket_web_ingress" {

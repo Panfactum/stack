@@ -133,9 +133,9 @@ module "buildkit" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
 
   # High availability is not required
-  instance_type_spread_required = false
-  az_spread_required            = false
-  az_spread_preferred           = false
+  instance_type_anti_affinity_required = false
+  az_spread_required                   = false
+  az_spread_preferred                  = false
 
   # Ensure that we are using the appropriate CPU architectures
   arm_nodes_enabled = each.key == "arm64"
