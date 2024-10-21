@@ -9,6 +9,16 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* The required Nix version to use the Panfactum Stack has been updated to `>= 2.23` (up from `>= 2.18`). The latest Nix versions
+  include performance improvements required to make local development ergonomic on all operating systems. Additionally, we have
+  added a check to the loading script (`.envrc`) to ensure that users have a compatible Nix version installed.
+
+  If you installed Nix using the Determinate Systems installer, see [these upgrade docs.](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#upgrading-nix)
+
 ## edge.24-10-21
 
 ### Breaking Changes
