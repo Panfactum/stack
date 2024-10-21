@@ -90,6 +90,17 @@ module "ingress" {
   ingress_configs = [{
     service      = local.name
     service_port = local.port
+    cdn = {
+      default_cache_behavior = {
+        caching_enabled = false
+      }
+      path_match_behavior = {
+        "_next/static/*" = {
+          caching_enabled = true
+          cookies_in_cache_key = []
+        }
+      }
+    }
   }]
 
   cdn_mode_enabled = true
