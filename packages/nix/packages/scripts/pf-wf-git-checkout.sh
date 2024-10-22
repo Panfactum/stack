@@ -105,19 +105,19 @@ if [[ -n $USERNAME ]]; then
 fi
 
 ####################################################################
-# Step 4: Resolve the GIT_REF to a commit hash
+# Step 5: Resolve the GIT_REF to a commit hash
 ####################################################################
 
-GIT_COMMIT_SHA=$(pf-get-commit-hash --ref="$GIT_REF")
+GIT_COMMIT_SHA=$(pf-get-commit-hash --ref="$GIT_REF" --repo="https://$REPO")
 
 ####################################################################
-# Step 5: Checkout the GIT_REF
+# Step 6: Checkout the GIT_REF
 ####################################################################
 git fetch origin "$GIT_COMMIT_SHA"
 git checkout "$GIT_COMMIT_SHA"
 
 ####################################################################
-# Step 6: Initialize LFS
+# Step 7: Initialize LFS
 ####################################################################
 git lfs install --local
 git lfs pull
