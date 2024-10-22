@@ -1,31 +1,36 @@
+variable "pg_initial_storage_gb" {
+  description = "The initial storage size for the postgres cluster"
+  type        = number
+  default     = 10
+}
+
+variable "pg_max_connections" {
+  description = "The maximum number of connections to allow to the postgres cluster"
+  type        = number
+  default     = 100
+}
+
+variable "pg_instances" {
+  description = "The number of instances to deploy in the postgres cluster"
+  type        = number
+  default     = 2
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to enable burstable nodes for the postgres cluster"
+  type        = bool
+  default     = true
+}
+
 variable "aws_iam_ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
   default     = []
 }
 
-variable "db_recovery_mode_enabled" {
-  description = "Whether to enable recovery mode for the PostgreSQL database"
-  type        = bool
-  default     = false
-}
-
-variable "db_recovery_directory" {
-  description = "The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives"
-  type        = string
-  default     = null
-}
-
-variable "db_recovery_target_time" {
-  description = "If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data."
-  type        = string
-  default     = null
-}
-
 variable "namespace" {
   description = "Kubernetes namespace to deploy the resources into"
   type        = string
-  default     = "authentik"
 }
 
 variable "eks_cluster_name" {
@@ -61,4 +66,14 @@ variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
   default     = true
+}
+
+variable "pf_module_source" {
+  description = "The source of the Panfactum modules"
+  type        = string
+}
+
+variable "pf_module_ref" {
+  description = "The reference of the Panfactum modules"
+  type        = string
 }
