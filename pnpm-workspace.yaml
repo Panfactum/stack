@@ -2,3 +2,4 @@ packages:
   - "packages/website"
   - "packages/eslint"
   - "packages/scraper"
+  - "packages/reference/services/demo-user-service"

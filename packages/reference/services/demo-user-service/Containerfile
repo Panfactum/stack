@@ -1,0 +1,46 @@
+#################################################
+## Base Image
+#################################################
+FROM node:20-bullseye-slim AS base
+WORKDIR /code
+
+#################################################
+## Dependencies Image
+#################################################
+FROM base AS deps
+
+# Install package manager
+RUN npm i -g pnpm@8.6.12
+
+# Install Dependencies
+COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
+COPY packages/reference/services/demo-user-service/package.json packages/reference/services/demo-user-service/
+RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
+
+#################################################
+## Development Image
+#################################################
+
+FROM deps AS development
+WORKDIR /code/packages/reference/services/demo-user-service
+COPY packages/reference/services/demo-user-service/ .
+RUN npx ncc build src/main.ts -o dist
+
+#################################################
+## Builder Image
+#################################################
+
+FROM deps AS builder
+ENV NODE_ENV=production
+WORKDIR /code/packages/reference/services/demo-user-service
+COPY packages/reference/services/demo-user-service/ .
+RUN npx ncc build src/main.ts -o dist
+
+#################################################
+## Production Image
+#################################################
+
+FROM base AS production
+ENV NODE_ENV=production
+WORKDIR /code/packages/reference/services/demo-user-service
+COPY --from=builder /code/packages/reference/services/demo-user-service/dist ./

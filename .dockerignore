@@ -16,6 +16,9 @@
 !packages/scraper/src
 !packages/scraper/.eslintrc.js
 !packages/scraper/tsconfig.json
+!packages/reference/services/demo-user-service/src
+!packages/reference/services/demo-user-service/package.json
+!packages/reference/services/demo-user-service/tsconfig.json
 !packages/eslint/package.json
 !packages/eslint/index.js
 !packages/bastion
