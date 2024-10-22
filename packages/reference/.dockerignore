@@ -1,1 +1,5 @@
 *
+!services/user/src
+!services/user/.eslintrc.cjs
+!services/user/package.json
+!services/user/tsconfig.json

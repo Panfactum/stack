@@ -1,0 +1,21 @@
+{
+  "name": "demo-user-service",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "AGPL",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "18.13.0",
+    "@vercel/ncc": "0.38.2",
+    "tsx": "4.19.1",
+    "typescript": "5.6.2"
+  },
+  "dependencies": {
+    "express": "5.0.1"
+  }
+}
