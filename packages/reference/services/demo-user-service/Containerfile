@@ -14,7 +14,7 @@ RUN npm i -g pnpm@8.6.12
 
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
-COPY packages/reference/services/user/package.json packages/reference/services/user/
+COPY packages/reference/services/demo-user-service/package.json packages/reference/services/demo-user-service/
 COPY packages/eslint/ packages/eslint/
 RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
 
@@ -23,8 +23,8 @@ RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
 #################################################
 
 FROM deps AS development
-WORKDIR /code/packages/scraper
-COPY packages/scraper/ .
+WORKDIR /code/packages/reference/services/demo-user-service
+COPY packages/reference/services/demo-user-service/ .
 RUN npx ncc build src/main.ts -o dist
 
 #################################################
@@ -33,8 +33,8 @@ RUN npx ncc build src/main.ts -o dist
 
 FROM deps AS builder
 ENV NODE_ENV=production
-WORKDIR /code/packages/scraper
-COPY packages/scraper/ .
+WORKDIR /code/packages/reference/services/demo-user-service
+COPY packages/reference/services/demo-user-service/ .
 RUN npx ncc build src/main.ts -o dist
 
 #################################################
@@ -43,5 +43,5 @@ RUN npx ncc build src/main.ts -o dist
 
 FROM base AS production
 ENV NODE_ENV=production
-WORKDIR /code/packages/scraper
-COPY --from=builder /code/packages/scraper/dist ./
+WORKDIR /code/packages/reference/services/demo-user-service
+COPY --from=builder /code/packages/reference/services/demo-user-service/dist ./
