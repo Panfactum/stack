@@ -22,10 +22,11 @@ variable "domains" {
 variable "origin_configs" {
   description = "A list of configuration settings for communicating with the upstream origins"
   type = list(object({
-    origin_id            = optional(string)          # A globally unique identifier for this origin (will be automatically computed if not provided)
-    origin_domain        = string                    # The domain name of the ingress origin
-    path_prefix          = optional(string, "/")     # Only traffic with this HTTP path prefix will be routed to the indicated origin
-    extra_origin_headers = optional(map(string), {}) # Headers sent from the CDN to the origin
+    origin_id                = optional(string)          # A globally unique identifier for this origin (will be automatically computed if not provided)
+    origin_domain            = string                    # The domain name of the ingress origin
+    path_prefix              = optional(string, "/")     # Only traffic with this HTTP path prefix will be routed to the indicated origin
+    extra_origin_headers     = optional(map(string), {}) # Headers sent from the CDN to the origin
+    origin_access_control_id = optional(string, null)    # The OAC id to use for accessing private origins
 
     # The default behavior of the CDN before routing requests to this origin
     default_cache_behavior = optional(object({
@@ -105,6 +106,36 @@ variable "redirect_rules" {
 }
 
 
+variable "cors_enabled" {
+  description = "True if the CloudFront distribution should handle adding CORS headers instead of the origin."
+  type        = bool
+  default     = false
+}
+
+variable "cors_max_age_seconds" {
+  description = "Time in seconds that the browser can cache the response for a preflight CORS request."
+  type        = number
+  default     = 3600
+}
+
+variable "cors_allowed_headers" {
+  description = "Specifies which headers are allowed for CORS requests."
+  type        = list(string)
+  default     = ["Content-Length"]
+}
+
+variable "cors_allowed_methods" {
+  description = "Specifies which methods are allowed. Can be GET, PUT, POST, DELETE or HEAD."
+  type        = list(string)
+  default     = ["GET", "HEAD"]
+}
+
+variable "cors_additional_allowed_origins" {
+  description = "Specifies which origins are allowed besides the domain name specified. Use '*' to allow any origin."
+  type        = list(string)
+  default     = []
+}
+
 variable "price_class" {
   description = "The price class for the CDN. Must be one of: PriceClass_All, PriceClass_200, PriceClass_100."
   type        = string
@@ -114,7 +145,6 @@ variable "price_class" {
     error_message = "cdn_price_class must be one of: PriceClass_All, PriceClass_200, PriceClass_100"
   }
 }
-
 
 variable "geo_restriction_type" {
   description = "What type of geographic restrictions to you want to apply to CDN clients. Must be one of: none, blacklist, whitelist."

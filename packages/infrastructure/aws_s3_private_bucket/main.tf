@@ -165,7 +165,9 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
 
 
 data "aws_iam_policy_document" "default_policy" {
+  override_policy_documents = var.access_policy == null ? [] : [var.access_policy]
   statement {
+    sid     = "RootAccess"
     effect  = "Allow"
     actions = ["s3:*"]
     principals {
@@ -178,7 +180,7 @@ data "aws_iam_policy_document" "default_policy" {
 
 resource "aws_s3_bucket_policy" "bucket" {
   bucket = aws_s3_bucket.bucket.bucket
-  policy = var.access_policy == null ? data.aws_iam_policy_document.default_policy.json : var.access_policy
+  policy = data.aws_iam_policy_document.default_policy.json
 }
 
 /***************************************************************

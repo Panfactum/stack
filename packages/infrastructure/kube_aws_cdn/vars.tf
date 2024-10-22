@@ -142,3 +142,33 @@ variable "logging_expire_after_days" {
   type        = number
   default     = 0
 }
+
+variable "cors_enabled" {
+  description = "True if the CloudFront distribution should handle adding CORS headers instead of the origin."
+  type        = bool
+  default     = false
+}
+
+variable "cors_max_age_seconds" {
+  description = "Time in seconds that the browser can cache the response for a preflight CORS request."
+  type        = number
+  default     = 3600
+}
+
+variable "cors_allowed_headers" {
+  description = "Specifies which headers are allowed for CORS requests."
+  type        = list(string)
+  default     = ["Content-Length"]
+}
+
+variable "cors_allowed_methods" {
+  description = "Specifies which methods are allowed. Can be GET, PUT, POST, DELETE or HEAD."
+  type        = list(string)
+  default     = ["GET", "HEAD"]
+}
+
+variable "cors_additional_allowed_origins" {
+  description = "Specifies which origins are allowed besides the domain name specified. Use '*' to allow any origin."
+  type        = list(string)
+  default     = []
+}

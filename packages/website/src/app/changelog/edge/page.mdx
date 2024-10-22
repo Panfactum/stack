@@ -19,6 +19,13 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
   If you installed Nix using the Determinate Systems installer, see [these upgrade docs.](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#upgrading-nix)
 
+### Added
+
+* Added a new module, [aws_s3_public_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website), to enable users to serve files directly from an S3 bucket via CloudFront.
+* [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) can now handle CORS headers on behalf of the origin servers
+* [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) now uses 10x more efficient [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)
+for request / response mutations.
+
 ## edge.24-10-21
 
 ### Breaking Changes
