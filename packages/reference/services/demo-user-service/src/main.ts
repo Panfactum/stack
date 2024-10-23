@@ -4,12 +4,12 @@ import pg from 'pg'
 import jwt from 'jsonwebtoken'
 
 const configuration = {
-  port: process.env.PORT ? parseFloat(process.env.PORT) : 3000,
+  port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
   host: process.env.HOST ?? 'localhost',
-  secret: process.env.SECRET,
+  secret: process.env.SECRET ?? 'secret',
   db: {
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
     database: process.env.DB_NAME,
     schema: process.env.DB_SCHEMA,
     user: process.env.DB_USER,
@@ -33,10 +33,9 @@ app.post('/user/registration', async (req, res) => {
 
   const result = await pgClient.query('INSERT INTO users(username, password) VALUES($1, $2) RETURNING *', [username, password])
   const user = result.rows[0]
-  const token = jwt.sign(user, configuration.secret)
+  const token = jwt.sign({id: user.id, username: user.username}, configuration.secret)
 
   res.send({
-    user,
     token
   })
 })

@@ -1,3 +1,39 @@
+variable "domain" {
+  description = "A list of domains from which the ingress will serve traffic"
+  type        = string
+}
+
+variable "image_version" {
+  description = "The version of the demo user service image to deploy"
+  type        = string
+}
+
+variable "healthcheck_route" {
+  description = "The route to use for the healthcheck"
+  type        = string
+}
+
+variable "db_name" {
+  description = "The name of the database"
+  type        = string
+}
+
+variable "db_schema" {
+  description = "The schema of the database"
+  type        = string
+}
+
+variable "secret" {
+  description = "The secret to used for jwt validation"
+  type        = string
+}
+
+variable "pull_through_cache_enabled" {
+  description = "Whether to use the ECR pull through cache for the deployed images"
+  type        = bool
+  default     = true
+}
+
 variable "burstable_nodes_enabled" {
   description = "Whether to enable burstable nodes for the postgres cluster"
   type        = bool

@@ -8,16 +8,111 @@ terraform {
 }
 
 locals {
+  name = "demo-user-service"
   namespace = module.namespace.namespace
-}
-
-module "pull_through" {
-  source =   "${var.pf_module_source}aws_ecr_pull_through_cache_addresses${var.pf_module_ref}"
-  pull_through_cache_enabled = true
+  port = 3000
 }
 
 module "namespace" {
   source =   "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
+  namespace = local.name
+}
 
-  namespace = "cicd"
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+
+  eks_cluster_name                     = var.eks_cluster_name
+  pg_cluster_namespace                 = local.namespace
+  aws_iam_ip_allow_list                = []
+
+  pg_initial_storage_gb                = 5 # for the purposes of the demo
+  pg_max_connections                   = 20 # for the purposes of the demo
+  pg_instances                         = 1 # for the purposes of the demo
+  burstable_nodes_enabled              = true # for the purposes of the demo
+
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  monitoring_enabled                   = var.monitoring_enabled
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+}
+
+module "demo_user_service_deployment" {
+  source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
+  namespace = module.namespace.namespace
+  name      = local.name
+
+  replicas                             = 2
+
+  common_env = {
+    NODE_ENV = "production"
+    PORT     = local.port
+    HOSTNAME = "0.0.0.0"
+    DB_HOST  = module.database.pooler_rw_service_name
+    DB_PORT  = module.database.pooler_rw_service_port
+    DB_NAME  = var.db_name
+    DB_SCHEMA = var.db_schema
+    SECRET = var.secret
+  }
+
+  common_env_from_secrets = {
+    DB_USER = {
+      secret_name = module.database.admin_creds_secret
+      key = "username"
+    }
+
+    DB_PASSWORD = {
+      secret_name = module.database.admin_creds_secret
+      key = "password"
+    }
+  }
+
+  containers = [
+    {
+      name    = "demo-user-service"
+      image_registry   = "891377197483.dkr.ecr.us-east-2.amazonaws.com"
+      image_repository = "demo-user-service"
+      image_tag = var.image_version
+      command = [
+        "node",
+        "server.js"
+      ]
+      liveness_probe_type  = "HTTP"
+      liveness_probe_port  = local.port
+      liveness_probe_route = var.healthcheck_route
+
+      ports = {
+        http ={
+          port = local.port
+        }
+      }
+    }
+  ]
+
+  vpa_enabled = var.vpa_enabled
+  controller_nodes_enabled = true
+
+  depends_on = [module.database]
+}
+
+module "ingress" {
+  source = "${var.pf_module_source}kube_ingress${var.pf_module_ref}"
+
+  name      = local.name
+  namespace = local.namespace
+
+  domains      = [var.domain]
+  ingress_configs = [{
+    service      = local.name
+    service_port = local.port
+  }]
+
+  cdn_mode_enabled = false
+  cors_enabled                   = true
+  cross_origin_embedder_policy   = "credentialless"
+  csp_enabled                    = true
+  cross_origin_isolation_enabled = true
+  rate_limiting_enabled          = true
+  permissions_policy_enabled     = true
+
+  depends_on = [module.demo_user_service_deployment]
 }
