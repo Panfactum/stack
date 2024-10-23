@@ -24,7 +24,7 @@ module "event_source" {
   namespace   = local.namespace
   replicas = 2
 
-  instance_type_spread_required = false // You probably want to leave this as true, but we disable this for cost savings
+  instance_type_anti_affinity_required = false // You probably want to leave this as true, but we disable this for cost savings
 
   event_source_spec = {
     service = {

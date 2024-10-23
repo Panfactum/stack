@@ -3,5 +3,5 @@ module "event_bus" {
 
   namespace = local.namespace
 
-  instance_type_spread_required = false // You probably want to leave this as true, but we disable this for cost savings
+  instance_type_anti_affinity_required = false // You probably want to leave this as true, but we disable this for cost savings
 }
