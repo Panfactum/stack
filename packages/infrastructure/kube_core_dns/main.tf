@@ -6,14 +6,6 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
     }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "4.0.5"
-    }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -32,12 +24,6 @@ terraform {
 locals {
   name      = "core-dns"
   namespace = "kube-system" // This must be deployed in the kube-system namespace per convention
-}
-
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "constants" {
@@ -128,13 +114,14 @@ module "core_dns" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   priority_class_name                  = "system-cluster-critical"
   dns_policy                           = "Default"
   containers = concat(
     [
       {
         name             = "coredns"
-        image_registry   = module.pull_through.docker_hub_registry
+        image_registry   = "docker.io"
         image_repository = "coredns/coredns"
         image_tag        = var.core_dns_image_version
         command = [

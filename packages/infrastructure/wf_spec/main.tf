@@ -612,6 +612,7 @@ module "util" {
   az_spread_required                   = false
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   lifetime_evictions_enabled           = false
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   extra_labels                         = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
 }
 

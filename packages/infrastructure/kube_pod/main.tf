@@ -521,7 +521,12 @@ module "util" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   node_requirements                    = var.node_requirements
   node_preferences                     = var.node_preferences
-  extra_labels                         = merge(data.pf_kube_labels.labels.labels, var.extra_labels) # Allow the caller to override so the module label can be set appropriately
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+
+  extra_labels = merge(
+    data.pf_kube_labels.labels.labels,
+    var.extra_labels # Allow the caller to override so the module label can be set appropriately
+  )
 }
 
 module "constants" {

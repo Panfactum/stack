@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     kubectl = {
       source  = "alekc/kubectl"
       version = "2.0.4"
@@ -38,18 +34,13 @@ data "pf_kube_labels" "labels" {
   module = "kube_cert_manager"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
   workload_name               = "cert-manager"
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -62,6 +53,7 @@ module "util_webhook" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -73,6 +65,7 @@ module "util_ca_injector" {
   workload_name               = "cert-manager-ca-injector"
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   controller_nodes_enabled    = true
   burstable_nodes_enabled     = true
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -188,9 +181,6 @@ resource "helm_release" "cert_manager" {
         // can go down temporarily without taking down the cluster so this does not need to be "system-cluster-critical"
         priorityClassName = module.constants.cluster_important_priority_class_name
       }
-      image = {
-        repository = "${module.pull_through.quay_registry}/jetstack/cert-manager-controller"
-      }
       replicaCount = 1
       strategy = {
         type = "Recreate"
@@ -230,9 +220,6 @@ resource "helm_release" "cert_manager" {
         fsGroup = 1001
       }
       webhook = {
-        image = {
-          repository = "${module.pull_through.quay_registry}/jetstack/cert-manager-webhook"
-        }
         replicaCount = 2
         extraArgs    = ["--v=${var.log_verbosity}"]
         serviceAccount = {
@@ -292,9 +279,6 @@ resource "helm_release" "cert_manager" {
 
       }
       cainjector = {
-        image = {
-          repository = "${module.pull_through.quay_registry}/jetstack/cert-manager-cainjector"
-        }
         enabled      = true
         replicaCount = 1
         strategy = {
@@ -331,13 +315,6 @@ resource "helm_release" "cert_manager" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 
   depends_on = [module.webhook_cert]
 }

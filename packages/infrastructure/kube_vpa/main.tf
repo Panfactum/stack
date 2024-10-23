@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -38,12 +34,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_vpa"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_admission_controller" {
   source = "../kube_workload_utility"
 
@@ -51,6 +41,7 @@ module "util_admission_controller" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   match_labels = {
@@ -67,6 +58,7 @@ module "util_recommender" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   match_labels = {
@@ -83,6 +75,7 @@ module "util_updater" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   match_labels = {
@@ -145,8 +138,7 @@ resource "helm_release" "vpa" {
         )
 
         image = {
-          repository = "${module.pull_through.kubernetes_registry}/autoscaling/vpa-recommender"
-          tag        = var.vertical_autoscaler_image_version
+          tag = var.vertical_autoscaler_image_version
         }
 
         // ONLY 1 of these should be running at a time
@@ -244,8 +236,7 @@ resource "helm_release" "vpa" {
         )
 
         image = {
-          repository = "${module.pull_through.kubernetes_registry}/autoscaling/vpa-updater"
-          tag        = var.vertical_autoscaler_image_version
+          tag = var.vertical_autoscaler_image_version
         }
 
         // ONLY 1 of these should be running at a time
@@ -287,8 +278,7 @@ resource "helm_release" "vpa" {
         )
 
         image = {
-          repository = "${module.pull_through.kubernetes_registry}/autoscaling/vpa-admission-controller"
-          tag        = var.vertical_autoscaler_image_version
+          tag = var.vertical_autoscaler_image_version
         }
 
         annotations = {
@@ -343,13 +333,6 @@ resource "helm_release" "vpa" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 
   depends_on = [module.webhook_cert]
 }

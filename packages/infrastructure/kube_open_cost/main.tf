@@ -38,12 +38,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_open_cost"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
@@ -51,6 +45,7 @@ module "util" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single copy
   az_spread_preferred                  = false // single copy
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -62,9 +57,12 @@ module "util_network_cost" {
   workload_name                        = "network-cost"
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = false
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // ds
   az_spread_preferred                  = false // ds
   extra_labels                         = data.pf_kube_labels.labels.labels
+
 }
 
 
@@ -185,9 +183,6 @@ resource "helm_release" "open_cost" {
             EMIT_KSM_V1_METRICS      = false
             EMIT_KSM_V1_METRICS_ONLY = true
           }
-          image = {
-            registry = module.pull_through.github_registry
-          }
           resources = {
             requests = {
               cpu    = "100m"
@@ -228,13 +223,6 @@ resource "helm_release" "open_cost" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 }
 
 resource "kubectl_manifest" "vpa" {
@@ -447,7 +435,7 @@ resource "kubectl_manifest" "network_cost" {
           affinity           = module.util_network_cost.affinity
           containers = [{
             name  = "network-cost"
-            image = "${module.pull_through.ecr_public_registry}/kubecost/kubecost-network-costs:v0.17.3"
+            image = "public.ecr.aws/kubecost/kubecost-network-costs:v0.17.3"
             securityContext = {
               privileged = true
             }

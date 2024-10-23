@@ -37,12 +37,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_vault"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_server" {
   source = "../kube_workload_utility"
 
@@ -50,6 +44,7 @@ module "util_server" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -174,8 +169,7 @@ resource "helm_release" "vault" {
 
       server = {
         image = {
-          repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault"
-          tag        = var.vault_image_tag
+          tag = var.vault_image_tag
         }
         resources = {
           requests = {
@@ -245,13 +239,6 @@ resource "helm_release" "vault" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 
   depends_on = [module.aws_permissions]
 }

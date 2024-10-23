@@ -19,12 +19,6 @@ terraform {
   }
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 data "pf_kube_labels" "labels" {
   module = "kube_pvc_annotator"
 }
@@ -75,6 +69,7 @@ module "pvc_annotator" {
   name                        = random_id.id.hex
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
   vpa_enabled                 = var.vpa_enabled
@@ -82,7 +77,7 @@ module "pvc_annotator" {
   cron_schedule = "*/15 * * * *"
   containers = [{
     name             = "pvc-annotate"
-    image_registry   = module.pull_through.ecr_public_registry
+    image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [

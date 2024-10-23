@@ -94,18 +94,6 @@ locals {
     }
   }
 
-  default_image = {
-    registry = module.pull_through.quay_registry
-  }
-
-  default_docker_image = {
-    registry = module.pull_through.docker_hub_registry
-  }
-
-  default_k8s_image = {
-    registry = module.pull_through.kubernetes_registry
-  }
-
   thanos_store_gateway_index_config = {
     type = "REDIS"
     config = {
@@ -156,11 +144,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_monitoring"
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_webhook" {
   source = "../kube_workload_utility"
 
@@ -169,6 +152,7 @@ module "util_webhook" {
   arm_nodes_enabled                    = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -181,6 +165,7 @@ module "util_operator" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // only runs one copy
   az_spread_preferred                  = false // only runs one copy
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -193,6 +178,7 @@ module "util_grafana" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -204,7 +190,8 @@ module "util_prometheus" {
   workload_name                        = "prometheus"
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
-  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful
   lifetime_evictions_enabled           = false
@@ -219,6 +206,8 @@ module "util_node_exporter" {
   controller_nodes_enabled             = true
   az_spread_preferred                  = false // daemonset
   instance_type_anti_affinity_required = false // daemonset
+  panfactum_scheduler_enabled          = false
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -229,6 +218,7 @@ module "util_ksm" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -240,6 +230,7 @@ module "util_thanos_compactor" {
   workload_name                        = "thanos-compactor"
   burstable_nodes_enabled              = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = false // single pod
   instance_type_anti_affinity_required = false // single pod
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -252,6 +243,7 @@ module "util_thanos_store_gateway" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful so always on
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -264,6 +256,7 @@ module "util_thanos_ruler" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful so always on
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -277,6 +270,7 @@ module "util_thanos_query" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -289,6 +283,7 @@ module "util_thanos_frontend" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -301,6 +296,7 @@ module "util_thanos_bucket_web" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -312,7 +308,8 @@ module "util_alertmanager" {
   workload_name                        = "alertmanager"
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
-  panfactum_scheduler_enabled          = false // Does not support custom schedulers yet
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful so always on
   lifetime_evictions_enabled           = false
@@ -524,7 +521,6 @@ resource "helm_release" "prometheus_stack" {
         fullnameOverride = "prometheus-operator"
         labels           = module.util_operator.labels
         podLabels        = module.util_operator.labels
-        image            = local.default_image
         strategy = {
           type          = "Recreate"
           rollingUpdate = null
@@ -542,7 +538,6 @@ resource "helm_release" "prometheus_stack" {
         admissionWebhooks = {
           deployment = {
             enabled     = true
-            image       = local.default_image
             labels      = module.util_webhook.labels
             podLabels   = module.util_webhook.labels
             replicas    = 2
@@ -568,11 +563,9 @@ resource "helm_release" "prometheus_stack" {
           }
         }
         prometheusConfigReloader = {
-          image       = local.default_image
           enableProbe = true
           resources   = local.default_resources
         }
-        thanosImage = local.default_image
       }
 
       //////////////////////////////////////////////////////////
@@ -582,14 +575,12 @@ resource "helm_release" "prometheus_stack" {
         fullnameOverride  = "node-exporter"
         priorityClassName = "system-node-critical"
         podLabels         = module.util_node_exporter.labels
-        image             = local.default_image
 
         # This is required because linkerd cannot proxy containers that have access to the host network
         # which this requires in order to collect its metrics.
         # Without this, requests would not have mTLS.
         kubeRBACProxy = {
           enabled   = true
-          image     = local.default_image
           resources = local.default_resources
         }
 
@@ -646,7 +637,6 @@ resource "helm_release" "prometheus_stack" {
       // Kube-state-metrics sub-chart
       //////////////////////////////////////////////////////////
       kube-state-metrics = {
-        image        = local.default_k8s_image
         customLabels = module.util_ksm.labels
         extraArgs = [
           "--metric-labels-allowlist=*=[${join(",", local.labels_to_track)}]"
@@ -869,7 +859,6 @@ resource "helm_release" "prometheus_stack" {
           podMetadata = {
             labels = module.util_prometheus.labels
           }
-          image                     = local.default_image
           replicas                  = 2
           tolerations               = module.util_prometheus.tolerations
           affinity                  = module.util_prometheus.affinity
@@ -950,7 +939,6 @@ resource "helm_release" "prometheus_stack" {
           ]
 
           thanos = {
-            image     = "${module.pull_through.quay_registry}/thanos/thanos:${var.thanos_image_version}"
             logLevel  = var.prometheus_log_level
             logFormat = "json"
             resources = local.default_resources
@@ -982,7 +970,6 @@ resource "helm_release" "prometheus_stack" {
           podMetadata = {
             labels = module.util_alertmanager.labels
           }
-          image     = local.default_image
           logLevel  = var.alertmanager_log_level
           logFormat = "json"
 
@@ -1014,7 +1001,6 @@ resource "helm_release" "prometheus_stack" {
       grafana = {
         enabled                  = true
         defaultDashboardsEnabled = false // We load custom ones
-        image                    = local.default_docker_image
         extraLabels              = module.util_grafana.labels
         podLabels                = module.util_grafana.labels
         annotations = {
@@ -1051,8 +1037,7 @@ resource "helm_release" "prometheus_stack" {
           }
         }
         sidecar = {
-          image     = local.default_image
-          resources = local.default_image
+          resources = local.default_resources
           datasources = {
             enabled = false // this sidecar does not work properly :(
           }
@@ -1222,7 +1207,6 @@ resource "helm_release" "prometheus_stack" {
 
   postrender {
     binary_path = "${path.module}/prometheus_kustomize/kustomize.sh"
-    args        = [local.scheduler]
   }
 
   depends_on = [module.grafana_db]
@@ -1369,9 +1353,6 @@ resource "helm_release" "thanos" {
   values = [
     yamlencode({
       fullnameOverride = "thanos"
-      global = {
-        imageRegistry = module.pull_through.docker_hub_registry
-      }
       query = {
         enabled = true
 

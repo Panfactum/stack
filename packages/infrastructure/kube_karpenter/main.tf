@@ -45,20 +45,16 @@ data "pf_aws_tags" "tags" {
   module = "kube_karpenter"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name             = "karpenter"
-  az_spread_preferred       = false
-  controller_nodes_required = true
-  burstable_nodes_enabled   = true
-  extra_labels              = data.pf_kube_labels.labels.labels
+  workload_name               = "karpenter"
+  az_spread_preferred         = false
+  controller_nodes_required   = true
+  burstable_nodes_enabled     = true
+  extra_labels                = data.pf_kube_labels.labels.labels
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled = false
 }
 
 module "constants" {
@@ -574,9 +570,6 @@ resource "helm_release" "karpenter" {
       }
 
       controller = {
-        image = {
-          repository = "${module.pull_through.ecr_public_registry}/karpenter/controller"
-        }
         resources = {
           requests = {
             memory = "400Mi"

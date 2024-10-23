@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -36,12 +32,6 @@ module "constants" {
   source = "../kube_constants"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
@@ -49,6 +39,7 @@ module "util" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -95,10 +86,6 @@ resource "helm_release" "gha_controller" {
       labels           = module.util.labels
       podLabels        = module.util.labels
 
-      image = {
-        repository = "${module.pull_through.github_registry}/actions/gha-runner-scale-set-controller"
-      }
-
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.gha_controller.metadata[0].name
@@ -130,13 +117,6 @@ resource "helm_release" "gha_controller" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 }
 
 resource "kubectl_manifest" "vpa" {

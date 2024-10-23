@@ -1,8 +1,0 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gha-controller
-spec:
-  template:
-    spec:
-      schedulerName: panfactum

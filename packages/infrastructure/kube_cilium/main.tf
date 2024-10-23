@@ -36,12 +36,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_alloy"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -49,6 +43,7 @@ module "util_controller" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -57,10 +52,12 @@ module "util_controller" {
 module "util_agent" {
   source = "../kube_workload_utility"
 
-  workload_name            = "cilium-agent"
-  burstable_nodes_enabled  = true
-  controller_nodes_enabled = true
-  extra_labels             = data.pf_kube_labels.labels.labels
+  workload_name               = "cilium-agent"
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  extra_labels                = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -148,10 +145,6 @@ resource "helm_release" "cilium" {
 
   values = [
     yamlencode({
-      image = {
-        repository = "${module.pull_through.quay_registry}/cilium/cilium"
-      }
-
       eni = {
         enabled = true
 
@@ -309,9 +302,6 @@ resource "helm_release" "cilium" {
       }
 
       operator = {
-        image = {
-          repository = "${module.pull_through.quay_registry}/cilium/operator"
-        }
         replicas = 2
         updateStrategy = {
           type          = "Recreate"
@@ -378,11 +368,6 @@ resource "helm_release" "cilium" {
       }
     })
   ]
-
-  postrender {
-    binary_path = "${path.module}/kustomize/kustomize.sh"
-    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
-  }
 }
 
 resource "kubectl_manifest" "vpa_operator" {

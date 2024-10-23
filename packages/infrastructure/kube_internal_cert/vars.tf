@@ -72,6 +72,16 @@ variable "private_key_rotation_enabled" {
   default     = true
 }
 
+variable "private_key_algorithm" {
+  description = "The algorithm to use for the private key. Must be one of: ECDSA, RSA"
+  type        = string
+  default     = "ECDSA"
+  validation {
+    condition     = contains(["ECDSA", "RSA"], var.private_key_algorithm)
+    error_message = "private_key_alogirthm must be one of: ECDSA, RSA"
+  }
+}
+
 // The default:
 // rotate every week with a one week buffer period in case something goes wrong
 variable "duration" {

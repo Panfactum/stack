@@ -200,7 +200,8 @@ words: [
   "awslogsdelivery",
   "numtide",
   "DEVSHELL",
-  "devshell"
+  "devshell",
+  "Kyverno"
 ]
 languageSettings:
   - languageId: markdown,mdx

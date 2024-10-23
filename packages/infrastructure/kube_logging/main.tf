@@ -62,12 +62,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_logging"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_read" {
   source = "../kube_workload_utility"
 
@@ -75,6 +69,7 @@ module "util_read" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -87,6 +82,7 @@ module "util_write" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -99,6 +95,7 @@ module "util_backend" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -108,6 +105,8 @@ module "util_canary" {
   source = "../kube_workload_utility"
 
   workload_name                        = "loki-canary"
+  panfactum_scheduler_enabled          = false
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   instance_type_anti_affinity_required = false
@@ -248,12 +247,7 @@ resource "helm_release" "loki" {
   values = [
     yamlencode({
       fullnameOverride = "loki"
-      global = {
-        image = {
-          registry = module.pull_through.docker_hub_registry
-        }
-      }
-      deploymentMode = "SimpleScalable"
+      deploymentMode   = "SimpleScalable"
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.loki.metadata[0].name
@@ -703,13 +697,6 @@ resource "helm_release" "loki" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 
   depends_on = [module.redis_cache]
 }

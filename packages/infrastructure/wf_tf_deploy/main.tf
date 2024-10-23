@@ -27,11 +27,6 @@ locals {
   entrypoint = "entry"
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -178,7 +173,7 @@ module "tf_deploy_workflow" {
       memory = "${var.memory_mb}Mi"
     }
   }
-  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
+  default_container_image = "public.ecr.aws/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
   templates = [
     {
       name = local.entrypoint

@@ -37,18 +37,13 @@ data "pf_kube_labels" "labels" {
 
 data "aws_region" "current" {}
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
   workload_name                        = "velero"
   burstable_nodes_enabled              = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single replica
   az_spread_preferred                  = false // single replica
   controller_nodes_required            = true  // we disable voluntary disruptions so this should be scheduled on a node that isn't autoscaled
@@ -204,14 +199,10 @@ resource "helm_release" "velero" {
         "karpenter.sh/do-not-disrupt" = "true"
       }
 
-      image = {
-        repository = "${module.pull_through.docker_hub_registry}/velero/velero"
-      }
-
       initContainers = [
         {
           name            = "velero-plugin-for-aws"
-          image           = "${module.pull_through.docker_hub_registry}/velero/velero-plugin-for-aws:${var.aws_plugin_version}"
+          image           = "docker.io/velero/velero-plugin-for-aws:${var.aws_plugin_version}"
           imagePullPolicy = "IfNotPresent"
           volumeMounts = [
             {
@@ -222,7 +213,7 @@ resource "helm_release" "velero" {
         },
         {
           name            = "velero-plugin-for-csi"
-          image           = "${module.pull_through.docker_hub_registry}/velero/velero-plugin-for-csi:${var.csi_plugin_version}"
+          image           = "docker.io/velero/velero-plugin-for-csi:${var.csi_plugin_version}"
           imagePullPolicy = "IfNotPresent"
           volumeMounts = [
             {
@@ -233,14 +224,6 @@ resource "helm_release" "velero" {
         }
       ]
 
-      kubectl = {
-        image = {
-          repository = "${module.pull_through.docker_hub_registry}/bitnami/kubectl"
-        }
-        annotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
-      }
       cleanUpCRDs = true
       upgradeCRDs = true
 
@@ -331,13 +314,6 @@ resource "helm_release" "velero" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 
   depends_on = [module.aws_permissions]
 }
@@ -459,7 +435,7 @@ module "snapshot_gc" {
   cron_schedule = "0 0 * * *"
   containers = [{
     name             = "garbage-collector"
-    image_registry   = module.pull_through.ecr_public_registry
+    image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [

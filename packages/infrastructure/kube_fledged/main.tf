@@ -16,10 +16,6 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -39,12 +35,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_fledged"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -52,6 +42,7 @@ module "util_controller" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -64,6 +55,7 @@ module "util_webhook" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -107,12 +99,6 @@ resource "helm_release" "kube_fledged" {
   values = [
     yamlencode({
       fullnameOverride = "kube-fledged"
-      image = {
-        kubefledgedControllerRepository    = "${module.pull_through.docker_hub_registry}/senthilrch/kubefledged-controller"
-        kubefledgedCRIClientRepository     = "${module.pull_through.docker_hub_registry}/senthilrch/kubefledged-cri-client"
-        kubefledgedWebhookServerRepository = "${module.pull_through.docker_hub_registry}/senthilrch/kubefledged-webhook-server"
-        busyboxImageRepository             = "${module.pull_through.docker_hub_registry}/senthilrch/busybox"
-      }
       args = {
         controllerImageCacheRefreshFrequency = "3m"
         controllerLogLevel                   = var.log_level

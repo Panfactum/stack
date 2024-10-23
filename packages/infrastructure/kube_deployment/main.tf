@@ -58,6 +58,7 @@ module "pod_template" {
   common_env_from_secrets     = var.common_env_from_secrets
   common_env_from_config_maps = var.common_env_from_config_maps
   containers                  = var.containers
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
 
   # Mount configuration
   config_map_mounts = var.config_map_mounts

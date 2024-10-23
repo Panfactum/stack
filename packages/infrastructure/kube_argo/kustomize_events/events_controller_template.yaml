@@ -1,8 +1,0 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: argo-events-controller-manager
-spec:
-  template:
-    spec:
-      schedulerName: "${SCHEDULER}"

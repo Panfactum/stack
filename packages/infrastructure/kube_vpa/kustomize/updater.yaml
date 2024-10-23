@@ -1,8 +1,0 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: vpa-updater
-spec:
-  template:
-    spec:
-      schedulerName: panfactum

@@ -15,11 +15,6 @@ terraform {
   }
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -83,13 +78,14 @@ module "disruption_window_enabler" {
   name                        = "disruption-window-enabler-${random_id.window_id.hex}"
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_nodes_enabled     = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = var.cron_schedule
   containers = [{
     name             = "enabler"
-    image_registry   = module.pull_through.ecr_public_registry
+    image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
@@ -109,6 +105,7 @@ module "disruption_window_disabler" {
   name                        = "disruption-window-disabler-${random_id.window_id.hex}"
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
   vpa_enabled                 = var.vpa_enabled
@@ -116,7 +113,7 @@ module "disruption_window_disabler" {
   cron_schedule = "0/15 * * * *" # Every 15 minutes
   containers = [{
     name             = "disabler"
-    image_registry   = module.pull_through.ecr_public_registry
+    image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [

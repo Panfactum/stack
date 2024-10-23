@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -35,12 +31,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_external_snapshotter"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -48,6 +38,7 @@ module "util_controller" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -60,6 +51,7 @@ module "util_webhook" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -104,9 +96,6 @@ resource "helm_release" "external_snapshotter" {
       controller = {
         enabled          = true
         fullnameOverride = "external-snapshotter"
-        image = {
-          repository = "${module.pull_through.kubernetes_registry}/sig-storage/snapshot-controller"
-        }
         args = {
           v               = var.log_verbosity
           leader-election = true
@@ -133,9 +122,6 @@ resource "helm_release" "external_snapshotter" {
       webhook = {
         enabled          = true
         fullnameOverride = "external-snapshotter-webhook"
-        image = {
-          repository = "${module.pull_through.kubernetes_registry}/sig-storage/snapshot-validation-webhook"
-        }
         args = {
           v = var.log_verbosity
         }
@@ -176,7 +162,6 @@ resource "helm_release" "external_snapshotter" {
   // Injects the CA data into the webhook manifest
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
-    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [module.webhook_cert]

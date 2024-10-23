@@ -47,11 +47,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_alloy"
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -61,6 +56,7 @@ module "util_controller" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -137,9 +133,6 @@ resource "helm_release" "ebs_csi_driver" {
   values = [
     yamlencode({
 
-      image = {
-        repository = "${module.pull_through.ecr_public_registry}/ebs-csi-driver/aws-ebs-csi-driver"
-      }
       labels = module.util_controller.labels
 
       controller = {
@@ -176,47 +169,26 @@ resource "helm_release" "ebs_csi_driver" {
 
       sidecars = {
         provisioner = {
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-provisioner"
-          }
           resources = local.default_resources
         }
         attacher = {
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-attacher"
-          }
           resources = local.default_resources
         }
         resizer = {
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-resizer"
-          }
           resources = local.default_resources
         }
         livenessProbe = {
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/livenessprobe"
-          }
           resources = local.default_resources
         }
         nodeDriverRegistrar = {
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/node-driver-registrar"
-          }
           resources = local.default_resources
         }
         volumemodifier = {
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/ebs-csi-driver/volume-modifier-for-k8s"
-          }
           resources = local.default_resources
         }
         snapshotter = {
           forceEnable = true
-          image = {
-            repository = "${module.pull_through.ecr_public_registry}/eks-distro/kubernetes-csi/external-snapshotter/csi-snapshotter"
-          }
-          resources = local.default_resources
+          resources   = local.default_resources
         }
       }
 
@@ -302,7 +274,6 @@ resource "helm_release" "ebs_csi_driver" {
   // (2) We need to remove the default podAntiAffinity rules from the deployment
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
-    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [module.aws_permissions]
