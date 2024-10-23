@@ -1,15 +1,15 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"os"
+	"demo-tracker-service/handlers"
+	"demo-tracker-service/middleware"
+	"demo-tracker-service/models"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"demo-tracker-service/handlers"
-	"demo-tracker-service/middleware"
+	"net/http"
+	"os"
 )
 
 var db *gorm.DB

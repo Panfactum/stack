@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
+
 	"net/http"
-	"os"
-	"gorm.io/gorm"
+
 	"demo-tracker-service/models"
+	"gorm.io/gorm"
 )
 
 type TrackRequest struct {
