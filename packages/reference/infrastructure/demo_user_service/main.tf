@@ -102,6 +102,7 @@ module "ingress" {
 
   domains      = [var.domain]
   ingress_configs = [{
+    path_prefix = "/user"
     service      = local.name
     service_port = local.port
   }]
