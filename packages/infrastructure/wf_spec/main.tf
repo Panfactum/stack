@@ -340,6 +340,25 @@ locals {
   * Template Defaults
   ************************************************/
 
+  resourcePodSpecPatch = yamlencode({
+    containers = [{
+      name : "main"
+      resources = {
+        requests = {
+          cpu    = "10m"
+          memory = "150Mi"
+        }
+        limits = {
+          memory = "250Mi"
+        }
+      }
+    }]
+  })
+
+  httpPodSpecPatch = yamlencode({
+    automountServiceAccountToken = true
+  })
+
   templates = [for template in var.templates :
     { for k, v in merge(
       template,
@@ -402,20 +421,8 @@ locals {
         })]] : null
 
         # Resource templates seem to keep OOMing so we need to patch the pods to up the memory
-        podSpecPatch = lookup(template, "podSpecPatch", contains(keys(template), "resource") ? yamlencode({
-          containers = [{
-            name : "main"
-            resources = {
-              requests = {
-                cpu    = "10m"
-                memory = "150Mi"
-              }
-              limits = {
-                memory = "250Mi"
-              }
-            }
-          }]
-          }) : null
+        podSpecPatch = lookup(template, "podSpecPatch",
+          contains(keys(template), "resource") ? local.resourcePodSpecPatch : null
         )
 
         # These need to be set here in order for them to show up on in a templateRef reference to the template;
@@ -469,9 +476,10 @@ locals {
   * Workflow Definition
   ************************************************/
   workflow_spec = { for k, v in {
-    activeDeadlineSeconds = var.active_deadline_seconds
-    affinity              = module.util.affinity
-    archiveLogs           = var.archive_logs_enabled
+    activeDeadlineSeconds        = var.active_deadline_seconds
+    automountServiceAccountToken = true
+    affinity                     = module.util.affinity
+    archiveLogs                  = var.archive_logs_enabled
     artifactGC = var.delete_artifacts_on_deletion ? {
       strategy = "OnWorkflowDeletion"
     } : null
