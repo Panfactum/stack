@@ -96,6 +96,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_s3_public_website",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
       "module": "aws_ses_domain",
       "type": "direct",
       "group": "aws"
