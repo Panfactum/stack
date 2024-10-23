@@ -25,9 +25,9 @@ module "database" {
   pg_cluster_namespace                 = local.namespace
   aws_iam_ip_allow_list                = []
 
-  pg_initial_storage_gb                = 5 # for the purposes of the demo
-  pg_max_connections                   = 20 # for the purposes of the demo
-  pg_instances                         = 1 # for the purposes of the demo
+  pg_initial_storage_gb                = 5    # for the purposes of the demo
+  pg_max_connections                   = 20   # for the purposes of the demo
+  pg_instances                         = 2    # for the purposes of the demo
   burstable_nodes_enabled              = true # for the purposes of the demo
 
   pull_through_cache_enabled           = var.pull_through_cache_enabled
@@ -46,7 +46,7 @@ module "demo_user_service_deployment" {
   common_env = {
     NODE_ENV = "production"
     PORT     = local.port
-    HOSTNAME = "0.0.0.0"
+    HOST = "0.0.0.0"
     DB_HOST  = module.database.pooler_rw_service_name
     DB_PORT  = module.database.pooler_rw_service_port
     DB_NAME  = var.db_name
@@ -56,12 +56,12 @@ module "demo_user_service_deployment" {
 
   common_env_from_secrets = {
     DB_USER = {
-      secret_name = module.database.admin_creds_secret
+      secret_name = module.database.superuser_creds_secret
       key = "username"
     }
 
     DB_PASSWORD = {
-      secret_name = module.database.admin_creds_secret
+      secret_name = module.database.superuser_creds_secret
       key = "password"
     }
   }
@@ -74,12 +74,12 @@ module "demo_user_service_deployment" {
       image_tag = var.image_version
       command = [
         "node",
-        "server.js"
+        "index.js"
       ]
       liveness_probe_type  = "HTTP"
       liveness_probe_port  = local.port
       liveness_probe_route = var.healthcheck_route
-
+      minimum_memory = 200
       ports = {
         http ={
           port = local.port
