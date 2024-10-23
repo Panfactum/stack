@@ -8,10 +8,19 @@ It will expose a public registration route and a route to get the user's informa
 ```dotenv
 HOST="localhost"
 PORT=3000
-DB_CONNECTION_STRING="..."
+DB_HOST="localhost"
+DB_PORT="5432"
+DB_NAME="postgres"
+DB_SCHEMA="public"
+DB_USER="v-oidc-b6d-superuse-kkM1PhJvHnTGpqUxK0bJ-1729636215"
+DB_PASSWORD="46Ypzc0TMgpKXLLVbA-I"
 ```
 
 ## Dependencies 
 
 - Postgres
 - Ingress
+
+## Explanations
+
+- [ ] Postgres Credential Rotation Handling

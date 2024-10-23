@@ -1,3 +1,12 @@
-### GET request with a header
+### GET
 GET http://localhost:3000/health
 Accept: application/json
+
+### Send POST request with json body
+POST http://localhost:3000/user/registration
+Content-Type: application/json
+
+{
+  "username": "testing2",
+  "password": "pass"
+}

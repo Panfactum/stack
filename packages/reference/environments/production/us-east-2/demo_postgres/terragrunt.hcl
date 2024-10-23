@@ -21,8 +21,8 @@ inputs = {
   eks_cluster_name = dependency.cluster.outputs.cluster_name
 
   # for the purposes of the demo
-  pg_initial_storage_gb = 10
+  pg_initial_storage_gb = 5
   pg_max_connections = 20
-  pg_instances = 1
+  pg_instances = 2
   burstable_nodes_enabled = true
 }
