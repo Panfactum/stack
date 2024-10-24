@@ -8,7 +8,7 @@ set -eo pipefail
 
 module_folder=$1
 
-if [[ -z $module_folder ]]; then
+if [[ -z $module_folder || ! -d $module_folder ]]; then
   echo ""
 else
   find "$(realpath "$module_folder")" -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d' ' -f1
