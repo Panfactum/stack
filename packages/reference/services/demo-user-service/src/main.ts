@@ -17,8 +17,6 @@ const configuration = {
   }
 }
 
-console.log('config', configuration)
-
 const pgClient = new pg.Client(configuration.db);
 const app = express()
 
@@ -33,7 +31,7 @@ app.get('/health', (_req, res) => {
   res.sendStatus(200)
 })
 
-app.post('/user/registration', async (req, res) => {
+app.post('/registration', async (req, res) => {
   const {username, password} = req.body
 
   const result = await pgClient.query('INSERT INTO users(username, password) VALUES($1, $2) RETURNING *', [username, password])
@@ -43,6 +41,24 @@ app.post('/user/registration', async (req, res) => {
   res.send({
     token
   })
+})
+
+app.get('/validate', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]
+
+  if (!token) {
+    res.status(401).send({error: 'Token is required'})
+    return
+  }
+
+  try {
+    const decoded = jwt.verify(token, configuration.secret)
+    const result = await pgClient.query('SELECT * FROM users WHERE id = $1', [decoded.id])
+
+    res.sendStatus(result.rows.length > 0 ? 200 : 401)
+  } catch (error) {
+    res.status(401).send({error: 'Invalid token'})
+  }
 })
 
 app.listen(configuration.port, configuration.host, () => {
