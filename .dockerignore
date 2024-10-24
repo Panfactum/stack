@@ -19,12 +19,7 @@
 !packages/reference/services/demo-user-service/src
 !packages/reference/services/demo-user-service/package.json
 !packages/reference/services/demo-user-service/tsconfig.json
-!packages/reference/services/demo-tracker-service/handlers
-!packages/reference/services/demo-tracker-service/middleware
-!packages/reference/services/demo-tracker-service/models
-!packages/reference/services/demo-tracker-service/go.mod
-!packages/reference/services/demo-tracker-service/go.sum
-!packages/reference/services/demo-tracker-service/main.go
+!packages/reference/services/demo-tracker-service
 !packages/eslint/package.json
 !packages/eslint/index.js
 !packages/bastion
