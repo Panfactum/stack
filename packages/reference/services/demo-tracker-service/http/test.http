@@ -1,0 +1,9 @@
+### Send POST request with json body
+POST http://localhost:8080/auth/track
+Content-Type: application/json
+Authorization: Bearer "x"
+
+{
+  "id": 999,
+  "value": "content"
+}

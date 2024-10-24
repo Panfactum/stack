@@ -52,7 +52,7 @@ app.get('/validate', async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, configuration.secret)
+    const decoded = jwt.verify(token, configuration.secret) as {id: string, username: string}
     const result = await pgClient.query('SELECT * FROM users WHERE id = $1', [decoded.id])
 
     res.sendStatus(result.rows.length > 0 ? 200 : 401)

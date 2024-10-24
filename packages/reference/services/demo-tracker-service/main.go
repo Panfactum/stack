@@ -42,7 +42,7 @@ func init() {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: false,
-			TablePrefix:   dbSchema,
+			TablePrefix:   dbSchema + ".",
 		},
 	})
 	if err != nil {
