@@ -8,6 +8,7 @@ module "demo_tracker_service_builder" {
 
   code_repo = "github.com/panfactum/stack.git"
   dockerfile_path = "./packages/reference/services/demo-tracker-service/Containerfile"
+  build_context = "./packages/reference/services/demo-tracker-service"
   image_repo = "demo-tracker-service"
 
   args = {}
