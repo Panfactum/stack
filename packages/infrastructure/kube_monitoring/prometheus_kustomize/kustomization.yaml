@@ -10,19 +10,3 @@ patches:
     target:
       kind: Certificate
       name: monitoring-admission
-  - path: grafana.yaml
-    target:
-      kind: Deployment
-      name: prometheus-grafana
-  - path: ksm.yaml
-    target:
-      kind: Deployment
-      name: prometheus-kube-state-metrics
-  - path: operator.yaml
-    target:
-      kind: Deployment
-      name: prometheus-operator
-  - path: operator_webhook.yaml
-    target:
-      kind: Deployment
-      name: prometheus-operator-webhook

@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -32,12 +28,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_metrics_server"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
@@ -45,6 +35,7 @@ module "util" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -93,10 +84,6 @@ resource "helm_release" "metrics_server" {
         "reloader.stakater.com/auto" = "true"
       }
 
-
-      image = {
-        repository = "${module.pull_through.kubernetes_registry}/metrics-server/metrics-server"
-      }
       args = [
         "--v=${var.log_verbosity}",
         "--logging-format=json",

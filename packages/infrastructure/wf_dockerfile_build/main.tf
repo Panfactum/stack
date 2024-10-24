@@ -23,11 +23,6 @@ locals {
   entrypoint = "entry"
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -172,7 +167,7 @@ module "image_builder_workflow" {
       memory = "100Mi"
     }
   }
-  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
+  default_container_image = "public.ecr.aws/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
   templates = [
     {
       name    = local.entrypoint

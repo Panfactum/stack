@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -46,12 +42,6 @@ data "aws_region" "current" {}
 
 data "pf_kube_labels" "labels" {
   module = "kube_alloy"
-}
-
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util" {
@@ -112,9 +102,6 @@ resource "helm_release" "alloy" {
       crds = {
         create = false
       }
-      image = {
-        registry = module.pull_through.docker_hub_registry
-      }
       alloy = {
         clustering = {
           enabled = false
@@ -144,9 +131,6 @@ resource "helm_release" "alloy" {
         podLabels         = module.util.labels
       }
       configReloader = {
-        image = {
-          registry = module.pull_through.github_registry
-        }
         resources = {
           requests = {
             cpu    = "50m"

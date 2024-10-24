@@ -10,10 +10,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     kubectl = {
       source  = "alekc/kubectl"
       version = "2.0.4"
@@ -56,12 +52,6 @@ locals {
 
 data "pf_kube_labels" "labels" {
   module = "kube_descheduler"
-}
-
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_controller" {
@@ -109,9 +99,6 @@ resource "helm_release" "descheduler" {
         logging-format = "json"
       }
       kind = "Deployment"
-      image = {
-        repository = "${module.pull_through.kubernetes_registry}/descheduler/descheduler"
-      }
       podLabels = merge(
         module.util_controller.labels,
         {
@@ -327,14 +314,6 @@ resource "helm_release" "descheduler" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
-
 }
 
 resource "kubectl_manifest" "vpa_descheduler" {

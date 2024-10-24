@@ -8,10 +8,6 @@ terraform {
       source  = "alekc/kubectl"
       version = "2.0.4"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -37,12 +33,6 @@ locals {
   ]))
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 resource "random_id" "id" {
   byte_length = 2
   prefix      = "redis-"
@@ -61,6 +51,7 @@ module "util" {
   spot_nodes_enabled                   = var.spot_nodes_enabled
   arm_nodes_enabled                    = var.arm_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
   az_spread_required                   = true
   az_spread_preferred                  = true // stateful
@@ -146,8 +137,7 @@ resource "helm_release" "redis" {
       }
 
       global = {
-        imageRegistry = module.pull_through.docker_hub_registry
-        storageClass  = "ebs-standard"
+        storageClass = "ebs-standard"
       }
 
       kubectl = {
@@ -592,7 +582,7 @@ module "secrets_sync" {
   containers = [
     {
       name             = "sync"
-      image_registry   = module.pull_through.ecr_public_registry
+      image_registry   = "public.ecr.aws"
       image_repository = module.constants.panfactum_image_repository
       image_tag        = module.constants.panfactum_image_tag
       command          = ["/scripts/creds-sync.sh"]

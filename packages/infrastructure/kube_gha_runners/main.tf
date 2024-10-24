@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     vault = {
       source  = "hashicorp/vault"
       version = "3.25.0"
@@ -30,17 +26,11 @@ terraform {
 locals {
   namespace = "gha"
 
-  runner_images = { for runner, config in var.runners : runner => config.action_runner_image != null ? config.action_runner_image : "${module.pull_through.github_registry}/actions/actions-runner:${config.action_runner_version}" }
+  runner_images = { for runner, config in var.runners : runner => config.action_runner_image != null ? config.action_runner_image : "ghcr.io/actions/actions-runner:${config.action_runner_version}" }
 }
 
 data "pf_kube_labels" "labels" {
   module = "kube_gha_runners"
-}
-
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 /***************************************
@@ -57,6 +47,7 @@ module "util" {
   arm_nodes_enabled                    = each.value.arm_nodes_enabled
   controller_nodes_enabled             = false
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -72,6 +63,7 @@ module "util_listener" {
   arm_nodes_enabled                    = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels

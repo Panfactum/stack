@@ -31,12 +31,16 @@ data "aws_region" "current" {}
 
 locals {
   namespace = module.namespace.namespace
-  ci_image = "${module.pull_through.ecr_public_registry}/t8f0s7h5/panfactum:f06e9fd7ab80321190532a26a4b2ed9067a058a1"
+  ci_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
 }
 
 module "pull_through" {
   source =   "${var.pf_module_source}aws_ecr_pull_through_cache_addresses${var.pf_module_ref}"
   pull_through_cache_enabled = true
+}
+
+module "constants" {
+  source = "${var.pf_module_source}kube_constants${var.pf_module_ref}"
 }
 
 module "namespace" {

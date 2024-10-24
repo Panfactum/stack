@@ -46,11 +46,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_argo"
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source                               = "../kube_workload_utility"
   workload_name                        = "argo-controller"
@@ -58,6 +53,7 @@ module "util_controller" {
   az_spread_preferred                  = var.enhanced_ha_enabled
   az_spread_required                   = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -70,6 +66,7 @@ module "util_server" {
   az_spread_preferred                  = var.enhanced_ha_enabled
   az_spread_required                   = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -79,6 +76,7 @@ module "util_events_controller" {
   source                               = "../kube_workload_utility"
   workload_name                        = "argo-events-controller"
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   az_spread_required                   = var.enhanced_ha_enabled
@@ -94,6 +92,7 @@ module "util_webhook" {
   az_spread_preferred                  = var.enhanced_ha_enabled
   az_spread_required                   = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -371,9 +370,6 @@ resource "helm_release" "argo" {
           "configmap.reloader.stakater.com/reload" = local.configmap_name
           "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${module.database.superuser_creds_secret}"
         }
-        image = {
-          registry = module.pull_through.quay_registry
-        }
 
         logging = {
           format = "json"
@@ -406,9 +402,6 @@ resource "helm_release" "argo" {
       }
 
       executor = {
-        image = {
-          registry = module.pull_through.quay_registry
-        }
         resources = {
           requests = {
             memory = "50Mi"
@@ -448,9 +441,6 @@ resource "helm_release" "argo" {
           "configmap.reloader.stakater.com/reload" = local.configmap_name
           "secret.reloader.stakater.com/reload"    = "${kubernetes_secret.sso_info.metadata[0].name},${module.database.superuser_creds_secret}"
         }
-        image = {
-          registry = module.pull_through.quay_registry
-        }
         logging = {
           format = "json"
           level  = var.log_level
@@ -478,13 +468,6 @@ resource "helm_release" "argo" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize_workflows/kustomize.sh"
-    }
-  }
 
   depends_on = [module.database]
 }
@@ -617,35 +600,6 @@ resource "kubectl_manifest" "pdb_server" {
   depends_on        = [helm_release.argo]
 }
 
-resource "kubectl_manifest" "workflow_image_cache" {
-  count = var.node_image_cache_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "kubefledged.io/v1alpha2"
-    kind       = "ImageCache"
-    metadata = {
-      name      = "argo-workflows"
-      namespace = local.namespace
-      labels    = module.util_controller.labels
-    }
-    spec = {
-      cacheSpec = [
-        {
-          images = [
-            # This is needed by all workflows so we should ensure it is always available (don't forget to update the tag when updating argo)
-            "${module.pull_through.quay_registry}/argoproj/argoexec:v3.5.5",
-
-            # Many of our pre-built workflows use this image so we should have it ready on the nodes
-            "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
-          ]
-        }
-      ]
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.argo]
-}
-
 /***************************************
 * Argo Events
 ***************************************/
@@ -666,19 +620,13 @@ resource "helm_release" "argo_events" {
       fullnameOverride     = "argo-events"
       createAggregateRoles = true
 
-      global = {
-        image = {
-          repository = "${module.pull_through.quay_registry}/argoproj/argo-events"
-        }
-      }
-
       configs = {
         jetstream = {
           versions = [{
             version              = "default"
-            natsImage            = "${module.pull_through.docker_hub_registry}/library/nats:${var.event_bus_nats_version}"
-            metricsExporterImage = "${module.pull_through.docker_hub_registry}/natsio/prometheus-nats-exporter:${var.event_bus_prometheus_nats_exporter_version}"
-            configReloaderImage  = "${module.pull_through.docker_hub_registry}/natsio/nats-server-config-reloader:${var.event_bus_nats_server_config_reloader_version}"
+            natsImage            = "docker.io/library/nats:${var.event_bus_nats_version}"
+            metricsExporterImage = "docker.io/natsio/prometheus-nats-exporter:${var.event_bus_prometheus_nats_exporter_version}"
+            configReloaderImage  = "docker.io/natsio/nats-server-config-reloader:${var.event_bus_nats_server_config_reloader_version}"
             startCommand         = "/nats-server"
           }]
         }
@@ -744,7 +692,6 @@ resource "helm_release" "argo_events" {
 
   postrender {
     binary_path = "${path.module}/kustomize_events/kustomize.sh"
-    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 }
 
@@ -1100,7 +1047,7 @@ module "test_workflow" {
       memory = "100Mi"
     }
   }
-  default_container_image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
+  default_container_image = "public.ecr.aws/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
   arguments = {
     parameters = [
       {

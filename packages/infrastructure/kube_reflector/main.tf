@@ -16,10 +16,6 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -35,12 +31,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_reflector"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -48,6 +38,7 @@ module "util_controller" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single replica
   az_spread_preferred                  = false // single replica
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -82,9 +73,6 @@ resource "helm_release" "reflector" {
   values = [
     yamlencode({
       fullnameOverride = "reflector"
-      image = {
-        repository = "${module.pull_through.docker_hub_registry}/emberstack/kubernetes-reflector"
-      }
       configuration = {
         logging = {
           minimumLevel = var.log_level
@@ -112,13 +100,6 @@ resource "helm_release" "reflector" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 }
 
 resource "kubectl_manifest" "vpa" {

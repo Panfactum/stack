@@ -67,12 +67,6 @@ resource "vault_mount" "transit" {
 * Vault Secrets Operator
 ***************************************/
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 resource "vault_transit_secret_backend_key" "secrets_operator" {
   backend          = vault_mount.transit.path
   name             = "vault-secrets-operator"
@@ -138,15 +132,7 @@ resource "helm_release" "vault_secrets_operator" {
       controller = {
         tolerations = module.util_secrets_operator.tolerations
         affinity    = module.util_secrets_operator.affinity
-        kubeRbacProxy = {
-          image = {
-            repository = "${module.pull_through.quay_registry}/brancz/kube-rbac-proxy"
-          }
-        }
         manager = {
-          image = {
-            repository = "${module.pull_through.docker_hub_registry}/hashicorp/vault-secrets-operator"
-          }
           logging = {
             level = var.log_level
           }

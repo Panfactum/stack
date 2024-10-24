@@ -43,12 +43,6 @@ data "pf_aws_tags" "tags" {
 }
 
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -57,6 +51,7 @@ module "util_controller" {
   controller_nodes_enabled    = true
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
 
@@ -340,9 +335,6 @@ resource "helm_release" "alb_controller" {
       fullnameOverride = "alb-controller"
 
       ingressClass = "alb"
-      image = {
-        repository = "${module.pull_through.ecr_public_registry}/eks/aws-load-balancer-controller"
-      }
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.alb_controller.metadata[0].name
@@ -424,7 +416,6 @@ resource "helm_release" "alb_controller" {
 
   postrender {
     binary_path = "${path.module}/alb_kustomize/kustomize.sh"
-    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [

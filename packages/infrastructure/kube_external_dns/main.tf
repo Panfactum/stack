@@ -91,11 +91,6 @@ resource "random_id" "ids" {
   byte_length = 8
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   for_each = local.config
   source   = "../kube_workload_utility"
@@ -105,6 +100,7 @@ module "util" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -195,9 +191,6 @@ resource "helm_release" "external_dns" {
       }
       logLevel  = var.log_level
       logFormat = "json"
-      image = {
-        repository = "${module.pull_through.kubernetes_registry}/external-dns/external-dns"
-      }
 
       tolerations       = module.util[each.key].tolerations
       priorityClassName = module.constants.cluster_important_priority_class_name
@@ -243,14 +236,6 @@ resource "helm_release" "external_dns" {
       txtPrefix  = "external-dns-"
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-      args        = [random_id.ids[each.key].hex]
-    }
-  }
 
   depends_on = [module.aws_permissions]
 }

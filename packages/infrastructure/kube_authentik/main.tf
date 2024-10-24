@@ -43,12 +43,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_authentik"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -59,6 +53,7 @@ module "util_server" {
   workload_name                        = "authentik-server"
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
@@ -70,6 +65,7 @@ module "util_worker" {
 
   workload_name                        = "authentik-worker"
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   burstable_nodes_enabled              = true
@@ -212,9 +208,7 @@ resource "helm_release" "authentik" {
       fullnameOverride = "authentik"
 
       global = {
-        image = {
-          repository = "${module.pull_through.github_registry}/goauthentik/server"
-        }
+
         serviceAccount = {
           create = true
         }
@@ -523,13 +517,6 @@ resource "helm_release" "authentik" {
 
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 
   depends_on = [
     module.database,

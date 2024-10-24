@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -40,12 +36,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_vault_proxy"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 resource "random_id" "oauth2_proxy" {
   byte_length = 8
   prefix      = "oauth2-proxy-"
@@ -58,6 +48,7 @@ module "util" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
   az_spread_preferred                  = var.az_spread_preferred
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -168,9 +159,6 @@ resource "helm_release" "oauth2_proxy" {
         [for domain in var.allowed_email_domains : ["--email-domain", domain]]
       ))
 
-      image = {
-        repository = "${module.pull_through.quay_registry}/oauth2-proxy/oauth2-proxy"
-      }
       labels = module.util.labels
       podLabels = merge(
         module.util.labels,
@@ -201,14 +189,6 @@ resource "helm_release" "oauth2_proxy" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-      args        = [random_id.oauth2_proxy.hex]
-    }
-  }
 
   timeout = 60
 }

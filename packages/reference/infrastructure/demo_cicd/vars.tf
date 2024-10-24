@@ -76,3 +76,8 @@ variable "pf_module_ref" {
   description = "The git ref for Panfactum submodules"
   type = string
 }
+
+variable "module_bucket" {
+  description = "The S3 bucket that host tf modules"
+  type = string
+}

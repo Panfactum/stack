@@ -335,9 +335,9 @@ variable "pod_version_labels_enabled" {
 }
 
 variable "pull_through_cache_enabled" {
-  description = "Whether to use the ECR pull through cache for the annotator images"
+  description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "unhealthy_pod_eviction_policy" {

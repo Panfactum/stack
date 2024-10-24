@@ -48,24 +48,21 @@ provider "registry.opentofu.org/hashicorp/aws" {
 }
 
 provider "registry.opentofu.org/hashicorp/helm" {
-  version = "2.16.0"
+  version = "2.16.1"
   hashes = [
-    "h1:2f898EII+amPiD6+G+5/l9rsJYHQ3434oevMlPP1y7s=",
-    "h1:3QVLb8NsxyXTVjR+8qOeV1m2dIKpqo3brGzDYLQCs9U=",
-    "h1:G8zZFX1mjqf1nttWcfJxoL61HJOb1rk0SoZCnVR41aE=",
-    "h1:xMJMw/OBKA2Zz+eaDGAJSV1bwfvGoIwk9DRN/phkHo4=",
-    "zh:1705620c693a0ed09149119163c29331ea1d04b89e2fd7dc000fe513829c157c",
-    "zh:2232967efb4ac0ef977306329a8a7827bd1ca09fa704870f4985b9be56cbdc9f",
-    "zh:487de2aa7e26161efab2fe9a3ef1bdb5868ba4b1517db3418cb790da057d1ec8",
-    "zh:4e34b93c7c19664aced2a1db438eaebec1836b5aea76461f62fed3e70f6f6eb2",
-    "zh:538086449a01b6757e47970620c20427f43b4400bc2bb6a88b35cea70fdc1623",
-    "zh:548b212a4df2fe12b91549473f92855e4af3535f0f0f83e40fc1937222d6d07d",
-    "zh:839914391b092960a0a219219aca2559b6511f27dee8f0cca3e725db2a065f01",
-    "zh:adf0628e23f5f315f1951dee64fbeecd154073781f8e275238e99d822441d920",
-    "zh:b454fc54075e9d1d98f58405f2492c447d10961c0eb6e19c7bfc0d8cf9d4c558",
-    "zh:bc9ee201e065d7dd651b05edfd864930298690c7638f73ae6dc748a80fe2658c",
+    "h1:OAMufKLYnPEyJMNMaOFYQys3HdXtFdaT7kEaWmaINTI=",
+    "zh:1c820d7997377c80c320b3bb4f257258af6c499bf2f2082a87975854b156b82b",
+    "zh:223dc3ba691a03eeb32d14160b3c6adc77d55a767274c728250cd4f1d4238a2a",
+    "zh:332095747133eb558da1455056f993314b16346d46065967ffe5f7b243614591",
+    "zh:46155a04e08e9790e22cb7b70d83cdf908e36121597c801a9300f8c100f1ad01",
+    "zh:51974f6ceb6b4c2aa575384a0cc1fbad22b8b868558e969a196575d43e9d0198",
+    "zh:7da302779eb39e63a62a0928e391852054ad83eb2025c190475c94a5afc77d29",
+    "zh:947bbf2a4d8461ec4a544ef7b76f45815602563123987a63dce843258440aa24",
+    "zh:b84a6658447bbd46daff26010771f0e2168423f0f7f1c1bc2b4ba53f9e891263",
+    "zh:dd21fdb13d85467b848682c63f440974cef99472d988794f019630f20ac3d2e6",
+    "zh:e0f77d2f7cf84d6c0d7f30f6cdc325c319ff4eadd525c6fb6979da62e5ff843d",
   ]
-  constraints = "2.16.0"
+  constraints = "2.16.1"
 }
 
 provider "registry.opentofu.org/hashicorp/kubernetes" {

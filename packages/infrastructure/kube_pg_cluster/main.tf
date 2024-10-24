@@ -353,6 +353,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
             archive_mode               = "on"
             archive_timeout            = "5min"
             dynamic_shared_memory_type = "posix"
+            full_page_writes           = "on"
             log_destination            = "csvlog"
             log_directory              = "/controller/log"
             log_filename               = "postgres"

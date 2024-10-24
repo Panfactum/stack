@@ -131,8 +131,12 @@ A few critical points to notice:
    * A [DAG Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/) (for defining an execution graph of other templates)
    * A [Container Set Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/) (for defining an execution graph of *containers* within a *single* Pod)
    * A [Kubernetes Resource Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/) (for performing CRUD operations against Kubernetes resources)
-   * An [HTTP Template](https://argo-workflows.readthedocs.io/en/latest/http-template/) (for executing HTTP requests)
    * A [Suspend Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/) (for suspending a Workflow)
+
+   <MarkdownAlert severity="warning">
+     The [HTTP Template](https://argo-workflows.readthedocs.io/en/latest/http-template/) is currently broken ([issue](https://github.com/argoproj/argo-workflows/issues/10340)). Instead,
+     use a container template to call into `curl` (or equivalent alternative).
+   </MarkdownAlert>
 
 3. You might want to override one or more pod-level defaults for a template (example: provide certain tolerations for some
    pods but not others).  See the `second-template` template above as an example.

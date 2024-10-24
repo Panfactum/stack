@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -9,10 +7,6 @@ terraform {
     helm = {
       source  = "hashicorp/helm"
       version = "2.12.1"
-    }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -36,11 +30,6 @@ locals {
 
 data "pf_kube_labels" "labels" {
   module = "kube_scheduler"
-}
-
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "constants" {
@@ -168,11 +157,12 @@ module "scheduler" {
   az_spread_preferred                  = var.enhanced_ha_enabled
   priority_class_name                  = "system-cluster-critical" # Scheduling will break if this breaks
   panfactum_scheduler_enabled          = false                     # Cannot schedule itself
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
 
   containers = [
     {
       name             = "scheduler"
-      image_registry   = module.pull_through.kubernetes_registry
+      image_registry   = "registry.k8s.io"
       image_repository = "kube-scheduler"
       image_tag        = var.scheduler_version
       command = [

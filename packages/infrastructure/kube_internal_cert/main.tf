@@ -75,14 +75,14 @@ resource "kubectl_manifest" "cert" {
       isCA = var.is_ca
 
       privateKey = {
-        algorithm      = "ECDSA"
-        size           = 256
+        algorithm      = var.private_key_algorithm
+        size           = var.private_key_algorithm == "ECDSA" ? 256 : 4096
         rotationPolicy = var.private_key_rotation_enabled ? "Always" : "Never"
         encoding       = var.private_key_encoding
       }
 
       issuerRef = {
-        name  = var.issuer_name == null ? (var.is_ca ? "internal-ca" : "internal") : var.issuer_name
+        name  = var.issuer_name == null ? (var.is_ca ? "internal-ca" : (var.private_key_algorithm == "ECDSA" ? "internal" : "internal-rsa")) : var.issuer_name
         kind  = var.use_cluster_issuer ? "ClusterIssuer" : "Issuer"
         group = "cert-manager.io"
       }

@@ -34,11 +34,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_buildkit"
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -164,7 +159,7 @@ module "buildkit" {
   containers = [
     {
       name             = "buildkitd"
-      image_registry   = module.pull_through.docker_hub_registry
+      image_registry   = "docker.io"
       image_repository = "moby/buildkit"
       image_tag        = var.buildkit_image_version
       command = [
@@ -356,7 +351,7 @@ module "scale_to_zero" {
   cron_schedule = "*/15 * * * *"
   containers = [{
     name             = "scale-to-zero"
-    image_registry   = module.pull_through.ecr_public_registry
+    image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [
@@ -424,6 +419,7 @@ module "cache_clear" {
   name                        = "cache-clear"
   namespace                   = local.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   spot_nodes_enabled          = true
   arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
@@ -432,7 +428,7 @@ module "cache_clear" {
   cron_schedule = var.cache_clear_cron
   containers = [{
     name             = "cache-clear"
-    image_registry   = module.pull_through.ecr_public_registry
+    image_registry   = "public.ecr.aws"
     image_repository = module.constants.panfactum_image_repository
     image_tag        = module.constants.panfactum_image_tag
     command = [

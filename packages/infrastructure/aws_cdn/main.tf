@@ -9,10 +9,6 @@ terraform {
       version               = "5.70.0"
       configuration_aliases = [aws.global]
     }
-    archive = {
-      source  = "hashicorp/archive"
-      version = "2.6.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -57,7 +53,8 @@ locals {
     "me-south-1"     = "ap-south-1"
   }
 
-  page_rules_enabled = length(var.redirect_rules) > 0
+  page_rules_enabled        = length(var.redirect_rules) > 0 || var.cors_enabled
+  response_function_enabled = var.cors_enabled
 
   default_allowed_methods      = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
   default_cached_methods       = ["GET", "HEAD"]
@@ -104,15 +101,16 @@ locals {
   }
 
   origin_configs = { for config in [for config in var.origin_configs : {
-    origin_id              = lookup(config, "origin_id", substr(sha256("${join("", var.domains)}${var.name}${config.path_prefix}"), 0, 12))
-    path_prefix            = config.path_prefix
-    default_cache_behavior = merge(local.default_cache_behavor, lookup(config, "default_cache_behavior", {}))
-    path_match_behavior    = { for path, behavior in lookup(config, "path_match_behavior", {}) : path => merge(local.default_cache_behavor, behavior) }
-    origin_domain          = config.origin_domain
-    extra_origin_headers   = config.extra_origin_headers
+    origin_id                = lookup(config, "origin_id", null) == null ? substr(sha256("${join("", var.domains)}${var.name}${config.path_prefix}"), 0, 12) : lookup(config, "origin_id")
+    path_prefix              = config.path_prefix
+    origin_access_control_id = config.origin_access_control_id
+    default_cache_behavior   = merge(local.default_cache_behavor, lookup(config, "default_cache_behavior", {}))
+    path_match_behavior      = { for path, behavior in lookup(config, "path_match_behavior", {}) : path => merge(local.default_cache_behavor, behavior) }
+    origin_domain            = config.origin_domain
+    extra_origin_headers     = config.extra_origin_headers
   }] : config.origin_id => config }
 
-  origin_configs_by_path_behavior = { for config in flatten([for config in local.origin_configs : [for path, behavior in config.path_match_behavior : merge({ origin_id = config.origin_id, origin_path_prefix : config.path_prefix, path : path }, behavior)]]) : substr(sha256("${config.origin_id}-${config.path}"), 0, 12) => config }
+  origin_configs_by_path_behavior = { for config in flatten([for config in local.origin_configs : [for path, behavior in config.path_match_behavior : merge({ origin_id = config.origin_id, origin_path_prefix : config.path_prefix, path : path, origin_access_control_id = config.origin_access_control_id }, behavior)]]) : substr(sha256("${config.origin_id}-${config.path}"), 0, 12) => config }
 
   // This ensures that longer prefixes are always first when applied to the CDN cache configs; this is important
   // because we prioritize specificity (otherwise /a might take precedence over /abc)
@@ -268,32 +266,35 @@ resource "aws_cloudfront_cache_policy" "default_cache_behaviors" {
 }
 
 // The defaults for the origins (not for the overall CDN)
+# Note: If the origin_access_control_id is set, assume that we are targeting an S3 bucket, so set this to very specific values
+# to ensure that signatures are calculated correctly. As a result, we override the module inputs.
 resource "aws_cloudfront_origin_request_policy" "default_cache_behaviors" {
   for_each = local.origin_configs
   name     = "default-${each.key}"
   comment  = "Default origin request policy for origin id ${each.key} for ${var.name}"
+
   cookies_config {
-    cookie_behavior = length(each.value.default_cache_behavior.cookies_not_forwarded) == 0 ? "all" : "allExcept"
+    cookie_behavior = each.value.origin_access_control_id == null ? (length(each.value.default_cache_behavior.cookies_not_forwarded) == 0 ? "all" : "allExcept") : "none"
     dynamic "cookies" {
-      for_each = length(each.value.default_cache_behavior.cookies_not_forwarded) == 0 ? [] : ["items_needed"]
+      for_each = each.value.origin_access_control_id != null || length(each.value.default_cache_behavior.cookies_not_forwarded) == 0 ? [] : ["items_needed"]
       content {
         items = each.value.default_cache_behavior.cookies_not_forwarded
       }
     }
   }
   headers_config {
-    header_behavior = length(each.value.default_cache_behavior.headers_not_forwarded) == 0 ? "allViewer" : "allExcept"
+    header_behavior = each.value.origin_access_control_id == null ? (length(each.value.default_cache_behavior.headers_not_forwarded) == 0 ? "allViewer" : "allExcept") : "whitelist"
     dynamic "headers" {
-      for_each = length(each.value.default_cache_behavior.headers_not_forwarded) == 0 ? [] : ["items_needed"]
+      for_each = each.value.origin_access_control_id == null && length(each.value.default_cache_behavior.headers_not_forwarded) == 0 ? [] : ["items_needed"]
       content {
-        items = each.value.default_cache_behavior.headers_not_forwarded
+        items = each.value.origin_access_control_id == null ? each.value.default_cache_behavior.headers_not_forwarded : ["origin", "access-control-request-headers", "access-control-request-method"]
       }
     }
   }
   query_strings_config {
-    query_string_behavior = length(each.value.default_cache_behavior.query_strings_not_forwarded) == 0 ? "all" : "allExcept"
+    query_string_behavior = each.value.origin_access_control_id == null ? (length(each.value.default_cache_behavior.query_strings_not_forwarded) == 0 ? "all" : "allExcept") : "none"
     dynamic "query_strings" {
-      for_each = length(each.value.default_cache_behavior.query_strings_not_forwarded) == 0 ? [] : ["items_needed"]
+      for_each = each.value.origin_access_control_id != null || length(each.value.default_cache_behavior.query_strings_not_forwarded) == 0 ? [] : ["items_needed"]
       content {
         items = each.value.default_cache_behavior.query_strings_not_forwarded
       }
@@ -342,33 +343,37 @@ resource "aws_cloudfront_cache_policy" "path_behaviors" {
   }
 }
 
-// Path-based origin request policies
+# Path-based origin request policies
+# Note: If the origin_access_control_id is set, assume that we are targeting an S3 bucket, so set this to very specific values
+# to ensure that signatures are calculated correctly. As a result, we override the module inputs.
 resource "aws_cloudfront_origin_request_policy" "path_behaviors" {
+
   for_each = local.origin_configs_by_path_behavior
   name     = "path-${each.key}"
   comment  = "Path-based origin request policies for origin id ${each.value.origin_id} for path ${each.value.path} in CDN ${var.name}"
+
   cookies_config {
-    cookie_behavior = length(each.value.cookies_not_forwarded) == 0 ? "all" : "allExcept"
+    cookie_behavior = each.value.origin_access_control_id == null ? (length(each.value.cookies_not_forwarded) == 0 ? "all" : "allExcept") : "none"
     dynamic "cookies" {
-      for_each = length(each.value.cookies_not_forwarded) == 0 ? [] : ["items_needed"]
+      for_each = each.value.origin_access_control_id != null || length(each.value.cookies_not_forwarded) == 0 ? [] : ["items_needed"]
       content {
         items = each.value.cookies_not_forwarded
       }
     }
   }
   headers_config {
-    header_behavior = length(each.value.headers_not_forwarded) == 0 ? "allViewer" : "allExcept"
+    header_behavior = each.value.origin_access_control_id == null ? (length(each.value.headers_not_forwarded) == 0 ? "allViewer" : "allExcept") : "whitelist"
     dynamic "headers" {
-      for_each = length(each.value.headers_not_forwarded) == 0 ? [] : ["items_needed"]
+      for_each = each.value.origin_access_control_id == null && length(each.value.headers_not_forwarded) == 0 ? [] : ["items_needed"]
       content {
-        items = each.value.headers_not_forwarded
+        items = each.value.origin_access_control_id == null ? each.value.headers_not_forwarded : ["origin", "access-control-request-headers", "access-control-request-method"]
       }
     }
   }
   query_strings_config {
-    query_string_behavior = length(each.value.query_strings_not_forwarded) == 0 ? "all" : "allExcept"
+    query_string_behavior = each.value.origin_access_control_id == null ? (length(each.value.query_strings_not_forwarded) == 0 ? "all" : "allExcept") : "none"
     dynamic "query_strings" {
-      for_each = length(each.value.query_strings_not_forwarded) == 0 ? [] : ["items_needed"]
+      for_each = each.value.origin_access_control_id != null || length(each.value.query_strings_not_forwarded) == 0 ? [] : ["items_needed"]
       content {
         items = each.value.query_strings_not_forwarded
       }
@@ -376,137 +381,73 @@ resource "aws_cloudfront_origin_request_policy" "path_behaviors" {
   }
 }
 
-// Permissions for associated edge lambda functions
-data "aws_iam_policy_document" "lambda_assume_role_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-    principals {
-      identifiers = ["lambda.amazonaws.com"]
-      type        = "Service"
-    }
-    principals {
-      identifiers = ["edgelambda.amazonaws.com"]
-      type        = "Service"
-    }
-  }
-}
-
-resource "aws_iam_role" "lambda_edge_role" {
-  name_prefix        = "cdn-${var.name}-lambda-"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role_policy.json
-
-  tags = merge(data.pf_aws_tags.tags.tags, {
-    description = "Role for Lambda@Edge functions created for the ${var.name} CDN"
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_edge_policy" {
-  role       = aws_iam_role.lambda_edge_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-
-// The default 404 response function
-data "archive_file" "edge_function_404" {
-  type        = "zip"
-  source_file = "${path.module}/404.js"
-  output_path = "${path.module}/404.zip"
-}
-
-resource "random_id" "edge_function_404" {
-  prefix      = "${var.name}-404-"
+resource "random_id" "error" {
+  prefix      = "${var.name}-error-"
   byte_length = 4
 }
 
-resource "aws_lambda_function" "edge_function_404" {
-  provider         = aws.global
-  filename         = data.archive_file.edge_function_404.output_path
-  source_code_hash = data.archive_file.edge_function_404.output_base64sha512
-  function_name    = random_id.edge_function_404.hex
-  description      = "Returns 404 if none of the upstreams can handle the inbound request for ${var.name} CDN"
-  role             = aws_iam_role.lambda_edge_role.arn
-  handler          = "404.handler"
-  runtime          = "nodejs20.x"
-  publish          = true
-  memory_size      = 128
-  timeout          = 5
-
-  tags = merge(data.pf_aws_tags.tags.tags, {
-    description = "Default 404 response for the ${var.name} CDN"
-  })
-
-}
-
-resource "aws_lambda_permission" "edge_function_404" {
-  provider      = aws.global
-  statement_id  = "AllowExecutionFromCloudFront"
-  action        = "lambda:GetFunction"
-  function_name = aws_lambda_function.edge_function_404.function_name
-  principal     = "edgelambda.amazonaws.com"
-  lifecycle {
-    replace_triggered_by = [
-      aws_lambda_function.edge_function_404
-    ]
-  }
+resource "aws_cloudfront_function" "error" {
+  provider = aws.global
+  name     = random_id.error.hex
+  code     = file("${path.module}/404.js")
+  comment  = "Returns 404 if none of the upstreams can handle the inbound request for ${var.name} CDN"
+  runtime  = "cloudfront-js-2.0"
+  publish  = true
 }
 
 // The page rules function
-data "archive_file" "edge_function_page_rules" {
+resource "random_id" "request" {
   count = local.page_rules_enabled ? 1 : 0
 
-  type = "zip"
-  source {
-    content  = jsonencode(var.redirect_rules)
-    filename = "redirect-rules.json"
-  }
-  source {
-    content  = file("${path.module}/page-rules.js")
-    filename = "page-rules.js"
-  }
-  output_path = "${path.module}/page-rules.zip"
-}
-
-resource "random_id" "edge_function_page_rules" {
-  count = local.page_rules_enabled ? 1 : 0
-
-  prefix      = "${var.name}-page-rules-"
+  prefix      = "${var.name}-request-"
   byte_length = 4
 }
 
-resource "aws_lambda_function" "edge_function_page_rules" {
-  count    = local.page_rules_enabled ? 1 : 0
+resource "aws_cloudfront_function" "request" {
   provider = aws.global
+  count    = local.page_rules_enabled ? 1 : 0
 
-  filename         = data.archive_file.edge_function_page_rules[0].output_path
-  source_code_hash = data.archive_file.edge_function_page_rules[0].output_base64sha512
-  function_name    = random_id.edge_function_page_rules[0].hex
-  description      = "Page rules for inbound requests for ${var.name} CDN"
-  role             = aws_iam_role.lambda_edge_role.arn
-  handler          = "page-rules.handler"
-  runtime          = "nodejs20.x"
-  publish          = true
-  memory_size      = 128
-  timeout          = 5
-
-  tags = merge(data.pf_aws_tags.tags.tags, {
-    description = "Page rules for the ${var.name} CDN"
+  name = random_id.request[0].hex
+  code = templatefile("${path.module}/request.js", {
+    REDIRECT_RULES = jsonencode(var.redirect_rules)
+    CORS_RULES = jsonencode({
+      enabled         = var.cors_enabled
+      max_age         = var.cors_max_age_seconds
+      allowed_headers = var.cors_allowed_headers
+      allowed_methods = var.cors_allowed_methods
+      allowed_origins = concat([for domain in var.domains : "https://${domain}"], var.cors_additional_allowed_origins)
+    })
   })
+  comment = "Rules for inbound requests for ${var.name} CDN"
+  runtime = "cloudfront-js-2.0"
+  publish = true
 }
 
-resource "aws_lambda_permission" "edge_function_page_rules" {
-  count    = local.page_rules_enabled ? 1 : 0
-  provider = aws.global
+// The response function
+resource "random_id" "response" {
+  count = local.response_function_enabled ? 1 : 0
 
-  statement_id  = "AllowExecutionFromCloudFront"
-  action        = "lambda:GetFunction"
-  function_name = aws_lambda_function.edge_function_page_rules[0].function_name
-  principal     = "edgelambda.amazonaws.com"
-  lifecycle {
-    replace_triggered_by = [
-      aws_lambda_function.edge_function_page_rules[0]
-    ]
-  }
+  prefix      = "${var.name}-response-"
+  byte_length = 4
+}
+
+resource "aws_cloudfront_function" "response" {
+  provider = aws.global
+  count    = local.response_function_enabled ? 1 : 0
+
+  name = random_id.response[0].hex
+  code = templatefile("${path.module}/response.js", {
+    CORS_RULES = jsonencode({
+      enabled         = var.cors_enabled
+      max_age         = var.cors_max_age_seconds
+      allowed_headers = var.cors_allowed_headers
+      allowed_methods = var.cors_allowed_methods
+      allowed_origins = concat([for domain in var.domains : "https://${domain}"], var.cors_additional_allowed_origins)
+    })
+  })
+  comment = "Response mutator for ${var.name} CDN"
+  runtime = "cloudfront-js-2.0"
+  publish = true
 }
 
 resource "random_id" "log_bucket_name" {
@@ -542,17 +483,21 @@ resource "aws_cloudfront_distribution" "cdn" {
     for_each = local.origin_configs
     content {
 
-      origin_id   = origin.key
-      domain_name = origin.value.origin_domain
+      origin_id                = origin.key
+      domain_name              = origin.value.origin_domain
+      origin_access_control_id = origin.value.origin_access_control_id
 
       // defines how to connect to the origin
-      custom_origin_config {
-        origin_protocol_policy   = "https-only"
-        http_port                = 80
-        https_port               = 443
-        origin_ssl_protocols     = ["TLSv1.2"]
-        origin_keepalive_timeout = 60
-        origin_read_timeout      = 60
+      dynamic "custom_origin_config" {
+        for_each = origin.value.origin_access_control_id == null ? ["enabled"] : []
+        content {
+          origin_protocol_policy   = "https-only"
+          http_port                = 80
+          https_port               = 443
+          origin_ssl_protocols     = ["TLSv1.2"]
+          origin_keepalive_timeout = 60
+          origin_read_timeout      = 60
+        }
       }
 
       // extra headers to add IN ADDITION to the headers on the original request
@@ -583,9 +528,9 @@ resource "aws_cloudfront_distribution" "cdn" {
     cached_methods           = ["GET", "HEAD"]
     viewer_protocol_policy   = "redirect-to-https"
 
-    lambda_function_association {
-      event_type = "viewer-request"
-      lambda_arn = aws_lambda_function.edge_function_404.qualified_arn
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.error.arn
     }
   }
 
@@ -596,16 +541,23 @@ resource "aws_cloudfront_distribution" "cdn" {
       path_pattern             = replace("${ordered_cache_behavior.value.origin_path_prefix}${ordered_cache_behavior.value.path}", "////", "/")
       target_origin_id         = ordered_cache_behavior.value.origin_id
       cache_policy_id          = aws_cloudfront_cache_policy.path_behaviors[ordered_cache_behavior.key].id
-      origin_request_policy_id = aws_cloudfront_origin_request_policy.path_behaviors[ordered_cache_behavior.key].id
+      origin_request_policy_id = aws_cloudfront_origin_request_policy.default_cache_behaviors[ordered_cache_behavior.value.origin_id].id
       allowed_methods          = ordered_cache_behavior.value.allowed_methods
       cached_methods           = ordered_cache_behavior.value.cached_methods
       compress                 = ordered_cache_behavior.value.compression_enabled
       viewer_protocol_policy   = ordered_cache_behavior.value.viewer_protocol_policy
-      dynamic "lambda_function_association" {
+      dynamic "function_association" {
         for_each = local.page_rules_enabled ? ["enabled"] : []
         content {
-          event_type = "viewer-request"
-          lambda_arn = aws_lambda_function.edge_function_page_rules[0].qualified_arn
+          event_type   = "viewer-request"
+          function_arn = aws_cloudfront_function.request[0].arn
+        }
+      }
+      dynamic "function_association" {
+        for_each = local.response_function_enabled ? ["enabled"] : []
+        content {
+          event_type   = "viewer-response"
+          function_arn = aws_cloudfront_function.response[0].arn
         }
       }
     }
@@ -623,11 +575,18 @@ resource "aws_cloudfront_distribution" "cdn" {
       cached_methods           = ordered_cache_behavior.value.default_cache_behavior.cached_methods
       compress                 = ordered_cache_behavior.value.default_cache_behavior.compression_enabled
       viewer_protocol_policy   = ordered_cache_behavior.value.default_cache_behavior.viewer_protocol_policy
-      dynamic "lambda_function_association" {
+      dynamic "function_association" {
         for_each = local.page_rules_enabled ? ["enabled"] : []
         content {
-          event_type = "viewer-request"
-          lambda_arn = aws_lambda_function.edge_function_page_rules[0].qualified_arn
+          event_type   = "viewer-request"
+          function_arn = aws_cloudfront_function.request[0].arn
+        }
+      }
+      dynamic "function_association" {
+        for_each = local.response_function_enabled ? ["enabled"] : []
+        content {
+          event_type   = "viewer-response"
+          function_arn = aws_cloudfront_function.response[0].arn
         }
       }
     }

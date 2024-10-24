@@ -187,11 +187,45 @@ module "sensor" {
     },
     {
       template = {
-        name = "log"
-        log = {
-          intervalSeconds = 1
+        name = module.module_uploader_workflow.name
+        conditions = "push-to-main"
+        argoWorkflow = {
+          operation = "submit"
+          source = {
+            resource = {
+              apiVersion = "argoproj.io/v1alpha1"
+              kind = "Workflow"
+              metadata = {
+                generateName = module.module_uploader_workflow.generate_name
+                namespace = local.namespace
+              }
+              spec = {
+                arguments = module.module_uploader_workflow.arguments
+                workflowTemplateRef = {
+                  name = module.module_uploader_workflow.name
+                }
+              }
+            }
+          }
+          parameters = [
+            {
+              dest = "spec.arguments.parameters.0.value"
+              src = {
+                dependencyName = "push-to-main"
+                dataKey = "body.after" # The git commit after the push
+              }
+            }
+          ]
         }
       }
-    }
+    },
+#     {
+#       template = {
+#         name = "log"
+#         log = {
+#           intervalSeconds = 1
+#         }
+#       }
+#     }
   ]
 }

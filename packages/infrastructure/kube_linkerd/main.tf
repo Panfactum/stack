@@ -14,10 +14,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     pf = {
       source  = "panfactum/pf"
       version = "0.0.3"
@@ -42,12 +38,6 @@ locals {
   linkerd_profile_validator_webhook_secret = "linkerd-sp-validator-k8s-tls"     # MUST be named this
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_destination" {
   source = "../kube_workload_utility"
 
@@ -55,6 +45,7 @@ module "util_destination" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -67,6 +58,7 @@ module "util_identity" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -79,6 +71,7 @@ module "util_proxy_injector" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -87,19 +80,24 @@ module "util_proxy_injector" {
 module "util_proxy" {
   source = "../kube_workload_utility"
 
-  workload_name            = "linkerd-proxy"
-  burstable_nodes_enabled  = true
-  controller_nodes_enabled = true
-  extra_labels             = data.pf_kube_labels.labels.labels
+  workload_name               = "linkerd-proxy"
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  extra_labels                = data.pf_kube_labels.labels.labels
+
 }
 
 module "util_viz" {
   source = "../kube_workload_utility"
 
-  workload_name            = "linkerd-viz"
-  burstable_nodes_enabled  = true
-  controller_nodes_enabled = true
-  extra_labels             = data.pf_kube_labels.labels.labels
+  workload_name               = "linkerd-viz"
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  extra_labels                = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -244,7 +242,6 @@ resource "helm_release" "linkerd" {
     yamlencode({
       controllerLogLevel        = var.log_level
       controllerLogFormat       = "json"
-      controllerImage           = "${module.pull_through.github_registry}/linkerd/controller"
       controllerReplicas        = 2
       enablePodAntiAffinity     = true  # This should always be enabled as we really need to avoid having the service mesh go down
       enablePodDisruptionBudget = false # We do this below
@@ -267,9 +264,6 @@ resource "helm_release" "linkerd" {
       }
 
       proxy = {
-        image = {
-          name = "${module.pull_through.github_registry}/linkerd/proxy"
-        }
         nativeSidecar = true
         logFormat     = "json"
         logLevel      = "${var.log_level},linkerd=${var.log_level},linkerd2_proxy=${var.log_level}"
@@ -287,9 +281,6 @@ resource "helm_release" "linkerd" {
       }
 
       policyController = {
-        image = {
-          name = "${module.pull_through.github_registry}/linkerd/policy-controller"
-        }
         logLevel = var.log_level
         resources = {
           memory = {
@@ -367,16 +358,7 @@ resource "helm_release" "linkerd" {
       }
 
 
-      debugContainer = {
-        image = {
-          name = "${module.pull_through.github_registry}/linkerd/debug"
-        }
-      }
-
       proxyInit = {
-        image = {
-          name = "${module.pull_through.github_registry}/linkerd/proxy-init"
-        }
         logFormat = "json"
         logLevel  = var.log_level
 
@@ -494,34 +476,6 @@ resource "helm_release" "linkerd" {
   ]
 }
 
-resource "kubectl_manifest" "proxy_image_cache" {
-  count = var.node_image_cache_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "kubefledged.io/v1alpha2"
-    kind       = "ImageCache"
-    metadata = {
-      name      = "linkerd-proxy"
-      namespace = local.namespace
-      labels    = module.util_proxy.labels
-    }
-    spec = {
-      cacheSpec = [
-        {
-          # These two images are needed by virtually every pod in the cluster so we should ensure they are
-          # always immediately available (don't forget to update when updating linkerd)
-          images = [
-            "${module.pull_through.github_registry}/linkerd/proxy-init:v2.4.0",
-            "${module.pull_through.github_registry}/linkerd/proxy:edge-24.5.1",
-          ]
-        }
-      ]
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.linkerd]
-}
-
 /***************************************
 * Linkerd Viz
 ***************************************/
@@ -541,7 +495,6 @@ resource "helm_release" "viz" {
 
   values = [
     yamlencode({
-      defaultRegistry       = "${module.pull_through.github_registry}/linkerd"
       defaultLogFormat      = "json"
       defaultLogLevel       = var.log_level
       tolerations           = module.util_viz.tolerations

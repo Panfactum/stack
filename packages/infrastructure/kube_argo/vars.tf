@@ -1,7 +1,7 @@
 variable "argo_workflows_helm_version" {
   description = "The version of the argo workflows helm chart to deploy"
   type        = string
-  default     = "0.41.1"
+  default     = "0.42.5"
 }
 
 variable "argo_events_helm_version" {

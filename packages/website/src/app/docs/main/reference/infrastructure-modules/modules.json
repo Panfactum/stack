@@ -96,6 +96,11 @@
       "group": "aws"
     },
     {
+      "module": "aws_s3_public_website",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
       "module": "aws_ses_domain",
       "type": "direct",
       "group": "aws"
@@ -261,6 +266,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_kyverno",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_linkerd",
       "type": "direct",
       "group": "kubernetes"
@@ -298,6 +308,11 @@
     {
       "module": "kube_pod",
       "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_policies",
+      "type": "direct",
       "group": "kubernetes"
     },
     {

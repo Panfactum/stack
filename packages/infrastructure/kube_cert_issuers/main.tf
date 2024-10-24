@@ -24,9 +24,10 @@ terraform {
 }
 
 locals {
-  ci_public_name      = "public"
-  ci_internal_name    = "internal"
-  ci_internal_ca_name = "internal-ca"
+  ci_public_name       = "public"
+  ci_internal_name     = "internal"
+  ci_internal_rsa_name = "internal-rsa"
+  ci_internal_ca_name  = "internal-ca"
 
   route53_solvers = [
     for domain, config in var.route53_zones : {
@@ -287,6 +288,113 @@ resource "kubernetes_config_map" "ca_bundle" {
   data = {
     "ca.crt" = vault_pki_secret_backend_root_cert.pki_internal.issuing_ca
   }
+}
+
+//////////////////////////////////
+/// Regular certs - RSA
+//////////////////////////////////
+
+resource "kubernetes_service_account" "vault_rsa_issuer" {
+  metadata {
+    name      = "vault-issuer-rsa"
+    namespace = var.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
+}
+
+resource "kubernetes_role" "vault_rsa_issuer" {
+  metadata {
+    name      = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
+    namespace = var.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
+  rule {
+    verbs          = ["create"]
+    resources      = ["serviceaccounts/token"]
+    resource_names = [kubernetes_service_account.vault_rsa_issuer.metadata[0].name]
+    api_groups     = [""]
+  }
+}
+
+resource "kubernetes_role_binding" "vault_rsa_issuer" {
+  metadata {
+    name      = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
+    namespace = var.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "cert-manager"
+    namespace = var.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.vault_rsa_issuer.metadata[0].name
+  }
+}
+
+data "vault_policy_document" "vault_rsa_issuer" {
+  rule {
+    capabilities = ["create", "read", "update"]
+    path         = "${vault_mount.pki_internal.path}/sign/${vault_pki_secret_backend_role.vault_rsa_issuer.name}"
+  }
+}
+
+module "vault_rsa_role" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
+  service_account_namespace = var.namespace
+  vault_policy_hcl          = data.vault_policy_document.vault_rsa_issuer.hcl
+  audience                  = "vault://${local.ci_internal_rsa_name}"
+  token_ttl_seconds         = 120
+}
+
+resource "vault_pki_secret_backend_role" "vault_rsa_issuer" {
+  backend = vault_mount.pki_internal.path
+  name    = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
+
+  // This is super permissive b/c these certificates are only used for
+  // internal traffic encryption
+  allow_any_name              = true
+  allow_wildcard_certificates = true
+  enforce_hostnames           = false
+  allow_ip_sans               = true
+  require_cn                  = false
+
+  key_type = "rsa"
+  key_bits = 4096
+
+  max_ttl = 60 * 60 * 24 * 90 // Internal certs need to be rotated at least quarterly
+}
+
+resource "kubectl_manifest" "internal_rsa_ci" {
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name   = local.ci_internal_rsa_name
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      vault = {
+        path   = "${vault_mount.pki_internal.path}/sign/${vault_pki_secret_backend_role.vault_rsa_issuer.name}"
+        server = var.vault_internal_url
+        auth = {
+          kubernetes = {
+            role      = module.vault_rsa_role.role_name
+            mountPath = "/v1/auth/kubernetes"
+            serviceAccountRef = {
+              name = kubernetes_service_account.vault_rsa_issuer.metadata[0].name
+            }
+          }
+        }
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 //////////////////////////////////

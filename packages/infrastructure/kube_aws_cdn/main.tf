@@ -37,12 +37,17 @@ module "cdn" {
     default_cache_behavior = lookup(config, "default_cache_behavior", {})
     path_match_behavior    = lookup(config, "path_match_behavior", {})
   }]
-  redirect_rules            = var.redirect_rules
-  price_class               = var.price_class
-  geo_restriction_type      = var.geo_restriction_type
-  geo_restriction_list      = var.geo_restriction_list
-  origin_shield_enabled     = var.origin_shield_enabled
-  logging_enabled           = var.logging_enabled
-  logging_cookies_enabled   = var.logging_cookies_enabled
-  logging_expire_after_days = var.logging_expire_after_days
+  redirect_rules                  = var.redirect_rules
+  price_class                     = var.price_class
+  cors_enabled                    = var.cors_enabled
+  cors_additional_allowed_origins = var.cors_additional_allowed_origins
+  cors_allowed_headers            = var.cors_allowed_headers
+  cors_allowed_methods            = var.cors_allowed_methods
+  cors_max_age_seconds            = var.cors_max_age_seconds
+  geo_restriction_type            = var.geo_restriction_type
+  geo_restriction_list            = var.geo_restriction_list
+  origin_shield_enabled           = var.origin_shield_enabled
+  logging_enabled                 = var.logging_enabled
+  logging_cookies_enabled         = var.logging_cookies_enabled
+  logging_expire_after_days       = var.logging_expire_after_days
 }

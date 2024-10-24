@@ -10,10 +10,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -69,12 +65,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_ingress_nginx"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
@@ -82,6 +72,7 @@ module "util" {
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
   lifetime_evictions_enabled  = false
 
 
@@ -175,9 +166,6 @@ resource "helm_release" "nginx_ingress" {
       commonLabels     = module.util.labels
 
       controller = {
-        image = {
-          registry = module.pull_through.kubernetes_registry
-        }
 
         replicaCount = var.min_replicas < 6 && var.enhanced_ha_enabled ? 6 : var.min_replicas < 3 ? 3 : var.min_replicas
 
@@ -399,7 +387,6 @@ resource "helm_release" "nginx_ingress" {
   // so we manually inject the "plugins" field into the configmap
   postrender {
     binary_path = "${path.module}/kustomize/kustomize.sh"
-    args        = [var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"]
   }
 
   depends_on = [module.webhook_cert]

@@ -10,7 +10,3 @@ patches:
     target:
       kind: Certificate
       name: aws-load-balancer-serving-cert
-  - path: deployment.yaml
-    target:
-      kind: Deployment
-      name: alb-controller

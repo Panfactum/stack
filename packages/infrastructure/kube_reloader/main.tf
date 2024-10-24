@@ -35,12 +35,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_reloader"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -48,6 +42,7 @@ module "util_controller" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single replica
   az_spread_preferred                  = false // single replica
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -91,9 +86,6 @@ resource "helm_release" "reloader" {
         matchLabels            = module.util_controller.match_labels
         enableHA               = false
         deployment = {
-          image = {
-            name = "${module.pull_through.github_registry}/stakater/reloader"
-          }
           labels = merge(
             { for k, v in module.util_controller.labels : k => v if k != "id" }, # id gets duplicated by matchLabels and breaks kustomize
             {
@@ -125,13 +117,6 @@ resource "helm_release" "reloader" {
       }
     })
   ]
-
-  dynamic "postrender" {
-    for_each = var.panfactum_scheduler_enabled ? ["enabled"] : []
-    content {
-      binary_path = "${path.module}/kustomize/kustomize.sh"
-    }
-  }
 }
 
 resource "kubectl_manifest" "vpa" {

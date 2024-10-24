@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "2.12.1"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.70.0"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.6.0"
@@ -35,12 +31,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_pvc_autoresizer"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -48,6 +38,7 @@ module "util_controller" {
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single copy
   az_spread_preferred                  = false // single copy
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -82,7 +73,7 @@ resource "helm_release" "pvc_autoresizer" {
   values = [
     yamlencode({
       image = {
-        repository = "${module.pull_through.ecr_public_registry}/t8f0s7h5/pvc-autoresizer"
+        repository = "public.ecr.aws/t8f0s7h5/pvc-autoresizer"
         tag        = var.pvc_autoresizer_version
       }
       controller = {

@@ -115,12 +115,11 @@ locals {
     var.workload_name != null ? {
       "panfactum.com/workload" = var.workload_name
     } : null,
-    var.lifetime_evictions_enabled ? null : {
-      "panfactum.com/prevent-lifetime-eviction" = "true"
+    {
+      "panfactum.com/prevent-lifetime-eviction"  = var.lifetime_evictions_enabled ? "false" : "true",
+      "panfactum.com/scheduler-enabled"          = var.panfactum_scheduler_enabled ? "true" : "false",
+      "panfactum.com/pull-through-cache-enabled" = var.pull_through_cache_enabled ? "true" : "false"
     },
-    var.panfactum_scheduler_enabled ? {
-      "panfactum.com/scheduler" = "true"
-    } : null,
     local.match_labels
   )
 

@@ -30,7 +30,7 @@ are called points-of-presence (PoPs). PoPs serve several purposes:
 
 - Enhancing TLS performance by speeding up the initial connection between the client and server ([reference](https://www.imperva.com/learn/performance/cdn-and-ssl-tls/))
 - Improving overall performance and reducing load on servers by caching responses from origin servers
-- Running edge computations ([Lambda@Edge](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html))
+- Running edge computations ([CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html))
 
 Unlike traditional servers where DNS records such as `example.com` route
 to a single set of servers, CloudFront works with AWS's DNS servers to ensure that clients are always routed
@@ -91,7 +91,7 @@ If so, the rules from that behavior configuration will be applied. See below.
 
 The cache "behavior" for both `default_cache_behavior` and `path_match_behavior` works as follows:
 
-1. The `view_protocol_policy` ([docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesViewerProtocolPolicy))
+1. The `viewer_protocol_policy` ([docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesViewerProtocolPolicy))
 will be applied. [^2]
 
 2. Any global redirect rules (see below) will take effect. Otherwise, the request will be processed.
@@ -155,6 +155,34 @@ redirect_rules = [{
 
 The above rule would redirect a request for `http://example.com/some/resource` to `https://new.example.com/some/rseource`.
 
+#### CORS
+
+This module allows [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) header handling to happen inside CloudFront
+rather than by your origin servers.
+
+To enable this functionality, set `cors_enabled` to `true`.
+
+When this is enabled, CloudFront will respond to all `OPTIONS` preflight requests without forwarding any requests to the
+origin. Additionally, CloudFront will ensure all responses returned from the origin have the appropriate CORS
+headers set before forwarding the response to the client.
+
+You can customize the CORS behavior with the following inputs:
+
+- `cors_max_age_seconds`: Sets the `Access-Control-Max-Age` response header.
+- `cors_allowed_headers`: Sets the `Access-Control-Allow-Headers` response header.
+- `cors_allowed_methods`: Sets the `Access-Control-Allow-Methods` response header.
+
+By default, the only allowed origins will be from the `domains` input. If you want to allow additional origins,
+you must set `cors_additional_allowed_origins`. Adding `"*"` to this input will allow all origins.
+
+<MarkdownAlert severity="warning">
+   By enabling CORS handling in CloudFront, the CORS headers set by your origin servers will be overwritten.
+</MarkdownAlert>
+
+#### S3 Origins
+
+If you want to use an S3 bucket as the origin for this CloudFront distribution, you should use our
+[aws_s3_public_website](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
 
 ### Number of PoPs
 

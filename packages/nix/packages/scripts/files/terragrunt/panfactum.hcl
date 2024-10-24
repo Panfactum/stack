@@ -71,7 +71,7 @@ locals {
   pf_stack_local_ref                     = local.pf_stack_version == "local" ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", "${local.pf_stack_local_path}/packages/infrastructure") : ""
   pf_stack_local_use_relative            = lookup(local.vars, "pf_stack_local_use_relative", true)
   pf_stack_local_path_relative_to_module = local.pf_stack_version == "local" && local.pf_stack_local_use_relative ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "realpath", "--relative-to=${local.repo_root}", local.pf_stack_version == "local" ? local.pf_stack_local_path : local.repo_root) : ""
-  pf_stack_source                        = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "${local.pf_stack_repo}//packages/infrastructure/${local.module}?ref=${local.pf_stack_version_commit_hash}"
+  pf_stack_source                        = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//${local.module}"
 
   # Repo metadata
   repo_vars      = jsondecode(run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-repo-variables"))
@@ -329,7 +329,7 @@ retry_sleep_interval_sec = 30
 inputs = merge(
   local.extra_inputs,
   {
-    pf_module_source = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "../../../../${local.pf_stack_local_path_relative_to_module}/packages/infrastructure//" : "${local.pf_stack_local_path}/packages/infrastructure//") : "${local.pf_stack_repo}//packages/infrastructure/"
-    pf_module_ref    = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : "?ref=${local.pf_stack_version_commit_hash}"
+    pf_module_source = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "../../../../${local.pf_stack_local_path_relative_to_module}/packages/infrastructure//" : "${local.pf_stack_local_path}/packages/infrastructure//") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//"
+    pf_module_ref    = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : ""
   }
 )

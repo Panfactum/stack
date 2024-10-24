@@ -42,11 +42,6 @@ locals {
   deregistration_delay = 60
 }
 
-module "pull_through" {
-  source                     = "../aws_ecr_pull_through_cache_addresses"
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "constants" {
   source = "../kube_constants"
 }
@@ -152,6 +147,7 @@ module "bastion" {
   az_spread_preferred                  = var.enhanced_ha_enabled
   priority_class_name                  = module.constants.cluster_important_priority_class_name
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access
   // SSHD requires root to run unfortunately. However, we drop all capability except
@@ -160,7 +156,7 @@ module "bastion" {
   containers = [
     {
       name             = "bastion"
-      image_registry   = module.pull_through.ecr_public_registry
+      image_registry   = "public.ecr.aws"
       image_repository = "t8f0s7h5/bastion"
       image_tag        = var.bastion_image_version
       command = [
@@ -191,7 +187,7 @@ module "bastion" {
     {
       name             = "permission-init"
       init             = true
-      image_registry   = module.pull_through.ecr_public_registry
+      image_registry   = "public.ecr.aws"
       image_repository = "t8f0s7h5/bastion"
       image_tag        = var.bastion_image_version
       command = [
