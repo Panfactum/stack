@@ -1,10 +1,20 @@
 ### GET
-GET http://localhost:3000/health
+GET {{url}}/health
 Accept: application/json
 
 ### Send POST request with json body
-POST http://localhost:3000/user/registration
+POST {{url}}/registration
 Content-Type: application/json
+
+{
+  "username": "testing2",
+  "password": "pass"
+}
+
+### Send POST request with json body
+GET {{url}}/validate
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJhNzQwMjRmLTFiNTgtNGIwOS1iMTgzLTBkY2Q1YjA4Y2MxMSIsInVzZXJuYW1lIjoidGVzdGluZzIiLCJpYXQiOjE3Mjk3OTA4OTh9.urkoujHTiuF0IDKmQeQWhae_BQtLFUcmliizw3prLZk
 
 {
   "username": "testing2",

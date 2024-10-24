@@ -1,5 +1,5 @@
 ### Send POST request with json body
-POST http://localhost:8080/auth/track
+POST http://localhost:8080/track/
 Content-Type: application/json
 Authorization: Bearer "x"
 

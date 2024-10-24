@@ -60,9 +60,9 @@ func main() {
 
 	r.HandleFunc("/health", handlers.HealthCheckHandler).Methods("GET")
 
-	authRouter := r.PathPrefix("/auth").Subrouter()
-	authRouter.Use(middleware.AuthMiddleware)
-	authRouter.HandleFunc("/track", handlers.TrackURLHandler(db)).Methods("POST")
+	trackRouter := r.PathPrefix("/track").Subrouter()
+	trackRouter.Use(middleware.AuthMiddleware)
+	trackRouter.HandleFunc("/", handlers.TrackURLHandler(db)).Methods("POST")
 
 	port := os.Getenv("PORT")
 	if port == "" {

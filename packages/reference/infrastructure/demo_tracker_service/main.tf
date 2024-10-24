@@ -49,7 +49,7 @@ module "demo_tracker_service_deployment" {
     DB_PORT  = module.database.pooler_rw_service_port
     DB_NAME  = var.db_name
     DB_SCHEMA = var.db_schema
-    SECRET = var.secret
+    TOKEN_VALIDATION_URL = var.token_validation_url
   }
 
   common_env_from_secrets = {

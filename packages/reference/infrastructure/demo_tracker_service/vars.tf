@@ -23,8 +23,8 @@ variable "db_schema" {
   type        = string
 }
 
-variable "secret" {
-  description = "The secret to used for jwt validation"
+variable "token_validation_url" {
+  description = "The URL to use for token validation"
   type        = string
 }
 

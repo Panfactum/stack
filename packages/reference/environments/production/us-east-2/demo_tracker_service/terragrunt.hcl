@@ -24,6 +24,6 @@ inputs = {
   image_version = run_cmd("pf-get-commit-hash", "--ref=service-examples", "--repo=https://github.com/panfactum/stack")
   healthcheck_route = "/health"
   db_name = "postgres"
-  db_schema = "app"
-  secret = "secret"
+  db_schema = "public"
+  token_validation_url = "http://demo-user-service.demo-user.service/validate"
 }
