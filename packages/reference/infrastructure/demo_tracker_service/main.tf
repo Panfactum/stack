@@ -8,7 +8,7 @@ terraform {
 }
 
 locals {
-  name = "demo-user-service"
+  name = "demo-tracker-service"
   namespace = module.namespace.namespace
   port = 3000
 }
@@ -36,7 +36,7 @@ module "database" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
 }
 
-module "demo_user_service_deployment" {
+module "demo_tracker_service_deployment" {
   source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   namespace = module.namespace.namespace
   name      = local.name
@@ -44,9 +44,7 @@ module "demo_user_service_deployment" {
   replicas                             = 2
 
   common_env = {
-    NODE_ENV = "production"
     PORT     = local.port
-    HOST = "0.0.0.0"
     DB_HOST  = module.database.pooler_rw_service_name
     DB_PORT  = module.database.pooler_rw_service_port
     DB_NAME  = var.db_name
@@ -68,18 +66,15 @@ module "demo_user_service_deployment" {
 
   containers = [
     {
-      name    = "demo-user-service"
+      name    = "demo-tracker-service"
       image_registry   = "891377197483.dkr.ecr.us-east-2.amazonaws.com"
-      image_repository = "demo-user-service"
+      image_repository = "demo-tracker-service"
       image_tag = var.image_version
-      command = [
-        "node",
-        "index.js"
-      ]
+      command = []
       liveness_probe_type  = "HTTP"
       liveness_probe_port  = local.port
       liveness_probe_route = var.healthcheck_route
-      minimum_memory = 200
+      minimum_memory = 100
       ports = {
         http ={
           port = local.port
@@ -102,7 +97,7 @@ module "ingress" {
 
   domains      = [var.domain]
   ingress_configs = [{
-    path_prefix = "/user"
+    path_prefix = "/tracker"
     remove_prefix = true
     service      = local.name
     service_port = local.port
@@ -116,5 +111,5 @@ module "ingress" {
   rate_limiting_enabled          = true
   permissions_policy_enabled     = true
 
-  depends_on = [module.demo_user_service_deployment]
+  depends_on = [module.demo_tracker_service_deployment]
 }

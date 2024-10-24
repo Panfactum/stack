@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
-
-	"net/http"
-
 	"demo-tracker-service/models"
+	"encoding/json"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type TrackRequest struct {

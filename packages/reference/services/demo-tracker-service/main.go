@@ -4,10 +4,13 @@ import (
 	"demo-tracker-service/handlers"
 	"demo-tracker-service/middleware"
 	"demo-tracker-service/models"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
+	"log"
 	"net/http"
 	"os"
 )
@@ -15,19 +18,37 @@ import (
 var db *gorm.DB
 
 func init() {
-	err := godotenv.Load()
+	// Load environment variables from the .env file only if it exists (development)
+	if _, err := os.Stat(".env"); err == nil {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
+
+	// Read database configuration from environment variables
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+	dbSchema := os.Getenv("DB_SCHEMA")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+
+	// Construct the connection string (DSN) for PostgreSQL
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
+
+	// Connect to the database
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: false,
+			TablePrefix:   dbSchema,
+		},
+	})
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("failed to connect to database:", err)
 	}
 
-	dsn := os.Getenv("DATABASE_URL")
-	var errDB error
-	db, errDB = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if errDB != nil {
-		log.Fatal("failed to connect to database:", errDB)
-	}
-
-	// Auto migrate the URL model
 	err = db.AutoMigrate(&models.URL{})
 	if err != nil {
 		log.Fatal("failed to migrate database:", err)
@@ -37,12 +58,21 @@ func init() {
 func main() {
 	r := mux.NewRouter()
 
-	// Add middleware for JWT auth
-	r.Use(middleware.AuthMiddleware)
+	r.HandleFunc("/health", handlers.HealthCheckHandler).Methods("GET")
 
-	// Add route to handle tracking
-	r.HandleFunc("/track", handlers.TrackURLHandler(db)).Methods("POST")
+	authRouter := r.PathPrefix("/auth").Subrouter()
+	authRouter.Use(middleware.AuthMiddleware)
+	authRouter.HandleFunc("/track", handlers.TrackURLHandler(db)).Methods("POST")
 
-	log.Println("Server started on :8080")
-	http.ListenAndServe(":8080", r)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port if not set
+	}
+
+	log.Printf("Server starting on port %s", port)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
+	if err != nil {
+		log.Fatal("Server failed to start:", err)
+	}
+	log.Printf("Server started on port %s", port)
 }
