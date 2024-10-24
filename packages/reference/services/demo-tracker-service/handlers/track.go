@@ -13,8 +13,6 @@ type TrackRequest struct {
 
 func TrackURLHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Context().Value("user_id").(string)
-
 		var req TrackRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -27,14 +25,17 @@ func TrackURLHandler(db *gorm.DB) http.HandlerFunc {
 		}
 
 		url := models.URL{
-			UserID:    userID,
 			TargetURL: req.TargetURL,
 		}
 
-		// Check if URL already exists for the user
+		// Check if URL already exists
 		var existingURL models.URL
-		if err := db.Where("user_id = ? AND target_url = ?", userID, req.TargetURL).First(&existingURL).Error; err == nil {
-			http.Error(w, "URL already exists for this user", http.StatusConflict)
+		if db == nil {
+			http.Error(w, "Database connection is not available", http.StatusInternalServerError)
+			return
+		}
+		if err := db.Where("target_url = ?", req.TargetURL).First(&existingURL).Error; err == nil {
+			http.Error(w, "URL already exists", http.StatusConflict)
 			return
 		}
 

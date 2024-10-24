@@ -39,7 +39,8 @@ func init() {
 		dbHost, dbPort, dbUser, dbPassword, dbName)
 
 	// Connect to the database
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	var err error
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: false,
 			TablePrefix:   dbSchema + ".",

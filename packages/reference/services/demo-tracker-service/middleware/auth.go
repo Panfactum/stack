@@ -30,7 +30,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-
+		fmt.Println(validationURL)
 		// Create a new HTTP request to validate the token
 		req, err := http.NewRequest("GET", validationURL, nil)
 		if err != nil {
@@ -43,7 +43,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// Set a timeout for the API call
 		client := &http.Client{Timeout: 5 * time.Second}
-
+		fmt.Println(validationURL)
 		// Make the API request to validate the token
 		resp, err := client.Do(req)
 		if err != nil {
@@ -57,7 +57,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
 			return
 		}
-
+		fmt.Println("token is valid")
 		// Token is valid, call the next handler in the chain
 		next.ServeHTTP(w, r)
 	})

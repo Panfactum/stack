@@ -1,9 +1,18 @@
 ### Send POST request with json body
-POST http://localhost:8080/track/
+POST {{url}}/track/
 Content-Type: application/json
-Authorization: Bearer "x"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJhNzQwMjRmLTFiNTgtNGIwOS1iMTgzLTBkY2Q1YjA4Y2MxMSIsInVzZXJuYW1lIjoidGVzdGluZzIiLCJpYXQiOjE3Mjk3OTA4OTh9.urkoujHTiuF0IDKmQeQWhae_BQtLFUcmliizw3prLZk
 
 {
-  "id": 999,
-  "value": "content"
+  "target_url": "https://panfactum.com"
+}
+
+### Send POST request with json body
+GET {{url}}/validate
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJhNzQwMjRmLTFiNTgtNGIwOS1iMTgzLTBkY2Q1YjA4Y2MxMSIsInVzZXJuYW1lIjoidGVzdGluZzIiLCJpYXQiOjE3Mjk3OTA4OTh9.urkoujHTiuF0IDKmQeQWhae_BQtLFUcmliizw3prLZk
+
+{
+  "username": "testing2",
+  "password": "pass"
 }
