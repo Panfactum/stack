@@ -15,7 +15,6 @@ RUN npm i -g pnpm@8.6.12
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
 COPY packages/reference/services/demo-user-service/package.json packages/reference/services/demo-user-service/
-COPY packages/eslint/ packages/eslint/
 RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
 
 #################################################

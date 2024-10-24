@@ -1,7 +1,2 @@
 *
-!handlers
-!middleware
-!models
-!go.mod
-!go.sum
-!main.go
+!src
