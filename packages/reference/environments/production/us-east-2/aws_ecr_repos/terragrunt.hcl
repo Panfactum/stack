@@ -13,6 +13,8 @@ inputs = {
     scraper = {}
     demo-user-service = {}
     demo-tracker-service = {}
+    demo-python-service = {}
+
     test = {
       expire_all_images = true  # b/c this is only for testing BuildKit functionality
       is_immutable      = false # b/c this is only used for testing BuildKit functionality
