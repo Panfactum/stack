@@ -21,7 +21,7 @@ inputs = {
   namespace = "demo-tracker-service"
 
   domain        = "demo.panfactum.com"
-  image_version = run_cmd("pf-get-commit-hash", "--ref=service-examples", "--repo=https://github.com/panfactum/stack")
+  image_version = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=service-examples", "--repo=https://github.com/panfactum/stack")
   healthcheck_route = "/health"
   db_name = "postgres"
   db_schema = "public"

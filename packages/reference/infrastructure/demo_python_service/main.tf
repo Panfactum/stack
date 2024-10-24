@@ -70,7 +70,7 @@ module "demo_python_service_deployment" {
       image_registry   = "891377197483.dkr.ecr.us-east-2.amazonaws.com"
       image_repository = local.name
       image_tag = var.image_version
-      command = []
+      command = ["gunicorn", "--bind", "0.0.0.0:${local.port}", "src.app:app"]
       liveness_probe_type  = "HTTP"
       liveness_probe_port  = local.port
       liveness_probe_route = var.healthcheck_route
@@ -82,6 +82,13 @@ module "demo_python_service_deployment" {
       }
     }
   ]
+
+  tmp_directories = {
+    "cache" = {
+      mount_path = "/tmp"
+      size_mb = 100
+    }
+  }
 
   vpa_enabled = var.vpa_enabled
   controller_nodes_enabled = true
