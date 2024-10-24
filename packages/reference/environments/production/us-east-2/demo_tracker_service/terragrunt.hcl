@@ -25,5 +25,5 @@ inputs = {
   healthcheck_route = "/health"
   db_name = "postgres"
   db_schema = "public"
-  token_validation_url = "http://demo-user-service.demo-user.service/validate"
+  token_validation_url = "http://demo-user-service.demo-user-service:3000/validate"
 }

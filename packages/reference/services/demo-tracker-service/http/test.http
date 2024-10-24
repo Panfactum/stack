@@ -1,18 +1,12 @@
+### GET
+GET {{url}}/health
+Accept: application/json
+
 ### Send POST request with json body
 POST {{url}}/track/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJhNzQwMjRmLTFiNTgtNGIwOS1iMTgzLTBkY2Q1YjA4Y2MxMSIsInVzZXJuYW1lIjoidGVzdGluZzIiLCJpYXQiOjE3Mjk3OTA4OTh9.urkoujHTiuF0IDKmQeQWhae_BQtLFUcmliizw3prLZk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcxNWVjOGJiLTdlMjUtNGEyNC1iNTI4LWRjMzE1NTlmMDg4ZiIsInVzZXJuYW1lIjoidGVzdGluZ2YyIiwiaWF0IjoxNzI5Nzk0OTc0fQ.1X-zLrdC3sx-oUs-wGrvvf0WScjI-AeTixPRV1Ed0NU
 
 {
-  "target_url": "https://panfactum.com"
-}
-
-### Send POST request with json body
-GET {{url}}/validate
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJhNzQwMjRmLTFiNTgtNGIwOS1iMTgzLTBkY2Q1YjA4Y2MxMSIsInVzZXJuYW1lIjoidGVzdGluZzIiLCJpYXQiOjE3Mjk3OTA4OTh9.urkoujHTiuF0IDKmQeQWhae_BQtLFUcmliizw3prLZk
-
-{
-  "username": "testing2",
-  "password": "pass"
+  "target_url": "https://uptownhr.com"
 }
