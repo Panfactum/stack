@@ -10,6 +10,10 @@ provider "kubernetes" {
     "^reloader.stakater.com\\/last-reloaded-from\\/.*", // Ignore the reloader annotations
     "^azure.workload.identity\\/.*",                    // Prevents us from overriding annotations needed to AZWI
     "^panfactum.com\\/.*",                              // Our out-of-band annotations
-    "^kubectl.kubernetes.io\\/.*"                       // kubectl-generated annotations
+    "^kubectl.kubernetes.io\\/.*",                      // kubectl-generated annotations
+    "^.*kyverno.io\\/.*"                                // kyverno-generated annotations
+  ]
+  ignore_labels = [
+    "^.*kyverno.io\\/.*"                                // kyverno-generated labels
   ]
 }
