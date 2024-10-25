@@ -93,7 +93,10 @@ provider "registry.opentofu.org/hashicorp/tls" {
   version     = "4.0.6"
   constraints = "4.0.6"
   hashes = [
+    "h1:0oXaBUFJ5bA0ED7OCajAOa9YSGTTpe8FyUFJP+zO6A4=",
     "h1:EJoUGDo7L52Iu22cA1KCndJ9B1Rrfd75wyZzsScEnc0=",
+    "h1:L0qelmHXJC1mdk2+N7ZV5trzVfbB2cmzPp+DZvhCNv4=",
+    "h1:nbB85V/P7q9ZPajmun379YAaURjhrXb7QbzFR//YQvA=",
     "zh:4b53b372767e5068d9bbfc89199201c1ae4283dde2f0c301974f8abb4215791f",
     "zh:5b4c308bd074c6d0bd560220e6ee10a9859ca9a1f29a59367b0477a740ff265e",
     "zh:674dd6bc85597677e160ee601d88b21c5a974759a658769812d2904bd94bc042",

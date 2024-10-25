@@ -70,6 +70,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ### Fixed
 
+* Added Kyverno rule that forces linkerd sidecars to terminate prior to the pod's `terminationGracePeriodSeconds` to ensure that pods
+are not marked as "failed" by controllers such as Argo if the main container has a TCP connection leak.
+
 * Resolved unnecessary log noise that was introduced in the last release when running Terragrunt commands.
 
 ## edge.24-10-23

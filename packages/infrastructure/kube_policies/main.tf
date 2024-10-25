@@ -70,6 +70,7 @@ resource "kubectl_manifest" "panfactum_policies" {
         local.rule_add_default_tolerations,
         local.rule_add_extra_tolerations_if_burstable_toleration,
         local.rule_add_extra_tolerations_if_controller_toleration,
+        local.rule_linkerd,
         local.rule_add_environment_variables
       ) : rule if rule != null]
     }

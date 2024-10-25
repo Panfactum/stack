@@ -50,7 +50,10 @@ provider "registry.opentofu.org/hashicorp/aws" {
 provider "registry.opentofu.org/hashicorp/helm" {
   version = "2.16.1"
   hashes = [
+    "h1:2+/GaP4mkUHazjFrmDEoGKcm4g2L6zpd2DNKKqwiYmQ=",
     "h1:OAMufKLYnPEyJMNMaOFYQys3HdXtFdaT7kEaWmaINTI=",
+    "h1:VRNzXynt9zAlCwuwyylvsRPmpbQY+LNo82F/tK7sYl4=",
+    "h1:n8QIKeuMmAL4zHYv3SITKgYWuCA1HiJsr7y4fbepztQ=",
     "zh:1c820d7997377c80c320b3bb4f257258af6c499bf2f2082a87975854b156b82b",
     "zh:223dc3ba691a03eeb32d14160b3c6adc77d55a767274c728250cd4f1d4238a2a",
     "zh:332095747133eb558da1455056f993314b16346d46065967ffe5f7b243614591",
