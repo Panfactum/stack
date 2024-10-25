@@ -163,7 +163,8 @@ module "core_dns" {
     var.monitoring_enabled ? [
       {
         name             = "proxy"
-        image_registry   = module.pull_through.quay_registry
+        image_registry   = "quay.io"
+        image_registry   = "quay.io"
         image_repository = "brancz/kube-rbac-proxy"
         image_tag        = "v0.17.1"
 
@@ -215,8 +216,8 @@ module "core_dns" {
   service_ip   = var.service_ip
   service_name = "kube-dns" // By convention, this must be available at kube-system/kube-dns
 
-  vpa_enabled = var.vpa_enabled
-
+  vpa_enabled               = var.vpa_enabled
+  node_image_cached_enabled = false // This is deployed before Kyverno is available
 
   extra_pod_labels = {
     "k8s-app" = "kube-dns"

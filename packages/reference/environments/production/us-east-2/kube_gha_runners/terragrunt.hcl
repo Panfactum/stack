@@ -17,6 +17,11 @@ dependency "kube_gha" {
   skip_outputs = true
 }
 
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
+}
+
 inputs = {
   github_token = local.secrets.github_token
   runners = {

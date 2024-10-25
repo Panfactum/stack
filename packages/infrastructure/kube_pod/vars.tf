@@ -277,3 +277,9 @@ variable "pull_through_cache_enabled" {
   type        = bool
   default     = true
 }
+
+variable "host_network" {
+  description = "Whether the generated pods are allowed to use the host network"
+  type        = bool
+  default     = false
+}

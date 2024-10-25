@@ -1,5 +1,4 @@
-{ pkgs }:
-{
+{ pkgs }: {
 
   shellHook = ''
     export REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -21,6 +20,7 @@
     nodejs_20
     nodePackages_latest.pnpm # nodejs package manager
     go
+    upx # compressing go binaries
 
     ####################################
     # Version Control

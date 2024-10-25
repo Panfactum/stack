@@ -9,6 +9,65 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Breaking Changes
+
+* We have added the [Kyverno](https://kyverno.io/docs/introduction/) policy engine as a core part of the Panfactum Stack. Kyverno allows
+  us to install rules onto the cluster to automatically generate, mutate, or validate resources based on a powerful, Kubernetes-native expression
+  language. This provides several benefits:
+
+  * Provides a unified control plane for adding functionality that previously required managing additional controllers or custom scripts.
+  * Allows us to simplify several parts of our IaC modules by offloading resource management to global Kyverno policies.
+  * Allows us to add Panfactum-compatible, sensible defaults to Kubernetes resources that are not created by Panfactum modules.
+  * Allows users to add management logic to their clusters that was previously only possible by building and deploying custom controllers. See the [example policies.](https://kyverno.io/policies/)
+
+  **You must install Kyverno by following this [new bootstrapping guide section.](/docs/edge/guides/bootstrapping/policy-controller)** Many modules
+  now depend on Kyverno and will not function without it.
+
+* `kube_fledged` has been removed in favor of a new node-local image caching mechanism built by Panfactum on top of Kyverno. The new mechanism has the following
+  benefits over `kube_fledged`:
+
+  * The node's image cache will be created immediately when a node launches, concurrently with other node setup steps.
+  * Cached images will never be removed from the node's image store.
+  * Overall controller performance is significantly improved reducing the overall resource requirements for caching.
+  * The caching mechanism no longer generates pods that prevent Karpenter from disrupting underutilized nodes.
+
+  To install the new mechanism, please follow [this guide.](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches) To start caching images, you may use the new
+  [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) module. Additionally,
+  we provide a new input to our submodules such as [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) called `node_image_cached_enabled` that when enabled
+  will automatically add the submodule's images to the node-local image cache.
+
+  **`kube_fledged` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release.
+
+* `kube_reflector` has been removed in favor of a new syncing mechanism built by Panfactum on top of Kyverno.
+
+  * To sync ConfigMaps, use [kube\_sync\_config\_map](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map).
+  * To sync Secrets, use [kube\_sync\_secret](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret).
+
+  **`kube_reflector` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release.
+
+* All pods in Panfactum clusters will now automatically tolerate `arm64` and `spot` node taints regardless of whether they were created
+  by Panfactum modules (this was already the default for Panfactum modules). To disable these tolerations for a specific pod, you must
+  add the `panfactum.com/arm64-enabled = "false"` or `panfactum.com/spot-enabled = "false"` labels, respectively.
+
+### Changed
+
+* We have upgrade the CNPG operator in [kube\_cloudnative\_pg](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cloudnative_pg) to 1.24 (up from 1.23).
+  This adds additional stability improvements during failover events.
+
+  After performing this upgrade, you MUST use the new [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  submodule as well. Old versions are no longer compatible.
+
+* We have upgraded the default PostgreSQL version in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to 16.4 (up
+  from 16.2). This upgrade should not require any action on your part, but be sure to [pin your PostgreSQL version](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#database-version)
+  if you do not want to be automatically upgraded.
+
+### Added
+
+* Adds a new submodule, [kube\_daemon\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set), for creating
+  Kubernetes [DaemonSets](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/).
+
 ## edge.24-10-23
 
 ### Breaking Changes
@@ -22,20 +81,20 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 ### Changed
 
 * Panfactum modules are now downloaded as gzipped tarballs from an HTTPS server rather than requiring a full git clone of the Panfactum Stack repository. This should
-dramatically improve initialization speed of modules and reduces network bandwidth by over 90%. This is an internal refactor that should not have any impact on how you
-use Panfactum modules.
+  dramatically improve initialization speed of modules and reduces network bandwidth by over 90%. This is an internal refactor that should not have any impact on how you
+  use Panfactum modules.
 
 ### Added
 
-* Added a new module, [aws_s3_public_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website), to enable users to serve files directly from an S3 bucket via CloudFront.
-* [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) can now handle CORS headers on behalf of the origin servers
-* [aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) now uses 10x more efficient [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)
-for request / response mutations.
+* Added a new module, [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website), to enable users to serve files directly from an S3 bucket via CloudFront.
+* [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) can now handle CORS headers on behalf of the origin servers
+* [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) now uses 10x more efficient [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)
+  for request / response mutations.
 
 ### Fixed
 
-* Deploying modules that use Helm charts hosted in ECR (e.g., [kube_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter))
-will now use the appropriate credentials.
+* Deploying modules that use Helm charts hosted in ECR (e.g., [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter))
+  will now use the appropriate credentials.
 
 * Upgraded Argo Workflows to fix some issues related to workflow timeouts being ignored.
 

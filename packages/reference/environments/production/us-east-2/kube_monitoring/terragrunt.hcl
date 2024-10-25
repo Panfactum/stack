@@ -15,6 +15,11 @@ dependency "vault" {
   config_path = "../kube_vault"
 }
 
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
+}
+
 inputs = {
   eks_cluster_name = dependency.cluster.outputs.cluster_name
 

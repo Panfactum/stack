@@ -4,6 +4,18 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 ## Usage
 
+### Database Version
+
+The PostgreSQL version can be controlled via the `pg_version` string. The version MUST be one a valid tag of an image
+from the [CNPG container repository.](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql)
+
+The default value for `pg_version` is the one that we test in our clusters, so we recommend starting there.
+
+<MarkdownAlert severity="warning">
+    At this time, major version upgrades are not supported for existing clusters (coming soon). Minor version upgrades will be applied
+    automatically when `pg_version` is changed.
+</MarkdownAlert>
+
 ### Credentials
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
@@ -38,12 +50,12 @@ environment variables in our [kube_deployment](/docs/main/reference/infrastructu
 
 ```hcl
 module "database" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_cluster?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
   ...
 }
 
 module "deployment" {
-  "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_deployment?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   ...
   
   common_env_from_secrets = {
@@ -237,7 +249,7 @@ For example:
 
 ```hcl
 module "database" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_cluster?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
   ...
 }
 

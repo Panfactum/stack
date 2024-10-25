@@ -182,3 +182,9 @@ resource "kubectl_manifest" "pdb" {
   depends_on        = [kubectl_manifest.cron_job]
 }
 
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = tolist(toset([for container in var.containers : "${container.image_registry}/${container.image_repository}:${container.image_tag}"]))
+}

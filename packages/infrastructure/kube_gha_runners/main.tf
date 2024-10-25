@@ -355,23 +355,7 @@ resource "kubectl_manifest" "pdb" {
   depends_on        = [helm_release.runner]
 }
 
-resource "kubectl_manifest" "workflow_image_cache" {
-  count = var.node_image_cache_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "kubefledged.io/v1alpha2"
-    kind       = "ImageCache"
-    metadata = {
-      name      = "gha-runners"
-      namespace = local.namespace
-    }
-    spec = {
-      cacheSpec = [
-        {
-          images = tolist(toset(values(local.runner_images)))
-        }
-      ]
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
+module "image_cache" {
+  source = "../kube_node_image_cache"
+  images = tolist(toset(values(local.runner_images)))
 }

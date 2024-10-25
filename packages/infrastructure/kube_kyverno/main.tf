@@ -34,12 +34,6 @@ data "pf_kube_labels" "labels" {
   module = "kube_kyverno"
 }
 
-module "pull_through" {
-  source = "../aws_ecr_pull_through_cache_addresses"
-
-  pull_through_cache_enabled = var.pull_through_cache_enabled
-}
-
 module "util_crd_migrate" {
   source = "../kube_workload_utility"
 
@@ -57,9 +51,12 @@ module "util_admission_controller" {
   workload_name               = "kyverno-admission-controller"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
+
+  # This controller is critical to launching all pods so it cannot go down
+  az_spread_required                   = true
+  instance_type_anti_affinity_required = true
 }
 
 module "util_background_controller" {
@@ -117,6 +114,50 @@ module "util_policy_reports_cleanup" {
   extra_labels                = data.pf_kube_labels.labels.labels
 }
 
+module "util_admission_reports_cleanup" {
+  source = "../kube_workload_utility"
+
+  workload_name               = "kyverno-admission-reports-cleanup"
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  az_spread_preferred         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  extra_labels                = data.pf_kube_labels.labels.labels
+}
+
+module "util_cluster_admission_reports_cleanup" {
+  source = "../kube_workload_utility"
+
+  workload_name               = "kyverno-cluster-admission-reports-cleanup"
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  az_spread_preferred         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  extra_labels                = data.pf_kube_labels.labels.labels
+}
+
+module "util_ephemeral_reports_cleanup" {
+  source = "../kube_workload_utility"
+
+  workload_name               = "kyverno-ephemeral-reports-cleanup"
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  az_spread_preferred         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  extra_labels                = data.pf_kube_labels.labels.labels
+}
+
+module "util_cluster_ephemeral_reports_cleanup" {
+  source = "../kube_workload_utility"
+
+  workload_name               = "kyverno-cluster-ephemeral-reports-cleanup"
+  burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
+  az_spread_preferred         = var.enhanced_ha_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  extra_labels                = data.pf_kube_labels.labels.labels
+}
+
 module "constants" {
   source = "../kube_constants"
 }
@@ -160,6 +201,13 @@ resource "helm_release" "kyverno" {
         }
       }
 
+      features = {
+        logging = {
+          format    = "json"
+          verbosity = var.log_level
+        }
+      }
+
       config = {
         resourceFilters = [
           "[Event,*,*]",
@@ -179,6 +227,9 @@ resource "helm_release" "kyverno" {
           "[EphemeralReport,*,*]",
           "[ClusterEphemeralReport,*,*]",
         ]
+        webhooks = [{
+          namespaceSelector = {}
+        }]
         excludeKyvernoNamespace = false
       }
 
@@ -188,7 +239,7 @@ resource "helm_release" "kyverno" {
         tolerations = module.util_admission_controller.tolerations
 
         antiAffinity = {
-          enabled = false # We do custom rules
+          enabled = true
         }
 
         podAntiAffinity           = lookup(module.util_admission_controller.affinity, "podAntiAffinity", null)
@@ -241,7 +292,7 @@ resource "helm_release" "kyverno" {
         tolerations = module.util_cleanup_controller.tolerations
 
         antiAffinity = {
-          enabled = false # We do custom rules
+          enabled = true
         }
 
         podAntiAffinity           = lookup(module.util_cleanup_controller.affinity, "podAntiAffinity", null)
@@ -282,7 +333,7 @@ resource "helm_release" "kyverno" {
         tolerations = module.util_background_controller.tolerations
 
         antiAffinity = {
-          enabled = false # We do custom rules
+          enabled = true
         }
 
         podAntiAffinity           = lookup(module.util_background_controller.affinity, "podAntiAffinity", null)
@@ -322,7 +373,7 @@ resource "helm_release" "kyverno" {
         tolerations = module.util_reports_controller.tolerations
 
         antiAffinity = {
-          enabled = false # We do custom rules
+          enabled = true
         }
 
         podAntiAffinity           = lookup(module.util_reports_controller.affinity, "podAntiAffinity", null)
@@ -368,38 +419,348 @@ resource "helm_release" "kyverno" {
         tolerations = module.util_policy_reports_cleanup.tolerations
         podLabels   = module.util_policy_reports_cleanup.labels
       }
+
+      cleanupJobs = {
+        admissionReports = {
+          labels                  = module.util_admission_reports_cleanup.labels
+          tolerations             = module.util_admission_reports_cleanup.tolerations
+          podAntiAffinity         = lookup(module.util_admission_reports_cleanup.affinity, "podAntiAffinity", null)
+          nodeAffinity            = lookup(module.util_admission_reports_cleanup.affinity, "nodeAffinity", null)
+          ttlSecondsAfterFinished = "30"
+        }
+        clusterAdmissionReports = {
+          labels                  = module.util_cluster_admission_reports_cleanup.labels
+          tolerations             = module.util_cluster_admission_reports_cleanup.tolerations
+          podAntiAffinity         = lookup(module.util_cluster_admission_reports_cleanup.affinity, "podAntiAffinity", null)
+          nodeAffinity            = lookup(module.util_cluster_admission_reports_cleanup.affinity, "nodeAffinity", null)
+          ttlSecondsAfterFinished = "30"
+        }
+        ephemeralReports = {
+          labels                  = module.util_ephemeral_reports_cleanup.labels
+          tolerations             = module.util_ephemeral_reports_cleanup.tolerations
+          podAntiAffinity         = lookup(module.util_ephemeral_reports_cleanup.affinity, "podAntiAffinity", null)
+          nodeAffinity            = lookup(module.util_ephemeral_reports_cleanup.affinity, "nodeAffinity", null)
+          ttlSecondsAfterFinished = "30"
+        }
+        clusterEphemeralReports = {
+          labels                  = module.util_cluster_ephemeral_reports_cleanup.labels
+          tolerations             = module.util_cluster_ephemeral_reports_cleanup.tolerations
+          podAntiAffinity         = lookup(module.util_cluster_ephemeral_reports_cleanup.affinity, "podAntiAffinity", null)
+          nodeAffinity            = lookup(module.util_cluster_ephemeral_reports_cleanup.affinity, "nodeAffinity", null)
+          ttlSecondsAfterFinished = "30"
+        }
+      }
     })
   ]
 }
 
+resource "kubernetes_cluster_role" "extra_background_controller" {
+  metadata {
+    name = "kyverno:extra-background-controller"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = "background-controller"
+    })
+  }
+  rule {
+    api_groups = [""]
+    verbs      = ["create", "update", "delete"]
+    resources  = ["configmaps", "secrets"]
+  }
+}
 
-# resource "kubectl_manifest" "vpa" {
-#   count = var.vpa_enabled ? 1 : 0
+resource "kubernetes_cluster_role" "extra_admission_controller" {
+  metadata {
+    name = "kyverno:extra-admission-controller"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = "admission-controller"
+    })
+  }
+  rule {
+    api_groups = [""]
+    verbs      = ["create", "update", "delete"]
+    resources  = ["configmaps", "secrets"]
+  }
+}
+
+# Cannot deploy due to: https://github.com/kyverno/kyverno/issues/11469
+# resource "kubectl_manifest" "pdb_admission_controller" {
 #   yaml_body = yamlencode({
-#     apiVersion = "autoscaling.k8s.io/v1"
-#     kind       = "VerticalPodAutoscaler"
+#     apiVersion = "policy/v1"
+#     kind       = "PodDisruptionBudget"
 #     metadata = {
-#       name      = "alb-controller"
+#       name      = "kyverno-admission-controller"
 #       namespace = local.namespace
-#       labels    = module.util_controller.labels
+#       labels    = module.util_admission_controller.labels
 #     }
 #     spec = {
-#       resourcePolicy = {
-#         containerPolicies = [{
-#           containerName = "aws-load-balancer-controller"
-#           minAllowed = {
-#             memory = "${floor(85 / 1.3)}Mi"
-#           }
-#         }]
+#       unhealthyPodEvictionPolicy = "AlwaysAllow"
+#       selector = {
+#         matchLabels = module.util_admission_controller.match_labels
 #       }
-#       targetRef = {
-#         apiVersion = "apps/v1"
-#         kind       = "Deployment"
-#         name       = "alb-controller"
-#       }
+#       maxUnavailable = 1
 #     }
 #   })
-#   force_conflicts   = true
 #   server_side_apply = true
-#   depends_on        = [helm_release.alb_controller]
+#   force_conflicts   = true
+#   depends_on        = [helm_release.kyverno]
 # }
+
+resource "kubectl_manifest" "pdb_background_controller" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "kyverno-background-controller"
+      namespace = local.namespace
+      labels    = module.util_background_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_background_controller.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.kyverno]
+}
+
+# Cannot deploy due to: https://github.com/kyverno/kyverno/issues/11469
+# resource "kubectl_manifest" "pdb_cleanup_controller" {
+#   yaml_body = yamlencode({
+#     apiVersion = "policy/v1"
+#     kind       = "PodDisruptionBudget"
+#     metadata = {
+#       name      = "kyverno-cleanup-controller"
+#       namespace = local.namespace
+#       labels    = module.util_cleanup_controller.labels
+#     }
+#     spec = {
+#       unhealthyPodEvictionPolicy = "AlwaysAllow"
+#       selector = {
+#         matchLabels = module.util_cleanup_controller.match_labels
+#       }
+#       maxUnavailable = 1
+#     }
+#   })
+#   server_side_apply = true
+#   force_conflicts   = true
+#   depends_on        = [helm_release.kyverno]
+# }
+
+resource "kubectl_manifest" "pdb_reports_controller" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "kyverno-reports-controller"
+      namespace = local.namespace
+      labels    = module.util_reports_controller.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_reports_controller.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  server_side_apply = true
+  force_conflicts   = true
+  depends_on        = [helm_release.kyverno]
+}
+
+resource "kubectl_manifest" "vpa_admission_controller" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-admission-controller"
+      namespace = local.namespace
+      labels    = module.util_admission_controller.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "kyverno-admission-controller"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+resource "kubectl_manifest" "vpa_background_controller" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-background-controller"
+      namespace = local.namespace
+      labels    = module.util_background_controller.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "kyverno-background-controller"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+
+resource "kubectl_manifest" "vpa_cleanup_controller" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-cleanup-controller"
+      namespace = local.namespace
+      labels    = module.util_cleanup_controller.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "kyverno-cleanup-controller"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+
+resource "kubectl_manifest" "vpa_reports_controller" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-reports-controller"
+      namespace = local.namespace
+      labels    = module.util_reports_controller.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "kyverno-reports-controller"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+resource "kubectl_manifest" "vpa_admission_reports_cleanup" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-cleanup-admission-reports"
+      namespace = local.namespace
+      labels    = module.util_admission_reports_cleanup.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "batch/v1"
+        kind       = "CronJob"
+        name       = "kyverno-cleanup-admission-reports"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+
+resource "kubectl_manifest" "vpa_cluster_admission_reports_cleanup" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-cleanup-cluster-admission-reports"
+      namespace = local.namespace
+      labels    = module.util_cluster_admission_reports_cleanup.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "batch/v1"
+        kind       = "CronJob"
+        name       = "kyverno-cleanup-cluster-admission-reports"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+resource "kubectl_manifest" "vpa_ephemeral_reports_cleanup" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-cleanup-ephemeral-reports"
+      namespace = local.namespace
+      labels    = module.util_ephemeral_reports_cleanup.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "batch/v1"
+        kind       = "CronJob"
+        name       = "kyverno-cleanup-ephemeral-reports"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+
+
+resource "kubectl_manifest" "vpa_cluster_ephemeral_reports_cleanup" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "kyverno-cleanup-cluster-ephemeral-reports"
+      namespace = local.namespace
+      labels    = module.util_cluster_ephemeral_reports_cleanup.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "batch/v1"
+        kind       = "CronJob"
+        name       = "kyverno-cleanup-cluster-ephemeral-reports"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.kyverno]
+}
+

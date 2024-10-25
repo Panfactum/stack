@@ -12,13 +12,13 @@ dependency "cert_manager" {
   skip_outputs = true
 }
 
-dependency "reflector" {
-  config_path  = "../kube_reflector"
-  skip_outputs = true
-}
-
 dependency "cert_issuers" {
   config_path = "../kube_cert_issuers"
+}
+
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
 }
 
 inputs = {

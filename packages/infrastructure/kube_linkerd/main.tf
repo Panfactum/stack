@@ -158,14 +158,17 @@ resource "kubernetes_config_map" "ca_bundle" {
     name      = local.linkerd_root_ca_secret
     labels    = module.util_identity.labels
     namespace = local.namespace
-    annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
-    }
   }
   data = {
     "ca-bundle.crt" = var.vault_ca_crt
   }
+}
+
+module "sync_ca_bundle" {
+  source = "../kube_sync_config_map"
+
+  config_map_name      = kubernetes_config_map.ca_bundle.metadata[0].name
+  config_map_namespace = kubernetes_config_map.ca_bundle.metadata[0].namespace
 }
 
 ///////////////////////////////////////////
@@ -473,6 +476,15 @@ resource "helm_release" "linkerd" {
     module.linkerd_proxy_injector,
     module.linkerd_identity_issuer,
     module.linkerd_profile_validator
+  ]
+}
+
+# Do not forget to update this when updating the linkerd version
+module "image_cache" {
+  source = "../kube_node_image_cache"
+  images = [
+    "cr.l5d.io/linkerd/proxy:edge-24.5.1",
+    "cr.l5d.io/linkerd/proxy-init:v2.4.0"
   ]
 }
 

@@ -12,6 +12,11 @@ dependency "cilium" {
   skip_outputs = true
 }
 
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
+}
+
 inputs = {
   self_generated_certs_enabled = false
 }

@@ -766,22 +766,6 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### dynamic\_secrets
-
-Description: Dynamic variable secrets
-
-Type:
-
-```hcl
-list(object({             // key is the secret provider class
-    secret_provider_class = string // name of the secret provider class
-    mount_path            = string // absolute path of where to mount the secret
-    env_var               = string // name of the env var that will have a path to the secret mount
-  }))
-```
-
-Default: `[]`
-
 ### extra\_aws\_permissions
 
 Description: Extra JSON-encoded AWS permissions to assign to the Workflow's service account

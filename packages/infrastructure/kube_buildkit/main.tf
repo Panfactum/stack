@@ -311,6 +311,13 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "autoscaler" {
   depends_on = [module.buildkit]
 }
 
+module "image_cache" {
+  source = "../kube_node_image_cache"
+  images = [
+    "docker.io/moby/buildkit:${var.buildkit_image_version}"
+  ]
+}
+
 /***************************************
 * Buildkit Scale-To-Zero
 *

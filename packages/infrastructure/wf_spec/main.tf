@@ -25,130 +25,12 @@ data "pf_kube_labels" "labels" {
 
 locals {
 
-  dynamic_env_secrets_by_provider = { for config in var.dynamic_secrets : config.secret_provider_class => config }
-
   /************************************************
   * Environment variables
   ************************************************/
 
-  // Always set env vars
-  static_env = {
-
-    // TODO: We should figure out a way to add this in, but it is difficult b/c a workflow
-    // has multiple pods
-    // POD_TERMINATION_GRACE_PERIOD_SECONDS = tostring(var.termination_grace_period_seconds)
-
-  }
-
-  // Reflective env variables
-  common_reflective_env = [
-    {
-      name = "POD_IP"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "status.podIP"
-        }
-      }
-    },
-    {
-      name = "POD_NAME"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.name"
-        }
-      }
-    },
-    {
-      name = "POD_NAMESPACE"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.namespace"
-        }
-      }
-    },
-    {
-      name = "NAMESPACE"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.namespace"
-        }
-      }
-    },
-    {
-      name = "POD_SERVICE_ACCOUNT"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "spec.serviceAccountName"
-        }
-      }
-    },
-    {
-      name = "NODE_NAME"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "spec.nodeName"
-        }
-      }
-    },
-    {
-      name = "NODE_IP"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "status.hostIP"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_CPU_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.cpu"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_MEMORY_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.memory"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_MEMORY_LIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "limits.memory"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.ephemeral-storage"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_EPHEMERAL_STORAGE_LIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "limits.ephemeral-storage"
-        }
-      }
-    }
-  ]
-
   // Static env variables (non-secret)
-  common_static_env = [for k, v in merge(var.common_env, local.static_env) : {
+  common_static_env = [for k, v in var.common_env : {
     name  = k
     value = v == "" ? null : v
   }]
@@ -193,7 +75,6 @@ locals {
   // NOTE: The order that these env blocks is defined in
   // is incredibly important. Do NOT move them around unless you know what you are doing.
   common_env = concat(
-    local.common_reflective_env,
     local.common_static_env,
     local.common_static_secret_env,
     local.common_secret_key_ref_env,
@@ -267,16 +148,6 @@ locals {
           }
         ]
       }
-    }],
-    [for path, config in local.dynamic_env_secrets_by_provider : {
-      name = path
-      csi = {
-        driver   = "secrets-store.csi.k8s.io"
-        readOnly = true
-        volumeAttributes = {
-          secretProviderClass = path
-        }
-      }
     }]
   )
 
@@ -301,11 +172,6 @@ locals {
     readOnly  = true
   }]
 
-  common_dynamic_secret_volume_mounts = [for path, config in local.dynamic_env_secrets_by_provider : {
-    name      = path
-    mountPath = config.mount_path
-  }]
-
   common_downward_api_mounts = [{
     name      = "podinfo"
     mountPath = "/etc/podinfo"
@@ -315,7 +181,6 @@ locals {
     local.common_tmp_volume_mounts,
     local.common_secret_volume_mounts,
     local.common_config_map_volume_mounts,
-    local.common_dynamic_secret_volume_mounts,
     local.common_downward_api_mounts
   )
 

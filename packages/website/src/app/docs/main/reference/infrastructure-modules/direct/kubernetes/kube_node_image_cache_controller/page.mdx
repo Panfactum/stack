@@ -1,0 +1,57 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_node_image_cache_controller" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_node_image_cache_controller" status="stable" type="direct" />
+
+# Kubernetes Node Image Cache Controller
+
+This controller creates a DamonSet that creates a pod on each node filled with noop containers that use the images
+that you wish to cache.
+
+Many of the Panfactum modules have built-in integrations with this controller, and you can add additional
+images to the cache by leveraging the [kube\_node\_image\_cache](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
+
+## Providers
+
+The following providers are needed by this module:
+
+* http (3.4.5)
+
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

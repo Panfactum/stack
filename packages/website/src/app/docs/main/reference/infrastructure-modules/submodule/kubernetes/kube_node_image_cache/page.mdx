@@ -1,0 +1,51 @@
+import ModuleHeader from "../../../ModuleHeader";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_node_image_cache" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_node_image_cache" status="stable" type="submodule" />
+
+# Kubernetes Node Image Cache
+
+This module allows you to specify additional images that should be cached on every node via the `images` input.
+
+The [kube\_node\_image\_cache\_controller](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller) must be installed in order for this to work.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### images
+
+Description: Images to add to the node image cache
+
+Type: `list(string)`
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

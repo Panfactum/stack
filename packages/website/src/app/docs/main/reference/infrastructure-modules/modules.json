@@ -201,6 +201,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_daemon_set",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_deployment",
       "type": "submodule",
       "group": "kubernetes"
@@ -296,6 +301,16 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_node_image_cache",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_node_image_cache_controller",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_open_cost",
       "type": "direct",
       "group": "kubernetes"
@@ -377,6 +392,16 @@
     },
     {
       "module": "kube_stateful_set",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sync_config_map",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sync_secret",
       "type": "submodule",
       "group": "kubernetes"
     },

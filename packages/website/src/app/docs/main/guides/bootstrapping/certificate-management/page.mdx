@@ -194,55 +194,9 @@ Congratulations! We have just verified that the internal certificate provisionin
 as intended. We will test public certificates when we deploy our ingress system in a future
 guide section.
 
-## Reflector
-
-Configmaps and secrets are namespaced-scoped resources. As a result, they can only be accessed by other resources deployed
-in the same namespace. This can pose a barrier when you want to share global configuration or secret values
-across the entire cluster.
-
-For x.509 infrastructure, this prevents resources from access the
-[root CA certificate bundle.](/docs/main/concepts/networking/cryptography#certificate-authorities)
-This is required for systems like a service mesh to function properly (next section).
-
-The [Reflector](https://github.com/emberstack/kubernetes-reflector) controller was developed to solve this problem.
-With this controller deployed in the cluster, you can provide annotations on ConfigMaps and Secrets that
-will instruct the Reflector to synchronize them across namespaces. [^7]
-
-[^7]: The cert-manager maintainers offer a similar solution called [trust-manager](https://cert-manager.io/docs/trust/trust-manager/),
-    but trust-manager only works for certificate bundles and the Reflector works for any Secret or ConfigMap.
-
-We provide a module to deploy this controller: [kube\_reflector](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_reflector).
-
-Let's deploy the Reflector now:
-
-1. Create a new directory adjacent to your `kube_cert_issuers` module called `kube_reflector`.
-
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_reflector/terragrunt.hcl).
-
-3. Run `pf-tf-init` to enable the required providers.
-
-4. Run `terragrunt apply`.
-
-To test that the Reflector is working, run `kubectl get configmap -A | grep internal-ca` to verify that the
-root CA bundle as been distributed to all namespaces:
-
-```shell-session
-aws-ebs-csi-driver        internal-ca                                                1      14d
-cert-manager              internal-ca                                                1      14d
-cilium                    internal-ca                                                1      14d
-core-dns                  internal-ca                                                1      14d
-default                   internal-ca                                                1      14d
-kube-node-lease           internal-ca                                                1      14d
-kube-public               internal-ca                                                1      14d
-kube-system               internal-ca                                                1      14d
-reflector                 internal-ca                                                1      14d
-secrets-csi               internal-ca                                                1      14d
-vault                     internal-ca                                                1      14d
-```
-
 ## Next Steps
 
 Now that internal certificate management is working, we will build upon that foundation to deploy a service mesh
 which will ensure that *all* network traffic in the cluster is secured with mTLS.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/vault"} forwardHref={"/docs/main/guides/bootstrapping/service-mesh"} stepNumber={12} />
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/vault"} forwardHref={"/docs/main/guides/bootstrapping/service-mesh"} stepNumber={13} />

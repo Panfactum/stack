@@ -36,120 +36,8 @@ locals {
   * Environment variables
   ************************************************/
 
-  // Always set env vars
-  static_env = {
-    POD_TERMINATION_GRACE_PERIOD_SECONDS = tostring(var.termination_grace_period_seconds)
-  }
-
-  // Reflective env variables
-  common_reflective_env = [
-    {
-      name = "POD_IP"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "status.podIP"
-        }
-      }
-    },
-    {
-      name = "POD_NAME"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.name"
-        }
-      }
-    },
-    {
-      name = "POD_NAMESPACE"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.namespace"
-        }
-      }
-    },
-    {
-      name = "NAMESPACE"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.namespace"
-        }
-      }
-    },
-    {
-      name = "POD_SERVICE_ACCOUNT"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "spec.serviceAccountName"
-        }
-      }
-    },
-    {
-      name = "NODE_NAME"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "spec.nodeName"
-        }
-      }
-    },
-    {
-      name = "NODE_IP"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "status.hostIP"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_CPU_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.cpu"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_MEMORY_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.memory"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_MEMORY_LIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "limits.memory"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.ephemeral-storage"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_EPHEMERAL_STORAGE_LIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "limits.ephemeral-storage"
-        }
-      }
-    }
-  ]
-
   // Static env variables (non-secret)
-  common_static_env = [for k, v in merge(var.common_env, local.static_env) : {
+  common_static_env = [for k, v in var.common_env : {
     name  = k
     value = v == "" ? null : v
   }]
@@ -194,7 +82,6 @@ locals {
   // NOTE: The order that these env blocks is defined in
   // is incredibly important. Do NOT move them around unless you know what you are doing.
   common_env = concat(
-    local.common_reflective_env,
     local.common_static_env,
     local.common_static_secret_env,
     local.common_secret_key_ref_env,
@@ -330,7 +217,7 @@ locals {
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     }
     limits = { for k, v in {
-      cpu               = container.maximum_cpu != null ? container.maximum_cpu : null
+      cpu               = container.maximum_cpu != null ? "${container.maximum_cpu}m" : null
       memory            = floor(container.minimum_memory * 1024 * 1024 * container.memory_limit_multiplier)
       ephemeral-storage = "${local.total_tmp_storage_mb + 100}Mi"
     } : k => v if v != null }
@@ -380,7 +267,8 @@ locals {
         fsGroup             = var.mount_owner
         fsGroupChangePolicy = "OnRootMismatch" # Provides significant performance increase
       }
-      dnsPolicy = var.dns_policy
+      dnsPolicy   = var.dns_policy
+      hostNetwork = var.host_network
 
       ///////////////////////////
       // Scheduling

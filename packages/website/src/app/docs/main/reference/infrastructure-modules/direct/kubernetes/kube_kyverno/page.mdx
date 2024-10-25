@@ -8,7 +8,7 @@ import ModuleHeader from "../../../ModuleHeader";
 
 # Kyverno
 
-[Documentation](https://kyverno.io/docs/introduction/)
+See our [bootstrapping guide documentation](/docs/main/guides/bootstrapping/policy-controller) for installing [Kyverno](https://kyverno.io/docs/introduction/).
 
 ## Providers
 
@@ -50,11 +50,11 @@ Default: `"3.2.7"`
 
 ### log\_level
 
-Description: The log level for the ALB controller pods
+Description: The log verbosity (0-9) for the Kyverno pods
 
-Type: `string`
+Type: `number`
 
-Default: `"warning"`
+Default: `0`
 
 ### monitoring\_enabled
 
@@ -70,7 +70,7 @@ Description: Whether to use the Panfactum pod scheduler with enhanced bin-packin
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ### pull\_through\_cache\_enabled
 
@@ -86,7 +86,7 @@ Description: Whether the VPA resources should be enabled
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ## Outputs
 

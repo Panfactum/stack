@@ -307,3 +307,9 @@ variable "pull_through_cache_enabled" {
   type        = bool
   default     = true
 }
+
+variable "node_image_cached_enabled" {
+  description = "Whether to add the container images to the node image cache for faster startup times"
+  type        = bool
+  default     = false
+}

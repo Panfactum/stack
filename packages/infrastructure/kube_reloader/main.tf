@@ -160,6 +160,7 @@ resource "kubectl_manifest" "pdb" {
       labels    = module.util_controller.labels
     }
     spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
       }

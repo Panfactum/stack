@@ -223,9 +223,7 @@ resource "kubernetes_config_map" "artifacts" {
     namespace = local.namespace
     labels    = module.util_controller.labels
     annotations = {
-      "workflows.argoproj.io/default-artifact-repository"       = "s3"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
+      "workflows.argoproj.io/default-artifact-repository" = "s3"
     }
   }
   data = {
@@ -237,6 +235,13 @@ resource "kubernetes_config_map" "artifacts" {
       }
     })
   }
+}
+
+module "sync_artifact_config_map" {
+  source = "../kube_sync_config_map"
+
+  config_map_name      = kubernetes_config_map.artifacts.metadata[0].name
+  config_map_namespace = kubernetes_config_map.artifacts.metadata[0].namespace
 }
 
 /***************************************
@@ -598,6 +603,13 @@ resource "kubectl_manifest" "pdb_server" {
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [helm_release.argo]
+}
+
+module "image_cache" {
+  source = "../kube_node_image_cache"
+  images = [
+    "quay.io/argoproj/argoexec:v3.5.11"
+  ]
 }
 
 /***************************************
@@ -1092,4 +1104,7 @@ resource "kubectl_manifest" "test_workflow_template" {
   server_side_apply = true
   force_conflicts   = true
 }
+
+
+
 

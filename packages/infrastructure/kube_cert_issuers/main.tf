@@ -280,14 +280,17 @@ resource "kubernetes_config_map" "ca_bundle" {
     name      = "internal-ca"
     labels    = data.pf_kube_labels.labels.labels
     namespace = var.namespace
-    annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled" = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"      = "true"
-    }
   }
   data = {
     "ca.crt" = vault_pki_secret_backend_root_cert.pki_internal.issuing_ca
   }
+}
+
+module "sync_ca_bundle" {
+  source = "../kube_sync_config_map"
+
+  config_map_name      = kubernetes_config_map.ca_bundle.metadata[0].name
+  config_map_namespace = kubernetes_config_map.ca_bundle.metadata[0].namespace
 }
 
 //////////////////////////////////

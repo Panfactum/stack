@@ -7,23 +7,13 @@ variable "kyverno_helm_version" {
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool
   default     = true
-}
-
-variable "log_level" {
-  description = "The log level for the ALB controller pods"
-  type        = string
-  default     = "warning"
-  validation {
-    condition     = contains(["info", "error", "fatal", "panic", "warning", "debug", "trace"], var.log_level)
-    error_message = "Invalid log_level provided."
-  }
 }
 
 variable "monitoring_enabled" {
@@ -41,7 +31,17 @@ variable "enhanced_ha_enabled" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
-  default     = true
+  default     = false
 }
 
+variable "log_level" {
+  description = "The log verbosity (0-9) for the Kyverno pods"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.log_level >= 0 && var.log_level <= 9
+    error_message = "log_level must be between 0-9"
+  }
+}
 

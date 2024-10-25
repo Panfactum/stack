@@ -107,16 +107,6 @@ variable "extra_pod_annotations" {
   default     = {}
 }
 
-variable "dynamic_secrets" {
-  description = "Dynamic variable secrets"
-  type = list(object({             // key is the secret provider class
-    secret_provider_class = string // name of the secret provider class
-    mount_path            = string // absolute path of where to mount the secret
-    env_var               = string // name of the env var that will have a path to the secret mount
-  }))
-  default = []
-}
-
 variable "spot_nodes_enabled" {
   description = "Whether to allow Pods to schedule on spot nodes"
   type        = bool

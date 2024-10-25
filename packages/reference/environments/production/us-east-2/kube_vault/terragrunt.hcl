@@ -11,6 +11,11 @@ dependency "cluster" {
   config_path = "../aws_eks"
 }
 
+dependency "ebs_csi" {
+  config_path  = "../kube_aws_ebs_csi"
+  skip_outputs = true
+}
+
 inputs = {
   eks_cluster_name = dependency.cluster.outputs.cluster_name
 

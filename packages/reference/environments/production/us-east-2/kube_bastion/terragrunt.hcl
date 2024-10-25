@@ -17,6 +17,11 @@ dependency "lb_controller" {
   skip_outputs = true
 }
 
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
+}
+
 inputs = {
   bastion_domains = [
     "bastion.panfactum.com",

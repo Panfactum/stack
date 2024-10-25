@@ -12,6 +12,11 @@ dependency "cnpg" {
   skip_outputs = true
 }
 
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
+}
+
 dependency "cluster" {
   config_path = "../aws_eks"
 }

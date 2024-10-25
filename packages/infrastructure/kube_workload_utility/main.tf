@@ -118,7 +118,11 @@ locals {
     {
       "panfactum.com/prevent-lifetime-eviction"  = var.lifetime_evictions_enabled ? "false" : "true",
       "panfactum.com/scheduler-enabled"          = var.panfactum_scheduler_enabled ? "true" : "false",
-      "panfactum.com/pull-through-cache-enabled" = var.pull_through_cache_enabled ? "true" : "false"
+      "panfactum.com/pull-through-cache-enabled" = var.pull_through_cache_enabled ? "true" : "false",
+      "panfactum.com/arm64-enabled"              = var.arm_nodes_enabled ? "true" : "false",
+      "panfactum.com/burstable-enabled"          = var.burstable_nodes_enabled ? "true" : "false",
+      "panfactum.com/spot-enabled"               = var.spot_nodes_enabled ? "false" : "false",
+      "panfactum.com/controller-enabled"         = var.controller_nodes_enabled || var.controller_nodes_required ? "true" : "false"
     },
     local.match_labels
   )
@@ -137,15 +141,12 @@ locals {
     value    = "true"
     effect   = "NoSchedule"
   }
-  burstable_node_tolerations = [
-    local.spot_node_toleration,
-    {
-      key      = "burstable"
-      operator = "Equal"
-      value    = "true"
-      effect   = "NoSchedule"
-    }
-  ]
+  burstable_node_toleration = {
+    key      = "burstable"
+    operator = "Equal"
+    value    = "true"
+    effect   = "NoSchedule"
+  }
   controller_node_toleration = {
     key      = "controller"
     operator = "Equal"
@@ -153,9 +154,10 @@ locals {
     effect   = "NoSchedule"
   }
   tolerations = concat(
-    var.burstable_nodes_enabled ? local.burstable_node_tolerations : var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
+    var.burstable_nodes_enabled ? [local.burstable_node_toleration] : [],
+    var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
     var.arm_nodes_enabled ? [local.arm_node_toleration] : [],
-    var.controller_nodes_enabled || var.controller_nodes_required ? concat([local.controller_node_toleration, local.arm_node_toleration], local.burstable_node_tolerations) : [],
+    var.controller_nodes_enabled || var.controller_nodes_required ? [local.controller_node_toleration] : [],
     var.extra_tolerations
   )
 
