@@ -288,16 +288,16 @@ resource "helm_release" "kyverno" {
 
       backgroundController = {
         replicas    = 1 # HA isn't necessary for this
-        podLabels   = module.util_cleanup_controller.labels
-        tolerations = module.util_cleanup_controller.tolerations
+        podLabels   = module.util_background_controller.labels
+        tolerations = module.util_background_controller.tolerations
 
         antiAffinity = {
           enabled = true
         }
 
-        podAntiAffinity           = lookup(module.util_cleanup_controller.affinity, "podAntiAffinity", null)
-        nodeAffinity              = lookup(module.util_cleanup_controller.affinity, "nodeAffinity", null)
-        topologySpreadConstraints = module.util_cleanup_controller.topology_spread_constraints
+        podAntiAffinity           = lookup(module.util_background_controller.affinity, "podAntiAffinity", null)
+        nodeAffinity              = lookup(module.util_background_controller.affinity, "nodeAffinity", null)
+        topologySpreadConstraints = module.util_background_controller.topology_spread_constraints
 
         podDisruptionBudget = {
           enabled = false // We do this on our own
@@ -329,16 +329,16 @@ resource "helm_release" "kyverno" {
 
       cleanupController = {
         replicas    = 2
-        podLabels   = module.util_background_controller.labels
-        tolerations = module.util_background_controller.tolerations
+        podLabels   = module.util_cleanup_controller.labels
+        tolerations = module.util_cleanup_controller.tolerations
 
         antiAffinity = {
           enabled = true
         }
 
-        podAntiAffinity           = lookup(module.util_background_controller.affinity, "podAntiAffinity", null)
-        nodeAffinity              = lookup(module.util_background_controller.affinity, "nodeAffinity", null)
-        topologySpreadConstraints = module.util_background_controller.topology_spread_constraints
+        podAntiAffinity           = lookup(module.util_cleanup_controller.affinity, "podAntiAffinity", null)
+        nodeAffinity              = lookup(module.util_cleanup_controller.affinity, "nodeAffinity", null)
+        topologySpreadConstraints = module.util_cleanup_controller.topology_spread_constraints
 
         podDisruptionBudget = {
           enabled = false // We do this on our own

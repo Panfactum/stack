@@ -9,7 +9,7 @@ export default function BootstrappingGuideNav (props: BootstrappingGuideNavProps
   return (
     <MarkdownGuideNav
       {...props}
-      totalSteps={20}
+      totalSteps={21}
       progressLabel={'Panfactum Bootstrapping Guide:'}
     />
   )

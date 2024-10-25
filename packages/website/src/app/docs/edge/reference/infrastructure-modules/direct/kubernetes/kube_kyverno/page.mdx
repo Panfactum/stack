@@ -4,11 +4,11 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_reflector" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_reflector" status="stable" type="direct" />
+<ModuleHeader name="kube_kyverno" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_kyverno" status="stable" type="direct" />
 
-# Kubernetes Reloader
+# Kyverno
 
-This module deploys the [reflector](https://github.com/emberstack/kubernetes-reflector), a utility that syncs ConfigMaps and Secrets across namespaces.
+See our [bootstrapping guide documentation](/docs/edge/guides/bootstrapping/policy-controller) for installing [Kyverno](https://kyverno.io/docs/introduction/).
 
 ## Providers
 
@@ -32,13 +32,37 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### log\_level
+### enhanced\_ha\_enabled
 
-Description: The log level for the reflector pods
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
+### kyverno\_helm\_version
+
+Description: The version of kyverno helm chart to deploy
 
 Type: `string`
 
-Default: `"Error"`
+Default: `"3.2.7"`
+
+### log\_level
+
+Description: The log verbosity (0-9) for the Kyverno pods
+
+Type: `number`
+
+Default: `0`
+
+### monitoring\_enabled
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
 
 ### panfactum\_scheduler\_enabled
 
@@ -55,14 +79,6 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `true`
-
-### reflector\_helm\_version
-
-Description: The version of the emberstack/reflector helm chart
-
-Type: `string`
-
-Default: `"7.1.262"`
 
 ### vpa\_enabled
 

@@ -10,7 +10,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 ## Objective
 
-Install the basic kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
 and [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.
 
 ## Background
@@ -23,6 +23,12 @@ we recommend reviewing the [concept documentation](/docs/edge/concepts/networkin
 information.
 
 ## Deploy Cilium
+
+Cilium provides workloads in your clusters with network interfaces that allow them to connect with each other and the wider
+internet. Without this controller, your pods would not be able to communicate. We provide a module
+for deploying Cilium: [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
+
+Let's deploy it now.
 
 ### Deploy the Cilium Module
 
@@ -96,4 +102,4 @@ We will use that to test that cilium is working as intended:
 Now that basic networking is working within the cluster, we will configure your storage
 drivers.
 
-<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/kubernetes-cluster"} forwardHref={"/docs/edge/guides/bootstrapping/storage-interfaces"} stepNumber={9} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/kubernetes-cluster"} forwardHref={"/docs/edge/guides/bootstrapping/policy-controller"} stepNumber={9} />

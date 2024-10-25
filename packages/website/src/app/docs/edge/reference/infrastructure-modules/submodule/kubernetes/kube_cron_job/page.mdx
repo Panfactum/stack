@@ -293,6 +293,14 @@ Type: `number`
 
 Default: `1000`
 
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `false`
+
 ### node\_preferences
 
 Description: Node label preferences for the Pods
@@ -356,6 +364,14 @@ Description: The priority class to use for Pods in the CronJob
 Type: `string`
 
 Default: `null`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
 
 ### restart\_policy
 

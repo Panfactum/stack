@@ -4,17 +4,21 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_reflector" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_reflector" status="stable" type="direct" />
+<ModuleHeader name="kube_node_image_cache_controller" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_node_image_cache_controller" status="stable" type="direct" />
 
-# Kubernetes Reloader
+# Kubernetes Node Image Cache Controller
 
-This module deploys the [reflector](https://github.com/emberstack/kubernetes-reflector), a utility that syncs ConfigMaps and Secrets across namespaces.
+This controller creates a DamonSet that creates a pod on each node filled with noop containers that use the images
+that you wish to cache.
+
+Many of the Panfactum modules have built-in integrations with this controller, and you can add additional
+images to the cache by leveraging the [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* http (3.4.5)
 
 * [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
@@ -32,22 +36,6 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### log\_level
-
-Description: The log level for the reflector pods
-
-Type: `string`
-
-Default: `"Error"`
-
-### panfactum\_scheduler\_enabled
-
-Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
-
-Type: `bool`
-
-Default: `false`
-
 ### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
@@ -55,22 +43,6 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `true`
-
-### reflector\_helm\_version
-
-Description: The version of the emberstack/reflector helm chart
-
-Type: `string`
-
-Default: `"7.1.262"`
-
-### vpa\_enabled
-
-Description: Whether the VPA resources should be enabled
-
-Type: `bool`
-
-Default: `false`
 
 ## Outputs
 

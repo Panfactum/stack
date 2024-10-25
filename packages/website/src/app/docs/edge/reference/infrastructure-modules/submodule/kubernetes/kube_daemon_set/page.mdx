@@ -4,18 +4,30 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pod" status="stable" type="submodule" />
+<ModuleHeader name="kube_daemon_set" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_daemon_set" status="stable" type="submodule" />
 
-# Kubernetes Pod Template
+# Kubernetes DaemonSet
 
-This module does **not** create a Kubernetes Pod but rather exposes a `pod_template` output
-that is intended to by used by higher-level controllers such as Deployments and StatefulSets. This module
-is used internally by many Panfactum submodules such as
-[kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+Provides a production-hardened instance of a Kubernetes [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+with the following enhancements:
+
+* Standardized resource labels
+* Pod and container security hardening
+* Temporary directory mounting
+* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+* Service account configuration with default permissions
+* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
+* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
 
 ## Usage
 
-This module follows most of the conventions outlined in [this guide](/docs/edge/guides/deploying-workloads/basics).
+### Basics
+
+This module follows the basic workload deployment patterns describe in [this guide](/docs/edge/guides/deploying-workloads/basics).
 
 ## Providers
 
@@ -49,12 +61,12 @@ list(object({
     command                 = list(string)                     # The command to be run as the root process inside the container
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
-    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
-    minimum_memory          = optional(number, 100)            # The minimum amount of memory in megabytes
+    minimum_memory          = optional(number, 100)            #The minimum amount of memory in megabytes
     maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
     memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
     minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
     maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
     run_as_root             = optional(bool, false)            # Whether to run the container as root
     uid                     = optional(number, 1000)           # user to use when running the container if not root
     linux_capabilities      = optional(list(string), [])       # Default is drop ALL
@@ -71,17 +83,23 @@ list(object({
     readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
     readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
     ports = optional(map(object({                              # Keys are the port names, and the values are the port configuration.
-      port              = number                               # Port on the container that traffic should be routed to
+      port              = number                               # Port on the backing pods that traffic should be routed to
+      service_port      = optional(number, null)               # Port to expose on the service. defaults to port
       protocol          = optional(string, "TCP")              # One of TCP, UDP, or SCTP
-      service_port      = optional(number, null)               # Noop (required for tf type conversion)
-      expose_on_service = optional(bool, true)                 # Noop (required for tf type conversion)
+      expose_on_service = optional(bool, true)                 # Whether this port should be listed on the DaemonSet's service
     })), {})
   }))
 ```
 
+### name
+
+Description: The name of this DaemonSet
+
+Type: `string`
+
 ### namespace
 
-Description: The namespace where the pod will run
+Description: The namespace the DaemonSet should be created in
 
 Type: `string`
 
@@ -97,41 +115,17 @@ Type: `bool`
 
 Default: `true`
 
-### az\_anti\_affinity\_required
-
-Description: Whether to prevent pods from being scheduled on the same zone
-
-Type: `bool`
-
-Default: `false`
-
-### az\_spread\_preferred
-
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
-
-Type: `bool`
-
-Default: `false`
-
-### az\_spread\_required
-
-Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
-
-Type: `bool`
-
-Default: `false`
-
 ### burstable\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### common\_env
 
-Description: Key-value pairs of the environment variables for each container
+Description: Key pair values of the environment variables for each container
 
 Type: `map(string)`
 
@@ -177,7 +171,7 @@ Default: `{}`
 
 ### config\_map\_mounts
 
-Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the DaemonSet
 
 Type:
 
@@ -196,35 +190,19 @@ Description: Whether to allow pods to schedule on EKS Node Group nodes (controll
 
 Type: `bool`
 
-Default: `false`
-
-### controller\_nodes\_required
-
-Description: Whether the pods must be scheduled on a controller node
-
-Type: `bool`
-
-Default: `false`
+Default: `true`
 
 ### dns\_policy
 
-Description: The DNS policy for the pod
+Description: The DNS policy for the pods
 
 Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra\_labels
-
-Description: Extra labels to apply to all resources created by this module.
-
-Type: `map(string)`
-
-Default: `{}`
-
 ### extra\_pod\_annotations
 
-Description: Annotations to add to the pods in the deployment
+Description: Annotations to add to the pods in the DaemonSet
 
 Type: `map(string)`
 
@@ -255,28 +233,6 @@ list(object({
 
 Default: `[]`
 
-### extra\_volume\_mounts
-
-Description: A mapping of volume names to their mount configuration in the containers of the Pod. Used for dynamically generated Volumes such as in StatefulSets.
-
-Type:
-
-```hcl
-map(object({
-    mount_path = string # Where in the containers to mount the Volume
-  }))
-```
-
-Default: `{}`
-
-### host\_anti\_affinity\_required
-
-Description: Whether to prefer preventing pods from being scheduled on the same host
-
-Type: `bool`
-
-Default: `true`
-
 ### host\_network
 
 Description: Whether the generated pods are allowed to use the host network
@@ -285,21 +241,21 @@ Type: `bool`
 
 Default: `false`
 
-### instance\_type\_anti\_affinity\_required
+### min\_available
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
+Description: Controls how many pods are allowed to be unavailable in the DaemonSet under the Pod Disruption Budget
 
-Type: `bool`
+Type: `number`
 
-Default: `false`
+Default: `0`
 
-### match\_labels
+### min\_ready\_seconds
 
-Description: kubernetes labels to use in selectors to match the workload
+Description: The minimum number of seconds for which a newly created pod should be ready without any of its containers crashing.
 
-Type: `map(string)`
+Type: `number`
 
-Default: `null`
+Default: `5`
 
 ### mount\_owner
 
@@ -309,29 +265,13 @@ Type: `number`
 
 Default: `1000`
 
-### node\_preferences
-
-Description: Node label preferences for the pod
-
-Type: `map(object({ weight = number, operator = string, values = list(string) }))`
-
-Default: `{}`
-
 ### node\_requirements
 
-Description: Node label requirements for the pod
+Description: Node label requirements for the pods
 
 Type: `map(list(string))`
 
 Default: `{}`
-
-### panfactum\_scheduler\_enabled
-
-Description: Whether to use the Panfactum pod scheduler
-
-Type: `bool`
-
-Default: `true`
 
 ### pod\_version\_labels\_enabled
 
@@ -343,11 +283,11 @@ Default: `true`
 
 ### priority\_class\_name
 
-Description: The priority class to use for pods in the deployment
+Description: The priority class to use for pods in the DaemonSet
 
 Type: `string`
 
-Default: `null`
+Default: `"system-node-critical"`
 
 ### pull\_through\_cache\_enabled
 
@@ -367,7 +307,7 @@ Default: `"Always"`
 
 ### secret\_mounts
 
-Description: A mapping of Secret names to their mount configuration in the containers of the Pod
+Description: A mapping of Secret names to their mount configuration in the containers of the DaemonSet
 
 Type:
 
@@ -379,14 +319,6 @@ map(object({
 ```
 
 Default: `{}`
-
-### service\_account
-
-Description: The name of the service account to use for this deployment
-
-Type: `string`
-
-Default: `null`
 
 ### spot\_nodes\_enabled
 
@@ -402,7 +334,7 @@ Description: The number of seconds to wait for graceful termination before forci
 
 Type: `number`
 
-Default: `90`
+Default: `30`
 
 ### tmp\_directories
 
@@ -420,41 +352,57 @@ map(object({
 
 Default: `{}`
 
-### workload\_name
+### unhealthy\_pod\_eviction\_policy
 
-Description: The name of the workload. Used by observability platform for grouping pods.
+Description: Whether to allow unhealthy pods to be evicted. See [https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
 
 Type: `string`
 
-Default: `null`
+Default: `"AlwaysAllow"`
+
+### update\_type
+
+Description: The type of update that the DaemonSet should use. One of: RollingUpdate, OnDelete
+
+Type: `string`
+
+Default: `"RollingUpdate"`
+
+### vpa\_enabled
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+### wait\_for\_rollout
+
+Description: Whether to wait for the DaemonSet rollout before allowing terraform to proceed
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 
 The following outputs are exported:
 
-### containers
-
-Description: n/a
-
-### init\_containers
-
-Description: n/a
-
 ### labels
 
-Description: n/a
+Description: The default labels assigned to all resources in this DaemonSet
 
 ### match\_labels
 
-Description: n/a
+Description: The labels unique to this Deployment that can be used to select any pods in this DaemonSet
 
-### pod\_template
+### service\_account\_name
 
-Description: n/a
+Description: The service account used for the pods
 
 ## Maintainer Notes
 
-No notes
+No notes.
 
 {/* eslint-enable import/order */}
 

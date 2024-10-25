@@ -119,9 +119,9 @@ locals {
       "panfactum.com/prevent-lifetime-eviction"  = var.lifetime_evictions_enabled ? "false" : "true",
       "panfactum.com/scheduler-enabled"          = var.panfactum_scheduler_enabled ? "true" : "false",
       "panfactum.com/pull-through-cache-enabled" = var.pull_through_cache_enabled ? "true" : "false",
-      "panfactum.com/arm64-enabled"              = var.arm_nodes_enabled ? "true" : "false",
-      "panfactum.com/burstable-enabled"          = var.burstable_nodes_enabled ? "true" : "false",
-      "panfactum.com/spot-enabled"               = var.spot_nodes_enabled ? "false" : "false",
+      "panfactum.com/arm64-enabled"              = var.arm_nodes_enabled || var.controller_nodes_required || var.controller_nodes_enabled ? "true" : "false",
+      "panfactum.com/burstable-enabled"          = var.burstable_nodes_enabled || var.controller_nodes_required || var.controller_nodes_enabled ? "true" : "false",
+      "panfactum.com/spot-enabled"               = var.spot_nodes_enabled || var.burstable_nodes_enabled || var.controller_nodes_required || var.controller_nodes_required ? "false" : "false",
       "panfactum.com/controller-enabled"         = var.controller_nodes_enabled || var.controller_nodes_required ? "true" : "false"
     },
     local.match_labels

@@ -32,6 +32,7 @@ The basic process for running first-party code in a Kubernetes cluster is as fol
    | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)        | [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)      | Orchestrates stateless workloads such as webservers.                                                                    |
    | [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)      | [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) | Orchestrates for stateful workloads such as databases.                                                                  |
    | [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)            | [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job)         | Periodically runs one-shot processes on a schedule such as system maintenance scripts.                                  |
+   | [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)            | [kube_daemon_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set)         | Runs a pod on every tolerated node in the cluster.                                  |
    | [Argo Workflow](https://argoproj.github.io/workflows/)                                     | [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflows/wf_spec)                       | An advanced pattern available through our [Workflow Engine Addon](/docs/edge/guides/addons/workflow-engine/installing). |
 
 3. [Deploy the IaC module](/docs/edge/guides/iac/first-party-modules#deploying-modules) by configuring it in the appropriate environment directory and running `terragrunt apply`.
@@ -246,7 +247,7 @@ We provide the ability to run on cheaper node classes by enabling the following:
 * `spot_nodes_enabled`: If `true`, pods will be allowed to run on [Spot instances](https://aws.amazon.com/ec2/spot/)
   which can be 50-70% cheaper than On-Demand instances. The tradeoff is that spot instances can be terminated at any time
   with only a two-minute notice. **This is enabled by default** as most workloads can gracefully terminate in under two minutes,
-  but if your workload cannot or if it cannot tolerate arbitrary pod disruptions, you should set this to `false`.
+  but if your workload cannot or if it cannot tolerate arbitrary pod disruptions, you should set this to `false`. [^90]
 
 * `burstable_nodes_enabled`: If `true`, pods will be allowed to run on
   [Burstable instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html). Burstable
@@ -263,7 +264,13 @@ We provide the ability to run on cheaper node classes by enabling the following:
 * `arm_nodes_enabled`: If `true`, pods will be allowed to run on [ARM64](https://en.wikipedia.org/wiki/AArch64) instances
   which tend to be 20-30% cheaper than AMD64 instances. As most container images today are
   [multi-platform](https://docs.docker.com/build/building/multi-platform/), **this is enabled by default.** If your workload
-  can only run on AMD64 CPU architectures, you should set this to `false`.
+  can only run on AMD64 CPU architectures, you should set this to `false`. [^91]
+
+[^90]: Spot tolerations are added to *all* pods by default, even those not created by Panfactum submodules. You can add the label `"panfactum.com/spot-enabled" = "false"` to
+the pod to prevent spot tolerations from being injected.
+
+[^91]: ARM64 tolerations are added to *all* pods by default, even those not created by Panfactum submodules. You can add the label `"panfactum.com/arm-enabled" = "false"` to
+the pod to prevent spot tolerations from being injected.
 
 We also provide one additional node class: controller nodes. These nodes are special in that they are managed by
 [AWS EKS Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) rather than by Karpenter.
@@ -402,13 +409,17 @@ several inputs:
 
 [^20]: Unlike in base Kubernetes, workloads will be automatically restarted if the referenced ConfigMap or Secret value changes.
 
-All containers will additionally have the following environment variables set by default:
+All containers will additionally have the following environment variables set by default: [^92]
 
 * `POD_IP`: The IP address assigned to the pod.
 * `POD_NAME`: The name of the pod.
 * `POD_NAMESPACE`: The namespace of the pod.
 * `POD_SERVICE_ACCOUNT`: The name of the pod's service account.
 * `POD_TERMINATION_GRACE_PERIOD_SECONDS`: The pod's `terminationGracePeriodSeconds` field.
+* `CONTAINER_IMAGE`: The container's image field.
+* `CONTAINER_IMAGE_TAG`: The container's image's tag.
+* `CONTAINER_IMAGE_REPO`: The container's image's repository within the registry.
+* `CONTAINER_IMAGE_REGISTRY`: The container's image's registry.
 * `CONTAINER_CPU_REQUEST`: The number of CPU cores requested by the container.
 * `CONTAINER_MEMORY_REQUEST`: The number of bytes of RAM requested by the container.
 * `CONTAINER_MEMORY_LIMIT`: The number of bytes of RAM allowed to be used by the container before an OOM error.
@@ -416,6 +427,9 @@ All containers will additionally have the following environment variables set by
 * `CONTAINER_EPHEMERAL_STORAGE_LIMIT`: The number of bytes of ephemeral storage from the node that the container is allowed to use before the pod is evicted.
 * `NODE_IP`: The IP address assigned to the node the pod is scheduled on.
 * `NODE_NAME`: The name of the node the pod is scheduled on.
+
+[^92]: The environment variables are added to *all* containers by default, even those not created by Panfactum submodules.
+You can add the label `"panfactum.com/inject-env-enabled" = "false"` to the pod to prevent these environment variables from being injected into its containers.
 
 #### Mounted Files
 

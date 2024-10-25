@@ -70,6 +70,10 @@ const SIDENAV_SECTIONS = [
         path: '/internal-cluster-networking'
       },
       {
+        text: 'Policy Controller',
+        path: '/policy-controller'
+      },
+      {
         text: 'Storage Interfaces',
         path: '/storage-interfaces'
       },

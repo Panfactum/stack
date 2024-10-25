@@ -108,7 +108,7 @@ fi
 # Step 5: Resolve the GIT_REF to a commit hash
 ####################################################################
 
-GIT_COMMIT_SHA=$(pf-get-commit-hash --ref="$GIT_REF" --repo="https://$REPO")
+GIT_COMMIT_SHA=$(pf-get-commit-hash --ref="$GIT_REF" --repo="https://$REPO" --no-verify)
 
 ####################################################################
 # Step 6: Checkout the GIT_REF
