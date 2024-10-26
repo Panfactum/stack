@@ -1,4 +1,4 @@
-variable "redis_share_creds_admin_secret_destinations" {
+variable "redis_share_creds_secret_destinations" {
   description = "A list of namespaces to sync the Redis admin credentials to"
   type        = list(string)
   default     = []

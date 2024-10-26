@@ -5,12 +5,29 @@ import jwt from 'jsonwebtoken'
 import { pgClient } from "@/db";
 import { configuration } from "@/configuration";
 import {createUsersTable} from "@/createUsersTable";
+import { redisCache } from "@/cache";
+
+
+async function redisCheck() {
+  let value = await redisCache.get('time')
+
+  if (!value) {
+    value = Date.now().toString()
+    await redisCache.set('time', value, "EX", 10)
+
+    console.log('new time value', value)
+  }
+
+  return value
+}
 
 
 const app = express()
 
 app.use(express.json())
-app.get('/health', (_req, res) => {
+app.get('/health', async (_req, res) => {
+  await redisCheck()
+
   res.sendStatus(200)
 })
 
@@ -51,3 +68,4 @@ app.listen(configuration.port, configuration.host, () => {
 await pgClient.connect()
 
 await createUsersTable()
+

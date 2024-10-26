@@ -53,8 +53,9 @@ module "demo_user_service_deployment" {
     DB_SCHEMA = var.db_schema
     SECRET = var.secret
 
-    REDIS_HOST = var.redis_cache_host
-    REDIS_PORT = var.redis_cache_port
+    REDIS_SENTINEL_ENABLED = true
+    REDIS_SENTINEL_HOST = var.redis_cache_sentinel_host
+    REDIS_SENTINEL_PORT = var.redis_cache_sentinel_port
     REDIS_MASTER_SET = var.redis_master_set
   }
 
@@ -66,18 +67,18 @@ module "demo_user_service_deployment" {
 
     DB_PASSWORD = {
       secret_name = module.database.superuser_creds_secret
-      key = "password"
+      key         = "password"
     }
 
-    /*REDIS_CACHE_USERNAME = {
-      secret_name = var.redis_cache_admin_creds_secret
+    REDIS_USERNAME = {
+      secret_name = var.redis_cache_creds_secret
       key = "username"
     }
 
-    REDIS_CACHE_PASSWORD = {
-      secret_name = var.redis_cache_admin_creds_secret
+    REDIS_PASSWORD = {
+      secret_name = var.redis_cache_creds_secret
       key = "password"
-    }*/
+    }
   }
 
   containers = [

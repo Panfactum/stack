@@ -8,5 +8,5 @@ terraform {
 }
 
 inputs = {
-  redis_share_creds_admin_secret_destinations = ["demo_user_service"]
+  redis_share_creds_secret_destinations = ["demo-user-service"]
 }

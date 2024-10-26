@@ -28,13 +28,13 @@ variable "secret" {
   type        = string
 }
 
-variable "redis_cache_host" {
-  description = "The host of the redis cache"
+variable "redis_cache_sentinel_host" {
+  description = "The host of the redis sentinel cache"
   type        = string
 }
 
-variable "redis_cache_port" {
-  description = "The port of the redis cache"
+variable "redis_cache_sentinel_port" {
+  description = "The port of the redis sentinel cache"
   type        = number
 }
 
@@ -43,13 +43,8 @@ variable "redis_master_set" {
   type        = string
 }
 
-variable "redis_cache_admin_role" {
-  description = "The Vault role used to get admin credentials for the created Redis cluster"
-  type        = string
-}
-
-variable "redis_cache_admin_creds_secret" {
-  description = "The name of the Kubernetes Secret holding credentials for the admin role in the Redis database"
+variable "redis_cache_creds_secret" {
+  description = "The name of the Kubernetes Secret holding credentials for the Redis database"
   type        = string
 }
 

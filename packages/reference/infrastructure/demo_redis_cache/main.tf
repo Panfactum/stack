@@ -43,11 +43,20 @@ module "redis" {
   minimum_memory_mb = 100
 }
 
-module "kube_sync_secret" {
+module "kube_sync_secret_admin" {
     source = "${var.pf_module_source}kube_sync_secret${var.pf_module_ref}"
 
-    destination_namespaces = var.redis_share_creds_admin_secret_destinations
+    destination_namespaces = var.redis_share_creds_secret_destinations
     excluded_namespaces    = []
     secret_name            = module.redis.admin_creds_secret
     secret_namespace       = module.namespace.namespace
+}
+
+module "kube_sync_secret_superuser" {
+  source = "${var.pf_module_source}kube_sync_secret${var.pf_module_ref}"
+
+  destination_namespaces = var.redis_share_creds_secret_destinations
+  excluded_namespaces    = []
+  secret_name            = module.redis.superuser_creds_secret
+  secret_namespace       = module.namespace.namespace
 }

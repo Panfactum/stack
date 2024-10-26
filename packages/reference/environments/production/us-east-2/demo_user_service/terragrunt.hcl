@@ -31,9 +31,10 @@ inputs = {
   db_schema = "app"
   secret = "secret"
 
-  redis_cache_host = dependency.redis_cache.outputs.sentinel_host
-  redis_cache_port = dependency.redis_cache.outputs.sentinel_port
   redis_master_set = dependency.redis_cache.outputs.master_set
-  redis_cache_admin_role = dependency.redis_cache.outputs.admin_role
-  redis_cache_admin_creds_secret = dependency.redis_cache.outputs.admin_creds_secret
+  redis_cache_creds_secret = dependency.redis_cache.outputs.superuser_creds_secret
+
+  redis_cache_sentinel_enabled = true
+  redis_cache_sentinel_host = dependency.redis_cache.outputs.sentinel_host
+  redis_cache_sentinel_port = dependency.redis_cache.outputs.sentinel_port
 }
