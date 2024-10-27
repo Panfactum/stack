@@ -22,5 +22,3 @@ export const configuration = {
     password: process.env.REDIS_PASSWORD,
   }
 }
-
-console.log('configuration', configuration)

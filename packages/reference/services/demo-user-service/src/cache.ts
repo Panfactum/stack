@@ -15,6 +15,4 @@ const redisConfiguration = configuration.redis.sentinelEnabled ? {
   password: configuration.redis.password,
 }
 
-console.log('redisConfiguration', redisConfiguration)
-
 export const redisCache = new Redis(redisConfiguration)
