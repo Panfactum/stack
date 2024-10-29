@@ -1,0 +1,104 @@
+---
+import '../styles/global.css'
+import Layout from '../layouts/Layout.astro'
+import {
+  faComments,
+  faLightbulb,
+  faImages,
+} from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button } from '@/components/ui/button'
+---
+
+<Layout darkBackground={false} heroClass="bg-primary">
+  <section slot="hero" class="flex space-y-7xl flex-col items-center py-9xl">
+    <div
+      class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
+    >
+      <div
+        class="flex flex-col gap-3xl items-center text-center md:max-w-[888px]"
+      >
+        <h1 class="font-machina font-medium text-primary text-display-md">
+          Automated workflows for efficient deployments
+        </h1>
+        <p class="text-tertiary text-xl">
+          Real-time monitoring for optimized application performance.
+        </p>
+      </div>
+    </div>
+    <div
+      class="container px-container-padding-mobile xl:px-container-padding-desktop flex justify-center items-center"
+    >
+      <img
+        class="border-4 border-brand-700 w-8/12 rounded-lg"
+        src="/hero-img.png"
+        alt="Panfactum Platform Image"
+      />
+    </div>
+
+    <div
+      class="container xl:px-container-padding-desktop flex justify-center items-center"
+    >
+      <div class="flex flex-col self-center gap-5xl md:flex-row md:gap-4xl">
+        <div class="flex flex-col items-center gap-2xl">
+          <Button
+            variant="outline"
+            size="icon"
+            className="button-text-primary featured-icons-modern-border"
+          >
+            <FontAwesomeIcon icon={faComments} size="lg" />
+          </Button>
+
+          <div class="flex flex-col gap-md items-center text-center">
+            <h2 class="text-xl font-semibold text-primary">
+              Centralized issue tracking
+            </h2>
+            <p class="text-tertiary">Streamlined collaboration for dev teams</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-2xl">
+          <Button
+            variant="outline"
+            size="icon"
+            className="button-text-primary featured-icons-modern-border"
+          >
+            <FontAwesomeIcon icon={faLightbulb} size="lg" />
+          </Button>
+
+          <div class="flex flex-col gap-md items-center text-center">
+            <h2 class="text-xl font-semibold text-primary">
+              Continuous integration for faster delivery
+            </h2>
+            <p class="text-tertiary">
+              Unified dashboard for dev ops management
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-2xl">
+          <Button
+            variant="outline"
+            size="icon"
+            className="button-text-primary featured-icons-modern-border"
+          >
+            <FontAwesomeIcon icon={faImages} size="lg" />
+          </Button>
+
+          <div class="flex flex-col gap-md items-center text-center">
+            <h2 class="text-xl font-semibold text-primary">
+              Performance metrics for data-driven decisions
+            </h2>
+            <p class="text-tertiary">
+              Customizable dashboards for dev ops insights
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h1 class="text-4xl font-bold">Hello Astro</h1>
+    <p class="text-lg">Welcome to Astro</p>
+  </section>
+</Layout>

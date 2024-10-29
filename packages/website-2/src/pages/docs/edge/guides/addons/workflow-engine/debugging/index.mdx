@@ -1,0 +1,27 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Debugging'
+---
+
+# Debugging
+
+## Known Issues
+
+### Logs not showing up in web UI
+
+Logs may be delayed in showing up in the web UI. Typically, delayed logs will become visible once the workflow
+step runs to completion. However, they may occasionally never show up.
+
+This is an issue with the upstream project, and we will be investigating a fix in a future release.
+
+### Workflow step stuck in Running state
+
+If a pod created by a workflow step is deleted out-of-band (e.g., due to a spot node termination),
+there is a small chance that this deletion will not be registered with the Argo Workflow controller.
+This leads to an issue where the associated step is kept in a running state forever (or until
+you manually delete the workflow).
+
+For this reason, if you have long-running workflow steps, we recommend avoiding executing them on
+spot instances.
+
+The next Argo Workflow release should address this issue.

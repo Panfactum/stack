@@ -1,0 +1,241 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Hashicorp Vault'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_vault"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vault"
+  status="stable"
+  type="direct"
+/>
+
+# Hashicorp Vault
+
+This module deploys [Hashicorp Vault](https://www.vaultproject.io/) to the cluster via the [helm chart](https://github.com/hashicorp/vault-helm).
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### eks_cluster_name
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### vault_domain
+
+Description: The public domain for the Vault cluster
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### admin_iam_arns
+
+Description: List of IAM arns for encryption key admins.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### aws_iam_ip_allow_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### cdn_mode_enabled
+
+Description: Whether to enable CDN mode for the Vault ingress
+
+Type: `bool`
+
+Default: `true`
+
+### cors_enabled
+
+Description: Whether to enable CORS handling in the Vault ingress
+
+Type: `bool`
+
+Default: `false`
+
+### cors_extra_allowed_origins
+
+Description: Extra allowed origins for CORS handling
+
+Type: `list(string)`
+
+Default: `[]`
+
+### enhanced_ha_enabled
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
+### ingress_enabled
+
+Description: Whether or not to enable the ingress for routing traffic to vault
+
+Type: `bool`
+
+Default: `false`
+
+### monitoring_enabled
+
+Description: Whether to allow monitoring CRs to be deployed in the namespace
+
+Type: `bool`
+
+Default: `false`
+
+### panfactum_scheduler_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### pull_through_cache_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### reader_iam_arns
+
+Description: List of IAM arns for users who can use the encryption key for encryption and decryption.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### restricted_reader_iam_arns
+
+Description: List of IAM arns for users who can only view the encryption key.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### superuser_iam_arns
+
+Description: List of IAM arns for encryption key superusers.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### vault_helm_version
+
+Description: The version of the vault helm chart to deploy
+
+Type: `string`
+
+Default: `"0.27.0"`
+
+### vault_image_tag
+
+Description: The version of vault to use
+
+Type: `string`
+
+Default: `"1.14.7"`
+
+### vault_storage_increase_gb
+
+Description: The GB to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `1`
+
+### vault_storage_increase_threshold_percent
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### vault_storage_limit_gb
+
+Description: The maximum number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+Default: `null`
+
+### vault_storage_size_gb
+
+Description: The number of gigabytes to allocate to vault storage.
+
+Type: `number`
+
+Default: `20`
+
+### vpa_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### vault_domain
+
+Description: n/a
+
+### vault_internal_url
+
+Description: n/a
+
+### vault_url
+
+Description: n/a
+
+## Maintainer Notes
+
+No notes.
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

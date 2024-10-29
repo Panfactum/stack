@@ -1,0 +1,239 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Argo Workflows'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_argo"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo"
+  status="beta"
+  type="direct"
+/>
+
+# Argo Workflows
+
+## Providers
+
+The following providers are needed by this module:
+
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### argo_domain
+
+Description: The domain to use for the argo UI. Must be in a subdomain available to the environment.
+
+Type: `string`
+
+### eks_cluster_name
+
+Description: The name of the EKS cluster that contains the service account.
+
+Type: `string`
+
+### vault_domain
+
+Description: The domain of the Vault instance running in the cluster.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### argo_events_helm_version
+
+Description: The version of the argo events helm chart to deploy
+
+Type: `string`
+
+Default: `"2.4.4"`
+
+### argo_workflows_helm_version
+
+Description: The version of the argo workflows helm chart to deploy
+
+Type: `string`
+
+Default: `"0.42.5"`
+
+### aws_iam_ip_allow_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### db_recovery_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
+Type: `string`
+
+Default: `null`
+
+### db_recovery_mode_enabled
+
+Description: Whether to enable recovery mode for the PostgreSQL database
+
+Type: `bool`
+
+Default: `false`
+
+### db_recovery_target_time
+
+Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
+
+Type: `string`
+
+Default: `null`
+
+### enhanced_ha_enabled
+
+Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
+
+Type: `bool`
+
+Default: `true`
+
+### event_bus_nats_server_config_reloader_version
+
+Description: The version of nats-server-config-reloader to use for the event bus
+
+Type: `string`
+
+Default: `"0.14.2"`
+
+### event_bus_nats_version
+
+Description: The version of nats to use for the event bus
+
+Type: `string`
+
+Default: `"2.10.14"`
+
+### event_bus_prometheus_nats_exporter_version
+
+Description: The version of prometheus-nats-exporter to use for the event bus
+
+Type: `string`
+
+Default: `"0.15.0"`
+
+### ingress_enabled
+
+Description: Whether or not to enable the ingress for routing traffic to argo
+
+Type: `bool`
+
+Default: `true`
+
+### log_level
+
+Description: The log level for the argo pods
+
+Type: `string`
+
+Default: `"info"`
+
+### monitoring_enabled
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### node_image_cache_enabled
+
+Description: Whether to use kube-fledged to cache images locally for better startup performance
+
+Type: `bool`
+
+Default: `true`
+
+### panfactum_scheduler_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### pull_through_cache_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### test_workflow_enabled
+
+Description: Whether to enable the test WorkflowTemplate
+
+Type: `bool`
+
+Default: `false`
+
+### vpa_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+### workflow_archive_ttl
+
+Description: Length of time that previously run workflow states are stored
+
+Type: `string`
+
+Default: `"60d"`
+
+## Outputs
+
+The following outputs are exported:
+
+### artifact_bucket_arn
+
+Description: ARN of the S3 bucket holding workflow artifacts
+
+### artifact_bucket_name
+
+Description: Name of the S3 bucket holding workflow artifacts
+
+### db_recovery_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

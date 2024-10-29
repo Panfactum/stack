@@ -1,0 +1,177 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Key Performance Indicators (KPIs)'
+---
+
+# Key Performance Indicators (KPIs)
+
+Every organization should align on a handful of concrete metrics that it will use to assess engineering effectiveness.
+
+_There is no best set of metrics._ The importance lies primary in the acts of alignment and measurement.
+
+Additionally, these metrics will likely _not_ be solely attributable to the platform. That is
+okay. The goal is to provide overall awareness, not shoulder total responsibility for the overall numbers. That said,
+tracking KPIs will inevitably surface opportunities for platform improvement.
+
+We recommend choosing around ten metrics to focus on. Any less would have too little specificity. Any more would introduce
+too much measurement overhead.
+
+You should set aside time to review the metrics with your engineering leadership team at least once a quarter.
+
+Below are some metrics that we recommend as a starting point:
+
+## Change failure rate (CFR)
+
+Typically, organizations will have some way of tracking work via tickets / cards / issues. In this system,
+there is usually a distinction between bug / problem tickets and feature / enhancement tickets.
+
+This metrics captures the ratio:
+
+$$
+\frac{\text{bug tickets opened}}{\text{feature tickets completed}}
+$$
+
+for any given time period.
+
+This assumes that multiple bug reports for the same issue are consolidated. For organizations
+with QA, it can be helpful to have two CFR metrics: one for bugs caught by QA and one for bugs released to production.
+
+## Mean time to detect (MTTD)
+
+For bugs that make it to production, MTTD measures:
+
+$$
+\text{time}_{detected} - \text{time}_{deployed}
+$$
+
+In other words, how quickly after deploying a bug will your organization knows that it has shipped broken software?
+
+In practice, this can be difficult to measure precisely in realtime. This is a measure that we'd recommend you update
+quarterly by doing an analysis on a _small sample_ of bugs produced during that time period. Typically, 20-25 bugs
+will provide a sufficient set.
+
+## Mean time to respond (MTTR)
+
+As a counterpart to MTTD, we recommend tracking MTTR:
+
+$$
+\text{time}_{resolved} - \text{time}_{detected}
+$$
+
+MTTR captures your organization's effectiveness in fixing issues that make it to
+production. Usually this is easier to measure than MTTD as it can be computed as the time between when a bug ticket is opened and when it is closed.
+
+Since many organizations triage bugs into different severity levels with different resolution SLAs, it is usually best
+to compute this metric independently for each severity level.
+
+## Error Rates
+
+An error rate is
+
+$$
+\frac{\text{actions}_{failed}}{\text{actions}_{total}}
+$$
+
+An "action" is context specific. Here are a few examples:
+
+- for a backend service: the percent of requests that timeout or return `5xx` error codes
+- for a client-side application: the percent of user interactions that generate exceptions
+- for a data pipeline: the percent of pipeline runs that do not complete successfully
+
+Note that you should _not_ measure the error counts directly. No matter how many errors a single action
+generates, it should only be counted as failed a single time. [^2]
+
+[^2]:
+    Why? Consider one system that has 100x the raw error count as another but also 10% of the error rate. Which system is preferred?
+    The system with the lower error _rate_ would be preferable as a greater proportion of actions complete successfully.
+
+While an overall error rate is useful, it is best to provide error rates per subsystem to help pinpoint
+areas of concern. Your observability platform should be capable of collecting and displaying this information
+with relative ease.
+
+## System Latency
+
+System latency is how long it takes for your systems to respond to external events. This will almost certainly
+be the only performance metric your organization ought to care about. [^3]
+
+[^3]:
+    At larger scales, you might also be concerned about efficiency, but we address that in the infrastructure
+    and tooling costs KPIs.
+
+However, the specific latency target will be context specific. For a user-interaction to complete, it could
+be 100ms. For a data pipeline, it could be 24 hours.
+
+As a result, we recommend setting performance targets for different subsystems. For example,
+your team might decide that all HTTP requests should respond within 1 second.
+
+You would then measure the percent of actions that don't meet that performance standard:
+
+$$
+\frac{\text{actions}_{slow}}{\text{actions}_{total}}
+$$
+
+This can easily roll up to a global metric. It can also be used to directly compare the performance of different
+subsystems for the purpose of determining which systems need intervention. Again, your observability platform should be capable
+of collecting and displaying this information with relative ease.
+
+System latency will have tremendous impact on your organization's user satisfaction and conversion rates. For
+more information, see the [performance pillar.](/docs/framework/pillars/performance)
+
+## Recovery time objective (RTO)
+
+RTO measures that amount of time it would take for your organization to recover from a catastrophic incident. While
+this can mean different things for different organizations, we like to frame the question
+as follows:
+
+_Given only your database backups, how quickly can you stand-up a completely new copy of your entire infrastructure
+and resume normal operations?_
+
+We recommend testing this between one and four times per year depending on your organization's situation.
+
+## Development Velocity
+
+Perhaps the trickiest metric to measure is development velocity. We find that it is best to accept that any measure you choose will be fraught
+with shortcomings and bias. Do not let your teams get lost in the specifics. The importance lies in the act of measurement itself.
+
+As a platform engineer, the metric will catalyze conversations that uncover obstacles teams
+face to improving velocity. As you develop platform improvements, you will gain support and alignment
+by framing solutions in the context of removing these obstacles.
+
+It bears emphasizing that we'd recommend against using this metric to assess individual developers or teams but rather as an exercise to consider
+what might improve your organizational unit's output overall. [^1]
+
+[^1]:
+    If your engineering managers cannot either (a) discern who is meeting your team's output standards or (b) take corrective action
+    without relying on an arbitrary velocity metric, you likely have larger organizational issues to address.
+
+## Development Latency
+
+A more objective metric is how quickly can feature work be completed and shipped in your organization's software
+development lifecycle (SDLC). For any given feature ticket, this measures:
+
+$$
+\text{time}_{released} - \text{time}_{started}
+$$
+
+The start time is typically when a ticket is moved to an "in progress" category meaning a developer has started
+working on it. The released time is when the code has been deployed to production.
+
+A high development latency means your organization has too much work-in-progress and struggles to deploy changes rapidly
+and iteratively.
+
+## Infrastructure and Tooling Costs
+
+For most software development organizations, staffing costs will significantly exceed infrastructure and tooling costs.
+However, it can easily tip the opposite direction without active monitoring. Moreover, it is not uncommon
+that reductions in infrastructure spend can result in enough budget bandwidth for hiring additional engineers.
+
+This is straightforward (if tedious) to measure, but we recommend checking into these aggregate numbers at least once
+per quarter and dedicating a couple of hours to assessing if there are any easy, high ROI wins.
+
+Additionally, we recommend dividing costs into two buckets:
+
+- Costs that scale with number of developers
+- Costs that scale with number of users
+
+You will want to normalize those costs in each category (i.e., divide by the scalar factor) to in order to compute
+for cost _efficiency_. In other words, how much does it cost to service one user / developer.

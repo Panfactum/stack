@@ -1,0 +1,44 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Debugging'
+---
+
+# Debugging
+
+Below are some common steps to take when facing issues with the developer environment.
+
+## Reload the Developer Environment
+
+If your developer environment either fails to launch or does not pick up a desired change,
+simply run `nix-direnv-reload` to trigger a reload.
+
+Sometimes, the caching provided by `nix-direnv` might prevent your changes from appearing. For
+a hard reload, run `direnv reload`.
+
+## Nested Shells
+
+Sometimes `direnv` may not load and unload the shell properly. This can lead to starting multiple
+nested shells which can break some utilities. If you are unsure whether you are in this state,
+simply exit and relaunch the terminal.
+
+## New File Not Found
+
+If you are adding new files into your developer environment, you MUST first track them with `git` via
+`git add <file>` in order for them to visible to the `nix` build system.
+
+This can manifest as an error that looks like:
+
+```shell-session
+error: getting status of '<file>': No such file or directory
+```
+
+## No Column Named Domain
+
+```shell-session
+error: creating statement 'insert or replace into Cache(domain, key, value, timestamp) values (?, ?, ?, ?)': SQL logic error, table Cache has no column named domain (in '/home/user/.cache/nix/fetcher-cache-v2.sqlite')
+```
+
+This can occur after upgrading for version of the `nix` binary.
+
+To resolve, run `rm -f ~/.cache/nix/fetcher-cache-v2.sqlite`. This will allow the cache DB to be recreated
+with the correct schema.

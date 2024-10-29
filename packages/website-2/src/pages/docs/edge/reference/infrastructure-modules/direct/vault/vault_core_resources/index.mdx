@@ -1,0 +1,95 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Vault Core Resources'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="vault_core_resources"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/vault_core_resources"
+  status="stable"
+  type="direct"
+/>
+
+# Vault Core Resources
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### kubernetes_url
+
+Description: The url to the kubernetes API server
+
+Type: `string`
+
+### vault_internal_url
+
+Description: The internal url of the vault instance
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### log_level
+
+Description: The log level for the vault-secrets-operators pods
+
+Type: `string`
+
+Default: `"error"`
+
+### pull_through_cache_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### vault_secrets_operator_helm_version
+
+Description: The version of the vault-secrets-operator helm chart to deploy
+
+Type: `string`
+
+Default: `"0.8.1"`
+
+### vpa_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

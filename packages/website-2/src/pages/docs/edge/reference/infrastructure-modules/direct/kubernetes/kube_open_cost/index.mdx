@@ -1,0 +1,122 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'OpenCost'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_open_cost"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_open_cost"
+  status="alpha"
+  type="direct"
+/>
+
+# OpenCost
+
+This module equips our cluster with the [OpenCost](https://www.opencost.io/), a utility for
+assigning costs to every workload running in the cluster.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### eks_cluster_name
+
+Description: The name of the EKS cluster.
+
+Type: `string`
+
+### spot_data_feed_bucket
+
+Description: The name of the spot data feed bucket
+
+Type: `string`
+
+### spot_data_feed_bucket_arn
+
+Description: The arn of the spot data feed bucket
+
+Type: `string`
+
+### spot_data_feed_bucket_region
+
+Description: The region of the spot data feed bucket
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### aws_iam_ip_allow_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### open_cost_helm_version
+
+Description: The image version of the stakater/reloader helm chart
+
+Type: `string`
+
+Default: `"1.38.1"`
+
+### panfactum_scheduler_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### pull_through_cache_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### vpa_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

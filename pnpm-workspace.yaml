@@ -1,5 +1,6 @@
 packages:
   - "packages/website"
+  - "packages/website-2"
   - "packages/eslint"
   - "packages/scraper"
   - "packages/reference/services/demo-user-service"

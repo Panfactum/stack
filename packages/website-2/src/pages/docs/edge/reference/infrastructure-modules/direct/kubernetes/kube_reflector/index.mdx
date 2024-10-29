@@ -1,0 +1,95 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Kubernetes Reloader'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_reflector"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_reflector"
+  status="stable"
+  type="direct"
+/>
+
+# Kubernetes Reloader
+
+This module deploys the [reflector](https://github.com/emberstack/kubernetes-reflector), a utility that syncs ConfigMaps and Secrets across namespaces.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### log_level
+
+Description: The log level for the reflector pods
+
+Type: `string`
+
+Default: `"Error"`
+
+### panfactum_scheduler_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### pull_through_cache_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### reflector_helm_version
+
+Description: The version of the emberstack/reflector helm chart
+
+Type: `string`
+
+Default: `"7.1.262"`
+
+### vpa_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -1,0 +1,107 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Configuring Infrastructure-as-Code'
+---
+
+import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+
+import BootstrappingGuideNav from '../BootstrappingGuideNav'
+
+# Configuring Infrastructure-as-Code
+
+## Objective
+
+Complete the necessary repository setup to begin utilizing OpenTofu (Terraform) and Terragrunt.
+
+## Background
+
+<MarkdownAlert severity="warning">
+  If you're new to using infrastructure-as-code tooling professionally, you
+  should review the [concepts documentation](/docs/edge/concepts/iac) before
+  continuing.
+</MarkdownAlert>
+
+The Panfactum stack uses the open-source Terraform fork, [OpenTofu](https://opentofu.org/), to define the [100+
+infrastructure modules](/docs/edge/reference/infrastructure-modules/overview) that comprise the Panfactum stack. [^1] We
+use a [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) manager for Terraform / OpenTofu called [Terragrunt](https://terragrunt.gruntwork.io/)
+to deploy each module.
+
+[^1]: To learn more about why Terraform was forked, see the [OpenTofu manifesto](https://opentofu.org/manifesto/).
+
+Because both OpenTofu (Terraform) and Terragrunt are _unopinionated_ tools,
+every organization tends to implement infrastructure-as-code differently. While there is no
+"right" approach, it is tedious and error-prone to invent one from scratch.
+
+As a result, the Panfactum stack provides
+standardization with a _highly opinionated_ set of practices for deploying infrastructure-as-code
+that incorporates dozens of lessons learned over the past decade. It aligns with the recommendations
+provided by both Hashicorp (Terraform) and Gruntwork (Terragrunt).
+
+We assume that you will build upon the framework we provide
+as you begin to deploy infrastructure. We provide CLI tooling that enables you to quickly scaffold out
+your project to align with our guides. As you become comfortable working in the stack,
+you may customize any part of our starting setup to fit your organization's evolving needs.
+
+## Setting up Your Repo
+
+<MarkdownAlert severity="info">
+  We provide an example of a fully configured reference repository
+  [here](https://github.com/Panfactum/stack/tree/main/packages/reference).
+</MarkdownAlert>
+
+In order to provide a convenient and integrated experience for consumers of the Panfactum stack, we
+assume you will configure your stack repository inline with the following guidelines.
+
+### Version Control
+
+One core axiom is that the stack repo will follow [Github Flow](https://githubflow.github.io/) for creating
+and integrating new changes.
+
+The most important facets of GitHub flow are:
+
+- There is exactly **one** primary integration branch
+
+- That branch is **always** deployable
+
+We extend that pattern with one more rule:
+
+- That branch contains the configuration-as-code for **all** deployed infrastructure across **every**
+  environment
+
+This is a **critically important** concept. Again, **one** branch will define exactly what is deployed across
+**all** environments.
+
+Pick the branch you want to use and make sure it is set as the `repo_primary_branch` (per the [docs](/docs/edge/reference/configuration/repo-variables)).
+
+### Choose Environments Folder
+
+We store all configuration-as-code for all environment in a directory in the repo we canonically call
+the "environments folder" or "environments directory."
+
+Pick the folder you want to use and make sure it is set as the `environments_dir` (per the [docs](/docs/edge/reference/configuration/repo-variables)).
+
+## Configure Terragrunt Variables
+
+In order to begin deploying infrastructure modules, we must first configure Terragrunt.
+
+This is done by adding specific directories and files to your `environments_dir`. Specifically,
+`environments_dir` must be set up to follow [these conventions](/docs/edge/reference/configuration/terragrunt-variables).
+
+We provide a convenience script to perform this setup: `pf-env-scaffold -e <env1,env2,...>`.
+
+Run it now, specifying each environment (AWS account) you created in the prior section (e.g., `pf-env-scaffold -e management,production,development`).
+
+Once this completes, take a moment to validate that each `global.yaml`, `environment.yaml`, and `region.yaml` file
+contains the appropriate values. [^2]
+
+[^2]: See the [reference documentation](/docs/edge/reference/configuration/terragrunt-variables) for more information on the available values.
+
+## Next Steps
+
+In the next guide section, we will use this configuration to deploy your first infrastructure-as-code modules.
+
+<BootstrappingGuideNav
+  backHref={'/docs/edge/guides/bootstrapping/preparing-aws'}
+  forwardHref={'/docs/edge/guides/bootstrapping/infrastructure-as-code'}
+  stepNumber={4}
+/>

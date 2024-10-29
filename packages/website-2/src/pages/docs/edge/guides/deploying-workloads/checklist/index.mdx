@@ -1,0 +1,29 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Deploying Workloads: Checklist'
+---
+
+# Deploying Workloads: Checklist
+
+## Objective
+
+Provide a checklist of commonly missed steps to follow whenever creating a new workload on the Panfactum Stack.
+
+## Checklist
+
+- Have you ensured that [the container image is sourced from ECR](/docs/edge/guides/deploying-workloads/basics#containers) (either directly
+  or via the [pull-through cache](/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache))?
+- Have you implemented [liveness and readiness probes?](/docs/edge/guides/deploying-workloads/basics#liveness-and-readiness-probes)
+- Have you ensured your workload can [gracefully terminate in under 90 seconds?](/docs/edge/guides/deploying-workloads/basics#graceful-termination)
+- Have you set the [appropriate priority class?](/docs/edge/guides/deploying-workloads/basics#priority-class)
+- Have you set [resource minimums](/docs/edge/guides/deploying-workloads/basics#resource-management) for your workload?
+- Have you enabled [the appropriate node classes?](/docs/edge/guides/deploying-workloads/basics#node-classes)
+- Have you ensured you protected secret configuration values by providing them via `common_secrets` or `secret_mounts` (vs. `common_env` or `config_map_mounts`)?
+- Have you created the necessary [temporary directories](/docs/edge/guides/deploying-workloads/basics#temporary-directories) so that you can leave
+  the root filesystem as read-only?
+- Have you verified that the container can run under uid `1000`? If it cannot, have you set the `uid` input?
+- Have you given the workload all the [necessary permissions](/docs/edge/guides/deploying-workloads/permissions)?
+- Have you chosen an [SLA level for your workload and completed the necessary checklist?](/docs/edge/guides/deploying-workloads/high-availability)
+- Do you have a networked workload? If so:
+  - Have you set the `ports` for each container?
+  - Do you need to allow public access? Have you set up an Ingress with [kube_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)?

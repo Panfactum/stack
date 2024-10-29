@@ -1,0 +1,75 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Kubernetes Constants'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_constants"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_constants"
+  status="stable"
+  type="submodule"
+/>
+
+# Kubernetes Constants
+
+## Providers
+
+No requirements.
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+The following outputs are exported:
+
+### cilium_taint
+
+Description: The taint added to every node before the Cilium pods are ready (i.e., when networking is unavailable)
+
+### cluster_important_priority_class_name
+
+Description: A Kubernetes Priority Class that is higher than the workload-important but lower than system-cluster-critical.
+
+### controller_taint
+
+Description: The taint added to every EKS nodes
+
+### default_priority_class_name
+
+Description: The default Kubernetes Priority Class
+
+### panfactum_image_repository
+
+Description: The repository of the Panfactum devShell image with the AWS public ECR registry (public.ecr.aws).
+
+### panfactum_image_tag
+
+Description: The tag of the Panfactum devShell image that is compatible with this module's version of the Panfactum stack.
+
+### panfactum_scheduler_name
+
+Description: The name to use for the 'schedulerName' pod spec field when you want to use the Panfactum bin-packing pod scheduler.
+
+### workload_important_priority_class_name
+
+Description: A Kubernetes Priority Class that is higher than the default but lower than cluster-important. Generally, all stateful systems should have this priority class.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

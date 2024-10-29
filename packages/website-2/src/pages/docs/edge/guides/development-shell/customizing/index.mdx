@@ -1,0 +1,299 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Customizing the devShell'
+---
+
+import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+
+# Customizing the devShell
+
+The Panfactum stack comes with a preloaded "devShell" that contains both essential and convenience utilities
+for working with the stack. This shell automatically launches when you open your organization's stack
+repository in a terminal.
+
+You can also include additional utilities that are specific to your organization. This guide walks through
+the most common customization options.
+
+## Initial Installation
+
+When you first install the devShell, the `flake.nix` in the root of your repository should have the following
+contents:
+
+```nix
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+  };
+
+  outputs = { panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
+      {
+        devShell = panfactum.lib.${system}.mkDevShell { };
+      }
+    );
+}
+```
+
+## Adding New Tools
+
+`panfactum.lib.${system}.mkDevShell` takes an input called `packages` that can take addition nix packages ([derivations](https://zero-to-nix.com/concepts/derivations))
+to be added to your devShell. There are a few common ways to do this:
+
+### From nixpkgs
+
+<MarkdownAlert severity="info">
+  [This search interface](https://www.nixhub.io/) is very helpful for finding
+  specific versions of packages that are available in the nixpkgs repository.
+</MarkdownAlert>
+
+[nixpkgs](https://github.com/NixOS/nixpkgs) is the **largest** software repository in the world ([reference](https://repology.org/repositories/graphs)),
+so an enormous amount of tooling is readily available to you.
+
+To add a package such as `nodejs_20`, update your `flake.nix` with the following:
+
+```diff-nix[class="diff-highlight"]
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
++   nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
+  };
+
++ outputs = { nixpkgs, panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
++     let
++        pkgs = import nixpkgs {
++         inherit system;
++         config = { allowUnfree = true; };
++       };
++     in
+      {
+        devShell = panfactum.lib.${system}.mkDevShell {
++         packages = [
++           pkgs.nodejs_20
++         ];
+        };
+      }
+    );
+}
+```
+
+All packages defined in the `nixpkgs` GitHub repo are updated together,
+and **many** updates are made to the repository each day.
+`pkgs` refers to the set of packages defined by a **specific commit** in `nixpkgs`.
+That commit is determined by the `nixpkgs.url` field in your `flake.nix`.
+
+However, if you specify a branch such as `nixos-24.05` (via `inputs.pkgs.url = "github:NixOS/nixpkgs/nixos-24.05;"`),
+the commit hash is pinned in the `flake.lock` file and will not be automatically updated when you run `nix flake update`.
+
+In general, we recommend pinning the commit directly in the `flake.nix` to avoid ambiguity. For example,
+`nixpkgs.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";`.
+
+<MarkdownAlert severity="warning">
+  If you are not pinning the nixpkgs commit hash in your `flake.nix`, running
+  `nix flake update` will likely change the versions of the packages that are
+  installed.
+</MarkdownAlert>
+
+You may find that your want to include specific versions of separately tools
+that are on different commits of nixpkgs from each other. Fortunately, you can very easily include multiple
+commits of "views" of nixpkgs:
+
+```diff-nix[class="diff-highlight"]
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
++   nixpkgs1.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
++   nixpkgs2.url = "github:NixOS/nixpkgs/dd53ef232cf8398c6832dcc9e6c4194bf109e70e";
+  };
+
++ outputs = { nixpkgs1, nixpkgs2, panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
++     let
++        pkgs1 = import nixpkgs1 {
++         inherit system;
++         config = { allowUnfree = true; };
++       };
++        pkgs2 = import nixpkgs2 {
++         inherit system;
++         config = { allowUnfree = true; };
++       };
++     in
+      {
+        devShell = panfactum.lib.${system}.mkDevShell {
++         packages = [
++           pkgs1.nodejs_20
++           pkgs2.python3
++         ];
+        };
+      }
+    );
+}
+```
+
+### Custom Scripts
+
+You may want to include custom shell scripts in your developer environment.
+
+Imagine that you have the following script called `foobar.sh` that you want users to be able to call by
+executing `foobar` anywhere in the developer environment:
+
+```bash
+#!/usr/bin/env bash
+
+echo "Foobar"
+```
+
+You would include this in your `flake.nix` as follows:
+
+```diff-nix[class="diff-highlight"]
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
+  };
+
+  outputs = { nixpkgs, panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
+      let
+         pkgs = import nixpkgs {
+          inherit system;
+          config = { allowUnfree = true; };
+        };
+     in
+      {
+        devShell = panfactum.lib.${system}.mkDevShell {
+          packages = [
++           (pkgs.writeShellScriptBin "foobar" (builtins.readFile ./foobar.sh))
+          ];
+        };
+      }
+    );
+}
+```
+
+### Wrapping an Existing Tool
+
+Occasionally, you may want to use a package but automatically pass in default flags or
+environment variables for users of your developer environment.
+
+There is a handy package called
+[makeWrapper](https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/setup-hooks/make-wrapper.sh)
+that allows you to do this.
+
+For example, let's say you want to always add `-n cilium` to calls of the `cilium` CLI. Simply create the following
+`cilium.nix` file (make sure to `git add` it):
+
+```nix
+{ pkgs }:
+pkgs.symlinkJoin {
+  name = "cilium-cli";
+  paths = [ pkgs.cilium-cli ];
+  buildInputs = [ pkgs.makeWrapper ];
+  postBuild = ''
+    wrapProgram $out/bin/cilium \
+      --add-flags "-n cilium"
+  '';
+}
+```
+
+You would include this in your `flake.nix` as follows:
+
+```diff-nix[class="diff-highlight"]
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
+  };
+
+  outputs = { nixpkgs, panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
+      let
+         pkgs = import nixpkgs {
+          inherit system;
+          config = { allowUnfree = true; };
+        };
+     in
+      {
+        devShell = panfactum.lib.${system}.mkDevShell {
+          packages = [
++           (import ./cilium.nix { inherit pkgs; })
+          ];
+        };
+      }
+    );
+}
+```
+
+### Build a Custom Utility
+
+If you are looking to package a custom binary, you will need to learn how nix derivations work.
+
+We strongly encourage you to go through the [nix pills](https://nixos.org/guides/nix-pills/why-you-should-give-it-a-try)
+tutorial for a good beginner overview.
+
+The [nixpkgs manual](https://ryantm.github.io/nixpkgs/#preface) contains very detailed instructions
+for best practices in creating nix packages for the most popular language ecosystems.
+
+## Adding Additional Shell Hooks
+
+`panfactum.lib.${system}.mkDevShell` takes an input called `shellHook` that takes an arbitrary bash snippet (as a string)
+that will be executed every time the devShell loads.
+
+This can be extremely helpful for loading default environment variables, installing pre-commit hooks, issuing warnings,
+or automatically running any other repository maintenance activities.
+
+You can add the hook as follows:
+
+```diff-nix[class="diff-highlight"]
+{
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+    panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+  };
+
+  outputs = { panfactum, flake-utils, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+    (system:
+      {
+        devShell = panfactum.lib.${system}.mkDevShell {
+          shellHook = ''
+            export GREETING="Hello World!"
+            echo "$GREETING"
+          '';
+        };
+      }
+    );
+}
+```
+
+## Triggering Automatic Updates
+
+You may find it easier to split out your devShell customizations into multiple files. If you want the devShell to reload
+automatically when those files change, you need to add new `nix_direnv_watch_file` directives to your
+`.envrc` file.
+
+For example, if you want to watch all files in a directory called `shell`, your `.envrc` file should contain the line
+
+```bash
+nix_direnv_watch_file shell/*
+```
+
+## Additional Flake Customization
+
+While we provide a customized builder for the `outputs.devShell` field of your Nix flake, you should feel free to
+take advantage of the other fields for adding additional functionality. These will not interfere with Panfactum
+at all.
+
+For example, you can add packages (`nix build`), checks (`nix check`), and even apps (`nix run`).
+
+For more information on flake development, see the [flake documentation](https://nixos.wiki/wiki/Flakes).

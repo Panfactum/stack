@@ -1,0 +1,234 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Service Mesh'
+---
+
+import { Image } from 'astro:assets'
+import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+import BootstrappingGuideNav from '../BootstrappingGuideNav'
+import linkerdPods from './linkerd-pods.jpg'
+import linkerdSidecarImg from './linkerd-sidecars.jpg'
+
+# Service Mesh
+
+## Objective
+
+Deploy the [Linkerd2 service mesh](https://linkerd.io/).
+
+## Background
+
+For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd,
+check out our [concept documentation.](/docs/edge/concepts/networking/cluster-networking#service-mesh)
+
+## Deploy Linkerd2
+
+[Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes,
+and we provide a module for deploying it: [kube_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+
+This module not only deploys linkerd but also connects it to the certificate infrastructure that we
+provisioned in the previous section. It also installs linkerd-specific observability tooling that we
+will review later.
+
+Let's deploy the module now:
+
+1. Create a new directory adjacent to your `kube_cert_manager` module called `kube_linkerd`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_linkerd/terragrunt.hcl).
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+You should see a variety of linkerd pods successfully running:
+
+<Image src={linkerdPods} alt="linkerd pods running successfully" />
+
+## Test the Mesh
+
+## Control Plane Checks
+
+Linkerd comes with a companion cli tool, `linkerd`. This tool is included in the Panfactum devShell.
+
+Use it to run `linkerd check`. You should see a successful output like this:
+
+```shell-session
+kubernetes-api
+--------------
+√ can initialize the client
+√ can query the Kubernetes API
+
+kubernetes-version
+------------------
+√ is running the minimum Kubernetes API version
+
+linkerd-existence
+-----------------
+√ 'linkerd-config' config map exists
+√ heartbeat ServiceAccount exist
+√ control plane replica sets are ready
+√ no unschedulable pods
+√ control plane pods are ready
+√ cluster networks contains all pods
+√ cluster networks contains all services
+
+linkerd-config
+--------------
+√ control plane Namespace exists
+√ control plane ClusterRoles exist
+√ control plane ClusterRoleBindings exist
+√ control plane ServiceAccounts exist
+√ control plane CustomResourceDefinitions exist
+√ control plane MutatingWebhookConfigurations exist
+√ control plane ValidatingWebhookConfigurations exist
+√ proxy-init container runs as root user if docker container runtime is used
+
+linkerd-identity
+----------------
+√ certificate config is valid
+√ trust anchors are using supported crypto algorithm
+√ trust anchors are within their validity period
+√ trust anchors are valid for at least 60 days
+√ issuer cert is using supported crypto algorithm
+√ issuer cert is within its validity period
+√ issuer cert is valid for at least 60 days
+√ issuer cert is issued by the trust anchor
+
+linkerd-webhooks-and-apisvc-tls
+-------------------------------
+√ proxy-injector webhook has valid cert
+√ proxy-injector cert is valid for at least 60 days
+√ sp-validator webhook has valid cert
+√ sp-validator cert is valid for at least 60 days
+√ policy-validator webhook has valid cert
+√ policy-validator cert is valid for at least 60 days
+
+linkerd-version
+---------------
+√ can determine the latest version
+‼ cli is up-to-date
+    is running version 24.3.3 but the latest edge version is 24.3.4
+    see https://linkerd.io/2/checks/#l5d-version-cli for hints
+
+control-plane-version
+---------------------
+√ can retrieve the control plane version
+‼ control plane is up-to-date
+    is running version 24.3.3 but the latest edge version is 24.3.4
+    see https://linkerd.io/2/checks/#l5d-version-control for hints
+√ control plane and cli versions match
+
+linkerd-control-plane-proxy
+---------------------------
+√ control plane proxies are healthy
+‼ control plane proxies are up-to-date
+    some proxies are not running the current version:
+	* linkerd-destination-7dcbb4b49f-g8sqq (edge-24.3.3)
+	* linkerd-destination-7dcbb4b49f-zrzm7 (edge-24.3.3)
+	* linkerd-identity-5496585848-5clgt (edge-24.3.3)
+	* linkerd-identity-5496585848-wgpbg (edge-24.3.3)
+	* linkerd-proxy-injector-d6f96d8f5-w8665 (edge-24.3.3)
+	* linkerd-proxy-injector-d6f96d8f5-xpnvp (edge-24.3.3)
+    see https://linkerd.io/2/checks/#l5d-cp-proxy-version for hints
+√ control plane proxies and cli versions match
+
+linkerd-extension-checks
+------------------------
+√ namespace configuration for extensions
+
+Status check results are √
+```
+
+<MarkdownAlert severity="info">
+  Note that you may receive some warning about components not being up-to-date.
+  Linkerd produces many minor releases and these warning are benign. You should
+  stick with the default version included in the Panfactum stack unless you have
+  a specific reason to deviate.
+</MarkdownAlert>
+
+### Verify Certificate Rotation
+
+While linkerd may be working after the initial deploy, we also want to ensure it _continues_ to work
+after its certificates are rotated.
+
+Rotate the certificates now:
+
+```bash
+cmctl renew -n linkerd \
+    linkerd-identity-issuer \
+    linkerd-policy-validator-k8s-tls \
+    linkerd-proxy-injector-k8s-tls \
+    linkerd-sp-validator-k8s-tls
+```
+
+### Install Viz
+
+Linkerd also comes with a handy debugging suite called `viz` that can be easily installed (temporarily) using
+the cli. Run this now: `linkerd viz install | kubectl apply -f -`.
+
+### Inject Sidecars
+
+<MarkdownAlert severity="warning">
+  Do not begin this step until the Viz components from the previous step are
+  fully deployed.
+</MarkdownAlert>
+
+Linkerd works by injecting sidecar containers into your pods to connect them to the mesh. This happens on
+pod _creation_ so already existing pods will not have any sidecars injected. Let's restart them to connect
+them to the mesh:
+
+1. Using k9s, restart all your deployments not in the `linkerd` namespace:
+
+2. Navigate to `:deployments`. Don't forget to change the namespace filter to "all" by pressing `0`.
+
+3. Select each deployment by pressing `<space>`.
+
+4. Press `r` to restart.
+
+5. Perform a similar restart to `:statefulsets` and `:daemonsets`.
+
+6. Notice that the new pods have linkerd sidecar containers:
+
+<Image src={linkerdSidecarImg} alt="Pod with linkerd sidecar containers" />
+
+### Verify Data Plane
+
+1. Run `linkerd viz tap ns/vault` to start monitoring traffic in the `vault` namespace.
+
+2. Rotate a certificate to force cert-manager to connect with Vault: `cmctl renew -n cert-manager cert-manager-webhook-certs`.
+
+3. The tap session should produce a response similar to this:
+
+   ```shell-session
+   req id=0:0 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true :method=POST :authority=vault-active.vault.svc.cluster.local:8200 :path=/v1/auth/kubernetes/login
+   rsp id=0:0 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true :status=200 latency=69451µs
+   end id=0:0 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true duration=57µs response-length=763B
+   req id=0:1 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true :method=POST :authority=vault-active.vault.svc.cluster.local:8200 :path=/v1/pki/internal/sign/vault-issuer
+   rsp id=0:1 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true :status=200 latency=56146µs
+   end id=0:1 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true duration=210µs response-length=3914B
+   ```
+
+   Notice that the `src` IP address will be one of the cert-manager pods and the `dst` will be one of your
+   Vault pods. Additionally, notice that `tls=true` indicates that **the request came over a TLS connection even though Vault
+   itself was never configured with TLS.** This is the service mesh sidecar container in action.
+
+The Linkerd documentation also provides even more granular methods that you can use to [validate the security
+of your traffic](https://linkerd.io/2.15/tasks/validating-your-traffic/).
+
+### Remove Viz
+
+We will revisit observability tooling in a later section, so for now, let's remove the manually created
+`viz` to keep the cluster clean of redundant resources:
+
+`linkerd viz install | kubectl delete -f -`
+
+## Next Steps
+
+At this point, all the necessary components for powering _internal_ cluster networking are configured. However, before
+we configure _external_ networking, we will address autoscaling
+as the cluster is likely already running 75+ containers and will soon become resource constrained.
+
+<BootstrappingGuideNav
+  backHref={'/docs/edge/guides/bootstrapping/certificate-management'}
+  forwardHref={'/docs/edge/guides/bootstrapping/autoscaling'}
+  stepNumber={14}
+/>

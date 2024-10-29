@@ -1,0 +1,309 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Developing First-party Modules'
+---
+
+import ImageSvg from '@/components/ImageSvg'
+import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+
+import VersioningImg from './versioning.svg?raw'
+
+# Developing First-party Modules
+
+First-party modules are those infrastructure modules that are written and maintained by your organization
+and located in your organization's infrastructure stack repository. They are
+written using the OpenTofu (Terraform) [syntax](https://opentofu.org/docs/language/syntax/).
+
+## Setting up the Infrastructure Directory
+
+It is assumed that your infrastructure modules will live in your stack repository under a single
+directory.
+
+Set the `iac_dir` repo variable to that directory per the [reference docs](/docs/edge/reference/configuration/repo-variables).
+
+For example, if `iac_dir` is set to `infrastructure`, it is expected your filesystem layout
+will look as follows:
+
+```txt
+infrastructure/
+   - [module_1]/
+     - main.tf
+     - vars.tf
+     - outputs.tf
+   - [module_2]/
+   - [module_3]/
+   ***
+```
+
+All the normal conventions for developing OpenTofu (Terraform) modules apply.
+
+## Deploying Modules
+
+All the rules in the [main module deployment guide](/docs/edge/guides/iac/deploying-modules#defining-a-module-for-deployment) apply.
+However, there are some additional considerations for first-party modules:
+
+### Sourcing
+
+We provide convenience functionality for sourcing first-party modules in your Terragrunt configuration.
+This takes care of common issues around versioning and caching:
+
+In your `terragrunt.hcl`, you should source your module as follows:
+
+```hcl
+terraform {
+   source = include.panfactum.locals.source
+}
+```
+
+By default, the source will be the infrastructure module with the same directory name as the directory containing
+the `terragrunt.hcl`.
+
+For example, consider the following repository layout:
+
+```txt
+environments/
+   - development/
+     - us-east-2/
+        - module1/
+          - terragrunt.hcl
+          - module.yaml
+infrastructure/
+   - module1/
+   - module2/
+```
+
+The `environments/development/us-east-2/module1/terragrunt.hcl` configuration will automatically
+source the `infrastructure/module1` module since the `terragrunt.hcl` is in a directory called `module1`.
+
+### Overriding Default Source
+
+You can override this behavior by setting the `module` key in the `module.yaml`.
+
+Consider the above example again. This time, the `module.yaml` has the following contents:
+
+```yaml
+module: module2
+```
+
+Now the sourced module will be `infrastructure/module2`.
+
+### Versioning
+
+By default, the local version of the module will be sourced. This can be ideal
+for local testing and/or an integration environment where you always want the latest module code to be
+deployed. However, this is not ideal for higher environments where you want a more controlled release process.
+
+You likely already have some strategy for creating versioned releases in your repositories. Perhaps you use
+[semantic versioning](https://semver.org/) via git tags.
+
+You can pin a module to a particular version by setting the `version` key to your desired
+[git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in one of the `environment.yaml`, `region.yaml`, or `module.yaml` files.
+A git ref can be a tag, a branch name, or even a specific commit hash.
+
+For example, consider a stack repo that has the git tags `v1.0.0`, `v1.1.0`, and `v2.0.0` representing versioned
+releases of code.
+
+Your repo has the following layout:
+
+```txt
+environments/
+   - development/
+     - environment.yaml
+     - us-east-2/
+        - module1/
+        - module2/
+   - staging/
+     - environment.yaml
+     - us-east-2/
+        - module1/
+        - module2/
+   - production/
+     - environment.yaml
+     - us-east-2/
+        - module1/
+        - module2/
+     - us-west-2/
+        - region.yaml
+        - module1/
+        - module2/
+infrastructure/
+   - module1/
+   - module2/
+```
+
+Each `environment.yaml` as the following `version` keys:
+
+- `development/environment.yaml`: `main`
+- `staging/environment.yaml`: `v2.0.0`
+- `production/environment.yaml`: `v1.1.0`
+
+Additionally, the `production/us-west-2/region.yaml` file has the `version` key set to `v1.0.0`.
+
+In this scenario, even though all three environments will use both the `module1` and `module2` modules:
+
+- The [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) (e.g., module versions, module inputs, etc.) will for **all** module deployments will **always** be defined
+  by the values in the primary integration branch. This is set by the `repo_primary_branch` [repo variable.](/docs/edge/reference/configuration/repo-variables)
+- **All** modules in `development` will use the latest `infrastructure/*` code on the `main` branch (useful for ensuring the latest
+  code is always deployed). This is because `development/environment.yaml` has `version` set to `main`.
+- Similarly, **all** modules in `staging` will use the `infrastructure/*` code at the `v2.0.0` git tag.
+- The modules in `production` will default to using the `infrastructure/*` code at the `v1.1.0` tag except for the modules
+  in `us-west-2` which will use `v1.0.0`.
+
+<ImageSvg src={VersioningImg} alt="Terragrunt module versioning diagram" />
+
+## Writing Modules
+
+### Using Panfactum Submodules
+
+In addition to the infrastructure modules that you deploy directly, we provide [many submodules](/docs/edge/reference/infrastructure-modules/overview)
+that you many import directly for use in your custom modules.
+
+You can accomplish this via `module` blocks in your infrastructure code ([docs](https://developer.hashicorp.com/terraform/language/modules/sources)).
+
+For example:
+
+```hcl
+module "pod" {
+  source       = "github.com/Panfactum/stack.git//packages/infrastructure/kube_pod?ref=__PANFACTUM_VERSION_EDGE__"
+}
+```
+
+However, the above syntax has a major downside: your module sources will not automatically align to the version
+of the Panfactum Stack to which you are deploying the module. As a particular submodule version
+is always meant to be running on the same version of the Panfactum Stack, this is a problem. [^1]
+
+[^1]:
+    For example, you should not run a submodule version `edge.24-10-09` when the cluster is running
+    `edge.24-11-24`.
+
+Fortunately, we provide a convenient way to automatically align your submodule versions:
+
+1. Add the following variables to your module:
+
+   ```hcl
+   variable "pf_module_source" {
+     description = "The source for Panfactum submodules"
+     type = string
+   }
+
+   variable "pf_module_ref" {
+     description = "The git ref for Panfactum submodules"
+     type = string
+   }
+   ```
+
+2. You can now source Panfactum submodules as follows:
+
+   ```hcl
+   module "pod" {
+     source       = "${var.pf_module_source}kube_pod${var.pf_module_ref}"
+   }
+   ```
+
+Our Terragrunt configuration automatically takes care of passing in the appropriate values for `pf_module_source`
+and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#module-source), these variables will
+automatically update.
+
+<MarkdownAlert severity="warning">
+  If you are [using a local copy of the Panfactum submodules](/docs/edge/guides/iac/deploying-modules#using-a-local-copy-of-panfactum-modules),
+  `pf_module_source` will be a relative path. Unlike absolute paths, [relative paths provide performance improvements and automatic updates.](https://opentofu.org/docs/language/modules/sources/#local-paths)
+  However, the relative path cannot always be used such as from within nested folders inside your modules.
+
+You can use absolute paths instead
+by setting the `pf_stack_local_use_relative` [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#module-source) to `false`.
+However, this will force you to re-init any time you change the local Panfactum module code.
+
+</MarkdownAlert>
+
+### Using First-Party Submodules
+
+You may also want to create submodules that you can reference in other modules. There are no special
+rules to follow, but we recommend sourcing the modules via relative paths rather than via a remote address:
+
+```hcl
+module "utility" {
+  source       = "../utility_module"
+}
+```
+
+This ensures that you do not need to keep track of version dependencies across modules and reduces
+your deployment runtimes by avoiding unnecessary network calls.
+
+## Local Development
+
+When developing modules, you may want to test changes before committing them and waiting on the CI/CD pipeline
+for deployment. Additionally, you may want to use your own settings for the OpenTofu (Terraform) providers (for example, using
+a specific AWS profile for authentication).
+
+You can override all values in the committed version of `global.yaml`, `environment.yaml`, `region.yaml`, and `module.yaml`
+with `*.user.yaml` counterparts (e.g., `environment.user.yaml`). These files are never committed and are specific
+to **you**. For all available settings, see the [reference documentation.](/docs/edge/reference/configuration/terragrunt-variables)
+
+For example, you can set `version` to `local` in order to deploy your local code when you run `terragrunt apply`
+in a module directory.
+
+It is common that you might want to set the `version` in `environments/development/<some-region>/region.user.yaml` if you
+are frequently testing local changes in a particular `development` region:
+
+```yaml
+version: local
+```
+
+## Best Practices
+
+### Monorepo
+
+One of the reasons we _strongly_ recommend a monorepo setup is so that you can version your infrastructure code in
+tandem with your application code. Often times application code and infrastructure depend on one another, and by using
+tandem versioning you can ensure that version `X` of your application code will run properly as long as version `X` of the
+infrastructure has been deployed.
+
+In our experience, mistakes in managing this dependency graph causes a significant number (>25%) of all major bugs and outages
+in most software organizations. It benefits you to keep this as simple as possible.
+
+### Using the IaC Version for Application Code
+
+By default, `version` only refers to which version of the module to source. However, you may also want
+to use this to control which version of your application code to deploy as well (for example which container image tag to
+use in your Kubernetes deployment). That way changing `version` from `X` to `Y` will update **both** the infrastructure
+and the application code to version `Y`.
+
+In your `terragrunt.hcl`, you can retrieve the `version` via `include.panfactum.locals.version`. For example:
+
+```hcl
+inputs = {
+  kube_image_version = include.panfactum.locals.version
+}
+```
+
+This works especially well in a monorepo setup.
+
+_If you need the commit hash for a version, use `include.panfactum.locals.version_hash` instead_.
+
+### Rolling Deployments in Integration Environments
+
+In your integration environment (often called the development environment), it is often helpful to have the latest
+code on the primary integration branch deployed immediately. Simply set the `version` to the branch name in order to
+accomplish this.
+
+This eliminates a manual process and will allow you to catch bugs early and often.
+
+### Pinned Versions in Higher Environments
+
+You should **always** pin your versions in higher environments like `production`. This allows your organization
+to release new changes only when you are ready for them.
+
+Additionally, having to change a file in the repo to trigger a deployment ensures that your organization will
+implicitly implement change control practices (e.g., pull request approvals, immutable audit log, etc.) that meets
+most compliance frameworks such as SOC 2.
+
+### Showing the Commit Hash
+
+Often you want to know _exactly_ what code is deployed in an environment at any given time. Git refs like branch
+names or even tags are not helpful as they are mutable and can change what code they point to.
+
+The Panfactum Terragrunt system will automatically provide all deployed modules with an input variable
+called `version_hash` which represents the actual commit hash being deployed. You should use this to label
+and tag your infrastructure in your first-party modules; we do this automatically in the Panfactum modules.
+
+Note that if `version` is set to `local`, the `version_hash` will also be calculated as `local`.

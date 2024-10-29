@@ -1,0 +1,471 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Kubernetes Pod Template'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_pod"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pod"
+  status="stable"
+  type="submodule"
+/>
+
+# Kubernetes Pod Template
+
+This module does **not** create a Kubernetes Pod but rather exposes a `pod_template` output
+that is intended to by used by higher-level controllers such as Deployments and StatefulSets. This module
+is used internally by many Panfactum submodules such as
+[kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+
+## Usage
+
+This module follows most of the conventions outlined in [this guide](/docs/edge/guides/deploying-workloads/basics).
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### containers
+
+Description: A list of container configurations for the pod
+
+Type:
+
+```hcl
+list(object({
+    name                    = string                           # A unique name for the container within the pod
+    init                    = optional(bool, false)            # Iff true, the container will be an init container
+    image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
+    image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
+    image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    command                 = list(string)                     # The command to be run as the root process inside the container
+    working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
+    image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
+    minimum_memory          = optional(number, 100)            # The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    run_as_root             = optional(bool, false)            # Whether to run the container as root
+    uid                     = optional(number, 1000)           # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    read_only               = optional(bool, true)             # Whether to use a readonly file system
+    env                     = optional(map(string), {})        # Environment variables specific to the container
+    liveness_probe_command  = optional(list(string), null)     # Will run the specified command as the liveness probe if type is exec
+    liveness_probe_port     = optional(number, null)           # The number of the port for the liveness_probe
+    liveness_probe_type     = optional(string, null)           # Either exec, HTTP, or TCP
+    liveness_probe_route    = optional(string, null)           # The route if using HTTP liveness_probes
+    liveness_probe_scheme   = optional(string, "HTTP")         # HTTP or HTTPS
+    readiness_probe_command = optional(list(string), null)     # Will run the specified command as the ready check probe if type is exec (default to liveness_probe_command)
+    readiness_probe_port    = optional(number, null)           # The number of the port for the ready check (default to liveness_probe_port)
+    readiness_probe_type    = optional(string, null)           # Either exec, HTTP, or TCP (default to liveness_probe_type)
+    readiness_probe_route   = optional(string, null)           # The route if using HTTP ready checks (default to liveness_probe_route)
+    readiness_probe_scheme  = optional(string, null)           # Whether to use HTTP or HTTPS (default to liveness_probe_scheme)
+    ports = optional(map(object({                              # Keys are the port names, and the values are the port configuration.
+      port              = number                               # Port on the container that traffic should be routed to
+      protocol          = optional(string, "TCP")              # One of TCP, UDP, or SCTP
+      service_port      = optional(number, null)               # Noop (required for tf type conversion)
+      expose_on_service = optional(bool, true)                 # Noop (required for tf type conversion)
+    })), {})
+  }))
+```
+
+### namespace
+
+Description: The namespace where the pod will run
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### arm_nodes_enabled
+
+Description: Whether to allow pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `true`
+
+### az_anti_affinity_required
+
+Description: Whether to prevent pods from being scheduled on the same zone
+
+Type: `bool`
+
+Default: `false`
+
+### az_spread_preferred
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+
+Type: `bool`
+
+Default: `false`
+
+### az_spread_required
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)
+
+Type: `bool`
+
+Default: `false`
+
+### burstable_nodes_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### common_env
+
+Description: Key-value pairs of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### common_env_from_config_maps
+
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+
+Type:
+
+```hcl
+map(object({
+    config_map_name = string
+    key             = string
+  }))
+```
+
+Default: `{}`
+
+### common_env_from_secrets
+
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+
+Type:
+
+```hcl
+map(object({
+    secret_name = string
+    key         = string
+  }))
+```
+
+Default: `{}`
+
+### common_secrets
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### config_map_mounts
+
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the Pod
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false) # Whether the pod can launch if this ConfigMap does not exist
+  }))
+```
+
+Default: `{}`
+
+### controller_nodes_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
+
+### controller_nodes_required
+
+Description: Whether the pods must be scheduled on a controller node
+
+Type: `bool`
+
+Default: `false`
+
+### dns_policy
+
+Description: The DNS policy for the pod
+
+Type: `string`
+
+Default: `"ClusterFirst"`
+
+### extra_labels
+
+Description: Extra labels to apply to all resources created by this module.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra_pod_annotations
+
+Description: Annotations to add to the pods in the deployment
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra_pod_labels
+
+Description: Extra pod labels to use
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra_tolerations
+
+Description: Extra tolerations to add to the pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### extra_volume_mounts
+
+Description: A mapping of volume names to their mount configuration in the containers of the Pod. Used for dynamically generated Volumes such as in StatefulSets.
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string # Where in the containers to mount the Volume
+  }))
+```
+
+Default: `{}`
+
+### host_anti_affinity_required
+
+Description: Whether to prefer preventing pods from being scheduled on the same host
+
+Type: `bool`
+
+Default: `true`
+
+### host_network
+
+Description: Whether the generated pods are allowed to use the host network
+
+Type: `bool`
+
+Default: `false`
+
+### instance_type_anti_affinity_required
+
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
+
+Type: `bool`
+
+Default: `false`
+
+### match_labels
+
+Description: kubernetes labels to use in selectors to match the workload
+
+Type: `map(string)`
+
+Default: `null`
+
+### mount_owner
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### node_preferences
+
+Description: Node label preferences for the pod
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### node_requirements
+
+Description: Node label requirements for the pod
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### panfactum_scheduler_enabled
+
+Description: Whether to use the Panfactum pod scheduler
+
+Type: `bool`
+
+Default: `true`
+
+### pod_version_labels_enabled
+
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+
+Type: `bool`
+
+Default: `true`
+
+### priority_class_name
+
+Description: The priority class to use for pods in the deployment
+
+Type: `string`
+
+Default: `null`
+
+### pull_through_cache_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### restart_policy
+
+Description: The pod restart policy
+
+Type: `string`
+
+Default: `"Always"`
+
+### secret_mounts
+
+Description: A mapping of Secret names to their mount configuration in the containers of the Pod
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the Secret
+    optional   = optional(bool, false) # Whether the pod can launch if this Secret does not exist
+  }))
+```
+
+Default: `{}`
+
+### service_account
+
+Description: The name of the service account to use for this deployment
+
+Type: `string`
+
+Default: `null`
+
+### spot_nodes_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
+### termination_grace_period_seconds
+
+Description: The number of seconds to wait for graceful termination before forcing termination
+
+Type: `number`
+
+Default: `90`
+
+### tmp_directories
+
+Description: A mapping of temporary directory names (arbitrary) to their configuration
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the node rather than a PVC
+  }))
+```
+
+Default: `{}`
+
+### workload_name
+
+Description: The name of the workload. Used by observability platform for grouping pods.
+
+Type: `string`
+
+Default: `null`
+
+## Outputs
+
+The following outputs are exported:
+
+### containers
+
+Description: n/a
+
+### init_containers
+
+Description: n/a
+
+### labels
+
+Description: n/a
+
+### match_labels
+
+Description: n/a
+
+### pod_template
+
+Description: n/a
+
+## Maintainer Notes
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

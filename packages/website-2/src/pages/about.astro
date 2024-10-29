@@ -1,0 +1,248 @@
+---
+import '../styles/global.css'
+import Layout from '../layouts/Layout.astro'
+
+import { Button } from '@/components/ui/button'
+import Section from '../components/layout/section.astro'
+import Heading from '@/components/typography/heading.astro'
+import SubHeading from '@/components/typography/sub-heading.astro'
+
+import { faIdBadge } from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+---
+
+<Layout darkBackground={true} heroClass="bg-brand-section">
+  <Section slot="hero">
+    <div class="flex flex-col gap-3xl items-center text-center max-w-[846px]">
+      <h1
+        class="font-machina font-medium text-primary_on-brand text-display-2xl"
+      >
+        About Panfactum
+      </h1>
+      <p class="text-tertiary_on-brand text-xl">
+        The Panfactum Stack is an integrated set of OpenTofu (Terraform) modules
+        and local tooling aimed at providing the best experience for building,
+        deploying, and managing software on AWS and Kubernetes.
+      </p>
+    </div>
+  </Section>
+
+  <Section sectionClass="py-7xl" class="gap-y-6xl text-tertiary">
+    <div class="w-full max-w-xl self-start">
+      <h2 class="text-brand-secondary text-sm md:text-md font-semibold mb-lg">
+        pæn • fak • tm
+      </h2>
+      <h1 class="font-machina text-display-sm font-medium mb-xl">
+        Panfactum Missions
+      </h1>
+      <p class="text-lg text-tertiary">
+        Panfactum was founded with one goal: <span class="text-xl font-bold"
+          >create the best possible platform for building, deploying, and
+          maintaining software.</span
+        >
+      </p>
+    </div>
+    <div class="w-full md:flex md:gap-x-7xl">
+      <div>
+        <p class="text-tertiary text-md md:text-lg mb-lg">
+          Most existing platform providers fall into one of three buckets:
+        </p>
+
+        <ul class="list-disc list-inside">
+          <li>
+            <b class="font-bold text-lg">Hyper-focused:</b> tackles a single problem
+            well with no concern for the dozens of other moving parts in an effective
+            platform
+          </li>
+          <li>
+            <b class="font-bold text-lg">Happy-path:</b> easy to get started for
+            trivial use cases, but difficult to extend to meet user's unique needs
+          </li>
+          <li>
+            <b class="font-bold text-lg">Quantity-over-quality:</b> throws 100s of
+            options at users with little to no overarching guidance
+          </li>
+        </ul>
+      </div>
+
+      <div class="text-lg">
+        <p class="mb-4">Each misses the mark for serious, long-term users.</p>
+        <p>
+          Instead, we know we must provide a highly-opinionated foundational
+          platform that tackles <u>every major platform concern</u> while also remaining
+          easy to extended.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <div class="h-[1px] w-full bg-border-secondary"></div>
+
+  <Section class="text-tertiary text-lg xl:flex-row xl:gap-x-7xl">
+    <div class="flex flex-col gap-y-4xl items-start">
+      <div class="">
+        <SubHeading>History</SubHeading>
+        <Heading>A Brief History</Heading>
+      </div>
+      <div class="flex flex-col gap-y-xl">
+        <p>
+          In 2016, it was no surprise that most software organizations were
+          struggling to develop and deploy the <u
+            >foundational systems that comprise a good platform</u
+          >. However, after nearly a decade working in the DevSecOps field, it
+          was surprising how little progress had been made on this front.
+        </p>
+
+        <p>
+          To fill this gap, I developed a consulting niche deploying a platform
+          "starter kit" for companies ranging from pre-seed startups to >$1B
+          organizations. In 2023, this kit formally became the Panfactum Stack
+          that you see today.
+        </p>
+
+        <p>
+          Shortly thereafter, I launched Panfactum, LLC, to support the
+          continued development and support of the Stack. In 2024, we created
+          our first stable release and began taking on non-beta customers.
+        </p>
+
+        <p>
+          Since then, we have been focused on stable, long-term growth toward
+          our core mission: creating the best possible platform for building,
+          deploying, and maintaining software. Thanks to our amazing early
+          adopters, we have been profitable and growing since day one.
+        </p>
+        <p>
+          Our next chapter involves expanding the out-of-the-box capabilities of
+          the stack and growing the team to support our expanding user base!
+          Let's get to building!
+        </p>
+
+        <p class="">- Jack Langston</p>
+
+        <div>
+          <Button variant="outline" size="xl" className="w-full md:w-auto"
+            >Get in touch</Button
+          >
+        </div>
+      </div>
+    </div>
+    <div class="hidden xl:block">
+      <img src="/jack.png" class="min-w-sm" />
+    </div>
+  </Section>
+
+  <Section class="gap-6xl text-primary" sectionClass="bg-secondary">
+    <div class="text-center">
+      <h3 class="text-brand-secondary text-sm font-semibold">Features</h3>
+      <h2 class="font-machina text-display-sm">
+        Benchmark your platform engineering practice
+      </h2>
+    </div>
+
+    <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
+      <div class="flex flex-col items-center gap-xl text-center">
+        <Button variant="outline" size="icon">
+          <FontAwesomeIcon icon={faIdBadge} />
+        </Button>
+
+        <h3 class="text-primary text-lg font-semibold">Security</h3>
+        <p class="text-tertiary text-md">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
+          eget dolor.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center gap-xl text-center">
+        <Button variant="outline" size="icon">
+          <FontAwesomeIcon icon={faIdBadge} />
+        </Button>
+
+        <h3 class="text-primary text-lg font-semibold">Cost Savings</h3>
+        <p class="text-tertiary text-md">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
+          eget dolor.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center gap-xl text-center">
+        <Button variant="outline" size="icon">
+          <FontAwesomeIcon icon={faIdBadge} />
+        </Button>
+
+        <h3 class="text-primary text-lg font-semibold">High Availability</h3>
+        <p class="text-tertiary text-md">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
+          eget dolor.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center gap-xl text-center">
+        <Button variant="outline" size="icon">
+          <FontAwesomeIcon icon={faIdBadge} />
+        </Button>
+
+        <h3 class="text-primary text-lg font-semibold">Databases</h3>
+        <p class="text-tertiary text-md">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
+          eget dolor.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center gap-xl text-center">
+        <Button variant="outline" size="icon">
+          <FontAwesomeIcon icon={faIdBadge} />
+        </Button>
+
+        <h3 class="text-primary text-lg font-semibold">Local Development</h3>
+        <p class="text-tertiary text-md">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
+          eget dolor.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center gap-xl text-center">
+        <Button variant="outline" size="icon">
+          <FontAwesomeIcon icon={faIdBadge} />
+        </Button>
+
+        <h3 class="text-primary text-lg font-semibold">CI / CD</h3>
+        <p class="text-tertiary text-md">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
+          eget dolor.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section class="gap-6xl text-primary">
+    <div class="text-center">
+      <h3 class="text-brand-secondary text-sm font-semibold">We're Hiring</h3>
+      <h2 class="font-machina text-display-sm">Meet our team</h2>
+      <p class="text-lg text-tertiary">
+        Our philosophy is simple — hire a team of diverse, passionate people and
+        foster a culture that empowers you to do your best work.
+      </p>
+    </div>
+
+    <div class="flex gap-6xl">
+      <div
+        class="flex flex-col items-center gap-xl text-center sm:min-w-[240px]"
+      >
+        <img src="/face.png" class="w-[80px]" />
+
+        <h3 class="text-primary text-lg font-semibold">Jack Langston</h3>
+        <p class="text-tertiary text-md">Founder / CEO</p>
+      </div>
+
+      <div
+        class="flex flex-col items-center gap-xl text-center sm:min-w-[240px]"
+      >
+        <img src="/face.png" class="w-[80px]" />
+
+        <h3 class="text-primary text-lg font-semibold">James Lee</h3>
+        <p class="text-tertiary text-md">Founder / CTO</p>
+      </div>
+    </div>
+  </Section>
+</Layout>

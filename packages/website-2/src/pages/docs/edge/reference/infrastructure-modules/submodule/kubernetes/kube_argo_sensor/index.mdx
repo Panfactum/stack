@@ -1,0 +1,149 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Argo Event Sensor'
+---
+
+import ModuleHeader from '../../../ModuleHeader'
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader
+  name="kube_argo_sensor"
+  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_argo_sensor"
+  status="beta"
+  type="submodule"
+/>
+
+# Argo Event Sensor
+
+Deploys a [Sensor](hhttps://argoproj.github.io/argo-events/concepts/sensor/)
+resource as a part of the
+[Argo Events architecture](https://argoproj.github.io/argo-events/concepts/architecture/).
+
+The Sensor is a Deployment that executes
+[Triggers](https://argoproj.github.io/argo-events/concepts/trigger/)
+based on events on the
+[EventBus.](https://argoproj.github.io/argo-events/concepts/eventbus/)
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### dependencies
+
+Description: A list of events that can activate triggers on the sensor
+
+Type:
+
+```hcl
+list(object({
+    name                   = string
+    eventSourceName        = string
+    eventName              = optional(string, "default")
+    filtersLogicalOperator = optional(string, "and")
+    filters = optional(object({
+      dataLogicalOperator = optional(string, "and")
+      exprLogicalOperator = optional(string, "and")
+      script              = optional(string)
+      time = optional(object({
+        start = string
+        stop  = string
+      }))
+      context = optional(object({
+        id              = string
+        source          = optional(string)
+        specversion     = optional(string)
+        type            = optional(string)
+        datacontenttype = optional(string)
+        subject         = optional(string)
+        time            = optional(string)
+      }))
+      data = optional(list(object({
+        path       = string
+        type       = string
+        value      = list(string)
+        comparator = optional(string, "=")
+        template   = optional(string)
+      })))
+      exprs = optional(list(object({
+        expr = string
+        fields = list(object({
+          path = string
+          name = string
+        }))
+      })))
+    }))
+  }))
+```
+
+### name
+
+Description: The name of the Sensor
+
+Type: `string`
+
+### namespace
+
+Description: The namespace to deploy the Sensor into.
+
+Type: `string`
+
+### triggers
+
+Description: A list of actions that can be triggered by events from the EventBus
+
+Type: `any`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### event_bus_name
+
+Description: The EventBus to read from. Should almost always be 'default'.
+
+Type: `string`
+
+Default: `"default"`
+
+### panfactum_scheduler_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### vpa_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### service_account_name
+
+Description: n/a
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

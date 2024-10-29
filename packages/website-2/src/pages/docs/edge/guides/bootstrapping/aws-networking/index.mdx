@@ -1,0 +1,150 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'AWS Networking'
+---
+
+import { Image } from 'astro:assets'
+import BootstrappingGuideNav from '../BootstrappingGuideNav'
+import natImg from './nat.jpg'
+import vpcImg from './vpc.jpg'
+
+# AWS Networking
+
+## Objective
+
+Deploy the core AWS networking primitives including your [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
+and [Route 53 Hosted Zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html).
+
+## A Quick Note
+
+Up to now, we have focused on setting up **all** environments in each section. Moving forward,
+this guide will focus on setting up infrastructure for a **single** environment at a time. We recommend
+starting with your `production` environment and then returning here for additional environments as needed.
+
+Additionally, unless otherwise specified, the following sections of this guide **only** apply to environments that will be hosting Kubernetes clusters.
+Those that do not host live infrastructure (e.g., `management`) do not need much further setup.
+
+## Background
+
+If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/edge/concepts/networking/aws-primitives) before proceeding.
+
+## Create your VPC
+
+We will use the [aws_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
+This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
+See the module reference docs for a more comprehensive overview.
+
+### Choose your CIDR Blocks and Subnets
+
+One of the most important decision that you make throughout this entire guide
+is deciding your CIDR blocks for subnet setup. This is very difficult to change later
+and will usually require redeploying your entire VPC and all the resources it contains.
+
+We _strongly_ recommend choosing the largest possible CIDR block for your VPC: `10.0.0/16`.
+You want to ensure that you have _at least_ 100 IPs available in each public subnet and 1,000 IPs available
+in each private / isolated subnet. Choosing a large VPC CIDR gives you the most flexibility. [^1]
+
+[^1]:
+    If you need to choose a smaller block for some reason
+    (e.g., [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)),
+    that is completely fine, but you will want to ensure that it isn't too small. However, a
+    hard lower limit should be a `/19` network which would provide about 8,192 ($2^{32-19}$) IP addresses.
+
+We also _strongly_ recommend that you set up _at least_ three of each [subnet type](/docs/edge/concepts/networking/aws-primitives) (nine total).
+This allows you to have one subnet type in at least three availability zones which is required to achieve a highly available setup.
+
+More specifically, we recommend you use the following subnet configuration): [^2] [^3]
+
+| Name         | Type     | Availability Zone | CIDR            | Available IPs |
+| :----------- | :------- | :---------------: | :-------------- | :------------ |
+| `PUBLIC_A`   | Public   |         A         | `10.0.0.0/24`   | 254           |
+| `PUBLIC_B`   | Public   |         B         | `10.0.1.0/24`   | 254           |
+| `PUBLIC_C`   | Public   |         C         | `10.0.2.0/24`   | 254           |
+| `PRIVATE_A`  | Private  |         A         | `10.0.64.0/18`  | 16,382        |
+| `PRIVATE_B`  | Private  |         B         | `10.0.128.0/18` | 16,382        |
+| `PRIVATE_C`  | Private  |         C         | `10.0.192.0/18` | 16,382        |
+| `ISOLATED_A` | Isolated |         A         | `10.0.16.0/20`  | 4,094         |
+| `ISOLATED_B` | Isolated |         B         | `10.0.32.0/20`  | 4,094         |
+| `ISOLATED_C` | Isolated |         C         | `10.0.48.0/20`  | 4,094         |
+| N/A          | Reserved |        N/A        | `10.0.3.0/24`   | 254           |
+| N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
+| N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
+
+[^2]:
+    The public subnets are small because we will only deploy a handful of resources that can be directly
+    reached from the public internet (e.g., load balancers). The private subnets are the largest because that is
+    where the vast majority of the Kubernetes workloads will run.
+
+[^3]:
+    We reserve a few CIDR ranges so that you can
+    provision extra subnets in the future should you need to. This can be an extremely helpful escape hatch that prevents
+    you from needing to mutate existing subnets (causing a service disruption).
+
+If you are choosing a different network layout, we recommend [this site](https://www.davidc.net/sites/default/subnets/subnets.html)
+for helping to divide your network.
+
+### Understanding NAT
+
+If you are unfamiliar with NAT, you should stop now to review the [NAT concept documentation](/docs/edge/concepts/networking/nat).
+
+NAT is the one component of the VPC configuration that we have enhanced beyond the typical AWS-recommended setup.
+
+Specifically, we do _NOT_ use [AWS NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) by default. They are far
+too expensive for behavior that should ultimately be available for free (and is in other cloud providers). For many organizations,
+NAT Gateway costs alone can produce 10-50% of total AWS spend.
+
+Instead, we deploy a Panfactum-enhanced version of the [fck-nat project](https://github.com/AndrewGuenther/fck-nat). Using this
+pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and reduces the costs of NAT by over 90%.
+
+See the [aws_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) documentation for more details and to decide if it is right for you
+(it probably is).
+
+### Deploy the AWS VPC Module
+
+We will now deploy the [aws_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
+
+1. Set up a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
+
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl). Replace
+   the subnet configuration with your chosen settings.
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+5. Ensure that your VPC looks similar to the following:
+
+   <Image src={vpcImg} alt="VPC viewed from the AWS web console" />
+
+6. Ensure that your NAT nodes are running and healthy:
+
+   <Image src={natImg} alt="NAT nodes viewed from the AWS web console" />
+
+   Note that each node should have a Public IPv4 address which should match its [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html).
+   All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
+
+### Test Connectivity
+
+Let's verify that networking connectivity in the new VPC is working as intended.
+
+We provide a test script `pf-vpc-network-test` that ensures:
+
+- inbound traffic is rejected from your NAT nodes.
+- nodes running in your private subnets are able to connect to the internet through a NAT IP.
+
+Run the test by calling `pf-vpc-network-test <path-to-aws_vpc-module>`. For example, if running the test from inside
+the `aws_vpc` folder, you would run the test as `pf-vpc-network-test .`. [^4]
+
+[^4]: When prompted for an AWS profile, select the profile you use for IaC in this environment.
+
+If the test completes successfully, you are ready to proceed!
+
+## Next Steps
+
+Now that networking is set up in AWS, we can deploy your Kubernetes cluster.
+
+<BootstrappingGuideNav
+  backHref={'/docs/edge/guides/bootstrapping/dns'}
+  forwardHref={'/docs/edge/guides/bootstrapping/kubernetes-cluster'}
+  stepNumber={7}
+/>

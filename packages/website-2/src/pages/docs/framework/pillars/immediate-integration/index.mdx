@@ -1,0 +1,102 @@
+---
+layout: '@/layouts/DocumentationLayout.astro'
+title: 'Immediate Integration'
+---
+
+# Immediate Integration
+
+## Overview
+
+Immediate integration (II) is the practice of deploying code changes to a production-like environment
+as a part of an _individual_ developer's _synchronous_ workflow. In contrast with [continuous integration (CI)](/docs/framework/pillars/automation),
+immediate integration:
+
+- Deploys code to a dedicated environment for the individual developer
+
+- Immediately hot / live-reloads running code directly from a developer's machine (\< 1s delay) [^1]
+
+- Does _not_ run tests before deploying
+
+- Occurs _before_ committing code to a version-control system
+
+[^1]:
+    Live reloading refreshes the entire application when a file changes. Hot reloading refreshes the application
+    with the new code _while preserving the internal state of the running application._
+
+A simple example of immediate integration is using a tool such as [Docker Compose](https://docs.docker.com/compose/)
+to emulate a production system on a developer's local machine. However, there are more powerful
+techniques such as [Tilt](https://tilt.dev/).
+
+The quality of an organization's immediate integration setup is measured by:
+
+- The similarity of the immediate integration environment to production
+
+- The ease of sharing access to the environment for collaboration
+
+- The speed at which changes are reflected in the environment
+
+- The overhead of maintaining the environments
+
+Ultimately, immediate integration is the single most important productivity-enhancer for development teams, especially of SaaS software.
+The experience of developing end-to-end features directly against a copy of production without idiosyncrasies
+or context switching allows individuals and teams to achieve unparalleled [flow.](<https://en.wikipedia.org/wiki/Flow_(psychology)>)
+
+## Motivation
+
+This pillar provides organizational value for the following reasons:
+
+- Improves development velocity by
+
+  - providing the means to quickly review the system impact of code changes
+  - reducing risk and cost of re-work by testing in production-like environments as a part of the synchronous developer workflow
+  - reducing collaboration friction by allowing developers and product managers to collaborate on live systems reflecting WIP code
+
+- Minimizes the change failure rate (CFR) by reducing the number of bugs that make it to production and reduces the mean time to resolution (MTTR)
+  by improving the speed to deliver fixes
+
+## Benchmark
+
+### Metrics
+
+These are common measurements that can help an organization assess their performance in this pillar. These are
+intended to be **assessed within the context of performance on the [key platform metrics](/docs/framework/framework/kpis),** not used in a standalone manner.
+
+| Indicator                                                 | Business Impact                                                                                                                 | Ideal Target |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| Time to launch II environment                             | Launching / resetting immediate integration environments is a task developers will undertake multiple times per day             | \< 5 min     |
+| Time to seed II environment with production-like data     | Seeding / resetting immediate integration environments is a task developers will undertake many times per day                   | \< 5 min     |
+| Percent of production functionality in II environment     | The immediate integration environment should run a nearly exact copy of production to ensure discrepancies do not generate bugs | > 95 %       |
+| Percent of infrastructure emulated in II environment [^2] | The underlying infrastructure should _not_ be emulated to ensure infrastructure discrepancies do not generate bugs              | \< 5 %       |
+| Time to hot reload code changes                           | In order to be useful, code changes must be synchronously reflected in II environments                                          | \< 1s        |
+| Time to live reload infrastructure changes                | In order to be useful, infrastructure changes must be quickly reflected in II environments                                      | \< 60s       |
+
+[^2]: Infrastructure includes everything that is not first-party application code. This encompasses databases, orchestration systems, 3rd-party APIs, and even the infrastructure-as-code itself.
+
+### Organization Goals
+
+These are common goals to help organizations improve their performance on the key platform metrics. While each goal represents a best practice, **the level
+of impact and optimal approach will depend on your organization's unique context.**
+
+| Category   | Code    | Goal                                                                                                                          |
+| :--------- | :------ | :---------------------------------------------------------------------------------------------------------------------------- |
+| Launching  | `A.L.1` | The II environment can be launched in a single command.                                                                       |
+|            | `A.L.2` | The II environment can be launched from any host operating system.                                                            |
+|            | `A.L.3` | Seeding the II environment with data can be done in a single command.                                                         |
+|            | `A.L.4` | Seed scripts can be parameterized with dimensions such as size.                                                               |
+|            | `A.L.5` | Local tooling used for other environments can easily be re-used in II environments.                                           |
+|            | `A.L.6` | Launched environment reflects both the application code and infrastructure code on a developer's local machine.               |
+|            | `A.L.7` | II environments can be reset in a single command.                                                                             |
+| Developing | `A.D.1` | Developers can use II environments without needing to change their personal local development patterns (IDEs, scripts, etc.). |
+|            | `A.D.2` | A developer's personal II environments are isolated from all other environments.                                              |
+|            | `A.D.3` | Application code changes are hot-reloaded whenever possible.                                                                  |
+|            | `A.D.4` | Infrastructure code changes are automatically deployed as quickly as possible.                                                |
+|            | `A.D.5` | A developer can update any component of their II environment.                                                                 |
+| Similarity | `A.S.1` | The II environment uses the same infrastructure as production.                                                                |
+|            | `A.S.2` | The II environment consists of the entire production system.                                                                  |
+|            | `A.S.3` | Changes to production are automatically pulled into II environments unless explicitly overridden by developers.               |
+|            | `A.S.4` | II environments are deployed using the same mechanisms as production deployments (with testing disabled).                     |
+|            | `A.S.5` | Systems in II environments can be accessed using the same mechanisms as in production (with less permission restrictions).    |
+|            | `A.S.6` | Deployed artifacts are built using the same processes as they would be if deployed to production.                             |
+| Efficiency | `A.E.1` | II environments do not consume resources when not in use.                                                                     |
+|            | `A.E.2` | Keeping II environments updated with production does not require manual maintenance.                                          |
+|            | `A.E.3` | II environments have resource caps to prevent accidental spend.                                                               |

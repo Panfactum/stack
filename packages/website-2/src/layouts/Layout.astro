@@ -1,0 +1,61 @@
+---
+import '../styles/global.css'
+import { ViewTransitions } from 'astro:transitions'
+import { HeaderNav } from '../components/layout/header-nav'
+import Footer from '../components/layout/footer.astro'
+
+const pathname = new URL(Astro.request.url).pathname
+const showFooter =
+  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
+
+const redirect = Astro.props.redirect
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    {
+      redirect ? (
+        <meta http-equiv="refresh" content={`0; url=${redirect}`} />
+      ) : null
+    }
+
+    <title>Astro</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      src="https://kit.fontawesome.com/5a37fe5150.js"
+      crossorigin="anonymous"></script>
+    <ViewTransitions />
+  </head>
+
+  <body class="font-inter bg-primary text-primary">
+    <div class={Astro.props.heroClass}>
+      <div class="flex items-center justify-center h-20">
+        <HeaderNav
+          currentPath={pathname}
+          client:load
+          darkBackground={Astro.props.darkBackground}
+          transition:persist
+        />
+      </div>
+
+      <slot name="hero" />
+    </div>
+
+    <slot />
+
+    {showFooter ? <Footer /> : null}
+  </body>
+</html>
