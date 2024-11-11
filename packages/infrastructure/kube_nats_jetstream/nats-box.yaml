@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats-deployment
+  namespace: jetstream-testing
+  labels:
+    app: nats-box
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats
+  template:
+    metadata:
+      labels:
+        app: nats
+    spec:
+      containers:
+      - name: nats
+        image: natsio/nats-box
+      tolerations:
+        - effect: NoSchedule
+          key: spot
+          operator: Equal
+          value: "true"                                                                                                                                                                  
+        - effect: NoSchedule
+          key: burstable
+          operator: Equal
+          value: "true"                                                                                                                                                                  
+        - effect: NoSchedule
+          key: arm64
+          operator: Equal
+          value: "true"
