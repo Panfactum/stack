@@ -298,6 +298,14 @@ Type: `bool`
 
 Default: `false`
 
+### max\_surge
+
+Description: The maximum number of pods that can be scheduled above the desired number of pods.
+
+Type: `string`
+
+Default: `"25%"`
+
 ### max\_unavailable
 
 Description: Controls how many pods are allowed to be unavailable in the Deployment under the Pod Disruption Budget
@@ -483,7 +491,7 @@ Default: `"AlwaysAllow"`
 
 ### update\_type
 
-Description: The type of update that the Deployment should use
+Description: The type of update that the Deployment should use. Must be one of: RollingUpdate, Recreate
 
 Type: `string`
 
