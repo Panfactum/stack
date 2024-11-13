@@ -2,7 +2,7 @@
 variable "aws_ebs_csi_driver_helm_version" {
   description = "The version of the aws-ebs-csi-driver helm chart to deploy"
   type        = string
-  default     = "2.36.0"
+  default     = "2.37.0"
 }
 
 variable "eks_cluster_name" {
