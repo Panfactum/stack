@@ -313,7 +313,7 @@ resource "helm_release" "linkerd" {
       )
 
       // These pods must be running in order to prevent cascading cluster failures
-      priorityClassName = "system-cluster-critical"
+      priorityClassName = "system-node-critical"
 
       tolerations = module.util_identity.tolerations
 
