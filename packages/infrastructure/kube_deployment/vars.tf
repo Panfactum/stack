@@ -15,9 +15,19 @@ variable "priority_class_name" {
 }
 
 variable "update_type" {
-  description = "The type of update that the Deployment should use"
+  description = "The type of update that the Deployment should use. Must be one of: RollingUpdate, Recreate"
   type        = string
   default     = "RollingUpdate"
+  validation {
+    condition     = contains(["RollingUpdate", "Recreate"], var.update_type)
+    error_message = "update_type must be one of: RollingUpdate, Recreate"
+  }
+}
+
+variable "max_surge" {
+  description = "The maximum number of pods that can be scheduled above the desired number of pods."
+  type        = string
+  default     = "25%"
 }
 
 variable "extra_tolerations" {

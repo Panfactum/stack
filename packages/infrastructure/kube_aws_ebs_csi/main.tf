@@ -44,7 +44,7 @@ locals {
 }
 
 data "pf_kube_labels" "labels" {
-  module = "kube_alloy"
+  module = "kube_aws_ebs_csi"
 }
 
 module "util_controller" {

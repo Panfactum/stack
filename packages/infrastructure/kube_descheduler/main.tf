@@ -257,6 +257,35 @@ resource "helm_release" "descheduler" {
                   ]
                 }
               }
+            },
+
+            // Evicts pods that have not been mutated by the standard Panfactum Kyverno policies.
+            // This enables us to allow pods to be created even if Kyverno is down and then force a recreate
+            // in a few minutes. Without this, a failing Kyverno deployment would take down the entire cluster.
+            {
+              name = "pod-lifetime"
+              pluginConfig = [
+                local.default_evictor_config,
+                {
+                  name = "PodLifeTime"
+                  args = {
+                    maxPodLifeTimeSeconds = 60 * 15
+                    labelSelector = {
+                      matchExpressions = [{
+                        key      = "panfactum.com/kyverno-mutated"
+                        operator = "DoesNotExist"
+                      }]
+                    }
+                  }
+                },
+              ]
+              plugins = {
+                deschedule = {
+                  enabled = [
+                    "PodLifeTime"
+                  ]
+                }
+              }
             }
           ],
           // Note that this only works if the panfactum scheduler is enabled

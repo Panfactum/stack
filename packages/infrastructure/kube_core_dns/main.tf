@@ -111,12 +111,13 @@ module "core_dns" {
   replicas                             = 2
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = true // If DNS goes down, the cluster is borked so ensure this won't be affected by spot scale-in
   az_spread_preferred                  = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   priority_class_name                  = "system-cluster-critical"
   dns_policy                           = "Default"
+  max_surge                            = "0%" // Don't allow surges since instance type anti affinity is required
   containers = concat(
     [
       {

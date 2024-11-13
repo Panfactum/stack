@@ -39,7 +39,7 @@ module "util_admission_controller" {
 
   workload_name                        = "vpa-admission-controller"
   burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  controller_nodes_required            = true // This can prevent pods from scheduling so make sure it is not on a karpenter node
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled

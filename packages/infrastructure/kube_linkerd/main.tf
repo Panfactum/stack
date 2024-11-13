@@ -249,10 +249,18 @@ resource "helm_release" "linkerd" {
       enablePodAntiAffinity     = true  # This should always be enabled as we really need to avoid having the service mesh go down
       enablePodDisruptionBudget = false # We do this below
 
+      # We never need to surge this
+      deploymentStrategy = {
+        rollingUpdate = {
+          maxUnavailable = 1
+          maxSurge       = 0
+        }
+      }
+
       # Was never able to get the CNI to work.
       # Given the additional downside of this breaking init containers,
       # it's probably for the best to leave it disabled
-      cniEnabled = false,
+      cniEnabled = false
 
       identity = {
         externalCA = true

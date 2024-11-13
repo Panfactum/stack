@@ -58,7 +58,7 @@ resource "kubectl_manifest" "panfactum_policies" {
     apiVersion = "kyverno.io/v1"
     kind       = "ClusterPolicy"
     metadata = {
-      name   = "panfactum-policies"
+      name   = "pf-pod-policies"
       labels = data.pf_kube_labels.labels.labels
     }
     spec = {
@@ -71,8 +71,15 @@ resource "kubectl_manifest" "panfactum_policies" {
         local.rule_add_extra_tolerations_if_burstable_toleration,
         local.rule_add_extra_tolerations_if_controller_toleration,
         local.rule_linkerd,
-        local.rule_add_environment_variables
+        local.rule_add_environment_variables,
+        local.rule_add_pod_label
       ) : rule if rule != null]
+
+      // By default, the webhook should not fail if the pod mutations cannot be applied
+      // as this can end up in a dead-locked cluster
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 

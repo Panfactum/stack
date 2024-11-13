@@ -33,7 +33,7 @@ locals {
 data "aws_region" "region" {}
 
 data "pf_kube_labels" "labels" {
-  module = "kube_alloy"
+  module = "kube_cilium"
 }
 
 module "util_controller" {
@@ -42,11 +42,16 @@ module "util_controller" {
   workload_name                        = "cilium-operator"
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  pull_through_cache_enabled           = true
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
-  extra_labels                         = data.pf_kube_labels.labels.labels
+
+  // In cases where a cluster is recovering, it is possible the Panfactum scheduler might not have a node to run on
+  // and this operator is required to launch a new node. As a result, this shouldn't use the Panfactum scheduler or
+  // we might deadlock the cluster
+  panfactum_scheduler_enabled = false
+
+  extra_labels = data.pf_kube_labels.labels.labels
 }
 
 module "util_agent" {
@@ -55,7 +60,7 @@ module "util_agent" {
   workload_name               = "cilium-agent"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  panfactum_scheduler_enabled = false // daemon-set
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
@@ -302,11 +307,7 @@ resource "helm_release" "cilium" {
       }
 
       operator = {
-        replicas = 2
-        updateStrategy = {
-          type          = "Recreate"
-          rollingUpdate = null
-        }
+        replicas = 1
         tolerations = concat([
           // These are needed b/c the cilium agents on each node need the operator
           // to be running in order for them to remove this taint
@@ -337,9 +338,8 @@ resource "helm_release" "cilium" {
           }
         }
 
-        // The operator is what assigns and updates node ENIs so this is
-        // absolutely cluster critical
-        priorityClassName = "system-cluster-critical"
+        // The operator is required to launch new nodes
+        priorityClassName = "system-node-critical"
 
         extraArgs = [
           "--cluster-name=${var.eks_cluster_name}"

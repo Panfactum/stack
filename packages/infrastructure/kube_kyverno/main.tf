@@ -56,7 +56,7 @@ module "util_admission_controller" {
 
   # This controller is critical to launching all pods so it cannot go down
   az_spread_required                   = true
-  instance_type_anti_affinity_required = true
+  instance_type_anti_affinity_required = false // TODO: Make true but needs to be compatible with bootstrapping
 }
 
 module "util_background_controller" {
@@ -107,50 +107,6 @@ module "util_policy_reports_cleanup" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-policy-reports-cleanup"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  extra_labels                = data.pf_kube_labels.labels.labels
-}
-
-module "util_admission_reports_cleanup" {
-  source = "../kube_workload_utility"
-
-  workload_name               = "kyverno-admission-reports-cleanup"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  extra_labels                = data.pf_kube_labels.labels.labels
-}
-
-module "util_cluster_admission_reports_cleanup" {
-  source = "../kube_workload_utility"
-
-  workload_name               = "kyverno-cluster-admission-reports-cleanup"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  extra_labels                = data.pf_kube_labels.labels.labels
-}
-
-module "util_ephemeral_reports_cleanup" {
-  source = "../kube_workload_utility"
-
-  workload_name               = "kyverno-ephemeral-reports-cleanup"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  extra_labels                = data.pf_kube_labels.labels.labels
-}
-
-module "util_cluster_ephemeral_reports_cleanup" {
-  source = "../kube_workload_utility"
-
-  workload_name               = "kyverno-cluster-ephemeral-reports-cleanup"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
   az_spread_preferred         = var.enhanced_ha_enabled
@@ -234,9 +190,19 @@ resource "helm_release" "kyverno" {
       }
 
       admissionController = {
-        replicas    = 2
-        podLabels   = module.util_admission_controller.labels
-        tolerations = module.util_admission_controller.tolerations
+        replicas          = 2
+        podLabels         = module.util_admission_controller.labels
+        tolerations       = module.util_admission_controller.tolerations
+        priorityClassName = "system-node-critical" // DaemonSet pods cannot be scheduled without this running, so it should be the most critical
+        updateStrategy = {
+          rollingUpdate = {
+            maxSurge       = 0 // Prefer not to surge since instance-type spread is required
+            maxUnavailable = 1
+          }
+          type = "RollingUpdate"
+        }
+
+        apiPriorityAndFairness = true // Ensures stability on busy clusters
 
         antiAffinity = {
           enabled = true
@@ -328,9 +294,10 @@ resource "helm_release" "kyverno" {
       }
 
       cleanupController = {
-        replicas    = 2
-        podLabels   = module.util_cleanup_controller.labels
-        tolerations = module.util_cleanup_controller.tolerations
+        replicas          = 2
+        podLabels         = module.util_cleanup_controller.labels
+        tolerations       = module.util_cleanup_controller.tolerations
+        priorityClassName = "system-cluster-critical"
 
         antiAffinity = {
           enabled = true
@@ -418,37 +385,6 @@ resource "helm_release" "kyverno" {
         enabled     = true
         tolerations = module.util_policy_reports_cleanup.tolerations
         podLabels   = module.util_policy_reports_cleanup.labels
-      }
-
-      cleanupJobs = {
-        admissionReports = {
-          labels                  = module.util_admission_reports_cleanup.labels
-          tolerations             = module.util_admission_reports_cleanup.tolerations
-          podAntiAffinity         = lookup(module.util_admission_reports_cleanup.affinity, "podAntiAffinity", null)
-          nodeAffinity            = lookup(module.util_admission_reports_cleanup.affinity, "nodeAffinity", null)
-          ttlSecondsAfterFinished = "30"
-        }
-        clusterAdmissionReports = {
-          labels                  = module.util_cluster_admission_reports_cleanup.labels
-          tolerations             = module.util_cluster_admission_reports_cleanup.tolerations
-          podAntiAffinity         = lookup(module.util_cluster_admission_reports_cleanup.affinity, "podAntiAffinity", null)
-          nodeAffinity            = lookup(module.util_cluster_admission_reports_cleanup.affinity, "nodeAffinity", null)
-          ttlSecondsAfterFinished = "30"
-        }
-        ephemeralReports = {
-          labels                  = module.util_ephemeral_reports_cleanup.labels
-          tolerations             = module.util_ephemeral_reports_cleanup.tolerations
-          podAntiAffinity         = lookup(module.util_ephemeral_reports_cleanup.affinity, "podAntiAffinity", null)
-          nodeAffinity            = lookup(module.util_ephemeral_reports_cleanup.affinity, "nodeAffinity", null)
-          ttlSecondsAfterFinished = "30"
-        }
-        clusterEphemeralReports = {
-          labels                  = module.util_cluster_ephemeral_reports_cleanup.labels
-          tolerations             = module.util_cluster_ephemeral_reports_cleanup.tolerations
-          podAntiAffinity         = lookup(module.util_cluster_ephemeral_reports_cleanup.affinity, "podAntiAffinity", null)
-          nodeAffinity            = lookup(module.util_cluster_ephemeral_reports_cleanup.affinity, "nodeAffinity", null)
-          ttlSecondsAfterFinished = "30"
-        }
       }
     })
   ]
@@ -669,98 +605,3 @@ resource "kubectl_manifest" "vpa_reports_controller" {
   server_side_apply = true
   depends_on        = [helm_release.kyverno]
 }
-
-resource "kubectl_manifest" "vpa_admission_reports_cleanup" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "kyverno-cleanup-admission-reports"
-      namespace = local.namespace
-      labels    = module.util_admission_reports_cleanup.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "batch/v1"
-        kind       = "CronJob"
-        name       = "kyverno-cleanup-admission-reports"
-      }
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.kyverno]
-}
-
-
-resource "kubectl_manifest" "vpa_cluster_admission_reports_cleanup" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "kyverno-cleanup-cluster-admission-reports"
-      namespace = local.namespace
-      labels    = module.util_cluster_admission_reports_cleanup.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "batch/v1"
-        kind       = "CronJob"
-        name       = "kyverno-cleanup-cluster-admission-reports"
-      }
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.kyverno]
-}
-
-resource "kubectl_manifest" "vpa_ephemeral_reports_cleanup" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "kyverno-cleanup-ephemeral-reports"
-      namespace = local.namespace
-      labels    = module.util_ephemeral_reports_cleanup.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "batch/v1"
-        kind       = "CronJob"
-        name       = "kyverno-cleanup-ephemeral-reports"
-      }
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.kyverno]
-}
-
-
-resource "kubectl_manifest" "vpa_cluster_ephemeral_reports_cleanup" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "kyverno-cleanup-cluster-ephemeral-reports"
-      namespace = local.namespace
-      labels    = module.util_cluster_ephemeral_reports_cleanup.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "batch/v1"
-        kind       = "CronJob"
-        name       = "kyverno-cleanup-cluster-ephemeral-reports"
-      }
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.kyverno]
-}
-

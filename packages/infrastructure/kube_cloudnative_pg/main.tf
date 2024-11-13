@@ -35,7 +35,7 @@ locals {
 }
 
 data "pf_kube_labels" "labels" {
-  module = "kube_alloy"
+  module = "kube_cloudnative_pg"
 }
 
 module "pull_through" {

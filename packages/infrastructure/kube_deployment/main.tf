@@ -108,9 +108,13 @@ resource "kubectl_manifest" "deployment" {
     }
     spec = {
       replicas = var.replicas
-      strategy = {
+      strategy = { for k, v in {
         type = var.update_type
-      }
+        rollingUpdate = var.update_type == "RollingUpdate" ? {
+          maxSurge       = var.max_surge
+          maxUnavailable = var.max_unavailable
+        } : null
+      } : k => v if v != null }
       selector = {
         matchLabels = module.pod_template.match_labels
       }
