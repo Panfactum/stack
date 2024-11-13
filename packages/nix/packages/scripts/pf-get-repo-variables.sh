@@ -17,7 +17,7 @@ set -eo pipefail
 
 ROOT="${1:-$(pwd)}"
 ROOT=$(realpath "$ROOT")
-while [[ ! -d "${ROOT}/.git" ]] && [[ ! -d "$ROOT/.devenv" ]]; do
+while [[ ! -d "${ROOT}/.git" ]] && [[ ! -f "$ROOT/panfactum.yaml" ]]; do
   ROOT=$(dirname "$ROOT")
 done
 
