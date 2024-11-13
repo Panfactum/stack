@@ -80,6 +80,8 @@ are not marked as "failed" by controllers such as Argo if the main container has
 * Adjusted Cilium deployment to address edge cases where Cilium would not successfully launch new nodes
 after a complete zonal or cluster outage.
 
+* Resolved issue with [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) where `pg_cpu_millicores` could not be increased above `1000`.
+
 ## edge.24-10-25
 
 <MarkdownAlert severity="warning">

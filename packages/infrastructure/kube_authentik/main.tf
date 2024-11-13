@@ -90,7 +90,7 @@ module "database" {
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 10
   pg_memory_mb                         = 1000
-  pg_cpu_millicores                    = 2000
+  pg_cpu_millicores                    = 250
   pg_instances                         = 2
   pg_smart_shutdown_timeout            = 1
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list

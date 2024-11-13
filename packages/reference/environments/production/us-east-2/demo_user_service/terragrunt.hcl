@@ -21,20 +21,20 @@ dependency "redis_cache" {
 }
 
 inputs = {
-  eks_cluster_name       = dependency.cluster.outputs.cluster_name
-  namespace = "demo-user-service"
+  eks_cluster_name = dependency.cluster.outputs.cluster_name
+  namespace        = "demo-user-service"
 
-  domain        = "demo.panfactum.com"
-  image_version = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")
+  domain            = "demo.panfactum.com"
+  image_version     = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")
   healthcheck_route = "/health"
-  db_name = "postgres"
-  db_schema = "app"
-  secret = "secret"
+  db_name           = "postgres"
+  db_schema         = "app"
+  secret            = "secret"
 
-  redis_master_set = dependency.redis_cache.outputs.master_set
+  redis_master_set         = dependency.redis_cache.outputs.master_set
   redis_cache_creds_secret = dependency.redis_cache.outputs.superuser_creds_secret
 
   redis_cache_sentinel_enabled = true
-  redis_cache_sentinel_host = dependency.redis_cache.outputs.sentinel_host
-  redis_cache_sentinel_port = dependency.redis_cache.outputs.sentinel_port
+  redis_cache_sentinel_host    = dependency.redis_cache.outputs.sentinel_host
+  redis_cache_sentinel_port    = dependency.redis_cache.outputs.sentinel_port
 }

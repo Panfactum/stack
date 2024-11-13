@@ -17,13 +17,13 @@ dependency "cluster" {
 }
 
 inputs = {
-  eks_cluster_name       = dependency.cluster.outputs.cluster_name
-  namespace = "demo-java-service"
+  eks_cluster_name = dependency.cluster.outputs.cluster_name
+  namespace        = "demo-java-service"
 
-  domain        = "demo.panfactum.com"
-  image_version = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")
-  healthcheck_route = "/health"
-  db_name = "postgres"
-  db_schema = "public"
+  domain               = "demo.panfactum.com"
+  image_version        = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")
+  healthcheck_route    = "/health"
+  db_name              = "postgres"
+  db_schema            = "public"
   token_validation_url = "http://demo-user-service.demo-user-service:3000/validate"
 }

@@ -540,6 +540,9 @@ resource "kubernetes_manifest" "postgres_cluster" {
   field_manager {
     force_conflicts = true
   }
+  computed_fields = [
+    "spec.resources.requests"
+  ]
 
   depends_on = [module.client_certs, module.server_certs]
 }
