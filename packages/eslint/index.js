@@ -50,7 +50,7 @@ module.exports = {
                 "@typescript-eslint/no-unused-vars": "off",
                 "react/jsx-max-props-per-line": ["warn", {"maximum": 1, "when": "always"}],
                 "react/jsx-first-prop-new-line": ["warn", "multiline"],
-                "react/jsx-closing-tag-location": ["warn", true],
+                "react/jsx-closing-tag-location": [1],
                 "react/jsx-closing-bracket-location": ["warn", "tag-aligned"],
                 "react/self-closing-comp": ["warn", {"component": true, "html": true}],
                 "react/jsx-one-expression-per-line": ["warn", {"allow": "literal"}],
