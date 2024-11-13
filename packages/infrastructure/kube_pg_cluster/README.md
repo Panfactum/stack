@@ -89,6 +89,33 @@ The size of the EBS volume will grow by `pg_storage_increase_gb` on every scalin
 Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
 ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
 
+### Resource Allocation
+
+The resources (CPU and memory) given to each PostgreSQL node is automatically scaled by the Vertical Pod Autoscaler when `vpa_enabled` is `true` (the default). You
+can control the ranges of the resources allocated to the pods via the following inputs:
+
+* `pg_minimum_memory_mb`
+* `pg_maximum_memory_mb`
+* `pg_minimum_cpu_millicores`
+* `pg_maximum_cpu_millicores`
+
+Similarly, resources given to the PgBouncer instances are controlled via:
+
+* `pgbouncer_minimum_memory_mb`
+* `pgbouncer_maximum_memory_mb`
+* `pgbouncer_minimum_cpu_millicores`
+* `pgbouncer_maximum_cpu_millicores`
+
+If `vpa_enabled` is `false`, the actual resource requests and limits will be set to the minimums.
+
+<MarkdownAlert severity="warning">
+    You should take care to tune the memory minimums appropriately, especially for bursty workloads. If you are regularly
+    issuing queries that take more than twice the 95th percentile memory utilization, you must manually set `pg_minimum_memory_mb` to
+    a sensible value for your workloads as the VPA will under-provision resources.
+
+    Additionally, you should review our section on memory tuning below.
+</MarkdownAlert>
+
 ### Memory Tuning
 
 By default, we tune the PostgreSQL memory settings in accordance with

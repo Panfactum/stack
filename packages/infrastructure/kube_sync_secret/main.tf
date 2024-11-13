@@ -28,7 +28,6 @@ resource "kubectl_manifest" "sync_secret" {
       labels = data.pf_kube_labels.labels.labels
     }
     spec = {
-      generateExisting = true
       rules = [
         { for k, v in {
           name = "sync-secret"
@@ -48,11 +47,13 @@ resource "kubectl_manifest" "sync_secret" {
             }]
           } : null
           generate = {
-            apiVersion  = "v1"
-            kind        = "Secret"
-            name        = var.secret_name
-            namespace   = "{{request.object.metadata.name}}"
-            synchronize = true
+
+            apiVersion       = "v1"
+            kind             = "Secret"
+            name             = var.secret_name
+            namespace        = "{{request.object.metadata.name}}"
+            synchronize      = true
+            generateExisting = true
             clone = {
               namespace = var.secret_namespace
               name      = var.secret_name

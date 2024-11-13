@@ -230,3 +230,209 @@ resource "kubectl_manifest" "snapshot_class" {
     }
   })
 }
+
+/***************************************
+* Fix for adding the VPA
+* See: https://github.com/cloudnative-pg/cloudnative-pg/issues/2574
+***************************************/
+
+
+resource "kubernetes_cluster_role" "kyverno_background_controller" {
+  metadata {
+    name = "kyverno:background-controller:cnpg"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = "background-controller"
+    })
+  }
+  rule {
+    api_groups = ["postgresql.cnpg.io"]
+    verbs      = ["get", "list", "create", "update", "watch", "delete"]
+    resources  = ["clusters", "backups", "clusterimagecatalogs", "imagecatalogs", "poolers", "scheduledbackups"]
+  }
+}
+
+resource "kubernetes_cluster_role" "kyverno_admission_controller" {
+  metadata {
+    name = "kyverno:admission-controller:cnpg"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = "admission-controller"
+    })
+  }
+  rule {
+    api_groups = ["postgresql.cnpg.io"]
+    verbs      = ["get", "list", "create", "update", "watch", "delete"]
+    resources  = ["clusters", "backups", "clusterimagecatalogs", "imagecatalogs", "poolers", "scheduledbackups"]
+  }
+}
+
+
+resource "kubectl_manifest" "cnpg_scale_selector" {
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "ClusterPolicy"
+    metadata = {
+      name   = "cnpg-scale-selector"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      generateExisting             = true
+      mutateExistingOnPolicyUpdate = true
+      useServerSideApply           = true
+      rules = [
+
+        // This mutates the cluster CRD to be compatible with the VPA
+        {
+          name = "add-spec-selector-to-cluster-crd"
+          match = {
+            resources = {
+              kinds = ["CustomResourceDefinition"]
+              names = ["clusters.postgresql.cnpg.io"]
+            }
+          }
+          mutate = {
+            targets = [
+              {
+                apiVersion = "apiextensions.k8s.io/v1"
+                kind       = "CustomResourceDefinition"
+                name       = "clusters.postgresql.cnpg.io"
+              }
+            ]
+            patchesJson6902 = yamlencode([
+              {
+                op   = "add"
+                path = "/spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/selector"
+                value = {
+                  type = "string"
+                }
+              },
+              {
+                op    = "add",
+                path  = "/spec/versions/0/subresources/scale/labelSelectorPath"
+                value = ".spec.selector"
+              }
+            ])
+          }
+        },
+
+        // This mutates the cluster CRD to be compatible with the VPA
+        {
+          name = "add-spec-selector-to-pooler-crd"
+          match = {
+            resources = {
+              kinds = ["CustomResourceDefinition"]
+              names = ["poolers.postgresql.cnpg.io"]
+            }
+          }
+          mutate = {
+            targets = [
+              {
+                apiVersion = "apiextensions.k8s.io/v1"
+                kind       = "CustomResourceDefinition"
+                name       = "poolers.postgresql.cnpg.io"
+              }
+            ]
+            patchesJson6902 = yamlencode([
+              {
+                op   = "add"
+                path = "/spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/selector"
+                value = {
+                  type = "string"
+                }
+              },
+              {
+                op    = "add",
+                path  = "/spec/versions/0/subresources/scale/labelSelectorPath"
+                value = ".spec.selector"
+              }
+            ])
+          }
+        },
+
+        // This is necessary to prevent CNPG from removing the selector via
+        // its mutating webhook
+        {
+          name = "remove-cnpg-mutating-webhook"
+          match = {
+            resources = {
+              kinds = ["MutatingWebhookConfiguration"]
+              names = ["cnpg-mutating-webhook-configuration"]
+            }
+          }
+          mutate = {
+            targets = [
+              {
+                apiVersion = "admissionregistration.k8s.io/v1"
+                kind       = "MutatingWebhookConfiguration"
+                name       = "cnpg-mutating-webhook-configuration"
+              }
+            ]
+            patchesJson6902 = yamlencode([
+              {
+                op   = "remove"
+                path = "/webhooks/1"
+              }
+            ])
+          }
+        },
+
+        // This adds the selector to each cluster
+        {
+          name = "add-spec-selector-to-clusters"
+          match = {
+            resources = {
+              kinds = ["postgresql.cnpg.io/v1/Cluster"]
+            }
+          }
+          mutate = {
+            targets = [
+              {
+                apiVersion = "postgresql.cnpg.io/v1"
+                kind       = "Cluster"
+                name       = "{{ request.object.metadata.name }}"
+              }
+            ]
+            patchStrategicMerge = {
+              spec = {
+                selector = "cnpg.io/cluster={{ request.object.metadata.name }},cnpg.io/podRole=instance"
+              }
+            }
+          }
+        },
+
+        // This adds the selector to each pooler
+        {
+          name = "add-spec-selector-to-poolers"
+          match = {
+            resources = {
+              kinds = ["postgresql.cnpg.io/v1/Pooler"]
+            }
+          }
+          mutate = {
+            targets = [
+              {
+                apiVersion = "postgresql.cnpg.io/v1"
+                kind       = "Pooler"
+                name       = "{{ request.object.metadata.name }}"
+              }
+            ]
+            patchStrategicMerge = {
+              spec = {
+                selector = "id={{ request.object.metadata.labels.id }},cnpg.io/podRole=pooler"
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on = [
+    kubernetes_cluster_role.kyverno_admission_controller,
+    kubernetes_cluster_role.kyverno_background_controller
+  ]
+}

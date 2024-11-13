@@ -254,8 +254,6 @@ module "database" {
   eks_cluster_name                     = var.eks_cluster_name
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 2
-  pg_memory_mb                         = 1000
-  pg_cpu_millicores                    = 250
   pg_instances                         = 2
   pg_smart_shutdown_timeout            = 2
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list

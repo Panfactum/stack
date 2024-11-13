@@ -348,7 +348,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       postgresql = {
         parameters = merge(
-          {
+          { for k, v in {
             # Defaults - Need to be provided to avoid reconciliation error
             archive_mode               = "on"
             archive_timeout            = "5min"
@@ -377,12 +377,13 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
             # Memory tuning - Based on guide created by EDB (creators of CNPG)
             # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory
+            # If the VPA is enabled, us Kyverno to set these by setting them null in here.
             max_connections      = var.pg_max_connections
-            shared_buffers       = "${ceil(var.pg_memory_mb * var.pg_shared_buffers_percent / 100)}MB"
-            work_mem             = "${max(ceil(var.pg_memory_mb * var.pg_work_mem_percent / 100 / var.pg_max_connections), 4)}MB"
-            maintenance_work_mem = "${ceil(var.pg_memory_mb * var.pg_maintenance_work_mem_percent / 100)}MB"
-            effective_cache_size = "${ceil(var.pg_memory_mb * max((100 - var.pg_work_mem_percent - var.pg_maintenance_work_mem_percent - 10), var.pg_shared_buffers_percent) / 100)}MB"
-          },
+            shared_buffers       = var.vpa_enabled ? null : "${ceil(var.pg_minimum_memory_mb * var.pg_shared_buffers_percent / 100)}MB"
+            work_mem             = var.vpa_enabled ? null : "${max(ceil(var.pg_minimum_memory_mb * var.pg_work_mem_percent / 100 / var.pg_max_connections), 4)}MB"
+            maintenance_work_mem = var.vpa_enabled ? null : "${ceil(var.pg_minimum_memory_mb * var.pg_maintenance_work_mem_percent / 100)}MB"
+            effective_cache_size = var.vpa_enabled ? null : "${ceil(var.pg_minimum_memory_mb * max((100 - var.pg_work_mem_percent - var.pg_maintenance_work_mem_percent - 10), var.pg_shared_buffers_percent) / 100)}MB"
+          } : k => v if v != null },
           var.pg_parameters
         )
       }
@@ -472,16 +473,6 @@ resource "kubernetes_manifest" "postgres_cluster" {
         tolerations = module.util_cluster.tolerations
       } : k => v if v != null }
 
-      resources = {
-        requests = {
-          memory = "${var.pg_memory_mb}Mi"
-          cpu    = "${var.pg_cpu_millicores}m"
-        }
-        limits = {
-          memory = "${ceil(var.pg_memory_mb * 1.3)}Mi"
-        }
-      }
-
       storage = {
         pvcTemplate = {
           resources = {
@@ -540,11 +531,26 @@ resource "kubernetes_manifest" "postgres_cluster" {
   field_manager {
     force_conflicts = true
   }
+
   computed_fields = [
-    "spec.resources.requests"
+    "metadata.labels",
+    "metadata.annotations",
+    "spec.selector",
+
+    // We control resource settings from Kyverno so that we can (a)
+    // link the resource requests to the postgresql.parameters,
+    // (b) work around some problems with unit parsing in the IaC provider, and (c)
+    // allow the CNPG operator to handle pod reconciliation rather than
+    // relying on pod evictions (should be slightly more stable this way)
+    "spec.resources",
+    "spec.postgresql.parameters"
   ]
 
-  depends_on = [module.client_certs, module.server_certs]
+  depends_on = [
+    module.client_certs,
+    module.server_certs,
+    kubectl_manifest.non_vpa_resource_adjustments
+  ]
 }
 
 resource "kubectl_manifest" "scheduled_backup" {
@@ -569,30 +575,46 @@ resource "kubectl_manifest" "scheduled_backup" {
   depends_on        = [kubernetes_manifest.postgres_cluster]
 }
 
-# TODO: Re-enable once https://github.com/cloudnative-pg/cloudnative-pg/issues/2574 is addressed
-#resource "kubernetes_manifest" "vpa" {
-#  count = var.vpa_enabled ? 1: 0
-#  manifest = {
-#    apiVersion = "autoscaling.k8s.io/v1"
-#    kind  = "VerticalPodAutoscaler"
-#    metadata = {
-#      name = local.cluster_name
-#      namespace = var.pg_cluster_namespace
-#      labels = module.kube_labels.kube_labels
-#    }
-#    spec = {
-#      targetRef = {
-#        apiVersion = "postgresql.cnpg.io/v1"
-#        kind = "Cluster"
-#        name = local.cluster_name
-#      }
-#      updatePolicy = {
-#        updateMode = "Auto"
-#      }
-#    }
-#  }
-#  depends_on = [kubernetes_manifest.postgres_cluster]
-#}
+resource "kubectl_manifest" "vpa_cluster" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = random_id.cluster_id.hex
+      namespace = var.pg_cluster_namespace
+      labels    = module.util_cluster.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "postgresql.cnpg.io/v1"
+        kind       = "Cluster"
+        name       = local.cluster_name
+      }
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "postgres"
+          minAllowed = {
+            cpu    = "${var.pg_minimum_cpu_millicores}m"
+            memory = "${var.pg_minimum_memory_mb}Mi"
+          }
+          maxAllowed = {
+            cpu    = "${var.pg_maximum_cpu_millicores}m"
+            memory = "${var.pg_maximum_memory_mb}Mi"
+          }
+        }]
+      }
+      // Update mode is off b/c we use kyverno to propagate the resource recommendations to the cluster resource
+      // as additional computations need to be done based on the memory request
+      updatePolicy = {
+        updateMode = "Off"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster]
+}
 
 resource "kubectl_manifest" "pdb" {
   yaml_body = yamlencode({
@@ -631,6 +653,161 @@ resource "kubectl_manifest" "pdb" {
       "spec.maxUnavailable"
     ] : []
   )
+}
+
+resource "kubectl_manifest" "vpa_resource_adjustments" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "Policy"
+    metadata = {
+      name      = "cnpg-vpa-adjustments-${local.cluster_name}"
+      namespace = var.pg_cluster_namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      generateExisting             = true
+      mutateExistingOnPolicyUpdate = true
+      useServerSideApply           = true
+      rules = [
+        {
+          name = "adjust-cluster-based-on-vpa"
+          match = {
+            resources = {
+              kinds = ["autoscaling.k8s.io/v1/VerticalPodAutoscaler"]
+              names = [local.cluster_name]
+            }
+          }
+          context = [
+            {
+              name = "memory"
+              variable = {
+                value = "{{ divide('{{ request.object.status.recommendation.containerRecommendations[?containerName == 'postgres'] | [0].target.memory || '${var.pg_minimum_memory_mb}Mi' }}', '1') || `${var.pg_minimum_memory_mb * 1000 * 1000}` }}"
+              }
+            },
+            {
+              name = "cpu"
+              variable = {
+                value = "{{ divide('{{ request.object.status.recommendation.containerRecommendations[?containerName == 'postgres'] | [0].target.cpu || '${var.pg_minimum_cpu_millicores}m' }}', '1') || `${var.pg_minimum_cpu_millicores / 1000}` }}"
+              }
+            }
+          ]
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "postgresql.cnpg.io/v1"
+                kind       = "Cluster"
+                name       = local.cluster_name
+                namespace  = var.pg_cluster_namespace
+              }
+            ]
+            patchesJson6902 = yamlencode([
+              {
+                op    = "add"
+                path  = "/spec/postgresql/parameters/shared_buffers"
+                value = lookup(var.pg_parameters, "shared_buffers", "{{ round(multiply(`{{ memory }}`, `${var.pg_shared_buffers_percent / 100}`), `0`) }}B")
+              },
+              {
+                op    = "add"
+                path  = "/spec/postgresql/parameters/work_mem"
+                value = lookup(var.pg_parameters, "work_mem", "{{ max([round(multiply(`{{ memory }}`, `${var.pg_work_mem_percent / 100 / var.pg_max_connections}`), `0`), `${1024 * 1024 * 4}`]) }}B")
+              },
+              {
+                op    = "add"
+                path  = "/spec/postgresql/parameters/maintenance_work_mem"
+                value = lookup(var.pg_parameters, "maintenance_work_mem", "{{ round(multiply(`{{ memory }}`, `${var.pg_maintenance_work_mem_percent / 100}`), `0`) }}B")
+              },
+              {
+                op    = "add"
+                path  = "/spec/postgresql/parameters/effective_cache_size"
+                value = lookup(var.pg_parameters, "effective_cache_size", "{{ round(multiply(`{{ memory }}`, `${max((100 - var.pg_work_mem_percent - var.pg_maintenance_work_mem_percent - 10), var.pg_shared_buffers_percent) / 100}`), `0`) }}B")
+              },
+              {
+                op    = "add"
+                path  = "/spec/resources/requests/memory"
+                value = "{{ round(divide(`{{ memory }}`, `1000`), `0`) }}k"
+              },
+              {
+                op    = "add"
+                path  = "/spec/resources/requests/cpu"
+                value = "{{ round(multiply(`{{ cpu }}`, `1000`), `0`) }}m"
+              },
+              {
+                op    = "add"
+                path  = "/spec/resources/limits/memory"
+                value = "{{ round(divide(`{{ memory }}`, `900`), `0`) }}k"
+              }
+            ])
+          }
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on = [
+    kubectl_manifest.vpa_cluster
+  ]
+}
+
+resource "kubectl_manifest" "non_vpa_resource_adjustments" {
+  count = var.vpa_enabled ? 0 : 1
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "Policy"
+    metadata = {
+      name      = "cnpg-adjustments-${local.cluster_name}"
+      namespace = var.pg_cluster_namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      generateExisting             = true
+      mutateExistingOnPolicyUpdate = true
+      useServerSideApply           = true
+      rules = [
+        {
+          name = "adjust-cluster-resources"
+          match = {
+            resources = {
+              kinds = ["postgresql.cnpg.io/v1/Cluster"]
+              names = [local.cluster_name]
+            }
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "postgresql.cnpg.io/v1"
+                kind       = "Cluster"
+                name       = local.cluster_name
+                namespace  = var.pg_cluster_namespace
+              }
+            ]
+            patchesJson6902 = yamlencode([
+              {
+                op    = "add"
+                path  = "/spec/resources/requests/memory"
+                value = "${var.pg_minimum_memory_mb}Mi"
+              },
+              {
+                op    = "add"
+                path  = "/spec/resources/requests/cpu"
+                value = "${var.pg_minimum_cpu_millicores}m"
+              },
+              {
+                op    = "add"
+                path  = "/spec/resources/limits/memory"
+                value = "${ceil(var.pg_minimum_memory_mb * 1.1)}Mi"
+              }
+            ])
+          }
+        }
+      ]
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 /***************************************
@@ -989,10 +1166,11 @@ resource "kubectl_manifest" "connection_pooler" {
 
               resources = {
                 requests = {
-                  memory = "50Mi"
+                  cpu    = "${var.pgbouncer_minimum_cpu_millicores}m"
+                  memory = "${var.pgbouncer_minimum_memory_mb}Mi"
                 }
                 limits = {
-                  memory = "80Mi"
+                  memory = "${ceil(var.pgbouncer_minimum_memory_mb * 1.2)}Mi"
                 }
               }
             }
@@ -1012,29 +1190,41 @@ resource "kubectl_manifest" "connection_pooler" {
 }
 
 
-# TODO: These will not work until
-# https://github.com/cloudnative-pg/cloudnative-pg/issues/4210
-# is resovled
-#resource "kubernetes_manifest" "vpa_pooler" {
-#  for_each = var.vpa_enabled ? toset(["r", "rw"]) : []
-#  manifest = {
-#    apiVersion = "autoscaling.k8s.io/v1"
-#    kind  = "VerticalPodAutoscaler"
-#    metadata = {
-#      name      = "${local.cluster_name}-pooler-${each.key}"
-#      namespace = var.pg_cluster_namespace
-#      labels    = module.kube_labels_pooler[each.key].kube_labels
-#    }
-#    spec = {
-#      targetRef = {
-#        apiVersion = "postgresql.cnpg.io/v1"
-#        kind = "Pooler"
-#        name = "${local.cluster_name}-pooler-${each.key}"
-#      }
-#    }
-#  }
-#  depends_on = [kubernetes_manifest.connection_pooler]
-#}
+resource "kubectl_manifest" "vpa_pooler" {
+  for_each = var.vpa_enabled ? local.poolers_to_enable : []
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "${local.cluster_name}-pooler-${each.key}"
+      namespace = var.pg_cluster_namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "postgresql.cnpg.io/v1"
+        kind       = "Pooler"
+        name       = "${local.cluster_name}-pooler-${each.key}"
+      }
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "pgbouncer"
+          minAllowed = {
+            cpu    = "${var.pgbouncer_minimum_cpu_millicores}m"
+            memory = "${var.pgbouncer_minimum_memory_mb}Mi"
+          }
+          maxAllowed = {
+            cpu    = "${var.pgbouncer_maximum_cpu_millicores}m"
+            memory = "${var.pgbouncer_maximum_memory_mb}Mi"
+          }
+        }]
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.connection_pooler]
+}
 
 resource "kubectl_manifest" "pdb_pooler" {
   for_each = local.poolers_to_enable

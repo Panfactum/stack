@@ -183,9 +183,9 @@ resource "helm_release" "kyverno" {
           "[EphemeralReport,*,*]",
           "[ClusterEphemeralReport,*,*]",
         ]
-        webhooks = [{
+        webhooks = {
           namespaceSelector = {}
-        }]
+        }
         excludeKyvernoNamespace = false
       }
 
@@ -390,35 +390,30 @@ resource "helm_release" "kyverno" {
   ]
 }
 
-resource "kubernetes_cluster_role" "extra_background_controller" {
+resource "kubernetes_cluster_role" "extra_permissions" {
+  for_each = toset(["background-controller", "admission-controller"])
   metadata {
-    name = "kyverno:extra-background-controller"
+    name = "kyverno:${each.key}:extra"
     labels = merge(data.pf_kube_labels.labels.labels, {
       "app.kubernetes.io/part-of"   = "kyverno"
       "app.kubernetes.io/instance"  = "kyverno"
-      "app.kubernetes.io/component" = "background-controller"
+      "app.kubernetes.io/component" = each.key
     })
   }
   rule {
     api_groups = [""]
-    verbs      = ["create", "update", "delete"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete"]
     resources  = ["configmaps", "secrets"]
-  }
-}
-
-resource "kubernetes_cluster_role" "extra_admission_controller" {
-  metadata {
-    name = "kyverno:extra-admission-controller"
-    labels = merge(data.pf_kube_labels.labels.labels, {
-      "app.kubernetes.io/part-of"   = "kyverno"
-      "app.kubernetes.io/instance"  = "kyverno"
-      "app.kubernetes.io/component" = "admission-controller"
-    })
   }
   rule {
-    api_groups = [""]
-    verbs      = ["create", "update", "delete"]
-    resources  = ["configmaps", "secrets"]
+    api_groups = ["apiextensions.k8s.io"]
+    verbs      = ["get", "list", "create", "update", "delete"]
+    resources  = ["customresourcedefinitions"]
+  }
+  rule {
+    api_groups = ["admissionregistration.k8s.io"]
+    verbs      = ["get", "list", "create", "update", "delete"]
+    resources  = ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
   }
 }
 

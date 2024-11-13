@@ -425,3 +425,36 @@ resource "kubectl_manifest" "vpa_updater" {
   server_side_apply = true
   force_conflicts   = true
 }
+
+
+resource "kubernetes_cluster_role" "kyverno_background_controller" {
+  metadata {
+    name = "kyverno:background-controller:vpa"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = "background-controller"
+    })
+  }
+  rule {
+    api_groups = ["autoscaling.k8s.io"]
+    verbs      = ["get", "list", "create", "update", "watch", "delete"]
+    resources  = ["verticalpodautoscalers", "verticalpodautoscalercheckpoints"]
+  }
+}
+
+resource "kubernetes_cluster_role" "kyverno_admission_controller" {
+  metadata {
+    name = "kyverno:admission-controller:vpa"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = "admission-controller"
+    })
+  }
+  rule {
+    api_groups = ["autoscaling.k8s.io"]
+    verbs      = ["get", "list", "create", "update", "watch", "delete"]
+    resources  = ["verticalpodautoscalers", "verticalpodautoscalercheckpoints"]
+  }
+}

@@ -16,77 +16,97 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 ### Breaking Changes
 
 * We have added the [Kyverno](https://kyverno.io/docs/introduction/) policy engine as a core part of the Panfactum Stack. Kyverno allows
-us to install rules onto the cluster to automatically generate, mutate, or validate resources based on a powerful, Kubernetes-native expression
-language. This provides several benefits:
+  us to install rules onto the cluster to automatically generate, mutate, or validate resources based on a powerful, Kubernetes-native expression
+  language. This provides several benefits:
 
-* Provides a unified control plane for adding functionality that previously required managing additional controllers or custom scripts.
-* Allows us to simplify several parts of our IaC modules by offloading resource management to global Kyverno policies.
-* Allows us to add Panfactum-compatible, sensible defaults to Kubernetes resources that are not created by Panfactum modules.
-* Allows users to add management logic to their clusters that was previously only possible by building and deploying custom controllers. See the [example policies.](https://kyverno.io/policies/)
+  * Provides a unified control plane for adding functionality that previously required managing additional controllers or custom scripts.
+  * Allows us to simplify several parts of our IaC modules by offloading resource management to global Kyverno policies.
+  * Allows us to add Panfactum-compatible, sensible defaults to Kubernetes resources that are not created by Panfactum modules.
+  * Allows users to add management logic to their clusters that was previously only possible by building and deploying custom controllers. See the [example policies.](https://kyverno.io/policies/)
 
-**You must install Kyverno by following this [new bootstrapping guide section.](/docs/edge/guides/bootstrapping/policy-controller)** Many modules
-now depend on Kyverno and will not function without it.
+  **You must install Kyverno by following this [new bootstrapping guide section.](/docs/edge/guides/bootstrapping/policy-controller)** Many modules
+  now depend on Kyverno and will not function without it.
 
 * `kube_fledged` has been removed in favor of a new node-local image caching mechanism built by Panfactum on top of Kyverno. The new mechanism has the following
-benefits over `kube_fledged`:
+  benefits over `kube_fledged`:
 
-* The node's image cache will be created immediately when a node launches, concurrently with other node setup steps.
-* Cached images will never be removed from the node's image store.
-* Overall controller performance is significantly improved reducing the overall resource requirements for caching.
-* The caching mechanism no longer generates pods that prevent Karpenter from disrupting underutilized nodes.
+  * The node's image cache will be created immediately when a node launches, concurrently with other node setup steps.
+  * Cached images will never be removed from the node's image store.
+  * Overall controller performance is significantly improved reducing the overall resource requirements for caching.
+  * The caching mechanism no longer generates pods that prevent Karpenter from disrupting underutilized nodes.
 
-To install the new mechanism, please follow [this guide.](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches) To start caching images, you may use the new
-[kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) module. Additionally,
-we provide a new input to our submodules such as [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) called `node_image_cached_enabled` that when enabled
-will automatically add the submodule's images to the node-local image cache.
+  To install the new mechanism, please follow [this guide.](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches) To start caching images, you may use the new
+  [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) module. Additionally,
+  we provide a new input to our submodules such as [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) called `node_image_cached_enabled` that when enabled
+  will automatically add the submodule's images to the node-local image cache.
 
-**`kube_fledged` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release.
+  **`kube_fledged` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release. It should
+  not be removed until Kyverno is installed.
 
 * `kube_reflector` has been removed in favor of a new syncing mechanism built by Panfactum on top of Kyverno.
 
-* To sync ConfigMaps, use [kube\_sync\_config\_map](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map).
-* To sync Secrets, use [kube\_sync\_secret](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret).
+  * To sync ConfigMaps, use [kube\_sync\_config\_map](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map).
+  * To sync Secrets, use [kube\_sync\_secret](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret).
 
-**`kube_reflector` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release.
+  **`kube_reflector` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release. It should
+  not be removed until Kyverno is installed.
+
+* Vertical pod autoscaling now works for both the PostgreSQL clusters and Pgbouncer deployments created by the
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) submodule. The following variables
+  have been removed:
+
+  * `pg_memory_mb`
+  * `pg_cpu_millicores`
+
+  and the following variables have been added:
+
+  * `pg_minimum_memory_mb`
+  * `pg_maximum_memory_mb`
+  * `pg_minimum_cpu_millicores`
+  * `pg_maximum_cpu_millicores`
+  * `pgbouncer_minimum_memory_mb`
+  * `pgbouncer_maximum_memory_mb`
+  * `pgbouncer_minimum_cpu_millicores`
+  * `pgbouncer_maximum_cpu_millicores`
+
+  This change also resolves issues where some values for `pg_cpu_millicores` caused a permanent reconciliation conflict.
 
 * All pods in Panfactum clusters will now automatically tolerate `arm64` and `spot` node taints regardless of whether they were created
-by Panfactum modules (this was already the default for Panfactum modules). To disable these tolerations for a specific pod, you must
-add the `panfactum.com/arm64-enabled = "false"` or `panfactum.com/spot-enabled = "false"` labels, respectively.
+  by Panfactum modules (this was already the default for Panfactum modules). To disable these tolerations for a specific pod, you must
+  add the `panfactum.com/arm64-enabled = "false"` or `panfactum.com/spot-enabled = "false"` labels, respectively.
 
 ### Changed
 
 * We have upgrade the CNPG operator in [kube\_cloudnative\_pg](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cloudnative_pg) to 1.24 (up from 1.23).
-This adds additional stability improvements during failover events.
+  This adds additional stability improvements during failover events.
 
-After performing this upgrade, you MUST use the new [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
-submodule as well. Old versions are no longer compatible.
+  After performing this upgrade, you MUST use the new [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  submodule as well. Old versions are no longer compatible.
 
 * We have upgraded the default PostgreSQL version in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to 16.4 (up
-from 16.2). This upgrade should not require any action on your part, but be sure to [pin your PostgreSQL version](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#database-version)
-if you do not want to be automatically upgraded.
+  from 16.2). This upgrade should not require any action on your part, but be sure to [pin your PostgreSQL version](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#database-version)
+  if you do not want to be automatically upgraded.
 
 ### Added
 
 * Adds a new submodule, [kube\_daemon\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set), for creating
-Kubernetes [DaemonSets](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/).
+  Kubernetes [DaemonSets](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/).
 
 ### Fixed
 
 * Added Kyverno rule that forces linkerd sidecars to terminate prior to the pod's `terminationGracePeriodSeconds` to ensure that pods
-are not marked as "failed" by controllers such as Argo if the main container has a TCP connection leak.
+  are not marked as "failed" by controllers such as Argo if the main container has a TCP connection leak.
 
 * Resolved unnecessary log noise that was introduced in the last release when running Terragrunt commands.
 
 * Adjusted Cilium deployment to address edge cases where Cilium would not successfully launch new nodes
-after a complete zonal or cluster outage.
-
-* Resolved issue with [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) where `pg_cpu_millicores` could not be increased above `1000`.
+  after a complete zonal or cluster outage.
 
 ## edge.24-10-25
 
 <MarkdownAlert severity="warning">
-    A bug has been discovered in this release that can cause a complete cluster crash due to the introduction of the new Kyverno
-    policy engine. Please skip this release and use `edge.24-11-13` instead.
+  A bug has been discovered in this release that can cause a complete cluster crash due to the introduction of the new Kyverno
+  policy engine. Please skip this release and use `edge.24-11-13` instead.
 </MarkdownAlert>
 
 ## edge.24-10-23

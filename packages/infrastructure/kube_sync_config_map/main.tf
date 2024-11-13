@@ -28,7 +28,6 @@ resource "kubectl_manifest" "sync_config_map" {
       labels = data.pf_kube_labels.labels.labels
     }
     spec = {
-      generateExisting = true
       rules = [
         { for k, v in {
           name = "sync-config-map"
@@ -48,11 +47,12 @@ resource "kubectl_manifest" "sync_config_map" {
             }]
           } : null
           generate = {
-            apiVersion  = "v1"
-            kind        = "ConfigMap"
-            name        = var.config_map_name
-            namespace   = "{{request.object.metadata.name}}"
-            synchronize = true
+            apiVersion       = "v1"
+            kind             = "ConfigMap"
+            name             = var.config_map_name
+            namespace        = "{{request.object.metadata.name}}"
+            generateExisting = true
+            synchronize      = true
             clone = {
               namespace = var.config_map_namespace
               name      = var.config_map_name
