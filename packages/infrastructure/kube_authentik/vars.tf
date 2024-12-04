@@ -34,7 +34,7 @@ variable "aws_iam_ip_allow_list" {
 }
 
 variable "log_level" {
-  description = "The log level for the operator pods"
+  description = "The log level for the Authentik pods"
   type        = string
   default     = "error"
   validation {
@@ -44,7 +44,7 @@ variable "log_level" {
 }
 
 variable "error_reporting_enabled" {
-  description = "True iff errors should be reported to authentik for telemetry purposes"
+  description = "True iff errors should be reported to Authentik for telemetry purposes"
   type        = bool
   default     = true
 }

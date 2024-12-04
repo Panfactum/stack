@@ -286,37 +286,85 @@ resource "authentik_policy_password" "password_complexity" {
 }
 
 resource "authentik_stage_user_write" "write" {
-  name = "panfactum-recovery-write"
+  name               = "panfactum-recovery-write"
+  user_creation_mode = "never_create"
+}
+
+resource "authentik_policy_expression" "skip_if_restored" {
+  name       = "panfactum-recovery-skip-if-restored"
+  expression = "return bool(request.context.get('is_restored', True))"
+}
+
+resource "authentik_policy_binding" "skip_if_restored_id" {
+  order  = 0
+  target = authentik_flow_stage_binding.recovery_id.id
+  policy = authentik_policy_expression.skip_if_restored.id
+}
+
+resource "authentik_policy_binding" "skip_if_restored_email" {
+  order  = 0
+  target = authentik_flow_stage_binding.recovery_email.id
+  policy = authentik_policy_expression.skip_if_restored.id
+}
+
+resource "authentik_flow_stage_binding" "recovery_id" {
+  target                  = authentik_flow.recovery.uuid
+  stage                   = authentik_stage_identification.id.id
+  order                   = 10
+  evaluate_on_plan        = true
+  re_evaluate_policies    = true
+  policy_engine_mode      = "any"
+  invalid_response_action = "retry"
 }
 
 resource "authentik_flow_stage_binding" "recovery_email" {
-  target = authentik_flow.recovery.uuid
-  stage  = authentik_stage_email.email.id
-  order  = 10
+  target                  = authentik_flow.recovery.uuid
+  stage                   = authentik_stage_email.email.id
+  order                   = 20
+  evaluate_on_plan        = true
+  re_evaluate_policies    = true
+  policy_engine_mode      = "any"
+  invalid_response_action = "retry"
 }
 
 resource "authentik_flow_stage_binding" "recovery_password" {
-  target = authentik_flow.recovery.uuid
-  stage  = authentik_stage_prompt.password.id
-  order  = 20
+  target                  = authentik_flow.recovery.uuid
+  stage                   = authentik_stage_prompt.password.id
+  order                   = 20
+  evaluate_on_plan        = true
+  re_evaluate_policies    = false
+  policy_engine_mode      = "any"
+  invalid_response_action = "retry"
 }
 
 resource "authentik_flow_stage_binding" "recovery_mfa" {
-  target = authentik_flow.recovery.uuid
-  stage  = authentik_stage_authenticator_validate.mfa.id
-  order  = 30
+  target                  = authentik_flow.recovery.uuid
+  stage                   = authentik_stage_authenticator_validate.mfa.id
+  order                   = 30
+  evaluate_on_plan        = true
+  re_evaluate_policies    = false
+  policy_engine_mode      = "any"
+  invalid_response_action = "retry"
 }
 
 resource "authentik_flow_stage_binding" "recovery_write" {
-  target = authentik_flow.recovery.uuid
-  stage  = authentik_stage_user_write.write.id
-  order  = 40
+  target                  = authentik_flow.recovery.uuid
+  stage                   = authentik_stage_user_write.write.id
+  order                   = 40
+  evaluate_on_plan        = true
+  re_evaluate_policies    = false
+  policy_engine_mode      = "any"
+  invalid_response_action = "retry"
 }
 
 resource "authentik_flow_stage_binding" "recovery_login" {
-  target = authentik_flow.recovery.uuid
-  stage  = authentik_stage_user_login.login.id
-  order  = 50
+  target                  = authentik_flow.recovery.uuid
+  stage                   = authentik_stage_user_login.login.id
+  order                   = 100
+  evaluate_on_plan        = true
+  re_evaluate_policies    = false
+  policy_engine_mode      = "any"
+  invalid_response_action = "retry"
 }
 
 ###########################################################################

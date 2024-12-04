@@ -22,5 +22,5 @@ dependency "kyverno" {
 }
 
 inputs = {
-  vault_ca_crt       = dependency.cert_issuers.outputs.vault_ca_crt
+  vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
 }
