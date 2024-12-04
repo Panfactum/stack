@@ -82,10 +82,10 @@ locals {
   // NOTE: The order that these env blocks is defined in
   // is incredibly important. Do NOT move them around unless you know what you are doing.
   common_env = concat(
-    local.common_static_env,
     local.common_static_secret_env,
     local.common_secret_key_ref_env,
-    local.common_config_map_key_ref_env
+    local.common_config_map_key_ref_env,
+    local.common_static_env
   )
 
 
