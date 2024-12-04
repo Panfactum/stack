@@ -182,12 +182,12 @@ module "vault_image_builder_workflow" {
             command = ["/scripts/clone.sh"]
           },
           {
-            name = "build-amd64"
+            name = "build-arm64"
             command = ["/scripts/build.sh"]
             env = concat(
               module.vault_image_builder_workflow.env,
               [
-                { name = "ARCH", value = "amd64" }
+                { name = "ARCH", value = "arm64" }
               ]
             )
             dependencies = ["scale-buildkit", "clone"]
@@ -195,7 +195,7 @@ module "vault_image_builder_workflow" {
           {
             name = "copy-to-public-ecr"
             command = [ "/scripts/copy-to-public.sh"]
-            dependencies = ["build-amd64"]
+            dependencies = ["build-arm64"]
           }
         ]
       }

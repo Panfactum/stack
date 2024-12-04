@@ -421,9 +421,9 @@ module "image_cache" {
 
   images = [
     {
-      registry   = "docker.io"
-      repository = "hashicorp/vault"
-      tag        = "1.14.7"
+      registry   = module.constants.images.vault.registry
+      repository = module.constants.images.vault.repository
+      tag        = module.constants.images.vault.tag
     }
   ]
 }
