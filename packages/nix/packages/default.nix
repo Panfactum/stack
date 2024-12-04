@@ -1,14 +1,5 @@
-{
-  pkgs,
-  kubeUtilsPkgs,
-  awsUtilsPkgs,
-  tfUtilsPkgs,
-  buildkitPkgs,
-  redisPkgs,
-  postgresPkgs,
-  vaultPkgs,
-  linkerdPkgs,
-}:
+{ pkgs, kubeUtilsPkgs, awsUtilsPkgs, tfUtilsPkgs, buildkitPkgs, redisPkgs
+, postgresPkgs, vaultPkgs, linkerdPkgs, kyvernoPkgs, natsPkgs, }:
 let
   # Custom Packages
   customTerragrunt = pkgs.writeShellScriptBin "terragrunt" ''
@@ -35,9 +26,7 @@ let
         --add-flags "-n cilium"
     '';
   };
-in
-with pkgs;
-[
+in with pkgs; [
 
   ####################################
   # Custom Panfactum Scripts
@@ -61,6 +50,7 @@ with pkgs;
   kubeUtilsPkgs.stern # log aggregator for quick cli log inspection
   kubeUtilsPkgs.velero # backups of cluster state
   kubeUtilsPkgs.k9s # kubernetes tui
+  kyvernoPkgs.kyverno # kubernetes policy engine cli
 
   ####################################
   # Hashicorp Vault
@@ -148,5 +138,8 @@ with pkgs;
   ####################################
   redisPkgs.redis # redis-cli
   postgresPkgs.postgresql_16 # psql, cli for working with postgres
+  natsPkgs.natscli # cli for NATS
+  natsPkgs.nsc # cli for configuring NATS accounts
+  natsPkgs.nats-top # cli for configuring NATS accounts
   # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
 ]

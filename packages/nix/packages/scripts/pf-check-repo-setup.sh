@@ -44,7 +44,7 @@ function isIgnored() {
   git check-ignore "$REPO_ROOT/$1" >/dev/null
 }
 
-if ! isIgnored ".env" || ! isIgnored ".terragrunt-cache" || ! isIgnored ".terraform" || ! isIgnored ".devenv" || ! isIgnored ".direnv"; then
+if ! isIgnored ".env" || ! isIgnored ".terragrunt-cache" || ! isIgnored ".terraform" || ! isIgnored ".devenv" || ! isIgnored ".direnv" || ! isIgnored ".nats"; then
   errors+="\033[33m.gitignore file is missing files/directories that should not be committed. Run pf-update-gitignore to update.\033[0m\n\n"
 fi
 

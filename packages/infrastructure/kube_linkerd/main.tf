@@ -36,6 +36,36 @@ locals {
   linkerd_policy_validator_webhook_secret  = "linkerd-policy-validator-k8s-tls" # MUST be named this
   linkerd_proxy_injector_webhook_secret    = "linkerd-proxy-injector-k8s-tls"   # MUST be named this
   linkerd_profile_validator_webhook_secret = "linkerd-sp-validator-k8s-tls"     # MUST be named this
+
+  linkerd_image_tag = "edge-${substr(var.linkerd_helm_version, 2, -1)}"
+}
+
+module "util_cni" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "linkerd-cni"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  panfactum_scheduler_enabled          = false // ds
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  instance_type_anti_affinity_required = false // ds
+  az_spread_preferred                  = false // ds
+  extra_labels                         = data.pf_kube_labels.labels.labels
+  cilium_required                      = false
+  linkerd_required                     = false
+
+  extra_tolerations = [
+    {
+      effect   = "NoSchedule"
+      key      = "node.kubernetes.io/not-ready"
+      operator = "Exists"
+    },
+    {
+      effect   = "NoExecute"
+      key      = "node.kubernetes.io/not-ready"
+      operator = "Exists"
+    }
+  ]
 }
 
 module "util_destination" {
@@ -227,7 +257,86 @@ resource "helm_release" "linkerd_crds" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 }
+
+resource "helm_release" "linkerd_cni" {
+  namespace       = local.namespace
+  name            = "linkerd-cni"
+  repository      = "https://helm.linkerd.io/edge"
+  chart           = "linkerd2-cni"
+  version         = var.linkerd_helm_version
+  recreate_pods   = false
+  cleanup_on_fail = true
+  wait            = true
+  wait_for_jobs   = true
+  max_history     = 5
+
+  values = [
+    yamlencode({
+      podLabels         = module.util_cni.labels
+      commonLabels      = module.util_cni.labels
+      logLevel          = var.log_level
+      priorityClassName = "system-node-critical"
+
+      resources = {
+        memory = {
+          request = "100Mi"
+          limit   = "110Mi"
+        }
+        cpu = {
+          request = "10m"
+        }
+      }
+      tolerations = module.util_cni.tolerations
+    })
+  ]
+}
+
+// hostNetwork=true is required so that the linkerd CNI can be installed
+// concurrently with the cilium CNI; the helm chart does not provide a way
+// to expose this
+resource "kubectl_manifest" "linkerd_cni_enable_host_network" {
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "ClusterPolicy"
+    metadata = {
+      name   = "linkerd-cni-use-host-network"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      rules = [
+        {
+          name = "use-host-network"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["Pod"]
+                  operations = ["CREATE"]
+                  names      = ["linkerd-cni-*"]
+                }
+              }
+            ]
+          }
+          mutate = {
+            patchStrategicMerge = {
+              spec = {
+                hostNetwork = true
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+
+  force_conflicts   = true
+  server_side_apply = true
+
+  depends_on = [helm_release.linkerd_cni]
+}
+
 
 resource "helm_release" "linkerd" {
   namespace       = local.namespace
@@ -260,7 +369,7 @@ resource "helm_release" "linkerd" {
       # Was never able to get the CNI to work.
       # Given the additional downside of this breaking init containers,
       # it's probably for the best to leave it disabled
-      cniEnabled = false
+      cniEnabled = true
 
       identity = {
         externalCA = true
@@ -275,9 +384,10 @@ resource "helm_release" "linkerd" {
       }
 
       proxy = {
-        nativeSidecar = true
-        logFormat     = "json"
-        logLevel      = "${var.log_level},linkerd=${var.log_level},linkerd2_proxy=${var.log_level}"
+        nativeSidecar       = true
+        logFormat           = "json"
+        logLevel            = "${var.log_level},linkerd=${var.log_level},linkerd2_proxy=${var.log_level}"
+        shutdownGracePeriod = "29s" // The default of 120s exceeds the k8s default of 30s which causes problems
         resources = {
 
           // Native sidecars are not autoscaled due to this issue
@@ -289,6 +399,8 @@ resource "helm_release" "linkerd" {
             limit   = "200Mi"
           }
         }
+
+        opaquePorts = "25,587,3306,4222,6222,4444,5432,6379,9300,11211"
       }
 
       policyController = {
@@ -483,17 +595,203 @@ resource "helm_release" "linkerd" {
     module.linkerd_policy_validator,
     module.linkerd_proxy_injector,
     module.linkerd_identity_issuer,
-    module.linkerd_profile_validator
+    module.linkerd_profile_validator,
+    helm_release.linkerd_cni
   ]
 }
 
-# Do not forget to update this when updating the linkerd version
+/***************************************
+* Image Cache
+***************************************/
+
 module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
   source = "../kube_node_image_cache"
+
   images = [
-    "cr.l5d.io/linkerd/proxy:edge-24.5.1",
-    "cr.l5d.io/linkerd/proxy-init:v2.4.0"
+
+    // This ensures that the proxy image is preloaded onto each node.
+    // This is more for improving node startup time than anything else and saves
+    // around 4-5 seconds off the first container launch
+    {
+      registry    = "cr.l5d.io"
+      repository  = "linkerd/proxy"
+      tag         = local.linkerd_image_tag
+      pin_enabled = false
+    },
+
+    // Allows the operator components to failover faster
+    {
+      registry   = "cr.l5d.io"
+      repository = "linkerd/controller"
+      tag        = local.linkerd_image_tag
+    },
+    {
+      registry   = "cr.l5d.io"
+      repository = "linkerd/policy-controller"
+      tag        = local.linkerd_image_tag
+    }
   ]
+}
+
+
+/***************************************
+* Linkerd Policies
+***************************************/
+
+resource "kubectl_manifest" "kyverno_policies" {
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "ClusterPolicy"
+    metadata = {
+      name   = "linkerd-rules"
+      labels = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      rules = [
+
+        // Linkerd will try to inject a "validator" init container to all pods
+        // that ensures that the CNI is installed. However, we do not do this check
+        // as it adds too long to container startup time so we use taints to accomplish this check instead.
+        {
+          name = "remove-network-validator"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds = ["Pod"]
+                }
+              }
+            ]
+          }
+          preconditions = {
+            all = [
+              {
+                key      = "{{ request.object.spec.initContainers[] || `[]` | length(@) }}"
+                operator = "GreaterThanOrEquals"
+                value    = 1
+              },
+              {
+                key      = "{{ request.object.status.phase || 'Pending' }}"
+                operator = "AnyIn"
+                value    = "Pending"
+              }
+            ]
+          }
+          mutate = {
+            foreach = [
+              {
+                list = "request.object.spec.initContainers"
+                patchesJson6902 = yamlencode([
+                  {
+                    path = "/spec/initContainers/{{elementIndex}}"
+                    op   = "remove"
+                  }
+                ])
+                preconditions = {
+                  all = [
+                    {
+                      key      = "{{ element.name }}"
+                      operator = "AnyIn"
+                      value    = "linkerd-network-validator"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+
+        // This removes the linkerd taint on each node which
+        // indicates that the linkerd CNI has been installed
+        {
+          name = "remove-linkerd-taint"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds = ["Pod"]
+                  names = ["linkerd-cni-*"]
+                }
+              }
+            ]
+          }
+          preconditions = {
+            all = [
+              {
+                key      = "{{ request.object.status.phase || 'Pending' }}"
+                operator = "Equals"
+                value    = "Running"
+              }
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "v1"
+                kind       = "Node"
+                name       = "{{ request.object.spec.nodeName }}"
+              }
+            ]
+            foreach = [
+              {
+                list = "target.spec.taints"
+                preconditions = {
+                  all = [
+                    {
+                      key      = "{{ element.key }}"
+                      operator = "AnyIn"
+                      value    = "panfactum.com/linkerd-not-ready"
+                    }
+                  ]
+                }
+                patchesJson6902 = yamlencode([
+                  {
+                    path = "/spec/taints/{{elementIndex}}"
+                    op   = "remove"
+                  }
+                ])
+              }
+            ]
+          }
+        },
+
+        // The sidecar proxy should always shutdown prior to the pod terminationGracePeriodSeconds elapsing;
+        // otherwise, the pod will look "failed" to controllers like Argo. This can occur if the main pod
+        // has a TCP connection leak that would otherwise be harmless
+        {
+          name = "set-linkerd-shutdown-grace-period"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["Pod"]
+                  operations = ["CREATE"]
+                }
+              }
+            ]
+          }
+          mutate = {
+            patchStrategicMerge = {
+              metadata = {
+                annotations = {
+                  "+(config.linkerd.io/shutdown-grace-period)" = "{{ max([subtract(`{{ request.object.spec.terminationGracePeriodSeconds || `30` }}`,`1`), `0`]) }}s"
+                }
+              }
+            }
+          }
+        }
+      ]
+
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
+    }
+  })
+
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 /***************************************
@@ -526,6 +824,9 @@ resource "helm_release" "viz" {
       prometheus = {
         enabled = false // We use our external prometheus
       }
+
+      // This Job adds security controls to the linkerd namespace that breaks CNI installation so we disable it
+      createNamespaceMetadataJob = false
 
       metricsAPI = {
         replicas = 1
@@ -561,6 +862,50 @@ resource "helm_release" "viz" {
 * Autoscaling
 ***************************************/
 
+resource "kubectl_manifest" "vpa_cni" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "linkerd-cni"
+      namespace = local.namespace
+      labels    = module.util_cni.labels
+    }
+    spec = {
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "DaemonSet"
+        name       = "linkerd-cni"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd_cni]
+}
+
+resource "kubectl_manifest" "pdb_cni" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "linkerd-cni"
+      namespace = local.namespace
+      labels    = module.util_cni.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_cni.match_labels
+      }
+      minAvailable = 0
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.linkerd_cni]
+}
 
 resource "kubectl_manifest" "vpa_identity" {
   count = var.vpa_enabled ? 1 : 0

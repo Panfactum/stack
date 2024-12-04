@@ -57,6 +57,14 @@ module "util_admission_controller" {
   # This controller is critical to launching all pods so it cannot go down
   az_spread_required                   = true
   instance_type_anti_affinity_required = false // TODO: Make true but needs to be compatible with bootstrapping
+
+  extra_tolerations = [
+    {
+      key      = module.constants.linkerd_taint.key
+      operator = "Exists"
+      effect   = module.constants.linkerd_taint.effect
+    }
+  ]
 }
 
 module "util_background_controller" {
@@ -68,6 +76,14 @@ module "util_background_controller" {
   az_spread_preferred         = var.enhanced_ha_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
+
+  extra_tolerations = [
+    {
+      key      = module.constants.linkerd_taint.key
+      operator = "Exists"
+      effect   = module.constants.linkerd_taint.effect
+    }
+  ]
 }
 
 module "util_cleanup_controller" {
@@ -150,10 +166,12 @@ resource "helm_release" "kyverno" {
 
       crds = {
         install = true
-        migrations = {
-          enabled     = true
-          tolerations = module.util_crd_migrate.tolerations
-          podLabels   = module.util_crd_migrate.labels
+        migration = {
+          enabled         = true
+          tolerations     = module.util_crd_migrate.tolerations
+          podAntiAffinity = lookup(module.util_admission_controller.affinity, "podAntiAffinity", null)
+          nodeAffinity    = lookup(module.util_admission_controller.affinity, "nodeAffinity", null)
+          podLabels       = module.util_crd_migrate.labels
         }
       }
 
@@ -162,6 +180,23 @@ resource "helm_release" "kyverno" {
           format    = "json"
           verbosity = var.log_level
         }
+        // Disable reporting due to this issue: https://github.com/kyverno/kyverno/issues/11561
+        policyReports = {
+          enabled = false
+        }
+        aggregateReports = {
+          enabled = false
+        }
+        admissionReports = {
+          enabled = false
+        }
+        reporting = {
+          validate       = false
+          mutate         = false
+          mutateExisting = false
+          imageVerify    = false
+          generate       = false
+        }
       }
 
       config = {
@@ -169,8 +204,6 @@ resource "helm_release" "kyverno" {
           "[Event,*,*]",
           "[*/*,kube-public,*]",
           "[*/*,kube-node-lease,*]",
-          "[Node,*,*]",
-          "[Node/*,*,*]",
           "[APIService,*,*]",
           "[APIService/*,*,*]",
           "[TokenReview,*,*]",
@@ -184,13 +217,20 @@ resource "helm_release" "kyverno" {
           "[ClusterEphemeralReport,*,*]",
         ]
         webhooks = {
-          namespaceSelector = {}
+          namespaceSelector = {
+            matchExpressions = [{
+              key      = "kubernetes.io/metadata.name"
+              operator = "NotIn"
+              values   = ["dummy-test"]
+            }]
+          }
         }
+        excludeGroups           = []
         excludeKyvernoNamespace = false
       }
 
       admissionController = {
-        replicas          = 2
+        replicas          = 3
         podLabels         = module.util_admission_controller.labels
         tolerations       = module.util_admission_controller.tolerations
         priorityClassName = "system-node-critical" // DaemonSet pods cannot be scheduled without this running, so it should be the most critical
@@ -203,6 +243,21 @@ resource "helm_release" "kyverno" {
         }
 
         apiPriorityAndFairness = true // Ensures stability on busy clusters
+        priorityLevelConfigurationSpec = {
+          type = "Limited"
+          limited = {
+            lendablePercent = 75
+            limitResponse = {
+              queuing = {
+                handSize         = 8
+                queueLengthLimit = 100
+                queues           = 64
+              }
+              type = "Queue"
+            }
+            nominalConcurrencyShares = 100
+          }
+        }
 
         antiAffinity = {
           enabled = true
@@ -228,13 +283,17 @@ resource "helm_release" "kyverno" {
           }
         }
         container = {
+          extraArgs = {
+            clientRateLimitQPS   = 500 # 5x from the defaults because it seems we hit the limits pretty easily
+            clientRateLimitBurst = 1000
+          }
           resources = {
             requests = {
               cpu    = "100m"
-              memory = "100Mi"
+              memory = "200Mi"
             }
             limits = {
-              memory = "130Mi"
+              memory = "260Mi"
             }
           }
         }
@@ -269,13 +328,21 @@ resource "helm_release" "kyverno" {
           enabled = false // We do this on our own
         }
 
+        updateStrategy = {
+          rollingUpdate = {
+            maxSurge       = 0
+            maxUnavailable = 1
+          }
+          type = "RollingUpdate"
+        }
+
         resources = {
           requests = {
             cpu    = "100m"
-            memory = "100Mi"
+            memory = "500Mi"
           }
           limits = {
-            memory = "130Mi"
+            memory = "600Mi"
           }
         }
 
@@ -307,6 +374,14 @@ resource "helm_release" "kyverno" {
         nodeAffinity              = lookup(module.util_cleanup_controller.affinity, "nodeAffinity", null)
         topologySpreadConstraints = module.util_cleanup_controller.topology_spread_constraints
 
+        updateStrategy = {
+          rollingUpdate = {
+            maxSurge       = 0
+            maxUnavailable = 1
+          }
+          type = "RollingUpdate"
+        }
+
         podDisruptionBudget = {
           enabled = false // We do this on our own
         }
@@ -335,6 +410,7 @@ resource "helm_release" "kyverno" {
       }
 
       reportsController = {
+        enabled     = false
         replicas    = 1 # HA isn't necessary for this
         podLabels   = module.util_reports_controller.labels
         tolerations = module.util_reports_controller.tolerations
@@ -349,6 +425,14 @@ resource "helm_release" "kyverno" {
 
         podDisruptionBudget = {
           enabled = false // We do this on our own
+        }
+
+        updateStrategy = {
+          rollingUpdate = {
+            maxSurge       = 0
+            maxUnavailable = 1
+          }
+          type = "RollingUpdate"
         }
 
         resources = {
@@ -382,7 +466,7 @@ resource "helm_release" "kyverno" {
       }
 
       policyReportsCleanup = {
-        enabled     = true
+        enabled     = false
         tolerations = module.util_policy_reports_cleanup.tolerations
         podLabels   = module.util_policy_reports_cleanup.labels
       }
@@ -391,7 +475,7 @@ resource "helm_release" "kyverno" {
 }
 
 resource "kubernetes_cluster_role" "extra_permissions" {
-  for_each = toset(["background-controller", "admission-controller"])
+  for_each = toset(["background-controller", "admission-controller", "cleanup-controller"])
   metadata {
     name = "kyverno:${each.key}:extra"
     labels = merge(data.pf_kube_labels.labels.labels, {
@@ -402,17 +486,27 @@ resource "kubernetes_cluster_role" "extra_permissions" {
   }
   rule {
     api_groups = [""]
-    verbs      = ["get", "list", "watch", "create", "update", "delete"]
-    resources  = ["configmaps", "secrets"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
+    resources  = ["configmaps", "secrets", "nodes", "pods", "persistentvolumeclaims", "namespaces"]
   }
   rule {
     api_groups = ["apiextensions.k8s.io"]
-    verbs      = ["get", "list", "create", "update", "delete"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
     resources  = ["customresourcedefinitions"]
   }
   rule {
+    api_groups = ["apps"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
+    resources  = ["statefulsets", "deployments"]
+  }
+  rule {
+    api_groups = ["batch"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
+    resources  = ["jobs", "cronjobs"]
+  }
+  rule {
     api_groups = ["admissionregistration.k8s.io"]
-    verbs      = ["get", "list", "create", "update", "delete"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
     resources  = ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
   }
 }
@@ -485,27 +579,27 @@ resource "kubectl_manifest" "pdb_background_controller" {
 #   depends_on        = [helm_release.kyverno]
 # }
 
-resource "kubectl_manifest" "pdb_reports_controller" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = "kyverno-reports-controller"
-      namespace = local.namespace
-      labels    = module.util_reports_controller.labels
-    }
-    spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
-      selector = {
-        matchLabels = module.util_reports_controller.match_labels
-      }
-      maxUnavailable = 1
-    }
-  })
-  server_side_apply = true
-  force_conflicts   = true
-  depends_on        = [helm_release.kyverno]
-}
+# resource "kubectl_manifest" "pdb_reports_controller" {
+#   yaml_body = yamlencode({
+#     apiVersion = "policy/v1"
+#     kind       = "PodDisruptionBudget"
+#     metadata = {
+#       name      = "kyverno-reports-controller"
+#       namespace = local.namespace
+#       labels    = module.util_reports_controller.labels
+#     }
+#     spec = {
+#       unhealthyPodEvictionPolicy = "AlwaysAllow"
+#       selector = {
+#         matchLabels = module.util_reports_controller.match_labels
+#       }
+#       maxUnavailable = 1
+#     }
+#   })
+#   server_side_apply = true
+#   force_conflicts   = true
+#   depends_on        = [helm_release.kyverno]
+# }
 
 resource "kubectl_manifest" "vpa_admission_controller" {
   count = var.vpa_enabled ? 1 : 0
@@ -522,6 +616,14 @@ resource "kubectl_manifest" "vpa_admission_controller" {
         apiVersion = "apps/v1"
         kind       = "Deployment"
         name       = "kyverno-admission-controller"
+      }
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "kyverno"
+          minAllowed = {
+            memory = "200Mi"
+          }
+        }]
       }
     }
   })
@@ -545,6 +647,14 @@ resource "kubectl_manifest" "vpa_background_controller" {
         apiVersion = "apps/v1"
         kind       = "Deployment"
         name       = "kyverno-background-controller"
+      }
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "controller"
+          minAllowed = {
+            memory = "500Mi"
+          }
+        }]
       }
     }
   })
@@ -578,25 +688,25 @@ resource "kubectl_manifest" "vpa_cleanup_controller" {
 }
 
 
-resource "kubectl_manifest" "vpa_reports_controller" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "kyverno-reports-controller"
-      namespace = local.namespace
-      labels    = module.util_reports_controller.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "apps/v1"
-        kind       = "Deployment"
-        name       = "kyverno-reports-controller"
-      }
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.kyverno]
-}
+# resource "kubectl_manifest" "vpa_reports_controller" {
+#   count = var.vpa_enabled ? 1 : 0
+#   yaml_body = yamlencode({
+#     apiVersion = "autoscaling.k8s.io/v1"
+#     kind       = "VerticalPodAutoscaler"
+#     metadata = {
+#       name      = "kyverno-reports-controller"
+#       namespace = local.namespace
+#       labels    = module.util_reports_controller.labels
+#     }
+#     spec = {
+#       targetRef = {
+#         apiVersion = "apps/v1"
+#         kind       = "Deployment"
+#         name       = "kyverno-reports-controller"
+#       }
+#     }
+#   })
+#   force_conflicts   = true
+#   server_side_apply = true
+#   depends_on        = [helm_release.kyverno]
+# }

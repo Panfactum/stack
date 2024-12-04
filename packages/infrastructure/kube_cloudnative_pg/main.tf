@@ -204,8 +204,11 @@ resource "kubectl_manifest" "pdb" {
 module "image_cache" {
   source = "../kube_node_image_cache"
   images = [
-    "ghcr.io/cloudnative-pg/cloudnative-pg:1.24.1",
-    "ghcr.io/cloudnative-pg/postgresql:16.4-43"
+    {
+      registry   = "ghcr.io"
+      repository = "cloudnative-pg/cloudnative-pg"
+      tag        = "1.24.1"
+    }
   ]
 }
 

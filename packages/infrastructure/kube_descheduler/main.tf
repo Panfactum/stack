@@ -29,6 +29,10 @@ locals {
   name      = "descheduler"
   namespace = module.namespace.namespace
 
+  exlcuded_namespaces = [
+    "cilium-test" // We do not want any disruptions
+  ]
+
   default_evictor_config = {
     name = "DefaultEvictor"
     args = {
@@ -36,6 +40,11 @@ locals {
       evictFailedBarePods     = true
       evictLocalStoragePods   = true
       nodeFit                 = false
+      labelSelector = {
+        matchExpressions = [
+          { key = "panfactum.com/descheduler-enabled", operator = "NotIn", values = ["0", "false"] }
+        ]
+      }
     }
   }
 
@@ -46,6 +55,11 @@ locals {
       evictFailedBarePods     = true
       evictLocalStoragePods   = true
       nodeFit                 = true
+      labelSelector = {
+        matchExpressions = [
+          { key = "panfactum.com/descheduler-enabled", operator = "NotIn", values = ["0", "false"] }
+        ]
+      }
     }
   }
 }
@@ -216,7 +230,7 @@ resource "helm_release" "descheduler" {
                 {
                   name = "RemovePodsHavingTooManyRestarts"
                   args = {
-                    podRestartThreshold     = 5
+                    podRestartThreshold     = 3
                     includingInitContainers = true
                   }
                 }
@@ -259,11 +273,38 @@ resource "helm_release" "descheduler" {
               }
             },
 
+            // Evicts pods that have been labeled with evict
+            {
+              name = "pod-forced-eviction"
+              pluginConfig = [
+                local.default_evictor_config,
+                {
+                  name = "PodLifeTime"
+                  args = {
+                    maxPodLifeTimeSeconds = 60
+                    labelSelector = {
+                      matchExpressions = [{
+                        key      = "panfactum.com/evict"
+                        operator = "Exists"
+                      }]
+                    }
+                  }
+                },
+              ]
+              plugins = {
+                deschedule = {
+                  enabled = [
+                    "PodLifeTime"
+                  ]
+                }
+              }
+            },
+
             // Evicts pods that have not been mutated by the standard Panfactum Kyverno policies.
             // This enables us to allow pods to be created even if Kyverno is down and then force a recreate
             // in a few minutes. Without this, a failing Kyverno deployment would take down the entire cluster.
             {
-              name = "pod-lifetime"
+              name = "pod-lifetime-not-mutated"
               pluginConfig = [
                 local.default_evictor_config,
                 {

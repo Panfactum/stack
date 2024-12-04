@@ -35,6 +35,7 @@ addIgnoreIfNeeded .terragrunt-cache
 addIgnoreIfNeeded .terraform
 addIgnoreIfNeeded .devenv
 addIgnoreIfNeeded .direnv
+addIgnoreIfNeeded .nats
 
 echo -e ".gitignore updated\n" 1>&2
 

@@ -23,9 +23,8 @@ such as those for [Velero](https://velero.io/) or the
 
 ## Architecture
 
-This addon is very simple. It is just a CronJob that runs the `pf-set-pvc-metadata`
-command every 15 minutes. This module ensures that the appropriate arguments are passed
-to the command.
+This addon is very simple. It simply implements a Kyverno policy that adds the indicated labels and annotations
+to the PVCs.
 
 ## Usage Notes
 
@@ -45,15 +44,13 @@ The following providers are needed by this module:
 
 * [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
-
 ## Required Inputs
 
 The following input variables are required:
 
 ### config
 
-Description: Configuration to pass to pf-set-pvc-metadata. The top-level keys are the panfactum.com/pvc-group label values and the values are the corresponding labels and annotations to apply to all PVCs in the group.
+Description: The top-level keys are the panfactum.com/pvc-group label values and the values are the corresponding labels and annotations to apply to all PVCs in the group.
 
 Type:
 
@@ -72,31 +69,7 @@ Type: `string`
 
 ## Optional Inputs
 
-The following input variables are optional (have default values):
-
-### panfactum\_scheduler\_enabled
-
-Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
-
-Type: `bool`
-
-Default: `true`
-
-### pull\_through\_cache\_enabled
-
-Description: Whether to use the ECR pull through cache for the annotator images
-
-Type: `bool`
-
-Default: `true`
-
-### vpa\_enabled
-
-Description: Whether to enable the vertical pod autoscaler
-
-Type: `bool`
-
-Default: `true`
+No optional inputs.
 
 ## Outputs
 

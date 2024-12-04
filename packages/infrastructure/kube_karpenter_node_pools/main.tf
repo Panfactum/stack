@@ -159,6 +159,11 @@ locals {
     }
   ]
 
+  startup_taints = [
+    module.constants.cilium_taint,
+    module.constants.linkerd_taint
+  ]
+
   disruption_policy = {
     consolidationPolicy = "WhenEmptyOrUnderutilized"
     consolidateAfter    = "10s"
@@ -388,10 +393,8 @@ resource "kubectl_manifest" "burstable_node_pool" {
             kind  = "EC2NodeClass"
             name  = kubectl_manifest.burstable_node_class.name
           }
-          taints = local.burstable_taints
-          startupTaints = [
-            module.constants.cilium_taint
-          ]
+          taints        = local.burstable_taints
+          startupTaints = local.startup_taints
           requirements = concat(
             local.burstable_requirements,
             [
@@ -458,9 +461,7 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
             local.burstable_taints,
             local.arm_taints
           )
-          startupTaints = [
-            module.constants.cilium_taint
-          ]
+          startupTaints = local.startup_taints
           requirements = concat(
             local.burstable_requirements,
             [
@@ -523,10 +524,8 @@ resource "kubectl_manifest" "spot_node_pool" {
             kind  = "EC2NodeClass"
             name  = kubectl_manifest.spot_node_class.name
           }
-          taints = local.spot_taints
-          startupTaints = [
-            module.constants.cilium_taint
-          ]
+          taints        = local.spot_taints
+          startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
             [
@@ -593,9 +592,7 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
             local.spot_taints,
             local.arm_taints
           )
-          startupTaints = [
-            module.constants.cilium_taint
-          ]
+          startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
             [
@@ -658,10 +655,8 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
             kind  = "EC2NodeClass"
             name  = kubectl_manifest.default_node_class.name
           }
-          taints = local.arm_taints
-          startupTaints = [
-            module.constants.cilium_taint
-          ]
+          taints        = local.arm_taints
+          startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
             [
@@ -724,9 +719,7 @@ resource "kubectl_manifest" "on_demand_node_pool" {
             kind  = "EC2NodeClass"
             name  = kubectl_manifest.default_node_class.name
           }
-          startupTaints = [
-            module.constants.cilium_taint
-          ]
+          startupTaints = local.startup_taints
           requirements = concat(
             local.non_burstable_requirements,
             [

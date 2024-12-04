@@ -22,7 +22,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     pf = {
       source  = "panfactum/pf"
@@ -1274,4 +1274,23 @@ module "disruption_window_controller" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
 
   cron_schedule = var.voluntary_disruption_window_cron_schedule
+}
+
+
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry          = module.pull_through.github_registry
+      repository        = "cloudnative-pg/postgresql"
+      tag               = var.pg_version
+      arm_nodes_enabled = var.arm_nodes_enabled
+    }
+  ]
 }

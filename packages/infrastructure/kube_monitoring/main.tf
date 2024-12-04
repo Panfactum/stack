@@ -22,7 +22,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -2363,4 +2363,58 @@ module "ingress" {
   cross_origin_isolation_enabled = true
   permissions_policy_enabled     = true
   csp_enabled                    = true
+}
+
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry   = "quay.io"
+      repository = "prometheus-operator/prometheus-config-reloader"
+      tag        = "v0.73.2"
+    },
+    {
+      registry   = "quay.io"
+      repository = "prometheus/prometheus"
+      tag        = "v2.52.0"
+    },
+    {
+      registry   = "quay.io"
+      repository = "prometheus/alertmanager"
+      tag        = "v0.27.0"
+    },
+    {
+      registry   = "quay.io"
+      repository = "thanos/thanos"
+      tag        = "v0.35.0"
+    },
+    {
+      registry   = "docker.io"
+      repository = "bitnami/thanos"
+      tag        = "0.35.0-debian-12-r4"
+    },
+    {
+      registry   = "registry.k8s.io"
+      repository = "kube-state-metrics/kube-state-metrics"
+      tag        = "v2.12.0"
+    },
+    {
+      registry    = "quay.io"
+      repository  = "prometheus/node-exporter"
+      tag         = "v1.8.0"
+      pin_enabled = false // For DS
+    },
+    {
+      registry    = "quay.io"
+      repository  = "brancz/kube-rbac-proxy"
+      tag         = "v0.16.0"
+      pin_enabled = false // For DS
+    }
+  ]
 }

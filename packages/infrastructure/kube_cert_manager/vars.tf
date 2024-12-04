@@ -1,7 +1,7 @@
 variable "cert_manager_version" {
   description = "The version of cert-manager to deploy"
   type        = string
-  default     = "1.14.4"
+  default     = "1.16.2"
 }
 
 variable "vpa_enabled" {

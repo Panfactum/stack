@@ -27,7 +27,7 @@ The following providers are needed by this module:
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -176,6 +176,14 @@ Description: Kubernetes namespace to deploy the resources into
 Type: `string`
 
 Default: `"authentik"`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
 
 ### panfactum\_scheduler\_enabled
 

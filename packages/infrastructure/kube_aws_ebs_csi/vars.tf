@@ -77,5 +77,10 @@ variable "extra_storage_classes" {
     condition     = alltrue([for name, config in var.extra_storage_classes : contains(["Retain", "Delete"], config.reclaim_policy)])
     error_message = "reclaim_policy must be one of: Retain, Delete"
   }
+}
 
+variable "node_image_cached_enabled" {
+  description = "Whether to add the container images to the node image cache for faster startup times"
+  type        = bool
+  default     = true
 }

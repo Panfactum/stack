@@ -163,6 +163,7 @@ resource "helm_release" "vpa" {
           // Better packing
           "pod-recommendation-min-cpu-millicores" = 2
           "pod-recommendation-min-memory-mb"      = 10
+          "oom-min-bump-up-bytes"                 = 1024 * 1024 * 10
 
           // After 8 halvings, the metrics will essentially be ignored
           "cpu-histogram-decay-half-life"    = "${max(1, floor(var.history_length_hours / 8))}h0m0s"

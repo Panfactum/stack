@@ -201,7 +201,11 @@ words: [
   "numtide",
   "DEVSHELL",
   "devshell",
-  "Kyverno"
+  "Kyverno",
+  "Jetstream",
+  "prepull",
+  "prepuller",
+  "Prepuller"
 ]
 languageSettings:
   - languageId: markdown,mdx

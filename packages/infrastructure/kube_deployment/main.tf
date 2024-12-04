@@ -84,6 +84,8 @@ module "pod_template" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   termination_grace_period_seconds     = var.termination_grace_period_seconds
   restart_policy                       = var.restart_policy
+  cilium_required                      = var.cilium_required
+  linkerd_required                     = var.linkerd_required
 }
 
 resource "kubernetes_service_account" "service_account" {
@@ -101,10 +103,16 @@ resource "kubectl_manifest" "deployment" {
     metadata = {
       namespace = var.namespace
       name      = var.name
-      labels    = module.pod_template.labels
-      annotations = {
-        "reloader.stakater.com/auto" = "true"
-      }
+      labels = merge(
+        module.pod_template.labels,
+        var.extra_labels
+      )
+      annotations = merge(
+        {
+          "reloader.stakater.com/auto" = "true"
+        },
+        var.extra_annotations
+      )
     }
     spec = {
       replicas = var.replicas
@@ -203,12 +211,5 @@ resource "kubectl_manifest" "pdb" {
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [kubectl_manifest.deployment]
-}
-
-module "image_cache" {
-  count  = var.node_image_cached_enabled ? 1 : 0
-  source = "../kube_node_image_cache"
-
-  images = tolist(toset([for container in var.containers : "${container.image_registry}/${container.image_repository}:${container.image_tag}"]))
 }
 

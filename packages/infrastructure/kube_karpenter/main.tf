@@ -48,13 +48,16 @@ data "pf_aws_tags" "tags" {
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name               = "karpenter"
-  az_spread_preferred         = false
-  controller_nodes_required   = true
-  burstable_nodes_enabled     = true
-  extra_labels                = data.pf_kube_labels.labels.labels
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  panfactum_scheduler_enabled = false
+  workload_name                        = "karpenter"
+  az_spread_preferred                  = false
+  az_spread_required                   = false
+  instance_type_anti_affinity_required = false
+  host_anti_affinity_required          = false
+  controller_nodes_required            = true
+  burstable_nodes_enabled              = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  panfactum_scheduler_enabled          = false
 }
 
 module "constants" {
@@ -592,12 +595,14 @@ resource "helm_release" "karpenter" {
         }
       }
 
-      priorityClassName = "system-cluster-critical"
+      // This must be node-critical as we need to ensure that this is running in order for
+      // new nodes to be created
+      priorityClassName = "system-node-critical"
 
       replicas                  = 1
       topologySpreadConstraints = module.util.topology_spread_constraints
       tolerations               = module.util.tolerations
-      # affinity                  = module.util.affinity // This breaks the helm chart for some reason
+      affinity                  = module.util.affinity
       strategy = {
         type          = "Recreate"
         rollingUpdate = null

@@ -21,6 +21,9 @@ terraform {
 
 locals {
   entrypoint = "entry"
+  args = {
+
+  }
 }
 
 module "constants" {
@@ -91,7 +94,6 @@ data "aws_iam_policy_document" "image_builder" {
     resources = ["*"]
   }
 }
-
 
 #############################################################
 # Workflow

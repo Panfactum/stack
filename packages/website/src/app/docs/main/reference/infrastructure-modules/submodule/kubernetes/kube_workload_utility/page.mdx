@@ -71,6 +71,14 @@ Type: `bool`
 
 Default: `false`
 
+### cilium\_required
+
+Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
 ### controller\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
@@ -131,6 +139,14 @@ Default: `false`
 ### lifetime\_evictions\_enabled
 
 Description: Whether to allow pods to be evicted after exceeding a certain age (configured by Descheduler)
+
+Type: `bool`
+
+Default: `true`
+
+### linkerd\_required
+
+Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
 
 Type: `bool`
 

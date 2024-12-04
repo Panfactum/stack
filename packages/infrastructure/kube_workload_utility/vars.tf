@@ -123,3 +123,15 @@ variable "pull_through_cache_enabled" {
   type        = bool
   default     = true
 }
+
+variable "cilium_required" {
+  description = "True iff the Cilium CNI is required to be installed on a node prior to scheduling on it"
+  type        = bool
+  default     = true
+}
+
+variable "linkerd_required" {
+  description = "True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it"
+  type        = bool
+  default     = true
+}

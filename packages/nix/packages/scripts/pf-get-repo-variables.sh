@@ -57,7 +57,7 @@ if ! [[ $REPO_URL == git::https://* || $REPO_URL == github.com* || $REPO_URL == 
   exit 1
 fi
 
-DIRS=("environments_dir" "iac_dir" "aws_dir" "kube_dir" "ssh_dir" "buildkit_dir")
+DIRS=("environments_dir" "iac_dir" "aws_dir" "kube_dir" "ssh_dir" "buildkit_dir" "nats_dir")
 for DIR in "${DIRS[@]}"; do
   DIR_VALUE=$(echo "$VALUES" | jq -r ".$DIR")
   if [[ $DIR_VALUE != "null" ]]; then
@@ -74,7 +74,7 @@ done
 ####################################################################
 # Step 4: Set defaults
 ####################################################################
-VALUES=$(echo "$VALUES" | jq --arg root "$ROOT" '.repo_root = $root | .environments_dir //= "environments" | .iac_dir //= "infrastructure" | .aws_dir //= ".aws" | .kube_dir //= ".kube" | .ssh_dir //= ".ssh" | .buildkit_dir //= ".buildkit"')
+VALUES=$(echo "$VALUES" | jq --arg root "$ROOT" '.repo_root = $root | .environments_dir //= "environments" | .iac_dir //= "infrastructure" | .aws_dir //= ".aws" | .kube_dir //= ".kube" | .ssh_dir //= ".ssh" | .buildkit_dir //= ".buildkit" | .nats_dir //= ".nats"')
 
 ####################################################################
 # Step 5: Resolve directories

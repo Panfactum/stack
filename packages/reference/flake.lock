@@ -37,11 +37,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1726560853,
-        "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
         "type": "github"
       },
       "original": {
@@ -84,6 +84,22 @@
         "type": "github"
       }
     },
+    "kyvernoPkgsSrc": {
+      "locked": {
+        "lastModified": 1731731112,
+        "narHash": "sha256-nAlsuFVl77/sioOE3ce7ukm8iC+DmhakoYsDQfcbpLY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "34a626458d686f1b58139620a8b2793e9e123bba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "34a626458d686f1b58139620a8b2793e9e123bba",
+        "type": "github"
+      }
+    },
     "linkerdPkgsSrc": {
       "locked": {
         "lastModified": 1715530780,
@@ -97,6 +113,22 @@
         "owner": "NixOS",
         "repo": "nixpkgs",
         "rev": "3281bec7174f679eabf584591e75979a258d8c40",
+        "type": "github"
+      }
+    },
+    "natsPkgsSrc": {
+      "locked": {
+        "lastModified": 1731731112,
+        "narHash": "sha256-nAlsuFVl77/sioOE3ce7ukm8iC+DmhakoYsDQfcbpLY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "34a626458d686f1b58139620a8b2793e9e123bba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "34a626458d686f1b58139620a8b2793e9e123bba",
         "type": "github"
       }
     },
@@ -122,7 +154,9 @@
         "buildkitPkgsSrc": "buildkitPkgsSrc",
         "flake-utils": "flake-utils_2",
         "kubeUtilsPkgsSrc": "kubeUtilsPkgsSrc",
+        "kyvernoPkgsSrc": "kyvernoPkgsSrc",
         "linkerdPkgsSrc": "linkerdPkgsSrc",
+        "natsPkgsSrc": "natsPkgsSrc",
         "nixpkgs": "nixpkgs",
         "postgresPkgsSrc": "postgresPkgsSrc",
         "redisPkgsSrc": "redisPkgsSrc",
@@ -131,7 +165,7 @@
       },
       "locked": {
         "lastModified": 0,
-        "narHash": "sha256-rOIQ08WJWDlc6cmeu8JNTjZECH10fr6qkJVKDiI7IOI=",
+        "narHash": "sha256-i/g5Ky4Zcy6ip2T4udjpOlIXlOYF4aLJ2lUyjQLJdDo=",
         "path": "../..",
         "type": "path"
       },

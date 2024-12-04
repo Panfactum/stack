@@ -11,7 +11,7 @@ deployed by this module.
 ## Usage
 
 ### Credentials
-1
+
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
 
 - `superuser_creds_secret`: Complete access to the database
@@ -43,12 +43,12 @@ environment variables in our [kube_deployment](/docs/main/reference/infrastructu
 
 ```hcl
 module "redis" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_redis_sentinel?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}kube_redis_sentinel${var.pf_module_ref}"
   ...
 }
 
 module "deployment" {
-  "github.com/Panfactum/stack.git//packages/infrastructure/kube_pg_deployment?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   ...
   
   common_env_from_secrets = {
@@ -84,7 +84,18 @@ a non-graceful shutdown (an incredibly unlikely scenario).
 Persistence is always enabled in this module for similar reasons. Without persistence, an entire copy of the database would
 have to be transferred from the master to each replica on every Redis node restart. The cost of storing
 data on disk is far less than the network costs associated with this transfer. Moreover, persistence should
-never impact performance as writes are completed asynchronously.
+never impact performance as writes are completed asynchronously unless configured otherwise.
+
+Once the Redis cluster is running, the PVC autoresizer
+(provided by [kube_pvc_autoresizer](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
+will automatically expand the EBS volumes once the free space
+drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
+The size of the EBS volume will grow by `persistence_storage_increase_gb` on every scaling event until a maximum of `persistence_storage_limit_gb`.
+
+<MarkdownAlert severity="warning">
+    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+    ensure that `persistence_storage_increase_gb` is large enough to satisfy your data growth rate.
+</MarkdownAlert>
 
 ### Disruptions
 
@@ -121,7 +132,7 @@ For example:
 
 ```hcl
 module "redis" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_redis_sentinel?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}kube_redis_sentinel${var.pf_module_ref}"
   ...
 }
 
@@ -161,8 +172,6 @@ This is *strongly* discouraged. If limiting any and all potential disruptions is
 
 - Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
 - Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
-- Connect with a Sentinel-aware client
-- Set `enhanced_ha_enabled` to `true`
 
 Note that the above configuration will significantly increase the costs of running the Redis cluster (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.

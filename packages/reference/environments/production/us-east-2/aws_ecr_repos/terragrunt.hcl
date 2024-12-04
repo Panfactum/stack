@@ -23,10 +23,16 @@ inputs = {
     bastion = {
       expire_all_images = true # b/c we copy to the public ecr
     }
+    vault = {
+      expire_all_images = true # b/c we copy to the public ecr
+    }
     panfactum = {
       expire_all_images = true # b/c we copy to the public ecr
     }
     pvc-autoresizer = {
+      expire_all_images = true # b/c we copy to the public ecr
+    }
+    argo-events = {
       expire_all_images = true # b/c we copy to the public ecr
     }
   }

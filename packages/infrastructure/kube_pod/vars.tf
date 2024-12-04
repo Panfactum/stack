@@ -6,7 +6,6 @@ variable "namespace" {
 variable "workload_name" {
   description = "The name of the workload. Used by observability platform for grouping pods."
   type        = string
-  default     = null
 }
 
 variable "match_labels" {
@@ -24,6 +23,8 @@ variable "containers" {
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
     command                 = list(string)                     # The command to be run as the root process inside the container
+    image_prepull_enabled   = optional(bool, false)            # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
+    image_pin_enabled       = optional(bool, false)            # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
     privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
@@ -57,9 +58,14 @@ variable "containers" {
 }
 
 variable "restart_policy" {
-  description = "The pod restart policy"
+  description = "The pod restart policy. One of: Always, OnFailure, Never"
   type        = string
   default     = "Always"
+
+  validation {
+    condition     = contains(["Always", "OnFailure", "Never"], var.restart_policy)
+    error_message = "restart_policy must be one of: Always, OnFailure, Never"
+  }
 }
 
 variable "common_env" {
@@ -87,7 +93,7 @@ variable "common_env_from_config_maps" {
 }
 
 variable "extra_pod_annotations" {
-  description = "Annotations to add to the pods in the deployment"
+  description = "Annotations to add to the pod"
   type        = map(string)
   default     = {}
 }
@@ -99,7 +105,7 @@ variable "extra_pod_labels" {
 }
 
 variable "service_account" {
-  description = "The name of the service account to use for this deployment"
+  description = "The name of the service account to use for the pod"
   type        = string
   default     = null
 }
@@ -282,4 +288,16 @@ variable "host_network" {
   description = "Whether the generated pods are allowed to use the host network"
   type        = bool
   default     = false
+}
+
+variable "cilium_required" {
+  description = "True iff the Cilium CNI is required to be installed on a node prior to scheduling on it"
+  type        = bool
+  default     = true
+}
+
+variable "linkerd_required" {
+  description = "True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it"
+  type        = bool
+  default     = true
 }

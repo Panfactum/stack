@@ -249,7 +249,7 @@ resource "aws_ec2_tag" "node_subnet_tags" {
 // Latest bottlerocket image
 // See https://docs.aws.amazon.com/eks/latest/userguide/retrieve-ami-id-bottlerocket.html
 data "aws_ssm_parameter" "controller_ami" {
-  name = var.bootstrap_mode_enabled ? "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/x86_64/latest/image_id" : "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/arm64/latest/image_id"
+  name = "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/arm64/latest/image_id"
 }
 
 resource "aws_launch_template" "controller" {
@@ -316,10 +316,7 @@ resource "aws_eks_node_group" "controllers" {
   node_role_arn          = aws_iam_role.node_group.arn
   subnet_ids             = [for subnet in var.node_subnets : data.aws_subnet.node_groups[subnet].id]
 
-  # We use amd64 instances while bootstrapping b/c some of the test commands require it;
-  # after Karpenter is deployed (boostrapping is complete), we can switch to cheaper arm64 as Karpenter
-  # will create amd64 instances if they are ever needed.
-  instance_types = var.bootstrap_mode_enabled ? ["t3.large", "t3a.large"] : ["t4g.medium", "m6g.medium"]
+  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.medium", "m6g.medium"]
 
   # Unlike Karpenter, applies of this module will fail if EKS cannot replace the nodes in the node groups
   # with updated versions due to being unable to evict modules. As a result, we enable force eviction
@@ -362,7 +359,7 @@ resource "aws_eks_node_group" "controllers" {
     value  = module.constants.cilium_taint.value
   }
   dynamic "taint" {
-    for_each = var.bootstrap_mode_enabled ? toset([]) : toset(["burstable", "spot", "arm64"])
+    for_each = var.bootstrap_mode_enabled ? toset(["arm64"]) : toset(["burstable", "spot", "arm64"])
     content {
       effect = "NO_SCHEDULE"
       key    = taint.key
@@ -374,6 +371,17 @@ resource "aws_eks_node_group" "controllers" {
   // pods scheduled by the test commands can run
   dynamic "taint" {
     for_each = var.bootstrap_mode_enabled ? toset([]) : toset(["controller"])
+    content {
+      effect = "NO_SCHEDULE"
+      key    = taint.key
+      value  = "true"
+    }
+  }
+
+  // We only set the linkerd taint after bootstrapping is complete so that
+  // we know that linkerd is installed in the cluster
+  dynamic "taint" {
+    for_each = var.bootstrap_mode_enabled ? toset([]) : toset([module.constants.linkerd_taint.key])
     content {
       effect = "NO_SCHEDULE"
       key    = taint.key

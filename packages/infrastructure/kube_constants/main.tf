@@ -1,0 +1,3 @@
+locals {
+  image_tag = ""
+}

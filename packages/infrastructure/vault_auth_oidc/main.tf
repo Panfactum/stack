@@ -2,7 +2,7 @@ terraform {
   required_providers {
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
   }
 }
@@ -89,6 +89,11 @@ data "vault_policy_document" "superusers" {
     description  = "allow all on db infrastructure"
   }
   rule {
+    path         = "nats/*"
+    capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    description  = "allow all on nats instances"
+  }
+  rule {
     path         = "transit/*"
     capabilities = ["create", "read", "update", "patch", "delete", "list"]
     description  = "allows interacting with the transit secrets engine"
@@ -159,6 +164,11 @@ data "vault_policy_document" "admins" {
     description  = "allow all on db infrastructure"
   }
   rule {
+    path         = "nats/*"
+    capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    description  = "allow all on nats instances"
+  }
+  rule {
     path         = "transit/*"
     capabilities = ["create", "read", "update", "patch", "delete", "list"]
     description  = "allows interacting with the transit secrets engine"
@@ -222,6 +232,12 @@ data "vault_policy_document" "readers" {
     path         = "db/creds/reader*"
     capabilities = ["read", "list"]
     description  = "allows getting credentials for read-only database roles"
+  }
+  // TODO: Fix
+  rule {
+    path         = "nats/*"
+    capabilities = ["read", "list"]
+    description  = "allow getting credentials fornats instances"
   }
   rule {
     path         = "ssh/*"

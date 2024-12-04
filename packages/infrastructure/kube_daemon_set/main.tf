@@ -85,6 +85,8 @@ module "pod_template" {
   panfactum_scheduler_enabled          = false
   termination_grace_period_seconds     = var.termination_grace_period_seconds
   restart_policy                       = var.restart_policy
+  cilium_required                      = var.cilium_required
+  linkerd_required                     = var.linkerd_required
 }
 
 resource "kubernetes_service_account" "service_account" {
@@ -102,10 +104,16 @@ resource "kubectl_manifest" "daemon_set" {
     metadata = {
       namespace = var.namespace
       name      = var.name
-      labels    = module.pod_template.labels
-      annotations = {
-        "reloader.stakater.com/auto" = "true"
-      }
+      labels = merge(
+        module.pod_template.labels,
+        var.extra_labels
+      )
+      annotations = merge(
+        {
+          "reloader.stakater.com/auto" = "true"
+        },
+        var.extra_annotations
+      )
     }
     spec = {
       minReadySeconds = var.min_ready_seconds
@@ -181,4 +189,3 @@ resource "kubectl_manifest" "pdb" {
   server_side_apply = true
   depends_on        = [kubectl_manifest.daemon_set]
 }
-

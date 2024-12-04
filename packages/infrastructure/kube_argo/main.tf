@@ -16,7 +16,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     time = {
       source  = "hashicorp/time"
@@ -606,7 +606,11 @@ resource "kubectl_manifest" "pdb_server" {
 module "image_cache" {
   source = "../kube_node_image_cache"
   images = [
-    "quay.io/argoproj/argoexec:v3.5.11"
+    {
+      registry   = "quay.io"
+      repository = "argoproj/argoexec"
+      tag        = "v3.5.11"
+    }
   ]
 }
 
@@ -624,6 +628,7 @@ resource "helm_release" "argo_events" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  max_history     = 5
 
   values = [
     yamlencode({
@@ -643,6 +648,14 @@ resource "helm_release" "argo_events" {
       }
 
       controller = {
+
+        // This is required until the patch is merged upstream
+        // https://github.com/argoproj/argo-events/pull/3381
+        image = {
+          repository = "public.ecr.aws/panfactum/argo-events"
+          tag        = "patch-2"
+        }
+
         podLabels = merge(
           module.util_events_controller.labels,
           {

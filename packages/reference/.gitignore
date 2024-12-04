@@ -5,3 +5,4 @@
 .direnv
 .terraformrc
 .terraformrc.dev
+.nats

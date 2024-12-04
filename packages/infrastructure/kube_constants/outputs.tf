@@ -7,6 +7,15 @@ output "cilium_taint" {
   }
 }
 
+output "linkerd_taint" {
+  description = "The taint added to every node before the Linkerd CNI is installed (i.e., when networking is unavailable)"
+  value = {
+    key    = "panfactum.com/linkerd-not-ready"
+    value  = "true"
+    effect = "NoSchedule"
+  }
+}
+
 output "controller_taint" {
   description = "The taint added to every EKS nodes"
   value = {
@@ -44,4 +53,25 @@ output "panfactum_image_repository" {
 output "panfactum_image_tag" {
   description = "The tag of the Panfactum devShell image that is compatible with this module's version of the Panfactum stack."
   value       = "8872c1bd7032bee5e609137ba80b061295d44c3a"
+}
+
+output "images" {
+  description = "Images that are used throughout the stack"
+  value = {
+    devShell = {
+      registry   = "public.ecr.aws"
+      repository = "panfactum/panfactum"
+      tag        = local.image_tag
+    }
+    vault = {
+      registry   = "public.ecr.aws"
+      repository = "panfactum/vault"
+      tag        = local.image_tag
+    }
+    bastion = {
+      registry   = "public.ecr.aws"
+      repository = "panfactum/bastion"
+      tag        = local.image_tag
+    }
+  }
 }

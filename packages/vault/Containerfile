@@ -1,0 +1,18 @@
+FROM docker.io/hashicorp/vault:1.14.7 AS production
+
+ARG TARGETARCH
+ARG BUILDPLATFORM
+
+LABEL org.opencontainers.image.source=https://github.com/panfactum/stack
+LABEL org.opencontainers.image.description="Vault with extra auth plugins for the Panfactum stack"
+LABEL org.opencontainers.image.licenses="BSL 1.1"
+
+
+RUN mkdir -p /plugins
+
+RUN cd /plugins && \
+  wget -q -O vault-plugin-secrets-nats "https://github.com/edgefarm/vault-plugin-secrets-nats/releases/download/v1.7.0/vault-plugin-secrets-nats-linux-$TARGETARCH" && \
+  chmod +x vault-plugin-secrets-nats && \
+  echo "$(wget -q -O - "https://github.com/edgefarm/vault-plugin-secrets-nats/releases/download/v1.7.0/vault-plugin-secrets-nats-linux-$TARGETARCH.sha256" | cut -d' ' -f1) vault-plugin-secrets-nats"  |  sha256sum -c
+
+

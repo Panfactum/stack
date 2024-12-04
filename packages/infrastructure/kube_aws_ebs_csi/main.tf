@@ -279,6 +279,33 @@ resource "helm_release" "ebs_csi_driver" {
   depends_on = [module.aws_permissions]
 }
 
+// This improves node startup time performance
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry    = "public.ecr.aws"
+      repository  = "ebs-csi-driver/aws-ebs-csi-driver"
+      tag         = "v1.37.0"
+      pin_enabled = false
+    },
+    {
+      registry    = "public.ecr.aws"
+      repository  = "eks-distro/kubernetes-csi/livenessprobe"
+      tag         = "v2.14.0-eks-1-31-7"
+      pin_enabled = false
+    },
+    {
+      registry    = "public.ecr.aws"
+      repository  = "eks-distro/kubernetes-csi/node-driver-registrar"
+      tag         = "v2.12.0-eks-1-31-7"
+      pin_enabled = false
+    }
+  ]
+}
+
 /***************************************
 * Storage Classes
 ***************************************/

@@ -48,6 +48,16 @@ module "util_server" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_required                   = true // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
+
+  # Vault must be scheduled on arm64 nodes as we have installed custom
+  # vault plugins and Vault verifies the sha256sum of these binaries before
+  # executing them. Unfortunately, only one sha256sum can be assigned to a plugin
+  # meaning we can only use a single CPU architecture
+  # (as the checksums change depending on whether the binary was compiled for amd64 or arm64).
+  # We have chosen to run on arm64 nodes as that is the cheaper architecture on AWS.
+  node_requirements = {
+    "kubernetes.io/arch" = ["arm64"]
+  }
 }
 
 module "constants" {
@@ -168,9 +178,14 @@ resource "helm_release" "vault" {
       }
 
       server = {
-        image = {
-          tag = var.vault_image_tag
-        }
+
+        logLevel  = var.log_level
+        logFormat = "json"
+
+        #         image = {
+        #           repository = "891377197483.dkr.ecr.us-east-2.amazonaws.com/vault"
+        #           tag = "test2"
+        #         }
         resources = {
           requests = {
             memory = "200Mi"
@@ -192,11 +207,28 @@ resource "helm_release" "vault" {
             customizationHash = md5(join("", [
               for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)
             ]))
+            "panfactum.com/inject-env-enabled" = "false"
           }
         )
+        annotations = {
+          // This is required to make the external nats plugin work
+          // See https://github.com/linkerd/linkerd2/issues/13364
+          // "config.linkerd.io/skip-outbound-ports" = "4222"
+        }
         serviceAccount = {
           create = false,
           name   = kubernetes_service_account.vault.metadata[0].name
+        }
+        service = {
+          active = {
+            // TODO: This needs to ignore intra-cluster traffic as it causes
+            // delays during failovers
+            annotations = {
+              "retry.linkerd.io/http"    = "5xx"
+              "retry.linkerd.io/limit"   = "1"
+              "retry.linkerd.io/timeout" = "5s"
+            }
+          }
         }
         dataStorage = {
           enabled      = true
@@ -218,6 +250,11 @@ resource "helm_release" "vault" {
         extraEnvironmentVars = {
           AWS_REGION   = data.aws_region.region.name
           AWS_ROLE_ARN = module.aws_permissions.role_arn
+
+          // We noticed very slow startup times once the Vault db exceeds 100Mb.
+          // This is due to this issue https://github.com/hashicorp/vault/issues/14635
+          // which recommends VAULT_RAFT_FREELIST_SYNC as a solution
+          VAULT_RAFT_FREELIST_SYNC = "true"
         }
 
         ha = {
@@ -240,6 +277,7 @@ resource "helm_release" "vault" {
     })
   ]
 
+  timeout    = 60 * 10
   depends_on = [module.aws_permissions]
 }
 
@@ -261,10 +299,7 @@ resource "kubernetes_config_map" "dashboard" {
 module "pvc_annotator" {
   source = "../kube_pvc_annotator"
 
-  namespace                   = local.namespace
-  vpa_enabled                 = var.vpa_enabled
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  namespace = local.namespace
   config = {
     "${local.namespace}.vault" = {
       annotations = {
@@ -376,4 +411,20 @@ module "cdn" {
   origin_configs = module.ingress[0].cdn_origin_configs
 }
 
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry   = "docker.io"
+      repository = "hashicorp/vault"
+      tag        = "1.14.7"
+    }
+  ]
+}
 

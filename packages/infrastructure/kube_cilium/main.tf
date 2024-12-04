@@ -166,6 +166,10 @@ resource "helm_release" "cilium" {
       egressMasqueradeInterfaces = "eth0"
       routingMode                = "native"
 
+      cni = {
+        exclusive = false
+      }
+
       podLabels = merge(
         module.util_agent.labels,
         {
@@ -227,6 +231,13 @@ resource "helm_release" "cilium" {
             key      = "node.kubernetes.io/not-ready"
             operator = "Exists"
             effect   = "NoSchedule"
+          },
+
+          // The Linkerd CNI cannot be installed without the cilium CNI
+          {
+            key      = module.constants.linkerd_taint.key
+            operator = "Exists"
+            effect   = module.constants.linkerd_taint.effect
           },
 
           // This is required b/c otherwise networking will break during node shutdown
@@ -321,6 +332,11 @@ resource "helm_release" "cilium" {
             operator = "Exists"
             effect   = "NoSchedule"
           },
+          {
+            key      = module.constants.linkerd_taint.key
+            operator = "Exists"
+            effect   = module.constants.linkerd_taint.effect
+          }
           ],
           module.util_controller.tolerations
         )

@@ -22,10 +22,6 @@ listener "tcp" {
   telemetry {
     # Necessary for Prometheus Operator
     unauthenticated_metrics_access = "true"
-
-    disable_hostname = true
-    enable_hostname_label = true
-    prometheus_retention_time = "2m"
   }
 }
 
@@ -47,6 +43,8 @@ storage "raft" {
   }
 }
 
+plugin_directory = "/plugins"
+
 # This instructs Vault to use the automatic unsealing (https://developer.hashicorp.com/vault/docs/concepts/seal#auto-unseal)
 # Without this, we would need to manually enter the unseal keys every time the Vault pod restarts.
 # We use AWS KMS for the unseal mechanism to prevent ever leaking the unseal encryption material
@@ -61,8 +59,9 @@ seal "awskms" {
 }
 
 telemetry {
-  prometheus_retention_time = "30s"
   disable_hostname = true
+  enable_hostname_label = true
+  prometheus_retention_time = "2m"
 }
 
 

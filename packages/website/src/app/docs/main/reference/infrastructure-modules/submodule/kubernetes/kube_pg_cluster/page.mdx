@@ -93,8 +93,10 @@ will automatically expand the EBS volumes once the free space
 drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
 
-Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+<MarkdownAlert severity="warning">
+  Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+  ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+</MarkdownAlert>
 
 ### Resource Allocation
 
@@ -372,7 +374,7 @@ The following providers are needed by this module:
 
 * [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -471,6 +473,14 @@ Description: Whether to add active monitoring to the deployed systems
 Type: `bool`
 
 Default: `false`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
 
 ### panfactum\_scheduler\_enabled
 

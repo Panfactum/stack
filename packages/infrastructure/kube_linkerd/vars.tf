@@ -1,7 +1,7 @@
 variable "linkerd_helm_version" {
   description = "The version of the linkerd-crd and linkerd-control-plane helm charts to deploy (edge)"
   type        = string
-  default     = "2024.5.1"
+  default     = "2024.11.2"
 }
 
 variable "vault_ca_crt" {
@@ -53,4 +53,10 @@ variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
   default     = false
+}
+
+variable "node_image_cached_enabled" {
+  description = "Whether to add the container images to the node image cache for faster startup times"
+  type        = bool
+  default     = true
 }

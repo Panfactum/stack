@@ -185,3 +185,27 @@ resource "kubectl_manifest" "vpa_alloy" {
   server_side_apply = true
   depends_on        = [helm_release.alloy]
 }
+
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry    = "docker.io"
+      repository  = "grafana/alloy"
+      tag         = "v1.1.0"
+      pin_enabled = false
+    },
+    {
+      registry    = "ghcr.io"
+      repository  = "jimmidyson/configmap-reload"
+      tag         = "v0.12.0"
+      pin_enabled = false
+    }
+  ]
+}

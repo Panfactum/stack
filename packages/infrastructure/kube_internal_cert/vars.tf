@@ -82,6 +82,12 @@ variable "private_key_algorithm" {
   }
 }
 
+variable "sans_enabled" {
+  description = "Whether to set SANS in the generated certificate"
+  type        = bool
+  default     = true
+}
+
 // The default:
 // rotate every week with a one week buffer period in case something goes wrong
 variable "duration" {

@@ -16,7 +16,7 @@ variable "helm_version" {
 }
 
 variable "persistence_size_gb" {
-  description = "How many GB to initially allocate for persistent storage (will grow automatically as needed)"
+  description = "How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after cluster creation."
   type        = number
   default     = 1
 }
@@ -171,4 +171,10 @@ variable "creds_syncer_logging_enabled" {
   description = "Whether to enable logging for the creds-syncer pods"
   type        = bool
   default     = false
+}
+
+variable "node_image_cached_enabled" {
+  description = "Whether to add the container images to the node image cache for faster startup times"
+  type        = bool
+  default     = true
 }

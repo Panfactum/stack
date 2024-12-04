@@ -58,6 +58,8 @@ list(object({
     image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    image_prepull_enabled   = optional(bool, true)             # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
+    image_pin_enabled       = optional(bool, false)            # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     command                 = list(string)                     # The command to be run as the root process inside the container
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
@@ -118,6 +120,14 @@ Default: `true`
 ### burstable\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### cilium\_required
+
+Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
 
 Type: `bool`
 
@@ -200,6 +210,22 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
+### extra\_annotations
+
+Description: A map of extra annotations that will be added to the DaemonSet (not the pods)
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_labels
+
+Description: A map of extra labels that will be added to the DaemonSet (not the pods)
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### extra\_pod\_annotations
 
 Description: Annotations to add to the pods in the DaemonSet
@@ -241,6 +267,14 @@ Type: `bool`
 
 Default: `false`
 
+### linkerd\_required
+
+Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
 ### min\_available
 
 Description: Controls how many pods are allowed to be unavailable in the DaemonSet under the Pod Disruption Budget
@@ -264,6 +298,14 @@ Description: The ID of the group that owns the mounted volumes
 Type: `number`
 
 Default: `1000`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
 
 ### node\_requirements
 

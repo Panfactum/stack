@@ -473,3 +473,21 @@ resource "kubectl_manifest" "vpa_nginx" {
   server_side_apply = true
   depends_on        = [helm_release.nginx_ingress]
 }
+
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry   = "registry.k8s.io"
+      repository = "ingress-nginx/controller"
+      tag        = "v1.11.3@sha256:d56f135b6462cfc476447cfe564b83a45e8bb7da2774963b00d12161112270b7"
+    }
+  ]
+}
+

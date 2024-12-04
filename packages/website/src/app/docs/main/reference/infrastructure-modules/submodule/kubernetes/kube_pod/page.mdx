@@ -47,6 +47,8 @@ list(object({
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
     command                 = list(string)                     # The command to be run as the root process inside the container
+    image_prepull_enabled   = optional(bool, false)            # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
+    image_pin_enabled       = optional(bool, false)            # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
     privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
@@ -82,6 +84,12 @@ list(object({
 ### namespace
 
 Description: The namespace where the pod will run
+
+Type: `string`
+
+### workload\_name
+
+Description: The name of the workload. Used by observability platform for grouping pods.
 
 Type: `string`
 
@@ -128,6 +136,14 @@ Description: Whether to allow pods to schedule on burstable nodes
 Type: `bool`
 
 Default: `false`
+
+### cilium\_required
+
+Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
 
 ### common\_env
 
@@ -224,7 +240,7 @@ Default: `{}`
 
 ### extra\_pod\_annotations
 
-Description: Annotations to add to the pods in the deployment
+Description: Annotations to add to the pod
 
 Type: `map(string)`
 
@@ -293,6 +309,14 @@ Type: `bool`
 
 Default: `false`
 
+### linkerd\_required
+
+Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
 ### match\_labels
 
 Description: kubernetes labels to use in selectors to match the workload
@@ -359,7 +383,7 @@ Default: `true`
 
 ### restart\_policy
 
-Description: The pod restart policy
+Description: The pod restart policy. One of: Always, OnFailure, Never
 
 Type: `string`
 
@@ -382,7 +406,7 @@ Default: `{}`
 
 ### service\_account
 
-Description: The name of the service account to use for this deployment
+Description: The name of the service account to use for the pod
 
 Type: `string`
 
@@ -419,14 +443,6 @@ map(object({
 ```
 
 Default: `{}`
-
-### workload\_name
-
-Description: The name of the workload. Used by observability platform for grouping pods.
-
-Type: `string`
-
-Default: `null`
 
 ## Outputs
 

@@ -86,8 +86,10 @@ will automatically expand the EBS volumes once the free space
 drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
 The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
 
-Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
-ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+<MarkdownAlert severity="warning">
+    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+    ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+</MarkdownAlert>
 
 ### Resource Allocation
 

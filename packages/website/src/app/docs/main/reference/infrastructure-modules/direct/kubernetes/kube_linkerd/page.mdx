@@ -50,7 +50,7 @@ Description: The version of the linkerd-crd and linkerd-control-plane helm chart
 
 Type: `string`
 
-Default: `"2024.5.1"`
+Default: `"2024.11.2"`
 
 ### log\_level
 
@@ -75,6 +75,14 @@ Description: Whether to use kube-fledged to cache images locally for better star
 Type: `bool`
 
 Default: `false`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
 
 ### panfactum\_scheduler\_enabled
 

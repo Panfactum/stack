@@ -128,6 +128,8 @@ variable "containers" {
     image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    image_prepull_enabled   = optional(bool, true)             # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
+    image_pin_enabled       = optional(bool, true)             # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     command                 = list(string)                     # The command to be run as the root process inside the container
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
@@ -359,5 +361,30 @@ variable "max_unavailable" {
 variable "node_image_cached_enabled" {
   description = "Whether to add the container images to the node image cache for faster startup times"
   type        = bool
-  default     = false
+  default     = true
+}
+
+
+variable "cilium_required" {
+  description = "True iff the Cilium CNI is required to be installed on a node prior to scheduling on it"
+  type        = bool
+  default     = true
+}
+
+variable "linkerd_required" {
+  description = "True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it"
+  type        = bool
+  default     = true
+}
+
+variable "extra_labels" {
+  description = "A map of extra labels that will be added to the StatefulSet (not the pods)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "extra_annotations" {
+  description = "A map of extra annotations that will be added to the StatefulSet (not the pods)"
+  type        = map(string)
+  default     = {}
 }

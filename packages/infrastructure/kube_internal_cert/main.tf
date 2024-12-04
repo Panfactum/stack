@@ -42,7 +42,7 @@ resource "kubectl_manifest" "cert" {
         labels = merge(data.pf_kube_labels.labels.labels, var.extra_labels)
       }
       commonName = var.common_name == null ? (length(var.service_names) == 0 ? "default" : "${var.service_names[0]}.${var.namespace}.svc") : var.common_name
-      dnsNames = length(var.service_names) == 0 ? concat(["default"], local.localhost_sans) : concat(
+      dnsNames = var.sans_enabled ? (length(var.service_names) == 0 ? concat([var.common_name == null ? "default" : var.common_name], local.localhost_sans) : concat(
         flatten([for service in var.service_names : [
           service,
           "${service}.${var.namespace}",
@@ -56,8 +56,8 @@ resource "kubectl_manifest" "cert" {
           "*.${service}.${var.namespace}.svc.cluster.local"
         ]]),
         local.localhost_sans
-      )
-      ipAddresses = var.include_localhost ? ["127.0.0.1"] : []
+      )) : []
+      ipAddresses = var.sans_enabled && var.include_localhost ? ["127.0.0.1"] : []
       subject = {
         organizations = length(var.service_names) == 0 ? ["default"] : var.service_names
       }

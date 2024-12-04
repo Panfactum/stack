@@ -130,6 +130,8 @@ module "core_dns" {
           "-conf",
           "/etc/coredns/Corefile"
         ]
+        image_prepull_enabled = false // This is deployed before Kyverno is available
+        image_pin_enabled     = false // This is deployed before Kyverno is available
         linux_capabilities    = ["NET_BIND_SERVICE"]
         liveness_probe_port   = "8080"
         liveness_probe_type   = "HTTP"
@@ -217,8 +219,7 @@ module "core_dns" {
   service_ip   = var.service_ip
   service_name = "kube-dns" // By convention, this must be available at kube-system/kube-dns
 
-  vpa_enabled               = var.vpa_enabled
-  node_image_cached_enabled = false // This is deployed before Kyverno is available
+  vpa_enabled = var.vpa_enabled
 
   extra_pod_labels = {
     "k8s-app" = "kube-dns"

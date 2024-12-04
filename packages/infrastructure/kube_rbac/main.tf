@@ -28,7 +28,6 @@ locals {
 
   superuser_role_arns = tolist(toset(concat(
     var.kube_superuser_role_arns,
-    ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"],
     [
       for parts in [for arn in data.aws_iam_roles.superuser.arns : split("/", arn)] :
       format("%s/%s", parts[0], element(parts, length(parts) - 1))
@@ -266,6 +265,13 @@ resource "kubernetes_config_map" "aws_auth" {
     labels    = data.pf_kube_labels.labels.labels
   }
   data = {
+    mapUsers = yamlencode([
+      {
+        groups   = [local.superusers_group]
+        userarn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        username = "root"
+      }
+    ])
     mapRoles = yamlencode(concat(
 
       // allows nodes to register with the cluster
@@ -296,7 +302,7 @@ resource "kubernetes_config_map" "aws_auth" {
         groups   = [local.readers_group]
       }],
 
-      // allows access to read only
+      // allows access to restricted read only
       [for arn in local.restricted_reader_role_arns : {
         rolearn  = arn
         username = "{{SessionName}}"

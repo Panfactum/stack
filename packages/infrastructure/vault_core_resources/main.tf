@@ -2,7 +2,7 @@ terraform {
   required_providers {
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -50,6 +50,26 @@ resource "vault_mount" "db" {
 }
 
 /***************************************
+* NATS Secrets Backend
+***************************************/
+
+resource "vault_plugin" "nats" {
+  type    = "secret"
+  name    = "nats-secrets"
+  version = "v1.7.0"
+  command = "vault-plugin-secrets-nats"
+  sha256  = "8b7878dfe31f86c332d95a21a4e34ae64782545ee4e5ff98c68518a1dcb560c2"
+}
+
+resource "vault_mount" "nats" {
+  type                      = vault_plugin.nats.name
+  path                      = "nats"
+  seal_wrap                 = true
+  default_lease_ttl_seconds = 60 * 60 * 8
+  max_lease_ttl_seconds     = 60 * 60 * 8
+}
+
+/***************************************
 * Vault Transit Encryption
 ***************************************/
 
@@ -60,8 +80,6 @@ resource "vault_mount" "transit" {
   default_lease_ttl_seconds = 60 * 60 * 24
   max_lease_ttl_seconds     = 60 * 60 * 24
 }
-
-
 
 /***************************************
 * Vault Secrets Operator

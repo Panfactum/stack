@@ -14,7 +14,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -439,10 +439,7 @@ resource "kubectl_manifest" "vpa" {
 module "pvc_annotator" {
   source = "../kube_pvc_annotator"
 
-  namespace                   = var.namespace
-  vpa_enabled                 = var.vpa_enabled
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  namespace = var.namespace
   config = {
     "${var.namespace}.${random_id.id.hex}" = {
       annotations = {
@@ -738,4 +735,40 @@ module "disruption_window_controller" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
 
   cron_schedule = var.voluntary_disruption_window_cron_schedule
+}
+
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry          = "docker.io"
+      repository        = "bitnami/redis"
+      tag               = "7.2.4-debian-12-r9"
+      arm_nodes_enabled = var.arm_nodes_enabled
+    },
+    {
+      registry          = "docker.io"
+      repository        = "bitnami/redis-sentinel"
+      tag               = "7.2.4-debian-12-r7"
+      arm_nodes_enabled = var.arm_nodes_enabled
+    },
+    {
+      registry          = "docker.io"
+      repository        = "bitnami/redis-exporter"
+      tag               = "1.58.0-debian-12-r4"
+      arm_nodes_enabled = var.arm_nodes_enabled
+    },
+    {
+      registry          = "docker.io"
+      repository        = "bitnami/kubectl"
+      tag               = "1.29.2-debian-12-r3"
+      arm_nodes_enabled = var.arm_nodes_enabled
+    }
+  ]
 }

@@ -153,12 +153,24 @@ locals {
     value    = "true"
     effect   = "NoSchedule"
   }
+  cilium_toleration = {
+    key      = module.constants.cilium_taint.key
+    operator = "Exists"
+    effect   = module.constants.cilium_taint.effect
+  }
+  linkerd_toleration = {
+    key      = module.constants.linkerd_taint.key
+    operator = "Exists"
+    effect   = module.constants.linkerd_taint.effect
+  }
   tolerations = concat(
     var.burstable_nodes_enabled ? [local.burstable_node_toleration] : [],
     var.spot_nodes_enabled ? [local.spot_node_toleration] : [],
     var.arm_nodes_enabled ? [local.arm_node_toleration] : [],
     var.controller_nodes_enabled || var.controller_nodes_required ? [local.controller_node_toleration] : [],
-    var.extra_tolerations
+    var.linkerd_required ? [] : [local.linkerd_toleration],
+    var.cilium_required ? [] : [local.cilium_toleration],
+    [for toleration in var.extra_tolerations : { for k, v in toleration : k => v if v != null }]
   )
 
   // Topology Spread
@@ -179,5 +191,9 @@ locals {
 resource "random_id" "match_id" {
   prefix      = var.workload_name != null ? "${var.workload_name}-" : ""
   byte_length = 8
+}
+
+module "constants" {
+  source = "../kube_constants"
 }
 

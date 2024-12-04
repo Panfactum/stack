@@ -102,6 +102,8 @@ list(object({
     image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
     image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
     image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    image_prepull_enabled   = optional(bool, true)             # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
+    image_pin_enabled       = optional(bool, true)             # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
     command                 = list(string)                     # The command to be run as the root process inside the container
     working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
     image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
@@ -210,6 +212,14 @@ Type: `bool`
 
 Default: `false`
 
+### cilium\_required
+
+Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
 ### common\_env
 
 Description: Key pair values of the environment variables for each container
@@ -295,6 +305,22 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
+### extra\_annotations
+
+Description: A map of extra annotations that will be added to the StatefulSet (not the pods)
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_labels
+
+Description: A map of extra labels that will be added to the StatefulSet (not the pods)
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### extra\_pod\_annotations
 
 Description: Annotations to add to the pods in the Pod
@@ -352,6 +378,14 @@ Type: `bool`
 
 Default: `true`
 
+### linkerd\_required
+
+Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
 ### max\_unavailable
 
 Description: Controls how many pods are allowed to be unavailable in the StatefulSet under the Pod Disruption Budget
@@ -374,7 +408,7 @@ Description: Whether to add the container images to the node image cache for fas
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### node\_preferences
 

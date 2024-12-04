@@ -197,6 +197,7 @@ module "buildkit" {
       access_modes    = ["ReadWriteOnce"]
       increase_gb     = 25
       mount_path      = "/home/user/.local/share/buildkit"
+      backups_enabled = false
     }
   }
 
@@ -309,13 +310,6 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "autoscaler" {
     }
   }
   depends_on = [module.buildkit]
-}
-
-module "image_cache" {
-  source = "../kube_node_image_cache"
-  images = [
-    "docker.io/moby/buildkit:${var.buildkit_image_version}"
-  ]
 }
 
 /***************************************

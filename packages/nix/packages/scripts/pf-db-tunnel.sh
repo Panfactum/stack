@@ -109,8 +109,10 @@ else
 fi
 
 PG_DBS=$(kubectl get clusters.postgresql.cnpg.io "$NAMESPACE_FLAG" -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers | awk '{printf "%-15s %-25s %-25s\n", "PostgreSQL", $1, $2}')
-REDIS_DBS="$(kubectl get sts "$NAMESPACE_FLAG" -o json | jq -r '.items[] | select(.metadata.annotations["panfactum.com/db-type"]=="Redis") | "\(.metadata.namespace) \(.metadata.name)"' | awk '{printf "%-15s %-25s %-25s\n", "Redis", $1, $2}')"
-DBS="$PG_DBS\n$REDIS_DBS"
+STS=$(kubectl get sts "$NAMESPACE_FLAG" -o json)
+REDIS_DBS="$(echo "$STS" | jq -r '.items[] | select(.metadata.annotations["panfactum.com/db-type"]=="Redis") | "\(.metadata.namespace) \(.metadata.name)"' | awk '{printf "%-15s %-25s %-25s\n", "Redis", $1, $2}')"
+NATS_DBS="$(echo "$STS" | jq -r '.items[] | select(.metadata.annotations["panfactum.com/db-type"]=="NATS") | "\(.metadata.namespace) \(.metadata.name)"' | awk '{printf "%-15s %-25s %-25s\n", "NATS", $1, $2}')"
+DBS="$PG_DBS\n$REDIS_DBS\n$NATS_DBS"
 HEADER=$(printf "%-15s %-25s %-25s" "TYPE" "NAMESPACE" "NAME")
 
 if [[ -z $DBS ]]; then
@@ -137,8 +139,11 @@ KUBE_TYPE=""
 
 if [[ $SELECTED_DB_TYPE == "PostgreSQL" ]]; then
   KUBE_TYPE="clusters.postgresql.cnpg.io"
-elif [[ $SELECTED_DB_TYPE == "Redis" ]]; then
+elif [[ $SELECTED_DB_TYPE == "Redis" ]] || [[ $SELECTED_DB_TYPE == "NATS" ]]; then
   KUBE_TYPE="statefulset"
+else
+  echo "Unknown database type $SELECTED_DB_TYPE." >&2
+  exit 1
 fi
 
 ANNOTATIONS=$(kubectl get "$KUBE_TYPE" -n "$SELECTED_DB_NAMESPACE" -o jsonpath="{.items[?(@.metadata.name=='$SELECTED_DB_NAME')].metadata.annotations}" 2>/dev/null)
@@ -183,17 +188,38 @@ Admin)
 esac
 
 export VAULT_TOKEN
-CREDS="$(pf-get-db-creds --role "$ACTUAL_ROLE")"
 
-if [[ -z $CREDS ]]; then
-  echo "Unable to retrieve credentials at $VAULT_ADDR for $ACTUAL_ROLE" >&2
-  exit 1
+if [[ $SELECTED_DB_TYPE == "NATS" ]]; then
+  CREDS=$(vault write -format=json "pki/internal/issue/$ACTUAL_ROLE" common_name="${ACTUAL_ROLE#nats-}")
+
+  if [[ -z $CREDS ]]; then
+    echo "Unable to retrieve credentials at $VAULT_ADDR for $ACTUAL_ROLE" >&2
+    exit 1
+  fi
+
+  NATS_DIR=$(pf-get-repo-variables | jq -r .nats_dir)
+  mkdir -p "$NATS_DIR"
+
+  CA_FILE="$NATS_DIR/$SELECTED_DB_NAME.$SELECTED_DB_NAMESPACE.ca.crt"
+  CERT_FILE="$NATS_DIR/$SELECTED_DB_NAME.$SELECTED_DB_NAMESPACE.tls.crt"
+  KEY_FILE="$NATS_DIR/$SELECTED_DB_NAME.$SELECTED_DB_NAMESPACE.tls.key"
+
+  echo "$CREDS" | jq -r .data.issuing_ca >"$CA_FILE"
+  echo "$CREDS" | jq -r .data.certificate >"$CERT_FILE"
+  echo "$CREDS" | jq -r .data.private_key >"$KEY_FILE"
+else
+  CREDS="$(pf-get-db-creds --role "$ACTUAL_ROLE")"
+
+  if [[ -z $CREDS ]]; then
+    echo "Unable to retrieve credentials at $VAULT_ADDR for $ACTUAL_ROLE" >&2
+    exit 1
+  fi
+
+  USERNAME=$(echo -n "$CREDS" | grep username | awk '{print $2}')
+  PASSWORD=$(echo -n "$CREDS" | grep password | awk '{print $2}')
+  DURATION=$(echo -n "$CREDS" | grep lease_duration | awk '{print $2}')
+  LEASE_ID=$(echo -n "$CREDS" | grep lease_id | awk '{print $2}')
 fi
-
-USERNAME=$(echo -n "$CREDS" | grep username | awk '{print $2}')
-PASSWORD=$(echo -n "$CREDS" | grep password | awk '{print $2}')
-DURATION=$(echo -n "$CREDS" | grep lease_duration | awk '{print $2}')
-LEASE_ID=$(echo -n "$CREDS" | grep lease_id | awk '{print $2}')
 
 ####################################################################
 # Step 7: Pick a local port
@@ -215,16 +241,32 @@ if [[ ! $LOCAL_PORT =~ ^[0-9]+$ ]] || ((LOCAL_PORT < 1024 || LOCAL_PORT > 65535)
 fi
 
 ####################################################################
-# Step 8: Pick a local port
+# Step 8: Launch the tunnel
 ####################################################################
-echo "" >&2
-echo "Credentials will expire in $DURATION or until tunnel termination:" >&2
-echo "" >&2
-echo "Username: $USERNAME" >&2
-echo "Password: $PASSWORD" >&2
-echo "" >&2
-echo "" >&2
 
-echo "Running a tunnel on localhost:$LOCAL_PORT to $SELECTED_DB_TYPE database $SELECTED_DB_NAME.$SELECTED_DB_NAMESPACE via $SERVICE:$SERVICE_PORT!" >&2
+if [[ $SELECTED_DB_TYPE == "NATS" ]]; then
+  echo "Credentials saved to $NATS_DIR and will expire in 16 hours." >&2
+  echo "" >&2
+  echo "To connect using the NATS CLI, set the following environment variables:" >&2
+  echo "" >&2
+  echo "export NATS_CA=$CA_FILE" >&2
+  echo "export NATS_CERT=$CERT_FILE" >&2
+  echo "export NATS_KEY=$KEY_FILE" >&2
+  echo "export NATS_URL=tls://127.0.0.1:$LOCAL_PORT"
+  echo "" >&2
+  echo "If using a different client, configure TLS authentication using the above values." >&2
+  echo "" >&2
+  echo "" >&2
+else
+  echo "" >&2
+  echo "Credentials will expire in $DURATION or until tunnel termination:" >&2
+  echo "" >&2
+  echo "Username: $USERNAME" >&2
+  echo "Password: $PASSWORD" >&2
+  echo "" >&2
+  echo "" >&2
+fi
+
+echo "Running a tunnel on 127.0.0.1:$LOCAL_PORT to $SELECTED_DB_TYPE database $SELECTED_DB_NAME.$SELECTED_DB_NAMESPACE via $SERVICE:$SERVICE_PORT!" >&2
 
 pf-tunnel -b "$KUBE_CONTEXT" -r "$SERVICE:$SERVICE_PORT" -l "$LOCAL_PORT"

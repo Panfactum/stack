@@ -19,13 +19,21 @@ terraform {
   }
 }
 
-data "pf_kube_labels" "labels" {
-  module = "kube_node_image_cache"
+locals {
+  image_string_list = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}"]
+  image_string_list_pinned = {
+    amd64 = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}" if image.pin_enabled && image.amd_nodes_enabled && image.repository != module.constants.panfactum_image_repository] # We ignore the devShell image b/c it is already cached by default
+    arm64 = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}" if image.pin_enabled && image.arm_nodes_enabled && image.repository != module.constants.panfactum_image_repository] # We ignore the devShell image b/c it is already cached by default
+  }
+  policy_name = "image-cache-${substr(sha1(join("", [for image in local.image_string_list : sha1(image)])), 0, 6)}"
 }
 
-resource "random_id" "policy_name" {
-  prefix      = "image-cache-"
-  byte_length = 8
+module "constants" {
+  source = "../kube_constants"
+}
+
+data "pf_kube_labels" "labels" {
+  module = "kube_node_image_cache"
 }
 
 resource "kubectl_manifest" "update_image_cache" {
@@ -33,39 +41,52 @@ resource "kubectl_manifest" "update_image_cache" {
     apiVersion = "kyverno.io/v1"
     kind       = "ClusterPolicy"
     metadata = {
-      name   = random_id.policy_name.hex
+      name   = local.policy_name
       labels = data.pf_kube_labels.labels.labels
+      annotations = {
+        "pod-policies.kyverno.io/autogen-controllers" = "none"
+      }
     }
     spec = {
-      mutateExistingOnPolicyUpdate = true
+      useServerSideApply = true
       rules = flatten([for arch in ["amd64", "arm64"] : [
+
+        // Add the images to the `images` configmap will make sure
+        // the images are included in the DS that pins images to each node
         {
-          name = "update-images-${arch}"
+          name                   = "update-pinned-images-${arch}"
+          skipBackgroundRequests = false
           match = {
             any = [{
               resources = {
                 kinds      = ["ConfigMap"]
-                names      = ["images"]
+                names      = ["pinned-images-${arch}"]
                 namespaces = ["node-image-cache"]
               }
             }]
           }
           mutate = {
+            mutateExistingOnPolicyUpdate = true
             targets = [{
               apiVersion = "v1"
               kind       = "ConfigMap"
-              name       = "images"
+              name       = "pinned-images-${arch}"
               namespace  = "node-image-cache"
             }]
             patchStrategicMerge = {
-              data = { for i, image in var.images : "${random_id.policy_name.hex}-${i}" => image }
+              data = { for i, image in local.image_string_list_pinned[arch] : lower(substr(base64encode(sha1(image)), 0, 10)) => image }
             }
           }
         }
       ]])
+
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 
+  force_new         = true
   force_conflicts   = true
   server_side_apply = true
 }

@@ -18,7 +18,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -49,8 +49,8 @@ module "constants" {
 module "namespace" {
   source = "../kube_namespace"
 
-  namespace            = local.name
-  linkerd_inject       = false
+  namespace = local.name
+  //linkerd_inject       = false
   loadbalancer_enabled = true
 }
 
@@ -148,6 +148,14 @@ module "bastion" {
   priority_class_name                  = module.constants.cluster_important_priority_class_name
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
+
+  extra_pod_annotations = {
+    "config.linkerd.io/skip-outbound-ports" = "4222"
+    // "config.linkerd.io/proxy-log-format" = "text"
+    //"config.linkerd.io/proxy-log-level" = "trace"
+    // "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "false"
+    // "config.linkerd.io/enable-debug-sidecar" = "true"
+  }
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access
   // SSHD requires root to run unfortunately. However, we drop all capability except

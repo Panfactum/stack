@@ -128,7 +128,6 @@ resource "authentik_provider_scim" "aws" {
   property_mappings_group       = [data.authentik_property_mapping_scim.group.id]
 }
 
-
 resource "authentik_application" "aws" {
   name              = "aws"
   slug              = "aws"
@@ -144,7 +143,6 @@ resource "authentik_application" "aws" {
   ] : []
 }
 
-
 data "authentik_group" "superusers" {
   name = "superusers"
 }
@@ -154,7 +152,6 @@ resource "authentik_policy_binding" "superuser_access" {
   group  = data.authentik_group.superusers.id
   order  = 0
 }
-
 
 data "authentik_group" "group" {
   for_each = var.allowed_groups

@@ -250,14 +250,17 @@ locals {
 
   pod = {
     metadata = {
-      labels = var.pod_version_labels_enabled ? module.util.labels : {
-        for k, v in module.util.labels : k => v if !contains([
-          "panfactum.com/stack-commit",
-          "panfactum.com/stack-version",
-          "panfactum.com/version",
-          "panfactum.com/commit"
-        ], k)
-      }
+      labels = merge(
+        var.pod_version_labels_enabled ? module.util.labels : {
+          for k, v in module.util.labels : k => v if !contains([
+            "panfactum.com/stack-commit",
+            "panfactum.com/stack-version",
+            "panfactum.com/version",
+            "panfactum.com/commit"
+          ], k)
+        },
+        var.extra_pod_labels
+      )
       annotations = var.extra_pod_annotations
     }
     spec = {
@@ -400,6 +403,8 @@ module "util" {
   arm_nodes_enabled                    = var.arm_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
   controller_nodes_required            = var.controller_nodes_required
+  cilium_required                      = var.cilium_required
+  linkerd_required                     = var.linkerd_required
   instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
   az_anti_affinity_required            = var.az_anti_affinity_required
   host_anti_affinity_required          = var.host_anti_affinity_required
@@ -459,7 +464,7 @@ resource "kubernetes_role_binding" "pod_reader" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = var.service_account
+    name      = var.service_account == null ? "default" : var.service_account
     namespace = var.namespace
   }
   role_ref {
@@ -467,4 +472,23 @@ resource "kubernetes_role_binding" "pod_reader" {
     kind      = "Role"
     name      = kubernetes_role.pod_reader.metadata[0].name
   }
+}
+
+/************************************************
+* Caches the pod's images on the node
+************************************************/
+
+module "image_cache" {
+  count  = anytrue([for container in var.containers : (container.image_pin_enabled || container.image_prepull_enabled)]) ? 0 : 0
+  source = "../kube_node_image_cache"
+
+  images = [for config in values({ for container in var.containers : "${container.image_registry}/${container.image_repository}:${container.image_tag}" => {
+    registry          = container.image_registry
+    repository        = container.image_repository
+    tag               = container.image_tag
+    prepull_enabled   = container.image_prepull_enabled
+    pin_enabled       = container.image_pin_enabled
+    arm_nodes_enabled = var.arm_nodes_enabled
+    amd_nodes_enabled = true
+  }... }) : try(config[0], config)]
 }

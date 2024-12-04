@@ -15,9 +15,8 @@ such as those for [Velero](https://velero.io/) or the
 
 ## Architecture
 
-This addon is very simple. It is just a CronJob that runs the `pf-set-pvc-metadata` 
-command every 15 minutes. This module ensures that the appropriate arguments are passed
-to the command.
+This addon is very simple. It simply implements a Kyverno policy that adds the indicated labels and annotations
+to the PVCs.
 
 ## Usage Notes
 

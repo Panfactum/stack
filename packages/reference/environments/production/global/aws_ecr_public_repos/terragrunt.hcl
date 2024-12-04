@@ -18,5 +18,8 @@ inputs = {
     pvc-autoresizer = {
 
     }
+    argo-events = {
+
+    }
   }
 }

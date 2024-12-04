@@ -19,7 +19,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -358,8 +358,21 @@ resource "helm_release" "authentik" {
         tolerations               = module.util_server.tolerations
         topologySpreadConstraints = module.util_server.topology_spread_constraints
 
+        deploymentStrategy = {
+          type = "RollingUpdate"
+          rollingUpdate = {
+            maxSurge       = 0
+            maxUnavailable = 1
+          }
+        }
+
         service = {
           labels = module.util_server.labels
+          annotations = {
+            "retry.linkerd.io/http"    = "5xx"
+            "retry.linkerd.io/limit"   = "10"
+            "retry.linkerd.io/timeout" = "5s"
+          }
         }
 
         metrics = {
@@ -447,6 +460,13 @@ resource "helm_release" "authentik" {
         tolerations               = module.util_server.tolerations
         topologySpreadConstraints = module.util_server.topology_spread_constraints
 
+        deploymentStrategy = {
+          type = "RollingUpdate"
+          rollingUpdate = {
+            maxSurge       = 0
+            maxUnavailable = 1
+          }
+        }
 
         volumes = [
           {
@@ -711,5 +731,22 @@ module "cdn" {
 
   name           = "authentik"
   origin_configs = module.ingress[0].cdn_origin_configs
+}
+
+/***************************************
+* Image Cache
+***************************************/
+
+module "image_cache" {
+  count  = var.node_image_cached_enabled ? 1 : 0
+  source = "../kube_node_image_cache"
+
+  images = [
+    {
+      registry   = "ghcr.io"
+      repository = "goauthentik/server"
+      tag        = var.authentik_helm_version
+    }
+  ]
 }
 

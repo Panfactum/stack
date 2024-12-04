@@ -10,7 +10,7 @@ terraform {
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "3.25.0"
+      version = "4.5.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
@@ -26,7 +26,13 @@ terraform {
 locals {
   namespace = "gha"
 
-  runner_images = { for runner, config in var.runners : runner => config.action_runner_image != null ? config.action_runner_image : "ghcr.io/actions/actions-runner:${config.action_runner_version}" }
+  runner_images = {
+    for runner, config in var.runners : runner => {
+      registry   = config.action_runner_image_registry
+      repository = config.action_runner_image_repository
+      tag        = config.action_runner_image_tag
+    }
+  }
 }
 
 data "pf_kube_labels" "labels" {
@@ -238,7 +244,7 @@ resource "helm_release" "runner" {
           containers = [
             {
               name  = "runner"
-              image = local.runner_images[each.key]
+              image = "${local.runner_images[each.key].registry}/${local.runner_images[each.key].repository}:${local.runner_images[each.key].tag}"
               command = [
                 "/home/runner/run.sh",
                 "--labels=${each.key}"
@@ -357,5 +363,9 @@ resource "kubectl_manifest" "pdb" {
 
 module "image_cache" {
   source = "../kube_node_image_cache"
-  images = tolist(toset(values(local.runner_images)))
+  images = [for config in values({ for image in local.runner_images : "${image.registry}/${image.repository}:${image.tag}" => {
+    registry   = image.registry
+    repository = image.repository
+    image_tag  = image.tag
+  }... }) : try(config[0], config)]
 }
