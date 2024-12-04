@@ -195,7 +195,7 @@ module "vault_image_builder_workflow" {
           {
             name = "copy-to-public-ecr"
             command = [ "/scripts/copy-to-public.sh"]
-            dependencies = ["merge-manifests"]
+            dependencies = ["build-amd64"]
           }
         ]
       }

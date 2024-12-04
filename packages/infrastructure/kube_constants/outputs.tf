@@ -73,5 +73,15 @@ output "images" {
       repository = "panfactum/bastion"
       tag        = local.image_tag
     }
+    argo-events = {
+      registry   = "public.ecr.aws"
+      repository = "panfactum/argo-events"
+      tag        = local.image_tag
+    }
+    pvc-autoresizer = {
+      registry   = "public.ecr.aws"
+      repository = "panfactum/pvc-autoresizer"
+      tag        = local.image_tag
+    }
   }
 }

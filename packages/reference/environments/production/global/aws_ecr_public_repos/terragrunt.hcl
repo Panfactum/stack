@@ -21,5 +21,8 @@ inputs = {
     argo-events = {
 
     }
+    vault = {
+
+    }
   }
 }

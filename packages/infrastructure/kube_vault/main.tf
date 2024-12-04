@@ -182,10 +182,10 @@ resource "helm_release" "vault" {
         logLevel  = var.log_level
         logFormat = "json"
 
-        #         image = {
-        #           repository = "891377197483.dkr.ecr.us-east-2.amazonaws.com/vault"
-        #           tag = "test2"
-        #         }
+        image = {
+          repository = "${module.constants.images.vault.registry}/${module.constants.images.vault.repository}"
+          tag        = module.constants.images.vault.tag
+        }
         resources = {
           requests = {
             memory = "200Mi"
