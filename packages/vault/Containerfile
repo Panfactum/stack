@@ -4,7 +4,7 @@ ARG TARGETARCH
 ARG BUILDPLATFORM
 
 LABEL org.opencontainers.image.source=https://github.com/panfactum/stack
-LABEL org.opencontainers.image.description="Vault with extra auth plugins for the Panfactum stack"
+LABEL org.opencontainers.image.description="Vault with extra plugins for the Panfactum stack"
 LABEL org.opencontainers.image.licenses="BSL 1.1"
 
 
