@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "5.70.0"
+      version               = "5.80.0"
       configuration_aliases = [aws.secondary]
     }
     tls = {
@@ -33,6 +33,7 @@ locals {
   }
 }
 
+data "aws_caller_identity" "current" {}
 data "aws_region" "region" {}
 
 data "pf_aws_tags" "tags" {
@@ -63,6 +64,15 @@ resource "aws_eks_cluster" "cluster" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
   version  = var.kube_version
+
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = false
+  }
+
+  zonal_shift_config {
+    enabled = length(var.node_subnets) > 1
+  }
 
   vpc_config {
     subnet_ids              = [for subnet in data.aws_subnet.control_plane_subnets : subnet.id]

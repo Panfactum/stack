@@ -310,9 +310,9 @@ module "node_image_cache" {
   containers = [
     {
       name             = "dev-shell"
-      image_registry   = "public.ecr.aws"
-      image_repository = module.constants.panfactum_image_repository
-      image_tag        = module.constants.panfactum_image_tag
+      image_registry   = module.constants.images.devShell.registry
+      image_repository = module.constants.images.devShell.repository
+      image_tag        = module.constants.images.devShell.tag
       command = [
         "/scripts/sleep_${each.key}"
       ]

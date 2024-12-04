@@ -49,6 +49,10 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now launches with `arm64` nodes when `bootstrap_mode_enabled` is `true` as we have resolved the remaining issues
   that have prevented `arm64` from being used during bootstrapping.
 
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html) enabled.
+
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [ARC Zonal Shift](https://docs.aws.amazon.com/eks/latest/userguide/zone-shift.html) enabled if running nodes in multiple subnets.
+
 * [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now schedules pods exclusively on `arm64` nodes
   in order to support the integration of external secret plugins.
 
@@ -86,6 +90,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * BuildKit cache PVCs are now excluded from Velero backups as they consume a lot of storage and are safe to delete.
 
 * Fixed root user access provisioning in [kube\_rbac](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_rbac).
+
+* Addressed issue where the Descheduler was not replacing pods that were older than the max lifetime.
 
 ## edge.24-11-13
 

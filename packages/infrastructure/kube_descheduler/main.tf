@@ -254,12 +254,12 @@ resource "helm_release" "descheduler" {
                 {
                   name = "PodLifeTime"
                   args = {
-                    maxPodLifeTimeSeconds = 60 * 60 * 4
+                    maxPodLifeTimeSeconds = var.max_pod_lifetime_seconds
                     labelSelector = {
                       matchExpressions = [{
-                        key = "panfactum.com/prevent-lifetime-eviction",
+                        key      = "panfactum.com/prevent-lifetime-eviction",
                         operator = "NotIn",
-                        values = ["true", "1"]
+                        values   = ["true", "1"]
                       }]
                     }
                   }
@@ -314,9 +314,9 @@ resource "helm_release" "descheduler" {
                     maxPodLifeTimeSeconds = 60 * 15
                     labelSelector = {
                       matchExpressions = [{
-                        key = "panfactum.com/prevent-lifetime-eviction",
+                        key      = "panfactum.com/prevent-lifetime-eviction",
                         operator = "NotIn",
-                        values = ["true", "1"]
+                        values   = ["true", "1"]
                       }]
                     }
                   }

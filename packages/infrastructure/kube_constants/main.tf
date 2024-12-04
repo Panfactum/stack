@@ -1,3 +1,3 @@
 locals {
-  image_tag = "fb91529622640ebf4f5dc0fba9d7ffe160f5119e"
+  image_tag = "f662a00125166c56e01c1cbdad0bf42fe26e746d"
 }

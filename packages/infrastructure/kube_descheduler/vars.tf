@@ -44,3 +44,9 @@ variable "panfactum_scheduler_enabled" {
   default     = true
 }
 
+variable "max_pod_lifetime_seconds" {
+  description = "The maximum time that a pod can live before being replaced (unless lifetime evictions are disabled for the pod)"
+  type        = number
+  default     = 60 * 60 * 4
+}
+
