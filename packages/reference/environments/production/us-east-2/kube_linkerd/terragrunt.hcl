@@ -23,5 +23,4 @@ dependency "kyverno" {
 
 inputs = {
   vault_ca_crt       = dependency.cert_issuers.outputs.vault_ca_crt
-  monitoring_enabled = true
 }
