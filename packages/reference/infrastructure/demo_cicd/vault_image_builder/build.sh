@@ -48,7 +48,7 @@ buildctl \
   --frontend=dockerfile.v0 \
   --output "type=image,name=$IMAGE_REGISTRY/$IMAGE_REPO:$TAG,push=$PUSH_IMAGE" \
   --local context=. \
-  --local dockerfile=./packages/bastion \
+  --local dockerfile=./packages/vault \
   --opt filename=./Containerfile \
   --export-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=$IMAGE_REGISTRY/$IMAGE_REPO" \
   --import-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=$IMAGE_REGISTRY/$IMAGE_REPO"

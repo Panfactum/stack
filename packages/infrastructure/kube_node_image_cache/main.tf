@@ -22,8 +22,8 @@ terraform {
 locals {
   image_string_list = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}"]
   image_string_list_pinned = {
-    amd64 = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}" if image.pin_enabled && image.amd_nodes_enabled && image.repository != module.constants.panfactum_image_repository] # We ignore the devShell image b/c it is already cached by default
-    arm64 = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}" if image.pin_enabled && image.arm_nodes_enabled && image.repository != module.constants.panfactum_image_repository] # We ignore the devShell image b/c it is already cached by default
+    amd64 = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}" if image.pin_enabled && image.amd_nodes_enabled && image.repository != module.constants.images.devShell.repository] # We ignore the devShell image b/c it is already cached by default
+    arm64 = [for image in var.images : "${image.registry}/${image.repository}:${image.tag}" if image.pin_enabled && image.arm_nodes_enabled && image.repository != module.constants.images.devShell.repository] # We ignore the devShell image b/c it is already cached by default
   }
   policy_name = "image-cache-${substr(sha1(join("", [for image in local.image_string_list : sha1(image)])), 0, 6)}"
 }

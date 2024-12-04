@@ -169,7 +169,7 @@ module "image_builder_workflow" {
       memory = "100Mi"
     }
   }
-  default_container_image = "public.ecr.aws/${module.constants.panfactum_image_repository}:${module.constants.panfactum_image_tag}"
+  default_container_image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
   templates = [
     {
       name    = local.entrypoint
