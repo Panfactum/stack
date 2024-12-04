@@ -257,8 +257,9 @@ resource "helm_release" "descheduler" {
                     maxPodLifeTimeSeconds = 60 * 60 * 4
                     labelSelector = {
                       matchExpressions = [{
-                        key      = "panfactum.com/prevent-lifetime-eviction"
-                        operator = "DoesNotExist"
+                        key = "panfactum.com/prevent-lifetime-eviction",
+                        operator = "NotIn",
+                        values = ["true", "1"]
                       }]
                     }
                   }
@@ -313,8 +314,9 @@ resource "helm_release" "descheduler" {
                     maxPodLifeTimeSeconds = 60 * 15
                     labelSelector = {
                       matchExpressions = [{
-                        key      = "panfactum.com/kyverno-mutated"
-                        operator = "DoesNotExist"
+                        key = "panfactum.com/prevent-lifetime-eviction",
+                        operator = "NotIn",
+                        values = ["true", "1"]
                       }]
                     }
                   }
