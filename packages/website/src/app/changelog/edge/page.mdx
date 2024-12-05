@@ -31,7 +31,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   also need to delete any associated `EventSource` or `Sensor` resources *before* deleting the `EventBus` or the `EventBus`
   deletion will be blocked.
 
-  **Deleting an existing EventBus will cause any unprocessed events to be deleted.** Make sure that you have no pending events before perform this upgrade.
+  **Deleting an existing EventBus will cause any unprocessed events to be deleted.** Make sure that you have no pending events before performing this upgrade.
 
 * The `kube_fledged` and `kube_reflector` modules have been removed (they were deprecated in `edge.24-11-13`).
 
