@@ -91,6 +91,7 @@ module "database" {
   pg_initial_storage_gb                = 10
   pg_instances                         = 2
   pg_smart_shutdown_timeout            = 1
+  pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   pgbouncer_pool_mode                  = "transaction" // See https://github.com/goauthentik/authentik/issues/9152

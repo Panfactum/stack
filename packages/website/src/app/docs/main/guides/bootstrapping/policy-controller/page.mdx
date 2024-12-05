@@ -88,6 +88,42 @@ Let's deploy the policies now:
         in a subsequent guide step.
       </MarkdownAlert>
 
+## Run Network Tests
+
+<MarkdownAlert severity="warning">
+    This test takes awhile to complete, but please run it before continuing. If something is broken,
+    it will break other components in non-obvious ways. Additionally, the fix will usually require
+    re-provisioning your entire cluster.
+
+    Additionally, this test can be somewhat flaky. If the test fails the first time, try running it again.
+</MarkdownAlert>
+
+Now that both networking and the policy controller are installed, let's verify that everything is working as intended. The
+easiest approach is to perform a battery of network tests against the cluster to ensure that pods can both
+launch successfully and communicate with one another.
+
+Cilium comes with a [companion CLI tool](https://github.com/cilium/cilium-cli) that is bundled with the Panfactum devShell.
+We will use that to test that cilium is working as intended:
+
+1. Run `cilium connectivity test --test '!pod-to-pod-encryption'`. [^90] [^91]
+
+2. Wait about 20-30 minutes for the test to complete.
+
+3. If everything completes successfully, you should receive a message like this:
+
+```shell-session
+✅ All 46 tests (472 actions) successful, 18 tests skipped, 0 scenarios skipped.
+   ```
+
+4. Unfortunately, the test does not clean up after itself. You should run `kubectl delete ns cilium-test` to remove
+the test resources.
+
+[^90]: Skipping the pod-to-pod-encryption test is required due to [this issue](https://github.com/cilium/cilium/issues/36018).
+
+[^91]: If you receive an error like `Unable to detect Cilium version, assuming vX.X.X for connectivity tests: unable to parse cilium version on pod.`
+that means that you tried to run the test while not all `cilium-xxxx` pods were ready. Wait for all the `cilium-xxxxx` pods to reach
+a ready state and then try again.
+
 ## Next Steps
 
 Now that the policy engine and basic policies are deployed, let's deploy storage controllers to allow your pods to utilize storage.

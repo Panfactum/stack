@@ -104,6 +104,41 @@ locals {
       }
     }],
 
+    // The test pods should tolerate all nodes
+    [for toleration in ["burstable", "spot", "arm64", "controller"] : {
+      name = "add-${toleration}-to-cilium-test-ds"
+      match = {
+        any = [
+          {
+            resources = {
+              kinds      = ["DaemonSet"]
+              namespaces = [local.cilium_test_namespace]
+              operations = ["CREATE"]
+            }
+          }
+        ]
+      }
+      mutate = {
+        patchesJson6902 = yamlencode([
+          {
+            op   = "add"
+            path = "/spec/template/spec/tolerations/-"
+            value = {
+              key      = toleration
+              operator = "Equal"
+              value    = "true"
+              effect   = "NoSchedule"
+            }
+          },
+          {
+            op    = "add",
+            path  = "/metadata/labels/panfactum.com~1${toleration}-enabled"
+            value = "true"
+          }
+        ])
+      }
+    }],
+
     // The Cilium test namespace does not get automatically deleted
     // so this performs the cleanup in case the user forgets
     {
@@ -130,6 +165,39 @@ locals {
           metadata = {
             labels = {
               "+(cleanup.kyverno.io/ttl)" = "4h"
+            }
+          }
+        }
+      }
+    },
+
+    {
+      name = "cilium-test-pdb"
+      match = {
+        any = [
+          {
+            resources = {
+              kinds      = ["Namespace"]
+              names      = [local.cilium_test_namespace]
+              operations = ["CREATE", "UPDATE", "DELETE"]
+            }
+          }
+        ]
+      }
+      generate = {
+        apiVersion       = "policy/v1"
+        kind             = "PodDisruptionBudget"
+        name             = "cilium-test"
+        namespace        = local.cilium_test_namespace
+        synchronize      = true
+        generateExisting = true
+        data = {
+          spec = {
+            minAvailable = 1000
+            selector = {
+              matchLabels = {
+                "panfactum.com/descheduler-enabled" = "false"
+              }
             }
           }
         }

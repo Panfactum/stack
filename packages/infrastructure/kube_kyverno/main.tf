@@ -497,12 +497,17 @@ resource "kubernetes_cluster_role" "extra_permissions" {
   rule {
     api_groups = ["apps"]
     verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
-    resources  = ["statefulsets", "deployments"]
+    resources  = ["statefulsets", "deployments", "daemonsets"]
   }
   rule {
     api_groups = ["batch"]
     verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
     resources  = ["jobs", "cronjobs"]
+  }
+  rule {
+    api_groups = ["policy"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
+    resources  = ["poddisruptionbudgets"]
   }
   rule {
     api_groups = ["admissionregistration.k8s.io"]
