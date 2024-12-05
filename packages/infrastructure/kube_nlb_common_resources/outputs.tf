@@ -10,6 +10,7 @@ output "annotations" {
     "service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold"   = "2"
     "service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout"             = "2"
     "service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval"            = "5"
+    "service.beta.kubernetes.io/aws-load-balancer-attributes"                      = "zonal_shift.config.enabled=true"
     "service.beta.kubernetes.io/aws-load-balancer-target-group-attributes" = join(",", [
 
       // Ensures a client always connects to the same backing server; important
@@ -24,8 +25,8 @@ output "annotations" {
       // will only be stopped when this delay is met
       "deregistration_delay.timeout_seconds=${var.deregistration_delay_seconds}",
       "deregistration_delay.connection_termination.enabled=true",
-      ]
-    )
+      "target_health_state.unhealthy.connection_termination.enabled=false"
+    ])
   }
 }
 

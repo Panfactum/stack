@@ -16,7 +16,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 ### Breaking Changes
 
 * This release contains a major version upgrade to Linkerd.
-  **To upgrade with no downtime, you MUST deploy the upgraded [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd) is upgraded
+  **To upgrade with no downtime, you MUST deploy the upgraded [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
   before any other module**.
 
   This upgrade removes the need for the privileged `proxy-init` initContainer to be injected into every container as the initialization logic
@@ -52,6 +52,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html) enabled.
 
 * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [ARC Zonal Shift](https://docs.aws.amazon.com/eks/latest/userguide/zone-shift.html) enabled if running nodes in multiple subnets.
+
+* [kube\_ingress_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) now has [ARC Zonal Shift](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/zonal-shift.html) enabled.
 
 * [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now schedules pods exclusively on `arm64` nodes
   in order to support the integration of external secret plugins.

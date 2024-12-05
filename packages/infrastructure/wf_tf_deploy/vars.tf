@@ -80,17 +80,17 @@ variable "git_password" {
 
 variable "tmp_storage_gb" {
   description = "The number of GB to allocate to temporary storage for the IaC deployment"
-  type = number
-  default = 3
+  type        = number
+  default     = 3
 
   validation {
-    condition = var.tmp_storage_gb >= 3
+    condition     = var.tmp_storage_gb >= 3
     error_message = "tmp_storage_gb must be at least 3 for the deployment to run successfully"
   }
 }
 
 variable "code_storage_gb" {
   description = "The number of GB to allocate to temporary storage for downloading the code repository"
-  type = number
-  default = 1
+  type        = number
+  default     = 1
 }
