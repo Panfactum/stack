@@ -103,7 +103,7 @@ skip = include.panfactum.locals.is_ci
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
 * [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
 
@@ -148,6 +148,14 @@ Type: `string`
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### code\_storage\_gb
+
+Description: The number of GB to allocate to temporary storage for downloading the code repository
+
+Type: `number`
+
+Default: `1`
 
 ### cpu\_millicores
 
@@ -204,6 +212,14 @@ Description: A mapping of environment variable names to secret values
 Type: `map(string)`
 
 Default: `{}`
+
+### tmp\_storage\_gb
+
+Description: The number of GB to allocate to temporary storage for the IaC deployment
+
+Type: `number`
+
+Default: `3`
 
 ## Outputs
 

@@ -149,6 +149,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### code\_storage\_gb
+
+Description: The number of GB to allocate to temporary storage for downloading the code repository
+
+Type: `number`
+
+Default: `1`
+
 ### cpu\_millicores
 
 Description: The amount of CPU to allocate to pods in the workflow (in millicores)
@@ -204,6 +212,14 @@ Description: A mapping of environment variable names to secret values
 Type: `map(string)`
 
 Default: `{}`
+
+### tmp\_storage\_gb
+
+Description: The number of GB to allocate to temporary storage for the IaC deployment
+
+Type: `number`
+
+Default: `3`
 
 ## Outputs
 

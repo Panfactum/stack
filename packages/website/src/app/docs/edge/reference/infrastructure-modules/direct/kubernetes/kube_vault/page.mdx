@@ -14,7 +14,7 @@ This module deploys [Hashicorp Vault](https://www.vaultproject.io/) to the clust
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
@@ -102,6 +102,14 @@ Type: `bool`
 
 Default: `false`
 
+### log\_level
+
+Description: The log level for Vault pods. Must be one of: trace, debug, info, warn, error.
+
+Type: `string`
+
+Default: `"warn"`
+
 ### monitoring\_enabled
 
 Description: Whether to allow monitoring CRs to be deployed in the namespace
@@ -109,6 +117,14 @@ Description: Whether to allow monitoring CRs to be deployed in the namespace
 Type: `bool`
 
 Default: `false`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
 
 ### panfactum\_scheduler\_enabled
 

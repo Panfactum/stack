@@ -4,17 +4,13 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_redis_sentinel" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_redis_sentinel" status="stable" type="submodule" />
+<ModuleHeader name="kube_nats" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_nats" status="beta" type="submodule" />
 
-# Redis with Sentinel
+# NATS Jetstream
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
-This module deploys a highly-available set of [Redis](https://redis.io/docs/) nodes.
-
-This is deployed in a single master, many replica configuration. Failover is handled
-by [Redis Sentinel](https://redis.io/docs/management/sentinel/) which is also
-deployed by this module.
+This module deploys a highly-available [NATS cluster](https://nats.io/) running in [Jetstream mode.](https://docs.nats.io/nats-concepts/jetstream)
 
 ## Usage
 
@@ -22,14 +18,16 @@ deployed by this module.
 
 For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
 
-* `superuser_creds_secret`: Complete access to the database
-* `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
-* `reader_creds_secret`: Read-only access to the database
+* `superuser_creds_secret`: Full access to the [system account](https://docs.nats.io/running-a-nats-service/configuration/sys_accounts) (does not have access to normal data, so should generally be avoided)
+* `admin_creds_secret`: Read and write access to the data streams
+* `reader_creds_secret`: Read-only access to the data streams
 
+Authenticating with NATS is done via [TLS authentication.](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/tls_mutual_auth)
 Each of the above named Secrets contains the following values:
 
-* `username`: The username to use for authentication
-* `password`: The password to use for authentication
+* `ca.crt`: The CA certificate used to verify the server-provided certificate.
+* `tls.crt`: The certificate that the NATS client should provide to the server for authentication.
+* `tls.key`: The TLS key that the NATS client will use for securing communications with the server.
 
 The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
 Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
@@ -38,62 +36,79 @@ The credential lifetime is configured by the `vault_credential_lifetime_hours` i
 to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thus, in the worst-case,
 credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
 
-<MarkdownAlert severity="warning">
-  The module also supplies `root_username` and `root_password` outputs for the root user of the database.
-  These credentials are **unsafe** to use as they are not automatically rotated.
-</MarkdownAlert>
-
 ### Connecting
 
-The below example show how to connect to the Redis master
-using dynamically rotated admin credentials by setting various
-environment variables in our [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
+<MarkdownAlert severity="warning">
+  Note that you should generally never want to use the superuser role. While this role has access to system events, it does
+  NOT have access to the individual data streams due to a limitation in NATS resource isolation.
+</MarkdownAlert>
+
+The below example show how to connect to the NATS cluster
+using dynamically rotated admin credentials by mounting the client certificates
+in our [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) module.
 
 ```hcl
-module "redis" {
-  source = "${var.pf_module_source}kube_redis_sentinel${var.pf_module_ref}"
+module "nats" {
+  source = "${var.pf_module_source}kube_nats${var.pf_module_ref}"
   ...
 }
 
 module "deployment" {
   source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
   ...
-  common_env_from_secrets = {
-    REDIS_USERNAME = {
-      secret_name = module.redis.admin_creds_secret
-      key = "username"
-    }
-    REDIS_PASSWORD = {
-      secret_name = module.redis.admin_creds_secret
-      key = "password"
+  secret_mounts = {
+    "${module.nats.admin_creds_secret}" = {
+      mount_path = "/etc/nats-certs"
     }
   }
   common_env = {
-    REDIS_HOST = module.redis.redis_master_host
-    REDIS_PORT = module.redis.redis_port
+    NATS_HOST = module.nats.host
+    NATS_PORT = module.nats.client_port
+    
+    # It is not strictly necessary to set these, but these are used by the NATS CLI,
+    # so it can be helpful to have these set in case you need to debug.
+    NATS_URL = "tls://${module.nats.host}:${module.nats.client_port}"
+    NATS_KEY = "/etc/nats-certs/tls.key"
+    NATS_CERT = "/etc/nats-certs/tls.crt"
+    NATS_CA = "/etc/nats-certs/ca.crt"
   }
 }
 ```
 
+Note that you also must configure the client to use the certificates. For example, if using the [nats NPM package](https://www.npmjs.com/package/nats):
+
+```typescript
+import { connect } from "nats";
+
+const nc = await connect({
+  servers: process.env.NATS_HOST,
+  port: process.env.NATS_PORT,
+  tls: {
+    keyFile: process.env.NATS_KEY,
+    certFile: process.env.NATS_CERT,
+    caFile: process.env.NATS_CA,
+  }
+});
+```
+
 ### Persistence
 
-Redis provides two mechanisms for persistence:
-[AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/).
-This module uses RDB by default (tuned via `redis_save`).
+With NATS Jetstream, persistent is configured via [Streams](https://docs.nats.io/nats-concepts/jetstream/streams) which
+allow you to control how messages are stored and what the limits of retention are. You can have many different streams
+on the same NATS instance.
 
-Using AOF (whether independently or concurrently with RDB) negates the ability to do [partial resynchronizations after restarts
-and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers). Instead, a copy of the database must be transferred from the current master to restarted or new replicas. This greatly increases
-the time-to-recover as well as incurs a high network cost. In fact, there is arguably no benefit to AOF-based persistence
-at all with our replicated architecture as new Redis nodes will always pull their data from the running master, not
-from their local AOF. The only benefit would be if *all* Redis nodes simultaneously failed with
-a non-graceful shutdown (an incredibly unlikely scenario).
+This module only creates the NATS server, not the internal streams. Your services should perform any necessary stream setup
+before launching (similar to database migrations for other data stores).
 
-Persistence is always enabled in this module for similar reasons. Without persistence, an entire copy of the database would
-have to be transferred from the master to each replica on every Redis node restart. The cost of storing
-data on disk is far less than the network costs associated with this transfer. Moreover, persistence should
-never impact performance as writes are completed asynchronously unless configured otherwise.
+That said, there are a few global storage settings to be aware of when first creating the cluster:
 
-Once the Redis cluster is running, the PVC autoresizer
+* `persistence_initial_storage_gb` (can not be changed after NATS cluster creation)
+* `persistence_storage_limit_gb`
+* `persistence_storage_increase_threshold_percent`
+* `persistence_storage_increase_gb`
+* `persistence_storage_class_name` (can not be changed after NATS cluster creation)
+
+Once the NATS cluster is running, the PVC autoresizer
 (provided by [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer))
 will automatically expand the EBS volumes once the free space
 drops below `persistence_storage_increase_threshold_percent` of the current EBS volume size.
@@ -106,13 +121,11 @@ The size of the EBS volume will grow by `persistence_storage_increase_gb` on eve
 
 ### Disruptions
 
-By default, failovers of Redis pods in this module can be initiated at any time. This enables the cluster to automatically
-perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a Redis pod
-is disrupted, a short period of downtime might occur if the disrupted
-pod is the master instance.
+By default, shutdown of NATS pods in this module can be initiated at any time. This enables the cluster to automatically
+perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a NATS pod
+is disrupted, clients connected to that instance will need to re-establish a connection with the NATS cluster.
 
-While this can generally be mitigated when using a [Sentinel-aware client](https://redis.io/docs/latest/develop/reference/sentinel-clients/),
-you may want to provide more control over when these failovers can occur, so we provide the following options:
+While this generally does not cause issues, you may want to provide more control over when these failovers can occur, so we provide the following options:
 
 #### Disruption Windows
 
@@ -139,7 +152,7 @@ For example:
 
 ```hcl
 module "redis" {
-  source = "${var.pf_module_source}kube_redis_sentinel${var.pf_module_ref}"
+  source = "${var.pf_module_source}kube_nats${var.pf_module_ref}"
   ...
 }
 
@@ -170,9 +183,9 @@ operation that you do not want disrupted and then delete it upon completion.
 
 #### Completely Disabling Voluntary Disruptions
 
-Allowing the cluster to periodically initiate failovers of Redis is critical to maintaining system health. However,
+Allowing the cluster to periodically initiate replacement of NATS pods is critical to maintaining system health. However,
 there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
-the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any Redis
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of any NATS
 pod in this module.
 
 This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
@@ -180,7 +193,7 @@ This is *strongly* discouraged. If limiting any and all potential disruptions is
 * Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
 * Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
 
-Note that the above configuration will significantly increase the costs of running the Redis cluster (2.5-5x) versus more
+Note that the above configuration will significantly increase the costs of running the NATS cluster (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
 
 <MarkdownAlert severity="warning">
@@ -191,16 +204,6 @@ flexible settings. In the vast majority of cases, this is entirely unnecessary, 
   An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
   you should still implement defensive coding practices in your client code to account for potential disruptions.
 </MarkdownAlert>
-
-### Extra Redis Configuration
-
-You can add extra Redis configuration flags via the `redis_flags` module variable.
-
-These flags are passed as commandline arguments to the redis servers. This ensures they
-will be of the highest precedence.
-
-For more information about passing flags through the commandline and available options,
-see [this documentation](https://redis.io/docs/latest/operate/oss_and_stack/management/config/).
 
 ## Providers
 
@@ -224,7 +227,7 @@ The following input variables are required:
 
 ### namespace
 
-Description: The namespace to deploy to the redis instances into
+Description: The namespace to deploy to the NATS instances into
 
 Type: `string`
 
@@ -248,6 +251,14 @@ Type: `bool`
 
 Default: `false`
 
+### cert\_manager\_namespace
+
+Description: The namespace where cert-manager is deployed.
+
+Type: `string`
+
+Default: `"cert-manager"`
+
 ### controller\_nodes\_enabled
 
 Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
@@ -256,21 +267,21 @@ Type: `bool`
 
 Default: `false`
 
-### creds\_syncer\_logging\_enabled
+### fsync\_interval\_seconds
 
-Description: Whether to enable logging for the creds-syncer pods
+Description: Interval in seconds at which data will be synced to disk on each node. Setting this to 0 will force an fsync after each message (which will lower overall throughput dramatically).
 
-Type: `bool`
+Type: `number`
 
-Default: `false`
+Default: `10`
 
 ### helm\_version
 
-Description: The version of the bitnami/redis helm chart to use
+Description: The version of the bitnami/nats helm chart to use
 
 Type: `string`
 
-Default: `"19.0.2"`
+Default: `"8.4.5"`
 
 ### instance\_type\_anti\_affinity\_required
 
@@ -280,17 +291,49 @@ Type: `bool`
 
 Default: `true`
 
-### lfu\_cache\_enabled
+### log\_level
 
-Description: Whether redis will be deployed as an LFU cache
+Description: The log level for the NATS pods. Must be one of: info, debug, trace
 
-Type: `bool`
+Type: `string`
 
-Default: `false`
+Default: `"info"`
+
+### max\_connections
+
+Description: The maximum number of client connections to the NATS cluster
+
+Type: `number`
+
+Default: `64000`
+
+### max\_control\_line\_kb
+
+Description: The maximum length of a protocol line including combined length of subject and queue group (in KB).
+
+Type: `number`
+
+Default: `4`
+
+### max\_outstanding\_catchup\_mb
+
+Description: The maximum in-flight bytes for stream catch-up.
+
+Type: `number`
+
+Default: `128`
+
+### max\_payload\_mb
+
+Description: The maximum size of a message payload (in MB).
+
+Type: `number`
+
+Default: `8`
 
 ### minimum\_memory\_mb
 
-Description: The minimum memory in Mb to use for the redis nodes
+Description: The minimum memory in Mb to use for the NATS nodes
 
 Type: `number`
 
@@ -322,19 +365,27 @@ Default: `true`
 
 ### persistence\_backups\_enabled
 
-Description: Whether to enable backups of the Redis durable storage.
+Description: Whether to enable backups of the NATS durable storage.
 
 Type: `bool`
 
 Default: `true`
 
-### persistence\_size\_gb
+### persistence\_initial\_storage\_gb
 
-Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can not be changed after cluster creation.
+Description: How many GB to initially allocate for persistent storage (will grow automatically as needed). Can only be set on cluster creation.
 
 Type: `number`
 
 Default: `1`
+
+### persistence\_storage\_class\_name
+
+Description: The StorageClass to use for the PVs used to store filesystem data. Can only be set on cluster creation.
+
+Type: `string`
+
+Default: `"ebs-standard-retained"`
 
 ### persistence\_storage\_increase\_gb
 
@@ -354,11 +405,19 @@ Default: `20`
 
 ### persistence\_storage\_limit\_gb
 
-Description: The maximum number of gigabytes of storage to provision for each redis node
+Description: The maximum number of gigabytes of storage to provision for each NATS node
 
 Type: `number`
 
 Default: `null`
+
+### ping\_interval\_seconds
+
+Description: Interval in seconds at which pings are sent to clients, leaf nodes, and routes.
+
+Type: `number`
+
+Default: `20`
 
 ### pull\_through\_cache\_enabled
 
@@ -367,30 +426,6 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
-
-### redis\_flags
-
-Description: Extra configuration flags to pass to each redis node
-
-Type: `list(string)`
-
-Default: `[]`
-
-### redis\_save
-
-Description: Sets the save option for periodic snapshotting
-
-Type: `string`
-
-Default: `"300 100"`
-
-### replica\_count
-
-Description: The number of redis replicas to deploy
-
-Type: `number`
-
-Default: `3`
 
 ### spot\_nodes\_enabled
 
@@ -407,6 +442,22 @@ Description: The lifetime of database credentials generated by Vault
 Type: `number`
 
 Default: `16`
+
+### vault\_internal\_pki\_backend\_mount\_path
+
+Description: The mount path of the PKI backend for internal certificates.
+
+Type: `string`
+
+Default: `"pki/internal"`
+
+### vault\_internal\_url
+
+Description: The internal URL of the Vault cluster.
+
+Type: `string`
+
+Default: `"http://vault-active.vault.svc.cluster.local:8200"`
 
 ### voluntary\_disruption\_window\_cron\_schedule
 
@@ -448,81 +499,45 @@ Type: `bool`
 
 Default: `true`
 
+### write\_deadline\_seconds
+
+Description: The maximum number of seconds the server will block when writing messages to consumers.
+
+Type: `number`
+
+Default: `55`
+
 ## Outputs
 
 The following outputs are exported:
 
 ### admin\_creds\_secret
 
-Description: The name of the Kubernetes Secret holding credentials for the admin role in the Redis database
+Description: The name of the Kubernetes Secret holding certificate credentials for the admin role in the NATS cluster
 
-### admin\_role
+### client\_port
 
-Description: The Vault role used to get admin credentials for the created Redis cluster
+Description: The port that NATS clients should connect to.
 
-### master\_set
+### cluster\_port
 
-Description: The value for the master set to use when configuring Sentinel-aware Redis clients
+Description: The port that NATS uses for internal cluster communication.
 
-### match\_labels
+### host
 
-Description: A label selector that matches all Redis pods in the cluster
+Description: The NATS cluster hostname to connect to,
 
-### match\_labels\_master
+### metrics\_port
 
-Description: A label selector that matches only the Redis master pod in the cluster
-
-### namespace
-
-Description: Kubernetes namespace where module resources are created
+Description: The port that Prometheus metrics is served on.
 
 ### reader\_creds\_secret
 
-Description: The name of the Kubernetes Secret holding credentials for the reader role in the Redis database
-
-### reader\_role
-
-Description: The Vault role used to get read-only credentials for the created Redis cluster
-
-### redis\_host
-
-Description: A service address that points to all Redis nodes
-
-### redis\_host\_list
-
-Description: A list of domain names for every Redis pod in the cluster
-
-### redis\_master\_host
-
-Description: A service address that points to only the writable redis master
-
-### redis\_port
-
-Description: The port that the Redis servers listen on
-
-### redis\_sentinel\_host
-
-Description: A service address that points to the Redis Sentinels
-
-### redis\_sentinel\_port
-
-Description: The port that the Sentinel servers listen on
-
-### root\_name
-
-Description: The name of the root user of the database
-
-### root\_password
-
-Description: The password for root user of the database
+Description: The name of the Kubernetes Secret holding certificate credentials for the reader role in the NATS cluster
 
 ### superuser\_creds\_secret
 
-Description: The name of the Kubernetes Secret holding credentials for the superuser role in the Redis database
-
-### superuser\_role
-
-Description: The Vault role used to get superuser credentials for the created Redis cluster
+Description: The name of the Kubernetes Secret holding certificate credentials for the superuser role in the NATS cluster
 
 ## Usage
 

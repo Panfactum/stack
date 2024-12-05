@@ -15,7 +15,7 @@ Kubernetes cluster.
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
 * [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
@@ -27,7 +27,7 @@ The following providers are needed by this module:
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -139,7 +139,7 @@ Default: `true`
 
 ### error\_reporting\_enabled
 
-Description: True iff errors should be reported to authentik for telemetry purposes
+Description: True iff errors should be reported to Authentik for telemetry purposes
 
 Type: `bool`
 
@@ -155,7 +155,7 @@ Default: `false`
 
 ### log\_level
 
-Description: The log level for the operator pods
+Description: The log level for the Authentik pods
 
 Type: `string`
 
@@ -176,6 +176,14 @@ Description: Kubernetes namespace to deploy the resources into
 Type: `string`
 
 Default: `"authentik"`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
 
 ### panfactum\_scheduler\_enabled
 

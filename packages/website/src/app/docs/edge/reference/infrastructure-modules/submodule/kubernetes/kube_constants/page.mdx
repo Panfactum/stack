@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_constants" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_constants" status="stable" type="submodule" />
+<ModuleHeader name="kube_constants" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_constants" status="stable" type="submodule"/>
 
 # Kubernetes Constants
 
@@ -39,6 +38,14 @@ Description: The taint added to every EKS nodes
 ### default\_priority\_class\_name
 
 Description: The default Kubernetes Priority Class
+
+### images
+
+Description: Images that are used throughout the stack
+
+### linkerd\_taint
+
+Description: The taint added to every node before the Linkerd CNI is installed (i.e., when networking is unavailable)
 
 ### panfactum\_image\_repository
 

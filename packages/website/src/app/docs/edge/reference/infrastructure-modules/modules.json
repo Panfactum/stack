@@ -231,11 +231,6 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_fledged",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_gha",
       "type": "direct",
       "group": "kubernetes"
@@ -301,6 +296,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_nats",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_node_image_cache",
       "type": "submodule",
       "group": "kubernetes"
@@ -353,11 +353,6 @@
     {
       "module": "kube_redis_sentinel",
       "type": "submodule",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_reflector",
-      "type": "direct",
       "group": "kubernetes"
     },
     {

@@ -32,7 +32,7 @@ The basic process for running first-party code in a Kubernetes cluster is as fol
    | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)        | [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)      | Orchestrates stateless workloads such as webservers.                                                                    |
    | [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)      | [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) | Orchestrates for stateful workloads such as databases.                                                                  |
    | [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)            | [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job)         | Periodically runs one-shot processes on a schedule such as system maintenance scripts.                                  |
-   | [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)            | [kube_daemon_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set)         | Runs a pod on every tolerated node in the cluster.                                  |
+   | [DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)          | [kube\_daemon\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set)     | Runs a pod on every tolerated node in the cluster.                                                                      |
    | [Argo Workflow](https://argoproj.github.io/workflows/)                                     | [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflows/wf_spec)                       | An advanced pattern available through our [Workflow Engine Addon](/docs/edge/guides/addons/workflow-engine/installing). |
 
 3. [Deploy the IaC module](/docs/edge/guides/iac/first-party-modules#deploying-modules) by configuring it in the appropriate environment directory and running `terragrunt apply`.
@@ -103,7 +103,7 @@ That said, init containers do have several drawbacks:
   may be a large delay between when an init container finishes and a regular container starts.
 
 * Resources requested by init containers are never reclaimed by Kubernetes even after the init container terminates. For
-  example, if an init container used `500Mi` and the rest of containers only use `100Mi`, the pod will always have `500Mi`
+  example, if an init container requests `500Mi` and the rest of containers only request `100Mi`, the pod will always have `500Mi`
   of memory reserved throughout its lifetime even though`400Mi` is never used. For more information,
   see this [issue](https://github.com/kubernetes/kubernetes/issues/124282).
 
@@ -267,10 +267,10 @@ We provide the ability to run on cheaper node classes by enabling the following:
   can only run on AMD64 CPU architectures, you should set this to `false`. [^91]
 
 [^90]: Spot tolerations are added to *all* pods by default, even those not created by Panfactum submodules. You can add the label `"panfactum.com/spot-enabled" = "false"` to
-the pod to prevent spot tolerations from being injected.
+    the pod to prevent spot tolerations from being injected.
 
 [^91]: ARM64 tolerations are added to *all* pods by default, even those not created by Panfactum submodules. You can add the label `"panfactum.com/arm-enabled" = "false"` to
-the pod to prevent spot tolerations from being injected.
+    the pod to prevent spot tolerations from being injected.
 
 We also provide one additional node class: controller nodes. These nodes are special in that they are managed by
 [AWS EKS Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) rather than by Karpenter.
@@ -429,7 +429,7 @@ All containers will additionally have the following environment variables set by
 * `NODE_NAME`: The name of the node the pod is scheduled on.
 
 [^92]: The environment variables are added to *all* containers by default, even those not created by Panfactum submodules.
-You can add the label `"panfactum.com/inject-env-enabled" = "false"` to the pod to prevent these environment variables from being injected into its containers.
+    You can add the label `"panfactum.com/inject-env-enabled" = "false"` to the pod to prevent these environment variables from being injected into its containers.
 
 #### Mounted Files
 
@@ -513,6 +513,23 @@ by the controller and provide its name via the `service_account_name` output.
 
 You can use the output to assign additional permissions to the pods by following our guides
 [here](/docs/edge/guides/deploying-workloads/permissions).
+
+### Caching Images on Nodes
+
+By default, a pod's images are pulled just-in-time to the nodes where the pod is assigned. This can result in a significant
+delay to startup time, especially for large images.
+
+We provide a [custom controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller) that will automatically cache images on nodes before the pods are scheduled
+to ensure that they are available as soon as possible. Panfactum workload submodules already have implicit integration with this
+controller, and you can control the image cache settings on a per-container basis through the `containers` input to each workload submodule.
+
+In particular, the container configuration object has two relevant fields:
+
+* `image_prepull_enabed`: Iff true, will schedule a pod to seed the node cache of new nodes immediately upon node creation. (default: `true`)
+* `image_pin_enabled`: Iff true, will pin the image to the node to prevent it from evey being garbage collected. (default: `true`)
+
+If you are not using a Panfactum workload submodule, you can add images directly to the node cache by using the
+[kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) submodule.
 
 ## Custom Workload Deployments
 

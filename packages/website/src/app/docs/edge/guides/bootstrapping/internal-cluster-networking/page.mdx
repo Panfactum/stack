@@ -1,4 +1,3 @@
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import ciliumLaunchImg from './cilium-launch.jpg'
@@ -69,33 +68,15 @@ Let's deploy it now.
 
 5. Run `terragrunt apply`.
 
-6. If the deployment succeeds, you should see a `core-dns` deployment with 2/2 pods running:
+6. If the deployment succeeds, you should see a `core-dns` deployment with either 1/2 or 2/2 pods running:
 
    <MarkdownImage src={corednsImg} alt="CoreDNS launched successfully" />
 
-## Run Network Tests
-
-<MarkdownAlert severity="warning">
-  This test takes awhile to complete, but please run it before continuing. If something is broken,
-  it will break other components in non-obvious ways. Additionally, the fix will usually require
-  re-provisioning your entire cluster.
-</MarkdownAlert>
-
-Cilium comes with a [companion CLI tool](https://github.com/cilium/cilium-cli) that is bundled with the Panfactum devShell.
-We will use that to test that cilium is working as intended:
-
-1. Run `cilium connectivity test`.
-
-2. Wait about 20-30 minutes for the test to complete.
-
-3. If everything completes successfully, you should receive a message like this:
-
-   ```shell-session
-   ✅ All 46 tests (472 actions) successful, 18 tests skipped, 0 scenarios skipped.
-   ```
-
-4. Unfortunately, the test does not clean up after itself. You should run `kubectl delete ns cilium-test` to remove
-   the test resources.
+   If you see only 1/2 pods running, that is because we force the CoreDNS pods to run on nodes with different instance types
+   for high-availability. However, the cluster won't be able to dynamically provision the new instance types until
+   you complete the [autoscaling section](/docs/edge/guides/bootstrapping/autoscaling) of the bootstrapping guide.
+   Once you complete that guide section, you will see that both CoreDNS pods have launched successfully. This should
+   not have any impact in the interim.
 
 ### Next Steps
 
