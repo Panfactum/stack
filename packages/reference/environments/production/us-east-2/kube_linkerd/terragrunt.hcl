@@ -23,4 +23,9 @@ dependency "kyverno" {
 
 inputs = {
   vault_ca_crt = dependency.cert_issuers.outputs.vault_ca_crt
+
+  # You should keep monitoring of this module disabled unless you need
+  # granular request / tcp packet inspection as this adds significant
+  # extra cost which scales linearly with the size of your cluster
+  monitoring_enabled = false
 }

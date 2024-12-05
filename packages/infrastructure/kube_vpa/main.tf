@@ -427,6 +427,9 @@ resource "kubectl_manifest" "vpa_updater" {
   force_conflicts   = true
 }
 
+/***************************************
+* Kyverno Integration
+***************************************/
 
 resource "kubernetes_cluster_role" "kyverno_background_controller" {
   metadata {
@@ -458,4 +461,88 @@ resource "kubernetes_cluster_role" "kyverno_admission_controller" {
     verbs      = ["get", "list", "create", "update", "watch", "delete"]
     resources  = ["verticalpodautoscalers", "verticalpodautoscalercheckpoints"]
   }
+}
+
+resource "kubectl_manifest" "adjust_vpa_settings" {
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "Policy"
+    metadata = {
+      name      = "adjust-vpa-settings"
+      namespace = local.namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      rules = [
+        {
+          name = "adjust-update-settings"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["Deployment"]
+                  operations = ["CREATE", "UPDATE"]
+                  names = [
+                    "vpa-admission-controller",
+                    "vpa-recommender",
+                    "vpa-updater"
+                  ]
+                }
+              }
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [{
+              apiVersion = "apps/v1"
+              kind       = "Deployment"
+              name       = "{{ request.object.metadata.name }}"
+            }]
+            patchesJson6902 = yamlencode([
+              {
+                path = "/spec/strategy/rollingUpdate"
+                value = {
+                  maxSurge       = 0
+                  maxUnavailable = 1
+                }
+                op = "replace"
+              },
+            ])
+          }
+        },
+        {
+          name = "use-system-node-critical"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["Pod"]
+                  operations = ["CREATE"]
+                  names      = ["vpa-admission-controller-*"]
+                }
+              }
+            ]
+          }
+          mutate = {
+            patchesJson6902 = yamlencode([
+              {
+                path  = "/spec/priorityClassName"
+                value = "system-node-critical"
+                op    = "replace"
+              },
+              # This is required to avoid an error by the priority admission controller
+              {
+                path = "/spec/priority"
+                op   = "remove"
+              }
+            ])
+          }
+        }
+      ]
+    }
+  })
+
+  force_new         = true
+  force_conflicts   = true
+  server_side_apply = true
 }

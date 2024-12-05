@@ -326,7 +326,7 @@ resource "aws_eks_node_group" "controllers" {
   node_role_arn          = aws_iam_role.node_group.arn
   subnet_ids             = [for subnet in var.node_subnets : data.aws_subnet.node_groups[subnet].id]
 
-  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.medium", "m6g.medium"]
+  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.large", "m6g.large"]
 
   # Unlike Karpenter, applies of this module will fail if EKS cannot replace the nodes in the node groups
   # with updated versions due to being unable to evict modules. As a result, we enable force eviction
