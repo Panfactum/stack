@@ -435,6 +435,7 @@ resource "kubectl_manifest" "cnpg_scale_selector" {
   force_conflicts   = true
   server_side_apply = true
   depends_on = [
+    helm_release.cnpg,
     kubernetes_cluster_role.kyverno_admission_controller,
     kubernetes_cluster_role.kyverno_background_controller
   ]
