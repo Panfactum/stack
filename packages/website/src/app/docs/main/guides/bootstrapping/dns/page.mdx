@@ -63,7 +63,7 @@ it will set up the root [hosted zones](https://docs.aws.amazon.com/Route53/lates
   purchased domain, run
 
   ```bash
-  terragrunt import aws_route53_zone.zones[\"<your_domain>\"] <your_hosted_zone_id>
+  terragrunt import aws_route53_zone.zones\[\"<your_domain>\"\] <your_hosted_zone_id>
   ```
 
   **AFTER** you set up the module but **BEFORE** running  `terragrunt apply`.

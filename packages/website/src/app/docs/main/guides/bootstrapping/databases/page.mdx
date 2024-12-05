@@ -144,19 +144,20 @@ Let's try it out:
    Note that the `kube_pg_cluster` also set up authentication with Vault and now provisions you dynamic credentials.
    These credentials will automatically be revoked as soon as you close the tunnel.
 
-4. In a separate terminal, launch `pgadmin4` (included in the Panfactum stack). Once it is running, visit `http://localhost:5050/`.
+4. In a separate terminal, launch `pgadmin4` (can be installed with `nix-shell -p pgadmin4-desktopmode` if needed).
+Once it is running, visit `http://localhost:5050/`.
 
 5. Register a new server:
 
-   <MarkdownImage src={pgAdminRegisterSeverImg} alt={"Register a new server with PgAdmin4"} />
+   <MarkdownImage src={pgAdminRegisterSeverImg} alt={"Register a new server with pgAdmin4"} />
 
 6. Set the connection details using the information displayed when you opened the tunnel:
 
-   <MarkdownImage src={pgAdminConnectionDetailsImg} alt={"Add connection details to the new server configuration in PgAdmin4"} />
+   <MarkdownImage src={pgAdminConnectionDetailsImg} alt={"Add connection details to the new server configuration in pgAdmin4"} />
 
-7. You should now see the main PgAdmin4 dashboard and can begin running commands against the database:
+7. You should now see the main pgAdmin4 dashboard and can begin running commands against the database:
 
-   <MarkdownImage src={pgAdminDashboardImg} alt={"PgAdmin4 dashboard for the test database"} />
+   <MarkdownImage src={pgAdminDashboardImg} alt={"pgAdmin4 dashboard for the test database"} />
 
 #### Clean Up Test Database
 
@@ -173,37 +174,25 @@ Once you are done working with the test database:
 
 5. Remove the folder.
 
-## Redis
-
-Rivalling PostgreSQL in popularity is the key-value database, [Redis.](https://github.com/redis/redis) Redis
-is much simpler than PostgreSQL and is often used as an in-memory cache or job queuing system.
-
-Due to its simplicity, it does not require a full Kubernetes Operator to run effectively in a production-hardened
-manner. Instead, you can run our [kube\_redis\_sentinel](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
-directly.
-
-This deploys a highly-available set of Redis nodes that are managed by [Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/),
-a Redis companion project for managing failovers.
-
-Ultimately, working with Redis in the Panfactum stack is very similar to PostgreSQL, so we will not complete
-a full test here. We will make use of it in the next section when we set up your identity provider,
-so you can experiment with it then (including using `pf-db-tunnel` to connect to your Redis instances).
-
 ## Other Databases
 
-Database engines are extremely powerful
-and flexible tools. We believe our stack contains the necessary databases to solve 99.9% of the problems
-organizations may face:
+The PostgreSQL engine is the only one needed to complete the bootstrapping guide. As a result, we will delay installing additional
+databases until you need them.
+
+However, the Panfactum stack comes with built-in support for many other database engines.
+We believe our stack contains the necessary databases to address the majority of use-cases an
+organization may face:
 
 * **Relational:** PostgreSQL ([kube\_pg\_cluster](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster))
 * **Key-value:** Redis ([kube\_redis\_sentinel](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel))
+* **Message Broker:** NATS Jetstream ([kube\_nats](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_nats))
 * **Ledger:** Kafka (Coming soon)
 * **Warehouse:** ClickHouse (Coming soon)
 
-We are focusing our investments on those core modules to provide a best-in-class experience.
+We are focusing our investments on these core database modules to provide a best-in-class experience.
 
-That said, you can easily add other database modules to the Kubernetes clusters in the Panfactum stack. Utilities like
-EBS snapshotting will automatically work. In the future,
+Additionally, you can easily add other custom database modules to the Kubernetes clusters in the Panfactum stack. Utilities like
+EBS snapshotting and autoscaling will automatically work. In the future,
 we will provide guides for how to extend the core Panfactum utilities such as `pf-db-tunnel` to include your
 custom database deployments.
 
