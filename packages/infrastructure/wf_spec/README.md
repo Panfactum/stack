@@ -59,7 +59,7 @@ providing the relevant parameter to the template:
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   # By default, all pods will have this ConfigMap included as a volume
   config_map_mounts = {
@@ -86,7 +86,7 @@ but if you wanted to _add_ a new volume, you would need to explicitly concatenat
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
   
   templates = [
     {
@@ -116,7 +116,7 @@ although the syntax is slightly different. A Workflow has `arguments` and a temp
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   # These will show up in the the Argo web UI and you can pass them in when
   # creating a Workflow from a WorkflowTemplate programmatically
@@ -180,7 +180,7 @@ For example:
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
   
   passthrough_parameters = [
     {
@@ -221,7 +221,7 @@ is equivalent to
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
   
   arguments = {
     parameters = [
@@ -354,7 +354,7 @@ data "aws_iam_policy_document" "permissions" {
 }
 
 module "workflow_spec" {
-  source  = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   extra_aws_permissions = data.aws_iam_policy_document.permissions.json
 }
@@ -385,7 +385,7 @@ resource "kubernetes_cluster_role_binding" "permissions" {
 }
 
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 }
 ```
 
@@ -413,16 +413,11 @@ snippet shows an example:
 
 ```hcl
 module "constants" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
-}
-
-module "pull_through" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/aws_ecr_pull_through_cache_addresses?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
-  pull_through_cache_enabled = var.pull_through_cache_enabled
+  source = "${var.pf_module_source}kube_constants${var.pf_module_ref}"
 }
 
 module "example_wf" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name                    = "example"
   namespace               = var.namespace
@@ -433,21 +428,11 @@ module "example_wf" {
     {
       name    = "example"
       container = {
-        image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+        image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
         command = ["/some-command-here"]
       }
     }
   ]
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
@@ -473,7 +458,7 @@ resource "kubernetes_config_map" "wf_scripts" {
 }
 
 module "example_wf" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_MAIN__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name                    = "example"
   namespace               = var.namespace
@@ -484,7 +469,7 @@ module "example_wf" {
     {
       name    = "example"
       container = {
-        image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+        image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
         command = ["/scripts/example.sh"] # Execute the mounted script
       }
     }
@@ -497,16 +482,6 @@ module "example_wf" {
       mount_path = "/scripts"
     }
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 

@@ -56,6 +56,14 @@ module "util" {
 # EventSource
 #############################################################
 
+resource "kubernetes_service_account" "service_account" {
+  metadata {
+    name      = var.name
+    namespace = var.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
+}
+
 resource "kubectl_manifest" "event_source" {
   yaml_body = yamlencode({
     apiVersion = "argoproj.io/v1alpha1"
@@ -66,6 +74,8 @@ resource "kubectl_manifest" "event_source" {
       labels    = module.util.labels
     }
     spec = merge({
+      serviceAccountName = kubernetes_service_account.service_account.metadata[0].name
+
       # Note: This is our custom enhancement to the CRD in order to get the VPA
       # to work. See https://github.com/argoproj/argo-events/issues/3180
       labelSelector = "eventsource-name=${var.name},owner-name=${var.name},controller=eventsource-controller"
@@ -104,6 +114,8 @@ resource "kubectl_manifest" "event_source" {
 
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [module.aws_permissions]
 }
 
 resource "kubectl_manifest" "vpa" {

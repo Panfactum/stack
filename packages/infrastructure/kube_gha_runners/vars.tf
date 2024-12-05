@@ -58,7 +58,7 @@ variable "extra_pod_labels" {
 }
 
 variable "node_image_cache_enabled" {
-  description = "Whether to use kube-fledged to cache images locally for better startup performance"
+  description = "Whether to cache images locally for better startup performance"
   type        = bool
   default     = true
 }
