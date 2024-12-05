@@ -114,8 +114,6 @@ resource "kubectl_manifest" "event_source" {
 
   force_conflicts   = true
   server_side_apply = true
-
-  depends_on = [module.aws_permissions]
 }
 
 resource "kubectl_manifest" "vpa" {

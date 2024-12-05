@@ -238,7 +238,7 @@ module "tf_deploy_workflow" {
   tmp_directories = {
     code = {
       mount_path = "/code"
-      size_mb    = 1000
+      size_mb    = var.code_storage_gb * 1024
     }
     aws = {
       mount_path = "/.aws"
@@ -252,7 +252,7 @@ module "tf_deploy_workflow" {
     }
     tmp = {
       mount_path = "/tmp"
-      size_mb    = 3000
+      size_mb    = var.tmp_storage_gb * 1024
     }
     # TODO: I do not think that terragrunt should be utilizing this directory
     # but due to a bug it is so we must provide it. Revisit in a future release.
