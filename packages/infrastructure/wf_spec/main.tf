@@ -430,6 +430,10 @@ locals {
     workflowMetadata = {
       labels      = merge(module.util.labels, var.extra_workflow_labels)
       annotations = var.workflow_annotations
+      labelsFrom = merge(
+        { for parameter in var.labels_from_parameters : parameter => { expression = "workflow.parameters.${parameter}" } },
+        var.labels_from
+      )
     }
     workflowTemplateRef = var.cluster_workflow_template_ref == null ? null : {
       clusterScope = true

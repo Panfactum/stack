@@ -419,5 +419,16 @@ variable "pull_through_cache_enabled" {
   default     = true
 }
 
+variable "labels_from_parameters" {
+  description = "A list of parameter names that will be added as labels when the Workflow is created. The label values will be set as the parameter values."
+  type        = list(string)
+  default     = []
+}
+
+variable "labels_from" {
+  description = "Additional values from the spec.workflowMetadata.labelsFrom field. Will be merged with labels_from_parameters."
+  type        = map(string)
+  default     = {}
+}
 
 

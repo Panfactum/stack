@@ -135,6 +135,8 @@ module "tf_deploy_workflow" {
       default     = var.tf_apply_dir
     }
   ]
+  labels_from_parameters = ["git_ref"]
+
   common_env = {
     REPO         = var.repo
     GIT_REF      = "{{inputs.parameters.git_ref}}"

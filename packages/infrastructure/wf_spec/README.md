@@ -389,6 +389,21 @@ module "workflow_spec" {
 }
 ```
 
+### Workflow Labels
+
+In addition to the statically defined labels for the generated Workflows via `extra_workflow_labels`,
+you can also specify dynamically generated labels.
+This can be helpful for easily searching for workflows based on their runtime properties (e.g., parameter inputs).
+
+We provide two means to do this:
+
+- `labels_from_parameters`: Specify a list of parameters. Generated workflows will have labels added where the key is the parameter
+name and the value is the parameter value.
+
+- `labels_from`: Specify an arbitrary [labelsFrom](https://argo-workflows.readthedocs.io/en/latest/fields/#labelvaluefrom) configuration
+for the generated Workflows. The configuration is merged with `labels_from_parameters`.
+
+
 ### Using the Panfactum devShell
 
 We make the Panfactum devShell available as a container image that can be run in a

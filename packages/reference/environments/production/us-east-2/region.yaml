@@ -18,7 +18,7 @@ extra_inputs:
   enhanced_ha_enabled: false # Only set to 'false' in non-production environments
   panfactum_scheduler_enabled: true # Only set to `true` when kube_scheduler has been deployed
   vpa_enabled: true # Do not enable until kube_vpa is deployed
-  node_image_cache_enabled: true # Do not enable until kube_fledged is deployed
+  node_image_cache_enabled: true
   monitoring_enabled: true # Alpha: Do not use
   canary_enabled: false # Alpha: Do not use
 
