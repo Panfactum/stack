@@ -37,11 +37,11 @@ export function PricingHeader({ plan, addlFeatures, ...props }: Props) {
       </div>
 
       <div className="flex flex-col gap-y-xl items-start">
-        <h3 className="text-display-sm xl:text-display-md font-medium">
+        <h3 className="text-display-sm xl:text-display-md font-medium whitespace-nowrap">
           {CURRENCY_FORMAT.format(plan.price + planAddlFeatures)}{' '}
           <span className="text-md text-tertiary">per month</span>
         </h3>
-        <p className="text-sm text-tertiary">{plan.description}</p>
+        <p className="text-sm text-tertiary whitespace-nowrap">{plan.description}</p>
       </div>
 
       <Button variant="primary" size="xl">

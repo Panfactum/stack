@@ -93,12 +93,14 @@ function InputRow({
   title: string | ReactElement
 }) {
   return (
-    <div className="flex flex-col w-full lg:flex-row gap-x-6 gap-y-[24px] items-center justify-center lg:justify-start">
-      <div className="w-full lg:w-48 text-left text-md font-semibold">
+    <tr className="w-full flex flex-col items-start lg:flex-row py-4">
+      <td className="text-md font-semibold py-4 min-w-[300px] lg:text-left py-4">
         {title}
-      </div>
-      {children}
-    </div>
+      </td>
+      <td colSpan={4} className="w-full">
+        {children}
+      </td>
+    </tr>
   )
 }
 
@@ -115,7 +117,7 @@ function IntegerInput({
 }) {
   return (
     <div className={`flex flex-1 flex-col self-stretch gap-y-sm`}>
-      <Label className={`text-secondary text-sm font-inter`}>{label}</Label>
+      <Label className={`text-secondary text-sm font-inter whitespace-nowrap`}>{label}</Label>
       <Input
         id={id}
         type="number"
@@ -353,26 +355,31 @@ export default function Calculator({
 
   return (
     <>
-      <div className="flex flex-col items-center self-stretch gap-y-6xl">
-        <div className="w-full flex flex-row gap-x-2 lg:gap-x-6 gap-y-6 items-center flex-wrap lg:justify-start">
-          <div className="w-full lg:w-48 text-left text-md font-semibold">
-            Size Presets
-          </div>
-          <Button variant={'outline'} size={`sm`} onClick={setSoloPreset}>
-            Solo
-          </Button>
-          <Button variant={'outline'} size={`sm`} onClick={setSmallPreset}>
-            Small
-          </Button>
-          <Button variant={'outline'} size={`sm`} onClick={setMediumPreset}>
-            Medium
-          </Button>
-          <Button variant={'outline'} size={`sm`} onClick={setLargePreset}>
-            Large
-          </Button>
-        </div>
-        <InputRow title={'Organization'}>
-          <>
+      <table className="w-full">
+        <tbody>
+          <tr className="w-full flex flex-col items-start lg:flex-row">
+            <td className="text-md font-semibold py-4 min-w-[300px] lg:text-left">
+              Size Presets
+            </td>
+            <td colSpan={4}>
+              <div className="flex items-center gap-4">
+                <Button variant={'outline'} size={`sm`} onClick={setSoloPreset}>
+                  Solo
+                </Button>
+                <Button variant={'outline'} size={`sm`} onClick={setSmallPreset}>
+                  Small
+                </Button>
+                <Button variant={'outline'} size={`sm`} onClick={setMediumPreset}>
+                  Medium
+                </Button>
+                <Button variant={'outline'} size={`sm`} onClick={setLargePreset}>
+                  Large
+                </Button>
+              </div>
+            </td>
+          </tr>
+          <InputRow title={'Organization'}>
+          <div className="flex items-center flex-col lg:flex-row gap-4">
             <IntegerInput
               id="employee-count"
               label="Number of Employees"
@@ -391,10 +398,10 @@ export default function Calculator({
               value={lablorCostHourly}
               onChange={onLaborCostHourlyChange}
             />
-          </>
+          </div>
         </InputRow>
         <InputRow title={'Network'}>
-          <>
+          <div className="flex items-center flex-col lg:flex-row gap-4">
             <IntegerInput
               id="vpc-count"
               label="Number of VPCs"
@@ -413,7 +420,7 @@ export default function Calculator({
               value={interAZTraffic}
               onChange={onInterAZTrafficChange}
             />
-          </>
+          </div>
         </InputRow>
         <InputRow
           title={
@@ -429,8 +436,8 @@ export default function Calculator({
             </Tooltip>
           }
         >
-          <div className="grow flex self-stretch gap-2 items-center">
-            <span>5%</span>
+          <div className="w-full flex items-center h-[56px]">
+            <div className="flex-none w-[32px]">5%</div>
             <Slider
               defaultValue={[utilization]}
               min={0}
@@ -439,12 +446,13 @@ export default function Calculator({
               onValueChange={([a]) => {
                 setUtilization(a)
               }}
+              className="flex-1"
             />
-            <span>65%</span>
+            <div className="flex-none flex items-center justify-end w-[48px]">65%</div>
           </div>
         </InputRow>
         <InputRow title={'Application Servers'}>
-          <>
+          <div className="flex items-center gap-4">
             <IntegerInput
               id="workload-cpu-cores"
               label="vCPU Cores"
@@ -458,7 +466,7 @@ export default function Calculator({
               onChange={onWorkloadMemoryChange}
             />
             <div className={`flex-1`}></div>
-          </>
+          </div>
         </InputRow>
         <InputRow
           title={
@@ -472,7 +480,7 @@ export default function Calculator({
             </Tooltip>
           }
         >
-          <>
+          <div className="flex items-center flex-col lg:flex-row gap-4">
             <IntegerInput
               id="postgres-cpu-cores"
               label="vCPU Cores"
@@ -491,7 +499,7 @@ export default function Calculator({
               value={pgStorage}
               onChange={onPGStorageChange}
             />
-          </>
+          </div>
         </InputRow>
         <InputRow
           title={
@@ -505,7 +513,7 @@ export default function Calculator({
             </Tooltip>
           }
         >
-          <>
+          <div className="flex items-center flex-col lg:flex-row gap-4">
             <IntegerInput
               id="kv-cpu-cores"
               label="vCPU Cores"
@@ -524,10 +532,10 @@ export default function Calculator({
               value={kvStorage}
               onChange={onKVStorageChange}
             />
-          </>
+          </div>
         </InputRow>
         <InputRow title={'Observability'}>
-          <>
+          <div className="flex items-center flex-col lg:flex-row gap-4">
             <IntegerInput
               id="logs"
               label="GB Logs / Month"
@@ -546,7 +554,7 @@ export default function Calculator({
               value={spans}
               onChange={onSpansChange}
             />
-          </>
+          </div>
         </InputRow>
         <InputRow
           title={
@@ -571,6 +579,10 @@ export default function Calculator({
           <div className={`flex-1`}></div>
           <div className={`flex-1`}></div>
         </InputRow>
+        </tbody>
+      </table>
+      <div className="flex flex-col items-center self-stretch gap-y-6xl">
+        
       </div>
       <SavingsTable
         workloadCores={workloadCores}
