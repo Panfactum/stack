@@ -28,6 +28,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
+import StickyLayout from '@/layouts/StickyLayout.astro'
 const IMAGES = [
   {
     url: '/odeao-labs.png',
@@ -170,7 +171,7 @@ const SUPPORT_DREAMS = [
 >
   <HeroSection
     slot="hero"
-    class="flex space-y-6xl flex-col items-center py-4xl pb-0"
+    class="flex space-y-6xl flex-col items-center py-4xl"
   >
     <div
       class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
@@ -211,15 +212,6 @@ const SUPPORT_DREAMS = [
         </Button>
         <Button variant="primary" size="xl">Get started</Button>
       </div>
-    </div>
-    <div
-      class="container px-container-padding-mobile xl:px-container-padding-desktop flex justify-center items-center"
-    >
-      <img
-        src="/hero-img.png"
-        alt="Panfactum Platform Image"
-        class="hidden lg:block max-h-[576px]"
-      />
     </div>
   </HeroSection>
 

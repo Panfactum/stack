@@ -1,0 +1,82 @@
+---
+import '../styles/global.css'
+const redirect = Astro.props.redirect
+import { ViewTransitions } from 'astro:transitions'
+import Footer from '../components/layout/footer.astro'
+import { HeaderNav } from '@/components/layout/header-nav'
+import { Suspense } from 'react'
+import { DocsSidebar } from '@/components/documentation/docs-sidebar'
+
+const pathname = new URL(Astro.request.url).pathname
+const hasBorder = Astro.props.hasBorder ? Astro.props.hasBorder : false
+
+const showFooter =
+  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    {
+      redirect ? (
+        <meta http-equiv="refresh" content={`0; url=${redirect}`} />
+      ) : null
+    }
+
+    <title>Astro</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      src="https://kit.fontawesome.com/5a37fe5150.js"
+      crossorigin="anonymous"></script>
+    <ViewTransitions />
+  </head>
+
+  <body class="font-inter bg-primary text-primary">
+    <div class="top-nav h-[80px] w-full">
+      <HeaderNav
+        currentPath={pathname}
+        client:load
+        darkBackground={Astro.props.darkBackground}
+        hasBorder={hasBorder}
+        transition:persist
+      />
+
+      <slot name="hero" />
+    </div>
+
+    <div
+      class="body-content-z mx-auto flex flex-col lg:flex-row items-start h-full"
+      style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
+    >
+      <div class="doc-nav flex-none min-w-[300px] sticky top-0 h-full">
+        <Suspense>
+          <DocsSidebar client:load currentPath={pathname} transition:persist />
+        </Suspense>
+        <script src="./persist-sidebar-scroll.ts"></script>
+      </div>
+      <article
+        style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
+        class={`w-full py-[24px] overflow-auto h-full`}
+      >
+        <slot />
+      </article>
+      <div class="article-nav-links hidden xl:block min-w-[300px] max-w-[312px] flex-none sticky top-0">
+        <slot name="article-nav-links" />
+      </div>
+    </div>
+
+    {showFooter ? <Footer /> : null}
+  </body>
+</html>

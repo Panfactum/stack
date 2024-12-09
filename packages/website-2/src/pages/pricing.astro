@@ -12,6 +12,7 @@ import { Faq } from '../components/marketing/faq'
 import Calculator from '@/components/pricing/calculator'
 import Spacer from '@/components/ui/spacer'
 import SectionFullWidth from '@/components/layout/section-full-width.astro'
+import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
 
 const pathname = new URL(Astro.request.url).pathname
 ---
@@ -185,7 +186,7 @@ const pathname = new URL(Astro.request.url).pathname
     </div>
 
     <div class="md:max-w-xl w-full">
-      <Faq client:load />
+      <FaqAccordions />
     </div>
 
     <div
