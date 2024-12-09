@@ -17,7 +17,7 @@ export function HeaderNavMobile({
 }: MobileNav) {
   return (
     <div
-      className={`md:hidden bg-primary fixed top-0 left-0 bottom-0 w-full z-10`}
+      className={`bg-primary fixed top-0 left-0 bottom-0 w-full z-10`}
     >
       <div className="flex items-center justify-center h-20">
         <div className="container flex justify-between px-container-padding-mobile">

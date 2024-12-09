@@ -2,43 +2,200 @@
 import '../styles/global.css'
 import Layout from '../layouts/Layout.astro'
 
+import Hero from '@/components/typography/hero.astro'
 import Heading from '@/components/typography/heading.astro'
+import HeadingWide from '@/components/typography/heading-wide.astro'
 import SubHeading from '@/components/typography/sub-heading.astro'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Faq } from '@/components/marketing/faq'
+import Badge from '@/components/astro/badge/badge.astro'
+import BadgeSmall from '@/components/astro/badge/badge-small.astro'
 
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
 import { faIdBadge, faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import HeroSection from '../components/layout/hero-section.astro'
+import SectionFullWidth from '../components/layout/section-full-width.astro'
 import Section from '../components/layout/section.astro'
+import {
+  faArrowRight,
+  faChartLine,
+  faCommenting,
+  faMessage,
+  faSmile,
+  faZap,
+} from '@fortawesome/free-solid-svg-icons'
+
+import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
+import StickyLayout from '@/layouts/StickyLayout.astro'
+const IMAGES = [
+  {
+    url: '/odeao-labs.png',
+    alt: 'Odeao Labs',
+    class:
+      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+  },
+  {
+    url: '/kintsugi.png',
+    alt: 'Kintsugi',
+    class:
+      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+  },
+  {
+    url: '/stacked.png',
+    alt: 'Stacked',
+    class:
+      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+  },
+  {
+    url: '/magnolia.png',
+    alt: 'Magnolia',
+    class:
+      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+  },
+  {
+    url: '/warpspeed.png',
+    alt: 'Warpspeed',
+    class:
+      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+  },
+  {
+    url: '/odeao-labs.png',
+    alt: 'Odeao Labs',
+    class:
+      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+  },
+]
+
+const FEATURES = [
+  {
+    icon: faIdBadge,
+    title: 'Security',
+    content:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'Cost Savings',
+    content:
+      'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'High Availability',
+    content:
+      'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'Databases',
+    content:
+      'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'Local Development',
+    content:
+      'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'CI / CD',
+    content:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'Monitoring and Observability',
+    content:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'Infrastructure-as-Code',
+    content:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+  },
+  {
+    icon: faIdBadge,
+    title: 'Roadmap',
+    content:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+  },
+]
+
+const SUPPORT_DREAMS = [
+  {
+    icon: faMessage,
+    title: 'Unified version control',
+    content:
+      'Streamline your development process with our integrated issue tracking and project management features.',
+  },
+  {
+    icon: faZap,
+    title: 'Real-time deployment monitoring',
+    content:
+      'Get all the tools you need to deliver high-quality software with our comprehensive development platform.',
+  },
+  {
+    icon: faChartLine,
+    title: 'Advanced code analytics',
+    content:
+      'Make data-driven decisions with our customizable dashboards and extensive reporting capabilities.',
+  },
+  {
+    icon: faSmile,
+    title: 'Seamless collaboration tools',
+    content:
+      'Work together in real-time with our integrated messaging and video conferencing features.',
+  },
+  {
+    icon: faCommenting,
+    title: 'Extensive plugin library',
+    content:
+      'Customize your development workflow with our vast collection of integrations and plugins.',
+  },
+  {
+    icon: faMessage,
+    title: 'Expert technical support',
+    content:
+      'Get help when you need it with our 24/7 technical support and comprehensive documentation.',
+  },
+]
 ---
 
 <Layout
   darkBackground={true}
   heroClass="bg-brand-section lg:bg-hero-pattern bg-[center_top] bg-contain bg-no-repeat"
 >
-  <Section slot="hero" class="flex space-y-7xl flex-col items-center py-9xl">
+  <HeroSection
+    slot="hero"
+    class="flex space-y-6xl flex-col items-center py-4xl"
+  >
     <div
       class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
     >
       <div
         class="flex flex-col gap-3xl items-center text-center md:max-w-[888px]"
       >
-        <Badge variant="outline">
-          <Badge variant="outline" size="sm"
-            ><img class="h-2" src="/dot.png" />Alpha feature</Badge
-          >
+        <Badge>
+          <BadgeSmall>
+            <div
+              class="flex items-center justify-center w-[12px] h-[12px] bg-[#CEEAF8] rounded-full"
+            >
+              <div class="w-[6px] h-[6px] bg-[#3B81B0] rounded-full"></div>
+            </div>Alpha feature
+          </BadgeSmall>
           Check out the Web UI
+          <FontAwesomeIcon
+            icon={faArrowRight}
+            className="!h-[15px] !w-[15px] text-[#7289DA] mr-1"
+          />
         </Badge>
 
-        <h1
-          class="font-machina font-medium text-primary_on-brand text-display-md md:text-display-lg lg:text-display-2xl"
-        >
-          Cloud native system for platform engineering
-        </h1>
-        <p class="text-tertiary_on-brand text-lg md:text-xl">
+        <Hero> Cloud native system for platform engineering </Hero>
+        <p class="text-tertiary_on-brand text-lg md:text-xl max-w-[830px]">
           The Panfactum Stack is an integrated set of OpenTofu (Terraform)
           modules and local tooling aimed at providing the best experience for
           building, deploying, and managing software on AWS and Kubernetes.
@@ -56,51 +213,18 @@ import Section from '../components/layout/section.astro'
         <Button variant="primary" size="xl">Get started</Button>
       </div>
     </div>
-    <div
-      class="container px-container-padding-mobile xl:px-container-padding-desktop flex justify-center items-center"
-    >
-      <img
-        src="/hero-img.png"
-        alt="Panfactum Platform Image"
-        class="hidden lg:block max-h-[576px]"
-      />
-    </div>
-  </Section>
+  </HeroSection>
+
   <Section class="gap-4xl text-primary">
     <h2 class="text-tertiary text-md font-medium">Trusted by companies</h2>
     <div
       class="grid grid-cols-2 md:flex md:flex-wrap md:justify-center gap-6xl"
     >
-      <img
-        src="/odeao-labs.png"
-        alt="Odeao Labs"
-        class="h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center"
-      />
-      <img
-        src="/kintsugi.png"
-        alt="Odeao Labs"
-        class="h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center"
-      />
-      <img
-        src="/stacked.png"
-        alt="Odeao Labs"
-        class="h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center"
-      />
-      <img
-        src="/magnolia.png"
-        alt="Odeao Labs"
-        class="h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center"
-      />
-      <img
-        src="/warpspeed.png"
-        alt="Odeao Labs"
-        class="h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center"
-      />
-      <img
-        src="/odeao-labs.png"
-        alt="Odeao Labs"
-        class="h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center"
-      />
+      {
+        IMAGES.map((item, index) => (
+          <img src={item.url} alt={item.alt} class={item.class} />
+        ))
+      }
     </div>
   </Section>
 
@@ -111,144 +235,52 @@ import Section from '../components/layout/section.astro'
     </div>
 
     <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
+      {
+        FEATURES.map((item) => (
+          <div class="flex flex-col items-center gap-xl text-center max-w-[384px]">
+            <Button variant="outline" size="icon" className="w-[48px] h-[48px]">
+              <FontAwesomeIcon icon={item.icon} />
+            </Button>
 
-        <h3 class="text-primary text-lg font-semibold">Security</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">Cost Savings</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">High Availability</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">Databases</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">Local Development</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">CI / CD</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">
-          Monitoring and Observability
-        </h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">
-          Infrastructure-as-Code
-        </h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">Roadmap</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
+            <h3 class="text-primary text-lg font-semibold">{item.title}</h3>
+            <p class="text-tertiary text-md max-w-[378px]">{item.content}</p>
+          </div>
+        ))
+      }
     </div>
   </Section>
 
-  <Section class="py-7xl gap-y-6xl text-primary">
-    <div class="text-center">
+  <Section class="py-7xl gap-y-4xl text-primary">
+    <div class="text-center space-y-2">
       <SubHeading>Pricing</SubHeading>
       <Heading>Plans that fit your scale</Heading>
+      <p class="text-tertiary-600 pt-2">
+        Simple, transparent pricing that grows with you. Try any plan free for
+        30 days.
+      </p>
     </div>
 
     <div
       class="sm:flex justify-between self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
     >
-      <div class="self-start">
-        <h1 class="font-machina text-primary text-display-xs font-medium">
-          Open Source
-        </h1>
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="font-machina text-primary text-display-xs font-medium">
+            Open Source
+          </h1>
+          <p class="text-tertiary text-md">
+            Our most popular plan for small teams.
+          </p>
+        </div>
+
         <span
-          class="sm:hidden self-end text-display-md font-medium font-machina text-primary"
+          class="sm:hidden text-display-md font-medium font-machina text-primary leading-none"
         >
           Free
         </span>
-        <p class="text-tertiary text-md">
-          Our most popular plan for small teams.
-        </p>
       </div>
       <span
-        class="hidden sm:block self-end text-display-md font-medium font-machina text-primary"
+        class="hidden sm:block self-start text-display-md font-medium font-machina text-primary leading-none"
       >
         Free
       </span>
@@ -266,7 +298,9 @@ import Section from '../components/layout/section.astro'
               <h1 class="font-machina text-primary text-display-xs font-medium">
                 Starter
               </h1>
-              <Badge variant="brand">Popular</Badge>
+              <div class="flex items-center justify-center rounded-full h-8 border border-[#9AD3F1] bg-[#E6F4FC] px-2.5">
+                Popular
+              </div>
             </div>
 
             <div class="flex gap-xs items-baseline">
@@ -460,7 +494,10 @@ import Section from '../components/layout/section.astro'
     </div>
   </Section>
 
-  <Section sectionClass="bg-brand-section" class="gap-6xl text-primary">
+  <SectionFullWidth
+    sectionClass="bg-brand-section"
+    class="gap-7xl text-primary"
+  >
     <div class="flex flex-col gap-lg text-center">
       <SubHeading onBrand={true}>Support</SubHeading>
       <Heading onBrand={true}>Supporting your dreams</Heading>
@@ -470,141 +507,32 @@ import Section from '../components/layout/section.astro'
       </p>
     </div>
 
-    <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
+    <div
+      class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl pb-8"
+    >
+      {
+        SUPPORT_DREAMS.map((item) => (
+          <div class="flex flex-col items-center gap-xl text-center max-w-[384px] mx-auto">
+            <Button variant="primary" size="icon">
+              <FontAwesomeIcon icon={item.icon} />
+            </Button>
 
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Security
-        </h3>
-        <p class="text-md text-tertiary_on-brand">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Cost Savings
-        </h3>
-        <p class="text-md text-tertiary_on-brand">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          High Availability
-        </h3>
-        <p class="text-md text-tertiary_on-brand">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Databases
-        </h3>
-        <p class="text-tertiary_on-brand text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Local Development
-        </h3>
-        <p class="text-tertiary_on-brand text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          CI / CD
-        </h3>
-        <p class="text-tertiary_on-brand text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Monitoring and Observability
-        </h3>
-        <p class="text-tertiary_on-brand text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Infrastructure-as-Code
-        </h3>
-        <p class="text-tertiary_on-brand text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="primary" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-          Roadmap
-        </h3>
-        <p class="text-tertiary_on-brand text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
+            <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
+              {item.title}
+            </h3>
+            <p class="text-md text-tertiary_on-brand">{item.content}</p>
+          </div>
+        ))
+      }
     </div>
-  </Section>
+  </SectionFullWidth>
 
   <Section class="text-center gap-y-4xl text-primary">
     <img class="h-[40px]" src="/wild-crafted.png" alt="Wild Crafted" />
-    <p class="font-machina text-display-xs md:text-display-lg text-primary">
+    <HeadingWide>
       We've been using Panfactum to revolutionize our development workflow and
       can't imagine going back to traditional tools.
-    </p>
+    </HeadingWide>
     <div class="flex flex-col gap-y-xl items-center">
       <img src="/face.png" class="w-16" />
       <div>
@@ -625,7 +553,7 @@ import Section from '../components/layout/section.astro'
     </div>
 
     <div class="md:max-w-xl w-full">
-      <Faq client:load />
+      <FaqAccordions />
     </div>
 
     <div
@@ -641,7 +569,7 @@ import Section from '../components/layout/section.astro'
     </div>
   </Section>
 
-  <Section sectionClass="bg-brand-section" class="gap-y-4xl">
+  <SectionFullWidth sectionClass="bg-brand-section" class="gap-y-4xl">
     <div class="flex flex-col gap-xl text-center">
       <h2
         class="font-machina text-primary_on-brand text-display-sm font-medium"
@@ -663,5 +591,5 @@ import Section from '../components/layout/section.astro'
       </Button>
       <Button variant="primary" size="xl">Get started</Button>
     </div>
-  </Section>
+  </SectionFullWidth>
 </Layout>

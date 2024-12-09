@@ -9,8 +9,9 @@ import { lastDocumentationPath } from '@/stores/documentation-store.ts'
 import { Button } from '../ui/button.tsx'
 
 export interface HeaderNav {
-  currentPath: string
-  darkBackground: boolean
+  currentPath: string;
+  darkBackground: boolean;
+  hasBorder: boolean;
 }
 
 export interface NavLinks {
@@ -19,7 +20,7 @@ export interface NavLinks {
   override?: string
 }
 
-export function HeaderNav({ currentPath, ...props }: HeaderNav) {
+export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
   const $lastDocumentationPath = useStore(lastDocumentationPath)
   const [mobileOpened, setMobileOpened] = useState(false)
   const [navLinks, setNavLinks] = useState<NavLinks[]>([
@@ -53,7 +54,10 @@ export function HeaderNav({ currentPath, ...props }: HeaderNav) {
   }, [])
 
   return (
-    <>
+    <div
+        className="flex items-center justify-center h-20 border-b w-full"
+        style={{ borderColor: hasBorder ? '#E4E9EC' : 'transparent' }}
+      >
       <div
         className={`container flex justify-between items-center self-stretch ${props.darkBackground ? 'dark' : ''} px-container-padding-mobile xl:px-container-padding-desktop`}
       >
@@ -67,7 +71,7 @@ export function HeaderNav({ currentPath, ...props }: HeaderNav) {
                 <Button
                   variant="ghost"
                   size="lg"
-                  className={`!px-0 hover:text-primary ${currentPath.includes(link.url) ? 'text-primary font-bold' : ''}`}
+                  className={`!px-0 text-offWhite hover:text-primary shadow-none ${currentPath.includes(link.url) ? 'text-primary font-bold' : ''}`}
                   asChild={true}
                   key={link.title}
                 >
@@ -99,15 +103,18 @@ export function HeaderNav({ currentPath, ...props }: HeaderNav) {
           />
         </div>
       </div>
-      {mobileOpened && (
-        <HeaderNavMobile
-          currentPath={currentPath}
-          darkBackground={props.darkBackground}
-          open={mobileOpened}
-          setMobileOpened={setMobileOpened}
-          navLinks={navLinks}
-        />
-      )}
-    </>
+      <div className="block md:hidden">
+        {mobileOpened && (
+          <HeaderNavMobile
+            currentPath={currentPath}
+            darkBackground={props.darkBackground}
+            open={mobileOpened}
+            setMobileOpened={setMobileOpened}
+            navLinks={navLinks}
+          />
+        )}
+      </div>
+      
+    </div>
   )
 }
