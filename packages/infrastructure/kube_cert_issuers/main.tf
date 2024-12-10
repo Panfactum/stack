@@ -62,6 +62,13 @@ locals {
   ]
 
   lets_encrypt_solvers = concat(local.route53_solvers, local.cloudflare_solvers)
+
+  all_domains = tolist(toset(concat(
+    [for domain, _ in var.route53_zones : domain],
+    [for domain, _ in var.cloudflare_zones : domain]
+  )))
+
+  all_domains_with_subdomains = flatten([for domain in local.all_domains : (alltrue([for possible_parent in local.all_domains : (domain == possible_parent || !endswith(domain, possible_parent))]) ? [domain, "*.${domain}"] : ["*.${domain}"])])
 }
 
 data "aws_region" "main" {}
@@ -505,4 +512,50 @@ resource "kubectl_manifest" "internal_ca_ci" {
   })
   force_conflicts   = true
   server_side_apply = true
+}
+
+//////////////////////////////////
+/// Ingress Cert
+//////////////////////////////////
+
+resource "kubectl_manifest" "ingress_cert" {
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Certificate"
+    metadata = {
+      name      = "ingress-tls"
+      namespace = var.namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      secretName = "ingress-tls"
+      dnsNames   = local.all_domains_with_subdomains
+
+      // We don't rotate this as frequently to both respect
+      // the rate limits: https://letsencrypt.org/docs/rate-limits/
+      // and to avoid getting the 30 day renewal reminders
+      duration    = "2160h0m0s"
+      renewBefore = "720h0m0s"
+
+      privateKey = {
+        rotationPolicy = "Always"
+      }
+
+      issuerRef = {
+        name  = "public"
+        kind  = "ClusterIssuer"
+        group = "cert-manager.io"
+      }
+    }
+  })
+
+  force_conflicts   = true
+  server_side_apply = true
+
+  wait_for {
+    field {
+      key   = "status.conditions.[0].status"
+      value = "True"
+    }
+  }
 }
