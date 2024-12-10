@@ -109,6 +109,11 @@ variable "node_security_groups" {
   default     = []
 }
 
+variable "node_ebs_volume_size_gb" {
+  description = "The size of the EBS volume in GiB to use for each node."
+  type        = number
+  default     = 40
+}
 
 ################################################################################
 ## KMS Access

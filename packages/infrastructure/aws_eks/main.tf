@@ -288,7 +288,7 @@ resource "aws_launch_template" "controller" {
     device_name = "/dev/xvdb"
     ebs {
       delete_on_termination = "true"
-      volume_size           = 40
+      volume_size           = var.node_ebs_volume_size_gb
       volume_type           = "gp3"
       encrypted             = "true"
     }

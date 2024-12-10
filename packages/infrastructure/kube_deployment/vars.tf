@@ -308,6 +308,12 @@ variable "extra_pod_labels" {
   default     = {}
 }
 
+variable "extra_service_labels" {
+  description = "Extra service labels to use"
+  type        = map(string)
+  default     = {}
+}
+
 variable "ignore_replica_count" {
   description = "Whether to ignore changes to the replica count. Useful when implementing horizontal autoscaling."
   type        = bool

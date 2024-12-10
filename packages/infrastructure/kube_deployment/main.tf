@@ -150,7 +150,10 @@ module "service" {
   ports               = local.service_ports
   service_ip          = var.service_ip
   match_labels        = module.pod_template.match_labels
-  extra_labels        = module.pod_template.labels
+  extra_labels        = merge(
+    module.pod_template.labels,
+    var.extra_service_labels
+  )
 
   depends_on = [kubectl_manifest.deployment]
 }
