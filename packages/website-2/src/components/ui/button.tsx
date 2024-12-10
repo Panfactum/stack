@@ -55,7 +55,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         href={props.href}
-        className={`${cn(buttonVariants({ variant, size, className }))} shadow-sm py-[10px]`}
+        className={`${cn('shadow-sm py-[10px]', buttonVariants({ variant, size, className }))}`}
         ref={ref}
         {...props}
       />

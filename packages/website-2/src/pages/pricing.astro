@@ -11,6 +11,8 @@ import { Faq } from '../components/marketing/faq'
 
 import Calculator from '@/components/pricing/calculator'
 import Spacer from '@/components/ui/spacer'
+import SectionFullWidth from '@/components/layout/section-full-width.astro'
+import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
 
 const pathname = new URL(Astro.request.url).pathname
 ---
@@ -34,7 +36,7 @@ const pathname = new URL(Astro.request.url).pathname
   </section>
   <Section sectionClass="-translate-y-1/2 pb-0">
     <div
-      class="flex justify-between self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
+      class="flex justify-between self-stretch shadow-md px-3xl pt-3xl pb-3xl border border-secondary rounded-md bg-primary"
     >
       <div class="self-start">
         <h1 class="font-machina text-display-xs font-medium">Open Source</h1>
@@ -62,13 +64,13 @@ const pathname = new URL(Astro.request.url).pathname
         <tr>
           <th
             colspan="3"
-            class="h-[69px] text-primary text-lg font-semibold border border-secondary p-2xl lg:p-3xl text-start"
+            class="h-[93px] text-primary text-lg font-semibold border border-secondary p-2xl lg:p-3xl text-start"
             >Addons</th
           >
         </tr>
       </thead>
-      <tbody class="text-secondary">
-        <tr>
+      <tbody class="text-secondary text-sm">
+        <tr class="h-[64px]">
           <td
             class="border border-secondary py-xl px-3xl font-bold w-1/2 lg:w-3/4"
             >Audit Support (SOC2)</td
@@ -108,7 +110,10 @@ const pathname = new URL(Astro.request.url).pathname
     </table>
   </Section>
 
-  <Section class="gap-6xl text-primary" sectionClass="bg-secondary">
+  <SectionFullWidth
+    sectionClass="gap-7xl bg-secondary text-primary py-12"
+    class="gap-6xl"
+  >
     <div class="text-center">
       <h3 class="text-brand-secondary text-sm font-semibold">Ways to save</h3>
       <h2 class="font-machina text-display-sm font-medium">
@@ -153,7 +158,7 @@ const pathname = new URL(Astro.request.url).pathname
         </p>
       </div>
     </div>
-  </Section>
+  </SectionFullWidth>
 
   <Section class="gap-6xl text-primary">
     <div class="text-center">
@@ -163,7 +168,7 @@ const pathname = new URL(Astro.request.url).pathname
       </h2>
     </div>
 
-    <Calculator client:only pathName={pathname} />
+    <Calculator client:only="react" pathName={pathname} />
   </Section>
 
   <Spacer />
@@ -181,7 +186,7 @@ const pathname = new URL(Astro.request.url).pathname
     </div>
 
     <div class="md:max-w-xl w-full">
-      <Faq client:load />
+      <FaqAccordions />
     </div>
 
     <div

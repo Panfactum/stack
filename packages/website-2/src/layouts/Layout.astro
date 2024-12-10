@@ -41,7 +41,7 @@ const redirect = Astro.props.redirect
   </head>
 
   <body class="font-inter bg-primary text-primary">
-    <div class={Astro.props.heroClass}>
+    <div class={`${Astro.props.heroClass}`}>
       <div class="flex items-center justify-center h-20">
         <HeaderNav
           currentPath={pathname}
