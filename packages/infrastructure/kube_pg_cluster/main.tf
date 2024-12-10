@@ -266,6 +266,9 @@ resource "kubernetes_secret" "superuser" {
 ***************************************/
 
 resource "kubernetes_manifest" "postgres_cluster" {
+  timeouts {
+    create = "2h" # Recovery can take a long time given the size of the database. This will avoid timeout that would taint the resource and cause a destroy-recreate loop
+  }
   manifest = {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Cluster"
