@@ -11,17 +11,45 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## edge.24-12-10
+
+### Breaking Changes
+
+* This release changes the way that public ingress TLS certificates are provisioned in order to avoid
+  hitting rate limits on large clusters. **This architectural update requires that the modules
+  be upgraded in the following order:**
+
+  * [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+  * [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx). **To avoid service disruptions,
+    you MUST wait until all the old NGINX pods have been fully terminated before proceeding.**
+  * The remainder of the modules may be updated in any order.
+
+### Fixed
+
+* Adds `bootstrap_cluster_creator_admin_privileges` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to provide
+  backwards compatibility with clusters that were created with this field set to `true`.
+
+* Temporary Authentik disruptions caused by PostgreSQL database failovers have been mitigated.
+
 ## edge.24-12-05
 
 ### Breaking Changes
 
 * This release contains a major version upgrade to Linkerd.
-  **To upgrade with no downtime, you MUST deploy the upgraded [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
-  before any other module**.
 
   This upgrade removes the need for the privileged `proxy-init` initContainer to be injected into every container as the initialization logic
   is now completed once per node. This should reduce pod startup times by 5-20 seconds and improves overall security by
   removing the need to run a privileged container in each pod.
+
+  **To upgrade with no downtime, you MUST update the modules in the following order:**
+
+  * [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+  * [kube\_kyverno](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno)
+  * [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium)
+  * [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+  * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+  * [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+  * The remainder of the modules may be updated in any order.
 
 * The NATS backend for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) has been replaced
   with our enhanced NATS module, [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats). This provides improved
@@ -53,7 +81,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [ARC Zonal Shift](https://docs.aws.amazon.com/eks/latest/userguide/zone-shift.html) enabled if running nodes in multiple subnets.
 
-* [kube\_ingress_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) now has [ARC Zonal Shift](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/zonal-shift.html) enabled.
+* [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) now has [ARC Zonal Shift](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/zonal-shift.html) enabled.
 
 * [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now schedules pods exclusively on `arm64` nodes
   in order to support the integration of external secret plugins.
@@ -81,12 +109,12 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * The `kyverno` CLI has been added to the devShell.
 
 * Adds support for dynamically generated labels in [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec)
-via `labels_from_parameters` and `labels_from`.
+  via `labels_from_parameters` and `labels_from`.
 
-* [kube\_argo_event_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) now creates a ServiceAccount and output's its name. This can
-be used to assign AWS (or other permissions) to the EventSource pods.
+* [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) now creates a ServiceAccount and output's its name. This can
+  be used to assign AWS (or other permissions) to the EventSource pods.
 
-* Adds the ability to configure temporary storage space size in [wf\_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+* Adds the ability to configure temporary storage space size in [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
 
 ### Fixed
 

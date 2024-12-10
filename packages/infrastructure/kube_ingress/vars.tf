@@ -17,6 +17,8 @@ variable "ingress_configs" {
   description = "A list of ingress names to the configuration to use for the ingress"
   type = list(object({
 
+    tls_secret_name = optional(string) # The name of the secret containing the cert-manager provided public TLS certificate
+
     # This ingress matches all incoming requests on the indicated domains that have the indicated path prefixes
     path_prefix   = optional(string, "/")
     remove_prefix = optional(bool, false) # True iff the the path_prefix should be stripped before forwarding on to upstream service

@@ -259,7 +259,9 @@ resource "helm_release" "authentik" {
 
           // Postgres Settings
           {
-            name  = "AUTHENTIK_POSTGRESQL__USE_PGBOUNCER"
+            // Us PGPOOL instead of PGBOUNCER to workaround
+            // this issue: https://github.com/goauthentik/authentik/issues/12278
+            name  = "AUTHENTIK_POSTGRESQL__USE_PGPOOL"
             value = "true"
           },
           {

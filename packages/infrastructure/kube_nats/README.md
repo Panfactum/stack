@@ -87,7 +87,7 @@ const nc = await connect({
 
 ### Persistence
 
-With NATS Jetstream, persistent is configured via [Streams](https://docs.nats.io/nats-concepts/jetstream/streams) which
+With NATS Jetstream, persistence is configured via [Streams](https://docs.nats.io/nats-concepts/jetstream/streams) which
 allow you to control how messages are stored and what the limits of retention are. You can have many different streams
 on the same NATS instance.
 

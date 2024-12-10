@@ -190,6 +190,7 @@ locals {
   ingress_configs = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
     external_dns_hostnames = local.domains
     tls_hosts              = local.domains
+    tls_secret_name        = config.tls_secret_name
     rule_hosts             = local.domains
     path_prefix            = config.path_prefix
     remove_prefix          = config.remove_prefix
@@ -200,6 +201,7 @@ locals {
   ingress_configs_with_cdn = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
     external_dns_hostnames = [for domain in local.domains : "${local.cdn_subdomains[domain]}.${domain}"]
     tls_hosts              = [for domain in local.domains : "${local.cdn_subdomains[domain]}.${domain}"]
+    tls_secret_name        = config.tls_secret_name
     rule_hosts             = local.domains
     path_prefix            = config.path_prefix
     remove_prefix          = config.remove_prefix
@@ -228,48 +230,6 @@ data "pf_kube_labels" "labels" {
 /********************************************************************************************************************
 * Kubernetes Resources
 *********************************************************************************************************************/
-
-resource "kubectl_manifest" "ingress_cert" {
-  yaml_body = yamlencode({
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = var.name
-      namespace = var.namespace
-      labels    = data.pf_kube_labels.labels.labels
-    }
-    spec = {
-      secretName = "${var.name}-tls"
-      dnsNames   = local.all_domains
-
-      // We don't rotate this as frequently to both respect
-      // the rate limits: https://letsencrypt.org/docs/rate-limits/
-      // and to avoid getting the 30 day renewal reminders
-      duration    = "2160h0m0s"
-      renewBefore = "720h0m0s"
-
-      privateKey = {
-        rotationPolicy = "Always"
-      }
-
-      issuerRef = {
-        name  = "public"
-        kind  = "ClusterIssuer"
-        group = "cert-manager.io"
-      }
-    }
-  })
-
-  force_conflicts   = true
-  server_side_apply = true
-
-  wait_for {
-    field {
-      key   = "status.conditions.[0].status"
-      value = "True"
-    }
-  }
-}
 
 resource "kubectl_manifest" "ingress" {
   for_each = var.cdn_mode_enabled ? local.ingress_configs_with_cdn : local.ingress_configs
@@ -307,10 +267,14 @@ resource "kubectl_manifest" "ingress" {
     }
     spec = {
       ingressClassName = "nginx"
-      tls = [{
-        hosts      = each.value.tls_hosts
-        secretName = "${var.name}-tls"
-      }]
+      tls = [
+        merge(
+          {
+            hosts = each.value.tls_hosts
+          },
+          each.value.tls_secret_name == null ? null : { secretName = each.value.tls_secret_name }
+        )
+      ]
       rules = [for config in [for domain in each.value.rule_hosts : {
         domain       = domain
         path_prefix  = each.value.path_prefix
@@ -339,6 +303,5 @@ resource "kubectl_manifest" "ingress" {
   })
   force_conflicts   = true
   server_side_apply = true
-  depends_on        = [kubectl_manifest.ingress_cert]
 }
 

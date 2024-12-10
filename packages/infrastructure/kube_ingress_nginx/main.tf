@@ -186,6 +186,10 @@ resource "helm_release" "nginx_ingress" {
           // Allows the container to keep receiving traffic due to
           // the NLB taking a few seconds to completely disconnect
           shutdown-grace-period = local.deregistration_buffer
+
+          // The default certificate is create in the kube_cert_issuers module
+          // b/c that module already has all the possible domain inputs
+          default-ssl-certificate = "cert-manager/ingress-tls"
         }
 
         // See https://kubernetes.github.io/ingress-nginx/deploy/hardening-guide/

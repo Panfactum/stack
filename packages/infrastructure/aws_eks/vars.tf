@@ -65,6 +65,12 @@ variable "dns_service_ip" {
   type        = string
 }
 
+variable "bootstrap_cluster_creator_admin_privileges" {
+  description = "Whether to give cluster admin privileges to the cluster creator implicitly. Cannot be changed after cluster creation. For backwards compatibility purposes only."
+  type        = bool
+  default     = false
+}
+
 ######################################################################################
 # EKS add-ons versions
 # For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
