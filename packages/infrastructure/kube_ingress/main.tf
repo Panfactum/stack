@@ -196,6 +196,7 @@ locals {
     remove_prefix          = config.remove_prefix
     service                = config.service
     service_port           = config.service_port
+    extra_annotations      = config.extra_annotations
   } }
 
   ingress_configs_with_cdn = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
@@ -207,6 +208,7 @@ locals {
     remove_prefix          = config.remove_prefix
     service                = config.service
     service_port           = config.service_port
+    extra_annotations      = config.extra_annotations
   } }
 
   cdn_configs = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => config.cdn }
@@ -262,7 +264,9 @@ resource "kubectl_manifest" "ingress" {
         },
 
         // Strips the path_prefix (e.g., api.panfactum.com/payroll/health -> /health)
-        each.value.remove_prefix ? { "nginx.ingress.kubernetes.io/rewrite-target" = "/$2" } : {}
+        each.value.remove_prefix ? { "nginx.ingress.kubernetes.io/rewrite-target" = "/$2" } : {},
+
+        each.value.extra_annotations
       ) : k => v if v != null }
     }
     spec = {

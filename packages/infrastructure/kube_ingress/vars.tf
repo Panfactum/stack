@@ -17,7 +17,8 @@ variable "ingress_configs" {
   description = "A list of ingress names to the configuration to use for the ingress"
   type = list(object({
 
-    tls_secret_name = optional(string) # The name of the secret containing the cert-manager provided public TLS certificate
+    tls_secret_name   = optional(string)          # The name of the secret containing the cert-manager provided public TLS certificate
+    extra_annotations = optional(map(string), {}) # Extra annotations that will only apply to this ingress_config
 
     # This ingress matches all incoming requests on the indicated domains that have the indicated path prefixes
     path_prefix   = optional(string, "/")
@@ -101,7 +102,7 @@ variable "cdn_mode_enabled" {
 }
 
 variable "extra_annotations" {
-  description = "Extra annotations to add to the ingress objects"
+  description = "Extra annotations to add to all the ingress objects"
   type        = map(string)
   default     = {}
 }
