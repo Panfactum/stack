@@ -2,7 +2,7 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.27.0"
+      version = "2.34.0"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -10,15 +10,15 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.0.4"
+      version = "2.1.3"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = "3.6.3"
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }
@@ -41,6 +41,8 @@ module "namespace" {
 
   namespace = local.name
 }
+
+data "kubectl_server_version" "version" {}
 
 /***************************************
 * Scheduler
@@ -169,7 +171,7 @@ module "scheduler" {
       name             = "scheduler"
       image_registry   = "registry.k8s.io"
       image_repository = "kube-scheduler"
-      image_tag        = var.scheduler_version
+      image_tag        = data.kubectl_server_version.version.version
       command = [
         "/usr/local/bin/kube-scheduler",
         "--config=/etc/kubernetes/scheduler/config.yaml",

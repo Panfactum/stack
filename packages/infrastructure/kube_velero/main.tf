@@ -2,11 +2,11 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.27.0"
+      version = "2.34.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.0.4"
+      version = "2.1.3"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -18,11 +18,11 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = "3.6.3"
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }
@@ -203,17 +203,6 @@ resource "helm_release" "velero" {
         {
           name            = "velero-plugin-for-aws"
           image           = "docker.io/velero/velero-plugin-for-aws:${var.aws_plugin_version}"
-          imagePullPolicy = "IfNotPresent"
-          volumeMounts = [
-            {
-              mountPath = "/target"
-              name      = "plugins"
-            }
-          ]
-        },
-        {
-          name            = "velero-plugin-for-csi"
-          image           = "docker.io/velero/velero-plugin-for-csi:${var.csi_plugin_version}"
           imagePullPolicy = "IfNotPresent"
           volumeMounts = [
             {

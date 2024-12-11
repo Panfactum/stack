@@ -1,7 +1,7 @@
 variable "descheduler_helm_version" {
   description = "The version of the descheduler helm chart to deploy"
   type        = string
-  default     = "0.29.0"
+  default     = "0.31.0"
 }
 
 variable "pull_through_cache_enabled" {

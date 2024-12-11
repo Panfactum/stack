@@ -212,7 +212,7 @@ generate "kubectl_override_provider" {
   path      = "kubectl_override.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl_override.tf", {
-    kubectl_version = local.enable_kubernetes ? lookup(local.vars, "kubectl_version", "2.0.4") : ""
+    kubectl_version = local.enable_kubernetes ? lookup(local.vars, "kubectl_version", "2.1.3") : ""
   }) : ""
 }
 
@@ -301,8 +301,8 @@ remote_state {
 ### Terragrunt Configuration
 ################################################################
 
-terraform_version_constraint  = "~> 1.6"
-terragrunt_version_constraint = "~> 0.55"
+terraform_version_constraint  = "~> 1.8"
+terragrunt_version_constraint = "~> 0.69"
 terraform_binary              = "tofu"
 
 retryable_errors = local.is_ci ? [".*"] : [

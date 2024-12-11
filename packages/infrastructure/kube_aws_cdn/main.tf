@@ -2,7 +2,7 @@ terraform {
   required_providers {
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = "3.6.3"
     }
     aws = {
       source                = "hashicorp/aws"
@@ -15,7 +15,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }

@@ -8,7 +8,7 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = "3.6.3"
     }
     time = {
       source  = "hashicorp/time"
@@ -16,7 +16,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }

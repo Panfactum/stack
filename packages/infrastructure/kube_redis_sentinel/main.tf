@@ -2,15 +2,15 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.27.0"
+      version = "2.34.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.0.4"
+      version = "2.1.3"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = "3.6.3"
     }
     vault = {
       source  = "hashicorp/vault"
@@ -22,7 +22,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }
@@ -749,25 +749,25 @@ module "image_cache" {
     {
       registry          = "docker.io"
       repository        = "bitnami/redis"
-      tag               = "7.2.4-debian-12-r9"
+      tag               = "7.4.1-debian-12-r2"
       arm_nodes_enabled = var.arm_nodes_enabled
     },
     {
       registry          = "docker.io"
       repository        = "bitnami/redis-sentinel"
-      tag               = "7.2.4-debian-12-r7"
+      tag               = "7.4.1-debian-12-r2"
       arm_nodes_enabled = var.arm_nodes_enabled
     },
     {
       registry          = "docker.io"
       repository        = "bitnami/redis-exporter"
-      tag               = "1.58.0-debian-12-r4"
+      tag               = "1.66.0-debian-12-r2"
       arm_nodes_enabled = var.arm_nodes_enabled
     },
     {
       registry          = "docker.io"
       repository        = "bitnami/kubectl"
-      tag               = "1.29.2-debian-12-r3"
+      tag               = "1.31.2-debian-12-r6"
       arm_nodes_enabled = var.arm_nodes_enabled
     }
   ]

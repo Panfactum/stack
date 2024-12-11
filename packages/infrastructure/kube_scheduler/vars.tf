@@ -1,9 +1,3 @@
-variable "scheduler_version" {
-  description = "The version of the kube-scheduler to deploy"
-  type        = string
-  default     = "v1.29.6"
-}
-
 variable "pull_through_cache_enabled" {
   description = "Whether to use the ECR pull through cache for the deployed images"
   type        = bool

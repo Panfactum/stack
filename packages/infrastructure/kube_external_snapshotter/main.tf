@@ -2,7 +2,7 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.27.0"
+      version = "2.34.0"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -10,15 +10,15 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = "3.6.3"
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.0.4"
+      version = "2.1.3"
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }
@@ -71,14 +71,6 @@ module "namespace" {
 * External Snapshotter
 ***************************************/
 
-module "webhook_cert" {
-  source = "../kube_internal_cert"
-
-  service_names = ["external-snapshotter-webhook"]
-  secret_name   = "external-snapshotter-webhook-certs"
-  namespace     = local.namespace
-}
-
 resource "helm_release" "external_snapshotter" {
   namespace       = local.namespace
   name            = "external-snapshotter"
@@ -101,9 +93,6 @@ resource "helm_release" "external_snapshotter" {
           leader-election = true
         }
         podLabels = module.util_controller.labels
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
 
         replicaCount      = 1
         priorityClassName = module.constants.cluster_important_priority_class_name
@@ -118,53 +107,8 @@ resource "helm_release" "external_snapshotter" {
           }
         }
       }
-
-      webhook = {
-        enabled          = true
-        fullnameOverride = "external-snapshotter-webhook"
-        args = {
-          v = var.log_verbosity
-        }
-        podLabels = merge(
-          module.util_webhook.labels,
-          {
-            customizationHash = md5(join("", [for filename in sort(fileset(path.module, "kustomize/*")) : filesha256(filename)]))
-          }
-        )
-        podAnnotations = {
-          "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "true"
-        }
-
-        replicaCount              = 2
-        priorityClassName         = module.constants.cluster_important_priority_class_name
-        tolerations               = module.util_webhook.tolerations
-        affinity                  = module.util_webhook.affinity
-        topologySpreadConstraints = module.util_webhook.topology_spread_constraints
-
-
-        tls = {
-          certificateSecret = module.webhook_cert.secret_name
-          autogenerate      = false
-        }
-
-        resources = {
-          requests = {
-            memory = "100Mi"
-          }
-          limits = {
-            memory = "130Mi"
-          }
-        }
-      }
     })
   ]
-
-  // Injects the CA data into the webhook manifest
-  postrender {
-    binary_path = "${path.module}/kustomize/kustomize.sh"
-  }
-
-  depends_on = [module.webhook_cert]
 }
 
 resource "kubernetes_service" "service" {

@@ -1,7 +1,7 @@
 variable "kyverno_helm_version" {
   description = "The version of kyverno helm chart to deploy"
   type        = string
-  default     = "3.3.3"
+  default     = "3.3.4"
 }
 
 variable "vpa_enabled" {

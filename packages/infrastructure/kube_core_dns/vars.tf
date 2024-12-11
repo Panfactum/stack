@@ -1,7 +1,7 @@
 variable "core_dns_image_version" {
   description = "The version of the image to use for the deployment"
   type        = string
-  default     = "1.11.1"
+  default     = "1.12.0"
 }
 
 variable "vpa_enabled" {

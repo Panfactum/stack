@@ -12,7 +12,7 @@ variable "namespace" {
 variable "helm_version" {
   description = "The version of the bitnami/redis helm chart to use"
   type        = string
-  default     = "19.0.2"
+  default     = "20.5.0"
 }
 
 variable "persistence_size_gb" {

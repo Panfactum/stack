@@ -1,7 +1,7 @@
 variable "reloader_helm_version" {
   description = "The version of the stakater/reloader helm chart"
   type        = string
-  default     = "1.0.72"
+  default     = "1.2.0"
 }
 
 variable "pull_through_cache_enabled" {

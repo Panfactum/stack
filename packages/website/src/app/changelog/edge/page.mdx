@@ -13,6 +13,26 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Breaking Changes
+
+* All terraform provider versions in Panfactum modules have been upgraded to [new values](/docs/edge/reference/infrastructure-modules/overview#provider-versions)
+  so any first-party IaC modules that utilize Panfactum submodules will need to have their provider versions upgraded as well.
+
+* This release upgrades many components of the Panfactum Stack. Generally, none of these upgrades should require any action on your part. However,
+  see the release notes for each component for more information:
+  * [Kubernetes](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.30.md): 1.29 -> 1.30
+  * [Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/upgrading/#upgrading-to-v36): 3.5 -> 3.6
+  * [Karpenter](https://karpenter.sh/docs/upgrading/upgrade-guide/): 1.0 -> 1.1
+  * [Redis](https://redis.io/blog/announcing-redis-community-edition-and-redis-stack-74/): 7.2 -> 7.4
+  * [Velero](https://velero.io/docs/main/upgrade-to-1.15/): 1.13 -> 1.15
+  * [VPA](https://github.com/kubernetes/autoscaler/releases/tag/vertical-pod-autoscaler-1.2.0): 1.1 -> 1.2
+  * [PostgreSQL](https://www.postgresql.org/docs/release/16.6/): 16.4 -> 16.6
+
+### Added
+
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) and [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) can
+  now configure each node's root volume size via `node_ebs_volume_size_gb`.
+
 ### Fixed
 
 * Addresses issue where non-HA clusters could not recover when many nodes are disrupted at once.

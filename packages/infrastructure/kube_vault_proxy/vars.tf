@@ -1,7 +1,7 @@
 variable "oauth2_proxy_helm_version" {
   description = "The version of the descheduler helm chart to deploy"
   type        = string
-  default     = "7.5.4"
+  default     = "7.8.1"
 }
 
 variable "namespace" {

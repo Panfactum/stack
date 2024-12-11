@@ -1,7 +1,7 @@
 variable "external_dns_helm_version" {
   description = "The version of the ExternalDNS helm chart to deploy"
   type        = string
-  default     = "1.14.5"
+  default     = "1.15.0"
 }
 
 variable "eks_cluster_name" {

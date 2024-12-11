@@ -3,7 +3,7 @@
 variable "external_snapshotter_helm_version" {
   description = "The version of the external-snapshotter helm chart to deploy"
   type        = string
-  default     = "2.2.0"
+  default     = "4.0.0"
 }
 
 variable "vpa_enabled" {

@@ -4,15 +4,15 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/c0b1da36f7c34a7146501f684e9ebdf15d2bebf8";
     flake-utils.url = "github:numtide/flake-utils";
-    kubeUtilsPkgsSrc.url = "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5";
-    awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/658e7223191d2598641d50ee4e898126768fe847";
-    tfUtilsPkgsSrc.url = "github:NixOS/nixpkgs/73bed75dbd3de6d4fca3f81ce25a0cc7766afff6";
-    buildkitPkgsSrc.url = "github:NixOS/nixpkgs/b60793b86201040d9dee019a05089a9150d08b5b";
-    redisPkgsSrc.url = "github:NixOS/nixpkgs/f7207adcc68d9cafa29e3cd252a18743ae512c6a";
+    kubeUtilsPkgsSrc.url = "github:NixOS/nixpkgs/0cb2fd7c59fed0cd82ef858cbcbdb552b9a33465";
+    awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/566e53c2ad750c84f6d31f9ccb9d00f823165550";
+    tfUtilsPkgsSrc.url = "github:NixOS/nixpkgs/93dc9803a1ee435e590b02cde9589038d5cc3a4e";
+    buildkitPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
+    redisPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     postgresPkgsSrc.url = "github:NixOS/nixpkgs/daf7bb95821b789db24fc1ac21f613db0c1bf2cb";
     vaultPkgsSrc.url = "github:NixOS/nixpkgs/325eb628b89b9a8183256f62d017bfb499b19bd9";
-    linkerdPkgsSrc.url = "github:NixOS/nixpkgs/3281bec7174f679eabf584591e75979a258d8c40";
-    kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/34a626458d686f1b58139620a8b2793e9e123bba";
+    linkerdPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
+    kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     natsPkgsSrc.url = "github:NixOS/nixpkgs/34a626458d686f1b58139620a8b2793e9e123bba";
   };
 

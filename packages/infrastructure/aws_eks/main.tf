@@ -9,11 +9,11 @@ terraform {
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.5"
+      version = "4.0.6"
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.3"
+      version = "0.0.4"
     }
   }
 }
@@ -166,14 +166,19 @@ resource "aws_security_group_rule" "control_plane_egress" {
 resource "aws_iam_role" "eks_cluster_role" {
   name               = var.cluster_name
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  ]
   tags = merge(data.pf_aws_tags.tags.tags, {
     Name        = var.cluster_name
     description = "IAM role for the ${var.cluster_name} EKS control plane."
   })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_role" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  ])
+  policy_arn = each.key
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
 data "aws_iam_policy_document" "eks_assume_role" {

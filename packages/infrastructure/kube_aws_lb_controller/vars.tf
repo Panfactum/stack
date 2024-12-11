@@ -1,7 +1,7 @@
 variable "alb_controller_helm_version" {
   description = "The version of aws-application-loadbalancer-controller helm chart to deploy"
   type        = string
-  default     = "1.8.0"
+  default     = "1.10.1"
 }
 
 variable "vpc_id" {

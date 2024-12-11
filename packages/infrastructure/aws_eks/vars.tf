@@ -14,7 +14,7 @@ variable "cluster_description" {
 variable "kube_version" {
   description = "Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied."
   type        = string
-  default     = "1.29"
+  default     = "1.30"
 }
 
 variable "vpc_id" {
