@@ -44,9 +44,9 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.4/docs) (0.0.4)
 
-* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
 
 ## Required Inputs
 
@@ -160,7 +160,15 @@ Description: Desired Kubernetes version to use for all subsystems. Use only majo
 
 Type: `string`
 
-Default: `"1.29"`
+Default: `"1.30"`
+
+### node\_ebs\_volume\_size\_gb
+
+Description: The size of the EBS volume in GiB to use for each node.
+
+Type: `number`
+
+Default: `40`
 
 ### node\_security\_groups
 

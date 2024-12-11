@@ -39,13 +39,13 @@ This module's has inputs that map one-for-one to the [standard Kubernetes CronJo
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.4/docs) (0.0.4)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -310,6 +310,14 @@ Description: Annotations to add to generated Job resources
 Type: `map(string)`
 
 Default: `{}`
+
+### linkerd\_enabled
+
+Description: True iff the Linkerd sidecar should be injected into the pods
+
+Type: `bool`
+
+Default: `true`
 
 ### linkerd\_required
 

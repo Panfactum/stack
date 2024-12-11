@@ -198,14 +198,30 @@ Our Terragrunt configuration automatically takes care of passing in the appropri
 and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#module-source), these variables will
 automatically update.
 
-<MarkdownAlert severity="warning">
-  If you are [using a local copy of the Panfactum submodules](/docs/edge/guides/iac/deploying-modules#using-a-local-copy-of-panfactum-modules),
-  `pf_module_source` will be a relative path. Unlike absolute paths, [relative paths provide performance improvements and automatic updates.](https://opentofu.org/docs/language/modules/sources/#local-paths)
-  However, the relative path cannot always be used such as from within nested folders inside your modules.
+Finally, if you are using Panfactum submodules, your IaC provider version constraints must be set to a specific value
+for each provider. For the full list of provider version values, see the [reference docs](/docs/edge/reference/infrastructure-modules/overview#provider-versions).
 
-  You can use absolute paths instead
-  by setting the `pf_stack_local_use_relative` [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#module-source) to `false`.
-  However, this will force you to re-init any time you change the local Panfactum module code.
+Unfortunately, these must be set manually. For example:
+
+```hcl
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.34.0"
+    }
+  }
+}
+```
+
+<MarkdownAlert severity="info">
+    If you are [using a local copy of the Panfactum submodules](/docs/edge/guides/iac/deploying-modules#using-a-local-copy-of-panfactum-modules),
+    `pf_module_source` will be a relative path. Unlike absolute paths, [relative paths provide performance improvements and automatic updates.](https://opentofu.org/docs/language/modules/sources/#local-paths)
+    However, the relative path cannot always be used such as from within nested folders inside your modules.
+
+    You can use absolute paths instead
+    by setting the `pf_stack_local_use_relative` [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#module-source) to `false`.
+    However, this will force you to re-init any time you change the local Panfactum module code.
 </MarkdownAlert>
 
 ### Using First-Party Submodules

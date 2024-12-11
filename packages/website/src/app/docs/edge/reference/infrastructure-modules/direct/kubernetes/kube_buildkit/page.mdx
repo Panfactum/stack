@@ -14,11 +14,11 @@ The following providers are needed by this module:
 
 * [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.4/docs) (0.0.4)
 
 ## Required Inputs
 
@@ -40,7 +40,7 @@ Description: The version of BuildKit to use
 
 Type: `string`
 
-Default: `"v0.14.1-rootless"`
+Default: `"v0.18.1-rootless"`
 
 ### cache\_clear\_cron
 
@@ -105,14 +105,6 @@ Description: The minimum number of replicas of buildkit to use
 Type: `number`
 
 Default: `1`
-
-### panfactum\_image\_version
-
-Description: The version of the Panfactum image to use for maintenance tasks
-
-Type: `string`
-
-Default: `"95508e2e860c95cee40e61245c8f588b6b73a39b"`
 
 ### panfactum\_scheduler\_enabled
 
