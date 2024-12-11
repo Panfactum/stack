@@ -261,7 +261,12 @@ locals {
         },
         var.extra_pod_labels
       )
-      annotations = var.extra_pod_annotations
+      annotations = merge(
+        {
+          "linkerd.io/inject" = var.linkerd_enabled ? "enabled" : "disabled"
+        },
+        var.extra_pod_annotations
+      )
     }
     spec = {
       priorityClassName  = var.priority_class_name
@@ -404,7 +409,7 @@ module "util" {
   controller_nodes_enabled             = var.controller_nodes_enabled
   controller_nodes_required            = var.controller_nodes_required
   cilium_required                      = var.cilium_required
-  linkerd_required                     = var.linkerd_required
+  linkerd_required                     = var.linkerd_enabled && var.linkerd_required
   instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
   az_anti_affinity_required            = var.az_anti_affinity_required
   host_anti_affinity_required          = var.host_anti_affinity_required

@@ -86,6 +86,7 @@ module "pod_template" {
   restart_policy                       = var.restart_policy
   cilium_required                      = var.cilium_required
   linkerd_required                     = var.linkerd_required
+  linkerd_enabled                      = var.linkerd_enabled
 }
 
 resource "kubernetes_service_account" "service_account" {

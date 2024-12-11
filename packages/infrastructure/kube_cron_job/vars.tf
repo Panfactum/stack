@@ -340,3 +340,9 @@ variable "extra_annotations" {
   default     = {}
 }
 
+variable "linkerd_enabled" {
+  description = "True iff the Linkerd sidecar should be injected into the pods"
+  type        = bool
+  default     = true
+}
+

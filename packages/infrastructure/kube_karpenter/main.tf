@@ -603,10 +603,6 @@ resource "helm_release" "karpenter" {
       topologySpreadConstraints = module.util.topology_spread_constraints
       tolerations               = module.util.tolerations
       affinity                  = module.util.affinity
-      strategy = {
-        type          = "Recreate"
-        rollingUpdate = null
-      }
       nodeSelector = {
         "kubernetes.io/os"    = "linux",
         "panfactum.com/class" = "controller" # MUST be scheduled on controller nodes (controller by EKS)

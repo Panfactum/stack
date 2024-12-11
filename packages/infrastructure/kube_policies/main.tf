@@ -65,6 +65,7 @@ resource "kubectl_manifest" "panfactum_policies" {
       // The order here is EXTREMELY important. Do not change unless you know what you are doing.
       rules = [for rule in concat(
         local.rule_cilium_test,
+        local.rule_disable_linkerd,
         local.rule_node_image_cache,
         local.rule_use_pull_through_image_cache,
         local.rule_use_panfactum_scheduler,
@@ -90,6 +91,12 @@ resource "kubectl_manifest" "panfactum_policies" {
   force_new         = true
   force_conflicts   = true
   server_side_apply = true
+
+  depends_on = [
+    kubectl_manifest.linkerd_destination_global_context,
+    kubectl_manifest.linkerd_identity_global_context,
+    kubectl_manifest.scheduler_global_context
+  ]
 }
 
 

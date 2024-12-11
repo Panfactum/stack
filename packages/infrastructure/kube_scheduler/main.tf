@@ -159,6 +159,11 @@ module "scheduler" {
   panfactum_scheduler_enabled          = false                     # Cannot schedule itself
   pull_through_cache_enabled           = var.pull_through_cache_enabled
 
+  # The scheduler is a dependency of linkerd so we should not enable linkerd for it in order to avoid
+  # a deadlock. Additionally, this just communicates with the k8s API server which is not in the cluster
+  # so the service mesh does not add any value.
+  linkerd_enabled = false
+
   containers = [
     {
       name             = "scheduler"

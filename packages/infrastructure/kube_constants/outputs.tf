@@ -47,7 +47,7 @@ output "panfactum_scheduler_name" {
 
 output "panfactum_image_repository" {
   description = "The repository of the Panfactum devShell image with the AWS public ECR registry (public.ecr.aws)."
-  value       = "t8f0s7h5/panfactum"
+  value       = "panfactum/panfactum"
 }
 
 output "panfactum_image_tag" {
@@ -84,4 +84,9 @@ output "images" {
       tag        = local.image_tag
     }
   }
+}
+
+output "kube_version" {
+  description = "The version of Kubernetes to be used"
+  value       = "1.29"
 }

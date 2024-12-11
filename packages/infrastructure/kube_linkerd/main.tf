@@ -2,6 +2,10 @@
 
 terraform {
   required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.80.0"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "2.27.0"
@@ -66,6 +70,12 @@ module "util_cni" {
       operator = "Exists"
     }
   ]
+}
+
+module "aws_pull_through" {
+  source = "../aws_ecr_pull_through_cache_addresses"
+
+  pull_through_cache_enabled = var.pull_through_cache_enabled
 }
 
 module "util_destination" {
@@ -293,21 +303,52 @@ resource "helm_release" "linkerd_cni" {
   ]
 }
 
+resource "kubernetes_cluster_role" "linkerd_cni_node_patcher" {
+  metadata {
+    name   = "linkerd-cni-node-patcher"
+    labels = data.pf_kube_labels.labels.labels
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["nodes"]
+    verbs      = ["get", "list", "watch", "patch", "update"]
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "linkerd_cni_node_patcher" {
+  metadata {
+    name   = "linkerd-cni-node-patcher"
+    labels = data.pf_kube_labels.labels.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "linkerd-cni"
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.linkerd_cni_node_patcher.metadata[0].name
+  }
+
+  depends_on = [helm_release.linkerd_cni]
+}
+
 // hostNetwork=true is required so that the linkerd CNI can be installed
 // concurrently with the cilium CNI; the helm chart does not provide a way
 // to expose this
-resource "kubectl_manifest" "linkerd_cni_enable_host_network" {
+resource "kubectl_manifest" "linkerd_cni_policy" {
   yaml_body = yamlencode({
     apiVersion = "kyverno.io/v1"
     kind       = "ClusterPolicy"
     metadata = {
-      name   = "linkerd-cni-use-host-network"
+      name   = "linkerd-cni"
       labels = data.pf_kube_labels.labels.labels
     }
     spec = {
       rules = [
         {
-          name = "use-host-network"
+          name = "update-pods"
           match = {
             any = [
               {
@@ -322,7 +363,42 @@ resource "kubectl_manifest" "linkerd_cni_enable_host_network" {
           mutate = {
             patchStrategicMerge = {
               spec = {
-                hostNetwork = true
+                hostNetwork = true # Allows the pod to launch without waiting for cilium
+
+                # Removes the linkerd init taint
+                containers = [
+                  {
+                    name = "remove-taint"
+
+                    # module.aws_pull_through is required as this isn't guaranteed to go through the global pod mutator
+                    image = "${module.aws_pull_through.docker_hub_registry}/bitnami/kubectl:${module.constants.kube_version}"
+                    command = [
+                      "bash",
+                      "-c",
+                      "sleep 10; while true; do kubectl taint nodes \\$(NODE_NAME) panfactum.com/linkerd-not-ready- || true; sleep 300; done"
+                    ]
+                    securityContext = {
+                      runAsGroup               = 1000
+                      runAsUser                = 1000
+                      allowPrivilegeEscalation = false
+                      readOnlyRootFilesystem   = true
+                      privileged               = false
+                      capabilities = {
+                        drop = ["ALL"]
+                      }
+                    }
+
+                    resources = {
+                      requests = {
+                        cpu    = "2m"
+                        memory = "4Mi"
+                      }
+                      limits = {
+                        memory = "20Mi"
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
@@ -704,6 +780,9 @@ resource "kubectl_manifest" "kyverno_policies" {
 
         // This removes the linkerd taint on each node which
         // indicates that the linkerd CNI has been installed
+        // While this is duplicative with the remove-taint container defined
+        // above, this extra redundancy ensures we do not end up in a deadlocked
+        // situation
         {
           name = "remove-linkerd-taint"
           match = {
@@ -873,6 +952,12 @@ resource "kubectl_manifest" "vpa_cni" {
       labels    = module.util_cni.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "remove-taint"
+          mode          = "Off"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "DaemonSet"

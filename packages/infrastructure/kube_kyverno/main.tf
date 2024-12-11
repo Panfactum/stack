@@ -77,6 +77,8 @@ module "util_background_controller" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 
+  # This should be allowed to run on nodes where the linkerd taint exists
+  # b/c this pod is what delete the taint
   extra_tolerations = [
     {
       key      = module.constants.linkerd_taint.key
@@ -315,6 +317,9 @@ resource "helm_release" "kyverno" {
         replicas    = 1 # HA isn't necessary for this
         podLabels   = module.util_background_controller.labels
         tolerations = module.util_background_controller.tolerations
+
+        # This must be running in order to remove node taints, so it is critical for node creation
+        priorityClassName = "system-node-critical"
 
         antiAffinity = {
           enabled = true

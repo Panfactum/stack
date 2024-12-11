@@ -542,7 +542,7 @@ resource "kubectl_manifest" "ingress_cert" {
       }
 
       issuerRef = {
-        name  = "public"
+        name  = local.ci_public_name
         kind  = "ClusterIssuer"
         group = "cert-manager.io"
       }
@@ -558,4 +558,6 @@ resource "kubectl_manifest" "ingress_cert" {
       value = "True"
     }
   }
+
+  depends_on = [kubectl_manifest.cluster_issuer]
 }
