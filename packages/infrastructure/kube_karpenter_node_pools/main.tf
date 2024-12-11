@@ -201,7 +201,7 @@ locals {
       {
         deviceName = "/dev/xvdb"
         ebs = {
-          volumeSize          = "40Gi"
+          volumeSize          = "${var.node_ebs_volume_size_gb}Gi"
           encrypted           = true
           deleteOnTermination = true
           volumeType          = "gp3"

@@ -304,4 +304,3 @@ resource "kubectl_manifest" "ingress" {
   force_conflicts   = true
   server_side_apply = true
 }
-
