@@ -551,6 +551,10 @@ resource "kubernetes_manifest" "postgres_cluster" {
     module.server_certs,
     kubectl_manifest.non_vpa_resource_adjustments
   ]
+
+  timeouts {
+    create = "${var.create_timeout_minutes}m"
+  }
 }
 
 resource "kubectl_manifest" "scheduled_backup" {

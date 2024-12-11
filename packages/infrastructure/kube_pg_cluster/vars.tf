@@ -547,3 +547,9 @@ variable "node_image_cached_enabled" {
   type        = bool
   default     = true
 }
+
+variable "create_timeout_minutes" {
+  description = "The number of minutes to wait for a new database to be created"
+  type        = number
+  default     = 60
+}
