@@ -8,10 +8,8 @@ terraform {
 }
 
 dependency "cluster" {
-  config_path = "../aws_eks"
+  config_path  = "../aws_eks"
+  skip_outputs = true
 }
 
-inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  eks_cluster_url  = dependency.cluster.outputs.cluster_url
-}
+inputs = {}

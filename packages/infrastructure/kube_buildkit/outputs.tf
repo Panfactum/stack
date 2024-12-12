@@ -11,5 +11,5 @@ output "ecr_registry" {
 }
 
 output "eks_cluster_name" {
-  value = var.eks_cluster_name
+  value = local.cluster_name
 }

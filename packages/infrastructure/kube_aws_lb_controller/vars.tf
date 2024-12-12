@@ -18,11 +18,6 @@ variable "subnets" {
   }
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster that this is being deployed to"
-  type        = string
-}
-
 variable "vpa_enabled" {
   description = "Whether the VPA resources should be enabled"
   type        = bool

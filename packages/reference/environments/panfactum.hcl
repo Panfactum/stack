@@ -113,6 +113,9 @@ locals {
 
   # check if in ci system
   is_ci = get_env("CI", "false") == "true"
+
+  kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
+  kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
 }
 
 ################################################################
@@ -149,13 +152,15 @@ generate "pf_provider" {
   path      = "pf.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_pf ? templatefile("${local.provider_folder}/pf.tftpl", {
-    is_local      = local.enable_pf ? local.is_local : false
-    environment   = local.enable_pf ? local.vars.environment : ""
-    region        = local.enable_pf ? local.vars.region : ""
-    stack_version = local.enable_pf ? local.pf_stack_version : ""
-    stack_commit  = local.enable_pf ? local.pf_stack_version_commit_hash : ""
-    root_module   = local.enable_pf ? local.module : ""
-    extra_tags    = local.enable_pf ? local.extra_tags : {}
+    is_local            = local.enable_pf ? local.is_local : false
+    environment         = local.enable_pf ? local.vars.environment : ""
+    region              = local.enable_pf ? local.vars.region : ""
+    stack_version       = local.enable_pf ? local.pf_stack_version : ""
+    stack_commit        = local.enable_pf ? local.pf_stack_version_commit_hash : ""
+    root_module         = local.enable_pf ? local.module : ""
+    extra_tags          = local.enable_pf ? local.extra_tags : {}
+    kube_api_server     = local.kube_api_server
+    kube_config_context = local.kube_config_context
   }) : ""
 }
 
@@ -203,8 +208,8 @@ generate "kubectl_provider" {
   path      = "kubectl.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl.tftpl", {
-    kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
-    kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
+    kube_api_server     = local.kube_api_server
+    kube_config_context = local.kube_config_context
   }) : ""
 }
 
@@ -301,8 +306,8 @@ remote_state {
 ### Terragrunt Configuration
 ################################################################
 
-terraform_version_constraint  = "~> 1.8"
-terraform_binary              = "tofu"
+terraform_version_constraint = "~> 1.8"
+terraform_binary             = "tofu"
 
 retryable_errors = local.is_ci ? [".*"] : [
   "(?si).*UnrecognizedClientException.*",

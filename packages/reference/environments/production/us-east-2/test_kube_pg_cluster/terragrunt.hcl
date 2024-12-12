@@ -12,15 +12,6 @@ dependency "cnpg" {
   skip_outputs = true
 }
 
-dependency "cluster" {
-  config_path = "../aws_eks"
-}
-
-inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-
-  pull_through_cache_enabled = true
-  vpa_enabled                = true
-}
+inputs = {}
 
 skip = true

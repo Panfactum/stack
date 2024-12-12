@@ -131,7 +131,6 @@ module "pvc_autoresizer_image_builder_workflow" {
 
   name = local.pvc_autoresizer_image_name
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 60
 
   entrypoint = "build-images"

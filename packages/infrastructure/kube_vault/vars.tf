@@ -10,11 +10,6 @@ variable "vault_image_tag" {
   default     = "1.14.7" // This is the last open source release
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
 variable "vault_storage_size_gb" {
   description = "The number of gigabytes to allocate to vault storage."
   type        = number

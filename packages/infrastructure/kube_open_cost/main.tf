@@ -22,13 +22,14 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
 locals {
-  namespace = module.namespace.namespace
+  namespace    = module.namespace.namespace
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
 }
 
 data "aws_caller_identity" "current" {}
@@ -37,6 +38,7 @@ data "aws_region" "current" {}
 data "pf_kube_labels" "labels" {
   module = "kube_open_cost"
 }
+data "pf_metadata" "metadata" {}
 
 module "util" {
   source = "../kube_workload_utility"
@@ -114,7 +116,6 @@ module "aws_permissions" {
 
   service_account           = kubernetes_service_account.open_cost.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.spot_data.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -178,7 +179,7 @@ resource "helm_release" "open_cost" {
         }
 
         exporter = {
-          defaultClusterId = var.eks_cluster_name
+          defaultClusterId = local.cluster_name
           extraEnv = {
             EMIT_KSM_V1_METRICS      = false
             EMIT_KSM_V1_METRICS_ONLY = true
@@ -383,7 +384,7 @@ resource "kubernetes_config_map" "network_cost" {
             region = "us-east-2"
             zone   = "us-east-2b",
             ips = [
-              "10.0.48.0/20",
+              "10.0.58.0/20",
               "10.0.128.0/18"
             ]
           },
@@ -391,7 +392,7 @@ resource "kubernetes_config_map" "network_cost" {
             region = "us-east-2"
             zone   = "us-east-2c"
             ips = [
-              "10.0.48.0/20",
+              "10.0.58.0/20",
               "10.0.192.0/18"
             ]
           }

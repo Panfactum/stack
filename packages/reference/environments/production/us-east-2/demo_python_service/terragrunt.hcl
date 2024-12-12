@@ -12,13 +12,8 @@ dependency "ingress" {
   skip_outputs = true
 }
 
-dependency "cluster" {
-  config_path = "../aws_eks"
-}
-
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  namespace        = "demo-python-service"
+  namespace = "demo-python-service"
 
   domain               = "demo.panfactum.com"
   image_version        = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")

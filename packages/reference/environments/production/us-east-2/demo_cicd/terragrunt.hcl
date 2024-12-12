@@ -11,10 +11,6 @@ locals {
   secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
 }
 
-dependency "cluster" {
-  config_path = "../aws_eks"
-}
-
 dependency "buildkit" {
   config_path = "../kube_buildkit"
 }
@@ -24,7 +20,6 @@ dependency "module_bucket" {
 }
 
 inputs = {
-  eks_cluster_name       = dependency.cluster.outputs.cluster_name
   github_username        = "fullykubed"
   github_token           = local.secrets.github_token
   authentik_token        = local.secrets.authentik_token

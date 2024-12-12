@@ -6,7 +6,6 @@ module "website_builder" {
 
   name = "website-builder"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
   code_repo = "github.com/panfactum/stack.git"
@@ -32,7 +31,6 @@ module "build_and_deploy_website_workflow" {
 
   name = "build-and-deploy-website"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 60
   workflow_parallelism = 10
 

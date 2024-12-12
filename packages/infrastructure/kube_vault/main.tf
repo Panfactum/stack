@@ -23,19 +23,21 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
 locals {
-  name      = "vault"
-  namespace = module.namespace.namespace
+  name         = "vault"
+  namespace    = module.namespace.namespace
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
 }
 
 data "pf_kube_labels" "labels" {
   module = "kube_vault"
 }
+data "pf_metadata" "metadata" {}
 
 module "util_server" {
   source = "../kube_workload_utility"
@@ -87,8 +89,8 @@ module "unseal_key" {
     aws.secondary = aws.secondary
   }
 
-  name        = "kube-${var.eks_cluster_name}-vault-unseal"
-  description = "Vault unseal key for ${var.eks_cluster_name}"
+  name        = "kube-${local.cluster_name}-vault-unseal"
+  description = "Vault unseal key for ${local.cluster_name}"
 
   superuser_iam_arns         = var.superuser_iam_arns
   admin_iam_arns             = var.admin_iam_arns
@@ -123,7 +125,6 @@ module "aws_permissions" {
 
   service_account           = kubernetes_service_account.vault.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.sa.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }

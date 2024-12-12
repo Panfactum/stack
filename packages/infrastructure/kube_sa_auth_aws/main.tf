@@ -14,7 +14,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -26,6 +26,7 @@ locals {
     [for subnet in data.aws_subnet.cluster_subnet_info : subnet.tags["panfactum.com/public-ip"] if contains(keys(subnet.tags), "panfactum.com/public-ip")],
     [for subnet in data.aws_subnet.cluster_subnet_info : subnet.cidr_block]
   )
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
 }
 
 data "aws_caller_identity" "main" {}
@@ -34,6 +35,7 @@ data "aws_region" "main" {}
 data "pf_aws_tags" "tags" {
   module = "kube_sa_auth_aws"
 }
+data "pf_metadata" "metadata" {}
 
 # ################################################################################
 # IP Auto Discovery
@@ -42,7 +44,7 @@ data "pf_aws_tags" "tags" {
 data "aws_subnets" "cluster_subnets" {
   filter {
     name   = "tag-key"
-    values = ["kubernetes.io/cluster/${var.eks_cluster_name}"]
+    values = ["kubernetes.io/cluster/${local.cluster_name}"]
   }
 }
 
@@ -57,15 +59,15 @@ data "aws_subnet" "cluster_subnet_info" {
 
 resource "aws_iam_policy" "service_account" {
   name_prefix = "${substr(var.service_account, 0, 37)}-"
-  description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
+  description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${local.cluster_name}."
   policy      = var.iam_policy_json
   tags = merge(data.pf_aws_tags.tags.tags, {
-    description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
+    description = "Provides IAM permissions for ${var.service_account_namespace}/${var.service_account} in ${local.cluster_name}."
   })
 }
 
 data "aws_eks_cluster" "cluster" {
-  name = var.eks_cluster_name
+  name = local.cluster_name
 }
 
 data "aws_iam_policy_document" "service_account_assume" {
@@ -86,10 +88,10 @@ data "aws_iam_policy_document" "service_account_assume" {
 
 resource "aws_iam_role" "service_account" {
   name_prefix        = "${substr(var.service_account, 0, 37)}-"
-  description        = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
+  description        = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${local.cluster_name}."
   assume_role_policy = data.aws_iam_policy_document.service_account_assume.json
   tags = merge(data.pf_aws_tags.tags.tags, {
-    description = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name}."
+    description = "IAM role for ${var.service_account_namespace}/${var.service_account} in ${local.cluster_name}."
   })
   max_session_duration = 43200
 }
@@ -132,10 +134,10 @@ data "aws_iam_policy_document" "ip_blocks" {
 
 resource "aws_iam_policy" "ip_blocks" {
   name_prefix = "${substr(var.service_account, 0, 26)}-ip-blocks-"
-  description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
+  description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${local.cluster_name} to cluster IPs."
   policy      = data.aws_iam_policy_document.ip_blocks.json
   tags = merge(data.pf_aws_tags.tags.tags, {
-    description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${var.eks_cluster_name} to cluster IPs."
+    description = "Restricts ${var.service_account_namespace}/${var.service_account} in ${local.cluster_name} to cluster IPs."
   })
 }
 

@@ -1,8 +1,3 @@
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
 variable "github_username" {
   description = "The username of the GitHub account used by the CI/CD system"
   type = string

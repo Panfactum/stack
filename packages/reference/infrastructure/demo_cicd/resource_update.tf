@@ -46,7 +46,6 @@ module "resource_update_workflow" {
 
   name               = "resource-update-demo"
   namespace          = local.namespace
-  eks_cluster_name   = var.eks_cluster_name
 
   passthrough_parameters = [
     {

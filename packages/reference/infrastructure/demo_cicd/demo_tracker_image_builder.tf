@@ -3,7 +3,6 @@ module "demo_tracker_service_builder" {
 
   name = "demo-tracker-service-builder"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
   code_repo = "github.com/panfactum/stack.git"
@@ -19,7 +18,6 @@ module "build_and_deploy_demo_tracker_service_workflow" {
 
   name = "build-and-deploy-demo-tracker-service"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 60
   workflow_parallelism = 10
 

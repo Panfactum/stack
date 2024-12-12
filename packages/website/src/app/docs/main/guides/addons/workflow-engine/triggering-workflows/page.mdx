@@ -21,7 +21,6 @@ module "workflow_spec" {
 
   name               = "example"
   namespace          = "example-namespace"
-  eks_cluster_name   = var.eks_cluster_name
 
   arguments = {
     parameters = [
@@ -234,7 +233,6 @@ module "composed_workflow" {
 
   name = "composed-workflow"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
 
   entrypoint = "entry"
   templates = [
@@ -290,7 +288,6 @@ module "workflow_of_workflows_spec" {
 
   name               = "example-workflow-of-workflows"
   namespace          = "example-namespace"
-  eks_cluster_name   = var.eks_cluster_name
 
   entrypoint = "entry"
   templates = [

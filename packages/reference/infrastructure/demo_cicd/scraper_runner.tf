@@ -3,7 +3,6 @@ module "run_scraper_workflow_spec" {
 
   name = "run-scraper-and-index"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 60
 
   common_env = {

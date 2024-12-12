@@ -14,7 +14,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -66,6 +66,8 @@ locals {
 data "pf_kube_labels" "labels" {
   module = "kube_rbac"
 }
+
+data "pf_metadata" "metadata" {}
 
 ////////////////////////////////////////////////////////////
 // User Authentication

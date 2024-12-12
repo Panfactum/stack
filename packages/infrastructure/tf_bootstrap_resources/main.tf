@@ -9,7 +9,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -27,8 +27,10 @@ data "pf_aws_tags" "seondary_tags" {
   region_override = data.aws_region.secondary.name
 }
 
+data "pf_metadata" "metadata" {}
+
 locals {
-  environment = data.pf_aws_tags.tags.tags["panfactum.com/environment"]
+  environment = data.pf_metadata.metadata.environment
 }
 
 ####################################################

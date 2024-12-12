@@ -5,11 +5,6 @@ variable "aws_ebs_csi_driver_helm_version" {
   default     = "2.37.0"
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
 variable "aws_iam_ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)

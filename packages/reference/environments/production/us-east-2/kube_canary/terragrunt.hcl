@@ -17,12 +17,6 @@ dependency "logging" {
   skip_outputs = true
 }
 
-dependency "cluster" {
-  config_path = "../aws_eks"
-}
-
-inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-}
+inputs = {}
 
 skip = true

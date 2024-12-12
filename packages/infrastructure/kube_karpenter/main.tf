@@ -24,18 +24,19 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
+locals {
+  name         = "karpenter"
+  namespace    = module.namespace.namespace
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
+}
+
 data "aws_region" "main" {}
 data "aws_caller_identity" "main" {}
-
-locals {
-  name      = "karpenter"
-  namespace = module.namespace.namespace
-}
 
 data "pf_kube_labels" "labels" {
   module = "kube_karpenter"
@@ -44,6 +45,8 @@ data "pf_kube_labels" "labels" {
 data "pf_aws_tags" "tags" {
   module = "kube_karpenter"
 }
+
+data "pf_metadata" "metadata" {}
 
 module "util" {
   source = "../kube_workload_utility"
@@ -75,7 +78,7 @@ module "namespace" {
 *********************************************************************************************************************/
 
 resource "aws_sqs_queue" "karpenter" {
-  name_prefix               = "${var.cluster_name}-"
+  name_prefix               = "${local.cluster_name}-"
   message_retention_seconds = 300
   sqs_managed_sse_enabled   = true
   tags = merge(data.pf_aws_tags.tags.tags, {
@@ -196,7 +199,7 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:ResourceTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringLike"
@@ -225,11 +228,11 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:RequestTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEquals"
-      values   = [var.cluster_name]
+      values   = [local.cluster_name]
       variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
@@ -258,11 +261,11 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:RequestTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEquals"
-      values   = [var.cluster_name]
+      values   = [local.cluster_name]
       variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
@@ -294,11 +297,11 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:ResourceTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEqualsIfExists"
-      values   = [var.cluster_name]
+      values   = [local.cluster_name]
       variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
@@ -331,7 +334,7 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:ResourceTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringLike"
@@ -411,11 +414,11 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:RequestTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEquals"
-      values   = [var.cluster_name]
+      values   = [local.cluster_name]
       variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
@@ -440,11 +443,11 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:RequestTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEquals"
-      values   = [var.cluster_name]
+      values   = [local.cluster_name]
       variable = "aws:RequestTag/eks:eks-cluster-name"
     }
     condition {
@@ -455,7 +458,7 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:ResourceTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEquals"
@@ -486,7 +489,7 @@ data "aws_iam_policy_document" "karpenter" {
     condition {
       test     = "StringEquals"
       values   = ["owned"]
-      variable = "aws:ResourceTag/kubernetes.io/cluster/${var.cluster_name}"
+      variable = "aws:ResourceTag/kubernetes.io/cluster/${local.cluster_name}"
     }
     condition {
       test     = "StringEquals"
@@ -513,7 +516,7 @@ data "aws_iam_policy_document" "karpenter" {
     actions = [
       "eks:DescribeCluster",
     ]
-    resources = ["arn:aws:eks:${data.aws_region.main.name}:${data.aws_caller_identity.main.account_id}:cluster/${var.cluster_name}"]
+    resources = ["arn:aws:eks:${data.aws_region.main.name}:${data.aws_caller_identity.main.account_id}:cluster/${local.cluster_name}"]
   }
 }
 
@@ -530,7 +533,6 @@ module "aws_permissions" {
 
   service_account           = kubernetes_service_account.karpenter.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.cluster_name
   iam_policy_json           = data.aws_iam_policy_document.karpenter.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -612,7 +614,7 @@ resource "helm_release" "karpenter" {
         "panfactum.com/class" = "controller" # MUST be scheduled on controller nodes (controller by EKS)
       }
       settings = {
-        clusterName       = var.cluster_name
+        clusterName       = local.cluster_name
         interruptionQueue = aws_sqs_queue.karpenter.name
         featureGates = {
           spotToSpotConsolidation = true

@@ -129,7 +129,6 @@ module "vault_image_builder_workflow" {
 
   name = local.vault_image_builder_name
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   burstable_nodes_enabled = true
   arm_nodes_enabled = true
   panfactum_scheduler_enabled = true

@@ -24,7 +24,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -42,6 +42,7 @@ data "pf_aws_tags" "tags" {
   module = "kube_aws_lb_controller"
 }
 
+data "pf_metadata" "metadata" {}
 
 module "util_controller" {
   source = "../kube_workload_utility"
@@ -305,7 +306,6 @@ module "aws_permissions" {
 
   service_account           = kubernetes_service_account.alb_controller.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.alb.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -381,7 +381,7 @@ resource "helm_release" "alb_controller" {
       }
       configureDefaultAffinity = false
 
-      clusterName                = var.eks_cluster_name
+      clusterName                = data.pf_metadata.metadata.kube_cluster_name
       region                     = data.aws_region.main.name
       vpcId                      = var.vpc_id
       enableBackendSecurityGroup = true

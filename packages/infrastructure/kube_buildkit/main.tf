@@ -1,5 +1,3 @@
-// Live
-
 terraform {
   required_providers {
     kubernetes = {
@@ -16,12 +14,13 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
 locals {
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
 
   name      = "buildkit"
   namespace = module.namespace.namespace
@@ -33,6 +32,8 @@ locals {
 data "pf_kube_labels" "labels" {
   module = "kube_buildkit"
 }
+
+data "pf_metadata" "metadata" {}
 
 module "constants" {
   source = "../kube_constants"
@@ -103,7 +104,6 @@ module "aws_permissions" {
 
   service_account           = module.buildkit[each.key].service_account_name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.buildkit.json
   ip_allow_list             = var.ip_allow_list
 }

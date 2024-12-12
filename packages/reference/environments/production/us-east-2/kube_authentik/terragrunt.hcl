@@ -17,17 +17,12 @@ dependency "kyverno" {
   skip_outputs = true
 }
 
-dependency "cluster" {
-  config_path = "../aws_eks"
-}
-
 dependency "ses_domain" {
   config_path = "../aws_ses_domain"
 }
 
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  ingress_enabled  = true
+  ingress_enabled = true
 
   domain = "authentik.panfactum.com"
 

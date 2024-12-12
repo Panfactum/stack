@@ -5,7 +5,6 @@ module "tf_deploy" {
 
   name = "tf-deploy-prod"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
   repo = "github.com/panfactum/stack.git"

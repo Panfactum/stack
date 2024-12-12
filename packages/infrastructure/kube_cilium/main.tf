@@ -18,14 +18,16 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
 locals {
-  name      = "cilium"
-  namespace = module.namespace.namespace
+  name         = "cilium"
+  namespace    = module.namespace.namespace
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
+  cluster_url  = data.pf_metadata.metadata.kube_api_server
 }
 
 data "aws_region" "region" {}
@@ -33,6 +35,7 @@ data "aws_region" "region" {}
 data "pf_kube_labels" "labels" {
   module = "kube_cilium"
 }
+data "pf_metadata" "metadata" {}
 
 module "util_controller" {
   source = "../kube_workload_utility"
@@ -111,7 +114,6 @@ module "aws_permissions" {
   annotate_service_account  = false // The helm chart creates the service account
   service_account           = "cilium-operator"
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.cilium.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -183,7 +185,7 @@ resource "helm_release" "cilium" {
       // shifts so you MUST use the internal EKS API DNS name
       // in order for this to continue to work
       kubeProxyReplacement = true
-      k8sServiceHost       = trimprefix(var.eks_cluster_url, "https://")
+      k8sServiceHost       = trimprefix(local.cluster_url, "https://")
       k8sServicePort       = 443
 
       // Enhanced load balancing capabilities
@@ -356,7 +358,7 @@ resource "helm_release" "cilium" {
         priorityClassName = "system-node-critical"
 
         extraArgs = [
-          "--cluster-name=${var.eks_cluster_name}"
+          "--cluster-name=${local.cluster_name}"
         ]
         extraEnv = [
           { name : "AWS_ROLE_ARN", value = module.aws_permissions.role_arn },

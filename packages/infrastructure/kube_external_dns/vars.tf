@@ -4,11 +4,6 @@ variable "external_dns_helm_version" {
   default     = "1.15.0"
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
 variable "route53_zones" {
   description = "A mapping of public DNS domains managed by AWS to their configuration; external-dns uses this to set domain records"
   type = map(object({

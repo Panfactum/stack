@@ -22,18 +22,20 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
 locals {
-  namespace = module.namespace.namespace
+  namespace    = module.namespace.namespace
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
 }
 
 data "pf_kube_labels" "labels" {
   module = "kube_velero"
 }
+data "pf_metadata" "metadata" {}
 
 data "aws_region" "current" {}
 
@@ -65,7 +67,7 @@ module "namespace" {
 ***************************************/
 
 resource "random_id" "bucket_name" {
-  prefix      = "${var.eks_cluster_name}-backup-"
+  prefix      = "${local.cluster_name}-backup-"
   byte_length = 8
 }
 
@@ -73,7 +75,7 @@ module "backup_bucket" {
   source = "../aws_s3_private_bucket"
 
   bucket_name = random_id.bucket_name.hex
-  description = "State backups for the  ${var.eks_cluster_name} cluster"
+  description = "State backups for the ${local.cluster_name} cluster"
 
   intelligent_transitions_enabled = false
   timed_transitions_enabled       = false
@@ -131,7 +133,6 @@ module "aws_permissions" {
 
   service_account           = kubernetes_service_account.velero.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.velero.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }

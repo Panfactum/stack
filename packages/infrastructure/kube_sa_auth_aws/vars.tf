@@ -8,11 +8,6 @@ variable "service_account_namespace" {
   type        = string
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster that contains the service account."
-  type        = string
-}
-
 variable "iam_policy_json" {
   description = "An IAM policy document in rendered JSON string form."
   type        = string

@@ -21,8 +21,7 @@ dependency "redis_cache" {
 }
 
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
-  namespace        = "demo-user-service"
+  namespace = "demo-user-service"
 
   domain            = "demo.panfactum.com"
   image_version     = run_cmd("--terragrunt-quiet", "pf-get-commit-hash", "--ref=main", "--repo=https://github.com/panfactum/stack")

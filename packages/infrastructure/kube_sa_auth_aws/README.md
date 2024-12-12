@@ -47,7 +47,6 @@ module "aws_permissions" {
    
   service_account           = module.example_deployment.service_account_name
   service_account_namespace = var.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.example.json
 }
 ```

@@ -4,16 +4,6 @@ variable "cilium_helm_version" {
   default     = "1.16.3"
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
-variable "eks_cluster_url" {
-  description = "The url of the EKS cluster api server"
-  type        = string
-}
-
 variable "log_level" {
   description = "The log level for the Cilium pods"
   type        = string

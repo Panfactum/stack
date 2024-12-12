@@ -12,10 +12,6 @@ dependency "cert_manager" {
   skip_outputs = true
 }
 
-dependency "aws_eks" {
-  config_path = "../aws_eks"
-}
-
 dependency "vault_core" {
   config_path  = "../vault_core_resources"
   skip_outputs = true
@@ -35,7 +31,6 @@ dependency "delegated_zones" {
 
 inputs = {
   alert_email        = "it@panfactum.com"
-  eks_cluster_name   = dependency.aws_eks.outputs.cluster_name
   vault_internal_url = dependency.vault.outputs.vault_internal_url
 
   route53_zones = {

@@ -54,11 +54,6 @@ variable "log_level" {
   }
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster that contains the service account."
-  type        = string
-}
-
 variable "aws_iam_ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)

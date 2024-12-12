@@ -3,7 +3,6 @@ module "demo_user_service_builder" {
 
   name = "demo-user-service-builder"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
   code_repo = "github.com/panfactum/stack.git"
@@ -18,7 +17,6 @@ module "build_and_deploy_demo_user_service_workflow" {
 
   name = "build-and-deploy-demo-user-service"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 60
   workflow_parallelism = 10
 

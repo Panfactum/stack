@@ -118,7 +118,6 @@ module "tf_deploy" {
 
   name = "tf-deploy"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
 
   # This is the repository url for that contains your terragrunt configuration files
   repo = "github.com/panfactum/stack"

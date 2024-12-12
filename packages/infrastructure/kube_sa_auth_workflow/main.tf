@@ -18,7 +18,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -91,7 +91,6 @@ module "aws_permissions" {
 
   service_account           = var.service_account
   service_account_namespace = var.service_account_namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.aws_access.json
   ip_allow_list             = var.ip_allow_list
   annotate_service_account  = var.annotate_service_account

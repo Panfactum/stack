@@ -59,34 +59,34 @@ output "images" {
   description = "Images that are used throughout the stack"
   value = {
     devShell = {
-      registry   = "public.ecr.aws"
+      registry   = local.image_registry
       repository = "panfactum/panfactum"
       tag        = local.image_tag
+      image      = "${local.image_registry}/panfactum/panfactum:${local.image_tag}"
     }
     vault = {
-      registry   = "public.ecr.aws"
+      registry   = local.image_registry
       repository = "panfactum/vault"
       tag        = local.image_tag
+      image      = "${local.image_registry}/panfactum/vault:${local.image_tag}"
     }
     bastion = {
-      registry   = "public.ecr.aws"
+      registry   = local.image_registry
       repository = "panfactum/bastion"
       tag        = local.image_tag
+      image      = "${local.image_registry}/panfactum/bastion:${local.image_tag}"
     }
     argo-events = {
-      registry   = "public.ecr.aws"
+      registry   = local.image_registry
       repository = "panfactum/argo-events"
       tag        = local.image_tag
+      image      = "${local.image_registry}/panfactum/argo-events:${local.image_tag}"
     }
     pvc-autoresizer = {
-      registry   = "public.ecr.aws"
+      registry   = local.image_registry
       repository = "panfactum/pvc-autoresizer"
       tag        = local.image_tag
+      image      = "${local.image_registry}/panfactum/pvc-autoresizer:${local.image_tag}"
     }
   }
-}
-
-output "kube_version" {
-  description = "The version of Kubernetes to be used"
-  value       = "1.29"
 }

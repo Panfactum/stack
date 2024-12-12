@@ -3,7 +3,6 @@ module "scraper_builder" {
 
   name = "scraper-builder"
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   pull_through_cache_enabled = var.pull_through_cache_enabled
 
   code_repo = "github.com/panfactum/stack.git"

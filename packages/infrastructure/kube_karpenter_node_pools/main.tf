@@ -18,14 +18,15 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
 
 locals {
-  name    = "karpenter"
-  version = 2
+  cluster_name = data.pf_metadata.metadata.kube_cluster_name
+  name         = "karpenter"
+  version      = 2
 
   // (1) <2GB of memory is not efficient as each node requires about 1GB of memory just for the
   // base kubernetes utilities and controllers that must run on each node
@@ -220,6 +221,8 @@ data "pf_kube_labels" "labels" {
   module = "kube_karpenter_node_pools"
 }
 
+data "pf_metadata" "metadata" {}
+
 module "constants" {
   source = "../kube_constants"
 }
@@ -227,7 +230,7 @@ module "constants" {
 module "node_settings_burstable" {
   source = "../kube_node_settings"
 
-  cluster_name           = var.cluster_name
+  cluster_name           = local.cluster_name
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
   is_spot                = true
@@ -236,7 +239,7 @@ module "node_settings_burstable" {
 module "node_settings_spot" {
   source = "../kube_node_settings"
 
-  cluster_name           = var.cluster_name
+  cluster_name           = local.cluster_name
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
   cluster_ca_data        = var.cluster_ca_data
@@ -246,7 +249,7 @@ module "node_settings_spot" {
 module "node_settings" {
   source = "../kube_node_settings"
 
-  cluster_name           = var.cluster_name
+  cluster_name           = local.cluster_name
   cluster_endpoint       = var.cluster_endpoint
   cluster_dns_service_ip = var.cluster_dns_service_ip
   cluster_ca_data        = var.cluster_ca_data

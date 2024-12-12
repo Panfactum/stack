@@ -30,7 +30,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -226,7 +226,6 @@ module "loki_aws_permissions" {
 
   service_account           = kubernetes_service_account.loki.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.loki.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }

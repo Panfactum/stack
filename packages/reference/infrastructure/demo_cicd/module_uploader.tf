@@ -42,7 +42,6 @@ module "module_uploader_workflow" {
 
   name = local.module_uploader_workflow_name
   namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   active_deadline_seconds = 60 * 10
   workflow_parallelism = 10
   burstable_nodes_enabled = true

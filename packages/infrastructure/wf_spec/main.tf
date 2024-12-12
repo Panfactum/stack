@@ -14,7 +14,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -498,7 +498,6 @@ module "workflow_perms" {
 
   service_account           = kubernetes_service_account.sa.metadata[0].name
   service_account_namespace = var.namespace
-  eks_cluster_name          = var.eks_cluster_name
   extra_aws_permissions     = var.extra_aws_permissions
 }
 

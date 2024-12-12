@@ -10,11 +10,6 @@ variable "namespace" {
   default     = "cert-manager"
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
 variable "route53_zones" {
   description = "A mapping of public DNS domains managed by AWS to their configuration; cert-manager uses this to issue public-facing certificates."
   type = map(object({

@@ -18,7 +18,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -69,6 +69,7 @@ locals {
   )))
 
   all_domains_with_subdomains = flatten([for domain in local.all_domains : (alltrue([for possible_parent in local.all_domains : (domain == possible_parent || !endswith(domain, possible_parent))]) ? [domain, "*.${domain}"] : ["*.${domain}"])])
+  cluster_name                = data.pf_metadata.metadata.kube_cluster_name
 }
 
 data "aws_region" "main" {}
@@ -76,6 +77,7 @@ data "aws_region" "main" {}
 data "pf_kube_labels" "labels" {
   module = "kube_cert_issuers"
 }
+data "pf_metadata" "metadata" {}
 
 /***************************************
 * Cluster Issuer - Public
@@ -96,7 +98,6 @@ module "aws_permissions" {
 
   service_account           = var.service_account
   service_account_namespace = var.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.permissions.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -145,7 +146,7 @@ resource "kubectl_manifest" "cluster_issuer" {
 resource "vault_mount" "pki_internal" {
   path                      = "pki/internal"
   type                      = "pki"
-  description               = "Internal root CA for the ${var.eks_cluster_name} cluster"
+  description               = "Internal root CA for the ${local.cluster_name} cluster"
   default_lease_ttl_seconds = 60 * 60 * 24
   max_lease_ttl_seconds     = 60 * 60 * 24 * 365 * 10
 }

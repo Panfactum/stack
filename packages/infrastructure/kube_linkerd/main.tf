@@ -20,7 +20,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -334,6 +334,8 @@ resource "kubernetes_cluster_role_binding" "linkerd_cni_node_patcher" {
   depends_on = [helm_release.linkerd_cni]
 }
 
+data "kubectl_server_version" "version" {}
+
 // hostNetwork=true is required so that the linkerd CNI can be installed
 // concurrently with the cilium CNI; the helm chart does not provide a way
 // to expose this
@@ -371,7 +373,7 @@ resource "kubectl_manifest" "linkerd_cni_policy" {
                     name = "remove-taint"
 
                     # module.aws_pull_through is required as this isn't guaranteed to go through the global pod mutator
-                    image = "${module.aws_pull_through.docker_hub_registry}/bitnami/kubectl:${module.constants.kube_version}"
+                    image = "${module.aws_pull_through.docker_hub_registry}/bitnami/kubectl:${data.kubectl_server_version.version.major}.${data.kubectl_server_version.version.minor}"
                     command = [
                       "bash",
                       "-c",

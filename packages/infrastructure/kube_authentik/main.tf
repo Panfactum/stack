@@ -27,7 +27,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -86,7 +86,6 @@ module "namespace" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name                     = var.eks_cluster_name
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 10
   pg_instances                         = 2

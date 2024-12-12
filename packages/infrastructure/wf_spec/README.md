@@ -421,7 +421,6 @@ module "example_wf" {
 
   name                    = "example"
   namespace               = var.namespace
-  eks_cluster_name        = var.eks_cluster_name
 
   entrypoint = "example"
   templates = [
@@ -462,7 +461,6 @@ module "example_wf" {
 
   name                    = "example"
   namespace               = var.namespace
-  eks_cluster_name        = var.eks_cluster_name
 
   entrypoint = "example"
   templates = [

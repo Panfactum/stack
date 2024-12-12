@@ -4,11 +4,6 @@ variable "karpenter_helm_version" {
   default     = "1.1.1"
 }
 
-variable "cluster_name" {
-  description = "The name of the EKS cluster."
-  type        = string
-}
-
 variable "node_role_arn" {
   description = "The arn of the role the EKS cluster roles are assigned"
   type        = string

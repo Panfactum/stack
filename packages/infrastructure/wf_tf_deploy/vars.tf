@@ -60,11 +60,6 @@ variable "cpu_millicores" {
   default     = 500
 }
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster that contains the service account."
-  type        = string
-}
-
 variable "git_username" {
   description = "The username to use when checking out the code to deploy"
   type        = string

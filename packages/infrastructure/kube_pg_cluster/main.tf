@@ -26,7 +26,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -167,7 +167,6 @@ data "aws_iam_policy_document" "s3_access" {
 module "irsa" {
   source = "../kube_sa_auth_aws"
 
-  eks_cluster_name          = var.eks_cluster_name
   service_account           = local.cluster_name
   service_account_namespace = var.pg_cluster_namespace
   iam_policy_json           = data.aws_iam_policy_document.s3_access.json

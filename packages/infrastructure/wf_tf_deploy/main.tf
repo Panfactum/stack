@@ -14,7 +14,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -118,7 +118,6 @@ module "tf_deploy_workflow" {
 
   name                    = var.name
   namespace               = var.namespace
-  eks_cluster_name        = var.eks_cluster_name
   burstable_nodes_enabled = true
   active_deadline_seconds = 60 * 60
 

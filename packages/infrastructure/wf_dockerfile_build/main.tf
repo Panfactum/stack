@@ -14,7 +14,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -125,7 +125,6 @@ module "image_builder_workflow" {
 
   name                    = var.name
   namespace               = var.namespace
-  eks_cluster_name        = var.eks_cluster_name
   burstable_nodes_enabled = true
   active_deadline_seconds = var.build_timeout
   workflow_parallelism    = 10

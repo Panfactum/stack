@@ -30,7 +30,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.4"
+      version = "0.0.5"
     }
   }
 }
@@ -337,7 +337,6 @@ module "namespace" {
 module "grafana_db" {
   source = "../kube_pg_cluster"
 
-  eks_cluster_name                     = var.eks_cluster_name
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 1
   pg_instances                         = 2
@@ -446,7 +445,6 @@ module "aws_permissions" {
 
   service_account           = kubernetes_service_account.prometheus.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -1275,7 +1273,6 @@ module "aws_permissions_thanos_compactor" {
 
   service_account           = kubernetes_service_account.thanos_compactor.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -1293,7 +1290,6 @@ module "aws_permissions_thanos_store_gateway" {
 
   service_account           = kubernetes_service_account.thanos_store_gateway.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -1311,7 +1307,6 @@ module "aws_permissions_thanos_ruler" {
 
   service_account           = kubernetes_service_account.thanos_ruler.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }
@@ -1329,7 +1324,6 @@ module "aws_permissions_thanos_bucket_web" {
 
   service_account           = kubernetes_service_account.thanos_bucket_web.metadata[0].name
   service_account_namespace = local.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.prometheus.json
   ip_allow_list             = var.aws_iam_ip_allow_list
 }

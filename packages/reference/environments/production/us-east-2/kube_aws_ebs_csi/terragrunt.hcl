@@ -8,11 +8,11 @@ terraform {
 }
 
 dependency "cluster" {
-  config_path = "../aws_eks"
+  config_path  = "../aws_eks"
+  skip_outputs = true
 }
 
 inputs = {
-  eks_cluster_name = dependency.cluster.outputs.cluster_name
   extra_storage_classes = {
     example = {
       type        = "io2"
