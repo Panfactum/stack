@@ -30,95 +30,95 @@ import {
 import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
 import StickyLayout from '@/layouts/StickyLayout.astro'
 const IMAGES = [
-  {
-    url: '/odeao-labs.png',
-    alt: 'Odeao Labs',
-    class:
-      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
-  },
-  {
-    url: '/kintsugi.png',
-    alt: 'Kintsugi',
-    class:
-      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
-  },
-  {
-    url: '/stacked.png',
-    alt: 'Stacked',
-    class:
-      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
-  },
-  {
-    url: '/magnolia.png',
-    alt: 'Magnolia',
-    class:
-      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
-  },
-  {
-    url: '/warpspeed.png',
-    alt: 'Warpspeed',
-    class:
-      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
-  },
-  {
-    url: '/odeao-labs.png',
-    alt: 'Odeao Labs',
-    class:
-      'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
-  },
+  [
+    {
+      url: '/odeao-labs.png',
+      alt: 'Odeao Labs',
+      class:
+        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+    },
+    {
+      url: '/kintsugi.png',
+      alt: 'Kintsugi',
+      class:
+        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+    },
+  ],
+  [
+    {
+      url: '/stacked.png',
+      alt: 'Stacked',
+      class:
+        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+    },
+    {
+      url: '/magnolia.png',
+      alt: 'Magnolia',
+      class:
+        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+    },
+  ],
+  [
+    {
+      url: '/warpspeed.png',
+      alt: 'Warpspeed',
+      class:
+        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+    },
+  ],
 ]
 
 const FEATURES = [
   {
-    icon: faIdBadge,
+    icon: '/shield.svg',
     title: 'Security',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   },
   {
-    icon: faIdBadge,
+    icon: '/dollar.svg',
     title: 'Cost Savings',
     content:
       'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.',
   },
   {
-    icon: faIdBadge,
+    icon: '/power.svg',
     title: 'High Availability',
     content:
       'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam.',
   },
   {
-    icon: faIdBadge,
+    icon: '/db.svg',
     title: 'Databases',
     content:
       'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
   },
   {
-    icon: faIdBadge,
+    icon: '/code.svg',
     title: 'Local Development',
     content:
       'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.',
   },
   {
-    icon: faIdBadge,
+    icon: '/ci-cd.svg',
     title: 'CI / CD',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
   },
   {
-    icon: faIdBadge,
+    icon: '/eye.svg',
     title: 'Monitoring and Observability',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
   },
   {
-    icon: faIdBadge,
+    icon: '/qr-code.svg',
     title: 'Infrastructure-as-Code',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
   },
   {
-    icon: faIdBadge,
+    icon: '/flag.svg',
     title: 'Roadmap',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
@@ -217,12 +217,18 @@ const SUPPORT_DREAMS = [
 
   <Section class="gap-4xl text-primary">
     <h2 class="text-tertiary text-md font-medium">Trusted by companies</h2>
-    <div
-      class="grid grid-cols-2 md:flex md:flex-wrap md:justify-center gap-6xl"
-    >
+    <div class="flex flex-wrap justify-center gap-4xl">
       {
         IMAGES.map((item, index) => (
-          <img src={item.url} alt={item.alt} class={item.class} />
+          <div class="col-span-1 flex items-center gap-4xl">
+            {item.map((innerItem) => (
+              <img
+                src={innerItem.url}
+                alt={innerItem.alt}
+                class={innerItem.class}
+              />
+            ))}
+          </div>
         ))
       }
     </div>
@@ -238,11 +244,13 @@ const SUPPORT_DREAMS = [
       {
         FEATURES.map((item) => (
           <div class="flex flex-col items-center gap-xl text-center max-w-[384px]">
-            <Button variant="outline" size="icon" className="w-[48px] h-[48px]">
-              <FontAwesomeIcon icon={item.icon} />
-            </Button>
+            <div class="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] bg-white shadow">
+              <img src={item.icon} />
+            </div>
 
-            <h3 class="text-primary text-lg font-semibold">{item.title}</h3>
+            <h3 class="text-primary text-lg md:text-xl font-semibold">
+              {item.title}
+            </h3>
             <p class="text-tertiary text-md max-w-[378px]">{item.content}</p>
           </div>
         ))
@@ -298,7 +306,9 @@ const SUPPORT_DREAMS = [
               <h1 class="font-machina text-primary text-display-xs font-medium">
                 Starter
               </h1>
-              <div class="flex items-center justify-center rounded-full h-8 border border-[#9AD3F1] bg-[#E6F4FC] px-2.5">
+              <div
+                class="flex items-center justify-center rounded-full h-8 border border-[#9AD3F1] bg-[#E6F4FC] px-2.5"
+              >
                 Popular
               </div>
             </div>

@@ -829,6 +829,13 @@ export function DocsSidebar({
   const crumbs = buildBreadcrumbs(SIDENAV_SECTIONS, '/' + strippedPath.path)
   const [openMobile, setOpenMobile] = useState(false)
 
+  console.log('current Path: ', currentPath, basePath);
+
+  const mainNavigationLinkActive = (path: string) => {
+    console.log('path: ', currentPath, basePath + path);
+    return !!(path && currentPath.includes(path))
+  }
+
   return (
     <Sidebar
       currentPath={currentPath}
@@ -862,6 +869,7 @@ export function DocsSidebar({
           {SIDENAV_SECTIONS.map((item) => (
             <SidebarMenuItem key={item.text}>
               <SidebarMenuButton
+                isActive={mainNavigationLinkActive(item.path)}
                 asChild
               >
                 <a

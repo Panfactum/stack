@@ -36,7 +36,7 @@ function depthPadding(depth: number) {
   <>
     <article
       style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
-      class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] md:border-l border-secondary overflow-auto h-full`}
+      class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] overflow-auto h-full`}
     >
       <slot />
     </article>

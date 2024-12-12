@@ -13,40 +13,47 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import SectionFullWidth from '@/components/layout/section-full-width.astro'
 import { faBolt } from '@fortawesome/free-solid-svg-icons'
+import Kicker from '@/components/astro/hero/kicker.astro'
+import Title from '@/components/astro/hero/title.astro'
+import Subtitle from '@/components/astro/hero/subtitle.astro'
+import SectionKicker from '@/components/astro/section/section-kicker.astro'
+import SectionTitle from '@/components/astro/section/section-title.astro'
+import SectionContent from '@/components/astro/section/section-content.astro'
+import ContactUs from '@/components/astro/forms/contact-us.astro'
 
 const CORE_PLATFORM_VALUES = [
   {
-    icon: faMessage,
+    icon: '/chat-bubble.svg',
     title: 'Self-Hostable',
     content:
       'Software is easy to distribute, hardware is a commodity, and orchestration is a solved problem.',
   },
   {
-    icon: faBolt,
+    icon: '/thunder-bolt.svg',
     title: 'Open Tooling & Standards',
     content:
       'No standardized platform can cover 100% of the needs of every user, all the time.',
   },
   {
-    icon: faBarChart,
+    icon: '/bar-chart-break.svg',
     title: 'Integrated Approach',
     content:
       'Our platform will Just Work™ out-of-the-box without users needing to understand all the underlying complexity on day one.',
   },
   {
-    icon: faMessage,
+    icon: '/chat-happy.svg',
     title: 'Developer Productivity',
     content:
       'The success of most software companies is constrained by how quickly and robustly its engineers can write and deploy new software.',
   },
   {
-    icon: faMessage,
+    icon: '/ownership.svg',
     title: 'Ownership',
     content:
       'We believe a platform can only be successful if its users feel like they own it.',
   },
   {
-    icon: faMessage,
+    icon: '/ownership.svg',
     title: 'One More',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
@@ -80,40 +87,31 @@ const COMPANY_MEMBERS = [
 <Layout darkBackground={true} heroClass="bg-brand-section">
   <Section slot="hero">
     <div class="flex flex-col gap-3xl items-center text-center max-w-[846px]">
-      <h2 class="text-tertiary_on-brand text-sm md:text-md font-semibold">
-        pæn • fak • tm
-      </h2>
-      <h1
-        class="font-machina font-medium text-primary_on-brand text-display-lg leading-tight"
-      >
-        About Panfactum
-      </h1>
-      <p class="text-tertiary_on-brand text-xl">
+      <Kicker> pæn • fak • tm </Kicker>
+      <Title> About Panfactum </Title>
+      <Subtitle>
         The Panfactum Stack is an integrated set of OpenTofu (Terraform) modules
         and local tooling aimed at providing the best experience for building,
         deploying, and managing software on AWS and Kubernetes.
-      </p>
+      </Subtitle>
     </div>
   </Section>
 
   <Section sectionClass="py-7xl" class="gap-y-6xl text-tertiary">
     <div class="w-full max-w-xl self-start">
-      <h2 class="text-brand-secondary text-sm md:text-md font-semibold mb-lg">
-        pæn • fak • tm
-      </h2>
-      <h1 class="font-machina text-black text-display-md font-medium mb-xl">
-        Panfactum Missions
-      </h1>
-      <p class="text-xl text-tertiary">
-        Panfactum was founded with one goal: <span class="text-xl font-bold"
-          >create the best possible platform for building, deploying, and
-          maintaining software.</span
-        >
-      </p>
+      <SectionKicker class="mb-lg"> pæn • fak • tm </SectionKicker>
+      <SectionTitle> Panfactum Missions </SectionTitle>
+      <SectionContent>
+        Panfactum was founded with one goal:
+        <span class="text-xl font-bold">
+          create the best possible platform for building, deploying, and
+          maintaining software.
+        </span>
+      </SectionContent>
     </div>
     <div class="w-full md:flex md:gap-x-8xl pr-8">
       <div class="flex-1 max-w-[576px]">
-        <p class="text-tertiary text- md:text-lg mb-lg">
+        <p class="text-tertiary text-md md:text-lg mb-lg">
           Most existing platform providers fall into one of three buckets:
         </p>
 
@@ -134,7 +132,7 @@ const COMPANY_MEMBERS = [
         </ul>
       </div>
 
-      <div class="flex-1 w-full text-lg">
+      <div class="flex-1 w-full text-md md:text-lg">
         <p class="mb-4">Each misses the mark for serious, long-term users.</p>
         <p class="pr-8">
           Instead, we know we must provide a highly-opinionated foundational
@@ -147,7 +145,8 @@ const COMPANY_MEMBERS = [
     </div>
   </Section>
 
-  <div class="h-[1px] w-full bg-border-secondary"></div>
+  <div class="h-[1px] w-full max-w-[1216px] mx-auto bg-border-secondary my-4">
+  </div>
 
   <Section class="text-tertiary text-lg xl:flex-row xl:gap-x-7xl">
     <div class="flex flex-col gap-y-4xl items-start">
@@ -155,11 +154,13 @@ const COMPANY_MEMBERS = [
         <h2 class="text-brand-secondary text-sm md:text-md font-semibold mb-md">
           History
         </h2>
-        <h1 class="font-machina text-black text-display-md font-medium mb-lg">
+        <h1
+          class="font-machina text-black text-display-sm md:text-display-md font-medium mb-lg"
+        >
           A Brief History
         </h1>
       </div>
-      <div class="flex flex-col gap-y-xl text-lg">
+      <div class="flex flex-col gap-y-xl text-md md:text-lg">
         <p>
           In 2016, it was no surprise that most software organizations were
           struggling to develop and deploy the <a
@@ -200,8 +201,10 @@ const COMPANY_MEMBERS = [
         </p>
 
         <div>
-          <Button variant="outline" size="xl" className="w-full md:w-auto"
-            >Get in touch</Button
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full md:w-auto text-md h-[48px]">Get in touch</Button
           >
         </div>
       </div>
@@ -213,33 +216,28 @@ const COMPANY_MEMBERS = [
 
   <SectionFullWidth
     sectionClass="gap-6xl text-primary bg-secondary py-md"
-    class="gap-y-4xl py-md"
+    class="gap-y-4xl px-0"
   >
     <div class="text-center">
-      <h3 class="text-brand-secondary text-sm font-semibold mb-2">
-        Our Values
-      </h3>
-      <h2 class="font-machina text-display-md font-semibold mb-3">
-        Core Platform Values
-      </h2>
-      <p class="text-tertiary text-xl mb-8">
+      <SectionKicker> Our Values </SectionKicker>
+      <SectionTitle class="mb-sm"> Core Platform Values </SectionTitle>
+      <SectionContent class="mb-8">
         Our shared values keep us connected and guide us as one team.
-      </p>
+      </SectionContent>
     </div>
 
     <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
       {
         CORE_PLATFORM_VALUES.map((item) => (
           <div class="flex flex-col items-center gap-xl text-center">
-            <Button
-              variant="outline"
-              className="w-[48px] h-[48px] py-[0] px-0 gap-0"
-            >
-              <FontAwesomeIcon icon={item.icon} size="xl" />
-            </Button>
+            <div class="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] bg-white shadow">
+              <img src={item.icon} />
+            </div>
 
             <h3 class="text-primary text-xl font-semibold">{item.title}</h3>
-            <p class="text-tertiary text-md max-w-[384px]">{item.content}</p>
+            <p class="text-tertiary text-md max-w-[384px] w-full">
+              {item.content}
+            </p>
           </div>
         ))
       }
@@ -248,11 +246,9 @@ const COMPANY_MEMBERS = [
 
   <Section class="gap-6xl text-primary py-4">
     <div class="text-center">
-      <h3 class="text-brand-secondary text-sm font-semibold">We're Hiring!</h3>
-      <h2 class="font-machina text-display-md font-semibold tracking-tight">
-        Meet our team
-      </h2>
-      <p class="text-xl text-tertiary max-w-[768px] mx-auto px-xl">
+      <SectionKicker> We're Hiring! </SectionKicker>
+      <SectionTitle class="mb-4"> Meet our team </SectionTitle>
+      <p class="text-lg md:text-xl text-tertiary max-w-[768px] mx-auto px-xl">
         Our philosophy is simple — hire a team of diverse, passionate people and
         foster a culture that empowers you to do your best work.
       </p>
@@ -269,6 +265,20 @@ const COMPANY_MEMBERS = [
           </div>
         ))
       }
+    </div>
+  </Section>
+
+  <Section>
+    <div class="text-center mb-16">
+      <SectionKicker> Contact Us </SectionKicker>
+      <SectionTitle class="mb-4"> Get in touch </SectionTitle>
+      <p class="text-lg md:text-xl text-tertiary max-w-[768px] mx-auto px-xl">
+        We'd love to hear from you. Please fill out this form.
+      </p>
+    </div>
+
+    <div class="w-full flex justify-center">
+      <ContactUs />
     </div>
   </Section>
 </Layout>
