@@ -650,8 +650,8 @@ resource "helm_release" "argo_events" {
         // This is required until the patch is merged upstream
         // https://github.com/argoproj/argo-events/pull/3381
         image = {
-          repository = "public.ecr.aws/panfactum/argo-events"
-          tag        = "patch-2"
+          repository = "${module.constants.images.argo-events.registry}/${module.constants.images.argo-events.repository}"
+          tag        = module.constants.images.argo-events.tag
         }
 
         podLabels = merge(

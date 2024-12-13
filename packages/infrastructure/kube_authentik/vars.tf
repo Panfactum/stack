@@ -7,7 +7,7 @@ variable "namespace" {
 variable "authentik_helm_version" {
   description = "The version of the Authentik helm chart to deploy"
   type        = string
-  default     = "2024.6.4"
+  default     = "2024.8.4"
 }
 
 variable "vpa_enabled" {

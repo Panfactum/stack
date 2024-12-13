@@ -27,23 +27,23 @@ provider "registry.opentofu.org/alekc/kubectl" {
 }
 
 provider "registry.opentofu.org/hashicorp/aws" {
-  version     = "5.80.0"
-  constraints = "5.80.0"
+  version     = "5.81.0"
+  constraints = "5.81.0"
   hashes = [
-    "h1:AzWX+yfyr80tEDK4KeuW7jrv0Vwc3ey3k5LlSNgHAqA=",
-    "h1:JoC16JBBEQAl6WML0CtzXZ6xjJuTnDDYsCmG1fLnclc=",
-    "h1:RLfM1ji62WasileQ6RcGcMTagUwU1CrAQPkxw+Lpxq8=",
-    "h1:z1HH4XyEYXVbsp8Jc1sAsIE5IAiijOCqRSpH8OKiTnA=",
-    "zh:2760f2847f77d9841166e45c47d45aebb5edc9074499002d9f5ce6f3d00fe7d0",
-    "zh:2e9ad4857237e8daba6dc83c43d236b8c357b6fec52aef579615be9318f5a32a",
-    "zh:61e3c674399b1a847cd1b42f26dfb7bdc971d98ac036d4b3ab35f341a77a4caf",
-    "zh:80626f9ec276cd5302bb88ecb322c0546e33cfd85ca4b29fac98ba91614a1538",
-    "zh:918287607b1cc1ce6d056a9aaad0632c8d533c40e2db0a1f813d2c606df4c62d",
-    "zh:aae3c8ec041cbb4f20dc5d7822113299fa9833cbf61a233d28b8245107998bfe",
-    "zh:b2e0946f46e610ef4c10233cd38a4a4052d7f29465cb2a0951cb19a01015305f",
-    "zh:b982ebeb3b7d5038da4aabe1c3db053f794b88358b510d915aef2ad5db387f9f",
-    "zh:c68b1edf0d0d68029f2dac5e073684aa833ff4037f2f0479699a22c3b21b44d2",
-    "zh:cc2d7985df86e52fe3fb40f75d59aab2736541b675d78cbe1280066fd15e0443",
+    "h1:7mo2SoOo277YMcE7wFScaaI1zkzao7OWu3mfEqWjL+8=",
+    "h1:7u9iQx2dxJWCIYX/Gj4UxbsqiJht2iPFs/TZ+Qy3KXM=",
+    "h1:gffFQb3rOGnNkugQlXbhRXMKi/TtYLAzbPk1WfQlzck=",
+    "h1:ird967uf44WBZ0u9rMlOdO4nCKJZMlUknLcD3lz4dWs=",
+    "zh:0d0c7cc1e16b16cd00ab36de35038162e1871b51a902e9016d08c55c9fc4de35",
+    "zh:0e4b8c6e46999015292ab4fb9a430ab00107a276f25243552cde66db53c58661",
+    "zh:30041314cdd4e877d75ee8c9d36aecfca094e276f7a3d8150f929cf5169b2fa5",
+    "zh:5ebd248ce3e5a7ef9cc2f41499668f182146325e10ea305c70469122f6161a13",
+    "zh:888a69d371373b418549e03f5922becb2b8074cb463552ecfa65f30455708db0",
+    "zh:8a21bb7fe60383ff5ca9db8630a287e41fd520d2514c08874a16dc74500fadd7",
+    "zh:9c4663dcbfe58544642d70ebfdc6c5fa91592ff04164f77c655e32e6024483e2",
+    "zh:b322873f1209443a8407d5f782d7d917de6a1391239dbd0e7f809ce6507bed76",
+    "zh:b7c9d5ca14b818b5932ac58a490646a425ebc41b33d149090aa5f48d1ca35c99",
+    "zh:e76cd202b03749f3082b0cbe849fd2e731cf3f9a6aa994d2d629602c3aede36c",
   ]
 }
 

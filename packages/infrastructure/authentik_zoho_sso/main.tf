@@ -2,7 +2,7 @@ terraform {
   required_providers {
     authentik = {
       source  = "goauthentik/authentik"
-      version = "2024.6.1"
+      version = "2024.8.4"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -88,7 +88,7 @@ data "authentik_flow" "default-authorization-flow" {
   slug = "default-provider-authorization-implicit-consent"
 }
 
-data "authentik_property_mapping_saml" "email" {
+data "authentik_property_mapping_provider_saml" "email" {
   managed = "goauthentik.io/providers/saml/email"
 }
 
@@ -98,7 +98,7 @@ resource "authentik_provider_saml" "zoho" {
   acs_url            = var.zoho_acs_url
   sp_binding         = "post"
   issuer             = var.zoho_issuer
-  name_id_mapping    = data.authentik_property_mapping_saml.email.id
+  name_id_mapping    = data.authentik_property_mapping_provider_saml.email.id
   signing_kp         = authentik_certificate_key_pair.signing.id
 }
 

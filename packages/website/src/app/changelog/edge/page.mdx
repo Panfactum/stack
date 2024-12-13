@@ -20,6 +20,16 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
   * `pf`: 0.0.4 -> 0.0.5
+  * `authentik`: 2024.6.1 -> 2024.8.4
+
+### Changed
+
+* Upgrades Authentik in [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+to 2024.8.2 ([release notes](https://docs.goauthentik.io/docs/releases/2024.8)).
+
+### Fixed
+
+* Adds automatic NATS connection retries to Argo Events components.
 
 ## edge.24-12-11
 
@@ -31,6 +41,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * This release upgrades many components of the Panfactum Stack. Generally, none of these upgrades should require any action on your part. However,
   see the release notes for each component for more information:
   * [Kubernetes](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.30.md): 1.29 -> 1.30
+  * [Authentik](https://docs.goauthentik.io/docs/releases/2024.6): 2024.4.2 -> 2024.6.4
   * [Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/upgrading/#upgrading-to-v36): 3.5 -> 3.6
   * [Karpenter](https://karpenter.sh/docs/upgrading/upgrade-guide/): 1.0 -> 1.1
   * [Redis](https://redis.io/blog/announcing-redis-community-edition-and-redis-stack-74/): 7.2 -> 7.4

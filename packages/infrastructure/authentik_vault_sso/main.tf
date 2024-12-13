@@ -2,7 +2,7 @@ terraform {
   required_providers {
     authentik = {
       source  = "goauthentik/authentik"
-      version = "2024.6.1"
+      version = "2024.8.4"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -104,15 +104,15 @@ data "authentik_flow" "default-authorization-flow" {
   slug = "default-provider-authorization-implicit-consent"
 }
 
-data "authentik_scope_mapping" "profile" {
+data "authentik_property_mapping_provider_scope" "profile" {
   managed = "goauthentik.io/providers/oauth2/scope-profile"
 }
 
-data "authentik_scope_mapping" "email" {
+data "authentik_property_mapping_provider_scope" "email" {
   managed = "goauthentik.io/providers/oauth2/scope-email"
 }
 
-data "authentik_scope_mapping" "openid" {
+data "authentik_property_mapping_provider_scope" "openid" {
   managed = "goauthentik.io/providers/oauth2/scope-openid"
 }
 
@@ -124,9 +124,9 @@ resource "authentik_provider_oauth2" "vault" {
   signing_key        = authentik_certificate_key_pair.signing.id
   redirect_uris      = local.redirect_uris
   property_mappings = sort([
-    data.authentik_scope_mapping.profile.id,
-    data.authentik_scope_mapping.email.id,
-    data.authentik_scope_mapping.openid.id
+    data.authentik_property_mapping_provider_scope.profile.id,
+    data.authentik_property_mapping_provider_scope.email.id,
+    data.authentik_property_mapping_provider_scope.openid.id
   ])
 }
 

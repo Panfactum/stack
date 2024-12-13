@@ -2,7 +2,7 @@ terraform {
   required_providers {
     authentik = {
       source  = "goauthentik/authentik"
-      version = "2024.6.1"
+      version = "2024.8.4"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -84,22 +84,22 @@ resource "authentik_certificate_key_pair" "signing" {
 ###########################################################################
 
 
-data "authentik_flow" "default-authorization-flow" {
+data "authentik_flow" "default_authorization_flow" {
   slug = "default-provider-authorization-implicit-consent"
 }
 
-data "authentik_property_mapping_saml" "email" {
+data "authentik_property_mapping_provider_saml" "email" {
   managed = "goauthentik.io/providers/saml/email"
 }
 
 resource "authentik_provider_saml" "aws" {
   name               = "aws"
-  authorization_flow = data.authentik_flow.default-authorization-flow.id
+  authorization_flow = data.authentik_flow.default_authorization_flow.id
   acs_url            = var.aws_acs_url
   sp_binding         = "post"
   issuer             = var.aws_issuer
   audience           = var.aws_issuer
-  name_id_mapping    = data.authentik_property_mapping_saml.email.id
+  name_id_mapping    = data.authentik_property_mapping_provider_saml.email.id
   signing_kp         = authentik_certificate_key_pair.signing.id
 }
 
@@ -107,13 +107,13 @@ data "authentik_provider_saml_metadata" "aws" {
   provider_id = authentik_provider_saml.aws.id
 }
 
-data "authentik_property_mapping_scim" "group" {
+data "authentik_property_mapping_provider_scim" "group" {
   managed = "goauthentik.io/providers/scim/group"
 }
 
 // We need to use a custom mapping because we need to make the email the username
 // in order to work with AWS
-resource "authentik_property_mapping_scim" "aws" {
+resource "authentik_property_mapping_provider_scim" "aws" {
   expression = file("${path.module}/mapping.py")
   name       = "AWS SCIM Mapping"
 }
@@ -124,8 +124,8 @@ resource "authentik_provider_scim" "aws" {
   url                           = var.aws_scim_url
   token                         = var.aws_scim_token
   exclude_users_service_account = true
-  property_mappings             = [authentik_property_mapping_scim.aws.id]
-  property_mappings_group       = [data.authentik_property_mapping_scim.group.id]
+  property_mappings             = [authentik_property_mapping_provider_scim.aws.id]
+  property_mappings_group       = [data.authentik_property_mapping_provider_scim.group.id]
 }
 
 resource "authentik_application" "aws" {

@@ -242,7 +242,7 @@ generate "authentik_override_provider" {
   path      = "authentik_override.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik_override.tf", {
-    authentik_version = local.enable_authentik ? lookup(local.vars, "authentik_version", "2024.2.0") : ""
+    authentik_version = local.enable_authentik ? lookup(local.vars, "authentik_version", "2024.8.4") : ""
   }) : ""
 }
 
