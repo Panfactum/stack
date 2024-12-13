@@ -39,7 +39,6 @@ module "event_source" {
     github = {
       default = {
         active = true
-        deleteHookOnFinish = true
         repositories = [
           {
             owner = "panfactum"
