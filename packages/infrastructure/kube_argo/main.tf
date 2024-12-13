@@ -824,6 +824,18 @@ resource "kubernetes_cluster_role" "argo_pods_viewer" {
   }
 }
 
+resource "kubernetes_cluster_role" "argo_pods_deleter" {
+  metadata {
+    name   = "argo-pods-deleter"
+    labels = module.util_server.labels
+  }
+  rule {
+    api_groups = [""]
+    verbs      = ["delete"]
+    resources  = ["pods"]
+  }
+}
+
 resource "time_rotating" "token_rotation" {
   rotation_days = 7
 }
@@ -895,6 +907,24 @@ resource "kubernetes_cluster_role_binding" "superuser_pods_binding" {
   depends_on = [helm_release.argo_events]
 }
 
+resource "kubernetes_cluster_role_binding" "superuser_pods_delete_binding" {
+  metadata {
+    name   = "argo-pods-delete-superuser"
+    labels = module.util_server.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.superuser.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.argo_pods_deleter.metadata[0].name
+  }
+  depends_on = [helm_release.argo_events]
+}
+
 resource "kubernetes_secret" "superuser_token" {
   metadata {
     name      = "argo-superuser-${md5(time_rotating.token_rotation.id)}"
@@ -952,6 +982,24 @@ resource "kubernetes_cluster_role_binding" "admin_events_binding" {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
     name      = "argo-events-aggregate-to-edit" // This is a built in role in the chart
+  }
+  depends_on = [helm_release.argo_events]
+}
+
+resource "kubernetes_cluster_role_binding" "admin_pod_delete_binding" {
+  metadata {
+    name   = "argo-pods-delete-admin"
+    labels = module.util_server.labels
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.admin.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.argo_pods_deleter.metadata[0].name
   }
   depends_on = [helm_release.argo_events]
 }

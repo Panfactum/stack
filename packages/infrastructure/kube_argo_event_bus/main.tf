@@ -56,7 +56,7 @@ module "constants" {
 ***************************************/
 
 module "nats" {
-  source = "../kube_nats"
+  source            = "../kube_nats"
   minimum_memory_mb = 75
 
   namespace = var.namespace
