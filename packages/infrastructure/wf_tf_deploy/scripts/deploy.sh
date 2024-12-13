@@ -26,11 +26,11 @@ EOF
 #####################################################
 # Step 3: Setup the kubeconfig context
 #####################################################
-kubectl config set-cluster ci \
+kubectl config set-cluster "$KUBE_CLUSTER_NAME" \
   --server="https://$KUBERNETES_SERVICE_HOST" \
   --certificate-authority /var/run/secrets/kubernetes.io/serviceaccount/ca.crt --embed-certs
 kubectl config set-credentials ci --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
-kubectl config set-context ci --cluster=ci --user=ci --namespace=default
+kubectl config set-context ci --cluster="$KUBE_CLUSTER_NAME" --user=ci --namespace=default
 
 #####################################################
 # Step 4: Setup vault

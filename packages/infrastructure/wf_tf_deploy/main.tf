@@ -31,6 +31,8 @@ module "constants" {
   source = "../kube_constants"
 }
 
+data "pf_metadata" "metadata" {}
+
 #############################################################
 # AWS Permissions
 #
@@ -151,6 +153,7 @@ module "tf_deploy_workflow" {
     AWS_CONFIG_FILE       = "/.aws/config"
     KUBE_CONFIG_PATH      = "/.kube/config"
     KUBECONFIG            = "/.kube/config"
+    KUBE_CLUSTER_NAME     = data.pf_metadata.metadata.kube_cluster_name
     HELM_REPOSITORY_CACHE = "/tmp/.helm"
     HELM_CACHE_HOME       = "/tmp/.helm"
     HELM_DATA_HOME        = "/tmp/.helm"
