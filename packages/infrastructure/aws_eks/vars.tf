@@ -71,6 +71,12 @@ variable "bootstrap_cluster_creator_admin_privileges" {
   default     = false
 }
 
+variable "extended_support_enabled" {
+  description = "Whether to enable extended support for EOL Kubernetes versions."
+  type        = bool
+  default     = true
+}
+
 ######################################################################################
 # EKS add-ons versions
 # For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
@@ -116,29 +122,35 @@ variable "node_ebs_volume_size_gb" {
 }
 
 ################################################################################
-## KMS Access
+## Access Control
 ################################################################################
 
-variable "superuser_iam_arns" {
-  description = "List of IAM arns for encryption key superusers."
+variable "root_user_access_entry_enabled" {
+  description = "Whether to enable the root user access entry"
+  type        = bool
+  default     = true
+}
+
+variable "extra_superuser_principal_arns" {
+  description = "Grants read-write access to all resources to the indicated principals."
   type        = list(string)
   default     = []
 }
 
-variable "admin_iam_arns" {
-  description = "List of IAM arns for encryption key admins."
+variable "extra_admin_principal_arns" {
+  description = "Grants read-write access to most resources (not included top-level cluster configuration) to the indicated principals."
   type        = list(string)
   default     = []
 }
 
-variable "reader_iam_arns" {
-  description = "List of IAM arns for users who can use the encryption key for encryption and decryption."
+variable "extra_reader_principal_arns" {
+  description = "Grants read access to all resources (including secrets) to the indicated principals."
   type        = list(string)
   default     = []
 }
 
-variable "restricted_reader_iam_arns" {
-  description = "List of IAM arns for users who can only view the encryption key."
+variable "extra_restricted_reader_principal_arns" {
+  description = "Grants read access to all resources (not including secrets) to the indicated principals."
   type        = list(string)
   default     = []
 }

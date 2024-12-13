@@ -66,12 +66,16 @@ resource "aws_eks_cluster" "cluster" {
   version  = var.kube_version
 
   access_config {
-    authentication_mode                         = "API_AND_CONFIG_MAP"
+    authentication_mode                         = "API"
     bootstrap_cluster_creator_admin_permissions = var.bootstrap_cluster_creator_admin_privileges
   }
 
   zonal_shift_config {
     enabled = length(var.node_subnets) > 1
+  }
+
+  upgrade_policy {
+    support_type = var.extended_support_enabled ? "EXTENDED" : "STANDARD"
   }
 
   vpc_config {
@@ -175,7 +179,11 @@ resource "aws_iam_role" "eks_cluster_role" {
 resource "aws_iam_role_policy_attachment" "eks_cluster_role" {
   for_each = toset([
     "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSComputePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSNetworkingPolicy"
   ])
   policy_arn = each.key
   role       = aws_iam_role.eks_cluster_role.name
@@ -201,10 +209,10 @@ module "encrypt_key" {
   name        = "kube-${var.cluster_name}"
   description = "Encryption key for kubernetes control plane data"
 
-  superuser_iam_arns         = var.superuser_iam_arns
-  admin_iam_arns             = var.admin_iam_arns
-  reader_iam_arns            = var.reader_iam_arns
-  restricted_reader_iam_arns = var.restricted_reader_iam_arns
+  superuser_iam_arns         = var.extra_superuser_principal_arns
+  admin_iam_arns             = var.extra_admin_principal_arns
+  reader_iam_arns            = var.extra_reader_principal_arns
+  restricted_reader_iam_arns = var.extra_reader_principal_arns
 }
 
 moved {
@@ -240,6 +248,142 @@ module "aws_cloudwatch_log_group" {
   source      = "../aws_cloudwatch_log_group"
   name        = "/aws/eks/${var.cluster_name}/cluster"
   description = "Collects logs for our AWS EKS Cluster"
+}
+
+##########################################################################
+## Access Control
+##########################################################################
+
+locals {
+  superuser_arns = toset(concat(
+    tolist(data.aws_iam_roles.superuser.arns),
+    var.extra_superuser_principal_arns,
+    var.root_user_access_entry_enabled ? ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"] : []
+  ))
+  admin_arns = toset(concat(
+    tolist(data.aws_iam_roles.admin.arns),
+    var.extra_admin_principal_arns
+  ))
+  reader_arns = toset(concat(
+    tolist(data.aws_iam_roles.reader.arns),
+    var.extra_reader_principal_arns
+  ))
+  restricted_reader_arns = toset(concat(
+    tolist(data.aws_iam_roles.restricted_reader.arns),
+    var.extra_restricted_reader_principal_arns
+  ))
+}
+
+// Superuser access
+data "aws_iam_roles" "superuser" {
+  name_regex  = "AWSReservedSSO_Superuser.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+resource "aws_eks_access_entry" "superuser" {
+  for_each = local.superuser_arns
+
+  type              = "STANDARD"
+  cluster_name      = aws_eks_cluster.cluster.name
+  principal_arn     = each.key
+  kubernetes_groups = ["pf:superusers"]
+  tags              = data.pf_aws_tags.tags.tags
+}
+
+resource "aws_eks_access_policy_association" "superuser" {
+  for_each = local.superuser_arns
+
+  cluster_name  = aws_eks_cluster.cluster.name
+  principal_arn = each.key
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  access_scope {
+    type = "cluster"
+  }
+  depends_on = [aws_eks_access_entry.superuser]
+}
+
+// Admin access
+data "aws_iam_roles" "admin" {
+  name_regex  = "AWSReservedSSO_Admin.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+resource "aws_eks_access_entry" "admin" {
+  for_each = local.admin_arns
+
+  type              = "STANDARD"
+  cluster_name      = aws_eks_cluster.cluster.name
+  principal_arn     = each.key
+  kubernetes_groups = ["pf:admins"]
+  tags              = data.pf_aws_tags.tags.tags
+}
+
+resource "aws_eks_access_policy_association" "admin" {
+  for_each = local.admin_arns
+
+  cluster_name  = aws_eks_cluster.cluster.name
+  principal_arn = each.key
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
+  access_scope {
+    type = "cluster"
+  }
+  depends_on = [aws_eks_access_entry.admin]
+}
+
+// Reader access
+data "aws_iam_roles" "reader" {
+  name_regex  = "AWSReservedSSO_Reader.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+resource "aws_eks_access_entry" "reader" {
+  for_each = local.reader_arns
+
+  type              = "STANDARD"
+  cluster_name      = aws_eks_cluster.cluster.name
+  principal_arn     = each.key
+  kubernetes_groups = ["pf:readers"]
+  tags              = data.pf_aws_tags.tags.tags
+}
+
+resource "aws_eks_access_policy_association" "reader" {
+  for_each = local.reader_arns
+
+  cluster_name  = aws_eks_cluster.cluster.name
+  principal_arn = each.key
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
+  access_scope {
+    type = "cluster"
+  }
+  depends_on = [aws_eks_access_entry.reader]
+}
+
+// Restricted reader access
+data "aws_iam_roles" "restricted_reader" {
+  name_regex  = "AWSReservedSSO_RestrictedReader.*"
+  path_prefix = "/aws-reserved/sso.amazonaws.com/"
+}
+
+resource "aws_eks_access_entry" "restricted_reader" {
+  for_each = local.restricted_reader_arns
+
+  type              = "STANDARD"
+  cluster_name      = aws_eks_cluster.cluster.name
+  principal_arn     = each.key
+  kubernetes_groups = ["pf:restricted-readers"]
+  tags              = data.pf_aws_tags.tags.tags
+}
+
+resource "aws_eks_access_policy_association" "restricted_reader" {
+  for_each = local.restricted_reader_arns
+
+  cluster_name  = aws_eks_cluster.cluster.name
+  principal_arn = each.key
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  access_scope {
+    type = "cluster"
+  }
+  depends_on = [aws_eks_access_entry.restricted_reader]
 }
 
 ##########################################################################
