@@ -65,8 +65,8 @@ do this now:
       resource to generate the secret, and expose it as a sensitive module output.
 
       <MarkdownAlert severity="warning">
-        Your webhook will not be deleted from your git hosting provider when the EventSource is updated / deleted. This will a conflict
-        issues if you ever recreate the EventSource in the future. If you need to recreate the EventSource, you must manually delete any
+        Your webhook will not be deleted from your git hosting provider when the EventSource is deleted.
+        If you need to destroy the EventSource, you must manually delete any
         webhooks that Argo registered with the git provider.
       </MarkdownAlert>
 
