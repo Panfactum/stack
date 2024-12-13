@@ -10,7 +10,8 @@ cd /code/repo || exit
 ###########################################################
 ## Step 2: Set the image tag as the commit sha
 ###########################################################
-TAG="${IMAGE_TAG_PREFIX:+$IMAGE_TAG_PREFIX-}$(git rev-parse "$GIT_REF")-$ARCH"
+COMMIT_HASH=$(pf-get-commit-hash --repo "https://$CODE_REPO" --ref "$GIT_REF" --no-verify)
+TAG="${IMAGE_TAG_PREFIX:+$IMAGE_TAG_PREFIX-}$COMMIT_HASH-$ARCH"
 
 ###########################################################
 ## Step 3: Get BuildKit address
