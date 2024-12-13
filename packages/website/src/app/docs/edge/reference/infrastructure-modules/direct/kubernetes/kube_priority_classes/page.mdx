@@ -4,7 +4,7 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_priority_classes" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_priority_classes" status="stable" type="direct" />
+<ModuleHeader name="kube_priority_classes" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_priority_classes" status="deprecated" type="direct" />
 
 # Kubernetes Priority Classes
 
@@ -18,8 +18,7 @@ by Kubernetes:
 * `cluster-important` (`100000000`): Used for controllers that provide ancillary
   (but not critical) cluster functionality
 
-Additionally, allows you to set up arbitrary additional priority classes
-as needed.
+Additionally, you can set up arbitrary additional priority classes as needed via the `extra_priority_classes` input.
 
 ## Providers
 
@@ -29,7 +28,7 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.4/docs) (0.0.4)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
 
 ## Required Inputs
 

@@ -38,7 +38,22 @@ you have reviewed the changes and understand what steps you need to take.
 
 ## Update your Infrastructure
 
-1. Update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
+1. Update the provider versions in your first-party IaC modules to match the
+   [required provider versions in the new release](/docs/edge/reference/infrastructure-modules/overview#provider-versions):
+
+   ```diff-hcl[class="diff-highlight"]
+   terraform {
+     required_providers {
+       kubernetes = {
+         source  = "hashicorp/kubernetes"
+   -     version = "old-version"
+   +     version = "new-version"
+       }
+     }
+   }
+   ```
+
+2. Update the `pf_stack_version` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#variables)
    in **only** your lowest environment level: [^1]
 
    ```diff-yaml[class="diff-highlight"]
@@ -47,20 +62,20 @@ you have reviewed the changes and understand what steps you need to take.
    + pf_stack_version: "new-version"
    ```
 
-2. Ensure that the terragrunt `version` for that environment is set to `local` in order
+3. Ensure that the terragrunt `version` for that environment is set to `local` in order
    to deploy the local changes from step 1 (review [these docs](/docs/edge/guides/iac/first-party-modules)). [^2]
 
-3. Run `pf-tf-init` in the environment's Terragrunt directory to automatically upgrade your `module.yaml` and `.terraform.lock.hcl` files
+4. Run `pf-tf-init` in the environment's Terragrunt directory to automatically upgrade your `module.yaml` and `.terraform.lock.hcl` files
    for every module.
 
-4. On your local machine, run `terragrunt apply` across **all** modules in that environment. You can run
+5. On your local machine, run `terragrunt apply` across **all** modules in that environment. You can run
    `terragrunt run-all apply` to update all modules at once. [^3]
 
-5. Check to ensure that the environment is functioning as expected.
+6. Check to ensure that the environment is functioning as expected.
 
-6. Once you are satisfied, cut a new release of your stack repository indicating you have updated the Panfactum version.
+7. Once you are satisfied, cut a new release of your stack repository indicating you have updated the Panfactum version.
 
-7. Repeat step 2-5 for **all** environments **in sequence**, testing each environment before moving on to the next.
+8. Repeat step 2-5 for **all** environments **in sequence**, testing each environment before moving on to the next.
    For step 3, set the `version` to the release ref that you created in step 6.
 
 [^1]: Typically your "integration" environment which is frequently named `development`

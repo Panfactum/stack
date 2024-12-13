@@ -28,7 +28,6 @@ list here for convenience:
 | `vpa_enabled`                 | `bool`         | `false` | Whether to automatically enable vertical pod autoscaling for the Pods in the Kubernetes module. Requires [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) to have been deployed.                                                                   |
 | `monitoring_enabled`          | `bool`         | `false` | (Alpha) Whether to automatically install Prometheus scrapers and Grafana dashboards for the components in the module. Requires [kube\_monitoring](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring) to have been deployed.                               |
 | `canary_enabled`              | `bool`         | `false` | (Alpha) Whether to install synthetic healthchecks for the components in the module. Requires [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) to have been deployed.                                                                             |
-| `eks_cluster_name`            | `string`       | N/A     | The name of the EKS cluster where the module is deployed to. Used for setting up IAM permissions.                                                                                                                                                                                     |
 | `aws_iam_ip_allow_list`       | `list(string)` | `[]`    | All created IAM roles are only allowed to be used by internal IP addresses. This allows you to provide extra CIDR blocks from which IAM roles can be used.                                                                                                                            |
 | `vault_domain`                | `string`       | N/A     | The public domain name of Vault running in the cluster where the module is deployed. Used to set up federated authz/n.                                                                                                                                                                |
 
@@ -39,12 +38,12 @@ compatibility with Panfactum submodules:
 
 | Provider   | Version    |
 | :--------- | :--------- |
-| authentik  | `2024.6.1` |
+| authentik  | `2024.8.4` |
 | aws        | `5.80.0`   |
 | helm       | `2.12.1`   |
 | kubernetes | `2.34.0`   |
 | kubectl    | `2.1.3`    |
-| pf         | `0.0.4`    |
+| pf         | `0.0.5`    |
 | random     | `3.6.3`    |
 | tls        | `4.0.6`    |
 | vault      | `4.5.0`    |

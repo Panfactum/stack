@@ -3,7 +3,6 @@ import MarkdownImage from "@/components/markdown/MarkdownImage";
 import MarkdownSVGImage from "@/components/markdown/MarkdownSVGImage";
 
 import eksDashboardImg from './eks-dashboard.jpg'
-import k9sNodesImg from './k9s-nodes.jpg'
 import k9sImg from './k9s.jpg'
 import pullThroughSVG from './pull-through-cache.svg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
@@ -189,16 +188,6 @@ like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/p
 
 ### Deploy the Cluster
 
-<MarkdownAlert severity="warning">
-  When you deploy the cluster, ensure that you are using the credentials for the `root` user. You should already
-  be if you haven't deviated from this guide.
-
-  In EKS, the user that creates the cluster implicitly has admin access to the Kubernetes API server. This is critical
-  in the case that you accidentally break cluster authentication and need to recover. The `root`
-  user is the only user that can never be accidentally deleted; using another user may result in you losing your
-  ability to recover the cluster in an emergency.
-</MarkdownAlert>
-
 You are now ready to run `terragrunt apply`.
 
 This may take up to 20 minutes to complete.
@@ -319,22 +308,14 @@ As a result, we need to reset the cluster to a clean state before we continue.
 
 We provide a convenience command `pf-eks-reset` to perform the reset. Run this command now.
 
-Note that this will temporarily prevent EC2 nodes from joining the cluster until
-the `kube_rbac` module is deployed (below). [^12]
-
-[^12]: Just like human users, EC2 nodes use AWS IAM roles to authenticate with the EKS Kubernetes API server. These roles
-    must be authorized which we do in the `kube_rbac` module.
-
-## Deploy Kubernetes Modules
+## Prepare to Deploy Kubernetes Modules
 
 In the Panfactum stack everything is deployed via OpenTofu (Terraform) modules, including Kubernetes manifests. [^10] By constraining ourselves
 to a single IaC paradigm, we are able to greatly simplify operations for users of the stack.
 
 [^10]: Though we will often use [third-party helm charts](https://helm.sh/) under the hood.
 
-### Set up Kubernetes Provider
-
-In order to start using our kubernetes modules, we must first configure the
+In order to start using our Kubernetes modules, we must first configure the
 [Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
 some additional [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables).
 
@@ -347,68 +328,6 @@ In the `region.yaml` file for the region where you deployed the cluster, add the
 See [this file](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
 
 The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
-
-### RBAC
-
-Up until now, we have been using implicit EKS authentication to communicate with the cluster (the IAM user that created
-the cluster automatically has cluster access). We will now deploy the [kube\_rbac](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_rbac)
-module which will allow other users to authenticate (and eventually use dynamic rather than static credentials). This relies
-on a paradigm called [role-based access control](https://en.wikipedia.org/wiki/Role-based_access_control)
-which we will cover in more detail as we set up user roles and SSO.
-
-Since we are using an EKS cluster, authentication will work
-via the [AWS IAM Authenticator for Kubernetes](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). Users
-will use their IAM credentials to authenticate with the Kubernetes API server (hence why we have `aws_profile` set
-for each cluster in the `config.user.yaml` file).
-
-Authentication is controlled via a [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) found at
-`kube-system/aws-auth`. [^11]
-
-[^11]: The `<namespace>/<resource>` syntax is common in the Kubernetes ecosystem. `kube-system/aws-auth`
-    should be interpreted as the `aws-auth` resource in the `kube-system` namespace. We use this syntax because most resources
-    in Kubernetes are scoped to particular [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
-
-Let's deploy this module now:
-
-1. Adjacent to your `aws_eks` module, add a `kube_rbac` directory.
-
-2. Set up a `terragunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_rbac/terragrunt.hcl).
-   For now, you **only** need to set the `aws_node_role_arn` input. We
-   will set up the other inputs when we configure SSO for your infrastructure.
-
-3. Run `pf-tf-init` to enable the required providers.
-
-4. Run `terragrunt apply`.
-
-5. To verify that cluster authentication is functional, you should be able your cluster nodes within k9s (`:nodes`):
-
-   <MarkdownImage src={k9sNodesImg} alt="k9s showing node successfully joining the cluster" />
-
-   Note that the nodes are in a `NotReady` status as we have not yet installed the cluster networking utilities
-   which we will do in the next section.
-
-6. If all nodes join successfully, you have successfully set up your initial Kubernetes RBAC.
-
-### Priority Classes
-
-[Priority classes](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/) in Kubernetes
-instruct the cluster which pods to prioritize running should the cluster become resource constrained. If a utility
-is depended on for proper cluster operation, we want to give them higher priority.
-
-The Panfactum stack defines
-several priority levels to ensure that your cluster remains as healthy as possible even in adverse circumstances such
-as an unexpected AZ outage. These are defined in the [kube\_priority\_classes](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_priority_classes)
-module.
-
-Let's deploy this module:
-
-1. Adjacent to your `aws_eks` module, add a `kube_priority_classes` directory.
-
-2. Set up a `terragunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_priority_classes/terragrunt.hcl).
-
-3. Run `pf-tf-init` to enable the required providers.
-
-4. Run `terragrunt apply`.
 
 ## Next Steps
 

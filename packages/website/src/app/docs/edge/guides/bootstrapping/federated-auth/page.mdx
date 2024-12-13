@@ -44,10 +44,6 @@ Let's get started.
   choose to keep your existing configuration. However, you will need to manually add your SSO roles
   as inputs to:
 
-  * [kube\_rbac](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_rbac) to allow SSO authentication
-    with your Kubernetes clusters. Note that you MUST omit the /aws-reserved/sso.amazonaws.com/us-east-2/
-    part of the ARN.
-
   * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to allow SSO authentication
     with the cluster KMS encryption key.
 
@@ -232,7 +228,7 @@ Let's deploy it now:
 We will now configure your organization's local development environment to take advantage of dynamically
 provisioned SSO credentials and roles and stop using your static root access keys.
 
-1. For **every** Kubernetes cluster that you have already deployed, re-apply the `kube_rbac` module. This
+1. For **every** Kubernetes cluster that you have already deployed, re-apply the `aws_eks` module. This
    will automatically pick up the new AWS roles and give them equivalent access to resources in the Kubernetes
    cluster. **Failure to complete this step will cause you to lose access to your clusters.** [^2]
 
@@ -240,7 +236,6 @@ provisioned SSO credentials and roles and stop using your static root access key
    **every** module that make use of KMS keys in order to pick up the new SSO roles. In this guide, that would be the following modules:
 
    * sops keys deployed with the [aws\_kms\_encrypt\_key](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) module
-   * EKS clusters deployed with [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
    * Vault clusters deployed with [kube\_vaults](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
 
 3. Run `pf-update-aws` to scaffold files in your `aws_dir` directory.

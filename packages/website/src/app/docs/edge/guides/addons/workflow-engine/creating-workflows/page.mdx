@@ -58,7 +58,6 @@ module "workflow_spec" {
 
   name                        = "example"
   namespace                   = local.namespace
-  eks_cluster_name            = var.eks_cluster_name
 
   entrypoint = "entry"
   templates = [

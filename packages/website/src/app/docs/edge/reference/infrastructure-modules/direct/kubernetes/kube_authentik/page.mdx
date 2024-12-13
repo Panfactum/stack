@@ -23,7 +23,7 @@ The following providers are needed by this module:
 
 * [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.4/docs) (0.0.4)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
 
 * [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
@@ -36,12 +36,6 @@ The following input variables are required:
 ### akadmin\_email
 
 Description: The email address to use for the root authentik administrator. Warning: must be changed manually once applied.
-
-Type: `string`
-
-### eks\_cluster\_name
-
-Description: The name of the EKS cluster.
 
 Type: `string`
 
@@ -79,7 +73,7 @@ Description: The version of the Authentik helm chart to deploy
 
 Type: `string`
 
-Default: `"2024.6.4"`
+Default: `"2024.8.4"`
 
 ### aws\_iam\_ip\_allow\_list
 
