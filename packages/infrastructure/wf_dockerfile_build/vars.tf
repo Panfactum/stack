@@ -92,3 +92,7 @@ variable "git_password" {
   default     = ""
   sensitive   = true
 }
+
+variable "extra_ecr_repo_arns_for_pull_access" {
+  description = "ARNs of private ECR repositories from which the Dockerfile pulls base images FROM"
+}

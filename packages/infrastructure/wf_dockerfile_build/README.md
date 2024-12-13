@@ -44,10 +44,25 @@ The critical configuration values are:
     Make sure you review [our guide](/docs/main/guides/addons/buildkit/building-images) on how to optimize your Dockerfiles and build processes.
 </MarkdownAlert>
 
-### Authenticating with Private Repositories
+### Authenticating with Private Code Repositories
 
 `git_username` and `git_password` can be used for authenticating with a private `code_repo`. See our [documentation](/docs/main/guides/cicd/checking-out-code)
 for what values to provide. The only permissions needed by this Workflow is read access to the source code.
+
+### Using Private Base Images
+
+If your Dockerfile sources images from a private ECR repository such as this:
+
+```Dockerfile
+FROM xxxxxxxxx.dkr.ecr.us-west-2.amazonaws.com/some-image:latest
+RUN /foo/bar
+```
+
+then you will need to grant this Workflow permissions to pull from those repositories. To do that,
+provide the ECR repository ARNs to the `extra_ecr_repo_arns_for_pull_access` input.
+
+Note that if any provided ECR repository is in a separate AWS account from this Workflow, you 
+must also follow [this guide.](https://repost.aws/knowledge-center/secondary-account-access-ecr)
 
 ### Build Instance Sizing
 

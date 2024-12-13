@@ -87,6 +87,23 @@ data "aws_iam_policy_document" "image_builder" {
       "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/${var.image_repo}"
     ]
   }
+  dynamic "statement" {
+    for_each = length(var.extra_ecr_repo_arns_for_pull_access) > 0 ? toset(["enabled"]) : toset([])
+    content {
+      sid    = "ExtraPrivateECR"
+      effect = "Allow"
+      actions = [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeImages",
+        "ecr:DescribeRepositories",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:ListImages"
+      ]
+      resources = var.extra_ecr_repo_arns_for_pull_access
+    }
+  }
   statement {
     sid       = "PrivateECRAuth"
     effect    = "Allow"
