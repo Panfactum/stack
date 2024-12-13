@@ -5,6 +5,19 @@ resources in a Kubernetes cluster.
 
 ## Usage
 
+### TLS Certificates
+
+[kube_cert_issuers](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
+default cert for all covered domains and first-level subdomains (via [wildcard SANs](https://sectigostore.com/page/wildcard-san-certificates/)).
+This is stored at `cert-manager/ingress-tls`.
+
+However, if you need coverage for second-level or greater subdomains on the ingresses for this module, you will need
+a dedicated TLS cert. To generate this cert, set `generate_cert_enabled` to `true`.
+
+We use Let's Encrypt as the CA for your certificate requests. They provide certificates for free, but also impose
+[rate limits](https://letsencrypt.org/docs/rate-limits/). If you need to raise your rate limits,
+you can [submit a rate limits adjustment request](https://isrg.formstack.com/forms/rate_limit_adjustment_request).
+
 ### CDN
 
 If you want to provide a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network) in front of the created Ingresses
