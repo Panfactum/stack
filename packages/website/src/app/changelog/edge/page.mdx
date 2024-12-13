@@ -21,9 +21,13 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
   Kubernetes access control has now been moved to the [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module using
   [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html). This provides several benefits:
 
-  * RBAC now works out-of-the-box, making cluster bootstrapping simpler.
+  * Kubernetes RBAC now works out-of-the-box, making cluster bootstrapping simpler.
   * Accidental lock-out is now fully prevented.
   * One fewer location where custom SSO roles need to be synchronized.
+
+* The `kube_priority_classes` module has been consolidated with [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+  in order to remove a superfluous onboarding step. Please destroy any deployments of it **immediately before upgrading
+  [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)**.
 
 * `eks_cluster_name` is no longer an input to most submodules as it is now dynamically resolved based on which
   cluster you are deploying to.

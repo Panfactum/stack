@@ -45,3 +45,9 @@ variable "environment_variable_injection_enabled" {
   type        = bool
   default     = true
 }
+
+variable "extra_priority_classes" {
+  description = "A mapping of extra priority class names to their values"
+  type        = map(number)
+  default     = {}
+}

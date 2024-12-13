@@ -308,12 +308,6 @@ As a result, we need to reset the cluster to a clean state before we continue.
 
 We provide a convenience command `pf-eks-reset` to perform the reset. Run this command now.
 
-Note that this will temporarily prevent EC2 nodes from joining the cluster until
-the `kube_rbac` module is deployed (below). [^12]
-
-[^12]: Just like human users, EC2 nodes use AWS IAM roles to authenticate with the EKS Kubernetes API server. These roles
-    must be authorized which we do in the `kube_rbac` module.
-
 ## Prepare to Deploy Kubernetes Modules
 
 In the Panfactum stack everything is deployed via OpenTofu (Terraform) modules, including Kubernetes manifests. [^10] By constraining ourselves

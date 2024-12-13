@@ -22,13 +22,14 @@ terraform {
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-locals {
-}
 
 data "pf_kube_labels" "labels" {
   module = "kube_policies"
 }
 
+module "constants" {
+  source = "../kube_constants"
+}
 
 locals {
   match_any_pod = {
