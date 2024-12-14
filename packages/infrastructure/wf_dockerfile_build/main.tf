@@ -178,11 +178,11 @@ module "image_builder_workflow" {
   extra_aws_permissions = data.aws_iam_policy_document.image_builder.json
   default_resources = {
     requests = {
-      memory = "25Mi"
-      cpu    = "25m"
+      memory = "${var.memory_mb}Mi"
+      cpu    = "${var.cpu_millicores}m"
     }
     limits = {
-      memory = "100Mi"
+      memory = "${var.memory_mb}Mi"
     }
   }
   default_container_image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
@@ -243,7 +243,7 @@ module "image_builder_workflow" {
   tmp_directories = {
     code = {
       mount_path = "/code"
-      size_mb    = 1024
+      size_mb    = var.code_storage_gb * 1024
     }
     creds = {
       mount_path = "/.docker"

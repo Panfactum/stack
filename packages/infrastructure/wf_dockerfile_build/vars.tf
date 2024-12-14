@@ -27,6 +27,24 @@ variable "code_repo" {
   }
 }
 
+variable "code_storage_gb" {
+  description = "The size of the volume to mount the code into"
+  type        = number
+  default     = 1
+}
+
+variable "cpu_millicores" {
+  description = "The amount of CPU to allocate to pods in the workflow (in millicores)"
+  type        = number
+  default     = 25
+}
+
+variable "memory_mb" {
+  description = "The amount of memory to allocate to pods in the workflow (in MB)"
+  type        = number
+  default     = 100
+}
+
 variable "git_ref" {
   description = "The default git ref to checkout and build if none is provided to the WorkflowTemplate when executing the Workflow"
   type        = string
