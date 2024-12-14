@@ -36,7 +36,7 @@ variable "code_storage_gb" {
 variable "cpu_millicores" {
   description = "The amount of CPU to allocate to pods in the workflow (in millicores)"
   type        = number
-  default     = 500
+  default     = 25
 }
 
 variable "memory_mb" {
