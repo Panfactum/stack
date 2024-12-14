@@ -51,7 +51,7 @@ type ListBlockProps = {
 export function ListBlock({ icon, title, content}: ListBlockProps) {
     return (
         <div className="flex flex-col items-center gap-xl text-center">
-            <div className="icon-box w-[48px] h-[48px] flex items-center justify-center rounded-md text-white">
+            <div className="w-[48px] h-[48px] flex items-center justify-center rounded-md shadow-sm py-[10px] whitespace-nowrap focus-visible:outline-none focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none button-bg-primary button-text-primary border-2 button-border-primary">
               {getIcon(icon)}
             </div>
 
@@ -67,7 +67,7 @@ export function ListBlock({ icon, title, content}: ListBlockProps) {
 
 export function FeatureListBlock({ icon, title, content }: ListBlockProps) {
     return (<div className="flex flex-col items-center gap-xl text-center max-w-[384px]">
-            <div className="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] shadow dark:bg-primary dark:border-[#333741]">
+            <div className="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] shadow bg-primary dark:bg-primary dark:border-[#333741]">
               {getIcon(icon)}
             </div>
 

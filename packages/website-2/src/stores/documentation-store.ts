@@ -49,6 +49,7 @@ export function setVersion(version: string) {
 }
 
 export function getStoredY() {
+  console.log('scrollY: ', scrollYStore.get());
   return scrollYStore.get()
 }
 

@@ -44,7 +44,7 @@ const showFooter =
   </head>
 
   <body class="font-inter bg-primary text-primary">
-    <div class="top-nav h-[80px] w-full">
+    <div class="fixed top-0 left-0 top-nav h-[80px] w-full bg-white dark:bg-primary z-50">
       <HeaderNav
         currentPath={pathname}
         client:load
@@ -60,7 +60,7 @@ const showFooter =
       class="body-content-z mx-auto flex flex-col lg:flex-row items-start h-full"
       style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
     >
-      <div class="doc-nav flex-none w-[324px] sticky top-0 h-full">
+      <div class="pt-[80px] lg:pt-0 lg:fixed lg:top-[80px] h-auto lg:h-[calc(100vh-80px)] doc-nav flex-none w-full lg:w-[324px]">
         <Suspense>
           <DocsSidebar client:load currentPath={pathname} transition:persist />
         </Suspense>
@@ -68,11 +68,11 @@ const showFooter =
       </div>
       <article
         style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
-        class={`w-full py-[24px] overflow-auto h-full`}
+        class={`w-full py-[24px] overflow-auto h-full pl-0 lg:pl-[324px] pt-0 lg:pt-[80px]`}
       >
         <slot />
       </article>
-      <div class="article-nav-links hidden xl:block min-w-[300px] max-w-[312px] flex-none sticky top-0">
+      <div class="article-nav-links hidden xl:block min-w-[300px] max-w-[312px] flex-none pt-[80px] sticky top-[0px]">
         <slot name="article-nav-links" />
       </div>
     </div>

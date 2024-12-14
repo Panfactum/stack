@@ -844,13 +844,14 @@ export function DocsSidebar({
   console.log('right before render');
   return (
     <Sidebar
+      id={`sidebar-scroll`}
       currentPath={currentPath}
       {...props}
       crumbs={crumbs}
       openMobile={openMobile}
       setOpenMobile={setOpenMobile}
     >
-       <SidebarContent id={`sidebar-scroll`}>
+       <SidebarContent>
         <div className="p-4">
         <SidebarMenu>
           <div className={`flex flex-col gap-y-lg mb-4`}>

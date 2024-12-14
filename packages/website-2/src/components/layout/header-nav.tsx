@@ -114,7 +114,7 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
           </nav>
         </div>
         <div className="hidden justify-end items-center space-x-lg md:flex ">
-          <label className="toggle-switch">
+          {/* <label className="toggle-switch">
             <input
               type="checkbox"
               checked={theme === "dark" ? true : false}
@@ -128,7 +128,7 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
                 <img src={`/sun.svg`} alt="sun toggle icon" className={theme === "dark" ? 'hidden':'block'} />
               </span>
             </span>
-          </label>
+          </label> */}
           <a href={GITHUB_URL}>
               <FontAwesomeIcon
                 icon={faGithub}
