@@ -27,10 +27,16 @@ variable "code_repo" {
   }
 }
 
-variable "code_storage_mb" {
+variable "code_storage_gb" {
   description = "The size of the volume to mount the code into"
   type        = number
-  default     = 1024
+  default     = 12
+}
+
+variable "cpu_millicores" {
+  description = "The amount of CPU to allocate to pods in the workflow (in millicores)"
+  type        = number
+  default     = 500
 }
 
 variable "memory_mb" {
