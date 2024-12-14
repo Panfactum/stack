@@ -60,7 +60,7 @@ const FAQ_QA = [
 <div class="accordion">
   {
     FAQ_QA.map((item, index) => (
-      <div class="accordion-item">
+      <div class="accordion-item border-b border-secondary">
         <input type="checkbox" id={`accordion-${index + 1}`} hidden />
         <label
           class="accordion-header text-primary text-lg font-medium"
@@ -102,9 +102,9 @@ const FAQ_QA = [
             </svg>
           </div>
         </label>
-        <div class="accordion-content">
+        <div class="accordion-content text-tertiary">
           {item.content.map((contentItem) => (
-            <p>{contentItem}</p>
+            <p class="pb-4">{contentItem}</p>
           ))}
         </div>
       </div>
@@ -117,12 +117,8 @@ const FAQ_QA = [
     overflow: hidden;
   }
 
-  .accordion-item {
-    border-bottom: 1px solid #e9e8eb;
-  }
-
   .accordion-item:last-child {
-    border-bottom: none;
+    border-bottom: none !important;
   }
 
   .accordion-header {
@@ -140,12 +136,10 @@ const FAQ_QA = [
   .accordion-content {
     max-height: 0;
     overflow: hidden;
-    background: #fff;
     transition: max-height 0.5s ease;
   }
 
   .accordion-content p {
-    padding: 15px 0px;
     margin: 0;
   }
 

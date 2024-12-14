@@ -23,6 +23,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuButtonTreeItem,
   SidebarMenuItem,
   SidebarMenuSub,
 } from '@/components/ui/sidebar.tsx'
@@ -749,7 +750,7 @@ export function DocsSidebar({
       <Collapsible defaultOpen={isActive} className="group/collapsible">
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton asChild >
+            <SidebarMenuButtonTreeItem asChild isActive={isActive} >
               <div>
                 <span className="font-semibold">{text}</span>
                 <svg
@@ -764,7 +765,7 @@ export function DocsSidebar({
                   <path d="m9 18 6-6-6-6"></path>
                 </svg>
               </div>
-            </SidebarMenuButton>
+            </SidebarMenuButtonTreeItem>
           </CollapsibleTrigger>
         </SidebarMenuItem>
 
@@ -844,9 +845,10 @@ export function DocsSidebar({
       openMobile={openMobile}
       setOpenMobile={setOpenMobile}
     >
-      <SidebarHeader className={`gap-y-3xl`}>
+       <SidebarContent id={`sidebar-scroll`}>
+        <div className="p-4">
         <SidebarMenu>
-          <div className={`flex flex-col gap-y-lg`}>
+          <div className={`flex flex-col gap-y-lg mb-4`}>
             <Select
               value={$docStore.version}
               onValueChange={handleVersionChange}
@@ -869,6 +871,7 @@ export function DocsSidebar({
           {SIDENAV_SECTIONS.map((item) => (
             <SidebarMenuItem key={item.text}>
               <SidebarMenuButton
+                className="h-[44px] active:bg-white"
                 isActive={mainNavigationLinkActive(item.path)}
                 asChild
               >
@@ -891,11 +894,11 @@ export function DocsSidebar({
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-      </SidebarHeader>
+        </div>
+        
 
-      <Spacer />
+        <Spacer />
 
-      <SidebarContent id={`sidebar-scroll`}>
         {currentRoot && (
           <SidebarGroup>
             <SidebarMenu>
@@ -915,7 +918,7 @@ export function DocsSidebar({
 
                 return (
                   <SidebarMenuItem key={section.text}>
-                    <SidebarMenuButton
+                    <SidebarMenuButtonTreeItem
                       asChild
                       isActive={currentPath.includes(section.path)}
                     >
@@ -926,7 +929,7 @@ export function DocsSidebar({
                       >
                         {section.text}
                       </a>
-                    </SidebarMenuButton>
+                    </SidebarMenuButtonTreeItem>
                   </SidebarMenuItem>
                 )
               })}

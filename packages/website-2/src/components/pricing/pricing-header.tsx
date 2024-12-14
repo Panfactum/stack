@@ -27,21 +27,21 @@ export function PricingHeader({ plan, addlFeatures, ...props }: Props) {
 
   return (
     <div className="flex flex-col gap-y-3xl pb-3xl self-stretch">
-      <div className="flex gap-x-md border-b border-secondary pb-xl">
+      <div className="flex items-center gap-x-md border-b border-secondary pb-xl">
         <h3 className="text-primary text-xl font-semibold">{plan.name}</h3>
         {plan.popular ? (
-          <Badge variant="brand" size="md">
+          <div className="flex items-center justify-center font-medium rounded-full h-[24px] border border-[#9AD3F1] bg-[#E6F4FC] dark:bg-[transparent] dark:text-[#70BFEB] px-2.5">
             Popular
-          </Badge>
+          </div>
         ) : undefined}
       </div>
 
       <div className="flex flex-col gap-y-xl items-start">
-        <h3 className="text-display-sm xl:text-display-md font-medium whitespace-nowrap">
-          {CURRENCY_FORMAT.format(plan.price + planAddlFeatures)}{' '}
+        <h3 className="text-display-md font-medium whitespace-nowrap">
+          <span className="font-machina">{CURRENCY_FORMAT.format(plan.price + planAddlFeatures)}{' '}</span>
           <span className="text-md text-tertiary">per month</span>
         </h3>
-        <p className="text-sm text-tertiary whitespace-nowrap">{plan.description}</p>
+        <p className="text-sm text-tertiary whitespace-nowrap font-medium">{plan.description}</p>
       </div>
 
       <Button variant="primary" size="xl">

@@ -7,6 +7,7 @@ import { HeaderNavMobile } from '@/components/layout/header-nav-mobile.tsx'
 import { PanfactumLogo } from '@/components/panfactum-logo.tsx'
 import { lastDocumentationPath } from '@/stores/documentation-store.ts'
 import { Button } from '../ui/button.tsx'
+import './header-nav.css';
 
 export interface HeaderNav {
   currentPath: string;
@@ -18,6 +19,15 @@ export interface NavLinks {
   title: string
   url: string
   override?: string
+}
+
+const THEME_KEY = 'theme'
+const DARK_CLASS = 'dark'
+
+const getThemePreference = () => {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem(THEME_KEY)
+  }
 }
 
 export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
@@ -37,6 +47,9 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
       url: '/about',
     },
   ])
+  const [theme, setThemeState] = useState<
+    "theme-light" | "dark" | "system"
+  >("theme-light")
 
   // override url if lastDocumentationPath is set
   useEffect(() => {
@@ -53,10 +66,27 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
     setNavLinks(newLinks)
   }, [])
 
+  
+ 
+  useEffect(() => {
+    /* const isDarkMode = document.documentElement.classList.contains("dark")
+    console.log('trigger'); */
+    const isDark = getThemePreference() === DARK_CLASS
+    console.log('isDark: ', isDark);
+    setThemeState(isDark ? "dark" : "theme-light")
+  }, [])
+ 
+  useEffect(() => {
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+  }, [theme])
+
   return (
     <div
-        className="flex items-center justify-center h-20 border-b w-full"
-        style={{ borderColor: hasBorder ? '#E4E9EC' : 'transparent' }}
+        className={`flex items-center justify-center h-20 border-b w-full ${hasBorder ? 'border-primary' : 'border-[transparent]'}`}
       >
       <div
         className={`container flex justify-between items-center self-stretch ${props.darkBackground ? 'dark' : ''} px-container-padding-mobile xl:px-container-padding-desktop`}
@@ -84,6 +114,21 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
           </nav>
         </div>
         <div className="hidden justify-end items-center space-x-lg md:flex ">
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              checked={theme === "dark" ? true : false}
+              onChange={(value: { target: { checked: boolean }}) => {
+                setThemeState(!value.target.checked ? "theme-light" : "dark")
+              }}
+              />
+            <span className="slider">
+              <span className="slider-handle select-none">
+                <img src={`/moon.svg`} alt="moon toggle icon" className={theme === "dark" ? 'block':'hidden'} />
+                <img src={`/sun.svg`} alt="sun toggle icon" className={theme === "dark" ? 'hidden':'block'} />
+              </span>
+            </span>
+          </label>
           <FontAwesomeIcon
             icon={faGithub}
             className="icon-fg-github"

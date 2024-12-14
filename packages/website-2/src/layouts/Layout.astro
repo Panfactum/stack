@@ -3,15 +3,23 @@ import '../styles/global.css'
 import { ViewTransitions } from 'astro:transitions'
 import { HeaderNav } from '../components/layout/header-nav'
 import Footer from '../components/layout/footer.astro'
+import { Suspense } from 'react'
+import { DocsSidebar } from '@/components/documentation/docs-sidebar'
 
 const pathname = new URL(Astro.request.url).pathname
 const showFooter =
   Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
 
+const hasBorder = Astro.props.hasBorder ? Astro.props.hasBorder : false
+
+const isFixed = Astro.props.isFixed
+
 const redirect = Astro.props.redirect
+const heroClass = Astro.props.heroClass
+const darkBackground = Astro.props.darkBackground
 ---
 
-<html lang="en">
+<html lang="en" class={`html-class`}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -38,15 +46,55 @@ const redirect = Astro.props.redirect
       src="https://kit.fontawesome.com/5a37fe5150.js"
       crossorigin="anonymous"></script>
     <ViewTransitions />
+    <script is:inline>
+      const THEME_KEY = 'theme'
+      const DARK_CLASS = 'dark'
+      const LIGHT_CLASS = 'light'
+
+      const getThemePreference = () => {
+        if (typeof localStorage !== 'undefined') {
+          return localStorage.getItem(THEME_KEY)
+        }
+        /* return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? DARK_CLASS
+          : LIGHT_CLASS */
+      }
+      const isDark = getThemePreference() === DARK_CLASS
+
+      document.documentElement.classList[isDark ? 'add' : 'remove'](DARK_CLASS)
+
+      if (typeof localStorage !== 'undefined') {
+        // Watch the document element and persist user preference when it changes.
+        const observer = new MutationObserver(() => {
+          const isDark = document.documentElement.classList.contains(DARK_CLASS)
+          localStorage.setItem(THEME_KEY, isDark ? DARK_CLASS : LIGHT_CLASS)
+        })
+        observer.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['class'],
+        })
+      }
+
+      document.addEventListener('astro:after-swap', () => {
+        const isDark = getThemePreference() === DARK_CLASS
+
+        document.documentElement.classList[isDark ? 'add' : 'remove'](
+          DARK_CLASS,
+        )
+      })
+    </script>
   </head>
 
   <body class="font-inter bg-primary text-primary">
-    <div class={`${Astro.props.heroClass}`}>
-      <div class="flex items-center justify-center h-20">
+    <div
+      class={isFixed ? 'fixed top-0 left-0 top-nav h-[80px] w-full' : heroClass}
+    >
+      <div class="flex items-center justify-center w-full">
         <HeaderNav
           currentPath={pathname}
           client:load
-          darkBackground={Astro.props.darkBackground}
+          darkBackground={darkBackground}
+          hasBorder={hasBorder}
           transition:persist
         />
       </div>
@@ -54,7 +102,37 @@ const redirect = Astro.props.redirect
       <slot name="hero" />
     </div>
 
-    <slot />
+    {
+      isFixed ? (
+        <div
+          class="body-content-z mx-auto flex flex-col lg:flex-row items-start h-full fixed top-[80px] left-1/2 transform -translate-x-1/2 w-full"
+          style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
+        >
+          <div class="doc-nav flex-none min-w-[300px] max-w-[312px]">
+            <Suspense>
+              <DocsSidebar
+                client:load
+                currentPath={pathname}
+                transition:persist
+              />
+            </Suspense>
+            <script src="./persist-sidebar-scroll.ts" />
+          </div>
+          <article
+            style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
+            class={`w-full overflow-auto h-full md:border-l border-secondary`}
+          >
+            <slot />
+          </article>
+
+          <div class="article-nav-links hidden xl:block min-w-[300px] max-w-[312px] flex-none">
+            <slot name="article-nav-links" />
+          </div>
+        </div>
+      ) : (
+        <slot />
+      )
+    }
 
     {showFooter ? <Footer /> : null}
   </body>

@@ -28,6 +28,7 @@ export default {
         DEFAULT: 'black',
       },
       'brand-primary': 'var(--colors-background-bg-brand-primary)',
+      gradientBorder: `linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%)`,
     },
     extend: {
       maxWidth: {

@@ -3,16 +3,13 @@ import '../styles/global.css'
 import Layout from '../layouts/Layout.astro'
 
 import Hero from '@/components/typography/hero.astro'
-import Heading from '@/components/typography/heading.astro'
 import HeadingWide from '@/components/typography/heading-wide.astro'
-import SubHeading from '@/components/typography/sub-heading.astro'
 import { Button } from '@/components/ui/button'
-import { Faq } from '@/components/marketing/faq'
 import Badge from '@/components/astro/badge/badge.astro'
 import BadgeSmall from '@/components/astro/badge/badge-small.astro'
 
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
-import { faIdBadge, faCircleCheck } from '@fortawesome/free-regular-svg-icons'
+import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import HeroSection from '../components/layout/hero-section.astro'
@@ -20,15 +17,15 @@ import SectionFullWidth from '../components/layout/section-full-width.astro'
 import Section from '../components/layout/section.astro'
 import {
   faArrowRight,
-  faChartLine,
-  faCommenting,
-  faMessage,
-  faSmile,
-  faZap,
 } from '@fortawesome/free-solid-svg-icons'
 
 import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
-import StickyLayout from '@/layouts/StickyLayout.astro'
+import SectionKicker from '@/components/astro/section/section-kicker.astro'
+import SectionTitle from '@/components/astro/section/section-title.astro'
+import SectionContent from '@/components/astro/section/section-content.astro'
+import { ListBlock, FeatureListBlock } from '@/components/ListBlock'
+import './landing.css'
+
 const IMAGES = [
   [
     {
@@ -70,55 +67,55 @@ const IMAGES = [
 
 const FEATURES = [
   {
-    icon: '/shield.svg',
+    icon: 'shield',
     title: 'Security',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
   },
   {
-    icon: '/dollar.svg',
+    icon: 'dollar',
     title: 'Cost Savings',
     content:
       'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.',
   },
   {
-    icon: '/power.svg',
+    icon: 'power',
     title: 'High Availability',
     content:
       'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam.',
   },
   {
-    icon: '/db.svg',
+    icon: 'database',
     title: 'Databases',
     content:
       'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
   },
   {
-    icon: '/code.svg',
+    icon: 'code',
     title: 'Local Development',
     content:
       'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.',
   },
   {
-    icon: '/ci-cd.svg',
+    icon: 'ci-cd',
     title: 'CI / CD',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
   },
   {
-    icon: '/eye.svg',
+    icon: 'eye',
     title: 'Monitoring and Observability',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
   },
   {
-    icon: '/qr-code.svg',
+    icon: 'qrCode',
     title: 'Infrastructure-as-Code',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
   },
   {
-    icon: '/flag.svg',
+    icon: 'flag',
     title: 'Roadmap',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
@@ -127,47 +124,93 @@ const FEATURES = [
 
 const SUPPORT_DREAMS = [
   {
-    icon: faMessage,
-    title: 'Unified version control',
+    icon: 'chat-bubble',
+    title: 'Self-Hostable',
     content:
       'Streamline your development process with our integrated issue tracking and project management features.',
   },
   {
-    icon: faZap,
-    title: 'Real-time deployment monitoring',
+    icon: 'thunder-bolt',
+    title: 'Open Tooling & Standards',
     content:
       'Get all the tools you need to deliver high-quality software with our comprehensive development platform.',
   },
   {
-    icon: faChartLine,
-    title: 'Advanced code analytics',
+    icon: 'bar-chart-break',
+    title: 'Integrated Approach',
     content:
       'Make data-driven decisions with our customizable dashboards and extensive reporting capabilities.',
   },
   {
-    icon: faSmile,
-    title: 'Seamless collaboration tools',
+    icon: 'chat-happy',
+    title: 'Developer Productivity',
     content:
       'Work together in real-time with our integrated messaging and video conferencing features.',
   },
   {
-    icon: faCommenting,
-    title: 'Extensive plugin library',
+    icon: 'ownership',
+    title: 'Ownership',
     content:
       'Customize your development workflow with our vast collection of integrations and plugins.',
   },
   {
-    icon: faMessage,
-    title: 'Expert technical support',
+    icon: 'message-heart',
+    title: 'One More',
     content:
       'Get help when you need it with our 24/7 technical support and comprehensive documentation.',
+  },
+]
+
+const PRICES = [
+  {
+    type: 'Starter',
+    popular: true,
+    price: '$1000',
+    subtitle: 'Basic features for up to 10 users.',
+    featureLabel: `Open Source`,
+    featureList: [
+      'Access to basic features',
+      'Basic reporting and analytics',
+      'Up to 10 individual users',
+      '20GB individual data each user',
+      'Basic chat and email support',
+    ],
+  },
+  {
+    type: 'Growth',
+    popular: false,
+    price: '$5000',
+    subtitle: 'Advanced features and reporting.',
+    featureLabel: `Starter`,
+    featureList: [
+      'Access to basic features',
+      'Basic reporting and analytics',
+      'Up to 10 individual users',
+      '20GB individual data each user',
+      'Basic chat and email support',
+    ],
+  },
+  {
+    type: 'Scale',
+    popular: false,
+    price: '$10000',
+    subtitle: 'Unlimited features.',
+    featureLabel: `Growth`,
+    featureList: [
+      'Access to basic features',
+      'Basic reporting and analytics',
+      'Up to 10 individual users',
+      '20GB individual data each user',
+      'Basic chat and email support',
+    ],
   },
 ]
 ---
 
 <Layout
   darkBackground={true}
-  heroClass="bg-brand-section lg:bg-hero-pattern bg-[center_top] bg-contain bg-no-repeat"
+  heroClass="bg-brand-section lg:bg-hero-pattern bg-[center_top] bg-cover bg-no-repeat dark:bg-[#0C111D]"
+  isFixed={false}
 >
   <HeroSection
     slot="hero"
@@ -182,7 +225,7 @@ const SUPPORT_DREAMS = [
         <Badge>
           <BadgeSmall>
             <div
-              class="flex items-center justify-center w-[12px] h-[12px] bg-[#CEEAF8] rounded-full"
+              class="flex items-center justify-center w-[12px] h-[12px] bg-[#CEEAF8] dark:bg-[#091A25] rounded-full"
             >
               <div class="w-[6px] h-[6px] bg-[#3B81B0] rounded-full"></div>
             </div>Alpha feature
@@ -190,12 +233,14 @@ const SUPPORT_DREAMS = [
           Check out the Web UI
           <FontAwesomeIcon
             icon={faArrowRight}
-            className="!h-[15px] !w-[15px] text-[#7289DA] mr-1"
+            className="!h-[15px] !w-[15px] text-[#7289DA] dark:text-[#333741] mr-1"
           />
         </Badge>
 
         <Hero> Cloud native system for platform engineering </Hero>
-        <p class="text-tertiary_on-brand text-lg md:text-xl max-w-[830px]">
+        <p
+          class="text-tertiary_on-brand text-lg md:text-xl max-w-[830px] dark:text-[#94969C]"
+        >
           The Panfactum Stack is an integrated set of OpenTofu (Terraform)
           modules and local tooling aimed at providing the best experience for
           building, deploying, and managing software on AWS and Kubernetes.
@@ -215,7 +260,7 @@ const SUPPORT_DREAMS = [
     </div>
   </HeroSection>
 
-  <Section class="gap-4xl text-primary">
+  <Section class="gap-4xl text-primary mb-16">
     <h2 class="text-tertiary text-md font-medium">Trusted by companies</h2>
     <div class="flex flex-wrap justify-center gap-4xl">
       {
@@ -236,36 +281,33 @@ const SUPPORT_DREAMS = [
 
   <Section class="gap-6xl text-primary">
     <div class="text-center">
-      <SubHeading>Features</SubHeading>
-      <Heading>Benchmark your platform engineering practice</Heading>
+      <SectionKicker> Features </SectionKicker>
+      <SectionTitle class="max-w-[768px]">
+        Benchmark your platform engineering practice
+      </SectionTitle>
     </div>
 
     <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
       {
         FEATURES.map((item) => (
-          <div class="flex flex-col items-center gap-xl text-center max-w-[384px]">
-            <div class="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] bg-white shadow">
-              <img src={item.icon} />
-            </div>
-
-            <h3 class="text-primary text-lg md:text-xl font-semibold">
-              {item.title}
-            </h3>
-            <p class="text-tertiary text-md max-w-[378px]">{item.content}</p>
-          </div>
+          <FeatureListBlock
+            icon={item.icon}
+            title={item.title}
+            content={item.content}
+          />
         ))
       }
     </div>
   </Section>
 
   <Section class="py-7xl gap-y-4xl text-primary">
-    <div class="text-center space-y-2">
-      <SubHeading>Pricing</SubHeading>
-      <Heading>Plans that fit your scale</Heading>
-      <p class="text-tertiary-600 pt-2">
+    <div class="text-center space-y-2 mb-8">
+      <SectionKicker> Pricing </SectionKicker>
+      <SectionTitle> Plans that fit your scale </SectionTitle>
+      <SectionContent>
         Simple, transparent pricing that grows with you. Try any plan free for
         30 days.
-      </p>
+      </SectionContent>
     </div>
 
     <div
@@ -297,210 +339,64 @@ const SUPPORT_DREAMS = [
     <div
       class="flex flex-col self-stretch md:grid md:grid-cols-2 lg:grid-cols-3 gap-xl"
     >
-      <div
-        class="self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
-      >
-        <div class="flex flex-col self-start gap-4xl">
-          <div class="flex flex-col gap-y-xl">
-            <div class="flex justify-between">
-              <h1 class="font-machina text-primary text-display-xs font-medium">
-                Starter
-              </h1>
-              <div
-                class="flex items-center justify-center rounded-full h-8 border border-[#9AD3F1] bg-[#E6F4FC] px-2.5"
-              >
-                Popular
+      {
+        PRICES.map((price) => (
+          <div class="self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary">
+            <div class="flex flex-col self-start gap-4xl">
+              <div class="flex flex-col gap-y-xl">
+                <div class="flex justify-between">
+                  <h1 class="text-tertiary text-lg font-medium">
+                    {price.type}
+                  </h1>
+                  {price.popular && (
+                    <div class="flex items-center justify-center rounded-full h-[28px] border border-[#9AD3F1] bg-[#E6F4FC] px-2.5">
+                      Popular
+                    </div>
+                  )}
+                </div>
+
+                <div class="flex gap-xs items-baseline">
+                  <span class="text-display-md md:text-display-lg font-medium font-machina text-primary">
+                    {price.price}
+                  </span>
+                  <span class="text-md font-medium text-tertiary">
+                    {' '}
+                    per month{' '}
+                  </span>
+                </div>
+                <p class="text-tertiary text-md">{price.subtitle}</p>
+              </div>
+              <div class="flex flex-col gap-lg">
+                <Button variant={`primary`} size="xl" className="w-full">
+                  Subscribe
+                </Button>
+                <Button variant="secondary-gray" size="xl">
+                  Chat with sales
+                </Button>
               </div>
             </div>
 
-            <div class="flex gap-xs items-baseline">
-              <span
-                class="text-display-md font-medium font-machina text-primary"
-              >
-                $1,000
-              </span>
-              <span class="text-md font-medium text-tertiary"> per month </span>
-            </div>
-            <p class="text-tertiary text-md">
-              Basic features for up to 10 users.
-            </p>
-          </div>
-          <div class="flex flex-col gap-lg">
-            <Button variant={`primary`} size="xl" className="w-full"
-              >Subscribe</Button
-            >
-            <Button variant="secondary-gray" size="xl">
-              Chat with sales
-            </Button>
-          </div>
-        </div>
-
-        <div class="flex flex-col py-4xl px-3xl gap-3xl">
-          <div class="flex flex-col gap-y-xs">
-            <h4 class="text-md font-semibold">Features</h4>
-            <p>Everything in Starter plus ...</p>
-          </div>
-          <div class="flex flex-col gap-y-xl">
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Access to basic features</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Basic reporting and analytics</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Up to 10 individual users</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>20GB individual data each user</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Basic chat and email support</span>
+            <div class="flex flex-col py-4xl px-3xl gap-3xl">
+              <div class="flex flex-col gap-y-xs">
+                <h4 class="text-md font-semibold">Features</h4>
+                <p class="text-tertiary">
+                  Everything in <strong>{price.featureLabel}</strong> plus ...
+                </p>
+              </div>
+              <div class="flex flex-col gap-y-xl">
+                {price.featureList.map((feature) => (
+                  <div class="flex gap-x-lg items-center">
+                    <div class="text-[#2F688E]">
+                      <FontAwesomeIcon icon={faCircleCheck} size="xl" />
+                    </div>
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div
-        class="self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
-      >
-        <div class="flex flex-col self-start gap-4xl">
-          <div class="flex flex-col gap-y-xl">
-            <div class="flex justify-between">
-              <h1 class="font-machina text-primary text-display-xs font-medium">
-                Growth
-              </h1>
-            </div>
-
-            <div class="flex gap-xs items-baseline">
-              <span
-                class="text-display-md font-medium font-machina text-primary"
-              >
-                $5,000
-              </span>
-              <span class="text-md font-medium text-tertiary"> per month </span>
-            </div>
-            <p class="text-tertiary text-md">
-              Advanced features and reporting.
-            </p>
-          </div>
-          <div class="flex flex-col gap-lg">
-            <Button variant={`primary`} size="xl" className="w-full"
-              >Subscribe</Button
-            >
-            <Button variant="secondary-gray" size="xl">
-              Chat with sales
-            </Button>
-          </div>
-        </div>
-
-        <div class="flex flex-col py-4xl px-3xl gap-3xl">
-          <div class="flex flex-col gap-y-xs">
-            <h4 class="text-md font-semibold">Features</h4>
-            <p>Everything in Starter plus ...</p>
-          </div>
-          <div class="flex flex-col gap-y-xl">
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Access to basic features</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Basic reporting and analytics</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Up to 10 individual users</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>20GB individual data each user</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Basic chat and email support</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
-      >
-        <div class="flex flex-col self-start gap-4xl">
-          <div class="flex flex-col gap-y-xl">
-            <div class="flex justify-between">
-              <h1 class="font-machina text-primary text-display-xs font-medium">
-                Scale
-              </h1>
-            </div>
-            <div class="flex gap-xs items-baseline">
-              <span
-                class="text-display-md font-medium font-machina text-primary"
-              >
-                $10,000
-              </span>
-              <span class="text-md font-medium text-tertiary"> per month </span>
-            </div>
-            <p class="text-tertiary text-md">
-              Advanced features and reporting.
-            </p>
-          </div>
-          <div class="flex flex-col gap-lg">
-            <Button variant={`primary`} size="xl" className="w-full"
-              >Subscribe</Button
-            >
-            <Button variant="secondary-gray" size="xl">
-              Chat with sales
-            </Button>
-          </div>
-        </div>
-
-        <div class="flex flex-col py-4xl px-3xl gap-3xl">
-          <div class="flex flex-col gap-y-xs">
-            <h4 class="text-md font-semibold">Features</h4>
-            <p>Everything in Starter plus ...</p>
-          </div>
-          <div class="flex flex-col gap-y-xl">
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Access to basic features</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Basic reporting and analytics</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Up to 10 individual users</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>20GB individual data each user</span>
-            </div>
-
-            <div class="flex gap-x-lg items-center">
-              <FontAwesomeIcon icon={faCircleCheck} />
-              <span>Basic chat and email support</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        ))
+      }
     </div>
   </Section>
 
@@ -509,9 +405,11 @@ const SUPPORT_DREAMS = [
     class="gap-7xl text-primary"
   >
     <div class="flex flex-col gap-lg text-center">
-      <SubHeading onBrand={true}>Support</SubHeading>
-      <Heading onBrand={true}>Supporting your dreams</Heading>
-      <p class="text-tertiary_on-brand">
+      <SectionKicker onBrand={true}> Support </SectionKicker>
+      <SectionTitle onBrand={true} class="mb-0">
+        Supporting your derams
+      </SectionTitle>
+      <p class="text-tertiary_on-brand pt-0">
         Intuitive code review analytics to help you optimize your development
         workflow.
       </p>
@@ -522,16 +420,11 @@ const SUPPORT_DREAMS = [
     >
       {
         SUPPORT_DREAMS.map((item) => (
-          <div class="flex flex-col items-center gap-xl text-center max-w-[384px] mx-auto">
-            <Button variant="primary" size="icon">
-              <FontAwesomeIcon icon={item.icon} />
-            </Button>
-
-            <h3 class="text-primary_on-brand text-primary text-lg font-semibold">
-              {item.title}
-            </h3>
-            <p class="text-md text-tertiary_on-brand">{item.content}</p>
-          </div>
+          <ListBlock
+            icon={item.icon}
+            title={item.title}
+            content={item.content}
+          />
         ))
       }
     </div>
@@ -556,10 +449,10 @@ const SUPPORT_DREAMS = [
 
   <Section class="gap-6xl">
     <div class="text-center">
-      <Heading>Frequently asked questions</Heading>
-      <p class="text-lg md:text-xl text-tertiary mt-xl">
+      <SectionTitle> Frequently asked questions </SectionTitle>
+      <SectionContent>
         Everything you need to know about the product and billing.
-      </p>
+      </SectionContent>
     </div>
 
     <div class="md:max-w-xl w-full">
@@ -567,15 +460,17 @@ const SUPPORT_DREAMS = [
     </div>
 
     <div
-      class="flex flex-col items-center gap-y-3xl bg-secondary w-full py-4xl px-2xl text-center rounded-xl"
+      class="flex flex-col items-center gap-y-xl bg-secondary w-full py-4xl px-2xl text-center rounded-xl"
     >
       <img src="/face.png" class="w-16" />
-      <h2 class="text-primary text-lg font-semibold">Still have questions?</h2>
-      <p class="text-tertiary text-md">
+      <h2 class="text-primary text-xl font-semibold">Still have questions?</h2>
+      <p class="text-tertiary text-md md:text-lg max-w-[303px] md:max-w-none">
         Can’t find the answer you’re looking for? Please chat to our friendly
         team.
       </p>
-      <Button variant="primary" size="xl">Get in touch</Button>
+      <Button variant="primary" className="text-md h-[48px]"
+        >Get in touch</Button
+      >
     </div>
   </Section>
 
@@ -591,7 +486,9 @@ const SUPPORT_DREAMS = [
       </p>
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-lg w-full justify-center">
+    <div
+      class="flex flex-col flex-col-reverse sm:flex-row gap-lg w-full justify-center"
+    >
       <Button variant="secondary-gray" size="xl">
         <FontAwesomeIcon
           icon={faDiscord}

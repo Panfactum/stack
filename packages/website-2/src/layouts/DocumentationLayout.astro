@@ -1,9 +1,6 @@
 ---
 import '../styles/global.css'
-import { Suspense } from 'react'
-import { DocsSidebar } from '@/components/documentation/docs-sidebar'
 import Layout from './Layout.astro'
-import StickyLayout from './StickyLayout.astro'
 
 const pathname = new URL(Astro.request.url).pathname
 const { redirect } = Astro.props
@@ -25,13 +22,14 @@ function depthPadding(depth: number) {
 }
 ---
 
-<StickyLayout
+<Layout
   darkBackground={false}
   heroClass="bg-primary"
   showFooter={false}
   redirect={redirect}
-  hasBorder="true"
+  hasBorder={true}
   isDocumentationPage="true"
+  isFixed={true}
 >
   <>
     <article
@@ -64,4 +62,4 @@ function depthPadding(depth: number) {
       </div>
     ) : null
   }
-</StickyLayout>
+</Layout>

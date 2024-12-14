@@ -1,18 +1,9 @@
 ---
 import '../styles/global.css'
 import Layout from '../layouts/Layout.astro'
-
 import { Button } from '@/components/ui/button'
 import Section from '../components/layout/section.astro'
-
-import {
-  faBarChart,
-  faIdBadge,
-  faMessage,
-} from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import SectionFullWidth from '@/components/layout/section-full-width.astro'
-import { faBolt } from '@fortawesome/free-solid-svg-icons'
 import Kicker from '@/components/astro/hero/kicker.astro'
 import Title from '@/components/astro/hero/title.astro'
 import Subtitle from '@/components/astro/hero/subtitle.astro'
@@ -20,40 +11,41 @@ import SectionKicker from '@/components/astro/section/section-kicker.astro'
 import SectionTitle from '@/components/astro/section/section-title.astro'
 import SectionContent from '@/components/astro/section/section-content.astro'
 import ContactUs from '@/components/astro/forms/contact-us.astro'
+import { FeatureListBlock } from '@/components/ListBlock'
 
 const CORE_PLATFORM_VALUES = [
   {
-    icon: '/chat-bubble.svg',
+    icon: 'chat-bubble',
     title: 'Self-Hostable',
     content:
       'Software is easy to distribute, hardware is a commodity, and orchestration is a solved problem.',
   },
   {
-    icon: '/thunder-bolt.svg',
+    icon: 'thunder-bolt',
     title: 'Open Tooling & Standards',
     content:
       'No standardized platform can cover 100% of the needs of every user, all the time.',
   },
   {
-    icon: '/bar-chart-break.svg',
+    icon: 'bar-chart-break',
     title: 'Integrated Approach',
     content:
       'Our platform will Just Work™ out-of-the-box without users needing to understand all the underlying complexity on day one.',
   },
   {
-    icon: '/chat-happy.svg',
+    icon: 'chat-happy',
     title: 'Developer Productivity',
     content:
       'The success of most software companies is constrained by how quickly and robustly its engineers can write and deploy new software.',
   },
   {
-    icon: '/ownership.svg',
+    icon: 'ownership',
     title: 'Ownership',
     content:
       'We believe a platform can only be successful if its users feel like they own it.',
   },
   {
-    icon: '/ownership.svg',
+    icon: 'message-heart',
     title: 'One More',
     content:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
@@ -155,7 +147,7 @@ const COMPANY_MEMBERS = [
           History
         </h2>
         <h1
-          class="font-machina text-black text-display-sm md:text-display-md font-medium mb-lg"
+          class="font-machina text-primary text-display-sm md:text-display-md font-medium mb-lg"
         >
           A Brief History
         </h1>
@@ -229,16 +221,7 @@ const COMPANY_MEMBERS = [
     <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
       {
         CORE_PLATFORM_VALUES.map((item) => (
-          <div class="flex flex-col items-center gap-xl text-center">
-            <div class="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] bg-white shadow">
-              <img src={item.icon} />
-            </div>
-
-            <h3 class="text-primary text-xl font-semibold">{item.title}</h3>
-            <p class="text-tertiary text-md max-w-[384px] w-full">
-              {item.content}
-            </p>
-          </div>
+          <FeatureListBlock icon={item.icon} title={item.title} content={item.content} />
         ))
       }
     </div>
