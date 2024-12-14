@@ -154,7 +154,7 @@ export default function Search({ clicked }: { clicked: ClickedCallback }) {
 
       <div
         className={
-          'bg-primary rounded-sm px-8 py-4 mt-4 flex flex-col divide-dashed divide-y'
+          'bg-primary rounded-sm px-8 py-4 mt-4 flex flex-col'
         }
       >
         {hits.map((hit) => (
@@ -162,21 +162,23 @@ export default function Search({ clicked }: { clicked: ClickedCallback }) {
             key={hit.objectID}
             href={hit.url}
             onClick={clicked}
-            className=" cursor-pointer text-black pt-4 pb-4"
+            className=" cursor-pointer text-primary pt-4 pb-4"
           >
-            <h4>{createHierarchy(hit.hierarchy)}</h4>
+            <h4 className="text-md font-bold">{createHierarchy(hit.hierarchy)}</h4>
             <h2
+              className="text-md font-bold mb-3"
               dangerouslySetInnerHTML={{
                 __html: hit._highlightResult?.headingText?.value,
               }}
             />
 
             <p
+              className="text-sm mb-3"
               dangerouslySetInnerHTML={{
                 __html: selectDefaultSnippet(hit._snippetResult?.content ?? []),
               }}
             />
-            <h5>{crumbs(hit.breadCrumbs)}</h5>
+            <h5 className="text-xs">{crumbs(hit.breadCrumbs)}</h5>
           </a>
         ))}
 

@@ -712,14 +712,6 @@ export function DocsSidebar({
 
   const isVersioned = currentPath.startsWith(`${basePath}/${version}`)
 
-  React.useEffect(() => {
-    setNavRefStore(navRefStore)
-
-    if (currentRoot) {
-      setNavigationReferences(currentRoot?.path, currentPath)
-    }
-  })
-
   const currentRoot = SIDENAV_SECTIONS.find((item) =>
     currentPath.startsWith(
       `${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`,
@@ -736,6 +728,22 @@ export function DocsSidebar({
     basePath: string
     clicked: (open: boolean) => void
   }
+
+  React.useEffect(() => {
+    setNavRefStore(navRefStore)
+
+    if (currentRoot) {
+      setNavigationReferences(currentRoot?.path, currentPath)
+    }
+
+    const scroller = document.getElementById('sidebar-scroll')
+    const scrollY = documentationStore.get().scrollY
+
+    if (scrollY) {
+      console.log('HELLO: ', scrollY);
+      scroller?.scrollTo(0, scrollY)
+    }
+  }, [currentPath, currentRoot])
 
   const Section = ({
     text,
@@ -835,6 +843,8 @@ export function DocsSidebar({
     return !!(path && currentPath.includes(path))
   }
 
+
+  console.log('right before render');
   return (
     <Sidebar
       currentPath={currentPath}

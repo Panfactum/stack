@@ -15,9 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import HeroSection from '../components/layout/hero-section.astro'
 import SectionFullWidth from '../components/layout/section-full-width.astro'
 import Section from '../components/layout/section.astro'
-import {
-  faArrowRight,
-} from '@fortawesome/free-solid-svg-icons'
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 
 import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
 import SectionKicker from '@/components/astro/section/section-kicker.astro'
@@ -349,7 +347,7 @@ const PRICES = [
                     {price.type}
                   </h1>
                   {price.popular && (
-                    <div class="flex items-center justify-center rounded-full h-[28px] border border-[#9AD3F1] bg-[#E6F4FC] px-2.5">
+                    <div class="flex items-center justify-center font-medium rounded-full h-[24px] border border-[#9AD3F1] bg-[#E6F4FC] dark:bg-[transparent] dark:text-[#70BFEB] px-2.5">
                       Popular
                     </div>
                   )}

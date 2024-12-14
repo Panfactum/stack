@@ -1003,7 +1003,7 @@ function InfrastructureSavingsTableRow(
           header
         ) : (
           <Tooltip title={headerDescription}>
-            <span className="underline decoration-dotted decoration-white decoration-2 underline-offset-4">
+            <span className="underline decoration-dotted decoration-white decoration-2 underline-offset-4 max-w-4xl w-full">
               {header}
             </span>
           </Tooltip>

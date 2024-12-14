@@ -8,6 +8,10 @@ addEventListener('visibilitychange', () => {
   }
 })
 
+scroller?.addEventListener('scroll', () => {
+  documentationStore.setKey('scrollY', scroller.scrollTop)
+})
+
 const scrollY = documentationStore.get().scrollY
 
 if (scrollY) {
