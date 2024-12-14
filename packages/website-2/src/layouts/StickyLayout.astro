@@ -60,7 +60,7 @@ const showFooter =
       class="body-content-z mx-auto flex flex-col lg:flex-row items-start h-full"
       style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
     >
-      <div class="doc-nav flex-none min-w-[300px] sticky top-0 h-full">
+      <div class="doc-nav flex-none w-[324px] sticky top-0 h-full">
         <Suspense>
           <DocsSidebar client:load currentPath={pathname} transition:persist />
         </Suspense>

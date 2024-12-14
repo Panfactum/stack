@@ -31,6 +31,7 @@ import Spacer from '@/components/ui/spacer.tsx'
 import { DOCS_VERSIONS, isValidVersion } from '@/lib/constants.ts'
 import {
   documentationStore,
+  getStoredY,
   sectionLastPath,
   setNavigationReferences,
   setVersion,
@@ -737,12 +738,8 @@ export function DocsSidebar({
     }
 
     const scroller = document.getElementById('sidebar-scroll')
-    const scrollY = documentationStore.get().scrollY
 
-    if (scrollY) {
-      console.log('HELLO: ', scrollY);
-      scroller?.scrollTo(0, scrollY)
-    }
+    scroller?.scrollTo(0, getStoredY() || 0)
   }, [currentPath, currentRoot])
 
   const Section = ({

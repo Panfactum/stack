@@ -104,7 +104,7 @@ const Sidebar = React.forwardRef<
         className="group peer hidden md:block text-sidebar-foreground"
         data-variant={variant}
         data-side={side}
-        style={{ '--sidebar-width': '312px' } as React.CSSProperties}
+        style={{ '--sidebar-width': '324px' } as React.CSSProperties}
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
