@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css'
 const redirect = Astro.props.redirect
-import { ViewTransitions } from 'astro:transitions'
+import { ClientRouter } from 'astro:transitions'
 import Footer from '../components/layout/footer.astro'
 import { HeaderNav } from '@/components/layout/header-nav'
 import { Suspense } from 'react'
@@ -40,7 +40,7 @@ const showFooter =
     <script
       src="https://kit.fontawesome.com/5a37fe5150.js"
       crossorigin="anonymous"></script>
-    <ViewTransitions />
+    <ClientRouter />
   </head>
 
   <body class="font-inter bg-primary text-primary">

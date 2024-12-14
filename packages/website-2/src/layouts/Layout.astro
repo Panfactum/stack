@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css'
-import { ViewTransitions } from 'astro:transitions'
+import { ClientRouter } from 'astro:transitions'
 import { HeaderNav } from '../components/layout/header-nav'
 import Footer from '../components/layout/footer.astro'
 
@@ -37,7 +37,7 @@ const redirect = Astro.props.redirect
     <script
       src="https://kit.fontawesome.com/5a37fe5150.js"
       crossorigin="anonymous"></script>
-    <ViewTransitions />
+    <ClientRouter />
   </head>
 
   <body class="font-inter bg-primary text-primary">
