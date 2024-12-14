@@ -21,6 +21,8 @@ export interface NavLinks {
   override?: string
 }
 
+const GITHUB_URL = "https://github.com/Panfactum/stack"
+
 const THEME_KEY = 'theme'
 const DARK_CLASS = 'dark'
 
@@ -65,8 +67,6 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
 
     setNavLinks(newLinks)
   }, [])
-
-  
  
   useEffect(() => {
     /* const isDarkMode = document.documentElement.classList.contains("dark")
@@ -129,11 +129,14 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
               </span>
             </span>
           </label>
-          <FontAwesomeIcon
-            icon={faGithub}
-            className="icon-fg-github"
-            size={'2xl'}
-          />
+          <a href={GITHUB_URL}>
+              <FontAwesomeIcon
+                icon={faGithub}
+                className="icon-fg-github"
+                size={'2xl'}
+              />
+          </a>
+          
           <Button size="lg" variant="primary">
             Get Started
           </Button>

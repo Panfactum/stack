@@ -86,7 +86,7 @@ const DISCOUNTS = [
     </p>
   </Section>
   <Section class="gap-y-6xl">
-    <PricingTable client:load />
+    <PricingTable client:only="react" />
 
     <table class="w-full">
       <thead>
@@ -174,7 +174,7 @@ const DISCOUNTS = [
     <Calculator client:only="react" pathName={pathname} />
   </Section>
 
-  <Spacer className={""} />
+  <Spacer className={''} />
 
   <Section class="gap-6xl py-8">
     <div class="text-center">

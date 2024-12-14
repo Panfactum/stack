@@ -1,4 +1,4 @@
-export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum LLC.`
+export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum Group, Inc.`
 
 export const PANFACTUM_VERSION_MAIN = 'main'
 export const PANFACTUM_VERSION_EDGE = 'edge.24-10-25'
