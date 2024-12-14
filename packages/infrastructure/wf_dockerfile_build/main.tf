@@ -166,7 +166,7 @@ module "image_builder_workflow" {
       cpu    = "25m"
     }
     limits = {
-      memory = "100Mi"
+      memory = "${var.memory_mb}Mi"
     }
   }
   default_container_image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
@@ -227,7 +227,7 @@ module "image_builder_workflow" {
   tmp_directories = {
     code = {
       mount_path = "/code"
-      size_mb    = 1024
+      size_mb    = var.code_storage_mb
     }
     creds = {
       mount_path = "/.docker"
