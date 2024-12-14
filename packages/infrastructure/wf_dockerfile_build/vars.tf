@@ -30,7 +30,7 @@ variable "code_repo" {
 variable "code_storage_gb" {
   description = "The size of the volume to mount the code into"
   type        = number
-  default     = 12
+  default     = 1
 }
 
 variable "cpu_millicores" {
