@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css'
+import { Suspense } from 'react'
+import { DocsSidebar } from '@/components/documentation/docs-sidebar'
 import Layout from './Layout.astro'
 
 const pathname = new URL(Astro.request.url).pathname
@@ -27,39 +29,49 @@ function depthPadding(depth: number) {
   heroClass="bg-primary"
   showFooter={false}
   redirect={redirect}
-  hasBorder={true}
-  isDocumentationPage="true"
-  isFixed={true}
 >
-  <>
-    <article
-      style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
-      class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] overflow-auto h-full`}
+  <div class="flex flex-row md:flex-col items-center">
+    <div
+      class="w-full md:container flex flex-col lg:flex-row border-t border-secondary"
+      style="position: relative"
     >
-      <slot />
-    </article>
-  </>
-  {
-    Astro.props.headings ? (
-      <div
-        slot="article-nav-links"
-        class="hidden xl:flex flex-col gap-y-[16px] border-l border-secondary py-[24px] px-[16px] lg:px-[32px]"
-      >
-        <span class="font-semibold text-md">On this page</span>
+      <Suspense>
+        <DocsSidebar client:load currentPath={pathname} transition:persist />
+      </Suspense>
 
-        <ul class="flex flex-col gap-y-xs">
-          {Astro.props.headings?.map((heading) => (
-            <li class="flex items-center min-h-[20px] py-md text-sm text-quaternary font-semibold">
-              <a
-                href={`#${heading.slug}`}
-                class={`${depthPadding(heading.depth)}`}
-              >
-                {heading.text}
-              </a>
-            </li>
-          ))}
-        </ul>
+      <script src="./persist-sidebar-scroll.ts"></script>
+
+      <div
+        class={`flex w-full self-stretch lg:w-[calc(100%-var(--sidebar-width))]`}
+      >
+        <article
+          style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
+          class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] md:border-l border-secondary`}
+        >
+          <slot />
+        </article>
+
+        {
+          Astro.props.headings ? (
+            <div class="hidden xl:flex flex-col gap-y-[16px] border-l border-secondary py-[24px] px-[16px] lg:px-[32px]">
+              <span class="font-semibold text-md">On this page</span>
+
+              <ul class="flex flex-col gap-y-xs">
+                {Astro.props.headings?.map((heading) => (
+                  <li class="flex items-center min-h-[20px] py-md text-sm text-quaternary font-semibold">
+                    <a
+                      href={`#${heading.slug}`}
+                      class={`${depthPadding(heading.depth)}`}
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null
+        }
       </div>
-    ) : null
-  }
+    </div>
+  </div>
 </Layout>

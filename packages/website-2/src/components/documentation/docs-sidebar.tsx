@@ -709,6 +709,7 @@ export function DocsSidebar({
   const $docStore = useStore(documentationStore)
   const [$navRefStore, setNavRefStore] = React.useState({})
   const version = $docStore.version
+
   const isVersioned = currentPath.startsWith(`${basePath}/${version}`)
 
   React.useEffect(() => {
@@ -830,10 +831,7 @@ export function DocsSidebar({
   const crumbs = buildBreadcrumbs(SIDENAV_SECTIONS, '/' + strippedPath.path)
   const [openMobile, setOpenMobile] = useState(false)
 
-  console.log('current Path: ', currentPath, basePath);
-
   const mainNavigationLinkActive = (path: string) => {
-    console.log('path: ', currentPath, basePath + path);
     return !!(path && currentPath.includes(path))
   }
 
