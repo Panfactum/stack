@@ -104,7 +104,7 @@ const Sidebar = React.forwardRef<
         className="group peer hidden md:block text-sidebar-foreground"
         data-variant={variant}
         data-side={side}
-        style={{ '--sidebar-width': '312px' } as React.CSSProperties}
+        style={{ '--sidebar-width': '324px' } as React.CSSProperties}
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
@@ -201,6 +201,7 @@ const SidebarContent = React.forwardRef<
         'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden scrollbar',
         className,
       )}
+      style={{ marginBottom: `24px`, maxHeight: `calc(100vh - 80px)` }}
       {...props}
     />
   )
@@ -215,7 +216,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn('relative flex w-full min-w-0 flex-col p-2', className)}
+      className={cn('relative flex w-full min-w-0 flex-col p-4', className)}
       {...props}
     />
   )
@@ -320,7 +321,34 @@ const sidebarMenuButtonVariants = cva(
         lg: 'h-12 text-sm group-data-[collapsible=icon]:!p-0',
       },
       isActive: {
-        true: 'bg-brand-primary font-semibold',
+        true: 'bg-brand-primary font-semibold dark:bg-secondary',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+)
+
+
+const sidebarMenuButtonVariantsTreeItem = cva(
+  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
+  {
+    variants: {
+      variant: {
+        default: 'hover:bg-brand-primary',
+        outline:
+          'bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
+      },
+      size: {
+        default: 'min-h-[44px] px-lg py-md text-md',
+        sm: 'h-7 text-xs',
+        lg: 'h-12 text-sm group-data-[collapsible=icon]:!p-0',
+      },
+      isActive: {
+        true: 'bg-[transparent] font-semibold dark:bg-primary hover:bg-primary',
         false: '',
       },
     },
@@ -368,6 +396,45 @@ const SidebarMenuButton = React.forwardRef<
   },
 )
 SidebarMenuButton.displayName = 'SidebarMenuButton'
+
+
+const SidebarMenuButtonTreeItem = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<'button'> & {
+    asChild?: boolean
+    isActive?: boolean
+  } & VariantProps<typeof sidebarMenuButtonVariants>
+>(
+  (
+    {
+      asChild = false,
+      isActive = false,
+      variant = 'default',
+      size = 'default',
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : 'button'
+
+    const button = (
+      <Comp
+        ref={ref}
+        data-sidebar="menu-button"
+        data-size={size}
+        className={cn(
+          sidebarMenuButtonVariantsTreeItem({ variant, size, isActive }),
+          className,
+        )}
+        {...props}
+      />
+    )
+
+    return button
+  },
+)
+SidebarMenuButtonTreeItem.displayName = 'SidebarMenuButtonTreeItem'
 
 const SidebarMenuAction = React.forwardRef<
   HTMLButtonElement,
@@ -531,4 +598,5 @@ export {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarSeparator,
+  SidebarMenuButtonTreeItem
 }

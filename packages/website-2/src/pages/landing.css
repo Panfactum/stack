@@ -1,0 +1,6 @@
+.icon-box {
+    border: 2px solid;
+    border-color: #2F688E;
+    box-shadow: 0px 1px 2px 0px var(--colors-effects-shadows-shadow-xs), 0px -2px 0px 0px #1018280D inset, 0px 0px 0px 1px #1018282E inset;
+    background-color: #2F688E;
+}

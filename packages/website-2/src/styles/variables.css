@@ -1479,7 +1479,7 @@
     );
 
     --colors-scrollbar-thumb: var(--colors-gray-light-mode-300, #d0d8dd);
-    --sidebar-width: 312px;
+    --sidebar-width: 324px;
   }
 
   /*@media (prefers-color-scheme: dark),*/

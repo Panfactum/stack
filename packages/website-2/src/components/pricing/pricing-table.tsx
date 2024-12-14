@@ -1635,9 +1635,9 @@ const FeatureDetailsContainer: FC<{
 
   return (
     <tr>
-      <td colSpan={4} className={`w-full p-4`}>
+      <td colSpan={4} className={`w-full p-4 dark:bg-[transparent]`}>
         <div
-          className={`bg-secondary_alt p-5xl border border-secondary shadow-sm content`}
+          className={`bg-secondary_alt p-5xl border border-secondary shadow-sm content dark:bg-[#0C111D]`}
         >
           {children}
         </div>
@@ -1682,13 +1682,17 @@ export function PricingTable() {
           return (
             <div
               key={plan.name}
-              className="flex flex-col [&>*:nth-child(even)]:bg-secondary [&>*:nth-child(odd)]:bg-primary lg:px-3xl"
+              className="flex flex-col [&>*:nth-child(even)]:bg-secondary [&>*:nth-child(odd)]:bg-primary"
             >
               <PricingHeader plan={plan} addlFeatures={addlFeatures} />
 
               {featureOrder.map((name) => {
                 const feature = plan.features[name]
                 const featureAddl = addl[plan.name]?.[name] || 0
+
+                if (!feature) {
+                  return null
+                }
 
                 return (
                   <PlanFeatureMobile
@@ -1733,7 +1737,10 @@ export function PricingTable() {
                     className={`min-w-[170px] text-start text-primary py-lg px-3xl font-medium whitespace-nowrap`}
                   >
                     <div className={`flex items-center gap-2 ${feature.description ? 'cursor-pointer':''}`} onClick={() => toggleFeatureDetails(name)}>
-                      {name}
+                      <span className="text-sm">
+                        {name}
+                      </span>
+                      
                       {feature.description ? 
                         (<FontAwesomeIcon
                           className={`w-[12px] h-[12px] transition-transform ${isVisible ? '':'transform rotate-90'}`}

@@ -1,6 +1,9 @@
-import { persistentMap } from '@nanostores/persistent'
-import { computed } from 'nanostores'
-import { isValidVersion, Versions } from '@/lib/constants.ts'
+import { persistentAtom, persistentMap } from '@nanostores/persistent';
+import { computed } from 'nanostores';
+import { isValidVersion, Versions } from '@/lib/constants.ts';
+
+
+export const scrollYStore = persistentAtom('scrollY', undefined)
 
 const LAST_SECTION_STORE_KEY = 'navigationReferences:'
 const DOCUMENTATION_STORE_KEY = 'documentation:'
@@ -43,6 +46,10 @@ export function setNavigationReferences(rootPath: string, lastPath: string) {
 
 export function setVersion(version: string) {
   documentationStore.setKey('version', version)
+}
+
+export function getStoredY() {
+  return scrollYStore.get()
 }
 
 export function stripBasePath(currentPath: string) {

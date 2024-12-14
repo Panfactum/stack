@@ -13,8 +13,33 @@ import Calculator from '@/components/pricing/calculator'
 import Spacer from '@/components/ui/spacer'
 import SectionFullWidth from '@/components/layout/section-full-width.astro'
 import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
+import SectionKicker from '@/components/astro/section/section-kicker.astro'
+import SectionTitle from '@/components/astro/section/section-title.astro'
+import { FeatureListBlock } from '@/components/ListBlock'
+import SectionContent from '@/components/astro/section/section-content.astro'
 
 const pathname = new URL(Astro.request.url).pathname
+
+const DISCOUNTS = [
+  {
+    icon: 'chat-bubble',
+    title: 'Annual Payment',
+    content:
+      '15% off for customers who pay annually. Does not include one-time services.',
+  },
+  {
+    icon: 'thunder-bolt',
+    title: 'Panfactum Partners',
+    content:
+      'Up to 50% off for service providers implementing the Panfactum Stack for their clients. Learn more.',
+  },
+  {
+    icon: 'bar-chart-break',
+    title: 'Non-profits',
+    content:
+      '50% off for registered non-profit organizations. Does not include one-time services.',
+  },
+]
 ---
 
 <Layout darkBackground={true} heroClass="bg-brand-section">
@@ -22,13 +47,13 @@ const pathname = new URL(Astro.request.url).pathname
     <div
       class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
     >
-      <div class="flex flex-col gap-3xl items-center text-center max-w-[846px]">
+      <div class="flex flex-col gap-2xl items-center text-center max-w-[846px]">
         <h1
-          class="font-machina font-medium text-primary_on-brand text-display-2xl"
+          class="font-machina font-medium text-primary_on-brand text-display-md md:text-display-lg leading-none"
         >
           Pricing
         </h1>
-        <p class="text-tertiary_on-brand text-xl">
+        <p class="text-tertiary_on-brand text-lg md:text-xl pt-0">
           Something outrageous about pricing
         </p>
       </div>
@@ -44,27 +69,31 @@ const pathname = new URL(Astro.request.url).pathname
           Our most popular plan for small teams. testing
         </p>
       </div>
-      <span class="self-end text-display-md font-medium font-machina">
+      <span
+        class="self-end text-display-sm md:text-display-md font-medium font-machina"
+      >
         Free
       </span>
     </div>
   </Section>
   <Section sectionClass="pt-0">
-    <h2 class="font-machina text-display-lg font-medium">Support Plans</h2>
-    <p class="text-tertiary text-center">
+    <h2 class="font-machina text-display-md md:text-display-lg font-medium">
+      Support Plans
+    </h2>
+    <p class="text-tertiary text-center text-lg md:text-xl">
       Simple, transparent pricing that grows with you. Try any plan free for 30
       days.
     </p>
   </Section>
   <Section class="gap-y-6xl">
-    <PricingTable client:load />
+    <PricingTable client:only="react" />
 
     <table class="w-full">
       <thead>
         <tr>
           <th
             colspan="3"
-            class="h-[93px] text-primary text-lg font-semibold border border-secondary p-2xl lg:p-3xl text-start"
+            class="h-[72px] text-primary text-lg font-semibold border border-secondary p-2xl lg:p-3xl text-start"
             >Addons</th
           >
         </tr>
@@ -111,52 +140,26 @@ const pathname = new URL(Astro.request.url).pathname
   </Section>
 
   <SectionFullWidth
-    sectionClass="gap-7xl bg-secondary text-primary py-12"
+    sectionClass="gap-7xl bg-secondary text-primary py-8"
     class="gap-6xl"
   >
     <div class="text-center">
-      <h3 class="text-brand-secondary text-sm font-semibold">Ways to save</h3>
-      <h2 class="font-machina text-display-sm font-medium">
-        Available Discounts
-      </h2>
+      <SectionKicker class="text-brand-secondary mb-2"
+        >Ways to save</SectionKicker
+      >
+      <SectionTitle>Available Discounts</SectionTitle>
     </div>
 
-    <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">Security</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">Cost Savings</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
-
-      <div class="flex flex-col items-center gap-xl text-center">
-        <Button variant="outline" size="icon">
-          <FontAwesomeIcon icon={faIdBadge} />
-        </Button>
-
-        <h3 class="text-primary text-lg font-semibold">High Availability</h3>
-        <p class="text-tertiary text-md">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui
-          eget dolor.
-        </p>
-      </div>
+    <div class="flex flex-wrap justify-center gap-5xl">
+      {
+        DISCOUNTS.map((item) => (
+          <FeatureListBlock
+            icon={item.icon}
+            title={item.title}
+            content={item.content}
+          />
+        ))
+      }
     </div>
   </SectionFullWidth>
 
@@ -171,18 +174,14 @@ const pathname = new URL(Astro.request.url).pathname
     <Calculator client:only="react" pathName={pathname} />
   </Section>
 
-  <Spacer />
+  <Spacer className={''} />
 
-  <Section class="gap-6xl">
+  <Section class="gap-6xl py-8">
     <div class="text-center">
-      <h2
-        class="font-machina text-primary text-display-sm md:text-display-md font-medium"
-      >
-        Frequently asked questions
-      </h2>
-      <p class="text-lg md:text-xl text-tertiary mt-xl">
+      <SectionTitle> Frequently asked questions </SectionTitle>
+      <SectionContent>
         Everything you need to know about the product and billing.
-      </p>
+      </SectionContent>
     </div>
 
     <div class="md:max-w-xl w-full">
@@ -190,15 +189,17 @@ const pathname = new URL(Astro.request.url).pathname
     </div>
 
     <div
-      class="flex flex-col items-center gap-y-3xl bg-secondary w-full py-4xl px-2xl text-center rounded-xl"
+      class="flex flex-col items-center gap-y-xl bg-secondary w-full py-4xl px-2xl text-center rounded-xl"
     >
       <img src="/face.png" class="w-16" />
-      <h2 class="text-primary text-lg font-semibold">Still have questions?</h2>
-      <p class="text-tertiary text-md">
+      <h2 class="text-primary text-xl font-semibold">Still have questions?</h2>
+      <p class="text-tertiary text-md md:text-lg max-w-[303px] md:max-w-none">
         Can’t find the answer you’re looking for? Please chat to our friendly
         team.
       </p>
-      <Button variant="primary" size="xl">Get in touch</Button>
+      <Button variant="primary" className="text-md h-[48px]"
+        >Get in touch</Button
+      >
     </div>
   </Section>
 </Layout>

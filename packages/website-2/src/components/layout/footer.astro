@@ -16,23 +16,23 @@ import { COPYWRITE } from '../../lib/constants'
     <Spacer />
     <div class="flex flex-col md:flex-row gap-4xl justify-between">
       <div class="">
-        <h2 class="text-lg font-semibold">Join our newsletter</h2>
-        <p class="text-tertiary">
+        <h2 class="text-lg md:text-xl font-semibold">Join our newsletter</h2>
+        <p class="text-tertiary text-md">
           We’ll send you a nice letter once per week. No spam.
         </p>
       </div>
 
-      <div class="flex flex-1 flex-col md:flex-row gap-4 items-center">
+      <div class="flex flex-1 flex-col md:flex-row gap-2 items-center">
         <div class="hidden md:flex md:basis-3/6"></div>
         <input
           type="email"
           placeholder="Enter your email"
-          class="w-full border border-primary shadow-sm bg-primary md:w-auto md:flex-2 basis-2/6 rounded-md px-xl py-lg h-11 md:h-12"
+          class="w-full border border-primary shadow-sm bg-primary md:w-auto md:flex-2 basis-2/6 rounded-md px-xl py-lg h-[44px] md:h-[44px] "
         />
         <Button
           variant={`primary`}
-          className="w-full md:w-auto md:flex-2 basis-1/6"
-          size="2xl">Subscribe</Button
+          className="w-full md:w-auto md:flex-2 basis-1/6 h-[44px]"
+          >Subscribe</Button
         >
       </div>
     </div>

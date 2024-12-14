@@ -23,6 +23,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuButtonTreeItem,
   SidebarMenuItem,
   SidebarMenuSub,
 } from '@/components/ui/sidebar.tsx'
@@ -30,6 +31,7 @@ import Spacer from '@/components/ui/spacer.tsx'
 import { DOCS_VERSIONS, isValidVersion } from '@/lib/constants.ts'
 import {
   documentationStore,
+  getStoredY,
   sectionLastPath,
   setNavigationReferences,
   setVersion,
@@ -708,15 +710,8 @@ export function DocsSidebar({
   const $docStore = useStore(documentationStore)
   const [$navRefStore, setNavRefStore] = React.useState({})
   const version = $docStore.version
+
   const isVersioned = currentPath.startsWith(`${basePath}/${version}`)
-
-  React.useEffect(() => {
-    setNavRefStore(navRefStore)
-
-    if (currentRoot) {
-      setNavigationReferences(currentRoot?.path, currentPath)
-    }
-  })
 
   const currentRoot = SIDENAV_SECTIONS.find((item) =>
     currentPath.startsWith(
@@ -735,6 +730,16 @@ export function DocsSidebar({
     clicked: (open: boolean) => void
   }
 
+  React.useEffect(() => {
+    setNavRefStore(navRefStore)
+
+    if (currentRoot) {
+      setNavigationReferences(currentRoot?.path, currentPath)
+    }
+    const scroller = document.querySelector('.scrollbar')
+    scroller?.scrollTo(0, getStoredY() || 0)
+  }, [currentPath, currentRoot])
+
   const Section = ({
     text,
     path,
@@ -749,7 +754,7 @@ export function DocsSidebar({
       <Collapsible defaultOpen={isActive} className="group/collapsible">
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton asChild >
+            <SidebarMenuButtonTreeItem asChild isActive={isActive} >
               <div>
                 <span className="font-semibold">{text}</span>
                 <svg
@@ -764,7 +769,7 @@ export function DocsSidebar({
                   <path d="m9 18 6-6-6-6"></path>
                 </svg>
               </div>
-            </SidebarMenuButton>
+            </SidebarMenuButtonTreeItem>
           </CollapsibleTrigger>
         </SidebarMenuItem>
 
@@ -829,17 +834,23 @@ export function DocsSidebar({
   const crumbs = buildBreadcrumbs(SIDENAV_SECTIONS, '/' + strippedPath.path)
   const [openMobile, setOpenMobile] = useState(false)
 
+  const mainNavigationLinkActive = (path: string) => {
+    return !!(path && currentPath.includes(path))
+  }
+
   return (
     <Sidebar
+      id={`sidebar-scroll`}
       currentPath={currentPath}
       {...props}
       crumbs={crumbs}
       openMobile={openMobile}
       setOpenMobile={setOpenMobile}
     >
-      <SidebarHeader className={`gap-y-3xl`}>
+       <SidebarContent>
+        <div className="p-4">
         <SidebarMenu>
-          <div className={`flex flex-col gap-y-lg`}>
+          <div className={`flex flex-col gap-y-lg mb-4`}>
             <Select
               value={$docStore.version}
               onValueChange={handleVersionChange}
@@ -862,6 +873,8 @@ export function DocsSidebar({
           {SIDENAV_SECTIONS.map((item) => (
             <SidebarMenuItem key={item.text}>
               <SidebarMenuButton
+                className="h-[44px] active:bg-white"
+                isActive={mainNavigationLinkActive(item.path)}
                 asChild
               >
                 <a
@@ -883,11 +896,11 @@ export function DocsSidebar({
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-      </SidebarHeader>
+        </div>
+        
 
-      <Spacer />
+        <Spacer />
 
-      <SidebarContent id={`sidebar-scroll`}>
         {currentRoot && (
           <SidebarGroup>
             <SidebarMenu>
@@ -907,7 +920,7 @@ export function DocsSidebar({
 
                 return (
                   <SidebarMenuItem key={section.text}>
-                    <SidebarMenuButton
+                    <SidebarMenuButtonTreeItem
                       asChild
                       isActive={currentPath.includes(section.path)}
                     >
@@ -918,7 +931,7 @@ export function DocsSidebar({
                       >
                         {section.text}
                       </a>
-                    </SidebarMenuButton>
+                    </SidebarMenuButtonTreeItem>
                   </SidebarMenuItem>
                 )
               })}

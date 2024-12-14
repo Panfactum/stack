@@ -1003,7 +1003,7 @@ function InfrastructureSavingsTableRow(
           header
         ) : (
           <Tooltip title={headerDescription}>
-            <span className="underline decoration-dotted decoration-white decoration-2 underline-offset-4">
+            <span className="underline decoration-dotted decoration-white decoration-2 underline-offset-4 max-w-4xl w-full">
               {header}
             </span>
           </Tooltip>
@@ -1086,7 +1086,7 @@ export default function SavingsTable(
             Infrastructure Cost Savings
           </h3>
 
-          <div className="bg-gray-dark text-black font-medium rounded text-display-md">
+          <div className="font-machina bg-gray-dark text-primary font-medium rounded text-display-md">
             {CURRENCY_FORMAT.format(
               savings.total.baseCost - savings.total.stackCost,
             )}{' '}
@@ -1275,14 +1275,14 @@ export default function SavingsTable(
           </h3>
 
           <div>
-            <h3 className="bg-gray-dark text-black font-medium rounded text-display-md">
+            <h3 className="font-machina bg-gray-dark text-primary font-medium rounded text-display-md">
               {CURRENCY_FORMAT.format(
                 savings.monthlyMaintenance.savings +
                   savings.productivityBoost.savings,
               )}{' '}
               / month
             </h3>
-            <span className={`text-secondary text-display-xs font-medium`}>
+            <span className={`font-machina text-secondary text-display-xs font-medium`}>
               {CURRENCY_FORMAT.format(savings.setup.savings)} / one-time
             </span>
           </div>

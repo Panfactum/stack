@@ -4,9 +4,9 @@ const { class: className, flex, sectionClass, ...rest } = Astro.props
 const flexContainer = flex !== false
 ---
 
-<section class={`flex flex-col items-center py-7xl max-w-[1344px] px-8 mx-auto ${sectionClass || ''}`}>
+<section class={`flex flex-col items-center py-7xl max-w-[1344px] px-4 md:px-8 mx-auto ${sectionClass || ''}`}>
   <div
-    class={`container ${flexContainer ? 'flex flex-col items-center' : ''} px-container-padding-mobile xl:px-container-padding-desktop ${className || ''}`}
+    class={`container ${flexContainer ? 'flex flex-col items-center' : ''} px-0 md:px-8 ${className || ''}`}
   >
     <slot />
   </div>

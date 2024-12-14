@@ -71,4 +71,16 @@
   a:hover .icon.icon-link {
     filter: brightness(1.2); /* Lightens the icon on hover */
   }
+
+  h1, h2, h3, span {
+    @apply text-primary
+  }
+
+  img {
+    @apply bg-[transparent] p-4 dark:bg-[#e9e8eb]
+  }
+
+  strong {
+    @apply dark:text-primary
+  }
 }

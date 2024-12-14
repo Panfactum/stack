@@ -27,8 +27,12 @@ const Tooltip: React.FC<TooltipProps> = ({
 
       {/* Tooltip */}
       <div
-        className={`z-40 absolute bg-primary-solid whitespace-nowrap px-2 py-1 text-sm text-white rounded shadow-md hidden group-hover:block transition-opacity duration-200 ${pos} w-[300px] overflow-hidden text-ellipsis`}
-        style={{ whiteSpace: 'normal' }}
+        className={`z-40 absolute bg-primary-solid dark:bg-primary 
+          px-2 py-1 
+          text-sm text-white 
+          rounded shadow-md 
+          hidden group-hover:inline transition-opacity duration-200 min-w-[400px] w-full max-w-[700px] ${pos}`}
+        style={{ whiteSpace: 'pre-lines' }}
       >
         {title}
       </div>

@@ -17,9 +17,10 @@ export function HeaderNavMobile({
 }: MobileNav) {
   return (
     <div
-      className={`bg-primary fixed top-0 left-0 bottom-0 w-full z-10`}
+      className={`bg-white fixed top-0 bottom-0 left-0 bottom-0 flex flex-col justify-between w-full h-full z-[51]`}
     >
-      <div className="flex items-center justify-center h-20">
+      <div className="bg-white">
+        <div className="flex items-center justify-center h-20">
         <div className="container flex justify-between px-container-padding-mobile">
           <a href="/" onClick={() => setMobileOpened(false)}>
             <PanfactumLogo className={`fill-blue-500`} />
@@ -49,6 +50,8 @@ export function HeaderNavMobile({
           </a>
         ))}
       </div>
+      </div>
+      
 
       <div
         className={`flex flex-col py-3xl px-container-padding-mobile gap-4xl`}
