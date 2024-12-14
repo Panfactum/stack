@@ -1,19 +1,19 @@
-import { documentationStore } from '@/stores/documentation-store.ts'
+import {scrollYStore} from '@/stores/documentation-store.ts'
 
-const scroller = document.getElementById('sidebar-scroll')
+export const scroller = document.querySelector('.scrollbar')
 
 addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    documentationStore.setKey('scrollY', scroller?.scrollTop)
-  }
+    if (document.visibilityState === 'hidden') {
+        scrollYStore.set(scroller.scrollTop)
+    }
 })
 
-/* scroller?.addEventListener('scroll', () => {
-  documentationStore.setKey('scrollY', scroller.scrollTop)
-}) */
+scroller?.addEventListener('scroll', () => {
+    scrollYStore.set(scroller.scrollTop)
+})
 
-const scrollY = documentationStore.get().scrollY
+const scrollY = scrollYStore.get()
 
 if (scrollY) {
-  scroller?.scrollTo(0, scrollY)
+    scroller?.scrollTo(0, scrollY)
 }

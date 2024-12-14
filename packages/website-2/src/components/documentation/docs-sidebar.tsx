@@ -736,9 +736,7 @@ export function DocsSidebar({
     if (currentRoot) {
       setNavigationReferences(currentRoot?.path, currentPath)
     }
-
-    const scroller = document.getElementById('sidebar-scroll')
-
+    const scroller = document.querySelector('.scrollbar')
     scroller?.scrollTo(0, getStoredY() || 0)
   }, [currentPath, currentRoot])
 
@@ -840,8 +838,6 @@ export function DocsSidebar({
     return !!(path && currentPath.includes(path))
   }
 
-
-  console.log('right before render');
   return (
     <Sidebar
       id={`sidebar-scroll`}
