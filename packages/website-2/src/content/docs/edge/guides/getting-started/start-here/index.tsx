@@ -35,3 +35,21 @@ export function Or() {
     </div>
   )
 }
+
+export function GettingStarted () {
+    return (
+        <div className="flex flex-col gap-12 py-20">
+            <Option
+                href={'/docs/edge/guides/bootstrapping/overview'}
+                text={'Deploying the Panfactum Stack in your organization?'}
+                description={'You are bootstrapping new Panfactum infrastructure in your organization for the first time.'}
+            />
+            <Or/>
+            <Option
+                href={'/docs/edge/guides/getting-started/overview'}
+                text={"Connecting to your organization's existing Panfactum infrastructure?"}
+                description={'Someone has already deployed Panfactum in your organization, and you want to connect to that infrastructure.'}
+            />
+        </div>
+    )
+}

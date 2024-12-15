@@ -16,7 +16,7 @@ export const discordServerLink = 'https://discord.gg/MJQ3WHktAS'
 export enum Versions {
   unreleased = 'main',
   edge = 'edge',
-  stable_24_04 = '24-04',
+  stable_24_05 = '24-05',
 }
 
 export const DOCS_VERSIONS =
@@ -24,11 +24,11 @@ export const DOCS_VERSIONS =
     ? ([
         { text: 'Unreleased', slug: Versions.unreleased },
         { text: 'Edge', slug: Versions.edge },
-        { text: '24-05', slug: Versions.stable_24_04 },
+        { text: '24-05', slug: Versions.stable_24_05 },
       ] as const)
     : ([
         { text: 'Edge', slug: Versions.edge },
-        { text: '24-05', slug: Versions.stable_24_04 },
+        { text: '24-05', slug: Versions.stable_24_05 },
       ] as const)
 
 export function isValidVersion(version: string): boolean {

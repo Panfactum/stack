@@ -1,19 +1,26 @@
 import {scrollYStore} from '@/stores/documentation-store.ts'
+const eventHandlers = new WeakMap<HTMLElement, EventListener>()
 
-export const scroller = document.querySelector('.scrollbar')
+let scroller: HTMLElement | null = null
 
-addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        scrollYStore.set(scroller.scrollTop)
+export function addScrollListener() {
+    scroller = document.querySelector('.scrollbar') as HTMLElement | null
+
+    const scrollHandler = () => {
+        console.log('setting', scroller?.scrollTop)
+        scrollYStore.set(scroller?.scrollTop)
     }
-})
 
-scroller?.addEventListener('scroll', () => {
-    scrollYStore.set(scroller.scrollTop)
-})
+    if (scroller && !eventHandlers.has(scroller)) {
+        scroller.addEventListener('scroll', scrollHandler)
 
-const scrollY = scrollYStore.get()
+        eventHandlers.set(scroller, scrollHandler)
+    }
+}
 
-if (scrollY) {
-    scroller?.scrollTo(0, scrollY)
+export function goToScrollPosition() {
+    if (scroller) {
+        console.log('scrolling to', scrollYStore.get())
+        scroller.scrollTo(0, scrollYStore.get())
+    }
 }

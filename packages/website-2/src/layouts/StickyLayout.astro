@@ -61,7 +61,10 @@ const showFooter =
       style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
     >
       <div class="pt-[80px] lg:pt-0 lg:fixed lg:top-[80px] h-auto lg:h-[calc(100vh-80px)] doc-nav flex-none w-full lg:w-[324px]">
-        <DocsSidebar client:load currentPath={pathname} transition:persist />
+        <Suspense>
+          <DocsSidebar client:only currentPath={pathname} basePath="/docs" />
+        </Suspense>
+
         <script src="./persist-sidebar-scroll.ts"></script>
       </div>
       <article

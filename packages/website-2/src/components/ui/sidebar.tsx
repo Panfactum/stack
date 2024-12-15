@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
+import {addScrollListener, goToScrollPosition} from "@/layouts/persist-sidebar-scroll.ts";
 
 const SIDEBAR_WIDTH_MOBILE = '18rem'
 
@@ -42,7 +43,14 @@ const Sidebar = React.forwardRef<
 
     const state = 'expanded'
 
+      React.useEffect(() => {
+          addScrollListener()
+          goToScrollPosition()
+      }, [currentPath])
+
     if (isMobile) {
+      console.log('openMobile', openMobile)
+
       return (
         <>
           <div
@@ -74,7 +82,10 @@ const Sidebar = React.forwardRef<
           </div>
           <Sheet
             open={openMobile}
-            onOpenChange={() => setOpenMobile(!openMobile)}
+            onOpenChange={() => {
+                console.log('open change')
+                setOpenMobile(!openMobile)
+            }}
             {...props}
           >
             <SheetContent
@@ -87,6 +98,10 @@ const Sidebar = React.forwardRef<
                 } as React.CSSProperties
               }
               side={side}
+              onOpenAutoFocus={() => {
+                  addScrollListener()
+                  goToScrollPosition()
+              }}
             >
               <SheetTitle className={`hidden`}>
                 Documentation Navigation
@@ -97,6 +112,9 @@ const Sidebar = React.forwardRef<
         </>
       )
     }
+
+
+
 
     return (
       <div

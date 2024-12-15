@@ -2,7 +2,6 @@
 import '../styles/global.css'
 import StickyLayout from './StickyLayout.astro'
 
-const pathname = new URL(Astro.request.url).pathname
 const { redirect } = Astro.props
 
 function depthPadding(depth: number) {
@@ -39,7 +38,7 @@ function depthPadding(depth: number) {
     </article>
   </>
   {
-    Astro.props.headings ? (
+    Astro.props.headings?.length ? (
       <div
         slot="article-nav-links"
         class="hidden xl:flex flex-col gap-y-[16px] border-l border-secondary py-[24px] px-[16px] lg:px-[32px]"

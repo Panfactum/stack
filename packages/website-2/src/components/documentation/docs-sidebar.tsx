@@ -38,6 +38,7 @@ import {
   stripBasePath,
 } from '@/stores/documentation-store.ts'
 import modules from './modules.json'
+import {addScrollListener} from "@/layouts/persist-sidebar-scroll.ts";
 
 function DataFlowIcon() {
   return (
@@ -589,6 +590,30 @@ const SIDENAV_SECTIONS: SideNavSection[] = [
       {
         text: 'Releases',
         path: '/releases',
+        sub: [
+          {
+            text: 'Supported Releases',
+            path: '/supported-releases',
+          },
+          {
+            text: 'Change Log',
+            path: '/changelog',
+            sub: [
+              {
+                text: 'Edge',
+                path: '/edge',
+              },
+              {
+                text: '24.04',
+                path: '/24-05',
+              }
+            ]
+          },
+          {
+            text: 'Roadmap',
+            path: '/roadmap',
+          }
+        ]
       },
       {
         text: 'Configuration',
@@ -695,9 +720,9 @@ const SIDENAV_SECTIONS: SideNavSection[] = [
 
 export function DocsSidebar({
   currentPath,
+  basePath,
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const basePath = '/docs'
   const currentBasePath = (currentPath: string) => {
     const [_, docRoot, version, ...pathArr] = currentPath.split('/')
 
@@ -727,7 +752,6 @@ export function DocsSidebar({
 
   interface SectionProp extends SideNavSection {
     basePath: string
-    clicked: (open: boolean) => void
   }
 
   React.useEffect(() => {
@@ -736,8 +760,6 @@ export function DocsSidebar({
     if (currentRoot) {
       setNavigationReferences(currentRoot?.path, currentPath)
     }
-    const scroller = document.querySelector('.scrollbar')
-    scroller?.scrollTo(0, getStoredY() || 0)
   }, [currentPath, currentRoot])
 
   const Section = ({
@@ -745,7 +767,6 @@ export function DocsSidebar({
     path,
     sub,
     basePath = '/',
-    clicked,
   }: SectionProp) => {
     const sectionPath = basePath + path
     const isActive = !!(path && currentPath.includes(basePath + path))
@@ -789,8 +810,8 @@ export function DocsSidebar({
                   <SidebarMenuButton className="pl-6" asChild isActive={isActive}>
                     <a
                       href={sectionPath + el.path}
-                      onClick={clicked}
                       className="text-md"
+                      onClick={() => setOpenMobile(false)}
                     >
                       {el.text}
                     </a>
@@ -913,7 +934,6 @@ export function DocsSidebar({
                       key={section.text}
                       {...section}
                       basePath={sectionBasePath}
-                      clicked={() => setOpenMobile(false)}
                     />
                   )
                 }
