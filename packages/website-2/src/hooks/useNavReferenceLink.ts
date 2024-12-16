@@ -1,5 +1,10 @@
 import {useEffect, useState} from 'react'
-import {sectionLastPath,  lastDocumentationPath, stripBasePath} from "@/stores/documentation-store.ts";
+import {
+    sectionLastPath,
+    lastDocumentationPath,
+    stripBasePath,
+    documentationStore
+} from "@/stores/documentation-store.ts";
 import {useStore} from "@nanostores/react";
 
 export function useNavReferenceLink(defaultLink: string) {
@@ -58,6 +63,29 @@ export function useLastDocumentationPath() {
             shouldUpdate = false
         }
     }, [$lastDocumentationPath])
+
+    return {
+        link
+    }
+}
+
+export function useGetStartedLink() {
+    const [link, setLink] = useState<string>('/docs/edge/guides/getting-started/start-here')
+    const $documentationStore = useStore(documentationStore)
+
+    const verifyLink = `/docs/${$documentationStore.version}/guides/getting-started/start-here`
+
+    useEffect(() => {
+        void fetch(verifyLink, { method: 'HEAD' })
+            .then(res => res.ok)
+            .catch(_ => false)
+            .then(res => {
+                if (res) {
+                    setLink(verifyLink)
+                }
+            })
+
+    }, [$documentationStore])
 
     return {
         link

@@ -1,12 +1,13 @@
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HeaderNavMobile } from '@/components/layout/header-nav-mobile.tsx'
 import { PanfactumLogo } from '@/components/panfactum-logo.tsx'
 import { Button } from '../ui/button.tsx'
 import './header-nav.css';
 import {useLastDocumentationPath} from "@/hooks/useNavReferenceLink.ts";
+import {GetStarted} from "@/components/marketing/GetStarted.tsx";
 
 export interface HeaderNav {
   currentPath: string;
@@ -68,13 +69,11 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
   }, [documentationPath])
  
   useEffect(() => {
-    /* const isDarkMode = document.documentElement.classList.contains("dark")
-    console.log('trigger'); */
     const isDark = getThemePreference() === DARK_CLASS
     console.log('isDark: ', isDark);
     setThemeState(isDark ? "dark" : "theme-light")
   }, [])
- 
+
   useEffect(() => {
     const isDark =
       theme === "dark" ||
@@ -135,10 +134,8 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
                 size={'2xl'}
               />
           </a>
-          
-          <Button size="lg" variant="primary">
-            Get Started
-          </Button>
+
+          <GetStarted/>
         </div>
 
         <div className="flex justify-end items-center space-x-lg md:hidden">
