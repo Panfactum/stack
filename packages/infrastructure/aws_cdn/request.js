@@ -22,6 +22,11 @@ const parsedRewriteRules = rewriteRules
             return 1
         }
     })
+    // Append this _after_ the sort as this is the default fallback rule
+    .concat([{
+        match: `^$${pathPrefix}(.*)$`,
+        rewrite: "$1"
+    }])
     .map(function (rule) {
         return {
             match: new RegExp(rule.match),
@@ -112,6 +117,11 @@ function handler (event) {
         if (match) {
             request.uri = `$${newPathPrefix}$${rule.rewrite.replace(/\$(\d+)/g, function (_, group){ return match[group] || ''})}`
                 .replace(doubleSlashRegex, "/");
+
+            // Gracefully fix the uri if the user messes up the regex by mistake
+            if(!request.uri.startsWith("/")){
+                request.uri = "/" + request.uri
+            }
 
             // Only one match can apply, so break out of the loop
             // The longest "match" value will always match first b/c of the sort we do on parsedRewriteRules

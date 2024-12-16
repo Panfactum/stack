@@ -190,7 +190,7 @@ variable "default_file" {
 variable "default_file_strict" {
   description = "Iff true, then all requests with paths that do not contain a `.` will have the `default_file` appended."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "rewrite_rules" {

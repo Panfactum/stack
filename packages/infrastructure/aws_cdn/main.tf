@@ -118,8 +118,6 @@ locals {
   prefixes_sorted       = reverse(sort([for config in local.origin_configs : config.path_prefix]))
   origin_configs_sorted = flatten([for prefix in local.prefixes_sorted : [for config in local.origin_configs : config if config.path_prefix == prefix]])
 
-  default_rewrite_rule = { match = "(.*)", rewrite = "$1" }
-
   // Whether to enable the viewer request function (only enable if we are doing some mutation or logic based on the request)
   global_page_rules_enabled       = length(var.redirect_rules) > 0 || var.cors_enabled
   viewer_request_function_configs = { for k, v in local.origin_configs : k => v if local.global_page_rules_enabled || length(v.rewrite_rules) > 0 || v.remove_prefix }
@@ -408,6 +406,10 @@ resource "random_id" "request" {
 
   prefix      = "${var.name}-request-"
   byte_length = 4
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_cloudfront_function" "request" {
@@ -417,7 +419,7 @@ resource "aws_cloudfront_function" "request" {
   name = random_id.request[each.key].hex
   code = templatefile("${path.module}/request.js", {
     REDIRECT_RULES = jsonencode(var.redirect_rules)
-    REWRITE_RULES = jsonencode([for rule in concat(each.value.rewrite_rules, [local.default_rewrite_rule]) : {
+    REWRITE_RULES = jsonencode([for rule in each.value.rewrite_rules : {
       rewrite = rule.rewrite
       match   = replace("^${each.value.path_prefix}${trimsuffix(trimprefix(rule.match, "^"), "$")}$", "/\\/\\//", "/")
     }])
@@ -434,6 +436,10 @@ resource "aws_cloudfront_function" "request" {
   comment = "Rules for inbound requests for ${var.name} CDN origin ${each.key}"
   runtime = "cloudfront-js-2.0"
   publish = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // The response function

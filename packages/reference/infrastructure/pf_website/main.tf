@@ -91,11 +91,6 @@ module "ingress" {
     service      = local.name
     service_port = local.port
 
-    rewrite_rules = [{
-      match = "/docs/([^/]+)/(.*)"
-      rewrite = "/changelog/$1"
-    }]
-
     cdn = {
       default_cache_behavior = {
         caching_enabled = false
@@ -135,5 +130,15 @@ module "cdn" {
     target = "https://panfactum.com$1"
     permanent = true
   }]
+}
+
+module "website" {
+  source = "${var.pf_module_source}aws_s3_public_website${var.pf_module_ref}"
+  providers = {
+    aws.global = aws.global
+  }
+  bucket_name = "pf-website-astro"
+  description = "Hosts the new Astro Panfactum website"
+  domain      = "website2.panfactum.com"
 }
 
