@@ -32,8 +32,9 @@ export const lastDocumentationPath = computed([documentationStore], (store) => {
 
 export function setNavigationReferences(rootPath: string, lastPath: string) {
   const { path, version, isVersionedPath } = stripBasePath(lastPath)
+  const sectionKey = `${isVersionedPath ? version: ''}${rootPath}`
 
-  sectionLastPath.setKey(rootPath, path)
+  sectionLastPath.setKey(sectionKey, path)
   documentationStore.setKey(
     'lastPath',
     `${isVersionedPath ? `${version}/` : ''}${path}`,

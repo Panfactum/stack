@@ -738,14 +738,15 @@ export function DocsSidebar({
 
   const isVersioned = currentPath.startsWith(`${basePath}/${version}`)
 
-  const currentRoot = SIDENAV_SECTIONS.find((item) =>
-    currentPath.startsWith(
-      `${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`,
-    ),
-  )
+  const {path} = stripBasePath(currentPath)
+
+  const currentRoot = SIDENAV_SECTIONS.find((item) => ('/' + path).startsWith(item.path))
 
   const overrideRootUrl = (basePath: string, rootPath: string) => {
-    const ref = $navRefStore[rootPath]
+    const { path, version, isVersionedPath } = stripBasePath(basePath)
+
+    const sectionKey = `${isVersionedPath ? version: ''}${rootPath}`
+    const ref = $navRefStore[sectionKey]
 
     return `${basePath}${ref ? `/${ref}` : rootPath}`
   }
@@ -826,8 +827,6 @@ export function DocsSidebar({
   }
 
   const handleVersionChange = (version: string) => {
-    setVersion(version)
-
     if (isVersioned) {
       navigate(`${basePath}/${version}/${stripBasePath(currentPath).path}`)
     }

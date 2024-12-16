@@ -1,13 +1,12 @@
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useStore } from '@nanostores/react'
 import { useEffect, useState } from 'react'
 import { HeaderNavMobile } from '@/components/layout/header-nav-mobile.tsx'
 import { PanfactumLogo } from '@/components/panfactum-logo.tsx'
-import { lastDocumentationPath } from '@/stores/documentation-store.ts'
 import { Button } from '../ui/button.tsx'
 import './header-nav.css';
+import {useLastDocumentationPath} from "@/hooks/useNavReferenceLink.ts";
 
 export interface HeaderNav {
   currentPath: string;
@@ -33,7 +32,8 @@ const getThemePreference = () => {
 }
 
 export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
-  const $lastDocumentationPath = useStore(lastDocumentationPath)
+  const {link: documentationPath} = useLastDocumentationPath();
+
   const [mobileOpened, setMobileOpened] = useState(false)
   const [navLinks, setNavLinks] = useState<NavLinks[]>([
     {
@@ -53,20 +53,19 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
     "theme-light" | "dark" | "system"
   >("theme-light")
 
-  // override url if lastDocumentationPath is set
   useEffect(() => {
     const newLinks = navLinks.map((link) => {
       if (link.title === 'Docs') {
         return {
           ...link,
-          override: $lastDocumentationPath,
+          override: documentationPath,
         }
       }
       return link
     })
 
     setNavLinks(newLinks)
-  }, [])
+  }, [documentationPath])
  
   useEffect(() => {
     /* const isDarkMode = document.documentElement.classList.contains("dark")

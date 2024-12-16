@@ -1,0 +1,24 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import Section from '@/components/layout/section.astro'
+import {Button} from '@/components/ui/button'
+---
+
+<Layout
+    darkBackground={true}
+    showFooter={false}
+    heroClass="bg-brand-section"
+>
+  <Section class="content">
+    <h1>Page Not Found</h1>
+    <p>If you have reached this page in error, please report it to our <a href="https://github.com/Panfactum/panfactum/issues">issue tracker.</a></p>
+    <Button id="back" variant="primary">Go Back</Button>
+  </Section>
+</Layout>
+
+<script>
+  // on id=back click go back
+    document.getElementById('back').addEventListener('click', () => {
+        window.history.back()
+    })
+</script>
