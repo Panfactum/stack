@@ -53,12 +53,12 @@ so an enormous amount of tooling is readily available to you.
 
 To add a package such as `nodejs_20`, update your `flake.nix` with the following:
 
-```diff-nix[class="diff-highlight"]
+```diff lang="nix"
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
     panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
-+   nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
++    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
   };
 
 + outputs = { nixpkgs, panfactum, flake-utils, ... }@inputs:
@@ -102,13 +102,13 @@ You may find that your want to include specific versions of separately tools
 that are on different commits of nixpkgs from each other. Fortunately, you can very easily include multiple
 commits of "views" of nixpkgs:
 
-```diff-nix[class="diff-highlight"]
+```diff lang="nix"
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
-+   nixpkgs1.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
-+   nixpkgs2.url = "github:NixOS/nixpkgs/dd53ef232cf8398c6832dcc9e6c4194bf109e70e";
++    nixpkgs1.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
++    nixpkgs2.url = "github:NixOS/nixpkgs/dd53ef232cf8398c6832dcc9e6c4194bf109e70e";
   };
 
 + outputs = { nixpkgs1, nixpkgs2, panfactum, flake-utils, ... }@inputs:
@@ -151,7 +151,7 @@ echo "Foobar"
 
 You would include this in your `flake.nix` as follows:
 
-```diff-nix[class="diff-highlight"]
+```diff lang="nix"
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
@@ -206,7 +206,7 @@ pkgs.symlinkJoin {
 
 You would include this in your `flake.nix` as follows:
 
-```diff-nix[class="diff-highlight"]
+```diff lang="nix"
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
@@ -254,7 +254,7 @@ or automatically running any other repository maintenance activities.
 
 You can add the hook as follows:
 
-```diff-nix[class="diff-highlight"]
+```nix
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems

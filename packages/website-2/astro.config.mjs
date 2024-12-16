@@ -1,27 +1,26 @@
 // @ts-check
-import { defineConfig } from "astro/config";
-
-import react from "@astrojs/react";
-import remarkGfm from "remark-gfm";
-import tailwind from "@astrojs/tailwind";
-import mdx from "@astrojs/mdx";
-import sitemap from "@astrojs/sitemap";
-import expressiveCode from "astro-expressive-code";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeKatex from "rehype-katex";
-import remarkMath from "remark-math";
-import rehypeSlug from "rehype-slug";
-import rehypeWrap from "rehype-wrap-all";
-import rehypeUrls from "rehype-urls";
+import mdx from '@astrojs/mdx'
+import react from '@astrojs/react'
+import sitemap from '@astrojs/sitemap'
+import tailwind from '@astrojs/tailwind'
+import expressiveCode from 'astro-expressive-code'
+import { defineConfig } from 'astro/config'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeKatex from 'rehype-katex'
+import rehypeSlug from 'rehype-slug'
+import rehypeUrls from 'rehype-urls'
+import rehypeWrap from 'rehype-wrap-all'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
 import {
   discordServerLink,
   replaceVersionPlaceholders,
-} from "./src/lib/constants";
+} from './src/lib/constants'
 
 // https://astro.build/config
 export default defineConfig({
   // site: "https://panfactum.com",
-  site: "http://localhost:3000",
+  site: 'http://localhost:3000',
   integrations: [
     react(),
     tailwind({ applyBaseStyles: false }),
@@ -33,10 +32,10 @@ export default defineConfig({
     remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [
       rehypeSlug,
-      [rehypeAutolinkHeadings, { behavior: "append" }],
+      [rehypeAutolinkHeadings, { behavior: 'append' }],
       [
         rehypeWrap,
-        { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
+        { selector: 'table', wrapper: 'div.overflow-x-scroll mb-4' },
       ],
       rehypeKatex,
       [
@@ -44,12 +43,12 @@ export default defineConfig({
         {
           transform: (url) => {
             if (!url.path) {
-              return;
+              return
             }
             return replaceVersionPlaceholders(url.href).replaceAll(
-              "__discordServerLink__",
+              '__discordServerLink__',
               discordServerLink,
-            );
+            )
           },
         },
       ],
@@ -65,4 +64,4 @@ export default defineConfig({
       destination: "/docs/framework/framework/overview",
     },*/
   },
-});
+})
