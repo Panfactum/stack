@@ -4,6 +4,12 @@ export const PANFACTUM_VERSION_MAIN = 'main'
 export const PANFACTUM_VERSION_EDGE = 'edge.24-10-25'
 export const PANFACTUM_VERSION_24_05 = '24-05.0'
 
+export const PANFACTUM_VERSION_PLACEHOLDERS = {
+  __PANFACTUM_VERSION_EDGE__: PANFACTUM_VERSION_EDGE,
+  __PANFACTUM_VERSION_24_05__: PANFACTUM_VERSION_24_05,
+  __PANFACTUM_VERSION_MAIN__: PANFACTUM_VERSION_MAIN,
+}
+
 export function replaceVersionPlaceholders(str: string) {
   return str
     .replaceAll('__PANFACTUM_VERSION_EDGE__', PANFACTUM_VERSION_EDGE)
