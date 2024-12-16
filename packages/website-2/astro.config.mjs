@@ -43,6 +43,7 @@ export function replacePanfactumVariablesPlugin() {
 // https://astro.build/config
 export default defineConfig({
   // site: "https://panfactum.com",
+  cacheDir: '.cache',
   site: 'http://localhost:3000',
   integrations: [
     react(),

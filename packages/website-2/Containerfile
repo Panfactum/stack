@@ -8,11 +8,12 @@ WORKDIR /code
 ## Dependencies Image
 #################################################
 FROM base AS deps
+ARG BUILDARCH
 
 # Install package manager
 RUN apt update && \
   apt install -y curl unzip groff && \
-  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-$( [ "$BUILDARCH" = "amd64" ] && echo "x86_64" || echo "aarch64").zip" -o "awscliv2.zip" && \
   unzip awscliv2.zip && \
   ./aws/install && \
   apt-get clean autoclean && \
@@ -41,8 +42,7 @@ WORKDIR /code/packages/website-2
 COPY packages/website-2 .
 
 RUN mkdir /code/packages/website-2/dist
-RUN --mount=type=cache,id=website2-build,target=/code/packages/website-2/build/cache \
-
+RUN --mount=type=cache,id=website2-build,target=/code/packages/website-2/.cache \
   PUBLIC_ALGOLIA_APP_ID=${PUBLIC_ALGOLIA_APP_ID} \
   PUBLIC_ALGOLIA_SEARCH_API_KEY=${PUBLIC_ALGOLIA_SEARCH_API_KEY} \
   PUBLIC_ALGOLIA_INDEX_NAME=${PUBLIC_ALGOLIA_INDEX_NAME} \

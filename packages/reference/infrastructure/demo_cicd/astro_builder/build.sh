@@ -16,7 +16,7 @@ export BUILDKIT_HOST
 ###########################################################
 ## Step 3: Record the build
 ###########################################################
-pf-buildkit-record-build --arch="$ARCH"
+pf-buildkit-record-build --arch=arm64
 
 ###########################################################
 ## Step 4: Get AWS credentials for the s3 upload
@@ -42,5 +42,8 @@ buildctl \
   --secret id=AWS_ACCESS_KEY_ID,env=AWS_ACCESS_KEY_ID \
   --secret id=AWS_SECRET_ACCESS_KEY,env=AWS_SECRET_ACCESS_KEY \
   --secret id=AWS_SESSION_TOKEN,env=AWS_SESSION_TOKEN \
+  --opt build-arg:PUBLIC_ALGOLIA_APP_ID="$PUBLIC_ALGOLIA_APP_ID" \
+  --opt build-arg:PUBLIC_ALGOLIA_SEARCH_API_KEY="$PUBLIC_ALGOLIA_SEARCH_API_KEY" \
+  --opt build-arg:PUBLIC_ALGOLIA_INDEX_NAME="$PUBLIC_ALGOLIA_INDEX_NAME" \
   --export-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder" \
   --import-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder"

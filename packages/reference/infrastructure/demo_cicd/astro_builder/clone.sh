@@ -7,3 +7,5 @@ git clone https://github.com/Panfactum/stack.git --depth=1
 cd stack || exit
 git fetch origin "$GIT_REF"
 git checkout "$GIT_REF"
+git lfs install --local
+git lfs pull
