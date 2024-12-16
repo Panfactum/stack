@@ -6,7 +6,11 @@ LABEL org.opencontainers.image.licenses="BSL 1.1"
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get -y install --no-install-recommends ca-certificates openssh-server
+    apt-get -y install --no-install-recommends ca-certificates openssh-server && \
+    apt-get clean autoclean && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/{apt,dpkg,cache,log}/
+
 
 # Create the user that we use to login to
 # and unlock their account

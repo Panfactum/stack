@@ -12,6 +12,17 @@
 !packages/website/theme.js
 !packages/website/process-env.d.ts
 !packages/website/tsconfig.json
+!packages/website-2/src
+!packages/website-2/public
+!packages/website-2/.eslintrc.js
+!packages/website-2/jsconifg.json
+!packages/website-2/tsconfig.json
+!packages/website-2/tailwind.config.mjs
+!packages/website-2/panfactum-theme.mjs
+!packages/website-2/package.json
+!packages/website-2/components.json
+!packages/website-2/astro.config.mjs
+!packages/website-2/.prettierrc.mjs
 !packages/scraper/package.json
 !packages/scraper/src
 !packages/scraper/.eslintrc.js

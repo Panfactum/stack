@@ -87,7 +87,7 @@ module "cf" {
 
   origin_configs = [
     {
-      path_prefix = "" // This must be set to "" and not "/" in order to implement the regex logic without running into eval errors in the cloudfront function execution environment
+      path_prefix              = "" // This must be set to "" and not "/" in order to implement the regex logic without running into eval errors in the cloudfront function execution environment
       origin_domain            = module.bucket.regional_domain_name
       origin_access_control_id = aws_cloudfront_origin_access_control.cf_oac.id
 
