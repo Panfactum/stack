@@ -314,7 +314,7 @@ resource "helm_release" "descheduler" {
                     maxPodLifeTimeSeconds = 60 * 15
                     labelSelector = {
                       matchExpressions = [{
-                        key      = "panfactum.com/prevent-lifetime-eviction",
+                        key      = "panfactum.com/kyverno-mutated",
                         operator = "NotIn",
                         values   = ["true", "1"]
                       }]
