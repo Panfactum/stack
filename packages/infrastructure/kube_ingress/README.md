@@ -5,6 +5,31 @@ resources in a Kubernetes cluster.
 
 ## Usage
 
+### Basics
+
+This module provides the ability to create a set of routing rules for a given set of domains (`var.domains`) using
+Kubernetes Ingresses.
+
+It works as follows:
+
+1. For all domains in `domains`, ensure that a DNS record is configured to point to the domain to this cluster's NGINX
+  ingress controller (via [kube_external_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns))
+  and provide the ingress controller a TLS certificate for the domains
+  (via [kube_cert_manager](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)).
+
+2. When the ingress controller receives a request to a domain in `domains`, first apply the rate limits and redirect rules.
+
+3. Next, the request's path is compared to the `path_prefix` in every config of `ingress_configs`.
+  If the request path is prefixed with `path_prefix`, use the settings in that config object. [^90]
+
+4. Apply CORS handling, rewrite rules, and any other request modification before forwarding the request to the Kubernetes
+  service indicated by the config's `service` and `service_port` values.
+
+5. When receiving a response form the upstream, perform any response modifications before forwarding the response to the
+initiating client.
+
+[^90]: If multiple path prefixes match, the longest `path_prefix` value wins.
+
 ### TLS Certificates
 
 [kube_cert_issuers](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
@@ -50,6 +75,51 @@ to `https://vault.panfactum.com/some/path`.
 
 Note that the `source` value can use regex capture groups (e.g., `(/.*)`) that can then be referenced in
 `target` (e.g., `$1`).
+
+### Rewrite Rules
+
+You can use `rewrite_rules` in each `ingress_config` to rewrite the request's path _before_ forwarding to the request
+to the upstream service.
+
+Rewrite rules work as follows:
+
+1. The appropriate configuration from `ingress_configs` is chosen based on its `path_prefix`.
+
+2. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
+that regex matches, then the ***path after the `path_prefix`*** is transformed to `rewrite`. [^91] [^92] Regex capture groups are allowed in `match`
+and can be used in `rewrite`.
+
+3. Iff `remove_prefix` is `true`, prefix is removed from the request.
+
+4. The request is then forwarded to the upstream service.
+
+[^91]: If multiple rewrite rules match, the one with the longest `match` regex applies.
+
+[^92]: Note that we do not allow transforming the entire path at this phase because that would impact which config
+from `ingress_configs` would match. If you need that behavior, a `redirect_rule` would be more appropriate than
+a `rewrite_rule`.
+
+For example, consider a `kube_ingress` module with the following `ingress_configs` list:
+
+```hcl
+ingress_configs = [
+  {
+    path_prefix = "/a"
+    remove_prefix = true
+    rewrite_rules = [
+      {
+        match = "(.*)"
+        rewrite = "/1$1"
+      }
+    ]
+    service = "foo"
+    port = 80
+  }
+]
+```
+
+If the ingress receives a request with path `/a/b/c`, then the path will be mutated to `/1/b/c` before being sent to `foo:80`.
+If `remove_prefix` were false, then the path would be mutated to `/a/1/b/c` before being forwarded.
 
 ### Headers
 

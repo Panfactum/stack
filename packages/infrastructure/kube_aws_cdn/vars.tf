@@ -18,6 +18,13 @@ variable "origin_configs" {
     path_prefix          = optional(string, "/")     # Only traffic with this HTTP path prefix will be routed to the indicated origin
     extra_origin_headers = optional(map(string), {}) # Headers sent from the CDN to the origin
 
+    # Rules for mutating the request path before it is forwarded to the upstream service
+    remove_prefix = optional(bool, false) # True iff the the path_prefix should be stripped before forwarding on to upstream service
+    rewrite_rules = optional(list(object({
+      match   = string
+      rewrite = string
+    })), [])
+
     # The default behavior of the CDN before routing requests to this ingress
     default_cache_behavior = optional(object({
       caching_enabled      = optional(bool, true)                                                                 # Whether the CDN should cache responses from the origin (overrides all other caching settings)

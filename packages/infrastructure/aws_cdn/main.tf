@@ -53,7 +53,6 @@ locals {
     "me-south-1"     = "ap-south-1"
   }
 
-  page_rules_enabled        = length(var.redirect_rules) > 0 || var.cors_enabled
   response_function_enabled = var.cors_enabled
 
   default_allowed_methods      = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
@@ -108,6 +107,8 @@ locals {
     path_match_behavior      = { for path, behavior in lookup(config, "path_match_behavior", {}) : path => merge(local.default_cache_behavor, behavior) }
     origin_domain            = config.origin_domain
     extra_origin_headers     = config.extra_origin_headers
+    rewrite_rules            = config.rewrite_rules
+    remove_prefix            = config.remove_prefix
   }] : config.origin_id => config }
 
   origin_configs_by_path_behavior = { for config in flatten([for config in local.origin_configs : [for path, behavior in config.path_match_behavior : merge({ origin_id = config.origin_id, origin_path_prefix : config.path_prefix, path : path, origin_access_control_id = config.origin_access_control_id }, behavior)]]) : substr(sha256("${config.origin_id}-${config.path}"), 0, 12) => config }
@@ -116,6 +117,12 @@ locals {
   // because we prioritize specificity (otherwise /a might take precedence over /abc)
   prefixes_sorted       = reverse(sort([for config in local.origin_configs : config.path_prefix]))
   origin_configs_sorted = flatten([for prefix in local.prefixes_sorted : [for config in local.origin_configs : config if config.path_prefix == prefix]])
+
+  default_rewrite_rule = { match = "(.*)", rewrite = "$1" }
+
+  // Whether to enable the viewer request function (only enable if we are doing some mutation or logic based on the request)
+  global_page_rules_enabled       = length(var.redirect_rules) > 0 || var.cors_enabled
+  viewer_request_function_configs = { for k, v in local.origin_configs : k => v if local.global_page_rules_enabled || length(v.rewrite_rules) > 0 || v.remove_prefix }
 }
 
 data "aws_region" "region" {}
@@ -397,7 +404,7 @@ resource "aws_cloudfront_function" "error" {
 
 // The page rules function
 resource "random_id" "request" {
-  count = local.page_rules_enabled ? 1 : 0
+  for_each = local.viewer_request_function_configs
 
   prefix      = "${var.name}-request-"
   byte_length = 4
@@ -405,11 +412,15 @@ resource "random_id" "request" {
 
 resource "aws_cloudfront_function" "request" {
   provider = aws.global
-  count    = local.page_rules_enabled ? 1 : 0
+  for_each = local.viewer_request_function_configs
 
-  name = random_id.request[0].hex
+  name = random_id.request[each.key].hex
   code = templatefile("${path.module}/request.js", {
     REDIRECT_RULES = jsonencode(var.redirect_rules)
+    REWRITE_RULES = jsonencode([for rule in concat(each.value.rewrite_rules, [local.default_rewrite_rule]) : {
+      rewrite = rule.rewrite
+      match   = replace("^${each.value.path_prefix}${trimsuffix(trimprefix(rule.match, "^"), "$")}$", "/\\/\\//", "/")
+    }])
     CORS_RULES = jsonencode({
       enabled         = var.cors_enabled
       max_age         = var.cors_max_age_seconds
@@ -417,8 +428,10 @@ resource "aws_cloudfront_function" "request" {
       allowed_methods = var.cors_allowed_methods
       allowed_origins = concat([for domain in var.domains : "https://${domain}"], var.cors_additional_allowed_origins)
     })
+    PATH_PREFIX   = each.value.path_prefix
+    REMOVE_PREFIX = each.value.remove_prefix
   })
-  comment = "Rules for inbound requests for ${var.name} CDN"
+  comment = "Rules for inbound requests for ${var.name} CDN origin ${each.key}"
   runtime = "cloudfront-js-2.0"
   publish = true
 }
@@ -547,10 +560,10 @@ resource "aws_cloudfront_distribution" "cdn" {
       compress                 = ordered_cache_behavior.value.compression_enabled
       viewer_protocol_policy   = ordered_cache_behavior.value.viewer_protocol_policy
       dynamic "function_association" {
-        for_each = local.page_rules_enabled ? ["enabled"] : []
+        for_each = contains(keys(local.viewer_request_function_configs), ordered_cache_behavior.value.origin_id) ? ["enabled"] : []
         content {
           event_type   = "viewer-request"
-          function_arn = aws_cloudfront_function.request[0].arn
+          function_arn = aws_cloudfront_function.request[ordered_cache_behavior.value.origin_id].arn
         }
       }
       dynamic "function_association" {
@@ -576,10 +589,10 @@ resource "aws_cloudfront_distribution" "cdn" {
       compress                 = ordered_cache_behavior.value.default_cache_behavior.compression_enabled
       viewer_protocol_policy   = ordered_cache_behavior.value.default_cache_behavior.viewer_protocol_policy
       dynamic "function_association" {
-        for_each = local.page_rules_enabled ? ["enabled"] : []
+        for_each = contains(keys(local.viewer_request_function_configs), ordered_cache_behavior.value.origin_id) ? ["enabled"] : []
         content {
           event_type   = "viewer-request"
-          function_arn = aws_cloudfront_function.request[0].arn
+          function_arn = aws_cloudfront_function.request[ordered_cache_behavior.value.origin_id].arn
         }
       }
       dynamic "function_association" {

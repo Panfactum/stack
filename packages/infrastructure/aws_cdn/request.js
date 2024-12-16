@@ -1,6 +1,9 @@
 const redirectRules = JSON.parse('${REDIRECT_RULES}');
-const corsRules = JSON.parse('${CORS_RULES}')
-
+const rewriteRules = JSON.parse('${REWRITE_RULES}');
+const corsRules = JSON.parse('${CORS_RULES}');
+const pathPrefix = '${PATH_PREFIX}';
+const removePrefix = ${REMOVE_PREFIX};
+const newPathPrefix = removePrefix ? "" : pathPrefix;
 const parsedRedirectRules = redirectRules.map(function (rule) {
     return {
         source: new RegExp(rule.source),
@@ -9,6 +12,23 @@ const parsedRedirectRules = redirectRules.map(function (rule) {
     }
 })
 
+const parsedRewriteRules = rewriteRules
+    .sort(function (ruleA, ruleB) {
+        if(ruleA.match.length > ruleB.match.length){
+            return -1
+        } else if (ruleA.match.length === ruleB.match.length){
+            return 0
+        } else {
+            return 1
+        }
+    })
+    .map(function (rule) {
+        return {
+            match: new RegExp(rule.match),
+            rewrite: rule.rewrite
+        }
+    })
+const doubleSlashRegex = /\/\//g;
 const corsEnabled = corsRules.enabled
 const allowMethodsHeader = {value: corsRules.allowed_methods.join(',') };
 const allowHeadersHeader = { value: corsRules.allowed_headers.join(',') };
@@ -79,6 +99,23 @@ function handler (event) {
                     statusDescription: 'Denied'
                 };
             }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////
+    /// Step 3: Apply rewrite rules
+    /////////////////////////////////////////////////////////////
+    for (let i = 0; i < parsedRewriteRules.length; i++){
+        const rule = parsedRewriteRules[i]
+        const match = uri.match(rule.match);
+
+        if (match) {
+            request.uri = `$${newPathPrefix}$${rule.rewrite.replace(/\$(\d+)/g, function (_, group){ return match[group] || ''})}`
+                .replace(doubleSlashRegex, "/");
+
+            // Only one match can apply, so break out of the loop
+            // The longest "match" value will always match first b/c of the sort we do on parsedRewriteRules
+            break;
         }
     }
 

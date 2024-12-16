@@ -184,10 +184,13 @@ locals {
     var.extra_annotations
   )
 
-  # This is a helper so we can transform var.ingress_configs into a map
-  ingress_config_ids = [for config in var.ingress_configs : substr(sha256("${config.path_prefix}${join("", local.domains)}${config.service}${config.service_port}"), 0, 12)]
+  default_rewrite      = { match = "(.*)", rewrite = "$1" }
+  ingresses_x_rewrites = flatten([for config in var.ingress_configs : [for rewrite_rule in concat(config.rewrite_rules, [local.default_rewrite]) : merge(config, { match = trimsuffix(trimprefix(rewrite_rule.match, "^"), "$"), rewrite : rewrite_rule.rewrite })]])
 
-  ingress_configs = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
+  # This is a helper so we can transform var.ingress_configs into a map
+  ingress_config_ids = [for config in local.ingresses_x_rewrites : substr(sha256("${config.path_prefix}${join("", local.domains)}${config.service}${config.service_port}${config.match}"), 0, 12)]
+
+  ingress_configs = { for i, config in local.ingresses_x_rewrites : local.ingress_config_ids[i] => {
     external_dns_hostnames = local.domains
     tls_hosts              = local.domains
     tls_secret_name        = config.tls_secret_name == null ? (var.generate_cert_enabled ? "${var.name}-tls" : null) : config.tls_secret_name
@@ -197,9 +200,11 @@ locals {
     service                = config.service
     service_port           = config.service_port
     extra_annotations      = config.extra_annotations
+    match                  = config.match
+    rewrite                = config.rewrite
   } }
 
-  ingress_configs_with_cdn = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => {
+  ingress_configs_with_cdn = { for i, config in local.ingresses_x_rewrites : local.ingress_config_ids[i] => {
     external_dns_hostnames = [for domain in local.domains : "${local.cdn_subdomains[domain]}.${domain}"]
     tls_hosts              = [for domain in local.domains : "${local.cdn_subdomains[domain]}.${domain}"]
     tls_secret_name        = config.tls_secret_name == null ? (var.generate_cert_enabled ? "${var.name}-tls" : null) : config.tls_secret_name
@@ -209,18 +214,20 @@ locals {
     service                = config.service
     service_port           = config.service_port
     extra_annotations      = config.extra_annotations
+    match                  = config.match
+    rewrite                = config.rewrite
   } }
 
-  cdn_configs = { for i, config in var.ingress_configs : local.ingress_config_ids[i] => config.cdn }
-
-  cdn_origin_configs = [for name, config in local.ingress_configs_with_cdn : {
-    origin_id              = substr(sha256("${join("", config.rule_hosts)}${config.service}${config.service_port}${config.path_prefix}"), 0, 12)
-    domains                = config.rule_hosts
+  cdn_origin_configs = [for config in var.ingress_configs : {
+    origin_id              = substr(sha256("${join("", local.domains)}${config.service}${config.service_port}${config.path_prefix}"), 0, 12)
+    domains                = local.domains
     path_prefix            = config.path_prefix
-    default_cache_behavior = local.cdn_configs[name] != null ? lookup(local.cdn_configs[name], "default_cache_behavior", null) : null
-    path_match_behavior    = local.cdn_configs[name] != null ? lookup(local.cdn_configs[name], "path_match_behavior", {}) : {}
-    origin_domain          = "${local.cdn_subdomains[config.rule_hosts[0]]}.${config.rule_hosts[0]}"
-    extra_origin_headers   = local.cdn_configs[name] != null ? merge({}, lookup(local.cdn_configs[name], "extra_origin_headers", {})) : {}
+    default_cache_behavior = config.cdn != null ? lookup(config.cdn, "default_cache_behavior", null) : null
+    path_match_behavior    = config.cdn != null ? lookup(config.cdn, "path_match_behavior", {}) : {}
+    origin_domain          = "${local.cdn_subdomains[local.domains[0]]}.${local.domains[0]}"
+    extra_origin_headers   = config.cdn != null ? merge({}, lookup(config.cdn, "extra_origin_headers", {})) : {}
+    rewrite_rules          = config.rewrite_rules
+    remove_prefix          = config.remove_prefix
   }]
 }
 
@@ -306,8 +313,8 @@ resource "kubectl_manifest" "ingress" {
           "external-dns.alpha.kubernetes.io/hostname"                = join(",", each.value.external_dns_hostnames)
         },
 
-        // Strips the path_prefix (e.g., api.panfactum.com/payroll/health -> /health)
-        each.value.remove_prefix ? { "nginx.ingress.kubernetes.io/rewrite-target" = "/$2" } : {},
+        // Applies the rewrite (https://kubernetes.github.io/ingress-nginx/examples/rewrite/)
+        { "nginx.ingress.kubernetes.io/rewrite-target" = each.value.remove_prefix ? each.value.rewrite : replace("${each.value.path_prefix}${each.value.rewrite}", "/\\/\\//", "/") },
 
         each.value.extra_annotations
       ) : k => v if v != null }
@@ -332,8 +339,8 @@ resource "kubectl_manifest" "ingress" {
           host = config.domain,
           http = {
             paths = [{
-              pathType = "Prefix"
-              path     = "${config.path_prefix}(/|$)*(.*)"
+              pathType = "ImplementationSpecific"
+              path     = replace("${config.path_prefix}${each.value.match}$", "/\\/\\//", "/")
               backend = {
                 service = {
                   name = config.service

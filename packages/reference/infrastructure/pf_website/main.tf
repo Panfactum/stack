@@ -90,6 +90,12 @@ module "ingress" {
   ingress_configs = [{
     service      = local.name
     service_port = local.port
+
+    rewrite_rules = [{
+      match = "/docs/([^/]+)/(.*)"
+      rewrite = "/changelog/$1"
+    }]
+
     cdn = {
       default_cache_behavior = {
         caching_enabled = false

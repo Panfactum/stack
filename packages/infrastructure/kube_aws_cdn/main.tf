@@ -36,6 +36,7 @@ module "cdn" {
     extra_origin_headers   = config.extra_origin_headers
     default_cache_behavior = lookup(config, "default_cache_behavior", {})
     path_match_behavior    = lookup(config, "path_match_behavior", {})
+    rewrite_rules          = config.rewrite_rules
   }]
   redirect_rules                  = var.redirect_rules
   price_class                     = var.price_class

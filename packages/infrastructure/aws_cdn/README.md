@@ -94,13 +94,14 @@ The cache "behavior" for both `default_cache_behavior` and `path_match_behavior`
 1. The `viewer_protocol_policy` ([docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesViewerProtocolPolicy))
 will be applied. [^2]
 
-2. Any global redirect rules (see below) will take effect. Otherwise, the request will be processed.
+2. Any global redirect (see below) will take effect. Otherwise, the request will be processed.
 
 3. If `caching_enabled` is `true`, the request's HTTP method is in `cached_methods`, and the request has a cached response, then a cached response will be immediately returned.
 
 4. If no cached response is found and the request HTTP method is in `allowed_methods`, the request be forwarded 
 to the `origin_domain` in its original form (including the original `Host` header) 
-except for anything blocked by `cookies_not_forwarded`, `headers_not_forwarded`, and `query_strings_forwarded`.
+except for anything blocked by `cookies_not_forwarded`, `headers_not_forwarded`, and `query_strings_forwarded`. Additionally,
+path `rewrite_rules` (see below) will take effect.
 
 5. When a response is received, CloudFront will [automatically compress responses](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html#compressed-content-cloudfront-how-it-works)
 if `compression_enabled` is `true` and the client accepts either the Gzip or Brotli compression formats (via the `Accept-Encoding` HTTP header).
@@ -154,6 +155,53 @@ redirect_rules = [{
 ```
 
 The above rule would redirect a request for `http://example.com/some/resource` to `https://new.example.com/some/rseource`.
+
+#### Rewrite Rules
+
+Instead of responding with HTTP redirects, you can also "rewrite" an incoming request by changing its path before
+forwarding it to the origin server.
+
+Rewrite rules work as follows:
+
+1. The appropriate configuration from `origin_configs` is chosen based on its `path_prefix`.
+
+2. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
+   that regex matches, then the ***path after the `path_prefix`*** is transformed to `rewrite`. [^91] [^92] [^93] Regex capture groups are allowed in `match`
+   and can be used in `rewrite`.
+
+3. Iff `remove_prefix` is `true`, prefix is removed from the request.
+
+4. The request is then forwarded to the upstream service.
+
+[^91]: If multiple rewrite rules match, the one with the longest `match` regex applies.
+
+[^92]: Note that we do not allow transforming the entire path at this phase because that would impact which config
+from `origin_configs` would match. If you need that behavior, a `redirect_rule` would be more appropriate than
+a `rewrite_rule`.
+
+[^93]: Note that path rewriting occurs **after** a path behavior is selected.
+
+For example, consider a `aws_cdn` module with the following `origin_configs` list:
+
+```hcl
+origin_configs = [
+  {
+    path_prefix = "/a"
+    remove_prefix = true
+    rewrite_rules = [
+      {
+        match = "(.*)"
+        rewrite = "/1$1"
+      }
+    ]
+    ...
+  }
+]
+```
+
+If the CDN receives a request with path `/a/b/c`, then the path will be mutated to `/1/b/c` before being sent to the origin.
+If `remove_prefix` were false, then the path would be mutated to `/a/1/b/c` before being forwarded.
+
 
 #### CORS
 

@@ -85,10 +85,22 @@ module "cf" {
 
   domains = [var.domain]
 
-  origin_configs = [{
-    origin_domain            = module.bucket.regional_domain_name
-    origin_access_control_id = aws_cloudfront_origin_access_control.cf_oac.id
-  }]
+  origin_configs = [
+    {
+      origin_domain            = module.bucket.regional_domain_name
+      origin_access_control_id = aws_cloudfront_origin_access_control.cf_oac.id
+
+      rewrite_rules = concat(
+        var.default_file != "" ? [
+          {
+            match   = var.default_file_strict ? "([^.]*[^./])/?$" : "(.*/)$"
+            rewrite = "$1/${var.default_file}"
+          }
+        ] : [],
+        var.rewrite_rules
+      )
+    }
+  ]
 
   cors_enabled                    = true
   cors_allowed_headers            = var.cors_allowed_headers

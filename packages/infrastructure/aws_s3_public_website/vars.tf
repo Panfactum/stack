@@ -180,3 +180,24 @@ variable "cors_expose_headers" {
   type        = list(string)
   default     = []
 }
+
+variable "default_file" {
+  description = "A default file name to use when no file is specified (/some/file/ => /some/file/index.html). If this is '', no default file extension will be applied."
+  type        = string
+  default     = "index.html"
+}
+
+variable "default_file_strict" {
+  description = "Iff true, then all requests with paths that do not contain a `.` will have the `default_file` appended."
+  type        = bool
+  default     = false
+}
+
+variable "rewrite_rules" {
+  description = "Rewrite rules to add for the path resolution"
+  type = list(object({
+    match   = string
+    rewrite = string
+  }))
+  default = []
+}
