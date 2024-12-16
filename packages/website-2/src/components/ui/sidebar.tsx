@@ -53,7 +53,7 @@ const Sidebar = React.forwardRef<
       return (
         <>
           <div
-            className="flex flex-wrap whitespace-wrap gap-x-sm gap-y-sm items-center px-[16px] pt-[16px] pb-[16px] breadcrumb-fg text-xs font-medium cursor-pointer bg-primary fixed z-50 w-full"
+            className="flex flex-wrap whitespace-wrap gap-x-sm gap-y-sm items-center px-[16px] pt-[16px] pb-[16px] breadcrumb-fg text-xs font-medium cursor-pointer bg-primary fixed z-10 w-full"
             onClick={() => setOpenMobile(!openMobile)}
           >
             <svg
