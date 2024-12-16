@@ -752,6 +752,7 @@ export function DocsSidebar({
 
   interface SectionProp extends SideNavSection {
     basePath: string
+    isChild?: boolean;
   }
 
   React.useEffect(() => {
@@ -767,9 +768,13 @@ export function DocsSidebar({
     path,
     sub,
     basePath = '/',
+    isChild = false
   }: SectionProp) => {
     const sectionPath = basePath + path
     const isActive = !!(path && currentPath.includes(basePath + path))
+    const hasChild = sub && sub.length > 0
+
+    console.log('sub: ', sub);
 
     return (
       <Collapsible defaultOpen={isActive} className="group/collapsible">
@@ -794,33 +799,36 @@ export function DocsSidebar({
           </CollapsibleTrigger>
         </SidebarMenuItem>
 
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {sub.map((el) => {
-              if (el.sub) {
-                return <Section key={el.text} {...el} basePath={sectionPath} />
-              }
+        
+          <CollapsibleContent>
+            <SidebarMenuSub className="pl-6">
+              {sub.map((el) => {
+                if (el.sub) {
+                  return <Section key={el.text} {...el} basePath={sectionPath} />
+                }
 
-              const isActive = !!(
-                el.path && currentPath.includes(sectionPath + el.path)
-              )
+                const isActive = !!(
+                  el.path && currentPath.includes(sectionPath + el.path)
+                )
 
-              return (
-                <SidebarMenuItem key={el.text}>
-                  <SidebarMenuButton className="pl-6" asChild isActive={isActive}>
-                    <a
-                      href={sectionPath + el.path}
-                      className="text-md"
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      {el.text}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
-          </SidebarMenuSub>
-        </CollapsibleContent>
+                return (
+                  <SidebarMenuItem key={el.text}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <a
+                        href={sectionPath + el.path}
+                        className="text-md"
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        {el.text}
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+
+        
       </Collapsible>
     )
   }
