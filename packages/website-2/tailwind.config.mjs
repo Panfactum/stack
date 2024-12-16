@@ -126,6 +126,13 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      zIndex: {
+        'top-navigation': 400,
+        'top-navigation-mobile-menu': 405,
+        'content-fixed-navigation': 407,
+        'fixed-side-panel': 410,
+        'drawer': 500
+      }
     },
   },
   plugins: [

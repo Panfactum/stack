@@ -17,9 +17,9 @@ export function HeaderNavMobile({
 }: MobileNav) {
   return (
     <div
-      className={`bg-white fixed top-0 bottom-0 left-0 bottom-0 flex flex-col justify-between w-full h-full z-[51]`}
+      className={`bg-primary fixed top-0 bottom-0 left-0 bottom-0 flex flex-col justify-between w-full h-full z-[51]`}
     >
-      <div className="bg-white">
+      <div className="bg-primary">
         <div className="flex items-center justify-center h-20">
         <div className="container flex justify-between px-container-padding-mobile">
           <a href="/" onClick={() => setMobileOpened(false)}>
@@ -43,7 +43,7 @@ export function HeaderNavMobile({
           <a
             key={link.title}
             href={`${link.url}/${link.override || ''}`}
-            className={`text-tertiary text-md font-semibold py-lg ${currentPath.includes(link.url) ? '!text-primary !font-bold' : 'x'}`}
+            className={`text-primary text-md font-semibold py-lg ${currentPath.includes(link.url) ? '!font-bold' : ''}`}
             onClick={() => setMobileOpened(false)}
           >
             {link.title}

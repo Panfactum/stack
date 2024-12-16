@@ -11,7 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import {addScrollListener, goToScrollPosition} from "@/layouts/persist-sidebar-scroll.ts";
 
-const SIDEBAR_WIDTH_MOBILE = '18rem'
+const SIDEBAR_WIDTH_MOBILE = '324px'
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
@@ -49,12 +49,11 @@ const Sidebar = React.forwardRef<
       }, [currentPath])
 
     if (isMobile) {
-      console.log('openMobile', openMobile)
 
       return (
         <>
           <div
-            className="flex gap-x-sm items-center px-[16px] pt-[16px] breadcrumb-fg text-xs font-medium cursor-pointer"
+            className="flex flex-wrap whitespace-wrap gap-x-sm gap-y-sm items-center px-[16px] pt-[16px] pb-[16px] breadcrumb-fg text-xs font-medium cursor-pointer bg-primary fixed z-10 w-full"
             onClick={() => setOpenMobile(!openMobile)}
           >
             <svg
@@ -216,10 +215,9 @@ const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden scrollbar',
+        'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden scrollbar height-without-navigation-offset lg:height-with-navigation-offset pb-4',
         className,
       )}
-      style={{ marginBottom: `24px`, maxHeight: `calc(100vh - 80px)` }}
       {...props}
     />
   )
@@ -366,8 +364,8 @@ const sidebarMenuButtonVariantsTreeItem = cva(
         lg: 'h-12 text-sm group-data-[collapsible=icon]:!p-0',
       },
       isActive: {
-        true: 'bg-[transparent] font-semibold dark:bg-primary hover:bg-primary',
-        false: '',
+        true: 'bg-brand-primary font-semibold dark:bg-primary hover:bg-primary',
+        false: 'bg-[transparent]',
       },
     },
     defaultVariants: {

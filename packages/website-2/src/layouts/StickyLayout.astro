@@ -57,7 +57,7 @@ const showFooter =
     </div>
 
     <div
-      class="body-content-z mx-auto flex flex-col lg:flex-row items-start h-full"
+      class="mx-auto flex flex-col lg:flex-row items-start h-full z-content-fixed-navigation"
       style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
     >
       <div class="pt-[80px] lg:pt-0 lg:fixed lg:top-[80px] h-auto lg:h-[calc(100vh-80px)] doc-nav flex-none w-full lg:w-[324px]">
@@ -69,7 +69,7 @@ const showFooter =
       </div>
       <article
         style={{ '--sidebar-width': !Astro.props.headings ? 0 : undefined }}
-        class={`w-full py-[24px] overflow-auto h-full pl-0 lg:pl-[324px] pt-0 lg:pt-[80px]`}
+        class={`w-full py-[24px] overflow-auto h-full pl-0 lg:pl-[324px] pt-16 sm:pt-8 lg:pt-[80px]`}
       >
         <slot />
       </article>

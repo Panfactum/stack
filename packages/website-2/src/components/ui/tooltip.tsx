@@ -26,16 +26,16 @@ const Tooltip: React.FC<TooltipProps> = ({
       {children}
 
       {/* Tooltip */}
-      <div
+      <p
         className={`z-40 absolute bg-primary-solid dark:bg-primary 
           px-2 py-1 
           text-sm text-white 
           rounded shadow-md 
-          hidden group-hover:inline transition-opacity duration-200 min-w-[400px] w-full max-w-[700px] ${pos}`}
+          hidden group-hover:inline-block transition-opacity duration-200 w-fit min-w-[275px] ${pos}`}
         style={{ whiteSpace: 'pre-lines' }}
       >
         {title}
-      </div>
+      </p>
     </div>
   )
 }
