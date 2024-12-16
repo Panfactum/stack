@@ -1480,6 +1480,10 @@
 
     --colors-scrollbar-thumb: var(--colors-gray-light-mode-300, #d0d8dd);
     --sidebar-width: 324px;
+
+    --height-with-navigation-offset: calc(100vh - 80px);
+    
+    --height-without-navigation-offset: 100vh;
   }
 
   /*@media (prefers-color-scheme: dark),*/

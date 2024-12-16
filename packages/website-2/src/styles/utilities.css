@@ -163,4 +163,12 @@
     scrollbar-width: thin;
     scrollbar-color: var(--colors-scrollbar-thumb) transparent;
   }
+
+  .height-with-navigation-offset {
+    @apply max-h-[--height-with-navigation-offset];
+  }
+
+  .height-without-navigation-offset {
+    @apply max-h-screen
+  }
 }

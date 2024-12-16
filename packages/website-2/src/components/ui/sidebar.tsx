@@ -11,7 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import {addScrollListener, goToScrollPosition} from "@/layouts/persist-sidebar-scroll.ts";
 
-const SIDEBAR_WIDTH_MOBILE = '18rem'
+const SIDEBAR_WIDTH_MOBILE = '324px'
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
@@ -215,10 +215,9 @@ const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden scrollbar',
+        'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden scrollbar height-without-navigation-offset lg:height-with-navigation-offset pb-4',
         className,
       )}
-      style={{ marginBottom: `24px`, maxHeight: `calc(100vh - 80px)` }}
       {...props}
     />
   )
