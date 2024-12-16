@@ -1,6 +1,5 @@
 import { useStore } from '@nanostores/react'
 import { navigate } from 'astro:transitions/client'
-import { GalleryVerticalEnd } from 'lucide-react'
 import * as React from 'react'
 import { useState } from 'react'
 import { SearchButton } from '@/components/documentation/search/search-button.tsx'
@@ -20,7 +19,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuButtonTreeItem,
@@ -31,14 +29,13 @@ import Spacer from '@/components/ui/spacer.tsx'
 import { DOCS_VERSIONS, isValidVersion } from '@/lib/constants.ts'
 import {
   documentationStore,
-  getStoredY,
   sectionLastPath,
   setNavigationReferences,
   setVersion,
   stripBasePath,
 } from '@/stores/documentation-store.ts'
 import modules from './modules.json'
-import {addScrollListener} from "@/layouts/persist-sidebar-scroll.ts";
+import {useNavReferenceLink} from "@/hooks/useNavReferenceLink.ts";
 
 function DataFlowIcon() {
   return (
@@ -718,11 +715,26 @@ const SIDENAV_SECTIONS: SideNavSection[] = [
   },
 ]
 
+export const SavedLink: React.FC = ({href, ...props}) => {
+  const {link} = useNavReferenceLink(href)
+
+
+  return (
+      <a
+          href={link}
+          {...props}
+      >
+
+      </a>
+  )
+}
+
+
 export function DocsSidebar({
-  currentPath,
-  basePath,
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+                              currentPath,
+                              basePath,
+                              ...props
+                            }: React.ComponentProps<typeof Sidebar>) {
   const currentBasePath = (currentPath: string) => {
     const [_, docRoot, version, ...pathArr] = currentPath.split('/')
 
@@ -731,10 +743,12 @@ export function DocsSidebar({
     return isVersionedPath ? docRoot + '/' + version : docRoot
   }
 
-  const navRefStore = useStore(sectionLastPath)
+  const $navRefStore = useStore(sectionLastPath)
   const $docStore = useStore(documentationStore)
-  const [$navRefStore, setNavRefStore] = React.useState({})
+  // const [$navRefStore, setNavRefStore] = React.useState({})
   const version = $docStore.version
+
+  console.log('version', version, $docStore)
 
   const isVersioned = currentPath.startsWith(`${basePath}/${version}`)
 
@@ -756,7 +770,7 @@ export function DocsSidebar({
   }
 
   React.useEffect(() => {
-    setNavRefStore(navRefStore)
+    // setNavRefStore(navRefStore)
 
     if (currentRoot) {
       setNavigationReferences(currentRoot?.path, currentPath)
@@ -829,6 +843,8 @@ export function DocsSidebar({
   const handleVersionChange = (version: string) => {
     if (isVersioned) {
       navigate(`${basePath}/${version}/${stripBasePath(currentPath).path}`)
+    } else {
+      setVersion(version)
     }
   }
 
@@ -897,21 +913,15 @@ export function DocsSidebar({
                 isActive={mainNavigationLinkActive(item.path)}
                 asChild
               >
-                <a
-                  href={overrideRootUrl(
-                    `${basePath}${item.notVersioned ? '' : `/${version}`}`,
-                    item.path,
-                    item.notVersioned,
-                  )}
-                  onClick={() => setOpenMobile(false)}
-                >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <SavedLink href={`${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`} onClick={() => setOpenMobile(false)}>
+                  <div
+                      className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                     {item.icon()}
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
                     <span className="font-semibold">{item.text}</span>
                   </div>
-                </a>
+                </SavedLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

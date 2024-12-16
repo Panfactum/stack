@@ -62,5 +62,5 @@ export function stripBasePath(currentPath: string) {
     ? pathArr.join('/')
     : [version, ...pathArr].join('/')
 
-  return { path, version, isVersionedPath }
+  return { path, isVersionedPath, version: isVersionedPath ? version : null }
 }

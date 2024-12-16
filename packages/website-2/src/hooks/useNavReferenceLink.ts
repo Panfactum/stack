@@ -1,6 +1,38 @@
 import {useEffect, useState} from 'react'
-import {lastDocumentationPath} from "@/stores/documentation-store.ts";
+import {sectionLastPath,  lastDocumentationPath, stripBasePath} from "@/stores/documentation-store.ts";
 import {useStore} from "@nanostores/react";
+
+export function useNavReferenceLink(defaultLink: string) {
+  const $navRefStore = useStore(sectionLastPath)
+  const [link, setLink] = useState<string | null>(defaultLink)
+  const { path, version, isVersionedPath } = stripBasePath(defaultLink)
+  const sectionKey = `${isVersionedPath ? version: ''}/${path}`
+
+  const ref = $navRefStore[sectionKey]
+
+  useEffect(() => {
+      let shouldUpdate = true
+      setLink(defaultLink)
+
+      if (ref) {
+          const verifyLink = `/docs/${isVersionedPath ? version + '/': ''}${ref}`
+
+          void fetch(verifyLink, { method: 'HEAD' })
+              .then(res => res.ok)
+              .catch(_ => false)
+              .then(res => {
+                  if (shouldUpdate && res) {
+                      console.log('wtf' , res, verifyLink)
+                      setLink(verifyLink)
+                  }
+              })
+      }
+  }, [defaultLink])
+
+  return {
+    link
+  }
+}
 
 export function useLastDocumentationPath() {
     const [link, setLink] = useState<string | null>()
@@ -15,7 +47,6 @@ export function useLastDocumentationPath() {
                 .catch(_ => false)
                 .then(res => {
                     if (shouldUpdate && res) {
-                        console.log('wtf' , res, $lastDocumentationPath)
                         setLink($lastDocumentationPath)
                     }
                 })
