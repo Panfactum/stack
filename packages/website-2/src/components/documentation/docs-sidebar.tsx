@@ -772,9 +772,6 @@ export function DocsSidebar({
   }: SectionProp) => {
     const sectionPath = basePath + path
     const isActive = !!(path && currentPath.includes(basePath + path))
-    const hasChild = sub && sub.length > 0
-
-    console.log('sub: ', sub);
 
     return (
       <Collapsible defaultOpen={isActive} className="group/collapsible">
@@ -802,7 +799,7 @@ export function DocsSidebar({
         
           <CollapsibleContent>
             <SidebarMenuSub className="pl-6">
-              {sub.map((el) => {
+              {sub && sub.map((el) => {
                 if (el.sub) {
                   return <Section key={el.text} {...el} basePath={sectionPath} />
                 }
