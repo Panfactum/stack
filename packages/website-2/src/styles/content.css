@@ -83,4 +83,14 @@
   strong {
     @apply dark:text-primary
   }
+
+  h3[id],
+  h1[id],
+  h2[id] {
+      /* Your styles here */
+    margin-top: -80px;
+    padding-top: 80px;
+  }
+  
+    
 }
