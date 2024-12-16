@@ -366,8 +366,8 @@ const sidebarMenuButtonVariantsTreeItem = cva(
         lg: 'h-12 text-sm group-data-[collapsible=icon]:!p-0',
       },
       isActive: {
-        true: 'bg-[transparent] font-semibold dark:bg-primary hover:bg-primary',
-        false: '',
+        true: 'bg-brand-primary font-semibold dark:bg-primary hover:bg-primary',
+        false: 'bg-[transparent]',
       },
     },
     defaultVariants: {
