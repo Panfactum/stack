@@ -3,8 +3,6 @@ import { theme } from "./panfactum-theme.mjs";
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ['selector'],
-  /*darkMode: ['selector'],*/
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   safelist: [
     'pl-xl',
