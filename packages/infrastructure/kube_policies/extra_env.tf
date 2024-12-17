@@ -114,6 +114,14 @@ locals {
       }
     },
     {
+      name = "GOMEMLIMIT"
+      valueFrom = {
+        resourceFieldRef = {
+          resource = "limits.memory"
+        }
+      }
+    },
+    {
       name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
       valueFrom = {
         resourceFieldRef = {
@@ -153,6 +161,8 @@ locals {
         foreach = [
           {
             list = "request.object.spec.containers"
+            // TODO: This should prepend instead of append
+            // TODO: This should not overwrite existing
             patchStrategicMerge = {
               spec = {
                 containers = [
