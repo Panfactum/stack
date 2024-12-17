@@ -111,6 +111,17 @@ sourcing base images from private ECR repositories.
 
 ## edge.24-12-05
 
+<MarkdownAlert severity="warning">
+    When upgrading `aws_eks` to this version, you may receive an error about attempting to recreate the cluster due to this change:
+
+    ```shell-session
+    bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
+    ```
+
+    To workaround this issue, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
+    `bootstrap_cluster_creator_admin_privileges` input to `true`.
+</MarkdownAlert>
+
 ### Breaking Changes
 
 * This release contains a major version upgrade to Linkerd.
