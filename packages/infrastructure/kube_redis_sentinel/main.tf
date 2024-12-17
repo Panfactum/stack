@@ -178,6 +178,10 @@ resource "helm_release" "redis" {
 
         automountServiceAccountToken = true
 
+        pdb = {
+          create = false // We manage our own PDBs
+        }
+
         extraFlags = concat(
           var.lfu_cache_enabled ? [
             "--maxmemory", "$MEMORY_REQUEST",

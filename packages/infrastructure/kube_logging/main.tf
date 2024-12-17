@@ -142,7 +142,7 @@ module "redis_cache" {
   controller_nodes_enabled             = true
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   vpa_enabled                          = var.vpa_enabled
-  minimum_memory_mb                    = 50
+  minimum_memory_mb                    = 1000
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -818,6 +818,14 @@ resource "kubectl_manifest" "vpa_loki_backend" {
       labels    = module.util_backend.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "loki"
+          minAllowed = {
+            memory = "500Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "StatefulSet"
@@ -841,6 +849,14 @@ resource "kubectl_manifest" "vpa_loki_read" {
       labels    = module.util_read.labels
     }
     spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "loki"
+          minAllowed = {
+            memory = "500Mi"
+          }
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
