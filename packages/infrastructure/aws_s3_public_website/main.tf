@@ -107,6 +107,12 @@ module "cf" {
     }
   ]
 
+  custom_error_responses = [{
+    error_code         = "403"
+    response_code      = "404"
+    response_page_path = var.not_found_path
+  }]
+
   cors_enabled                    = true
   cors_allowed_headers            = var.cors_allowed_headers
   cors_allowed_methods            = var.cors_allowed_methods

@@ -475,7 +475,7 @@ resource "aws_eks_node_group" "controllers" {
   node_role_arn          = aws_iam_role.node_group.arn
   subnet_ids             = [for subnet in var.node_subnets : data.aws_subnet.node_groups[subnet].id]
 
-  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.large", "m6g.large"]
+  instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.medium", "m6g.medium", "m7g.medium"]
 
   # Unlike Karpenter, applies of this module will fail if EKS cannot replace the nodes in the node groups
   # with updated versions due to being unable to evict modules. As a result, we enable force eviction
@@ -493,9 +493,9 @@ resource "aws_eks_node_group" "controllers" {
   # Karpenter can always be running even if one node is taken offline during the
   # upgrade process.
   scaling_config {
-    desired_size = var.bootstrap_mode_enabled ? 3 : 2
-    max_size     = var.bootstrap_mode_enabled ? 3 : 2
-    min_size     = var.bootstrap_mode_enabled ? 3 : 2
+    desired_size = 3
+    max_size     = 3
+    min_size     = 3
   }
   update_config {
     max_unavailable_percentage = 50

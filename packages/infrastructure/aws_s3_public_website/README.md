@@ -12,6 +12,11 @@ so see the documentation for those modules for more information about various in
 
 ## Usage
 
+### Default Error Pages
+
+Often you will want to have a page to load if a client requests an asset not found in the S3 bucket. To configure
+the page that gets loaded, set the `not_found_path` input variable. It requires an absolute path from the root of the bucket.
+
 ### Re-routing to Default Files
 
 Often you will want to re-route requests from file-less paths
@@ -19,7 +24,7 @@ Often you will want to re-route requests from file-less paths
 
 The `default_file` input allows you to specify the filename that requests will be re-routed to (e.g., `/some/page/` -> `/some/page/${var.default_file}`.
 
-By default, this re-routing occurs for all requests with paths that do not contain a `.` will have
-the `default_file` appended. To instead only re-route if the path is to a directory or has a trailing slash (e.g., `/some/page/`),
+By default, this re-routing occurs for all requests with paths that do not contain a `.`.
+To instead only re-route if the path is to a directory or has a trailing slash (e.g., `/some/page/`),
 set `default_file_strict` to `false`.
 

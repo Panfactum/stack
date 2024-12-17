@@ -179,3 +179,23 @@ variable "cors_additional_allowed_origins" {
   type        = list(string)
   default     = []
 }
+
+variable "custom_error_responses" {
+  description = "Mutates error responses returned from the origin before forwarding them to the client"
+  type = list(object({
+    error_caching_min_ttl = optional(number, 60 * 60) // (seconds) Minimum amount of time you want HTTP error codes to stay in CloudFront caches before CloudFront queries your origin to see whether the object has been updated.
+    error_code            = string                    // The HTTP status code that you want match (4xx or 5xx)
+    response_code         = optional(string)          // The HTTP status code that you actually want to return to the client
+    response_page_path    = optional(string)          // The error page to return
+  }))
+  default = []
+
+  validation {
+    condition     = alltrue([for item in var.custom_error_responses : (startswith(item.error_code, "4") || startswith(item.error_code, "5"))])
+    error_message = "error_code must start with a 4 or 5"
+  }
+  validation {
+    condition     = alltrue([for item in var.custom_error_responses : (length(item.error_code) == 3)])
+    error_message = "error_code must be a valid status code (3 characters) (e.g., '404')"
+  }
+}

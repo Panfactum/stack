@@ -38,6 +38,7 @@ module "cdn" {
     path_match_behavior    = lookup(config, "path_match_behavior", {})
     rewrite_rules          = config.rewrite_rules
   }]
+  custom_error_responses          = var.custom_error_responses
   redirect_rules                  = var.redirect_rules
   price_class                     = var.price_class
   cors_enabled                    = var.cors_enabled

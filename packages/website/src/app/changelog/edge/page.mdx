@@ -23,6 +23,12 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) now supports
 sourcing base images from private ECR repositories.
 
+* Adds `not_found_path` to [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) to facilitate
+specifying the asset to load when no object exists at the requested path.
+
+* Adds `custom_error_responses` to [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) which can be used to overwrite error
+responses from the upstream origin.
+
 ### Fixed
 
 * Addressed conflicting PDB issue with the [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)

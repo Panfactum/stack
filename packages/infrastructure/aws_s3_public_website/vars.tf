@@ -201,3 +201,13 @@ variable "rewrite_rules" {
   }))
   default = []
 }
+
+variable "not_found_path" {
+  description = "The bucket path to return when the HTTP request path isn't found in the S3 bucket"
+  type        = string
+  default     = "/404.html"
+  validation {
+    condition     = startswith(var.not_found_path, "/")
+    error_message = "not_found_path must be an absolute path"
+  }
+}
