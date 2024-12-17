@@ -23,6 +23,21 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) now supports
 sourcing base images from private ECR repositories.
 
+### Fixed
+
+* Addressed conflicting PDB issue with the [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+module that prevented vertical autoscaling from working.
+
+* Standard Panfactum environment variables for Kubernetes workloads are now injected *before* user-defined environment variables to make them
+available for use in [dependent variables.](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/)
+
+* Standard Panfactum environment variables for Kubernetes workflows will no longer override user-defined environment variables.
+
+* Addressed issue where the CRDS in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
+were not automatically upgraded.
+
+* Fixed incorrect AWS permissions in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+
 ## edge.24-12-13
 
 ### Breaking Changes

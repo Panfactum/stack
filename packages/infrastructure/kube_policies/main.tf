@@ -61,6 +61,9 @@ resource "kubectl_manifest" "panfactum_policies" {
     metadata = {
       name   = "pf-pod-policies"
       labels = data.pf_kube_labels.labels.labels
+      annotations = {
+        "pod-policies.kyverno.io/autogen-controllers" = "none"
+      }
     }
     spec = {
       // The order here is EXTREMELY important. Do not change unless you know what you are doing.

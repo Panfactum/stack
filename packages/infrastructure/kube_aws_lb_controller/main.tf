@@ -123,6 +123,7 @@ data "aws_iam_policy_document" "alb" {
       "ec2:DescribeTags",
       "ec2:GetCoipPoolUsage",
       "ec2:DescribeCoipPools",
+      "ec2:GetSecurityGroupsForVpc",
       "elasticloadbalancing:DescribeLoadBalancers",
       "elasticloadbalancing:DescribeLoadBalancerAttributes",
       "elasticloadbalancing:DescribeListeners",
@@ -132,7 +133,10 @@ data "aws_iam_policy_document" "alb" {
       "elasticloadbalancing:DescribeTargetGroups",
       "elasticloadbalancing:DescribeTargetGroupAttributes",
       "elasticloadbalancing:DescribeTargetHealth",
-      "elasticloadbalancing:DescribeTags"
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:DescribeTrustStores",
+      "elasticloadbalancing:DescribeListenerAttributes",
+      "elasticloadbalancing:DescribeCapacityReservation"
     ]
     resources = ["*"]
   }
@@ -183,6 +187,16 @@ data "aws_iam_policy_document" "alb" {
       "ec2:CreateTags"
     ]
     resources = ["arn:aws:ec2:*:*:security-group/*"]
+    condition {
+      test     = "StringEquals"
+      values   = ["CreateSecurityGroup"]
+      variable = "ec2:CreateAction"
+    }
+    condition {
+      test     = "Null"
+      values   = ["false"]
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
+    }
   }
 
   statement {
@@ -192,6 +206,16 @@ data "aws_iam_policy_document" "alb" {
       "ec2:DeleteTags"
     ]
     resources = ["arn:aws:ec2:*:*:security-group/*"]
+    condition {
+      test     = "Null"
+      values   = ["false"]
+      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
+    }
+    condition {
+      test     = "Null"
+      values   = ["true"]
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
+    }
   }
 
   statement {
@@ -202,6 +226,11 @@ data "aws_iam_policy_document" "alb" {
       "ec2:DeleteSecurityGroup"
     ]
     resources = ["*"]
+    condition {
+      test     = "Null"
+      values   = ["false"]
+      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
+    }
   }
 
   statement {
@@ -240,6 +269,16 @@ data "aws_iam_policy_document" "alb" {
       "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
       "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
     ]
+    condition {
+      test     = "Null"
+      values   = ["false"]
+      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
+    }
+    condition {
+      test     = "Null"
+      values   = ["true"]
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
+    }
   }
 
   statement {
@@ -269,6 +308,36 @@ data "aws_iam_policy_document" "alb" {
       "elasticloadbalancing:DeleteTargetGroup"
     ]
     resources = ["*"]
+    condition {
+      test     = "Null"
+      values   = ["false"]
+      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
+    }
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:AddTags"
+    ]
+    resources = [
+      "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+      "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+      "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+    ]
+    condition {
+      test = "StringEquals"
+      values = [
+        "CreateTargetGroup",
+        "CreateLoadBalancer"
+      ]
+      variable = "elasticloadbalancing:CreateAction"
+    }
+    condition {
+      test     = "Null"
+      values   = ["false"]
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
+    }
   }
 
   statement {
@@ -277,7 +346,7 @@ data "aws_iam_policy_document" "alb" {
       "elasticloadbalancing:RegisterTargets",
       "elasticloadbalancing:DeregisterTargets"
     ]
-    resources = ["*"]
+    resources = ["arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"]
   }
 
   statement {
@@ -315,6 +384,17 @@ resource "aws_security_group" "backend" {
   name_prefix = "alb-controller-backend-"
   description = "The backend security group for the ALB ingress controller"
   tags        = data.pf_aws_tags.tags.tags
+}
+
+// This is required b/c the helm chart does not automatically upgrade the CRDs
+data "kubectl_file_documents" "crds" {
+  content = file("${path.module}/crds.yaml")
+}
+resource "kubectl_manifest" "crds" {
+  count             = length(data.kubectl_file_documents.crds.documents)
+  yaml_body         = element(data.kubectl_file_documents.crds.documents, count.index)
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 resource "helm_release" "alb_controller" {
@@ -419,6 +499,7 @@ resource "helm_release" "alb_controller" {
   }
 
   depends_on = [
+    kubectl_manifest.crds,
     module.aws_permissions
   ]
 }

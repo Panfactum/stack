@@ -31,8 +31,7 @@ locals {
       value = "{{ termSeconds }}"
     },
     {
-      name  = "POD_IP"
-      value = null
+      name = "POD_IP"
       valueFrom = {
         fieldRef = {
           apiVersion = "v1"
@@ -41,8 +40,7 @@ locals {
       }
     },
     {
-      name  = "POD_NAME"
-      value = null
+      name = "POD_NAME"
       valueFrom = {
         fieldRef = {
           apiVersion = "v1"
@@ -51,14 +49,12 @@ locals {
       }
     },
     {
-      name      = "POD_NAMESPACE"
-      value     = "{{ request.object.metadata.namespace }}"
-      valueFrom = null
+      name  = "POD_NAMESPACE"
+      value = "{{ request.object.metadata.namespace }}"
     },
     {
-      name      = "NAMESPACE"
-      value     = "{{ request.object.metadata.namespace }}"
-      valueFrom = null
+      name  = "NAMESPACE"
+      value = "{{ request.object.metadata.namespace }}"
     },
     {
       name = "POD_SERVICE_ACCOUNT"
@@ -70,8 +66,7 @@ locals {
       }
     },
     {
-      name  = "NODE_NAME"
-      value = null
+      name = "NODE_NAME"
       valueFrom = {
         fieldRef = {
           apiVersion = "v1"
@@ -80,8 +75,7 @@ locals {
       }
     },
     {
-      name  = "NODE_IP"
-      value = null
+      name = "NODE_IP"
       valueFrom = {
         fieldRef = {
           apiVersion = "v1"
@@ -117,7 +111,7 @@ locals {
       name = "GOMEMLIMIT"
       valueFrom = {
         resourceFieldRef = {
-          resource = "limits.memory"
+          resource = "requests.memory"
         }
       }
     },
@@ -141,6 +135,51 @@ locals {
 
   rule_add_environment_variables = var.environment_variable_injection_enabled ? [
     {
+      name  = "ensure-env-array"
+      match = local.match_any_pod_create
+      mutate = {
+        foreach = [
+          {
+            list = "request.object.spec.containers"
+            patchStrategicMerge = {
+              spec = {
+                containers = [{
+                  "(name)" = "{{ element.name }}"
+                  env      = []
+                }]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      name  = "ensure-env-array-init-containers"
+      match = local.match_any_pod_create
+      preconditions = {
+        all = [{
+          key      = "{{ request.object.spec.initContainers[] || `[]` | length(@) }}"
+          operator = "GreaterThanOrEquals"
+          value    = 1
+        }]
+      }
+      mutate = {
+        foreach = [
+          {
+            list = "request.object.spec.initContainers"
+            patchStrategicMerge = {
+              spec = {
+                initContainers = [{
+                  "(name)" = "{{ element.name }}"
+                  env      = []
+                }]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       name    = "add-environment-variables"
       match   = local.match_any_pod_create
       context = local.common_env_context
@@ -158,21 +197,23 @@ locals {
         ]
       }
       mutate = {
-        foreach = [
+        foreach = [for env in local.common_env :
           {
             list = "request.object.spec.containers"
-            // TODO: This should prepend instead of append
-            // TODO: This should not overwrite existing
-            patchStrategicMerge = {
-              spec = {
-                containers = [
-                  {
-                    name = "{{ element.name }}"
-                    env  = local.common_env
-                  }
-                ]
-              }
+            preconditions = {
+              any = [{
+                key      = "{{ length(element.env[?(@.name=='${env.name}')]) }}"
+                operator = "Equals"
+                value    = 0
+              }]
             }
+            patchesJson6902 = yamlencode([
+              {
+                op    = "add"
+                path  = "/spec/containers/{{elementIndex}}/env/0"
+                value = env
+              }
+            ])
           }
         ]
       }
@@ -202,22 +243,26 @@ locals {
         }]
       }
       mutate = {
-        foreach = [
+        foreach = [for env in local.common_env :
           {
             list = "request.object.spec.initContainers"
-            patchStrategicMerge = {
-              spec = {
-                initContainers = [
-                  {
-                    name = "{{ element.name }}"
-                    env  = local.common_env
-                  }
-                ]
-              }
+            preconditions = {
+              any = [{
+                key      = "{{ length(element.env[?(@.name=='${env.name}')]) }}"
+                operator = "Equals"
+                value    = 0
+              }]
             }
+            patchesJson6902 = yamlencode([
+              {
+                op    = "add"
+                path  = "/spec/initContainers/{{elementIndex}}/env/0"
+                value = env
+              }
+            ])
           }
         ]
       }
-    }
-  ] : [null, null]
+    },
+  ] : [null, null, null, null]
 }
