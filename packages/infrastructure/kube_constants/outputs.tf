@@ -79,8 +79,8 @@ output "images" {
     argo-events = {
       registry   = local.image_registry
       repository = "panfactum/argo-events"
-      tag        = "patch-12"
-      image      = "${local.image_registry}/panfactum/argo-events:patch-12"
+      tag        = "patch-14"
+      image      = "${local.image_registry}/panfactum/argo-events:patch-14"
     }
     pvc-autoresizer = {
       registry   = local.image_registry
