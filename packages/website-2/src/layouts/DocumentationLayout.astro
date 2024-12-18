@@ -46,16 +46,18 @@ function depthPadding(depth: number) {
         <span class="font-semibold text-md">On this page</span>
 
         <ul class="flex flex-col gap-y-xs">
-          {Astro.props.headings?.map((heading) => (
-            <li class="flex items-center min-h-[20px] py-md text-sm text-quaternary font-semibold">
-              <a
-                href={`#${heading.slug}`}
-                class={`${depthPadding(heading.depth)}`}
-              >
-                {heading.text}
-              </a>
-            </li>
-          ))}
+          {Astro.props.headings
+            ?.filter((heading) => heading.depth > 1)
+            .map((heading) => (
+              <li class="flex items-center min-h-[20px] py-md text-sm text-quaternary font-semibold">
+                <a
+                  href={`#${heading.slug}`}
+                  class={`${depthPadding(heading.depth) - 1}`}
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
         </ul>
       </div>
     ) : null
