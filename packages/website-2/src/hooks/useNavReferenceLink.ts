@@ -1,93 +1,91 @@
-import {useEffect, useState} from 'react'
+import { useStore } from '@nanostores/react'
+import { useEffect, useState } from 'react'
+import { stripBasePath } from '@/components/documentation/DocsSidebar/SideNavVersions.ts'
 import {
-    sectionLastPath,
-    lastDocumentationPath,
-    stripBasePath,
-    documentationStore
-} from "@/stores/documentation-store.ts";
-import {useStore} from "@nanostores/react";
+  sectionLastPath,
+  lastDocumentationPath,
+  documentationStore,
+} from '@/stores/documentation-store.ts'
 
 export function useNavReferenceLink(defaultLink: string) {
   const $navRefStore = useStore(sectionLastPath)
-  const [link, setLink] = useState<string | null>(defaultLink)
+  const [link, setLink] = useState<string>(defaultLink)
   const { path, version, isVersionedPath } = stripBasePath(defaultLink)
-  const sectionKey = `${isVersionedPath ? version: ''}/${path}`
+  const sectionKey = `${isVersionedPath ? version : ''}/${path}`
 
   const ref = $navRefStore[sectionKey]
 
   useEffect(() => {
-      let shouldUpdate = true
-      setLink(defaultLink)
+    let shouldUpdate = true
+    setLink(defaultLink)
 
-      if (ref) {
-          const verifyLink = `/docs/${isVersionedPath ? version + '/': ''}${ref}`
+    if (ref) {
+      const verifyLink = `/docs/${isVersionedPath ? version + '/' : ''}${ref}`
 
-          void fetch(verifyLink, { method: 'HEAD' })
-              .then(res => res.ok)
-              .catch(_ => false)
-              .then(res => {
-                  if (shouldUpdate && res) {
-                      console.log('wtf' , res, verifyLink)
-                      setLink(verifyLink)
-                  }
-              })
-      }
+      void fetch(verifyLink, { method: 'HEAD' })
+        .then((res) => res.ok)
+        .catch((_) => false)
+        .then((res) => {
+          if (shouldUpdate && res) {
+            setLink(verifyLink)
+          }
+        })
+    }
   }, [defaultLink])
 
   return {
-    link
+    link,
   }
 }
 
 export function useLastDocumentationPath() {
-    const [link, setLink] = useState<string | null>()
-    const $lastDocumentationPath = useStore(lastDocumentationPath)
+  const [link, setLink] = useState<string | null>()
+  const $lastDocumentationPath = useStore(lastDocumentationPath)
 
-    useEffect(() => {
-        let shouldUpdate = true
+  useEffect(() => {
+    let shouldUpdate = true
 
-        if ($lastDocumentationPath) {
-            void fetch(`/docs/${$lastDocumentationPath}`, { method: 'HEAD' })
-                .then(res => res.ok)
-                .catch(_ => false)
-                .then(res => {
-                    if (shouldUpdate && res) {
-                        setLink($lastDocumentationPath)
-                    }
-                })
-
-
-        }
-
-        return () => {
-            shouldUpdate = false
-        }
-    }, [$lastDocumentationPath])
-
-    return {
-        link
+    if ($lastDocumentationPath) {
+      void fetch(`/docs/${$lastDocumentationPath}`, { method: 'HEAD' })
+        .then((res) => res.ok)
+        .catch((_) => false)
+        .then((res) => {
+          if (shouldUpdate && res) {
+            setLink($lastDocumentationPath)
+          }
+        })
     }
+
+    return () => {
+      shouldUpdate = false
+    }
+  }, [$lastDocumentationPath])
+
+  return {
+    link,
+  }
 }
 
 export function useGetStartedLink() {
-    const [link, setLink] = useState<string>('/docs/edge/guides/getting-started/start-here')
-    const $documentationStore = useStore(documentationStore)
+  const [link, setLink] = useState<string>(
+    '/docs/edge/guides/getting-started/start-here',
+  )
+  const $documentationStore = useStore(documentationStore)
 
-    const verifyLink = `/docs/${$documentationStore.version}/guides/getting-started/start-here`
+  const verifyLink = `/docs/${$documentationStore.version}/guides/getting-started/start-here`
 
-    useEffect(() => {
-        void fetch(verifyLink, { method: 'HEAD' })
-            .then(res => res.ok)
-            .catch(_ => false)
-            .then(res => {
-                if (res) {
-                    setLink(verifyLink)
-                }
-            })
+  useEffect(() => {
+    void fetch(verifyLink, { method: 'HEAD' })
+      .then((res) => res.ok)
+      .catch((_) => false)
+      .then((res) => {
+        if (res) {
+          setLink(verifyLink)
+        }
+      })
+  }, [$documentationStore])
 
-    }, [$documentationStore])
-
-    return {
-        link
-    }
+  return {
+    link,
+  }
 }

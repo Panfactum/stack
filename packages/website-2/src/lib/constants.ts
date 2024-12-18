@@ -37,10 +37,6 @@ export const DOCS_VERSIONS =
         { text: '24-05', slug: Versions.stable_24_05 },
       ] as const)
 
-export function isValidVersion(version: string): boolean {
-  return Object.values(Versions).includes(version as Versions)
-}
-
 export function algoliaEnv() {
   const ALGOLIA_APP_ID = import.meta.env.PUBLIC_ALGOLIA_APP_ID
   const ALGOLIA_SEARCH_API_KEY = import.meta.env.PUBLIC_ALGOLIA_SEARCH_API_KEY

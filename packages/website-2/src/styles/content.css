@@ -20,11 +20,11 @@
 
   code {
     &:not(pre > code)::before {
-      content: '‘'; /* Add backtick before the code content */
+      content: ''; /* Add backtick before the code content */
     }
 
     &:not(pre > code)::after {
-      content: '‘'; /* Add backtick after the code content */
+      content: ''; /* Add backtick after the code content */
     }
   }
 

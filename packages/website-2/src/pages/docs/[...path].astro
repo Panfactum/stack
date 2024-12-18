@@ -1,6 +1,12 @@
 ---
 import { getCollection, render } from 'astro:content'
 import { mdxComponents } from '../../components/documentation/mdx-components'
+import DocumentationLayout from '../../layouts/DocumentationLayout.astro'
+import { Versions } from '../../lib/constants'
+import { VersionedSection } from '../../components/documentation/DocsSidebar/SideNavVersions'
+import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_EDGE } from './edge/_sideNavSections'
+import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_MAIN } from './main/_sideNavSections'
+import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_24_05 } from './24-05/_sideNavSections'
 
 // 1. Generate a new path for every collection entry
 export async function getStaticPaths() {
@@ -14,7 +20,19 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props
-const { Content } = await render(entry)
+const { Content, headings } = await render(entry)
+
+export const VERSIONED_SECTIONS: VersionedSection = {
+  [Versions.edge]: SIDENAV_SECTIONS_EDGE,
+  [Versions.unreleased]: SIDENAV_SECTIONS_MAIN,
+  [Versions.stable_24_05]: SIDENAV_SECTIONS_24_05,
+}
 ---
 
-<Content components={mdxComponents} />
+<DocumentationLayout
+  title={entry.data.title}
+  headings={headings}
+  versionedSections={VERSIONED_SECTIONS}
+>
+  <Content components={mdxComponents} />
+</DocumentationLayout>

@@ -117,7 +117,9 @@ function IntegerInput({
 }) {
   return (
     <div className={`flex flex-1 flex-col self-stretch gap-y-sm`}>
-      <Label className={`text-secondary text-sm font-inter whitespace-nowrap`}>{label}</Label>
+      <Label className={`text-secondary text-sm font-inter whitespace-nowrap`}>
+        {label}
+      </Label>
       <Input
         id={id}
         type="number"
@@ -136,7 +138,6 @@ export default function Calculator({
 }: {
   pathName: string
 }) {
-  console.log('pathname', pathName, props)
   const [utilization, setUtilization, onUtilizationChange] = useIntegerInput(
     'utilization',
     25,
@@ -366,224 +367,236 @@ export default function Calculator({
                 <Button variant={'outline'} size={`sm`} onClick={setSoloPreset}>
                   Solo
                 </Button>
-                <Button variant={'outline'} size={`sm`} onClick={setSmallPreset}>
+                <Button
+                  variant={'outline'}
+                  size={`sm`}
+                  onClick={setSmallPreset}
+                >
                   Small
                 </Button>
-                <Button variant={'outline'} size={`sm`} onClick={setMediumPreset}>
+                <Button
+                  variant={'outline'}
+                  size={`sm`}
+                  onClick={setMediumPreset}
+                >
                   Medium
                 </Button>
-                <Button variant={'outline'} size={`sm`} onClick={setLargePreset}>
+                <Button
+                  variant={'outline'}
+                  size={`sm`}
+                  onClick={setLargePreset}
+                >
                   Large
                 </Button>
               </div>
             </td>
           </tr>
           <InputRow title={'Organization'}>
-          <div className="flex items-center flex-col lg:flex-row gap-4">
+            <div className="flex items-center flex-col lg:flex-row gap-4">
+              <IntegerInput
+                id="employee-count"
+                label="Number of Employees"
+                value={employeeCount}
+                onChange={onEmployeesChange}
+              />
+              <IntegerInput
+                id="developer-count"
+                label="Number of Developers"
+                value={developerCount}
+                onChange={onDevelopersChange}
+              />
+              <IntegerInput
+                id="labor-cost"
+                label="Developer Cost (Hourly USD)"
+                value={lablorCostHourly}
+                onChange={onLaborCostHourlyChange}
+              />
+            </div>
+          </InputRow>
+          <InputRow title={'Network'}>
+            <div className="flex items-center flex-col lg:flex-row gap-4">
+              <IntegerInput
+                id="vpc-count"
+                label="Number of VPCs"
+                value={vpcCount}
+                onChange={onVPCCountChange}
+              />
+              <IntegerInput
+                id="egress-traffic"
+                label="Outbound Traffic GB / Month"
+                value={egressTraffic}
+                onChange={onEgressTrafficChange}
+              />
+              <IntegerInput
+                id="inter-az-traffic"
+                label="Inter-AZ Traffic GB / Month"
+                value={interAZTraffic}
+                onChange={onInterAZTrafficChange}
+              />
+            </div>
+          </InputRow>
+          <InputRow
+            title={
+              <Tooltip
+                title={
+                  'The average percent of provisioned resource capacity actually being used by your workloads. A normal range is 20-30% and a ceiling is 65% as you should always have hot spare capacity.'
+                }
+                position={'right'}
+              >
+                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                  Resource Utilization %
+                </span>
+              </Tooltip>
+            }
+          >
+            <div className="w-full flex items-center h-[56px]">
+              <div className="flex-none w-[32px]">5%</div>
+              <Slider
+                defaultValue={[utilization]}
+                min={0}
+                max={1}
+                step={0.1}
+                onValueChange={([a]) => {
+                  setUtilization(a)
+                }}
+                className="flex-1"
+              />
+              <div className="flex-none flex items-center justify-end w-[48px]">
+                65%
+              </div>
+            </div>
+          </InputRow>
+          <InputRow title={'Application Servers'}>
+            <div className="flex items-center gap-4">
+              <IntegerInput
+                id="workload-cpu-cores"
+                label="vCPU Cores"
+                value={workloadCores}
+                onChange={onWorkloadCoresChange}
+              />
+              <IntegerInput
+                id="workload-memory-gb"
+                label="Memory GB"
+                value={workloadMemory}
+                onChange={onWorkloadMemoryChange}
+              />
+              <div className={`flex-1`}></div>
+            </div>
+          </InputRow>
+          <InputRow
+            title={
+              <Tooltip
+                title={'For example, PostgreSQL or MySQL'}
+                position={'right'}
+              >
+                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                  Relational Databases
+                </span>
+              </Tooltip>
+            }
+          >
+            <div className="flex items-center flex-col lg:flex-row gap-4">
+              <IntegerInput
+                id="postgres-cpu-cores"
+                label="vCPU Cores"
+                value={pgCores}
+                onChange={onPGCoresChange}
+              />
+              <IntegerInput
+                id="postgres-memory-gb"
+                label="Memory GB"
+                value={pgMemory}
+                onChange={onPGMemoryChange}
+              />
+              <IntegerInput
+                id="postgres-storage-gb"
+                label="Storage GB"
+                value={pgStorage}
+                onChange={onPGStorageChange}
+              />
+            </div>
+          </InputRow>
+          <InputRow
+            title={
+              <Tooltip
+                title={'For example, Redis or memcached'}
+                position={'right'}
+              >
+                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                  Key-Value Databases
+                </span>
+              </Tooltip>
+            }
+          >
+            <div className="flex items-center flex-col lg:flex-row gap-4">
+              <IntegerInput
+                id="kv-cpu-cores"
+                label="vCPU Cores"
+                value={kvCores}
+                onChange={onKVCoresChange}
+              />
+              <IntegerInput
+                id="kv-memory-gb"
+                label="Memory GB"
+                value={kvMemory}
+                onChange={onKVMemoryChange}
+              />
+              <IntegerInput
+                id="kv-storage-gb"
+                label="Storage GB"
+                value={kvStorage}
+                onChange={onKVStorageChange}
+              />
+            </div>
+          </InputRow>
+          <InputRow title={'Observability'}>
+            <div className="flex items-center flex-col lg:flex-row gap-4">
+              <IntegerInput
+                id="logs"
+                label="GB Logs / Month"
+                value={logs}
+                onChange={onLogsChange}
+              />
+              <IntegerInput
+                id="metrics"
+                label="# of Metrics (Ks)"
+                value={metrics}
+                onChange={onMetricsChange}
+              />
+              <IntegerInput
+                id="spans"
+                label="# of Tracing Spans / Month (Ms)"
+                value={spans}
+                onChange={onSpansChange}
+              />
+            </div>
+          </InputRow>
+          <InputRow
+            title={
+              <Tooltip
+                title={
+                  'CPU-minutes are the number of minutes a CI/CD pipeline is running multiplied by the number of provisioned vCPUs. For example, in standard GHA this would be 2 / minute.'
+                }
+                position={'right'}
+              >
+                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                  CI / CD
+                </span>
+              </Tooltip>
+            }
+          >
             <IntegerInput
-              id="employee-count"
-              label="Number of Employees"
-              value={employeeCount}
-              onChange={onEmployeesChange}
-            />
-            <IntegerInput
-              id="developer-count"
-              label="Number of Developers"
-              value={developerCount}
-              onChange={onDevelopersChange}
-            />
-            <IntegerInput
-              id="labor-cost"
-              label="Developer Cost (Hourly USD)"
-              value={lablorCostHourly}
-              onChange={onLaborCostHourlyChange}
-            />
-          </div>
-        </InputRow>
-        <InputRow title={'Network'}>
-          <div className="flex items-center flex-col lg:flex-row gap-4">
-            <IntegerInput
-              id="vpc-count"
-              label="Number of VPCs"
-              value={vpcCount}
-              onChange={onVPCCountChange}
-            />
-            <IntegerInput
-              id="egress-traffic"
-              label="Outbound Traffic GB / Month"
-              value={egressTraffic}
-              onChange={onEgressTrafficChange}
-            />
-            <IntegerInput
-              id="inter-az-traffic"
-              label="Inter-AZ Traffic GB / Month"
-              value={interAZTraffic}
-              onChange={onInterAZTrafficChange}
-            />
-          </div>
-        </InputRow>
-        <InputRow
-          title={
-            <Tooltip
-              title={
-                'The average percent of provisioned resource capacity actually being used by your workloads. A normal range is 20-30% and a ceiling is 65% as you should always have hot spare capacity.'
-              }
-              position={'right'}
-            >
-              <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
-                Resource Utilization %
-              </span>
-            </Tooltip>
-          }
-        >
-          <div className="w-full flex items-center h-[56px]">
-            <div className="flex-none w-[32px]">5%</div>
-            <Slider
-              defaultValue={[utilization]}
-              min={0}
-              max={1}
-              step={0.1}
-              onValueChange={([a]) => {
-                setUtilization(a)
-              }}
-              className="flex-1"
-            />
-            <div className="flex-none flex items-center justify-end w-[48px]">65%</div>
-          </div>
-        </InputRow>
-        <InputRow title={'Application Servers'}>
-          <div className="flex items-center gap-4">
-            <IntegerInput
-              id="workload-cpu-cores"
-              label="vCPU Cores"
-              value={workloadCores}
-              onChange={onWorkloadCoresChange}
-            />
-            <IntegerInput
-              id="workload-memory-gb"
-              label="Memory GB"
-              value={workloadMemory}
-              onChange={onWorkloadMemoryChange}
+              id="cicd-minutes"
+              label="CPU-Minutes / Month"
+              value={cicdMinutes}
+              onChange={onCICDMinutesChange}
             />
             <div className={`flex-1`}></div>
-          </div>
-        </InputRow>
-        <InputRow
-          title={
-            <Tooltip
-              title={'For example, PostgreSQL or MySQL'}
-              position={'right'}
-            >
-              <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
-                Relational Databases
-              </span>
-            </Tooltip>
-          }
-        >
-          <div className="flex items-center flex-col lg:flex-row gap-4">
-            <IntegerInput
-              id="postgres-cpu-cores"
-              label="vCPU Cores"
-              value={pgCores}
-              onChange={onPGCoresChange}
-            />
-            <IntegerInput
-              id="postgres-memory-gb"
-              label="Memory GB"
-              value={pgMemory}
-              onChange={onPGMemoryChange}
-            />
-            <IntegerInput
-              id="postgres-storage-gb"
-              label="Storage GB"
-              value={pgStorage}
-              onChange={onPGStorageChange}
-            />
-          </div>
-        </InputRow>
-        <InputRow
-          title={
-            <Tooltip
-              title={'For example, Redis or memcached'}
-              position={'right'}
-            >
-              <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
-                Key-Value Databases
-              </span>
-            </Tooltip>
-          }
-        >
-          <div className="flex items-center flex-col lg:flex-row gap-4">
-            <IntegerInput
-              id="kv-cpu-cores"
-              label="vCPU Cores"
-              value={kvCores}
-              onChange={onKVCoresChange}
-            />
-            <IntegerInput
-              id="kv-memory-gb"
-              label="Memory GB"
-              value={kvMemory}
-              onChange={onKVMemoryChange}
-            />
-            <IntegerInput
-              id="kv-storage-gb"
-              label="Storage GB"
-              value={kvStorage}
-              onChange={onKVStorageChange}
-            />
-          </div>
-        </InputRow>
-        <InputRow title={'Observability'}>
-          <div className="flex items-center flex-col lg:flex-row gap-4">
-            <IntegerInput
-              id="logs"
-              label="GB Logs / Month"
-              value={logs}
-              onChange={onLogsChange}
-            />
-            <IntegerInput
-              id="metrics"
-              label="# of Metrics (Ks)"
-              value={metrics}
-              onChange={onMetricsChange}
-            />
-            <IntegerInput
-              id="spans"
-              label="# of Tracing Spans / Month (Ms)"
-              value={spans}
-              onChange={onSpansChange}
-            />
-          </div>
-        </InputRow>
-        <InputRow
-          title={
-            <Tooltip
-              title={
-                'CPU-minutes are the number of minutes a CI/CD pipeline is running multiplied by the number of provisioned vCPUs. For example, in standard GHA this would be 2 / minute.'
-              }
-              position={'right'}
-            >
-              <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
-                CI / CD
-              </span>
-            </Tooltip>
-          }
-        >
-          <IntegerInput
-            id="cicd-minutes"
-            label="CPU-Minutes / Month"
-            value={cicdMinutes}
-            onChange={onCICDMinutesChange}
-          />
-          <div className={`flex-1`}></div>
-          <div className={`flex-1`}></div>
-        </InputRow>
+            <div className={`flex-1`}></div>
+          </InputRow>
         </tbody>
       </table>
-      <div className="flex flex-col items-center self-stretch gap-y-6xl">
-        
-      </div>
+      <div className="flex flex-col items-center self-stretch gap-y-6xl"></div>
       <SavingsTable
         workloadCores={workloadCores}
         workloadMemory={workloadMemory}
