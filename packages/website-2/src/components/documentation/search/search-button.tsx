@@ -39,7 +39,7 @@ const SearchButton = React.forwardRef<HTMLInputElement, InputProps>(
             </div>
           </DialogTrigger>
           <DialogSearchContent>
-            <Search clicked={() => console.log('clicked')} />
+            <Search />
           </DialogSearchContent>
         </Dialog>
       </>

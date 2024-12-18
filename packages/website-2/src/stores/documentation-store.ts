@@ -1,7 +1,7 @@
-import { persistentAtom, persistentMap } from '@nanostores/persistent';
-import { computed } from 'nanostores';
-import { isValidVersion, Versions } from '@/lib/constants.ts';
-
+import { persistentAtom, persistentMap } from '@nanostores/persistent'
+import { computed } from 'nanostores'
+import { stripBasePath } from '@/components/documentation/DocsSidebar/SideNavVersions.ts'
+import { Versions } from '@/lib/constants.ts'
 
 export const scrollYStore = persistentAtom('scrollY', undefined)
 
@@ -32,7 +32,7 @@ export const lastDocumentationPath = computed([documentationStore], (store) => {
 
 export function setNavigationReferences(rootPath: string, lastPath: string) {
   const { path, version, isVersionedPath } = stripBasePath(lastPath)
-  const sectionKey = `${isVersionedPath ? version: ''}${rootPath}`
+  const sectionKey = `${isVersionedPath ? version : ''}${rootPath}`
 
   sectionLastPath.setKey(sectionKey, path)
   documentationStore.setKey(
@@ -40,7 +40,7 @@ export function setNavigationReferences(rootPath: string, lastPath: string) {
     `${isVersionedPath ? `${version}/` : ''}${path}`,
   )
 
-  if (isVersionedPath) {
+  if (isVersionedPath && version) {
     setVersion(version)
   }
 }
@@ -51,16 +51,4 @@ export function setVersion(version: string) {
 
 export function getStoredY() {
   return scrollYStore.get()
-}
-
-export function stripBasePath(currentPath: string) {
-  const [_, docRoot, version, ...pathArr] = currentPath.split('/')
-
-  const isVersionedPath = isValidVersion(version)
-
-  const path = isVersionedPath
-    ? pathArr.join('/')
-    : [version, ...pathArr].join('/')
-
-  return { path, isVersionedPath, version: isVersionedPath ? version : null }
 }

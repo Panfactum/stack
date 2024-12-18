@@ -3,16 +3,16 @@ import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useState } from 'react'
 import { HeaderNavMobile } from '@/components/layout/header-nav-mobile.tsx'
+import { GetStarted } from '@/components/marketing/GetStarted.tsx'
 import { PanfactumLogo } from '@/components/panfactum-logo.tsx'
+import { useLastDocumentationPath } from '@/hooks/useNavReferenceLink.ts'
 import { Button } from '../ui/button.tsx'
-import './header-nav.css';
-import {useLastDocumentationPath} from "@/hooks/useNavReferenceLink.ts";
-import {GetStarted} from "@/components/marketing/GetStarted.tsx";
+import './header-nav.css'
 
 export interface HeaderNav {
-  currentPath: string;
-  darkBackground: boolean;
-  hasBorder: boolean;
+  currentPath: string
+  darkBackground: boolean
+  hasBorder: boolean
 }
 
 export interface NavLinks {
@@ -21,10 +21,10 @@ export interface NavLinks {
   override?: string
 }
 
-const GITHUB_URL = "https://github.com/Panfactum/stack"
+const GITHUB_URL = 'https://github.com/Panfactum/stack'
 
 export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
-  const {link: documentationPath} = useLastDocumentationPath();
+  const { link: documentationPath } = useLastDocumentationPath()
 
   const [mobileOpened, setMobileOpened] = useState(false)
   const [navLinks, setNavLinks] = useState<NavLinks[]>([
@@ -55,12 +55,12 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
 
     setNavLinks(newLinks)
   }, [documentationPath])
- 
+
 
   return (
     <div
-        className={`flex items-center justify-center h-20 border-b w-full ${hasBorder ? 'border-primary' : 'border-[transparent]'}`}
-      >
+      className={`flex items-center justify-center h-20 border-b w-full ${hasBorder ? 'border-primary' : 'border-[transparent]'}`}
+    >
       <div
         className={`container flex justify-between items-center self-stretch ${props.darkBackground ? 'dark' : ''} px-container-padding-mobile xl:px-container-padding-desktop`}
       >
@@ -88,14 +88,14 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
         </div>
         <div className="hidden justify-end items-center space-x-lg md:flex ">
           <a href={GITHUB_URL}>
-              <FontAwesomeIcon
-                icon={faGithub}
-                className="icon-fg-github"
-                size={'2xl'}
-              />
+            <FontAwesomeIcon
+              icon={faGithub}
+              className="icon-fg-github"
+              size={'2xl'}
+            />
           </a>
 
-          <GetStarted/>
+          <GetStarted />
         </div>
 
         <div className="flex justify-end items-center space-x-lg md:hidden">
@@ -118,7 +118,6 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
           />
         )}
       </div>
-      
     </div>
   )
 }
