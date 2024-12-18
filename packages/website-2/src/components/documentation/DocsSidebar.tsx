@@ -200,92 +200,89 @@ export function DocsSidebar({
       setOpenMobile={setOpenMobile}
     >
       <SidebarContent>
-        <div className="p-4">
-          <SidebarMenu>
-            <div className={`flex flex-col gap-y-lg mb-4`}>
-              <Select
-                value={$docStore.version}
-                onValueChange={handleVersionChange}
+        <SidebarMenu className="relative pb-20">
+          <div
+            className={`flex flex-col gap-y-lg p-4 sticky h-full top-0 bg-primary z-top-navigation`}
+          >
+            <Select
+              value={$docStore.version}
+              onValueChange={handleVersionChange}
+            >
+              <SelectTrigger className="border-secondary h-[46px]">
+                <SelectValue placeholder="Theme" value={$docStore.version} />
+              </SelectTrigger>
+              <SelectContent>
+                {DOCS_VERSIONS.map((version) => (
+                  <SelectItem key={version.slug} value={version.slug}>
+                    {version.text}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <SearchButton />
+          </div>
+
+          {sections.map((item) => (
+            <SidebarMenuItem key={item.text}>
+              <SidebarMenuButton
+                className="h-[44px] active:bg-white"
+                isActive={mainNavigationLinkActive(item.path)}
+                asChild
               >
-                <SelectTrigger className="border-secondary h-[46px]">
-                  <SelectValue placeholder="Theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  {DOCS_VERSIONS.map((version) => (
-                    <SelectItem key={version.slug} value={version.slug}>
-                      {version.text}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <SearchButton />
-            </div>
-          </SidebarMenu>
-          <SidebarMenu>
-            {sections.map((item) => (
-              <SidebarMenuItem key={item.text}>
-                <SidebarMenuButton
-                  className="h-[44px] active:bg-white"
-                  isActive={mainNavigationLinkActive(item.path)}
-                  asChild
+                <SavedLink
+                  href={`${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`}
+                  onClick={() => setOpenMobile(false)}
                 >
-                  <SavedLink
-                    href={`${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`}
-                    onClick={() => setOpenMobile(false)}
-                  >
-                    <>
-                      <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                        {item.icon ? iconMapping[item.icon]() : null}
-                      </div>
-                      <div className="flex flex-col gap-0.5 leading-none">
-                        <span className="font-semibold">{item.text}</span>
-                      </div>
-                    </>
-                  </SavedLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </div>
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    {item.icon ? iconMapping[item.icon]() : null}
+                  </div>
+                  <div className="flex flex-col gap-0.5 leading-none">
+                    <span className="font-semibold">{item.text}</span>
+                  </div>
+                </SavedLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
 
-        <Spacer />
+          <Spacer />
 
-        {currentRoot && (
-          <SidebarGroup>
-            <SidebarMenu>
-              {currentRoot.sub?.map((section) => {
-                const sectionBasePath = `${basePath}${currentRoot.notVersioned ? '' : `/${version}`}${currentRoot.path}`
+          {currentRoot && (
+            <SidebarGroup>
+              <SidebarMenu>
+                {currentRoot.sub?.map((section) => {
+                  const sectionBasePath = `${basePath}${currentRoot.notVersioned ? '' : `/${version}`}${currentRoot.path}`
 
-                if (section.sub) {
+                  if (section.sub) {
+                    return (
+                      <Section
+                        key={section.text}
+                        {...section}
+                        basePath={sectionBasePath}
+                      />
+                    )
+                  }
+
                   return (
-                    <Section
-                      key={section.text}
-                      {...section}
-                      basePath={sectionBasePath}
-                    />
-                  )
-                }
-
-                return (
-                  <SidebarMenuItem key={section.text}>
-                    <SidebarMenuButtonTreeItem
-                      asChild
-                      isActive={currentPath.includes(section.path)}
-                    >
-                      <a
-                        href={sectionBasePath + section.path}
-                        onClick={() => setOpenMobile(false)}
-                        className="font-medium"
+                    <SidebarMenuItem key={section.text}>
+                      <SidebarMenuButtonTreeItem
+                        asChild
+                        isActive={currentPath.includes(section.path)}
                       >
-                        {section.text}
-                      </a>
-                    </SidebarMenuButtonTreeItem>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
+                        <a
+                          href={sectionBasePath + section.path}
+                          onClick={() => setOpenMobile(false)}
+                          className="font-medium"
+                        >
+                          {section.text}
+                        </a>
+                      </SidebarMenuButtonTreeItem>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroup>
+          )}
+        </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   )
