@@ -84,7 +84,7 @@
   }
 
   strong {
-    @apply dark:text-primary;
+    @apply text-primary;
   }
 
   /*h1[id]::before {

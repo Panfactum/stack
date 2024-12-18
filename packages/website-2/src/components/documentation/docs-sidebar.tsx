@@ -731,10 +731,10 @@ export const SavedLink: React.FC = ({href, ...props}) => {
 
 
 export function DocsSidebar({
-                              currentPath,
-                              basePath,
-                              ...props
-                            }: React.ComponentProps<typeof Sidebar>) {
+  currentPath,
+  basePath,
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const currentBasePath = (currentPath: string) => {
     const [_, docRoot, version, ...pathArr] = currentPath.split('/')
 
@@ -889,49 +889,46 @@ export function DocsSidebar({
       setOpenMobile={setOpenMobile}
     >
        <SidebarContent>
-        <div className="p-4">
-        <SidebarMenu>
-          <div className={`flex flex-col gap-y-lg mb-4`}>
-            <Select
-              value={$docStore.version}
-              onValueChange={handleVersionChange}
-            >
-              <SelectTrigger className="border-secondary h-[46px]">
-                <SelectValue placeholder="Theme" value={$docStore.version} />
-              </SelectTrigger>
-              <SelectContent>
-                {DOCS_VERSIONS.map((version) => (
-                  <SelectItem key={version.slug} value={version.slug}>
-                    {version.text}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <SearchButton />
-          </div>
-        </SidebarMenu>
-        <SidebarMenu>
-          {SIDENAV_SECTIONS.map((item) => (
-            <SidebarMenuItem key={item.text}>
-              <SidebarMenuButton
-                className="h-[44px] active:bg-white"
-                isActive={mainNavigationLinkActive(item.path)}
-                asChild
+          <SidebarMenu className="relative pb-20">
+            <div className={`flex flex-col gap-y-lg p-4 sticky h-full top-0 bg-primary z-top-navigation`}>
+              <Select
+                value={$docStore.version}
+                onValueChange={handleVersionChange}
               >
-                <SavedLink href={`${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`} onClick={() => setOpenMobile(false)}>
-                  <div
-                      className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    {item.icon()}
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">{item.text}</span>
-                  </div>
-                </SavedLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-        </div>
+                <SelectTrigger className="border-secondary h-[46px]">
+                  <SelectValue placeholder="Theme" value={$docStore.version} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOCS_VERSIONS.map((version) => (
+                    <SelectItem key={version.slug} value={version.slug}>
+                      {version.text}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <SearchButton />
+            </div>
+
+            {SIDENAV_SECTIONS.map((item) => (
+              <SidebarMenuItem key={item.text}>
+                <SidebarMenuButton
+                  className="h-[44px] active:bg-white"
+                  isActive={mainNavigationLinkActive(item.path)}
+                  asChild
+                >
+                  <SavedLink href={`${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`} onClick={() => setOpenMobile(false)}>
+                    <div
+                        className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                      {item.icon()}
+                    </div>
+                    <div className="flex flex-col gap-0.5 leading-none">
+                      <span className="font-semibold">{item.text}</span>
+                    </div>
+                  </SavedLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+            
         
 
         <Spacer />
@@ -972,6 +969,7 @@ export function DocsSidebar({
             </SidebarMenu>
           </SidebarGroup>
         )}
+        </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   )

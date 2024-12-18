@@ -21,7 +21,7 @@ export default {
     colors: {
       black: '#000',
       white: '#fff',
-      offWhite: '#a3a3a3',
+      offWhite: '#ededed',
       primary: {
         DEFAULT: 'black',
       },
@@ -129,8 +129,8 @@ export default {
         'top-navigation-mobile-menu': 405,
         'content-fixed-navigation': 407,
         'fixed-side-panel': 410,
-        'drawer': 500
-      }
+        drawer: 500,
+      },
     },
   },
   plugins: [

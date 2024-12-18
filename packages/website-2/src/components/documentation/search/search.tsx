@@ -123,17 +123,17 @@ export default function Search({ clicked }: { clicked: ClickedCallback }) {
   return (
     <div
       className={
-        'sm:absolute sm:top-16 sm:left-1/2 sm:-translate-x-1/2 sm:w-3/4 md:w-3/5 lg:w-1/2 h-fit z-[51] overflow-y-hidden'
+        'fixed top-0 left-0 w-full sm:absolute sm:top-16 sm:left-1/2 sm:-translate-x-1/2 sm:w-3/4 md:w-3/5 lg:w-1/2 h-fit z-[51] overflow-y-hidden'
       }
     >
-      <div className="relative flex items-center w-full h-12 rounded-md focus-within:shadow-lg bg-white overflow-hidden">
+      <div className="relative flex items-center w-full h-12 rounded-md focus-within:shadow-lg bg-primary overflow-hidden">
         <div className="grid place-items-center h-full w-12 text-gray-300">
           <FontAwesomeIcon icon={faMagnifyingGlass} />
         </div>
 
         <input
           ref={autoFocus}
-          className="peer h-full w-full outline-none text-sm text-gray-700 pr-8"
+          className="peer h-full w-full outline-none bg-primary text-sm text-gray-700 pr-8"
           type="text"
           id="search"
           placeholder="Search Panfactum Docs ..."
@@ -144,7 +144,7 @@ export default function Search({ clicked }: { clicked: ClickedCallback }) {
 
         {inputValue && (
           <button
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white hover:bg-gray-dark rounded-full"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-gray-dark rounded-full"
             onClick={handleClear}
           >
             <FontAwesomeIcon icon={faXmark} />
