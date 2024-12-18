@@ -67,7 +67,7 @@ export function ListBlock({ icon, title, content}: ListBlockProps) {
 
 export function FeatureListBlock({ icon, title, content }: ListBlockProps) {
     return (<div className="flex flex-col items-center gap-xl text-center max-w-[384px]">
-            <div className="w-[48px] h-[48px] flex items-center justify-center border border-[#e4e9ec] rounded-md p-[14px] shadow bg-primary dark:bg-primary dark:border-[#333741]">
+            <div className="w-[48px] h-[48px] flex items-center justify-center border border-primary rounded-md p-[14px] shadow bg-primary">
               {getIcon(icon)}
             </div>
 
