@@ -1,19 +1,13 @@
 ---
 import '../styles/global.css'
 import { ClientRouter } from 'astro:transitions'
-import Footer from '../components/layout/footer.astro'
 import { HeaderNav } from '@/components/layout/header-nav'
 import { Suspense } from 'react'
 import { DocsSidebar } from '@/components/documentation/DocsSidebar'
-import { VersionedSection } from '../components/documentation/DocsSidebar/SideNavVersions'
-import { Versions } from '../lib/constants'
 
 const pathname = new URL(Astro.request.url).pathname
 const hasBorder = Astro.props.hasBorder ? Astro.props.hasBorder : false
 const headings = Astro.props.headings || []
-
-const showFooter =
-  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
 
 const { redirect } = Astro.props
 
@@ -138,8 +132,6 @@ function depthPadding(depth: number) {
         }
       </div>
     </div>
-
-    {showFooter ? <Footer /> : null}
   </body>
 </html>
 
