@@ -70,13 +70,13 @@ function depthPadding(depth: number) {
         const element = document.querySelector(hash)
         if (element) {
           window.scrollTo({
-            top: element.offsetTop - 90, // Adjust this value to match your fixed nav height
+            top: element.offsetTop - 100, // Adjust this value to match your fixed nav height
             behavior: 'smooth',
           })
         }
       }
     }
-
+    window.addEventListener('popstate', adjustScroll)
     window.addEventListener('hashchange', adjustScroll)
     adjustScroll() // Adjust scroll on initial load if there's a hash
   })
