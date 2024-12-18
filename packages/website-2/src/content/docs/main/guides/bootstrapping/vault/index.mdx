@@ -51,7 +51,7 @@ Let's do this now:
 
    Checking the logs of one of the Vault pods will show error messages that look like this (the exact order and information may appear different):
 
-   ```shell-session
+   ```shell
    │ 2024-03-19T13:06:57.989Z [WARN]  failed to unseal core: error="stored unseal keys are supported, but none were found"                   │
    │ 2024-03-19T13:06:58.600Z [INFO]  core: security barrier not initialized                                                                 │
    │ 2024-03-19T13:06:58.600Z [INFO]  core.autoseal: recovery seal configuration missing, but cannot check old path as core is sealed        │
@@ -131,7 +131,7 @@ a remote terminal session to perform the initialization:
 3. Run `vault operator init -recovery-shares=<...> -recovery-threshold=<...>`. Set `recovery-shares` and
    `recovery-threshold` to the values you decided above. You should see a message like the following:
 
-   ```shell-session
+   ```shell
    Recovery Key 1: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
 
    Initial Root Token: hvs.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -149,7 +149,7 @@ a remote terminal session to perform the initialization:
    step when prompted. After each unseal operation you should see the below message. **Continue running unseal operations until you
    you see `Sealed` as `false` in the output** (using a different recovery key each time).
 
-   ```shell-session
+   ```shell
    Key                      Value
    ---                      -----
    Recovery Seal Type       shamir
@@ -178,7 +178,7 @@ a remote terminal session to perform the initialization:
 
    3. You should see an output with all three members:
 
-      ```shell-session
+      ```shell
       Host Name    API Address                 Cluster Address                        Active Node    Version    Upgrade Version    Redundancy Zone    Last Echo
       ---------    -----------                 ---------------                        -----------    -------    ---------------    ---------------    ---------
       vault-2      http://10.0.114.250:8200    https://vault-2.vault-internal:8201    false          1.15.2     1.15.2             n/a                2024-03-19T15:04:52Z
@@ -240,7 +240,7 @@ Here is how we will work around this issue:
 4. Run `vault status` to verify you are able to connect to the cluster. You should receive an output that looks
    similar to below:
 
-   ```shell-session
+   ```shell
    Key                      Value
    ---                      -----
    Seal Type                shamir
@@ -294,7 +294,7 @@ automatic unsealing and automatic updating of the active service address.
 
 2. When it restarts, the container should contain the following log messages (press enter on the pod):
 
-   ```shell-session
+   ```shell
    │ 2024-03-19T16:07:55.131Z [INFO]  core: vault is unsealed                                             │
    │ 2024-03-19T16:07:55.131Z [INFO]  core: entering standby mode                                         │
    │ 2024-03-19T16:07:55.195Z [INFO]  core: unsealed with stored key

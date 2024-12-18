@@ -50,7 +50,7 @@ Linkerd comes with a companion cli tool, `linkerd`. This tool is included in the
 
 Use it to run `linkerd check`. You should see a successful output like this:
 
-```shell-session
+```shell
 kubernetes-api
 --------------
 √ can initialize the client
@@ -197,7 +197,7 @@ them to the mesh:
 
 3. The tap session should produce a response similar to this:
 
-   ```shell-session
+   ```shell
    req id=0:0 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true :method=POST :authority=vault-active.vault.svc.cluster.local:8200 :path=/v1/auth/kubernetes/login
    rsp id=0:0 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true :status=200 latency=69451µs
    end id=0:0 proxy=in  src=10.0.186.223:40976 dst=10.0.232.215:8200 tls=true duration=57µs response-length=763B

@@ -74,7 +74,7 @@ Let's test to ensure it is working as intended:
 4. To diagnose utilization issues in the cluster, we bundle a CLI utility called `kube-capacity` for consolidating
    granular metrics across the entire cluster. Run `kube-capacity -uc` now:
 
-   ```shell-session
+   ```shell
    NODE                                         NAMESPACE            POD                                                 CONTAINER                 CPU REQUESTS   CPU LIMITS    CPU UTIL    MEMORY REQUESTS   MEMORY LIMITS   MEMORY UTIL
    *                                            *                    *                                                   *                         1240m (21%)    3700m (63%)   514m (8%)   1740Mi (9%)       5334Mi (29%)    4596Mi (25%)
    ....

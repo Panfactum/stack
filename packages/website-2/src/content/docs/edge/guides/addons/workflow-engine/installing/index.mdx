@@ -149,7 +149,7 @@ in the Panfactum devShell:
 
    like this:
 
-   ```shell-session
+   ```shell
    Name:                test-w9vtr
    Namespace:           argo
    ServiceAccount:      unset
@@ -165,7 +165,7 @@ in the Panfactum devShell:
 4. Run `argo logs -n argo <workflow-name>` where `<workflow-name>` is the generated name from step 2. Verify that
    your message was successfully printed:
 
-   ```shell-session
+   ```shell
    test-w9vtr-test-1726256991: {"argo":true,"level":"info","msg":"capturing logs","time":"2024-07-25T20:09:37.490Z"}
    test-w9vtr-test-1726256991: You entered: Hi!
    test-w9vtr-test-1726256991: Workflow completed successfully.

@@ -189,7 +189,7 @@ Let's set that up now:
    that by running `delv @1.1.1.1 vault.prod.panfactum.com` replacing `prod.panfactum.com` with your domain. You should receive
    a response like this:
 
-   ```shell-session
+   ```shell
    ; fully validated
    vault.prod.panfactum.com. 60	IN	A	18.223.233.91
    vault.prod.panfactum.com. 60	IN	A	52.14.249.23
@@ -209,7 +209,7 @@ Let's set that up now:
 
    {/* spellchecker: disable */}
 
-   ```shell-session
+   ```shell
    ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/seal-status", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:58:54+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 667, "duration": 0.003, "request_id": "b2718b569ed881072fbe7682a2cc635d", "request_length": 29, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
    ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/health?standbycode=200&sealedcode=200&uninitcode=200&drsecondarycode=200&performancestandbycode=200", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:58:54+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 638, "duration": 0.004, "request_id": "dca72e8c51d359bcfcd4c702c53d85a8", "request_length": 90, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
    ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/seal-status", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:59:04+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 667, "duration": 0.020, "request_id": "7296f3e527c7dab1e2868b81e6252c32", "request_length": 29, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
@@ -333,7 +333,7 @@ as intended.
 
 3. In a separate terminal session, run `curl localhost:3030/nginx_status`. NGINX should return a result like this:
 
-   ```shell-session
+   ```shell
    Active connections: 1
    server accepts handled requests
     28680 28680 13962
