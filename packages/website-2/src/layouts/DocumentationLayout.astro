@@ -61,3 +61,23 @@ function depthPadding(depth: number) {
     ) : null
   }
 </StickyLayout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const adjustScroll = () => {
+      const hash = window.location.hash
+      if (hash) {
+        const element = document.querySelector(hash)
+        if (element) {
+          window.scrollTo({
+            top: element.offsetTop - 90, // Adjust this value to match your fixed nav height
+            behavior: 'smooth',
+          })
+        }
+      }
+    }
+
+    window.addEventListener('hashchange', adjustScroll)
+    adjustScroll() // Adjust scroll on initial load if there's a hash
+  })
+</script>

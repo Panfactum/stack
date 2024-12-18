@@ -87,17 +87,19 @@
     @apply dark:text-primary;
   }
 
-  h1[id] {
+  /*h1[id]::before {
+    content: '';
+    display: block;
+    height: 80px;
     margin-top: -80px;
-    padding-top: 160px;
-  }
+  }*/
 
+  h1[id],
   h2[id],
   h3[id],
   h4[id],
   h5[id],
   h6[id] {
-    margin-top: -40px;
-    padding-top: 90px;
+    scroll-margin-top: 90px;
   }
 }
