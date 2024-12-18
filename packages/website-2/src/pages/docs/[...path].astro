@@ -1,22 +1,20 @@
 ---
-import { getCollection, render } from "astro:content";
+import { getCollection, render } from 'astro:content'
+import { mdxComponents } from '../../components/documentation/mdx-components'
 
 // 1. Generate a new path for every collection entry
 export async function getStaticPaths() {
-    const docs = await getCollection("docs");
-    return docs.map((doc) => {
-        return {
-            params: { path: doc.id },
-            props: { entry: doc },
-        };
-    });
+  const docs = await getCollection('docs')
+  return docs.map((doc) => {
+    return {
+      params: { path: doc.id },
+      props: { entry: doc },
+    }
+  })
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
-const components = {
-
-};
+const { entry } = Astro.props
+const { Content } = await render(entry)
 ---
 
-<Content components={components} />
+<Content components={mdxComponents} />
