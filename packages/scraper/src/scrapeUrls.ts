@@ -18,6 +18,7 @@ const scraperClient = axios.create({
 rax.attach(scraperClient)
 
 const { tmpDir } = consts()
+console.log('tmpDir', tmpDir)
 
 export async function scrapeUrls (urls: string[], useCache = false): Promise<ScrapedUrl[]> {
   if (useCache && fs.existsSync(`${tmpDir}/scraped.json`)) {
