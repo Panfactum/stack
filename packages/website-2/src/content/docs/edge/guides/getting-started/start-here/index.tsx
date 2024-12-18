@@ -29,9 +29,9 @@ export function Option(props: {
 export function Or() {
   return (
     <div className="flex items-center gap-4 justify-center">
-      <div className="bg-black h-1 w-4" />
+      <div className="bg-black dark:bg-white h-1 w-4" />
       <span className="text-black text-2xl font-bold">OR</span>
-      <div className="bg-black h-1 w-4" />
+      <div className="bg-black dark:bg-white h-1 w-4" />
     </div>
   )
 }
