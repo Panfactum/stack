@@ -45,5 +45,6 @@ buildctl \
   --opt build-arg:PUBLIC_ALGOLIA_APP_ID="$PUBLIC_ALGOLIA_APP_ID" \
   --opt build-arg:PUBLIC_ALGOLIA_SEARCH_API_KEY="$PUBLIC_ALGOLIA_SEARCH_API_KEY" \
   --opt build-arg:PUBLIC_ALGOLIA_INDEX_NAME="$PUBLIC_ALGOLIA_INDEX_NAME" \
+  --opt build-arg:SITE_URL="$SITE_URL" \
   --export-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder" \
   --import-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder"
