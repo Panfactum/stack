@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="aws_s3_public_website" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_s3_public_website" status="beta" type="submodule" />
+<ModuleHeader name="aws_s3_public_website" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_s3_public_website" status="beta" type="submodule"/>
 
 # Public Files Hosted in S3 Bucket
 
@@ -13,20 +12,38 @@ public URL. The URL for each file is `https://{var.domain}/path/to/file/in/bucke
 
 Under the hood, this module passes most arguments to either
 
-* `aws_cdn` ([docs](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn)); or
-* `aws_s3_private_bucket` ([docs](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket))
+- `aws_cdn` ([docs](/docs/edge/reference/infrastructure-modules/submodule/aws/aws\_cdn)); or
+- `aws_s3_private_bucket` ([docs](/docs/edge/reference/infrastructure-modules/submodule/aws/aws\_s3\_private\_bucket))
 
 so see the documentation for those modules for more information about various input settings.
+
+## Usage
+
+### Default Error Pages
+
+Often you will want to have a page to load if a client requests an asset not found in the S3 bucket. To configure
+the page that gets loaded, set the `not_found_path` input variable. It requires an absolute path from the root of the bucket.
+
+### Re-routing to Default Files
+
+Often you will want to re-route requests from file-less paths
+(e.g., `/some/page`) to paths for a default file in the corresponding folders (e.g., `/some/page/index.html`).
+
+The `default_file` input allows you to specify the filename that requests will be re-routed to (e.g., `/some/page/` -> `/some/page/${var.default_file}`.
+
+By default, this re-routing occurs for all requests with paths that do not contain a `.`.
+To instead only re-route if the path is to a directory or has a trailing slash (e.g., `/some/page/`),
+set `default_file_strict` to `false`.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -142,6 +159,22 @@ object({
 
 Default: `{}`
 
+### default\_file
+
+Description: A default file name to use when no file is specified (/some/file/ => /some/file/index.html). If this is '', no default file extension will be applied.
+
+Type: `string`
+
+Default: `"index.html"`
+
+### default\_file\_strict
+
+Description: Iff true, then all requests with paths that do not contain a `.` will have the `default_file` appended.
+
+Type: `bool`
+
+Default: `true`
+
 ### expire\_after\_days
 
 Description: Whether objects older than indicated days should be deleted. (0 to disable)
@@ -214,9 +247,17 @@ Type: `number`
 
 Default: `0`
 
+### not\_found\_path
+
+Description: The bucket path to return when the HTTP request path isn't found in the S3 bucket
+
+Type: `string`
+
+Default: `"/404.html"`
+
 ### path\_match\_behaviors
 
-Description: Similar to default\_cache\_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '\*.jpg').
+Description: Similar to default\_cache\_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '*.jpg').
 
 Type:
 
@@ -256,6 +297,21 @@ Description: The price class for the CDN. Must be one of: PriceClass\_All, Price
 Type: `string`
 
 Default: `"PriceClass_100"`
+
+### rewrite\_rules
+
+Description: Rewrite rules to add for the path resolution
+
+Type:
+
+```hcl
+list(object({
+    match   = string
+    rewrite = string
+  }))
+```
+
+Default: `[]`
 
 ### timed\_transitions\_enabled
 

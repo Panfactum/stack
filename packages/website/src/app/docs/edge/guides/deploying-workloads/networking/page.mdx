@@ -84,9 +84,8 @@ configuration toggles you should be aware of:
   will disconnect the pod from the service mesh and reduce your operational security, but it will allow network unrestricted
   network traffic.
 
-* If the pods in the `linkerd` namespace go down, network communication in the cluster will begin to degrade as the
-  service mesh requires active controllers to manage and distribute network updates. This should never occur in the Panfactum
-  Stack when `enhanced_ha_enabled` is set to `true` for the `kube_linkerd` module.
+* If the pods in the `linkerd` namespace go down for a prolonged period (> 10 minutes), network communication in the cluster will begin to degrade as the
+  service mesh requires active controllers to manage and distribute network updates.
 
 ## Network Policies
 

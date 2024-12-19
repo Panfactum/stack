@@ -1,17 +1,21 @@
 import MarkdownImage from "@/components/markdown/MarkdownImage";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 import natImg from './nat.jpg'
 import vpcImg from './vpc.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
+
 # AWS Networking
 
 ## Objective
 
-Deploy the core AWS networking primitives including your [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
-and [Route 53 Hosted Zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html).
+Deploy the core AWS networking infrastructure such as the [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
+that will contain all of your deployed resources.
 
-## A Quick Note
+If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/edge/concepts/networking/aws-primitives) before proceeding.
+
+<MarkdownAlert severity="info">
 
 Up to now, we have focused on setting up **all** environments in each section. Moving forward,
 this guide will focus on setting up infrastructure for a **single** environment at a time. We recommend
@@ -20,83 +24,41 @@ starting with your `production` environment and then returning here for addition
 Additionally, unless otherwise specified, the following sections of this guide **only** apply to environments that will be hosting Kubernetes clusters.
 Those that do not host live infrastructure (e.g., `management`) do not need much further setup.
 
-## Background
+</MarkdownAlert>
 
-If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/edge/concepts/networking/aws-primitives) before proceeding.
+## Choose Your SLA Target
+
+When using Panfactum, you will need to choose an [SLA target level](/docs/edge/guides/deploying-workloads/high-availability#sla-levels) when deploying each environment. The configured SLA
+target changes how Panfactum modules behave. Higher targets will improve uptime but also increase your infrastructure
+costs.
+
+We provide three different SLA targets:
+
+- **Level 1:** 99.9% uptime (< 45 minutes of downtime / month) -- Lowest cost
+- **Level 2:** 99.99% uptime (< 5 minutes of downtime / month) -- Roughly 2x the cost of level 1
+- **Level 3:** 99.999% uptime (< 30 seconds of downtime / month) -- Roughly 1.5x the cost of level 2
+
+We recommend level 1 for test / development environments and level 2 or above for environments running live workloads. The
+default value is level 3.
+
+To choose a level, set the [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#metadata)
+`sla_target` in your environment's `environment.yaml`. This overrides the default SLA level for all modules
+deployed in that environment. [^91]
+
+[^91]: The `sla_target` can still be overwritten at more specific scopes such as regions or even on a per-module basis. For
+more information on setting Terragrunt variables, see [the reference docs](/docs/edge/reference/configuration/terragrunt-variables#metadata).
 
 ## Create your VPC
 
-We will use the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
+We provide an [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
-
-### Choose your CIDR Blocks and Subnets
-
-One of the most important decision that you make throughout this entire guide
-is deciding your CIDR blocks for subnet setup. This is very difficult to change later
-and will usually require redeploying your entire VPC and all the resources it contains.
-
-We *strongly* recommend choosing the largest possible CIDR block for your VPC: `10.0.0/16`.
-You want to ensure that you have *at least* 100 IPs available in each public subnet and 1,000 IPs available
-in each private / isolated subnet. Choosing a large VPC CIDR gives you the most flexibility. [^1]
-
-[^1]: If you need to choose a smaller block for some reason
-    (e.g., [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)),
-    that is completely fine, but you will want to ensure that it isn't too small. However, a
-    hard lower limit should be a `/19` network which would provide about 8,192 ($2^{32-19}$) IP addresses.
-
-We also *strongly* recommend that you set up *at least* three of each [subnet type](/docs/edge/concepts/networking/aws-primitives) (nine total).
-This allows you to have one subnet type in at least three availability zones which is required to achieve a highly available setup.
-
-More specifically, we recommend you use the following subnet configuration): [^2] [^3]
-
-| Name         | Type     | Availability Zone | CIDR            | Available IPs |
-| :----------- | :------- | :---------------: | :-------------- | :------------ |
-| `PUBLIC_A`   | Public   |         A         | `10.0.0.0/24`   | 254           |
-| `PUBLIC_B`   | Public   |         B         | `10.0.1.0/24`   | 254           |
-| `PUBLIC_C`   | Public   |         C         | `10.0.2.0/24`   | 254           |
-| `PRIVATE_A`  | Private  |         A         | `10.0.64.0/18`  | 16,382        |
-| `PRIVATE_B`  | Private  |         B         | `10.0.128.0/18` | 16,382        |
-| `PRIVATE_C`  | Private  |         C         | `10.0.192.0/18` | 16,382        |
-| `ISOLATED_A` | Isolated |         A         | `10.0.16.0/20`  | 4,094         |
-| `ISOLATED_B` | Isolated |         B         | `10.0.32.0/20`  | 4,094         |
-| `ISOLATED_C` | Isolated |         C         | `10.0.48.0/20`  | 4,094         |
-| N/A          | Reserved |        N/A        | `10.0.3.0/24`   | 254           |
-| N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
-| N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
-
-[^2]: The public subnets are small because we will only deploy a handful of resources that can be directly
-    reached from the public internet (e.g., load balancers). The private subnets are the largest because that is
-    where the vast majority of the Kubernetes workloads will run.
-
-[^3]: We reserve a few CIDR ranges so that you can
-    provision extra subnets in the future should you need to. This can be an extremely helpful escape hatch that prevents
-    you from needing to mutate existing subnets (causing a service disruption).
-
-If you are choosing a different network layout, we recommend [this site](https://www.davidc.net/sites/default/subnets/subnets.html)
-for helping to divide your network.
-
-### Understanding NAT
-
-If you are unfamiliar with NAT, you should stop now to review the [NAT concept documentation](/docs/edge/concepts/networking/nat).
-
-NAT is the one component of the VPC configuration that we have enhanced beyond the typical AWS-recommended setup.
-
-Specifically, we do *NOT* use [AWS NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) by default. They are far
-too expensive for behavior that should ultimately be available for free (and is in other cloud providers). For many organizations,
-NAT Gateway costs alone can produce 10-50% of total AWS spend.
-
-Instead, we deploy a Panfactum-enhanced version of the [fck-nat project](https://github.com/AndrewGuenther/fck-nat). Using this
-pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and reduces the costs of NAT by over 90%.
-
-See the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) documentation for more details and to decide if it is right for you
-(it probably is).
 
 ### Deploy the AWS VPC Module
 
 We will now deploy the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
 
-1. Set up a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
+1. Create a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
 2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl). Replace
    the subnet configuration with your chosen settings.
@@ -105,16 +67,24 @@ We will now deploy the [aws\_vpc](/docs/edge/reference/infrastructure-modules/di
 
 4. Run `terragrunt apply`.
 
-5. Ensure that your VPC looks similar to the following:
+5. Ensure that your VPC looks similar to the following: [^80]
 
    <MarkdownImage src={vpcImg} alt="VPC viewed from the AWS web console" />
 
-6. Ensure that your NAT nodes are running and healthy:
+6. Ensure that your [NAT nodes](/docs/edge/concepts/networking/nat) are running and healthy:
 
    <MarkdownImage src={natImg} alt="NAT nodes viewed from the AWS web console" />
 
    Note that each node should have a Public IPv4 address which should match its [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html).
    All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
+
+<MarkdownAlert severity="warning">
+    If you deviate from the default settings for the [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module,
+    you will need to follow the instructions inside the module documentation for further instructions on how to configure
+    AWS networking to support Panfactum infrastructure.
+</MarkdownAlert>
+
+[^80]: If your `sla_target` is `1`, then the resources will be deployed in a single AZ. Additionally, there will be fewer subnets and NAT instances than shown below.
 
 ### Test Connectivity
 

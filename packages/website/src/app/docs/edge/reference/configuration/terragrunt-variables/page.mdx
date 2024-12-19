@@ -79,13 +79,14 @@ files (or their `*.user.yaml` counterparts) inside the environments directory.
 
 ### Metadata
 
-Used for consistency across labels and tags.
+Sets properties that will impact all Panfactum modules in the module tree.
 
-| Variable      | Type        | Description                                                                  | Recommended File   |
-| :------------ | :---------- | :--------------------------------------------------------------------------- | :----------------- |
-| `environment` | string      | The name of the environment                                                  | `environment.yaml` |
-| `region`      | string      | The name of the region                                                       | `region.yaml`      |
-| `extra_tags`  | map(string) | An object containing extra tags to add to all resources in the current scope | Any                |
+| Variable      | Type                      | Description                                                                                                                                                                                            | Recommended File   |
+|:--------------|:--------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|
+| `environment` | string                    | The name of the environment. Used for descriptions and tags.                                                                                                                                           | `environment.yaml` |
+| `region`      | string                    | The name of the region. Used for descriptions and tags.                                                                                                                                                | `region.yaml`      |
+| `sla_target`  | number (`1`, `2`, or `3`) | Sets the desired [SLA Level](https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability). The defaults for Panfactum modules will be automatically adjusted based on the SLA target. Defaults to `3`. | `environment.yaml` |
+| `extra_tags`  | map(string)               | An object containing extra tags to add to all resources in the current scope                                                                                                                           | Any                |
 
 ### Inputs
 

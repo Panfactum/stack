@@ -3,61 +3,150 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="aws_vpc" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_vpc" status="stable" type="direct" />
+<ModuleHeader name="aws_vpc" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_vpc" status="stable" type="direct"/>
 
 # AWS Virtual Private Cloud (VPC)
 
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 This module configures the following infrastructure resources for a Virtual Private Cloud:
 
-* Establishes a [VPC](https://aws.amazon.com/vpc/)
+- Establishes a [VPC](https://aws.amazon.com/vpc/)
 
-* Deploys [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) with associated [CIDR reservations](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-cidr-reservation.html) and [Route tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
+- Deploys [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) with associated [CIDR reservations](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-cidr-reservation.html) and [Route tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
 
-* [NAT](https://en.wikipedia.org/wiki/Network_address_translation) instances with static [Elastic IP](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html)
+- [NAT](https://en.wikipedia.org/wiki/Network_address_translation) instances with static [Elastic IP](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html)
   addresses associated and mapped correctly.
 
-* An [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow resources that get public IPs in the VPC to be accessible from the internet.
+- An [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow resources that get public IPs in the VPC to be accessible from the internet.
 
-* [VPC peering](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html) as required with resources outside the VPC.
+- [VPC peering](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-peering.html) as required with resources outside the VPC.
 
-* Full [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) with appropriate retention and tiering for compliance and cost management.
+- Full [VPC Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html) with appropriate retention and tiering for compliance and cost management.
 
-* An [S3 Gateway endpoint](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) for free network
+- An [S3 Gateway endpoint](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) for free network
   traffic to/from AWS S3
+
+## Usage
+
+### CIDR Blocks and Subnets
+
+A critical decision for this module is deciding your CIDR blocks for subnet setup. This is very difficult to change later
+and will usually require redeploying your entire VPC and all the resources it contains.
+
+We *strongly* recommend choosing the largest possible CIDR block for your VPC: `10.0.0/16` (the default for this module).
+You want to ensure that you have *at least* 100 IPs available in each public subnet and 1,000 IPs available
+in each private / isolated subnet. Choosing a large VPC CIDR gives you the most flexibility. [^1]
+
+[^1]: If you need to choose a smaller block for some reason
+(e.g., [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html)),
+that is completely fine, but you will want to ensure that it isn't too small. However, a
+hard lower limit should be a `/19` network which would provide about 8,192 ($2^{32-19}$) IP addresses.
+
+Iff you use the default CIDR of `10.0.0/16`, your subnets will be automatically configured as follows: [^2] [^3]
+
+[^2]: The public subnets are small because we will only deploy a handful of resources that can be directly
+reached from the public internet (e.g., load balancers). The private subnets are the largest because that is
+where the vast majority of the Kubernetes workloads will run.
+
+[^3]: We reserve a few CIDR ranges so that you can
+provision extra subnets in the future should you need to. This can be an extremely helpful escape hatch that prevents
+you from needing to mutate existing subnets (causing a service disruption).
+
+#### SLA Level 1 [^5]
+
+| Name         | Type     | Availability Zone | CIDR            | Available IPs |
+|:-------------|:---------|:-----------------:|:----------------|:--------------|
+| `PUBLIC_A`   | Public   |         A         | `10.0.0.0/24`   | 254           |
+| `PUBLIC_B`   | Public   |         B         | `10.0.1.0/24`   | 254           |
+| N/A          | Reserved |        N/A        | `10.0.2.0/24`   | 254           |
+| `PRIVATE_A`  | Private  |         A         | `10.0.64.0/18`  | 16,382        |
+| N/A          | Reserved |        N/A        | `10.0.128.0/18` | 16,382        |
+| N/A          | Reserved |        N/A        | `10.0.192.0/18` | 16,382        |
+| `ISOLATED_A` | Isolated |         A         | `10.0.16.0/20`  | 4,094         |
+| N/A          | Reserved |        N/A        | `10.0.32.0/20`  | 4,094         |
+| N/A          | Reserved |        N/A        | `10.0.48.0/20`  | 4,094         |
+| N/A          | Reserved |        N/A        | `10.0.3.0/24`   | 254           |
+| N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
+| N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
+
+*We recommend the above _Reserved_ CIDR blocks in case you want upgrade your SLA target in the future*.
+
+#### SLA Level 2+
+
+| Name         | Type     | Availability Zone | CIDR            | Available IPs |
+| :----------- | :------- | :---------------: | :-------------- | :------------ |
+| `PUBLIC_A`   | Public   |         A         | `10.0.0.0/24`   | 254           |
+| `PUBLIC_B`   | Public   |         B         | `10.0.1.0/24`   | 254           |
+| `PUBLIC_C`   | Public   |         C         | `10.0.2.0/24`   | 254           |
+| `PRIVATE_A`  | Private  |         A         | `10.0.64.0/18`  | 16,382        |
+| `PRIVATE_B`  | Private  |         B         | `10.0.128.0/18` | 16,382        |
+| `PRIVATE_C`  | Private  |         C         | `10.0.192.0/18` | 16,382        |
+| `ISOLATED_A` | Isolated |         A         | `10.0.16.0/20`  | 4,094         |
+| `ISOLATED_B` | Isolated |         B         | `10.0.32.0/20`  | 4,094         |
+| `ISOLATED_C` | Isolated |         C         | `10.0.48.0/20`  | 4,094         |
+| N/A          | Reserved |        N/A        | `10.0.3.0/24`   | 254           |
+| N/A          | Reserved |        N/A        | `10.0.4.0/22`   | 1022          |
+| N/A          | Reserved |        N/A        | `10.0.8.0/21`   | 2046          |
+
+[^5]: For more information on SLA levels, see this [guide](/docs/edge/guides/deploying-workloads/high-availability).
+
+#### Custom Network Layout
+
+If you are choosing a different network layout, we recommend [this site](https://www.davidc.net/sites/default/subnets/subnets.html)
+for helping to divide your network.
+
+To configure the network, you will need to manually specify both the `subnets` and `nat_associations` inputs.
+
+<MarkdownAlert severity="warning">
+    You need *at least* one of each [subnet type](/docs/edge/concepts/networking/aws-primitives) in at least three availability zones
+    for a highly available deployment (SLA target >= 2).
+
+    You need *at least* two public subnets regardless of the SLA target in order to deploy Panfactum (EKS limitation).
+</MarkdownAlert>
+
+### Network Address Translation (NAT)
+
+If you are unfamiliar with NAT, you should review the [NAT concept documentation](/docs/edge/concepts/networking/nat).
+
+NAT is the one component of the VPC configuration that we have enhanced beyond the typical AWS-recommended setup.
+
+Specifically, we do *NOT* use [AWS NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) by default. They are far
+too expensive for behavior that should ultimately be available for free (and is in other cloud providers). For many organizations,
+NAT Gateway costs alone can produce 10-50% of total AWS spend.
+
+Instead, we deploy a Panfactum-enhanced version of the [fck-nat project](https://github.com/AndrewGuenther/fck-nat). Using this
+pattern, our module launches self-hosted NAT nodes in EC2 autoscaling groups and reduces the costs of NAT by over 90%.
+
+This setup does come with some limitations:
+
+- _Outbound_ network bandwidth is limited to 5 Gbit/s per AZ (vs 25 Gbit/s for AWS NAT Gateways)
+- _Outbound_ network connectivity in each AZ is impacted by the health of a single EC2 node
+
+In practice, these limitations rarely impact an organization, especially as they only
+impact _outbound_ connections (not inbound traffic):
+
+- If you need > 5 Gbit/s of outbound public internet traffic, you would usually establish
+  a private network tunnel to the destination to improve throughput beyond even 25 Gbit/s.
+- The EC2 nodes are _extremely_ stable as NAT only relies on functionality that is
+  native to the linux kernel (we have never seen a NAT node crash).
+- The primary downside  is that during NAT node upgrades,
+  outbound network connectivity will be temporarily
+  suspended. This typically manifests as a brief (1-2 min) delay in outbound traffic. Upgrades
+  are typically only necessary every 6 months, so you can still easily achieve high uptime
+  in this configuration.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
-
-### subnets
-
-Description: Subnet configuration
-
-Type:
-
-```hcl
-map(object({
-    az         = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
-    cidr_block = string                    # Subnet IP block
-    public     = bool                      # If subnet is routable to and from the public internet
-    extra_tags = optional(map(string), {}) # Additional tags for the subnet
-  }))
-```
-
-### vpc\_cidr
-
-Description: The main CIDR range for the VPC.
-
-Type: `string`
 
 ### vpc\_name
 
@@ -76,6 +165,32 @@ Description: A mapping of NATed egress network traffic between subnets. Keys rep
 Type: `map(string)`
 
 Default: `{}`
+
+### subnets
+
+Description: Subnet configuration
+
+Type:
+
+```hcl
+map(object({
+    az          = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
+    cidr_block  = string                    # Subnet IP block
+    public      = bool                      # If subnet is routable to and from the public internet
+    extra_tags  = optional(map(string), {}) # Additional tags for the subnet
+    description = optional(string)          # A description of the subnet's purpose
+  }))
+```
+
+Default: `{}`
+
+### vpc\_cidr
+
+Description: The main CIDR range for the VPC.
+
+Type: `string`
+
+Default: `"10.0.0.0/16"`
 
 ### vpc\_extra\_tags
 
@@ -141,50 +256,9 @@ Description: n/a
 
 Description: n/a
 
-## Usage
+## Maintainer Notes
 
-### NAT
-
-Our NAT implementation is a customized version
-of the [fck-nat](https://fck-nat.dev/stable/)
-project.
-
-This means that instead of using an [AWS NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html), we perform NAT through
-EC2 instances deployed into autoscaling groups.
-
-Why? NAT Gateways are *extremely* expensive for what they do. For many organizations,
-this single infrastructure component can be 10-50% of total AWS spend. Because NAT
-is trivial to implement in linux, we can reduce this spend by over 90% by implementing
-it ourselves as we do in this module.
-
-While we take inspiration from the fck-nat project, we enhance their scripts to also
-include assigning static public IPs. This is important in many environments for
-IP whitelisting purposes.
-
-This setup does come with some limitations:
-
-* *Outbound* network bandwidth is limited to 5 Gbit/s per AZ (vs 25 Gbit/s for AWS NAT Gateways)
-* *Outbound* network connectivity in each AZ is impacted by the health of a single EC2 node
-
-In practice, these limitations rarely impact an organization, especially as they only
-impact *outbound* connections (not inbound traffic):
-
-* If you need > 5 Gbit/s of outbound public internet traffic, you would usually establish
-  a private network tunnel to the destination to improve throughput beyond even 25 Gbit/s.
-* The EC2 nodes are *extremely* stable as NAT only relies on functionality that is
-  native to the linux kernel (we have never seen a NAT node crash).
-* The primary downside  is that during NAT node upgrades,
-  outbound network connectivity will be temporarily
-  suspended. This typically manifests as a \~2 minute delay in outbound traffic. Upgrades
-  are typically only necessary every 6 months, so you can still easily achieve 99.99% uptime
-  in this configuration.
-
-## Future Enhancements
-
-### NAT
-
-* [Reduce fck-nat downtime during node upgrades](https://github.com/Panfactum/stack/issues/12)
-* [Allow using AWS NAT Gateway instead of fck-nat](https://github.com/Panfactum/stack/issues/13)
+None.
 
 {/* eslint-enable import/order */}
 

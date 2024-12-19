@@ -3,29 +3,28 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_scheduler" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_scheduler" status="stable" type="direct" />
+<ModuleHeader name="kube_scheduler" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_scheduler" status="stable" type="direct"/>
 
 # Kubernetes Scheduler
 
 An alternative Kubernetes scheduler used to optimize resource utilization
 in the Panfactum stack.
 
-See this article for [motivation.](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money?utm_medium=social\&utm_source=twitter\&utm_campaign=blog)
+See this article for [motivation.](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money?utm_medium=social&utm_source=twitter&utm_campaign=blog)
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -34,14 +33,6 @@ No required inputs.
 ## Optional Inputs
 
 The following input variables are optional (have default values):
-
-### enhanced\_ha\_enabled
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
 
 ### log\_verbosity
 
@@ -66,6 +57,14 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `true`
+
+### sla\_target
+
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+
+Type: `number`
+
+Default: `3`
 
 ### vpa\_enabled
 
