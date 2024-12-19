@@ -3,6 +3,7 @@ import { navigate } from 'astro:transitions/client'
 import * as React from 'react'
 import { type ReactNode, useState } from 'react'
 import {
+  buildBreadcrumbs,
   stripBasePath,
   type VersionedSection,
 } from '@/components/documentation/DocsSidebar/SideNavVersions.ts'
@@ -106,7 +107,9 @@ export function DocsSidebar({
           <CollapsibleTrigger asChild>
             <SidebarMenuButtonTreeItem asChild isActive={isActive}>
               <div>
-                <span className="font-semibold">{text}</span>
+                <span aria-selected={isActive} className="font-semibold">
+                  {text}
+                </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -144,6 +147,7 @@ export function DocsSidebar({
                         href={sectionPath + el.path}
                         className="text-md"
                         onClick={() => setOpenMobile(false)}
+                        aria-selected={isActive}
                       >
                         {el.text}
                       </a>
@@ -163,23 +167,6 @@ export function DocsSidebar({
     } else {
       setVersion(version)
     }
-  }
-
-  function buildBreadcrumbs(
-    sections: SideNavSection[],
-    path: string,
-  ): string[] {
-    for (const section of sections) {
-      if (path.startsWith(section.path)) {
-        if (section.sub) {
-          const newPath = path.substring(section.path.length)
-          return [section.text].concat(buildBreadcrumbs(section.sub, newPath))
-        } else {
-          return [section.text]
-        }
-      }
-    }
-    return []
   }
 
   const strippedPath = stripBasePath(currentPath)
@@ -237,7 +224,12 @@ export function DocsSidebar({
                     {item.icon ? iconMapping[item.icon]() : null}
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">{item.text}</span>
+                    <span
+                      aria-selected={mainNavigationLinkActive(item.path)}
+                      className="font-semibold"
+                    >
+                      {item.text}
+                    </span>
                   </div>
                 </SavedLink>
               </SidebarMenuButton>
@@ -272,6 +264,7 @@ export function DocsSidebar({
                           href={sectionBasePath + section.path}
                           onClick={() => setOpenMobile(false)}
                           className="font-medium"
+                          aria-selected={currentPath.includes(section.path)}
                         >
                           {section.text}
                         </a>

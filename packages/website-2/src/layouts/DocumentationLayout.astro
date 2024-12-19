@@ -4,6 +4,7 @@ import { ClientRouter } from 'astro:transitions'
 import { HeaderNav } from '@/components/layout/header-nav'
 import { Suspense } from 'react'
 import { DocsSidebar } from '@/components/documentation/DocsSidebar'
+import { buildBreadCrumbRoot } from '../components/documentation/DocsSidebar/SideNavVersions'
 
 const pathname = new URL(Astro.request.url).pathname
 const hasBorder = Astro.props.hasBorder ? Astro.props.hasBorder : false
@@ -26,6 +27,8 @@ function depthPadding(depth: number) {
     return 'pl-5xl'
   }
 }
+
+const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
 ---
 
 <html lang="en">
@@ -76,9 +79,16 @@ function depthPadding(depth: number) {
       class="mx-auto flex flex-col lg:flex-row items-start h-full z-content-fixed-navigation"
       style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
     >
-      <div
+      <nav
         class="pt-[80px] lg:pt-0 lg:fixed lg:top-[80px] h-auto lg:h-[calc(100vh-80px)] doc-nav flex-none w-full lg:w-[324px]"
       >
+        <aside class="hidden crumbs">
+          {
+            breadcrumbs.map((crumb, index) => (
+              <span class="text-black">{crumb}</span>
+            ))
+          }
+        </aside>
         <Suspense>
           <DocsSidebar
             client:only
@@ -89,8 +99,8 @@ function depthPadding(depth: number) {
         </Suspense>
 
         <script src="./persist-sidebar-scroll.ts"></script>
-      </div>
-      <article
+      </nav>
+      <div
         style={{ '--sidebar-width': headings ? 0 : undefined }}
         class={`w-full py-[24px] overflow-auto h-full pl-0 lg:pl-[324px] pt-16 sm:pt-8 lg:pt-[80px]`}
       >
@@ -100,7 +110,7 @@ function depthPadding(depth: number) {
         >
           <slot />
         </article>
-      </article>
+      </div>
 
       <div
         class="article-nav-links hidden xl:block min-w-[300px] max-w-[312px] flex-none pt-[80px] sticky top-[0px]"

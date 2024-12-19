@@ -30,7 +30,9 @@ const MarkdownAlert: React.FC<AlertProps> = ({
 }) => {
   return (
     <div className={cn(alertVariants({ severity }), className)}>
-      <div className={`w-full`}>{props.children}</div>
+      <div className={`w-full`} role="alert">
+        {props.children}
+      </div>
     </div>
   )
 }

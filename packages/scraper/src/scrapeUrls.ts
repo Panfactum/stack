@@ -21,9 +21,10 @@ const { tmpDir } = consts()
 console.log('tmpDir', tmpDir)
 
 export async function scrapeUrls (urls: string[], useCache = false): Promise<ScrapedUrl[]> {
-  if (useCache && fs.existsSync(`${tmpDir}/scraped.json`)) {
+  const cachePath = `${tmpDir}/scraped.json`
+  if (useCache && fs.existsSync(cachePath)) {
     console.log('existing scraped.json found and using cache')
-    const jsonFile = fs.readFileSync('scraped.json')
+    const jsonFile = fs.readFileSync(cachePath)
     return JSON.parse(jsonFile.toString())
   }
 

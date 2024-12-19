@@ -35,3 +35,38 @@ export function stripBasePath(currentPath: string) {
 
   return { path, isVersionedPath, version: isVersionedPath ? version : null }
 }
+
+export function buildBreadcrumbs(
+  sections: SideNavSection[],
+  path: string,
+): string[] {
+  for (const section of sections) {
+    if (path.startsWith(section.path)) {
+      if (section.sub) {
+        const newPath = path.substring(section.path.length)
+        return [section.text].concat(buildBreadcrumbs(section.sub, newPath))
+      } else {
+        return [section.text]
+      }
+    }
+  }
+  return []
+}
+
+export function buildBreadCrumbRoot(
+  versionedSections: VersionedSection,
+  currentPath: string,
+) {
+  const [_, docRoot, version, ...pathArr] = currentPath.split('/')
+  const isVersionedPath = isValidVersion(version)
+
+  const path = isVersionedPath
+    ? pathArr.join('/')
+    : [version, ...pathArr].join('/')
+
+  const sections = isVersionedPath
+    ? versionedSections[version as Versions]
+    : versionedSections[Versions.edge]
+
+  return buildBreadcrumbs(sections, '/' + path)
+}

@@ -92,7 +92,7 @@ function parseUrlContent (content: string): UrlContent[] {
   pageElement.childNodes.forEach((node) => {
     if (node instanceof HTMLElement) {
       const tagName = node.tagName.toLowerCase()
-      const isFootNotes = node.attributes['data-footnotes'] === 'true'
+      const isFootNotes = node.attributes['data-footnotes'] !== undefined
 
       if (tagName.startsWith('h') && tagName.length === 2) {
         if (currentSection) {
@@ -101,7 +101,7 @@ function parseUrlContent (content: string): UrlContent[] {
 
         const headingNumber = parseInt(<string>tagName[1])
         const anchorElement = node.querySelector('a[id]')
-        const sectionAnchor = anchorElement ? `#${anchorElement.getAttribute('id')}` : ''
+        const sectionAnchor = anchorElement ? `#${anchorElement.getAttribute('id')}` : node.getAttribute('id') ?? ''
         const headingText = node.textContent?.trim() ?? ''
 
         // Update the hierarchy
@@ -134,7 +134,7 @@ function parseUrlContent (content: string): UrlContent[] {
 
         const headingNumber = 2
         const anchorElement = node.querySelector('a[id]')
-        const sectionAnchor = anchorElement ? `#${anchorElement.getAttribute('id')}` : ''
+        const sectionAnchor = anchorElement ? `#${anchorElement.getAttribute('id')}` : node.getAttribute('id') ?? ''
         const headingText = 'Footnotes'
 
         // Update the hierarchy
@@ -173,7 +173,7 @@ function parseUrlContent (content: string): UrlContent[] {
           })
         } else if (node.querySelector('[role="alert"]')) {
           currentSection.content.push(stripHtml(node.textContent))
-        } else if (node.querySelector('[footnotes="true"]')) {
+        } else if (node.querySelector('[footnotes]')) {
           currentSection.content.push(stripHtml(node.textContent))
         } else if (node.querySelector('table')) {
           const records = node.querySelectorAll('table tbody tr')
