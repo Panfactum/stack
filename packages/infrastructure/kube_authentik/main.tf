@@ -27,7 +27,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.5"
+      version = "0.0.7"
     }
   }
 }
@@ -122,7 +122,7 @@ module "redis" {
   vpa_enabled                          = var.vpa_enabled
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.sla_target == 3
+  instance_type_anti_affinity_required = false // Not needed; a small chance of disruption is entirely fine
 }
 
 /***************************************

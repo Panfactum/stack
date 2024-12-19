@@ -22,7 +22,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.5"
+      version = "0.0.7"
     }
   }
 }
@@ -31,6 +31,7 @@ locals {
   customization_hash = md5(join("", [
     for filename in sort(fileset(path.module, "kustomize/*")) : filesha256("${path.module}/${filename}")
   ]))
+  sla_target = data.pf_metadata.metadata.sla_target
 }
 
 resource "random_id" "id" {
@@ -42,6 +43,8 @@ data "pf_kube_labels" "labels" {
   module = "kube_redis"
 }
 
+data "pf_metadata" "metadata" {}
+
 module "util" {
   source = "../kube_workload_utility"
 
@@ -52,7 +55,8 @@ module "util" {
   arm_nodes_enabled                    = var.arm_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required != null ? var.instance_type_anti_affinity_required : local.sla_target == 3
+  host_anti_affinity_required          = local.sla_target >= 2
   az_spread_required                   = true
   az_spread_preferred                  = true // stateful
   lifetime_evictions_enabled           = false
@@ -615,8 +619,12 @@ module "secrets_sync" {
     }
   }
 
-  vpa_enabled              = var.vpa_enabled
-  controller_nodes_enabled = true
+  vpa_enabled                          = var.vpa_enabled
+  controller_nodes_enabled             = true
+  instance_type_anti_affinity_required = false
+  host_anti_affinity_required          = false
+  az_spread_preferred                  = false
+  replicas                             = 1
 
   depends_on = [helm_release.redis]
 }

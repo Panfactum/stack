@@ -2,7 +2,7 @@
   description = "Local development utilities for working with the Panfactum stack";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/c0b1da36f7c34a7146501f684e9ebdf15d2bebf8";
+    nixpkgs.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     flake-utils.url = "github:numtide/flake-utils";
     kubeUtilsPkgsSrc.url = "github:NixOS/nixpkgs/0cb2fd7c59fed0cd82ef858cbcbdb552b9a33465";
     awsUtilsPkgsSrc.url = "github:NixOS/nixpkgs/566e53c2ad750c84f6d31f9ccb9d00f823165550";

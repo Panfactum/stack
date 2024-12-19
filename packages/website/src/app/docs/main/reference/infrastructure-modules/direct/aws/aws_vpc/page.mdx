@@ -29,7 +29,7 @@ This module configures the following infrastructure resources for a Virtual Priv
 
 ## Usage
 
-### Choose your CIDR Blocks and Subnets
+### CIDR Blocks and Subnets
 
 A critical decision for this module is deciding your CIDR blocks for subnet setup. This is very difficult to change later
 and will usually require redeploying your entire VPC and all the resources it contains.
@@ -142,7 +142,7 @@ The following providers are needed by this module:
 
 - [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -174,11 +174,11 @@ Type:
 
 ```hcl
 map(object({
-    az         = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
-    cidr_block = string                    # Subnet IP block
-    public     = bool                      # If subnet is routable to and from the public internet
-    extra_tags = optional(map(string), {}) # Additional tags for the subnet
-    description = optional(string)         # A description of the subnet's purpose
+    az          = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
+    cidr_block  = string                    # Subnet IP block
+    public      = bool                      # If subnet is routable to and from the public internet
+    extra_tags  = optional(map(string), {}) # Additional tags for the subnet
+    description = optional(string)          # A description of the subnet's purpose
   }))
 ```
 

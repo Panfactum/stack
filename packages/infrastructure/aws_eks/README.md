@@ -41,7 +41,7 @@ If you need to overwrite the default module behavior, you can specify `control_p
   Your node subnets **cannot** be changed without downtime in the future.
 </MarkdownAlert>
 
-Node subnets are the subnets within which your actual workloads will run once deployed to the Kubernetes clsuter.
+Node subnets are the subnets within which your actual workloads will run once deployed to the Kubernetes cluster.
 
 By default, the node subnets will be any subnet named `PRIVATE_A`, `PRIVATE_B`, or `PRIVATE_C` in the VPC indicated
 by the `vpc_id` input as these are the subnets created by the [aws_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.

@@ -128,9 +128,9 @@ variable "panfactum_scheduler_enabled" {
 }
 
 variable "instance_type_anti_affinity_required" {
-  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type"
+  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla_target == 3."
   type        = bool
-  default     = true
+  default     = null
 }
 
 variable "voluntary_disruptions_enabled" {

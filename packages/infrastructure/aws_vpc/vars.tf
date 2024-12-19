@@ -14,12 +14,27 @@ variable "subnets" {
     description = optional(string)          # A description of the subnet's purpose
   }))
   default = {}
+
+  validation {
+    condition     = alltrue([for subnet, config in var.subnets : provider::pf::cidr_count_hosts(config.cidr_block) >= 1000 || config.public])
+    error_message = "All non-public subnets must have a cidr_block that contains at least 1,000 IP addresses in order to work with Panfactum."
+  }
+
+  validation {
+    condition     = alltrue([for subnet, config in var.subnets : provider::pf::cidr_count_hosts(config.cidr_block) >= 100])
+    error_message = "All subnets must have a cidr_block that contains at least 100 IP addresses in order to work with Panfactum."
+  }
 }
 
 variable "vpc_cidr" {
   description = "The main CIDR range for the VPC."
   type        = string
   default     = "10.0.0.0/16"
+
+  validation {
+    condition     = provider::pf::cidr_count_hosts(var.vpc_cidr) > 8000
+    error_message = "The VPC CIDR range must contain at least 8,000 IP addresses in order to work with Panfactum."
+  }
 }
 
 variable "vpc_extra_tags" {

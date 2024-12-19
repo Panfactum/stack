@@ -13,6 +13,23 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## Unreleased
 
+### Breaking Changes
+
+* Introduces the concept of [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels).
+This makes it easier to (a) know what uptime you can expect from Panfactum deployments, and (b) make it easier to adjust the cost-to-availability
+tradeoff for entire subsections of the deployment.
+
+    This features comes with the following changes:
+
+    * Provides a new [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#metadata), `sla_target`, that can be used to set the target level for a particular scope (e.g., environment, region, module).
+    It defaults to `3`.
+    * The default behavior for Panfactum modules will now automatically adjust to the provided `sla_target`.
+    * The `enhanced_ha_enabled` input has been removed from all modules. The previous behavior
+    when `enhanced_ha_enabled` was set to `true` (the default) is now equivalent to setting `sla_target` to `3` (the default).
+
+* This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
+    * `pf`: 0.0.5 -> 0.0.7
+
 ### Added
 
 * Adds support for arbitrary path rewriting in [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),

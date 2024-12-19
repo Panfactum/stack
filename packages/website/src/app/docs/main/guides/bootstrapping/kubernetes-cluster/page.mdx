@@ -132,15 +132,6 @@ you need to override either the control plane or node group versions.
 Set `bootstrap_mode_enabled` to `true`. This will ensure your node count and type is sufficient to complete the
 bootstrapping guide. Once autoscaling is installed, this can be set to `false` to reduce resource usage.
 
-### Choose Cluster Availability Guarantees
-
-By default, all cluster components are deployed with very strong availability guarantees. Our target is 99.995% uptime.
-
-However, this comes at additional cost that is not necessary in all environments and deployment scenarios.
-
-The uptime guarantees can be slightly weakened to 99.9% by setting `extra_inputs.enhanced_ha_enabled` to `false` in your `region.yaml`
-like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml). This can save about \$50 / month.
-
 ### Deploy the Cluster
 
 You are now ready to run `terragrunt apply`.

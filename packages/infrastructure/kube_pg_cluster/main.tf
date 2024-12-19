@@ -26,7 +26,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.5"
+      version = "0.0.7"
     }
   }
 }
@@ -88,7 +88,7 @@ module "util_cluster" {
   arm_nodes_enabled                    = var.arm_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required || (var.burstable_nodes_enabled || var.spot_nodes_enabled)
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required || (var.burstable_nodes_enabled || var.spot_nodes_enabled) // Force override instance_type_anti_affinity_required if using disruptible nodes as this can lead to a crash loop if all nodes are terminated at once
   az_spread_required                   = true
   az_spread_preferred                  = true // stateful so always on
   lifetime_evictions_enabled           = false

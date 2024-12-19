@@ -211,7 +211,7 @@ The following providers are needed by this module:
 
 - [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 - [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
@@ -273,11 +273,11 @@ Default: `"20.5.0"`
 
 ### instance\_type\_anti\_affinity\_required
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target == 3.
 
 Type: `bool`
 
-Default: `true`
+Default: `null`
 
 ### lfu\_cache\_enabled
 

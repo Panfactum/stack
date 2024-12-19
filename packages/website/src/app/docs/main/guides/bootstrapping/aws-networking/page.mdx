@@ -13,7 +13,9 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 Deploy the core AWS networking infrastructure such as the [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
 that will contain all of your deployed resources.
 
-## A Quick Note
+If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/main/concepts/networking/aws-primitives) before proceeding.
+
+<MarkdownAlert severity="info">
 
 Up to now, we have focused on setting up **all** environments in each section. Moving forward,
 this guide will focus on setting up infrastructure for a **single** environment at a time. We recommend
@@ -22,23 +24,19 @@ starting with your `production` environment and then returning here for addition
 Additionally, unless otherwise specified, the following sections of this guide **only** apply to environments that will be hosting Kubernetes clusters.
 Those that do not host live infrastructure (e.g., `management`) do not need much further setup.
 
-## Background
-
-If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/main/concepts/networking/aws-primitives) before proceeding.
+</MarkdownAlert>
 
 ## Choose Your SLA Target
 
-When using Panfactum, you will need to choose an SLA target when deploying each environment. The configured SLA
-target changes how the deployed modules behave. Higher targets will improve uptime but increase your infrastructure
+When using Panfactum, you will need to choose an [SLA target level](/docs/main/guides/deploying-workloads/high-availability#sla-levels) when deploying each environment. The configured SLA
+target changes how Panfactum modules behave. Higher targets will improve uptime but also increase your infrastructure
 costs.
 
-We provide three different SLA targets: [^90]
+We provide three different SLA targets:
 
 - **Level 1:** 99.9% uptime (< 45 minutes of downtime / month) -- Lowest cost
 - **Level 2:** 99.99% uptime (< 5 minutes of downtime / month) -- Roughly 2x the cost of level 1
 - **Level 3:** 99.999% uptime (< 30 seconds of downtime / month) -- Roughly 1.5x the cost of level 2
-
-[^90]: You can read more about achieving uptime requirements for your workloads [here](/docs/main/guides/deploying-workloads/high-availability).
 
 We recommend level 1 for test / development environments and level 2 or above for environments running live workloads. The
 default value is level 3.
@@ -47,12 +45,12 @@ To choose a level, set the [Terragrunt variable](/docs/main/reference/configurat
 `sla_target` in your environment's `environment.yaml`. This overrides the default SLA level for all modules
 deployed in that environment. [^91]
 
-[^91]: The `sla_target` can still be overwritten at lower scopes such as regions or even on a per-module basis. For
+[^91]: The `sla_target` can still be overwritten at more specific scopes such as regions or even on a per-module basis. For
 more information on setting Terragrunt variables, see [the reference docs](/docs/main/reference/configuration/terragrunt-variables#metadata).
 
 ## Create your VPC
 
-We will use the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
+We provide an [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module to deploy the VPC.
 This includes not only the VPC but also configuration of subnets, routing tables, flow logs, etc.
 See the module reference docs for a more comprehensive overview.
 
@@ -60,7 +58,7 @@ See the module reference docs for a more comprehensive overview.
 
 We will now deploy the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module via terragrunt:
 
-1. Set up a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
+1. Create a new `aws_vpc` directory **in the primary region** for your environment (not `global`).
 
 2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl). Replace
    the subnet configuration with your chosen settings.
@@ -69,7 +67,7 @@ We will now deploy the [aws\_vpc](/docs/main/reference/infrastructure-modules/di
 
 4. Run `terragrunt apply`.
 
-5. Ensure that your VPC looks similar to the following:
+5. Ensure that your VPC looks similar to the following: [^80]
 
    <MarkdownImage src={vpcImg} alt="VPC viewed from the AWS web console" />
 
@@ -85,6 +83,8 @@ We will now deploy the [aws\_vpc](/docs/main/reference/infrastructure-modules/di
     you will need to follow the instructions inside the module documentation for further instructions on how to configure
     AWS networking to support Panfactum infrastructure.
 </MarkdownAlert>
+
+[^80]: If your `sla_target` is `1`, then the resources will be deployed in a single AZ. Additionally, there will be fewer subnets and NAT instances than shown below.
 
 ### Test Connectivity
 

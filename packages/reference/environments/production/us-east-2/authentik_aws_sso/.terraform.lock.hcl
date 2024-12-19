@@ -52,23 +52,23 @@ provider "registry.opentofu.org/goauthentik/authentik" {
 }
 
 provider "registry.opentofu.org/hashicorp/aws" {
-  version     = "5.81.0"
-  constraints = "5.81.0"
+  version     = "5.82.0"
+  constraints = "5.82.0"
   hashes = [
-    "h1:7mo2SoOo277YMcE7wFScaaI1zkzao7OWu3mfEqWjL+8=",
-    "h1:7u9iQx2dxJWCIYX/Gj4UxbsqiJht2iPFs/TZ+Qy3KXM=",
-    "h1:gffFQb3rOGnNkugQlXbhRXMKi/TtYLAzbPk1WfQlzck=",
-    "h1:ird967uf44WBZ0u9rMlOdO4nCKJZMlUknLcD3lz4dWs=",
-    "zh:0d0c7cc1e16b16cd00ab36de35038162e1871b51a902e9016d08c55c9fc4de35",
-    "zh:0e4b8c6e46999015292ab4fb9a430ab00107a276f25243552cde66db53c58661",
-    "zh:30041314cdd4e877d75ee8c9d36aecfca094e276f7a3d8150f929cf5169b2fa5",
-    "zh:5ebd248ce3e5a7ef9cc2f41499668f182146325e10ea305c70469122f6161a13",
-    "zh:888a69d371373b418549e03f5922becb2b8074cb463552ecfa65f30455708db0",
-    "zh:8a21bb7fe60383ff5ca9db8630a287e41fd520d2514c08874a16dc74500fadd7",
-    "zh:9c4663dcbfe58544642d70ebfdc6c5fa91592ff04164f77c655e32e6024483e2",
-    "zh:b322873f1209443a8407d5f782d7d917de6a1391239dbd0e7f809ce6507bed76",
-    "zh:b7c9d5ca14b818b5932ac58a490646a425ebc41b33d149090aa5f48d1ca35c99",
-    "zh:e76cd202b03749f3082b0cbe849fd2e731cf3f9a6aa994d2d629602c3aede36c",
+    "h1:3ciyoYyQXydWJVMM3DOuSfw49U+iBmsoejxoC1nP9pQ=",
+    "h1:U86youC2fZKVgIsRskzlTfrUgxYT0rJx+aKUQYqfKW8=",
+    "h1:Wx5t+wX6z/6N8DzGMRu4MytH/X/kLToc+nYp468lLZU=",
+    "h1:cjOh730j+ofM9sonlRJvxWg3LUq65vYsNDtjBdQz9r0=",
+    "zh:0ed6d69d1d2c1a2fd4ba58a6704bb57e22a22639717acb38e021c58f17e65033",
+    "zh:28a693e995e6d45a694c24e9b09710b6e69dcdf17702b4abfb625af62f4d028c",
+    "zh:3398a683f18f2e2354857b14ecc75043248e688dc39e17ce19a54781f8c9db18",
+    "zh:3c85e969be5279254cbb4f20e7a98606baf426dd1f64551223859b56c4e5a5a5",
+    "zh:4c60c44d064ad6a1692ba7f2562c9e142cdfd08cd06def1ccbc199e83844894b",
+    "zh:6ab6a6c6b9f4526b3f2c482b31b4a648b76d04649dccf4bf01a06e88e64c9154",
+    "zh:b3810c116d4d6cdc1e1cf1cffc835ef2107bc8825568f8ac5584001c670ed763",
+    "zh:b85d04a7f4ae986e230b15c6a2f77b33cda5d4ed7d33fa0f201187ba1ae7ef3c",
+    "zh:c77c3dd39b254ba0987c5ce0220bef7b3ba0ac2fbd5c084341a7f0f8ccd4188f",
+    "zh:d0d60cde9cb8fb4d72afda5ade760a2690b3b3daa3450520b7ef00d91a8870ce",
   ]
 }
 

@@ -15,7 +15,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.5"
+      version = "0.0.7"
     }
   }
 }

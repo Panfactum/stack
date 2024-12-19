@@ -319,7 +319,6 @@ This is *strongly* discouraged. If limiting any and all potential disruptions is
 - Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
 - Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
 - Connect through PgBouncer with `pgbouncer_pool_mode` set to `transaction`
-- Set `enhanced_ha_enabled` to `true`
 
 Note that the above configuration will significantly increase the costs of running PostgreSQL (2.5-5x) versus more
 flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.

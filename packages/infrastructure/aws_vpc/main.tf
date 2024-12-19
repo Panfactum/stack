@@ -8,7 +8,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.5"
+      version = "0.0.7"
     }
   }
 }
@@ -126,7 +126,6 @@ locals {
   subnets = length(keys(var.subnets)) == 0 && var.vpc_cidr == "10.0.0.0/16" ? (data.pf_metadata.metadata.sla_target == 1 ? local.default_subnets_single_az : local.default_subnets_multi_az) : var.subnets
 
   nat_subnets        = { for source, destination in local.nat_associations : destination => source }
-  nat_subnet_list    = tolist(toset(keys(local.nat_subnets)))
   peering_route_list = flatten([for subnet in keys(local.subnets) : [for label, config in var.vpc_peer_acceptances : merge({ subnet = subnet, vpc = label }, config)]])
   peering_routes     = { for peer_route in local.peering_route_list : "${peer_route.subnet}_${peer_route.vpc}" => peer_route }
   public_subnets     = { for name, subnet in local.subnets : name => subnet if subnet.public }

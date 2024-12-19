@@ -13,7 +13,7 @@ terraform {
     }
     pf = {
       source  = "panfactum/pf"
-      version = "0.0.5"
+      version = "0.0.7"
     }
   }
 }
@@ -113,21 +113,29 @@ resource "aws_eks_cluster" "cluster" {
   lifecycle {
     prevent_destroy = true
 
-    # precondition {
-    #   condition = provider::pf::cidr_contains(var.service_cidr, var.dns_service_ip)
-    #   error_message = "The dns_service_ip is not in the service_cidr range."
-    # }
-    # precondition {
-    #   condition = !provider::pf::cidrs_overlap([var.service_cidr, data.aws_vpc.vpc.cidr_block])
-    #   error_message = "The service_cidr ${var.service_cidr} cannot overlap with the VPC CIDR ${data.aws_vpc.vpc.cidr_block}"
-    # }
+    precondition {
+      condition     = provider::pf::cidr_contains(var.service_cidr, var.dns_service_ip)
+      error_message = "The dns_service_ip is not in the service_cidr range."
+    }
+    precondition {
+      condition     = !provider::pf::cidrs_overlap([var.service_cidr, data.aws_vpc.vpc.cidr_block])
+      error_message = "The service_cidr ${var.service_cidr} cannot overlap with the VPC CIDR ${data.aws_vpc.vpc.cidr_block}"
+    }
     precondition {
       condition     = data.pf_metadata.metadata.sla_target == 1 || local.node_subnet_az_count >= 3
-      error_message = "Subnets specified be node_subnets must be deployed across at least 3 availability zones if sla_target >=2"
+      error_message = "Subnets specified by node_subnets must be deployed across at least 3 availability zones if sla_target >=2"
+    }
+    precondition {
+      condition     = data.pf_metadata.metadata.sla_target == 1 || local.control_plane_subnet_az_count >= 3
+      error_message = "Subnets specified by control_plane_subnets must be deployed across at least 3 availability zones if sla_target >=2"
     }
   }
 }
 
+locals {
+  control_plane_subnets         = length(var.control_plane_subnets) == 0 ? local.default_control_plane_subnets : var.control_plane_subnets
+  control_plane_subnet_az_count = length(toset([for subnet in data.aws_subnet.control_plane_subnets : subnet.availability_zone]))
+}
 
 data "aws_subnets" "control_plane_subnets" {
   filter {
@@ -136,7 +144,7 @@ data "aws_subnets" "control_plane_subnets" {
   }
   filter {
     name   = "tag:Name"
-    values = length(var.control_plane_subnets) == 0 ? local.default_control_plane_subnets : var.control_plane_subnets
+    values = local.control_plane_subnets
   }
 
   lifecycle {
@@ -144,7 +152,16 @@ data "aws_subnets" "control_plane_subnets" {
       condition     = length(self.ids) >= 2
       error_message = "Not enough subnets were found for the EKS control plane in VPC ${var.vpc_id}. Ensure that the subnets exist before deploying this module."
     }
+    postcondition {
+      condition     = length(self.ids) >= length(local.control_plane_subnets)
+      error_message = "Duplicate control plane subnets with the same name found in ${var.vpc_id}. Subnets in the same VPC must have unique Name tags."
+    }
   }
+}
+
+data "aws_subnet" "control_plane_subnets" {
+  for_each = toset(data.aws_subnets.control_plane_subnets.ids)
+  id       = each.key
 }
 
 resource "aws_ec2_tag" "subnet_tags" {
