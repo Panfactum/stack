@@ -48,3 +48,8 @@ buildctl \
   --opt build-arg:SITE_URL="$SITE_URL" \
   --export-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder" \
   --import-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder"
+
+###########################################################
+## Step 6: Invalidate the Cloudfront Cache
+###########################################################
+aws cloudfront create-invalidation --distribution-id="$DISTRIBUTION_ID" --paths="/*"

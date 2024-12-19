@@ -66,34 +66,24 @@ variable "workflow_archive_ttl" {
   default     = "60d"
 }
 
-variable "event_bus_nats_version" {
-  description = "The version of nats to use for the event bus"
-  type        = string
-  default     = "2.10.14"
-}
-
-variable "event_bus_prometheus_nats_exporter_version" {
-  description = "The version of prometheus-nats-exporter to use for the event bus"
-  type        = string
-  default     = "0.15.0"
-}
-
-variable "event_bus_nats_server_config_reloader_version" {
-  description = "The version of nats-server-config-reloader to use for the event bus"
-  type        = string
-  default     = "0.14.2"
-}
-
 variable "monitoring_enabled" {
   description = "Whether to add active monitoring to the deployed systems"
   type        = bool
   default     = false
 }
 
-variable "enhanced_ha_enabled" {
-  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
-  type        = bool
-  default     = true
+variable "sla_target" {
+  description = "The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost"
+  type        = number
+  default     = 3
+  validation {
+    condition     = var.sla_target <= 3 && var.sla_target >= 1
+    error_message = "sla_target must be one of: 1, 2, 3"
+  }
+  validation {
+    condition     = !strcontains(tostring(var.sla_target), ".")
+    error_message = "sla_target must be one of: 1, 2, 3"
+  }
 }
 
 variable "panfactum_scheduler_enabled" {

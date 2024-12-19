@@ -185,7 +185,7 @@ resource "kubectl_manifest" "vpa" {
         containerPolicies = [{
           containerName = "main"
           minAllowed = {
-            memory = "50Mi"
+            memory = "100Mi"
           }
         }]
       }

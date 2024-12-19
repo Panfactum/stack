@@ -10,7 +10,7 @@ output "test_config" {
     subnets = [for name, config in local.private_subnets : {
       subnet = name,
       asg    = aws_autoscaling_group.test[name].name
-      nat_ip = aws_eip.nat_ips[var.nat_associations[name]].public_ip
+      nat_ip = aws_eip.nat_ips[local.nat_associations[name]].public_ip
     }]
   }
 }

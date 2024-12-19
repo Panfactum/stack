@@ -3,8 +3,7 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="aws_ecr_pull_through_cache" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache" status="stable" type="direct" />
+<ModuleHeader name="aws_ecr_pull_through_cache" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache" status="stable" type="direct"/>
 
 # AWS ECR Pull Through Cache
 
@@ -14,21 +13,21 @@ used in your Kubernetes clusters.
 
 This provides several benefits:
 
-* Significantly improves startup time of both new nodes and new pods by pulling from localized
-  data storage rather than the public internet
-* Improves resiliency to outages of public container registries which might otherwise cripple
-  your infrastructure
-* Avoids the risk of hitting the rate limits imposed by public registries
-* Reduces costs associated with NAT gateways by keeping large image transfers inside
-  your private network
+ - Significantly improves startup time of both new nodes and new pods by pulling from localized
+data storage rather than the public internet
+ - Improves resiliency to outages of public container registries which might otherwise cripple
+ your infrastructure
+ - Avoids the risk of hitting the rate limits imposed by public registries
+ - Reduces costs associated with NAT gateways by keeping large image transfers inside
+your private network
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
 
 ## Required Inputs
 
@@ -73,8 +72,8 @@ No outputs.
 For some of the upstream registries, you MUST provide authentication information
 even if you are only accessing publicly available images (AWS limitation):
 
-* Docker Hub: [Instructions](https://docs.docker.com/security/for-developers/access-tokens/)
-* GitHub: [Instruction](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+- Docker Hub: [Instructions](https://docs.docker.com/security/for-developers/access-tokens/)
+- GitHub: [Instruction](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
 ### Configuring Repository Template
 

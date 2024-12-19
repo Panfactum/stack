@@ -4,18 +4,6 @@ variable "nginx_ingress_helm_version" {
   default     = "4.11.3"
 }
 
-variable "max_replicas" {
-  description = "The maximum number of nginx-ingress replicas to deploy"
-  type        = number
-  default     = 10
-}
-
-variable "min_replicas" {
-  description = "The minimum number of nginx-ingress replicas to deploy"
-  type        = number
-  default     = 3
-}
-
 variable "dhparam" {
   description = "The Diffie-Hellman parameter to use for establishing perfect forward secrecy with TLS"
   type        = string
@@ -64,10 +52,15 @@ variable "panfactum_scheduler_enabled" {
 }
 
 
-variable "enhanced_ha_enabled" {
-  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
-  type        = bool
-  default     = true
+variable "sla_target" {
+  description = "The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost"
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.sla_target <= 3 && var.sla_target >= 1
+    error_message = "sla_target must be one of: 1, 2, 3"
+  }
 }
 
 variable "node_image_cached_enabled" {

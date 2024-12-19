@@ -39,11 +39,12 @@ module "util_admission_controller" {
 
   workload_name                        = "vpa-admission-controller"
   burstable_nodes_enabled              = true
-  controller_nodes_required            = true // This can prevent pods from scheduling so make sure it is not on a karpenter node
+  controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
+  host_anti_affinity_required          = var.sla_target >= 2
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "admission-controller"
@@ -59,8 +60,9 @@ module "util_recommender" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = false // single instance
+  az_spread_preferred                  = false
+  host_anti_affinity_required          = false // single instance
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "recommender"
@@ -76,8 +78,9 @@ module "util_updater" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = false // single instance
+  az_spread_preferred                  = false
+  host_anti_affinity_required          = false // single instance
   match_labels = {
     "app.kubernetes.io/name"      = "vpa"
     "app.kubernetes.io/component" = "updater"
@@ -286,11 +289,7 @@ resource "helm_release" "vpa" {
           "reloader.stakater.com/auto" = "true"
         }
 
-        // We do need at least 2 otherwise we may get stuck in a loop
-        // b/c if this pod goes down, it cannot apply the appropriate
-        // resource requirements when it comes back up and then the
-        // updater will take it down again
-        replicaCount = 2
+        replicaCount = var.sla_target >= 2 ? 2 : 1
         affinity     = module.util_admission_controller.affinity
         tolerations  = module.util_admission_controller.tolerations
 
@@ -506,6 +505,31 @@ resource "kubectl_manifest" "adjust_vpa_settings" {
                   maxUnavailable = 1
                 }
                 op = "replace"
+              },
+            ])
+          }
+        },
+        {
+          name = "add-topology-spread-contraints-to-ac"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["Pod"]
+                  operations = ["CREATE"]
+                  names = [
+                    "vpa-admission-controller*"
+                  ]
+                }
+              }
+            ]
+          }
+          mutate = {
+            patchesJson6902 = yamlencode([
+              {
+                path  = "/spec/topologySpreadConstraints"
+                value = module.util_admission_controller.topology_spread_constraints
+                op    = "add"
               },
             ])
           }

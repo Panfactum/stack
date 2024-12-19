@@ -37,21 +37,24 @@ data "pf_kube_labels" "labels" {
 module "util_controller" {
   source = "../kube_workload_utility"
 
-  workload_name               = "cert-manager"
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
-  extra_labels                = data.pf_kube_labels.labels.labels
+  workload_name                        = "cert-manager"
+  az_spread_preferred                  = false // single instance
+  host_anti_affinity_required          = false // single instance
+  instance_type_anti_affinity_required = false // single instance
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "util_webhook" {
   source = "../kube_workload_utility"
 
   workload_name                        = "cert-manager-webhook"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
+  host_anti_affinity_required          = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
@@ -62,13 +65,15 @@ module "util_webhook" {
 module "util_ca_injector" {
   source = "../kube_workload_utility"
 
-  workload_name               = "cert-manager-ca-injector"
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  controller_nodes_enabled    = true
-  burstable_nodes_enabled     = true
-  extra_labels                = data.pf_kube_labels.labels.labels
+  workload_name                        = "cert-manager-ca-injector"
+  az_spread_preferred                  = false // single instance
+  host_anti_affinity_required          = false // single instance
+  instance_type_anti_affinity_required = false // single instance
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = true
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -220,7 +225,7 @@ resource "helm_release" "cert_manager" {
         fsGroup = 1001
       }
       webhook = {
-        replicaCount = 2
+        replicaCount = var.sla_target >= 2 ? 2 : 1
         extraArgs    = ["--v=${var.log_verbosity}"]
         serviceAccount = {
           create = false

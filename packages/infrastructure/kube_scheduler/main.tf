@@ -152,11 +152,12 @@ module "scheduler" {
   namespace = local.namespace
   name      = local.name
 
-  replicas                             = 1
+  replicas                             = var.sla_target >= 2 ? 2 : 1
   burstable_nodes_enabled              = true
-  controller_nodes_required            = true
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  controller_nodes_required            = var.sla_target >= 2 ? false : true
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
+  host_anti_affinity_required          = var.sla_target >= 2
   priority_class_name                  = "system-cluster-critical" # Scheduling will break if this breaks
   panfactum_scheduler_enabled          = false                     # Cannot schedule itself
   pull_through_cache_enabled           = var.pull_through_cache_enabled
@@ -175,12 +176,16 @@ module "scheduler" {
       command = [
         "/usr/local/bin/kube-scheduler",
         "--config=/etc/kubernetes/scheduler/config.yaml",
-        "-v=${var.log_verbosity}"
+        "-v=${var.log_verbosity}",
+        "--leader-elect=${var.sla_target >= 2}",
+        "--leader-elect-resource-namespace=scheduler"
       ]
       minimum_memory          = 75
       memory_limit_multiplier = 2.5 # Ensure this never gets stuck in OOM and crashes cluster
     }
   ]
+
+  max_surge = var.sla_target >= 2 ? "0%" : "100%"
 
   config_map_mounts = {
     "${kubernetes_config_map.scheduler.metadata[0].name}" = {

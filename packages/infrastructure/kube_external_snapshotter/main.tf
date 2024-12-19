@@ -35,21 +35,9 @@ module "util_controller" {
   source = "../kube_workload_utility"
 
   workload_name                        = "external-snapshotter-controller"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
-  extra_labels                         = data.pf_kube_labels.labels.labels
-}
-
-module "util_webhook" {
-  source = "../kube_workload_utility"
-
-  workload_name                        = "external-snapshotter-webhook"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = false // single instance
+  az_spread_preferred                  = false // single instance
+  host_anti_affinity_required          = false // single instance
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
@@ -190,29 +178,6 @@ resource "kubectl_manifest" "vpa_controller" {
   depends_on        = [helm_release.external_snapshotter]
 }
 
-resource "kubectl_manifest" "vpa_webhook" {
-  count = var.vpa_enabled ? 1 : 0
-  yaml_body = yamlencode({
-    apiVersion = "autoscaling.k8s.io/v1"
-    kind       = "VerticalPodAutoscaler"
-    metadata = {
-      name      = "external-snapshotter-webhook"
-      namespace = local.namespace
-      labels    = module.util_webhook.labels
-    }
-    spec = {
-      targetRef = {
-        apiVersion = "apps/v1"
-        kind       = "Deployment"
-        name       = "external-snapshotter-webhook"
-      }
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.external_snapshotter]
-}
-
 resource "kubectl_manifest" "pdb_controller" {
   yaml_body = yamlencode({
     apiVersion = "policy/v1"
@@ -226,28 +191,6 @@ resource "kubectl_manifest" "pdb_controller" {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_controller.match_labels
-      }
-      maxUnavailable = 1
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.external_snapshotter]
-}
-
-resource "kubectl_manifest" "pdb_webhook" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = "external-snapshotter-webhook"
-      namespace = local.namespace
-      labels    = module.util_webhook.labels
-    }
-    spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
-      selector = {
-        matchLabels = module.util_webhook.match_labels
       }
       maxUnavailable = 1
     }

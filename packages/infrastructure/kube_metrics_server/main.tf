@@ -36,8 +36,9 @@ module "util" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
+  host_anti_affinity_required          = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -121,9 +122,16 @@ resource "helm_release" "metrics_server" {
         enabled      = true
         minAvailable = 1
       }
-      priorityClassName   = "system-cluster-critical"
+      priorityClassName   = module.constants.cluster_important_priority_class_name
       podDisruptionBudget = { enabled = false } # Created below
       schedulerName       = var.panfactum_scheduler_enabled ? module.constants.panfactum_scheduler_name : "default-scheduler"
+      updateStrategy = {
+        type = "RollingUpdate"
+        rollingUpdate = {
+          maxSurge       = 0
+          maxUnavailable = 1
+        }
+      }
 
       ///////////////////////////////////////
       // Custom Cert Config

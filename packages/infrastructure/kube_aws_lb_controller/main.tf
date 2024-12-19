@@ -47,13 +47,15 @@ data "pf_metadata" "metadata" {}
 module "util_controller" {
   source = "../kube_workload_utility"
 
-  workload_name               = "alb-controller"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
-  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled  = var.pull_through_cache_enabled
-  extra_labels                = data.pf_kube_labels.labels.labels
+  workload_name                        = "alb-controller"
+  burstable_nodes_enabled              = true
+  controller_nodes_enabled             = true
+  host_anti_affinity_required          = var.sla_target >= 2
+  az_spread_preferred                  = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
 module "constants" {
@@ -439,8 +441,7 @@ resource "helm_release" "alb_controller" {
         }
       }
 
-      // DOES need to be highly available to avoid ingress disruptions
-      replicaCount      = 2
+      replicaCount      = var.sla_target >= 2 ? 2 : 1
       priorityClassName = module.constants.cluster_important_priority_class_name
       affinity          = module.util_controller.affinity
       updateStrategy = {

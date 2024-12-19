@@ -128,6 +128,7 @@ module "util_secrets_operator" {
   burstable_nodes_enabled              = true
   arm_nodes_enabled                    = true
   controller_nodes_enabled             = true
+  host_anti_affinity_required          = false
   instance_type_anti_affinity_required = false // single replica
   az_spread_preferred                  = false // single replica
   extra_labels                         = data.pf_kube_labels.labels.labels

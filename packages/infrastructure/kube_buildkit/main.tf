@@ -131,6 +131,7 @@ module "buildkit" {
   instance_type_anti_affinity_required = false
   az_spread_required                   = false
   az_spread_preferred                  = false
+  host_anti_affinity_required          = false
 
   # Ensure that we are using the appropriate CPU architectures
   arm_nodes_enabled = each.key == "arm64"

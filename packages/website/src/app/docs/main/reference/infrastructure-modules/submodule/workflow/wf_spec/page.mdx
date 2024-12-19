@@ -3,32 +3,31 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="wf_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_spec" status="beta" type="submodule" />
+<ModuleHeader name="wf_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_spec" status="beta" type="submodule"/>
 
 # Argo Workflow Specification
 
 The primary purpose of this submodule is to create a Workflow spec (`workflow_spec` output) that ensures compatibility
-with the Panfactum deployment of Argo Workflows (deployed via [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo))
+with the Panfactum deployment of Argo Workflows (deployed via [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube\_argo))
 and applies sensible defaults for usage in the overall Panfactum Stack.
 
 In particular, this module takes care of the following:
 
-* Assigns AWS permissions to the Workflow's ServiceAccount that allows the Workflow's templates to store
+- Assigns AWS permissions to the Workflow's ServiceAccount that allows the Workflow's templates to store
   artifacts and logs in S3.
-* Assigns the necessary Kubernetes permissions to the Workflow's ServiceAccount that allows the Workflow to launch
+- Assigns the necessary Kubernetes permissions to the Workflow's ServiceAccount that allows the Workflow to launch
   and record its status with the Argo Workflow controller.
-* Sets up basic Workflow parallelism, timeouts, and retry configurations
-* Assigns defaults for pods created by the Workflow (affinities, tolerations, volumes, security context, scheduler, etc.)
-* Provides recommended container defaults (`container_defaults` output)
-* Disables pod disruptions (overridable)
+- Sets up basic Workflow parallelism, timeouts, and retry configurations
+- Assigns defaults for pods created by the Workflow (affinities, tolerations, volumes, security context, scheduler, etc.)
+- Provides recommended container defaults (`container_defaults` output)
+- Disables pod disruptions (overridable)
 
 However, the core Workflow logic (defined via `templates`, `arguments`, and `entrypoint`) is left completely
 up to the user to define. For more information on the available values for these fields, see the official
 Argo documentation:
 
-* [Template](https://argo-workflows.readthedocs.io/en/latest/fields/#template)
-* [Arguments](https://argo-workflows.readthedocs.io/en/latest/fields/#arguments)
+- [Template](https://argo-workflows.readthedocs.io/en/latest/fields/#template)
+- [Arguments](https://argo-workflows.readthedocs.io/en/latest/fields/#arguments)
 
 ## Usage
 
@@ -41,16 +40,15 @@ Below we cover some more advanced patterns that you will likely find useful when
 Workflows are most useful when you need to define a multistep operation. Argo Workflows provides several means
 to do this, but we recommend the following for almost all use cases:
 
-* [DAG Templates](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/): For defining the execution graph across multiple other templates
-* [ContainerSet Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/): For defining an execution graph inside a *single* pod
+- [DAG Templates](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/): For defining the execution graph across multiple other templates
+- [ContainerSet Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/): For defining an execution graph inside a _single_ pod
 
 ContainerSets can be run faster as all steps will share the same execution context and can share disk space. However,
 they have a couple drawbacks:
+- All containers in the ContainerSet will consume Kubernetes resources (CPU and memory requests) [even when they are not running](https://argo-workflows.readthedocs.io/en/latest/container-set-template/#resource-requests).
+- They can only be used to orchestrate containers and not other types of templates.
 
-* All containers in the ContainerSet will consume Kubernetes resources (CPU and memory requests) [even when they are not running](https://argo-workflows.readthedocs.io/en/latest/container-set-template/#resource-requests).
-* They can only be used to orchestrate containers and not other types of templates.
-
-DAGs offer the most flexibility as they can define a graph of *any* set of templates, but every template in the execution graph will require creating its own Pod.
+DAGs offer the most flexibility as they can define a graph of _any_ set of templates, but every template in the execution graph will require creating its own Pod.
 Generally, this isn't an issue, but it does add some additional time (to create each pod) and can cause issues when trying to share large amounts of data between steps.
 
 If you do need to share large amounts of data between pods in a DAG, you can use the
@@ -91,7 +89,7 @@ module "workflow_spec" {
 ```
 
 Critically, all overrides are **shallow-merged by key**. This makes it possible to drop defaults (as in the example above),
-but if you wanted to *add* a new volume, you would need to explicitly concatenate to the original defaults.
+but if you wanted to _add_ a new volume, you would need to explicitly concatenate to the original defaults.
 
 ```hcl
 module "workflow_spec" {
@@ -117,7 +115,7 @@ Often you will want to supply inputs to workflows so to adjust how they behave. 
 inputs "parameters" and provides documentation on this functionality [here](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/). [^1]
 
 [^1]: Technically, there are two types of inputs: parameters (values) and artifacts (files), but we will
-    just focus on parameters in this section.
+just focus on parameters in this section.
 
 Note that *both* Workflows as a whole *and* their individual templates can be parameterized
 although the syntax is slightly different. A Workflow has `arguments` and a template has `inputs`:
@@ -308,11 +306,11 @@ powerful and less error-prone.
 By default, Workflows created by the `wf_spec` module will automatically retry template execution on failure. You can tune
 the behavior by adjusting the following inputs:
 
-* `retry_backoff_initial_duration_seconds`
-* `retry_backoff_max_duration_seconds`
-* `retry_max_attempts` (set to `0` to disable retries)
-* `retry_expression`
-* `retry_policy`
+- `retry_backoff_initial_duration_seconds`
+- `retry_backoff_max_duration_seconds`
+- `retry_max_attempts` (set to `0` to disable retries)
+- `retry_expression`
+- `retry_policy`
 
 Retries are done on a **per-template** basis and the above inputs set the default behavior for each
 template; the entire Workflow will never retry.
@@ -326,10 +324,10 @@ note that the template-level timeout is **reset on every retry.**
 
 There are three different levels of concurrency controls that you can use:
 
-* `pod_parallelism`: If set, limits how many pods in a single Workflow instance that can be running at once.
-* `workflow_parallelism`: Number of instances of this Workflow that can be running at once. See [mutexes and semaphores for Workflows](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization)
+- `pod_parallelism`: If set, limits how many pods in a single Workflow instance that can be running at once.
+- `workflow_parallelism`: Number of instances of this Workflow that can be running at once. See [mutexes and semaphores for Workflows](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization)
   for more information.
-* [Template-level mutexes and semaphores](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization):
+- [Template-level mutexes and semaphores](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization):
   Allows blocking individual templates from running.
   Can use the same mutex / semaphore across many workflows. Useful for locking access to certain resources (e.g., deploying to an environment).
 
@@ -402,17 +400,17 @@ This can be helpful for easily searching for workflows based on their runtime pr
 
 We provide two means to do this:
 
-* `labels_from_parameters`: Specify a list of parameters. Generated workflows will have labels added where the key is the parameter
-  name and the value is the parameter value.
+- `labels_from_parameters`: Specify a list of parameters. Generated workflows will have labels added where the key is the parameter
+name and the value is the parameter value.
 
-* `labels_from`: Specify an arbitrary [labelsFrom](https://argo-workflows.readthedocs.io/en/latest/fields/#labelvaluefrom) configuration
-  for the generated Workflows. The configuration is merged with `labels_from_parameters`.
+- `labels_from`: Specify an arbitrary [labelsFrom](https://argo-workflows.readthedocs.io/en/latest/fields/#labelvaluefrom) configuration
+for the generated Workflows. The configuration is merged with `labels_from_parameters`.
 
 ### Using the Panfactum devShell
 
 We make the Panfactum devShell available as a container image that can be run in a
 workflow. The specific image tag that is compatible with your version of the Panfactum stack can be sourced from the outputs of the
-[kube\_constants](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
+[kube\_constants](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_constants) submodule. The below code
 snippet shows an example:
 
 ```hcl
@@ -492,9 +490,9 @@ When a Workflow completes, it isn't automatically deleted. It is still
 
 Workflow objects will be automatically deleted from the Kubernetes cluster based on the following inputs:
 
-* `workflow_delete_seconds_after_completion`
-* `workflow_delete_seconds_after_failure`
-* `workflow_delete_seconds_after_success`
+- `workflow_delete_seconds_after_completion`
+- `workflow_delete_seconds_after_failure`
+- `workflow_delete_seconds_after_success`
 
 When a Workflow is deleted, all the other Kubernetes objects that it owns are also deleted (e.g., Pods, Artifacts, etc.).
 
@@ -511,13 +509,13 @@ guidance on implementing that pattern
 
 The following providers are needed by this module:
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -543,7 +541,7 @@ Type: `string`
 
 ### templates
 
-Description: A list of workflow templates. See [https://argo-workflows.readthedocs.io/en/stable/fields/#template](https://argo-workflows.readthedocs.io/en/stable/fields/#template).
+Description: A list of workflow templates. See https://argo-workflows.readthedocs.io/en/stable/fields/#template.
 
 Type: `any`
 
@@ -607,7 +605,7 @@ Default: `false`
 
 ### cluster\_workflow\_template\_ref
 
-Description: Name is the resource name of the ClusterWorkflowTemplate template ([https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/](https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/))
+Description: Name is the resource name of the ClusterWorkflowTemplate template (https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/)
 
 Type: `string`
 

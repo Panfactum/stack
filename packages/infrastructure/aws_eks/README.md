@@ -1,5 +1,7 @@
 # Elastic Kubernetes Service (EKS)
 
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
 This module provides our standard setup for a configurable AWS EKS Cluster.
 It includes:
 
@@ -20,7 +22,49 @@ It includes:
 
 - The requisite infrastructure for using [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
 
-## Post-install Steps
+## Usage
+
+### Installation
+
+#### Choose Control Plane Subnets
+
+Control plane subnets are the subnets within which AWS will deploy the EKS-managed Kubernetes API servers.
+
+By default, the control plane subnets will be any subnet named `PUBLIC_A`, `PUBLIC_B`, or `PUBLIC_C` in the VPC indicated
+by the `vpc_id` input as these are the subnets created by the [aws_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+
+If you need to overwrite the default module behavior, you can specify `control_plane_subnets`. This input takes **at least 2** subnets (each in a different AZ).
+
+#### Choose Node Subnets
+
+<MarkdownAlert severity="warning">
+  Your node subnets **cannot** be changed without downtime in the future.
+</MarkdownAlert>
+
+Node subnets are the subnets within which your actual workloads will run once deployed to the Kubernetes clsuter.
+
+By default, the node subnets will be any subnet named `PRIVATE_A`, `PRIVATE_B`, or `PRIVATE_C` in the VPC indicated
+by the `vpc_id` input as these are the subnets created by the [aws_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+
+If you need to overwrite the default module behavior, you can specify `node_subnets`.
+
+For an [SLA target of level 2 or above](/docs/main/guides/deploying-workloads/high-availability), you MUST provide **at least 3** subnets (each in a different AZ).
+
+### Overriding the Service CIDR
+
+Kubernetes requires that you specify a range of IP addresses that can be allocated to [Services](https://kubernetes.io/docs/concepts/services-networking/service/) deployed in Kubernetes. This
+is called the [Service CIDR](https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/).
+
+We provide a default CIDR range of `172.20.0.0/16`. We strongly discourage overriding this default unless you
+have a demonstrated need.
+
+If you do override with the `service_cidr` input, you MUST provide a private CIDR range that does not conflict with your VPC or any of its subnets. That
+is because Kubernetes performs its own routing and networking independently of AWS.
+
+You will also need to choose a `dns_service_ip` which **must** be in the `service_cidr`. If you use the
+`172.20.0.0/16` CIDR, then you should use `172.20.0.10` as this is the EKS default.
+
+#### Post-install Steps
 
 This module is intended to be installed as a part of [this guide](/docs/main/guides/bootstrapping/kubernetes-cluster) which includes manual steps
 that must be run after applying the module.

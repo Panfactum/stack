@@ -40,7 +40,7 @@ module "util_crd_migrate" {
   workload_name               = "kyverno-crd-migrate"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
+  az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
@@ -53,10 +53,7 @@ module "util_admission_controller" {
   controller_nodes_enabled    = true
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
-
-  # This controller is critical to launching all pods so it cannot go down
-  az_spread_required                   = true
-  instance_type_anti_affinity_required = false // TODO: Make true but needs to be compatible with bootstrapping
+  az_spread_required          = var.sla_target >= 2
 
   extra_tolerations = [
     {
@@ -73,7 +70,7 @@ module "util_background_controller" {
   workload_name               = "kyverno-background-controller"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
+  az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 
@@ -94,7 +91,7 @@ module "util_cleanup_controller" {
   workload_name               = "kyverno-cleanup-controller"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
+  az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
@@ -105,7 +102,7 @@ module "util_reports_controller" {
   workload_name               = "kyverno-reports-controller"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
+  az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
@@ -116,7 +113,7 @@ module "util_webhooks_cleanup" {
   workload_name               = "kyverno-webhooks-cleanup"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
+  az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
@@ -127,7 +124,7 @@ module "util_policy_reports_cleanup" {
   workload_name               = "kyverno-policy-reports-cleanup"
   burstable_nodes_enabled     = true
   controller_nodes_enabled    = true
-  az_spread_preferred         = var.enhanced_ha_enabled
+  az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
@@ -232,13 +229,13 @@ resource "helm_release" "kyverno" {
       }
 
       admissionController = {
-        replicas          = 3
+        replicas          = var.sla_target == 3 ? 3 : 2
         podLabels         = module.util_admission_controller.labels
         tolerations       = module.util_admission_controller.tolerations
         priorityClassName = "system-node-critical" // DaemonSet pods cannot be scheduled without this running, so it should be the most critical
         updateStrategy = {
           rollingUpdate = {
-            maxSurge       = 0 // Prefer not to surge since instance-type spread is required
+            maxSurge       = 0 // Prefer not to surge since scheduled on controllers
             maxUnavailable = 1
           }
           type = "RollingUpdate"
@@ -314,7 +311,7 @@ resource "helm_release" "kyverno" {
       }
 
       backgroundController = {
-        replicas    = 1 # HA isn't necessary for this
+        replicas    = var.sla_target == 3 ? 2 : 1
         podLabels   = module.util_background_controller.labels
         tolerations = module.util_background_controller.tolerations
 
@@ -366,7 +363,7 @@ resource "helm_release" "kyverno" {
       }
 
       cleanupController = {
-        replicas          = 2
+        replicas          = var.sla_target == 3 ? 2 : 1
         podLabels         = module.util_cleanup_controller.labels
         tolerations       = module.util_cleanup_controller.tolerations
         priorityClassName = "system-cluster-critical"
@@ -381,8 +378,8 @@ resource "helm_release" "kyverno" {
 
         updateStrategy = {
           rollingUpdate = {
-            maxSurge       = 0
-            maxUnavailable = 1
+            maxSurge       = var.sla_target == 3 ? 0 : 1
+            maxUnavailable = var.sla_target == 3 ? 1 : 0
           }
           type = "RollingUpdate"
         }
@@ -544,27 +541,27 @@ resource "kubernetes_cluster_role" "extra_permissions" {
 #   depends_on        = [helm_release.kyverno]
 # }
 
-resource "kubectl_manifest" "pdb_background_controller" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = "kyverno-background-controller"
-      namespace = local.namespace
-      labels    = module.util_background_controller.labels
-    }
-    spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
-      selector = {
-        matchLabels = module.util_background_controller.match_labels
-      }
-      maxUnavailable = 1
-    }
-  })
-  server_side_apply = true
-  force_conflicts   = true
-  depends_on        = [helm_release.kyverno]
-}
+# resource "kubectl_manifest" "pdb_background_controller" {
+#   yaml_body = yamlencode({
+#     apiVersion = "policy/v1"
+#     kind       = "PodDisruptionBudget"
+#     metadata = {
+#       name      = "kyverno-background-controller"
+#       namespace = local.namespace
+#       labels    = module.util_background_controller.labels
+#     }
+#     spec = {
+#       unhealthyPodEvictionPolicy = "AlwaysAllow"
+#       selector = {
+#         matchLabels = module.util_background_controller.match_labels
+#       }
+#       maxUnavailable = 1
+#     }
+#   })
+#   server_side_apply = true
+#   force_conflicts   = true
+#   depends_on        = [helm_release.kyverno]
+# }
 
 # Cannot deploy due to: https://github.com/kyverno/kyverno/issues/11469
 # resource "kubectl_manifest" "pdb_cleanup_controller" {

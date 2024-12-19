@@ -29,6 +29,9 @@ inputs = {
   ]
   dhparam                 = local.secrets.dhparam
   ingress_timeout_seconds = 60
+
+  // Tune this as appropriate for your use case: https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability
+  sla_level = 2
 }
 
 

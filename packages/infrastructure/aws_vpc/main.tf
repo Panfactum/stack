@@ -14,12 +14,123 @@ terraform {
 }
 
 locals {
-  nat_subnets        = { for source, destination in var.nat_associations : destination => source }
+  default_nat_associatsion_single_az = {
+    "PRIVATE_A" = "PUBLIC_A"
+  }
+  default_nat_associations_multi_az = {
+    "PRIVATE_A" = "PUBLIC_A"
+    "PRIVATE_B" = "PUBLIC_B"
+    "PRIVATE_C" = "PUBLIC_C"
+  }
+
+  # Default the NAT list based on the configured SLA target
+  nat_associations = length(keys(var.nat_associations)) == 0 && var.vpc_cidr == "10.0.0.0/16" ? (data.pf_metadata.metadata.sla_target == 1 ? local.default_nat_associatsion_single_az : local.default_nat_associations_multi_az) : var.nat_associations
+
+  default_subnets_single_az = {
+    "PUBLIC_A" = {
+      az          = "a"
+      cidr_block  = "10.0.0.0/24"
+      public      = true
+      description = "Subnet for incoming public traffic to availability zone A"
+      extra_tags  = {}
+    },
+    "PUBLIC_B" = {
+      az          = "b"
+      cidr_block  = "10.0.1.0/24"
+      public      = true
+      description = "Subnet for incoming public traffic to availability zone B"
+      extra_tags  = {}
+    },
+    "PRIVATE_A" = {
+      az          = "a"
+      cidr_block  = "10.0.64.0/18"
+      public      = false
+      description = "Subnet for private nodes in availability zone A"
+      extra_tags  = {}
+    },
+    "ISOLATED_A" = {
+      az          = "a"
+      cidr_block  = "10.0.16.0/20"
+      public      = false
+      description = "Subnet for node isolated from public internet in availability zone A"
+      extra_tags  = {}
+    }
+  }
+  default_subnets_multi_az = {
+    "PUBLIC_A" = {
+      az          = "a"
+      cidr_block  = "10.0.0.0/24"
+      public      = true
+      description = "Subnet for incoming public traffic to availability zone A"
+      extra_tags  = {}
+    },
+    "PUBLIC_B" = {
+      az          = "b"
+      cidr_block  = "10.0.1.0/24"
+      public      = true
+      description = "Subnet for incoming public traffic to availability zone B"
+      extra_tags  = {}
+    },
+    "PUBLIC_C" = {
+      az          = "c"
+      cidr_block  = "10.0.2.0/24"
+      public      = true
+      description = "Subnet for incoming public traffic to availability zone C"
+      extra_tags  = {}
+    },
+    "PRIVATE_A" = {
+      az          = "a"
+      cidr_block  = "10.0.64.0/18"
+      public      = false
+      description = "Subnet for private nodes in availability zone A"
+      extra_tags  = {}
+    },
+    "PRIVATE_B" = {
+      az          = "b"
+      cidr_block  = "10.0.128.0/18"
+      public      = false
+      description = "Subnet for private nodes in availability zone B"
+      extra_tags  = {}
+    },
+    "PRIVATE_C" = {
+      az          = "c"
+      cidr_block  = "10.0.192.0/18"
+      public      = false
+      description = "Subnet for private nodes in availability zone C"
+      extra_tags  = {}
+    },
+    "ISOLATED_A" = {
+      az          = "a"
+      cidr_block  = "10.0.16.0/20"
+      public      = false
+      description = "Subnet for node isolated from public internet in availability zone A"
+      extra_tags  = {}
+    }
+    "ISOLATED_B" = {
+      az          = "b"
+      cidr_block  = "10.0.32.0/20"
+      public      = false
+      description = "Subnet for node isolated from public internet in availability zone B"
+      extra_tags  = {}
+    }
+    "ISOLATED_C" = {
+      az          = "c"
+      cidr_block  = "10.0.48.0/20"
+      public      = false
+      description = "Subnet for node isolated from public internet in availability zone C"
+      extra_tags  = {}
+    }
+  }
+
+  # Default the subnet configuration based on the SLA level
+  subnets = length(keys(var.subnets)) == 0 && var.vpc_cidr == "10.0.0.0/16" ? (data.pf_metadata.metadata.sla_target == 1 ? local.default_subnets_single_az : local.default_subnets_multi_az) : var.subnets
+
+  nat_subnets        = { for source, destination in local.nat_associations : destination => source }
   nat_subnet_list    = tolist(toset(keys(local.nat_subnets)))
-  peering_route_list = flatten([for subnet in keys(var.subnets) : [for label, config in var.vpc_peer_acceptances : merge({ subnet = subnet, vpc = label }, config)]])
+  peering_route_list = flatten([for subnet in keys(local.subnets) : [for label, config in var.vpc_peer_acceptances : merge({ subnet = subnet, vpc = label }, config)]])
   peering_routes     = { for peer_route in local.peering_route_list : "${peer_route.subnet}_${peer_route.vpc}" => peer_route }
-  public_subnets     = { for name, subnet in var.subnets : name => subnet if subnet.public }
-  private_subnets    = { for name, subnet in var.subnets : name => subnet if contains(keys(var.nat_associations), name) }
+  public_subnets     = { for name, subnet in local.subnets : name => subnet if subnet.public }
+  private_subnets    = { for name, subnet in local.subnets : name => subnet if contains(keys(local.nat_associations), name) }
 
   # We omit some tags that change frequently from node group
   # instances b/c changing these tags forces the nodes to roll
@@ -39,6 +150,7 @@ data "pf_aws_tags" "tags" {
   module = "aws_vpc"
 }
 
+data "pf_metadata" "metadata" {}
 
 ##########################################################################
 ## Main VPC
@@ -48,6 +160,35 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags                 = merge(data.pf_aws_tags.tags.tags, var.vpc_extra_tags, { Name = var.vpc_name })
+
+  // The checks are here instead of under the subnet block to ensure the errors
+  // only show up once rather as these are a global checks
+  lifecycle {
+    precondition {
+      condition     = data.pf_metadata.metadata.sla_target == 1 || length(toset([for subnet, config in local.subnets_resolved_config : config.availability_zone if config.type == "public"])) >= 3
+      error_message = <<-EOT
+      If sla_target > 1, then you must deploy public subnets in at least three availability zones.
+
+      For more information, see https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability
+      EOT
+    }
+    precondition {
+      condition     = data.pf_metadata.metadata.sla_target == 1 || length(toset([for subnet, config in local.subnets_resolved_config : config.availability_zone if config.type == "private"])) >= 3
+      error_message = <<-EOT
+      If sla_target > 1, then you must deploy private subnets (non-public subnets with nat_associations) in at least three availability zones.
+
+      For more information, see https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability
+      EOT
+    }
+    precondition {
+      condition     = data.pf_metadata.metadata.sla_target == 1 || length(toset([for subnet, config in local.subnets_resolved_config : config.availability_zone if config.type == "isolated"])) >= 3
+      error_message = <<-EOT
+      If sla_target > 1, then you must deploy isolated subnets (non-public subnets without nat_assocations) in at least three availability zones.
+
+      For more information, see https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability
+      EOT
+    }
+  }
 }
 
 resource "aws_internet_gateway" "main" {
@@ -70,15 +211,23 @@ resource "aws_vpc_endpoint" "s3" {
 ## Subnets
 ##########################################################################
 
+locals {
+  subnets_resolved_config = { for k, v in local.subnets : k => merge(v, {
+    availability_zone = lower(length(v.az) == 1 ? "${data.aws_region.region.name}${v.az}" : v.az) ## Allows the user to input either 'a' or 'us-east-2a'
+    type              = v.public ? "public" : contains(keys(local.nat_associations), k) ? "private" : "isolated"
+  }) }
+}
+
 resource "aws_subnet" "subnets" {
-  for_each                = var.subnets
+  for_each = local.subnets_resolved_config
+
   vpc_id                  = aws_vpc.main.id
   cidr_block              = each.value.cidr_block
-  availability_zone       = lower(length(each.value.az) == 1 ? "${data.aws_region.region.name}${each.value.az}" : each.value.az) ## Allows the user to input either 'a' or 'us-east-2a'
+  availability_zone       = each.value.availability_zone
   map_public_ip_on_launch = each.value.public
   tags = merge(data.pf_aws_tags.tags.tags, each.value.extra_tags, {
     Name                 = each.key
-    "panfactum.com/type" = each.value.public ? "public" : contains(keys(var.nat_associations), each.key) ? "private" : "isolated"
+    "panfactum.com/type" = each.value.type
   })
 
   lifecycle {
@@ -175,6 +324,7 @@ resource "aws_network_interface" "nats" {
   tags = merge(data.pf_aws_tags.tags.tags, {
     Name = each.key
   })
+
 }
 
 resource "aws_security_group" "nats" {
@@ -433,7 +583,7 @@ resource "aws_autoscaling_group" "test" {
 ##########################################################################
 
 resource "aws_route_table" "tables" {
-  for_each = var.subnets
+  for_each = local.subnets
 
   vpc_id = aws_vpc.main.id
   tags   = merge(data.pf_aws_tags.tags.tags, { Name = "RT_${each.key}" })
@@ -456,7 +606,7 @@ resource "aws_route" "vpc_peers" {
 }
 
 resource "aws_route" "nats" {
-  for_each = var.nat_associations
+  for_each = local.nat_associations
 
   route_table_id         = aws_route_table.tables[each.key].id
   destination_cidr_block = "0.0.0.0/0"
@@ -464,7 +614,7 @@ resource "aws_route" "nats" {
 }
 
 resource "aws_route_table_association" "associations" {
-  for_each = var.subnets
+  for_each = local.subnets
 
   subnet_id      = aws_subnet.subnets[each.key].id
   route_table_id = aws_route_table.tables[each.key].id

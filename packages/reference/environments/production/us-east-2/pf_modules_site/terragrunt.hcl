@@ -8,7 +8,8 @@ terraform {
 }
 
 inputs = {
-  bucket_name = "pf-modules-website"
-  description = "Hosts the IaC modules and submodules for the Panfactum Stack"
-  domain      = "modules.panfactum.com"
+  bucket_name  = "pf-modules-website"
+  description  = "Hosts the IaC modules and submodules for the Panfactum Stack"
+  domain       = "modules.panfactum.com"
+  default_file = ""
 }

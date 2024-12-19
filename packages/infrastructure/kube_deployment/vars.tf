@@ -225,13 +225,13 @@ variable "dns_policy" {
 }
 
 variable "instance_type_anti_affinity_required" {
-  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type"
+  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla_target == 3."
   type        = bool
-  default     = false
+  default     = null
 }
 
 variable "host_anti_affinity_required" {
-  description = "Whether to prefer preventing pods from being scheduled on the same host"
+  description = "Whether to prefer preventing pods from being scheduled on the same host."
   type        = bool
   default     = true
 }
@@ -261,13 +261,13 @@ variable "controller_nodes_enabled" {
 }
 
 variable "az_spread_preferred" {
-  description = "Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)"
+  description = "Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways). Defaults to true iff sla_target >= 2."
   type        = bool
-  default     = true
+  default     = null
 }
 
 variable "az_spread_required" {
-  description = "Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)"
+  description = "Whether to enable topology spread constraints to spread pods across availability zones (with DoNotSchedule)."
   type        = bool
   default     = false
 }

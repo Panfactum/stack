@@ -26,6 +26,8 @@ locals {
     service_port = config.service_port
     protocol     = config.protocol
   } if config.expose_on_service }
+
+  sla_target = data.pf_metadata.metadata.sla_target
 }
 
 // This is needed b/c this can never
@@ -37,6 +39,8 @@ resource "random_id" "deployment_id" {
 data "pf_kube_labels" "labels" {
   module = "kube_deployment"
 }
+
+data "pf_metadata" "metadata" {}
 
 module "pod_template" {
   source = "../kube_pod"
@@ -72,14 +76,14 @@ module "pod_template" {
   spot_nodes_enabled                   = var.spot_nodes_enabled
   arm_nodes_enabled                    = var.arm_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
-  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required != null ? var.instance_type_anti_affinity_required : local.sla_target == 3
   az_anti_affinity_required            = var.az_anti_affinity_required
   host_anti_affinity_required          = var.host_anti_affinity_required
   extra_tolerations                    = var.extra_tolerations
   controller_nodes_required            = var.controller_nodes_required
   node_requirements                    = var.node_requirements
   node_preferences                     = var.node_preferences
-  az_spread_preferred                  = var.az_spread_preferred
+  az_spread_preferred                  = var.az_spread_preferred != null ? var.az_spread_preferred : local.sla_target >= 2
   az_spread_required                   = var.az_spread_required
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   termination_grace_period_seconds     = var.termination_grace_period_seconds

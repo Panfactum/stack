@@ -51,10 +51,11 @@ module "util_server" {
   source = "../kube_workload_utility"
 
   workload_name                        = "authentik-server"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  az_spread_preferred                  = var.sla_target >= 2
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -66,8 +67,9 @@ module "util_worker" {
   workload_name                        = "authentik-worker"
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -88,7 +90,7 @@ module "database" {
 
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 10
-  pg_instances                         = 2
+  pg_instances                         = var.sla_target >= 2 ? 2 : 1
   pg_smart_shutdown_timeout            = 1
   pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
@@ -97,7 +99,7 @@ module "database" {
   burstable_nodes_enabled              = true
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
 
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
@@ -120,7 +122,7 @@ module "redis" {
   vpa_enabled                          = var.vpa_enabled
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
 }
 
 /***************************************

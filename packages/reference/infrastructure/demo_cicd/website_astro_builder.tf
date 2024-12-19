@@ -47,6 +47,12 @@ data "aws_iam_policy_document" "astro_builder" {
       "arn:aws:s3:::pf-website-astro/*"
     ]
   }
+  statement {
+    sid = "CloudfrontInvalidation"
+    effect = "Allow"
+    actions = ["cloudfront:CreateInvalidation"]
+    resources = ["arn:aws:cloudfront::891377197483:distribution/E1BPTEFRQY1PK4"]
+  }
 }
 
 
@@ -95,6 +101,7 @@ module "astro_builder_workflow" {
     PUBLIC_ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
     PUBLIC_ALGOLIA_INDEX_NAME = var.algolia_index_name_2
     SITE_URL = var.site_url
+    DISTRIBUTION_ID = "E1BPTEFRQY1PK4"
   }
   extra_aws_permissions = data.aws_iam_policy_document.astro_builder.json
   default_resources = {

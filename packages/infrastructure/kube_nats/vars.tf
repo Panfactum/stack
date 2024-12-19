@@ -12,7 +12,7 @@ variable "namespace" {
 variable "helm_version" {
   description = "The version of the bitnami/nats helm chart to use"
   type        = string
-  default     = "8.4.5"
+  default     = "8.5.1"
 }
 
 variable "spot_nodes_enabled" {

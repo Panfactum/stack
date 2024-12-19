@@ -45,6 +45,7 @@ module "util_controller" {
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single replica
   az_spread_preferred                  = false // single replica
+  host_anti_affinity_required          = false //single replica
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 

@@ -72,6 +72,7 @@ module "util_controller" {
   source = "../kube_workload_utility"
 
   workload_name                        = "descheduler"
+  host_anti_affinity_required          = false
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled

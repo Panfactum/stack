@@ -3,6 +3,9 @@
 #################################################################
 
 locals {
+  # Load all the terragrunt variables
+  # For more information about the configuration architecture and available options,
+  # see https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables
   global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), {})
   global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), {})
   global_vars         = merge({}, local.global_raw_vars, local.global_user_vars)
@@ -102,7 +105,7 @@ locals {
   local_dev_namespace = get_env("LOCAL_DEV_NAMESPACE", "")
   is_local            = local.vars.environment == "local"
 
-  # get vault_token (only if the vault provider is enabled)
+  # Get vault_token (only if the vault provider is enabled)
   vault_address = local.is_ci ? get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
   vault_token = run_cmd(
     "--terragrunt-global-cache", "--terragrunt-quiet",
@@ -111,11 +114,17 @@ locals {
     local.enable_vault ? "" : "--noop"
   )
 
-  # check if in ci system
-  is_ci = get_env("CI", "false") == "true"
+  # With Panfactum CI (and most other CI providers), the CI env variable is set to indicate the execution context is a CI runner
+  is_ci = get_env("CI", "false") == "true" || get_env("CI", "false") == "1"
 
   kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
   kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
+
+  # sla_target is both a provider config option and a common module input. To keep everything aligned,
+  # this ensures that the provider config option will equal the module input iff the module input
+  # is set via extra_inputs. We default to 3.
+  # For more information on SLA targets, see https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability
+  sla_target = lookup(local.extra_inputs, "sla_target", lookup(local.vars, "sla_target", 3))
 }
 
 ################################################################
@@ -161,6 +170,7 @@ generate "pf_provider" {
     extra_tags          = local.enable_pf ? local.extra_tags : {}
     kube_api_server     = local.kube_api_server
     kube_config_context = local.kube_config_context
+    sla_target          = local.sla_target
   }) : ""
 }
 
@@ -335,5 +345,6 @@ inputs = merge(
   {
     pf_module_source = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "../../../../${local.pf_stack_local_path_relative_to_module}/packages/infrastructure//" : "${local.pf_stack_local_path}/packages/infrastructure//") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//"
     pf_module_ref    = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : ""
+    sla_target       = local.sla_target
   }
 )

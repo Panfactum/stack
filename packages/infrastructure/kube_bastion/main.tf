@@ -49,8 +49,7 @@ module "constants" {
 module "namespace" {
   source = "../kube_namespace"
 
-  namespace = local.name
-  //linkerd_inject       = false
+  namespace            = local.name
   loadbalancer_enabled = true
 }
 
@@ -140,21 +139,17 @@ module "bastion" {
   namespace = module.namespace.namespace
   name      = local.name
 
-  replicas                             = 2
+  replicas                             = var.sla_target >= 2 ? 2 : 1
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   priority_class_name                  = module.constants.cluster_important_priority_class_name
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
 
   extra_pod_annotations = {
     "config.linkerd.io/skip-outbound-ports" = "4222"
-    // "config.linkerd.io/proxy-log-format" = "text"
-    //"config.linkerd.io/proxy-log-level" = "trace"
-    // "config.alpha.linkerd.io/proxy-enable-native-sidecar" = "false"
-    // "config.linkerd.io/enable-debug-sidecar" = "true"
   }
 
   // https://superuser.com/questions/1547888/is-sshd-hard-coded-to-require-root-access

@@ -49,9 +49,10 @@ data "pf_kube_labels" "labels" {
 module "util_controller" {
   source                               = "../kube_workload_utility"
   workload_name                        = "argo-controller"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
-  az_spread_required                   = var.enhanced_ha_enabled
+  host_anti_affinity_required          = false // single instance
+  instance_type_anti_affinity_required = false // single instance
+  az_spread_preferred                  = false // single instance
+  az_spread_required                   = false // single instance
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
@@ -62,9 +63,9 @@ module "util_controller" {
 module "util_server" {
   source                               = "../kube_workload_utility"
   workload_name                        = "argo-server"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
-  az_spread_required                   = var.enhanced_ha_enabled
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
@@ -77,9 +78,10 @@ module "util_events_controller" {
   workload_name                        = "argo-events-controller"
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
-  az_spread_required                   = var.enhanced_ha_enabled
+  host_anti_affinity_required          = false // single instance
+  instance_type_anti_affinity_required = false // single instance
+  az_spread_preferred                  = false // single instance
+  az_spread_required                   = false // single instance
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -88,9 +90,9 @@ module "util_events_controller" {
 module "util_webhook" {
   source                               = "../kube_workload_utility"
   workload_name                        = "argo-webhook"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
-  az_spread_required                   = var.enhanced_ha_enabled
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
@@ -252,7 +254,7 @@ module "database" {
 
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = 2
-  pg_instances                         = 2
+  pg_instances                         = var.sla_target >= 2 ? 2 : 1
   pg_smart_shutdown_timeout            = 2
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
@@ -260,7 +262,7 @@ module "database" {
   backups_force_delete                 = true
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
 
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
@@ -633,18 +635,6 @@ resource "helm_release" "argo_events" {
       fullnameOverride     = "argo-events"
       createAggregateRoles = true
 
-      configs = {
-        jetstream = {
-          versions = [{
-            version              = "default"
-            natsImage            = "docker.io/library/nats:${var.event_bus_nats_version}"
-            metricsExporterImage = "docker.io/natsio/prometheus-nats-exporter:${var.event_bus_prometheus_nats_exporter_version}"
-            configReloaderImage  = "docker.io/natsio/nats-server-config-reloader:${var.event_bus_nats_server_config_reloader_version}"
-            startCommand         = "/nats-server"
-          }]
-        }
-      }
-
       controller = {
 
         // This is required until the patch is merged upstream
@@ -691,7 +681,7 @@ resource "helm_release" "argo_events" {
           }
         )
         priorityClassName         = module.constants.cluster_important_priority_class_name
-        replicas                  = 2
+        replicas                  = var.sla_target >= 2 ? 2 : 1
         tolerations               = module.util_webhook.tolerations
         affinity                  = module.util_webhook.affinity
         topologySpreadConstraints = module.util_webhook.topology_spread_constraints

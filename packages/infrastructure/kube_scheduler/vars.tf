@@ -16,10 +16,15 @@ variable "monitoring_enabled" {
   default     = false
 }
 
-variable "enhanced_ha_enabled" {
-  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
-  type        = bool
-  default     = true
+variable "sla_target" {
+  description = "The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost"
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.sla_target <= 3 && var.sla_target >= 1
+    error_message = "sla_target must be one of: 1, 2, 3"
+  }
 }
 
 variable "log_verbosity" {

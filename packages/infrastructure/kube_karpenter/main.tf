@@ -52,10 +52,9 @@ module "util" {
   source = "../kube_workload_utility"
 
   workload_name                        = "karpenter"
-  az_spread_preferred                  = false
-  az_spread_required                   = false
-  instance_type_anti_affinity_required = false
-  host_anti_affinity_required          = false
+  az_spread_preferred                  = var.sla_target == 3
+  instance_type_anti_affinity_required = false // Cannot be true b/c runs on controller nodes
+  host_anti_affinity_required          = var.sla_target == 3
   controller_nodes_required            = true
   burstable_nodes_enabled              = true
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -573,6 +572,9 @@ resource "helm_release" "karpenter" {
       nameOverride     = local.name
       fullnameOverride = local.name
       podLabels        = module.util.labels
+      podAnnotations = {
+        "linkerd.io/inject" = "disabled" // We shouldn't have this in the service mesh as it is required for launching the mesh
+      }
       serviceAccount = {
         create = false
         name   = kubernetes_service_account.karpenter.metadata[0].name
@@ -605,7 +607,7 @@ resource "helm_release" "karpenter" {
       // new nodes to be created
       priorityClassName = "system-node-critical"
 
-      replicas                  = 1
+      replicas                  = var.sla_target == 3 ? 2 : 1
       topologySpreadConstraints = module.util.topology_spread_constraints
       tolerations               = module.util.tolerations
       affinity                  = module.util.affinity
@@ -630,6 +632,13 @@ resource "helm_release" "karpenter" {
         // This ensures that new nodes can run the dynamically sized daemonsets
         // as well as the other pods.
         vmMemoryOverheadPercent = "0.2"
+      }
+
+      strategy = {
+        rollingUpdate = {
+          maxSurge       = var.sla_target == 3 ? 0 : 1
+          maxUnavailable = var.sla_target == 3 ? 1 : 0
+        }
       }
 
       logConfig = {

@@ -3,39 +3,38 @@ import ModuleHeader from "../../../ModuleHeader";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_cdn" status="beta" type="submodule" />
+<ModuleHeader name="kube_aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_cdn" status="beta" type="submodule"/>
 
 # AWS CDN for Kubernetes Ingresses
 
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs`
-output from instances of the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
-module and forwarding them to the [aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module.
+output from instances of the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube\_ingress)
+module and forwarding them to the [aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_cdn) module.
 
-This module takes the same arguments as `aws_cdn`, so see it's [module documentation](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn)
+This module takes the same arguments as `aws_cdn`, so see it's [module documentation](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_cdn)
 for more information.
 
 ## Limitations
 
 * The upstream ingresses for this module must all use the same set of domains. AWS Cloudfront provides
-  no ability to perform routing based on domain names (only HTTP paths). If the ingresses
-  you provide this module use different sets of domains, your routing will break in unexpected ways.
+   no ability to perform routing based on domain names (only HTTP paths). If the ingresses
+   you provide this module use different sets of domains, your routing will break in unexpected ways.
 
 * Changing the domains of your upstream ingresses will cause the Cloudfront distribution to re-provision its certificates
-  causing a brief window of downtime (1-2 minutes).
+   causing a brief window of downtime (1-2 minutes).
 
 * You cannot use the same domain name on multiple CDNs. As a result, you can only create ONE `kube_aws_cdn` resource
-  for all ingresses that use a particular domain name.
+   for all ingresses that use a particular domain name.
 
-* For additional limitations, see the [aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn) module docs.
+* For additional limitations, see the [aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_cdn) module docs.
 
 ## Usage
 
 <MarkdownAlert severity="warning">
-  Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
-  are deployed globally.
+   Note that the `aws.global` provider must be set exactly as shown in the below example as the CloudFront resources
+   are deployed globally.
 </MarkdownAlert>
 
 ```hcl
@@ -115,13 +114,13 @@ module "cdn" {
 
 The following providers are needed by this module:
 
-* [archive](https://registry.terraform.io/providers/hashicorp/archive/2.6.0/docs) (2.6.0)
+- [archive](https://registry.terraform.io/providers/hashicorp/archive/2.6.0/docs) (2.6.0)
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.5/docs) (0.0.5)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -150,7 +149,7 @@ list(object({
     # Rules for mutating the request path before it is forwarded to the upstream service
     remove_prefix = optional(bool, false) # True iff the the path_prefix should be stripped before forwarding on to upstream service
     rewrite_rules = optional(list(object({
-      match = string
+      match   = string
       rewrite = string
     })), [])
 
@@ -222,7 +221,7 @@ The following input variables are optional (have default values):
 
 ### cors\_additional\_allowed\_origins
 
-Description: Specifies which origins are allowed besides the domain name specified. Use '\*' to allow any origin.
+Description: Specifies which origins are allowed besides the domain name specified. Use '*' to allow any origin.
 
 Type: `list(string)`
 
@@ -272,6 +271,23 @@ Description: Time in seconds that the browser can cache the response for a prefl
 Type: `number`
 
 Default: `3600`
+
+### custom\_error\_responses
+
+Description: Mutates error responses returned from the origin before forwarding them to the client
+
+Type:
+
+```hcl
+list(object({
+    error_caching_min_ttl = optional(number, 60 * 60) // (seconds) Minimum amount of time you want HTTP error codes to stay in CloudFront caches before CloudFront queries your origin to see whether the object has been updated.
+    error_code            = string                    // The HTTP status code that you want match (4xx or 5xx)
+    response_code         = optional(string)          // The HTTP status code that you actually want to return to the client
+    response_page_path    = optional(string)          // The error page to return
+  }))
+```
+
+Default: `[]`
 
 ### description
 

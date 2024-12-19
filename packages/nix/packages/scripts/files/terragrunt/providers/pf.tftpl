@@ -10,6 +10,7 @@ provider "pf" {
   stack_commit = "${stack_commit}"
   kube_config_context = "${kube_config_context}"
   kube_api_server = "${kube_api_server}"
+  sla_target = ${sla_target}
   is_local = ${is_local}
   extra_tags = {
 %{for k, v in extra_tags}

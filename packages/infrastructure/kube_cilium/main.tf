@@ -41,8 +41,9 @@ module "util_controller" {
   source = "../kube_workload_utility"
 
   workload_name                        = "cilium-operator"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target >= 2 // We are a little more aggressive than typical here, b/c if the operator goes down, there is a significant delay in new node initialization
+  az_spread_preferred                  = var.sla_target >= 2
+  host_anti_affinity_required          = var.sla_target >= 2
   pull_through_cache_enabled           = true
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
@@ -318,7 +319,7 @@ resource "helm_release" "cilium" {
       }
 
       operator = {
-        replicas = 1
+        replicas = var.sla_target >= 2 ? 2 : 1
         tolerations = concat([
           // These are needed b/c the cilium agents on each node need the operator
           // to be running in order for them to remove this taint

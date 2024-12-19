@@ -70,7 +70,7 @@ module "util" {
 
   workload_name               = "nginx-ingress"
   burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  controller_nodes_enabled    = var.sla_target <= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   lifetime_evictions_enabled  = false
@@ -79,7 +79,7 @@ module "util" {
   // This does need to be spread across AZs in order to not end up
   // withe constant service disruptions
   az_spread_required                   = true
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
 
   extra_labels = data.pf_kube_labels.labels.labels
 }
@@ -167,7 +167,7 @@ resource "helm_release" "nginx_ingress" {
 
       controller = {
 
-        replicaCount = var.min_replicas < 6 && var.enhanced_ha_enabled ? 6 : var.min_replicas < 3 ? 3 : var.min_replicas
+        replicaCount = var.sla_target >= 2 ? 6 : 3
 
         annotations = {
           // Required b/c the webhook certificate doesn't automatically renew
@@ -302,8 +302,8 @@ resource "helm_release" "nginx_ingress" {
         updateStrategy = {
           type = "RollingUpdate"
           rollingUpdate = {
-            maxSurge       = "50%"
-            maxUnavailable = 0
+            maxSurge       = var.sla_target >= 2 ? 0 : 1
+            maxUnavailable = var.sla_target >= 2 ? 1 : 0
           }
         }
         minReadySeconds = 10

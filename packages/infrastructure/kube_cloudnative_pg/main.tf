@@ -48,8 +48,9 @@ module "util" {
   source = "../kube_workload_utility"
 
   workload_name                        = "cnpg-operator"
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target == 3
+  host_anti_affinity_required          = var.sla_target == 3
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = true
@@ -119,7 +120,7 @@ resource "helm_release" "cnpg" {
       }
 
       priorityClassName         = module.constants.cluster_important_priority_class_name
-      replicaCount              = 2
+      replicaCount              = var.sla_target == 3 ? 2 : 1
       affinity                  = module.util.affinity
       tolerations               = module.util.tolerations
       topologySpreadConstraints = module.util.topology_spread_constraints

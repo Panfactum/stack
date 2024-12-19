@@ -127,51 +127,6 @@ We *strongly* recommend leaving this as the module default. The version was spec
 with the rest of the Panfactum stack. See the [module documentation](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) if
 you need to override either the control plane or node group versions.
 
-### Choose Control Plane Subnets
-
-For `control_plane_subnets`, you need to enter the names of **at least 3** subnets (each in a different AZ) that
-you created in the [aws networking guide](/docs/main/guides/bootstrapping/aws-networking). [^3] This ensures the API server is resilient to an AZ outage.
-
-[^3]: Ensure that you choose an odd number for proper resilience to AZ outages. A requirement of `etcd`, the database
-    backend for Kubernetes.
-
-We assume that you will use the three **public** subnets so that you can access the API server from your local machine. [^2]
-We will do deeper into securing the API server in a subsequent section.
-
-[^2]: In fact, the rest of this guide depends on you doing this.
-
-### Choose a Service CIDR
-
-For `service_cidr`, you will want to a private CIDR range that does not conflict with your VPC or any of its subnets. That
-is because Kubernetes performs its own routing and networking independently of AWS.
-
-If you've been following the recommendations in this guide, we *strongly* recommend `172.20.0.0/16`.
-
-You will also need to choose a `dns_service_ip` which **must** be in the `service_cidr`. If you use the
-`172.20.0.0/16` CIDR, then you should use `172.20.0.10` as this is the EKS default.
-
-### Choose Node Subnets
-
-<MarkdownAlert severity="warning">
-  Your node subnets **cannot** be changed without downtime in the future.
-</MarkdownAlert>
-
-For `node_subnets`, you have an important decision to make: how many availability zones do you want your nodes
-to run in.
-
-More AZs will result in higher resiliency, but it will also result in increased cost as network traffic that crosses
-availability zones incurs additional charge. [^6]
-
-[^6]: For more information on costs and uptime targets, see our [high-availability guide](/docs/main/guides/deploying-workloads/high-availability).
-
-In production, **strongly** recommend using **three** AZs, but in development or test environments it is perfectly acceptable to
-choose one. [^4]
-
-[^4]: Note that this must be an odd number in order for many high availability algorithms to work in the case of an
-    AZ outage (e.g., [Raft](https://raft.github.io/)).
-
-The subnets you choose should be **private** and should each be in a different AZ if you are using more than one.
-
 ### Enable Bootstrapping Mode
 
 Set `bootstrap_mode_enabled` to `true`. This will ensure your node count and type is sufficient to complete the

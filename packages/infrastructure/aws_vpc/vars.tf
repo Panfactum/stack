@@ -7,16 +7,19 @@ variable "nat_associations" {
 variable "subnets" {
   description = "Subnet configuration"
   type = map(object({
-    az         = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
-    cidr_block = string                    # Subnet IP block
-    public     = bool                      # If subnet is routable to and from the public internet
-    extra_tags = optional(map(string), {}) # Additional tags for the subnet
+    az          = string                    # Availability zone (either of the format 'a' or 'us-east-2a')
+    cidr_block  = string                    # Subnet IP block
+    public      = bool                      # If subnet is routable to and from the public internet
+    extra_tags  = optional(map(string), {}) # Additional tags for the subnet
+    description = optional(string)          # A description of the subnet's purpose
   }))
+  default = {}
 }
 
 variable "vpc_cidr" {
   description = "The main CIDR range for the VPC."
   type        = string
+  default     = "10.0.0.0/16"
 }
 
 variable "vpc_extra_tags" {

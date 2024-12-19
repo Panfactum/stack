@@ -215,9 +215,9 @@ variable "dns_policy" {
 }
 
 variable "instance_type_anti_affinity_required" {
-  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type"
+  description = "Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla_target == 3."
   type        = bool
-  default     = true
+  default     = null
 }
 
 variable "host_anti_affinity_required" {

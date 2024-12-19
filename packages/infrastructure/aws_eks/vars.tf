@@ -25,6 +25,12 @@ variable "vpc_id" {
 variable "control_plane_subnets" {
   description = "List of subnet names for the control plane. Must be in at least two different availability zones."
   type        = set(string)
+  default     = [] // By default, will look up the default subnets deployed by the aws_vpc module. If you customize your aws_vpc deployment, you will need to provide the names of the PUBLIC subnets that were created.
+
+  validation {
+    condition     = length(var.control_plane_subnets) != 1
+    error_message = "You must specify at least 2 control_plane_subnets."
+  }
 }
 
 variable "control_plane_logging" {
@@ -58,11 +64,13 @@ variable "public_access_cidrs" {
 variable "service_cidr" {
   description = "CIDR block that kubernetes will use for assigning service and pod ID addresses."
   type        = string
+  default     = "172.20.0.0/16"
 }
 
 variable "dns_service_ip" {
   description = "The IP address of the cluster's DNS service. Must be inside the service_cidr range."
   type        = string
+  default     = "172.20.0.10"
 }
 
 variable "bootstrap_cluster_creator_admin_privileges" {
@@ -75,23 +83,6 @@ variable "extended_support_enabled" {
   description = "Whether to enable extended support for EOL Kubernetes versions."
   type        = bool
   default     = true
-}
-
-######################################################################################
-# EKS add-ons versions
-# For more info see: https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
-#######################################################################################
-
-variable "core_dns_addon_enabled" {
-  description = "FOR BACKWARDS COMPATIBILITY AND MIGRATIONS ONLY"
-  type        = bool
-  default     = false
-}
-
-variable "coredns_version" {
-  description = "The version to use for the coredns EKS add-on."
-  type        = string
-  default     = "v1.11.1-eksbuild.6"
 }
 
 ################################################################################

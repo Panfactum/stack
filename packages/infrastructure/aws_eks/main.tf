@@ -19,7 +19,6 @@ terraform {
 }
 
 locals {
-  vpc_id                       = values(data.aws_subnet.control_plane_subnets)[0].vpc_id // a bit hacky but we can just assume all subnets are in the same aws_vpc
   controller_nodes_description = "Nodes for cluster-critical components and bootstrapping processes. Not autoscaled."
 
   # We omit some tags that change frequently from node group
@@ -31,6 +30,9 @@ locals {
       "panfactum.com/stack-version"
     ], k)
   }
+
+  default_control_plane_subnets = ["PUBLIC_A", "PUBLIC_B", "PUBLIC_C"]
+  default_node_subnets          = ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"]
 }
 
 data "aws_caller_identity" "current" {}
@@ -39,6 +41,8 @@ data "aws_region" "region" {}
 data "pf_aws_tags" "tags" {
   module = "aws_eks"
 }
+
+data "pf_metadata" "metadata" {}
 
 module "constants" {
   source = "../kube_constants"
@@ -51,6 +55,10 @@ module "node_settings" {
   cluster_dns_service_ip = var.dns_service_ip
   cluster_endpoint       = aws_eks_cluster.cluster.endpoint
   is_spot                = false
+}
+
+data "aws_vpc" "vpc" {
+  id = var.vpc_id
 }
 
 ##########################################################################
@@ -79,7 +87,7 @@ resource "aws_eks_cluster" "cluster" {
   }
 
   vpc_config {
-    subnet_ids              = [for subnet in data.aws_subnet.control_plane_subnets : subnet.id]
+    subnet_ids              = data.aws_subnets.control_plane_subnets.ids
     endpoint_private_access = true
     endpoint_public_access  = var.enable_public_access
     public_access_cidrs     = var.public_access_cidrs
@@ -104,35 +112,58 @@ resource "aws_eks_cluster" "cluster" {
 
   lifecycle {
     prevent_destroy = true
+
+    # precondition {
+    #   condition = provider::pf::cidr_contains(var.service_cidr, var.dns_service_ip)
+    #   error_message = "The dns_service_ip is not in the service_cidr range."
+    # }
+    # precondition {
+    #   condition = !provider::pf::cidrs_overlap([var.service_cidr, data.aws_vpc.vpc.cidr_block])
+    #   error_message = "The service_cidr ${var.service_cidr} cannot overlap with the VPC CIDR ${data.aws_vpc.vpc.cidr_block}"
+    # }
+    precondition {
+      condition     = data.pf_metadata.metadata.sla_target == 1 || local.node_subnet_az_count >= 3
+      error_message = "Subnets specified be node_subnets must be deployed across at least 3 availability zones if sla_target >=2"
+    }
   }
 }
 
-data "aws_subnet" "control_plane_subnets" {
-  for_each = var.control_plane_subnets
-  vpc_id   = var.vpc_id
+
+data "aws_subnets" "control_plane_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
   filter {
     name   = "tag:Name"
-    values = [each.value]
+    values = length(var.control_plane_subnets) == 0 ? local.default_control_plane_subnets : var.control_plane_subnets
+  }
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.ids) >= 2
+      error_message = "Not enough subnets were found for the EKS control plane in VPC ${var.vpc_id}. Ensure that the subnets exist before deploying this module."
+    }
   }
 }
 
 resource "aws_ec2_tag" "subnet_tags" {
-  for_each    = var.control_plane_subnets
-  resource_id = data.aws_subnet.control_plane_subnets[each.key].id
+  for_each = toset(data.aws_subnets.control_plane_subnets.ids)
+
+  resource_id = each.key
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
 }
 
 resource "aws_ec2_tag" "vpc_tags" {
-  for_each    = toset([for sub in data.aws_subnet.control_plane_subnets : sub.vpc_id])
-  resource_id = each.key
+  resource_id = var.vpc_id
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
 }
 
 resource "aws_security_group" "control_plane" {
   description = "Security group for the ${var.cluster_name} EKS control plane."
-  vpc_id      = local.vpc_id
+  vpc_id      = var.vpc_id
   tags = merge(data.pf_aws_tags.tags.tags, {
     Name        = var.cluster_name
     description = "Security group for the ${var.cluster_name} EKS control plane."
@@ -213,29 +244,6 @@ module "encrypt_key" {
   admin_iam_arns             = var.extra_admin_principal_arns
   reader_iam_arns            = var.extra_reader_principal_arns
   restricted_reader_iam_arns = var.extra_reader_principal_arns
-}
-
-moved {
-  from = aws_eks_addon.coredns
-  to   = aws_eks_addon.coredns[0]
-}
-
-resource "aws_eks_addon" "coredns" {
-  count                       = var.core_dns_addon_enabled ? 1 : 0
-  cluster_name                = aws_eks_cluster.cluster.name
-  addon_name                  = "coredns"
-  addon_version               = var.coredns_version
-  resolve_conflicts_on_update = "OVERWRITE"
-  resolve_conflicts_on_create = "OVERWRITE"
-}
-
-resource "aws_eks_addon" "kube_proxy" {
-  count                       = var.core_dns_addon_enabled ? 1 : 0
-  cluster_name                = aws_eks_cluster.cluster.name
-  addon_name                  = "coredns"
-  addon_version               = var.coredns_version
-  resolve_conflicts_on_update = "OVERWRITE"
-  resolve_conflicts_on_create = "OVERWRITE"
 }
 
 ////////////////////////////////////////////////////////////
@@ -389,18 +397,47 @@ resource "aws_eks_access_policy_association" "restricted_reader" {
 ##########################################################################
 ## Node Groups
 ##########################################################################
-data "aws_subnet" "node_groups" {
-  for_each = toset(var.node_subnets)
-  vpc_id   = var.vpc_id
+
+locals {
+  node_subnets         = length(var.node_subnets) == 0 ? local.default_node_subnets : var.node_subnets
+  node_subnet_az_count = length(toset([for subnet in data.aws_subnet.node_groups : subnet.availability_zone]))
+}
+
+data "aws_subnets" "node_groups" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
   filter {
     name   = "tag:Name"
-    values = [each.key]
+    values = local.node_subnets
+  }
+
+  lifecycle {
+    precondition {
+      condition     = data.pf_metadata.metadata.sla_target >= 2 && length(local.node_subnets) >= 3
+      error_message = "If the sla_target >= 2, then at least 3 node_subnets must be specified."
+    }
+    postcondition {
+      condition     = (data.pf_metadata.metadata.sla_target >= 2 && length(self.ids) >= 3) || (data.pf_metadata.metadata.sla_target >= 2 && length(self.ids) == 0)
+      error_message = "Subnets specified by node_subnets were not found in VPC ${var.vpc_id}. Ensure that the subnets exist before deploying this module."
+    }
+    postcondition {
+      condition     = length(self.ids) >= length(local.node_subnets)
+      error_message = "Duplicate subnets with the same name found in ${var.vpc_id}. Subnets in the same VPC must have unique Name tags."
+    }
   }
 }
 
+data "aws_subnet" "node_groups" {
+  for_each = toset(data.aws_subnets.node_groups.ids)
+  id       = each.key
+}
+
 resource "aws_ec2_tag" "node_subnet_tags" {
-  for_each    = toset(var.node_subnets)
-  resource_id = data.aws_subnet.node_groups[each.key].id
+  for_each = toset(data.aws_subnets.node_groups.ids)
+
+  resource_id = each.key
   key         = "kubernetes.io/cluster/${var.cluster_name}"
   value       = "owned"
 }
@@ -473,7 +510,7 @@ resource "aws_eks_node_group" "controllers" {
   node_group_name_prefix = "controllers-"
   cluster_name           = var.cluster_name
   node_role_arn          = aws_iam_role.node_group.arn
-  subnet_ids             = [for subnet in var.node_subnets : data.aws_subnet.node_groups[subnet].id]
+  subnet_ids             = data.aws_subnets.node_groups.ids
 
   instance_types = var.bootstrap_mode_enabled ? ["t4g.large"] : ["t4g.medium", "m6g.medium", "m7g.medium"]
 
@@ -569,7 +606,7 @@ data "aws_security_group" "all_nodes_source" {
 resource "aws_security_group" "all_nodes" {
   description = "Security group for all nodes in the cluster"
   name_prefix = "${var.cluster_name}-nodes-"
-  vpc_id      = local.vpc_id
+  vpc_id      = var.vpc_id
 
   tags = merge(data.pf_aws_tags.tags.tags, {
     Name        = "${var.cluster_name}-nodes"

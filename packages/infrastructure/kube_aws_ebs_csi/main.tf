@@ -53,8 +53,9 @@ module "util_controller" {
   workload_name                        = "ebs-csi-controller"
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = false // Will prevent bootstrapping and simply unnecessary
+  az_spread_preferred                  = var.sla_target == 3
+  host_anti_affinity_required          = var.sla_target == 3
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -136,7 +137,7 @@ resource "helm_release" "ebs_csi_driver" {
 
       controller = {
 
-        replicaCount              = 2
+        replicaCount              = var.sla_target == 3 ? 2 : 1
         tolerations               = module.util_controller.tolerations
         affinity                  = module.util_controller.affinity
         topologySpreadConstraints = module.util_controller.topology_spread_constraints

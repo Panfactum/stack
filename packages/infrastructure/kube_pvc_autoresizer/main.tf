@@ -39,8 +39,9 @@ module "util_controller" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = false // single copy
-  az_spread_preferred                  = false // single copy
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
+  host_anti_affinity_required          = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -90,9 +91,10 @@ resource "helm_release" "pvc_autoresizer" {
           }
         )
 
-        replicaCount      = 1
+        replicas          = var.sla_target >= 2 ? 2 : 1
         priorityClassName = module.constants.cluster_important_priority_class_name
         tolerations       = module.util_controller.tolerations
+        affinity          = module.util_controller.affinity
 
         resources = {
           requests = {

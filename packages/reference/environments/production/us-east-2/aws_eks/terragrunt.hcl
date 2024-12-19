@@ -18,15 +18,6 @@ inputs = {
   cluster_name        = "production-primary"
   cluster_description = "The primary production kubernetes cluster"
 
-  control_plane_subnets = [
-    "PUBLIC_A",
-    "PUBLIC_B",
-    "PUBLIC_C"
-  ]
-  control_plane_logging = []
-  service_cidr          = "172.20.0.0/16"
-  dns_service_ip        = "172.20.0.10"
-
   bootstrap_mode_enabled = false # Set this to true when you are completing the bootstrap guide
   node_subnets = [
     "PRIVATE_A",

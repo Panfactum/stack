@@ -86,8 +86,8 @@ module "util_destination" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -99,8 +99,8 @@ module "util_identity" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -112,8 +112,8 @@ module "util_proxy_injector" {
   controller_nodes_enabled             = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.enhanced_ha_enabled
-  az_spread_preferred                  = var.enhanced_ha_enabled
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -897,7 +897,7 @@ resource "helm_release" "viz" {
       defaultLogFormat      = "json"
       defaultLogLevel       = var.log_level
       tolerations           = module.util_viz.tolerations
-      enablePodAntiAffinity = var.enhanced_ha_enabled
+      enablePodAntiAffinity = var.sla_target >= 2
       podLabels             = module.util_viz.labels
       commonLabels          = module.util_viz.labels
 

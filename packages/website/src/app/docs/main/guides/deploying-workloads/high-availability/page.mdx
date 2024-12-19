@@ -82,7 +82,16 @@ Required Tuning:
 
 [^5]: Ensure you implement an exponential backoff algorithm to avoid [thundering herd issues.](https://en.wikipedia.org/wiki/Thundering_herd_problem)
 
-## Spot Instances
+## Usage in Panfactum Modules
+
+Many [Panfactum modules](/docs/main/reference/infrastructure-modules/overview) have an `sla_target` input
+that can be used to configure the module to achieve the desired SLA level.
+
+However, not all modules can be automatically configured successfully with a single input.
+
+## FAQ
+
+### Can I really achieve high uptime while running workloads exclusively on spot instances?
 
 You might be tempted to avoid scheduling instances on spot instances in order to achieve maximum uptime. This is unnecessary.
 
