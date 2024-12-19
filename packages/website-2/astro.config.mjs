@@ -14,9 +14,8 @@ import remarkMath from 'remark-math'
 
 // https://astro.build/config
 export default defineConfig({
-  // site: "https://panfactum.com",
   cacheDir: '.cache',
-  site: 'http://localhost:3000',
+  site: process.env.SITE_URL ?? 'http://localhost:3000',
   integrations: [
     react(),
     tailwind({ applyBaseStyles: false }),
