@@ -30,6 +30,8 @@ inputs = {
   algolia_api_key        = local.secrets.algolia_api_key
   algolia_search_api_key = "76e7c17dae4d35f581c858ee2784b41a"
   algolia_index_name     = "docs"
+  algolia_index_name_2   = "docs-2"
+  site_url               = "https://website2.panfactum.com"
   scraper_image_version  = "684730eb4430cb0536d9874a9af908ec47f4372b"
   module_bucket          = dependency.module_bucket.outputs.bucket_name
 }

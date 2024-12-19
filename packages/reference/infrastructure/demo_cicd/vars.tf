@@ -62,6 +62,16 @@ variable "algolia_index_name" {
   type        = string
 }
 
+variable "algolia_index_name_2" {
+  description = "The name of the Algolia index to use for the new website"
+  type        = string
+}
+
+variable "site_url" {
+  description = "The URL of the site to use for the search index"
+  type        = string
+}
+
 variable "pf_module_source" {
   description = "The source for Panfactum submodules"
   type = string

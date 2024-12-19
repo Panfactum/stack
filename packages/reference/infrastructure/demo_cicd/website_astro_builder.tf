@@ -93,7 +93,8 @@ module "astro_builder_workflow" {
     BUILDKIT_BUCKET_REGION = var.buildkit_bucket_region
     ALGOLIA_APP_ID = var.algolia_app_id
     ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
-    ALGOLIA_INDEX_NAME = var.algolia_index_name
+    ALGOLIA_INDEX_NAME = var.algolia_index_name_2
+    SITE_URL = var.site_url
   }
   extra_aws_permissions = data.aws_iam_policy_document.astro_builder.json
   default_resources = {

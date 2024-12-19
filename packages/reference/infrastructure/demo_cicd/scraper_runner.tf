@@ -28,6 +28,11 @@ module "run_scraper_workflow_spec" {
         name = "sitemap_url"
         description = "The URL of the sitemap to scrape"
         default = "https://panfactum.com/sitemap.xml"
+      },
+
+      {
+        name = "algolia_index_name"
+        description = "The index name in algolia to update"
       }
     ]
   }
@@ -51,7 +56,7 @@ module "run_scraper_workflow_spec" {
       container = {
         image = "891377197483.dkr.ecr.us-east-2.amazonaws.com/scraper:${var.scraper_image_version}"
         command = ["node"]
-        args = ["index.js", "{{workflow.parameters.sitemap_url}}"]
+        args = ["index.js", "{{workflow.parameters.sitemap_url}}", "{{workflow.parameters.algolia_index_name}}"]
       }
     },
     {
