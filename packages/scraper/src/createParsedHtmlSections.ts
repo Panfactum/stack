@@ -101,7 +101,7 @@ function parseUrlContent (content: string): UrlContent[] {
 
         const headingNumber = parseInt(<string>tagName[1])
         const anchorElement = node.querySelector('a[id]')
-        const sectionAnchor = anchorElement ? `#${anchorElement.getAttribute('id')}` : node.getAttribute('id') ?? ''
+        const sectionAnchor = anchorElement ? `#${anchorElement.getAttribute('id')}` : `#${node.getAttribute('id') ?? ''}`
         const headingText = node.textContent?.trim() ?? ''
 
         // Update the hierarchy

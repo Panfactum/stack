@@ -39,11 +39,11 @@ module "run_scraper_workflow_spec" {
 
   default_resources = {
     requests = {
-      cpu    = "50m"
-      memory = "250Mi"
+      cpu    = "100m"
+      memory = "512Mi"
     }
     limits = {
-      memory = "500Mi"
+      memory = "1024Mi"
     }
   }
 
