@@ -11,53 +11,59 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
+## Unreleased
+
+### Fixed
+
+* The StatefulSets in [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) no longer need to be redeployed after each update of resource tags / labels.
+
 ## edge.24-12-19
 
 ### Breaking Changes
 
 * Introduces the concept of [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels).
-This makes it easier to (a) know what uptime you can expect from Panfactum deployments, and (b) make it easier to adjust the cost-to-availability
-tradeoff for entire subsections of the deployment.
+  This makes it easier to (a) know what uptime you can expect from Panfactum deployments, and (b) make it easier to adjust the cost-to-availability
+  tradeoff for entire subsections of the deployment.
 
-    This features comes with the following changes:
+  This features comes with the following changes:
 
-    * Provides a new [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#metadata), `sla_target`, that can be used to set the target level for a particular scope (e.g., environment, region, module).
+  * Provides a new [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#metadata), `sla_target`, that can be used to set the target level for a particular scope (e.g., environment, region, module).
     It defaults to `3`.
-    * The default behavior for Panfactum modules will now automatically adjust to the provided `sla_target`.
-    * The `enhanced_ha_enabled` input has been removed from all modules. The previous behavior
+  * The default behavior for Panfactum modules will now automatically adjust to the provided `sla_target`.
+  * The `enhanced_ha_enabled` input has been removed from all modules. The previous behavior
     when `enhanced_ha_enabled` was set to `true` (the default) is now equivalent to setting `sla_target` to `3` (the default).
 
 * This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
-    * `pf`: 0.0.5 -> 0.0.7
+  * `pf`: 0.0.5 -> 0.0.7
 
 ### Added
 
 * Adds support for arbitrary path rewriting in [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
-[kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
-[aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn), and
-[aws_s3_public_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website).
+  [kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
+  [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn), and
+  [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website).
 
 * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) now supports
-sourcing base images from private ECR repositories.
+  sourcing base images from private ECR repositories.
 
 * Adds `not_found_path` to [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) to facilitate
-specifying the asset to load when no object exists at the requested path.
+  specifying the asset to load when no object exists at the requested path.
 
 * Adds `custom_error_responses` to [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) which can be used to overwrite error
-responses from the upstream origin.
+  responses from the upstream origin.
 
 ### Fixed
 
 * Addressed conflicting PDB issue with the [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
-module that prevented vertical autoscaling from working.
+  module that prevented vertical autoscaling from working.
 
 * Standard Panfactum environment variables for Kubernetes workloads are now injected *before* user-defined environment variables to make them
-available for use in [dependent variables.](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/)
+  available for use in [dependent variables.](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/)
 
-* Standard Panfactum environment variables for Kubernetes workflows will no longer override user-defined environment variables.
+* Standard Panfactum environment variables for Kubernetes workloads will no longer override user-defined environment variables.
 
 * Addressed issue where the CRDS in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
-were not automatically upgraded.
+  were not automatically upgraded.
 
 * Fixed incorrect AWS permissions in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
 
@@ -75,9 +81,9 @@ were not automatically upgraded.
   * Accidental lock-out is now fully prevented.
   * One fewer location where custom SSO roles need to be synchronized.
 
-* The `kube_priority_classes` module has been consolidated with [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
-  in order to remove a superfluous onboarding step. Please destroy any deployments of it **immediately before upgrading
-  [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)**.
+* The `kube_priority_classes` module has been consolidated with [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+  in order to remove a superfluous bootstrapping step. Please destroy any deployments of it **immediately before upgrading
+  [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)**.
 
 * `eks_cluster_name` is no longer an input to most submodules as it is now dynamically resolved based on which
   cluster you are deploying to.
@@ -150,14 +156,25 @@ were not automatically upgraded.
 ## edge.24-12-05
 
 <MarkdownAlert severity="warning">
-    When upgrading `aws_eks` to this version, you may receive an error about attempting to recreate the cluster due to this change:
+  When upgrading `aws_eks` to this version, you may receive an error about attempting to recreate the cluster due to this change:
 
-    ```shell-session
-    bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
-    ```
+  ```shell-session
+  bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
+  ```
 
-    To workaround this issue, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
-    `bootstrap_cluster_creator_admin_privileges` input to `true`.
+  To workaround this issue, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
+  `bootstrap_cluster_creator_admin_privileges` input to `true`.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+  [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) in this version contains a bug
+  that forces redeployment of the underlying NATS StatefulSet on every tag / label update. This also impacts
+  [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) which utilizes
+  NATS under the hood.
+
+  This will cause complete loss of any pending NATS messages in any Jetstream streams. For most users, this should be OK
+  as NATS is primarily used for temporary storage as an event bus. However, if you cannot afford to lose your stream data, you
+  should delay upgrading those modules until your cluster reaches `edge.24-12-22` which contains the fix.
 </MarkdownAlert>
 
 ### Breaking Changes
@@ -178,7 +195,7 @@ were not automatically upgraded.
   * [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
   * The remainder of the modules may be updated in any order.
 
-* The NATS backend for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) has been replaced
+* The NATS backend for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) has been replaced
   with our enhanced NATS module, [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats). This provides improved
   availability, security, observability, and performance.
 

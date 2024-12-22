@@ -63,6 +63,7 @@ module "event_source" {
       }
     }
   }
+  depends_on = [module.event_bus]
 }
 
 module "ingress" {

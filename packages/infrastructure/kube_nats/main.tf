@@ -109,7 +109,7 @@ resource "helm_release" "nats" {
       }
 
       podLabels    = module.util.labels
-      commonLabels = merge(data.pf_kube_labels.labels.labels, module.util.match_labels)
+      commonLabels = data.pf_kube_labels.labels.labels
 
       replicaCount              = 3 # Always use 3 as this uses RAFT consensus
       resourceType              = "statefulset"
@@ -202,57 +202,100 @@ resource "helm_release" "nats" {
       networkPolicy = {
         enabled = false
       }
+      service = {
+        labels = data.pf_kube_labels.labels.labels
+      }
     })
   ]
 
   timeout = 60 * 15
 
-  depends_on = [kubectl_manifest.add_sts_annotations]
+  depends_on = [
+    kubectl_manifest.sts_fixup,
+    kubectl_manifest.pvc_label_policy
+  ]
 }
 
-resource "kubectl_manifest" "add_sts_annotations" {
+resource "kubectl_manifest" "sts_fixup" {
   yaml_body = yamlencode({
     apiVersion = "kyverno.io/v1"
     kind       = "Policy"
     metadata = {
-      name      = "${local.cluster_name}-add-annotations"
+      name      = "${local.cluster_name}-fixup"
       namespace = var.namespace
       labels    = data.pf_kube_labels.labels.labels
     }
     spec = {
       useServerSideApply = true
-      rules = [{
-        name = "add-sts-annotations"
-        match = {
-          any = [{
-            resources = {
-              kinds      = ["StatefulSet"]
-              names      = [local.cluster_name]
-              operations = ["CREATE", "UPDATE"]
-            }
-          }]
-        }
-        mutate = {
-          mutateExistingOnPolicyUpdate = true
-          targets = [{
-            apiVersion = "apps/v1"
-            kind       = "StatefulSet"
-            name       = local.cluster_name
-          }]
-          patchStrategicMerge = {
-            metadata = {
-              annotations = merge(
-                {
-                  "panfactum.com/db-type"      = "NATS"
-                  "panfactum.com/service"      = "${local.cluster_name}.${var.namespace}.svc.cluster.local"
-                  "panfactum.com/service-port" = "4222"
-                },
-                { for role in toset(["superuser", "reader", "admin"]) : "panfactum.com/${role}-role" => vault_pki_secret_backend_role.pki_roles[role].name }
-              )
+      rules = [
+        {
+          name = "add-sts-annotations"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["StatefulSet"]
+                  names      = [local.cluster_name]
+                  operations = ["CREATE", "UPDATE"]
+                }
+              }
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "apps/v1"
+                kind       = "StatefulSet"
+                name       = local.cluster_name
+              }
+            ]
+            patchStrategicMerge = {
+              metadata = {
+                annotations = merge(
+                  {
+                    "panfactum.com/db-type"      = "NATS"
+                    "panfactum.com/service"      = "${local.cluster_name}.${var.namespace}.svc.cluster.local"
+                    "panfactum.com/service-port" = "4222"
+                  },
+                  {
+                    for role in toset(["superuser", "reader", "admin"]) : "panfactum.com/${role}-role" =>
+                    vault_pki_secret_backend_role.pki_roles[role].name
+                  }
+                )
+              }
             }
           }
+        },
+
+        // volume claim templates can be updated so we need to remove the labels as they are frequently updated
+        {
+          name = "replace-sts-volume-claim-template-labels"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds      = ["StatefulSet"]
+                  names      = [local.cluster_name]
+                  operations = ["CREATE", "UPDATE"]
+                }
+              }
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = false // This cannot be updated after creation
+            patchesJson6902 = yamlencode([
+              {
+                op   = "replace"
+                path = "/spec/volumeClaimTemplates/0/metadata/labels"
+                value = {
+                  "panfactum.com/pvc-group" = "${var.namespace}.${random_id.id.hex}" // This wont change and is required by the autoresizer
+                }
+              }
+            ])
+          }
         }
-      }]
+      ]
     }
   })
 
@@ -335,8 +378,7 @@ resource "kubectl_manifest" "vpa" {
 * PVC Annotations
 ***************************************/
 
-// The helm chart does not allow us to label PVCs directly but this is required
-// by the autoresizer
+// PVC labels cannot be applied via the STS template
 resource "kubectl_manifest" "pvc_label_policy" {
   yaml_body = yamlencode({
     apiVersion = "kyverno.io/v1"
@@ -353,20 +395,24 @@ resource "kubectl_manifest" "pvc_label_policy" {
         match = {
           any = [{
             resources = {
-              kinds = ["PersistentVolumeClaim"]
-              selector = {
-                matchLabels = module.util.match_labels
-              }
-              operations = ["CREATE"]
+              kinds      = ["PersistentVolumeClaim"]
+              names      = ["data-${local.cluster_name}-*"]
+              operations = ["CREATE", "UPDATE"]
             }
           }]
         }
         mutate = {
+          mutateExistingOnPolicyUpdate = true
+          targets = [
+            {
+              apiVersion = "apps/v1"
+              kind       = "StatefulSet"
+              name       = "{{ request.object.metadata.name }}"
+            }
+          ]
           patchStrategicMerge = {
             metadata = {
-              labels = {
-                "panfactum.com/pvc-group" = "${var.namespace}.${random_id.id.hex}"
-              }
+              labels = data.pf_kube_labels.labels.labels
             }
           }
         }

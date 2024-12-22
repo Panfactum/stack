@@ -398,4 +398,6 @@ module "sensor" {
 #       }
 #     }
   ]
+
+  depends_on = [module.event_bus]
 }

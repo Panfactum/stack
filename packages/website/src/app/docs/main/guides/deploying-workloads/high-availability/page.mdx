@@ -14,7 +14,7 @@ and cost for each of your clusters and workloads. For example, you might priorit
 in development / test environments while prioritizing availability in production environments.
 
 Panfactum modules will adjust their default behavior based on the `sla_target` [Terragrunt variable.](/docs/main/reference/configuration/terragrunt-variables#metadata) [^1] [^80]
-That said, there are a handful of actions you must take to achieve any target _in addition to_ setting the `sla_target` variable. We detail those tuning requirements below.
+That said, there are a handful of actions you must take to achieve any target *in addition to* setting the `sla_target` variable. We detail those tuning requirements below.
 
 [^80]: This default behavior can always be overridden by providing explicit inputs to any given module.
 
@@ -59,8 +59,8 @@ Required Tuning:
 
 * Set `sla_target` to `2`.
 * Either:
-    * (Cheaper) Ensure that all workloads that connect to Panfactum-provided databases connect via their corresponding HA mechanism. [^60]
-    * (Expensive) Disable disruptions in the relevant Panfactum-provided database modules.
+  * (Cheaper) Ensure that all workloads that connect to Panfactum-provided databases connect via their corresponding HA mechanism. [^60]
+  * (Expensive) Disable disruptions in the relevant Panfactum-provided database modules.
 * Everything else in Level 1.
 
 [^60]: For example, use PgBouncer for PostgreSQL use PgBouncer or Sentinel for Redis.
@@ -76,15 +76,13 @@ Required Tuning:
 
 * Set `sla_target` to `3`.
 * Either:
-    * Implement client-side retries for *all* network requests. [^5]
-    * Use Linkerd to implement [automatic retries in the service-mesh layer.](https://linkerd.io/2-edge/features/retries-and-timeouts/)
+  * Implement client-side retries for *all* network requests. [^5]
+  * Use Linkerd to implement [automatic retries in the service-mesh layer.](https://linkerd.io/2-edge/features/retries-and-timeouts/)
 * Everything else in Level 2.
 
 [^5]: Ensure you implement an exponential backoff algorithm to avoid [thundering herd issues.](https://en.wikipedia.org/wiki/Thundering_herd_problem)
 
 ## Setting the SLA Target
-
-
 
 ## FAQ
 

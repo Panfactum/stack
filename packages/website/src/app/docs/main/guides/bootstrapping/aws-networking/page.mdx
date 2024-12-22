@@ -1,10 +1,9 @@
-import MarkdownImage from "@/components/markdown/MarkdownImage";
 import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownImage from "@/components/markdown/MarkdownImage";
 
 import natImg from './nat.jpg'
 import vpcImg from './vpc.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
-
 
 # AWS Networking
 
@@ -16,14 +15,12 @@ that will contain all of your deployed resources.
 If you are new to cloud networking, we recommend that your review the [concept documentation](/docs/main/concepts/networking/aws-primitives) before proceeding.
 
 <MarkdownAlert severity="info">
+  Up to now, we have focused on setting up **all** environments in each section. Moving forward,
+  this guide will focus on setting up infrastructure for a **single** environment at a time. We recommend
+  starting with your `production` environment and then returning here for additional environments as needed.
 
-Up to now, we have focused on setting up **all** environments in each section. Moving forward,
-this guide will focus on setting up infrastructure for a **single** environment at a time. We recommend
-starting with your `production` environment and then returning here for additional environments as needed.
-
-Additionally, unless otherwise specified, the following sections of this guide **only** apply to environments that will be hosting Kubernetes clusters.
-Those that do not host live infrastructure (e.g., `management`) do not need much further setup.
-
+  Additionally, unless otherwise specified, the following sections of this guide **only** apply to environments that will be hosting Kubernetes clusters.
+  Those that do not host live infrastructure (e.g., `management`) do not need much further setup.
 </MarkdownAlert>
 
 ## Choose Your SLA Target
@@ -34,9 +31,9 @@ costs.
 
 We provide three different SLA targets:
 
-- **Level 1:** 99.9% uptime (< 45 minutes of downtime / month) -- Lowest cost
-- **Level 2:** 99.99% uptime (< 5 minutes of downtime / month) -- Roughly 2x the cost of level 1
-- **Level 3:** 99.999% uptime (< 30 seconds of downtime / month) -- Roughly 1.5x the cost of level 2
+* **Level 1:** 99.9% uptime (\< 45 minutes of downtime / month) -- Lowest cost
+* **Level 2:** 99.99% uptime (\< 5 minutes of downtime / month) -- Roughly 2x the cost of level 1
+* **Level 3:** 99.999% uptime (\< 30 seconds of downtime / month) -- Roughly 1.5x the cost of level 2
 
 We recommend level 1 for test / development environments and level 2 or above for environments running live workloads. The
 default value is level 3.
@@ -46,7 +43,7 @@ To choose a level, set the [Terragrunt variable](/docs/main/reference/configurat
 deployed in that environment. [^91]
 
 [^91]: The `sla_target` can still be overwritten at more specific scopes such as regions or even on a per-module basis. For
-more information on setting Terragrunt variables, see [the reference docs](/docs/main/reference/configuration/terragrunt-variables#metadata).
+    more information on setting Terragrunt variables, see [the reference docs](/docs/main/reference/configuration/terragrunt-variables#metadata).
 
 ## Create your VPC
 
@@ -79,9 +76,9 @@ We will now deploy the [aws\_vpc](/docs/main/reference/infrastructure-modules/di
    All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.
 
 <MarkdownAlert severity="warning">
-    If you deviate from the default settings for the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module,
-    you will need to follow the instructions inside the module documentation for further instructions on how to configure
-    AWS networking to support Panfactum infrastructure.
+  If you deviate from the default settings for the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module,
+  you will need to follow the instructions inside the module documentation for further instructions on how to configure
+  AWS networking to support Panfactum infrastructure.
 </MarkdownAlert>
 
 [^80]: If your `sla_target` is `1`, then the resources will be deployed in a single AZ. Additionally, there will be fewer subnets and NAT instances than shown below.
