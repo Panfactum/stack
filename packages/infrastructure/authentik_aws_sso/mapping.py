@@ -32,4 +32,5 @@ return {
     "locale": locale,
     "active": request.user.is_active,
     "emails": emails,
+    "photos": None,
 }

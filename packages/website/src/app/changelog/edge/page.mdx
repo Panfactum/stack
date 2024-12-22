@@ -69,6 +69,14 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 ## edge.24-12-13
 
+<MarkdownAlert severity="warning">
+    This Authentik upgrade contains [a problem](https://github.com/goauthentik/authentik/issues/12321) that will result in updates
+    to group names not automatically synchronizing with AWS.
+
+    While we are working with Authentik to develop a workaround, it may be a few more releases until this is resolved. If that
+    is a problem, you should defer an upgrade to this version until the problem is fixed.
+</MarkdownAlert>
+
 ### Breaking Changes
 
 * The `kube_rbac` module has been deprecated and will be removed in the next release. Please destroy any deployments of

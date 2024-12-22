@@ -31,7 +31,7 @@ variable "aws_iam_ip_allow_list" {
 variable "log_level" {
   description = "The log level for the Authentik pods"
   type        = string
-  default     = "error"
+  default     = "debug"
   validation {
     condition     = contains(["info", "error", "trace", "debug"], var.log_level)
     error_message = "Invalid log_level provided."
