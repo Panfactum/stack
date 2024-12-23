@@ -7,7 +7,7 @@
   @apply prose md:prose-base max-w-full text-primary;
 
   @apply prose-h1:font-medium prose-h1:font-machina prose-h1:break-words;
-  @apply prose-h2:py-2 prose-h2:border-b prose-h2:border-primary prose-h2:break-words;
+  @apply prose-h2:py-2 prose-h2:mt-10 prose-h2:border-b prose-h2:border-primary prose-h2:break-words;
   @apply prose-h3:break-words;
   @apply prose-h4:break-words;
   @apply prose-h5:break-words;
