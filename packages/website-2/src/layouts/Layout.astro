@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css'
 import { ClientRouter } from 'astro:transitions'
+import { SEO } from 'astro-seo'
 import { HeaderNav } from '../components/layout/header-nav'
 import Footer from '../components/layout/footer.astro'
 
@@ -15,11 +16,11 @@ console.log('test ', Astro.props.frontmatter)
 
 <html lang="en">
   <head>
-    <title>{Astro.props.title}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={Astro.props.description} />
+
+    <SEO title={Astro.props.title} description={Astro.props.description} />
 
     {
       redirect ? (

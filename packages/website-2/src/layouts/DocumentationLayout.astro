@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css'
 import { ClientRouter } from 'astro:transitions'
+import { SEO } from 'astro-seo'
 import { HeaderNav } from '@/components/layout/header-nav'
 import { Suspense } from 'react'
 import { DocsSidebar } from '@/components/documentation/DocsSidebar'
@@ -34,10 +35,10 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{Astro.props.title}</title>
-    <meta name="description" content={Astro.props.description} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+
+    <SEO title={Astro.props.title} description={Astro.props.description} />
 
     {
       redirect ? (
