@@ -16,15 +16,15 @@
   @apply prose-td:border prose-th:border prose-td:border-secondary prose-th:border-secondary;
   @apply prose-td:py-lg prose-td:px-3xl prose-th:py-lg prose-th:px-3xl prose-th:bg-secondary;
   @apply prose-a:text-brand-secondary prose-a:underline;
-  @apply prose-code:font-montreal prose-code:font-medium prose-code:text-primary prose-code:bg-brand-secondary;
+  @apply prose-code:font-montreal prose-code:font-semibold prose-code:text-primary;
 
   code {
     &:not(pre > code)::before {
-      content: ''; /* Add backtick before the code content */
+      content: '`'; /* Add backtick before the code content */
     }
 
     &:not(pre > code)::after {
-      content: ''; /* Add backtick after the code content */
+      content: '`'; /* Add backtick after the code content */
     }
   }
 
