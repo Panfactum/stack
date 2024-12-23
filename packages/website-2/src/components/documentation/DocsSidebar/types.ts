@@ -3,4 +3,5 @@ export enum NavIcons {
   lightBulb = 'lightBulb',
   book = 'book',
   analyze = 'analyze',
+  history = 'history',
 }

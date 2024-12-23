@@ -40,6 +40,10 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
       title: 'About',
       url: '/about',
     },
+    {
+      title: 'Changelog',
+      url: '/docs/changelog/edge',
+    },
   ])
 
   useEffect(() => {
@@ -55,7 +59,6 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
 
     setNavLinks(newLinks)
   }, [documentationPath])
-
 
   return (
     <div

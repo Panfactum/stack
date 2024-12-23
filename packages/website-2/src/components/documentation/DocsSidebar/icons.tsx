@@ -80,9 +80,34 @@ function AnalyzeIcon() {
   )
 }
 
+function HistoryIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      stroke="#FFD700"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 8V12L14.5 14.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C14.1217 3 16.1566 3.84285 17.6569 5.34315C19.1571 6.84344 20 8.87827 20 11"
+        stroke="#FFD700"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export const iconMapping = {
   [NavIcons.dataFlow]: DataFlowIcon,
   [NavIcons.lightBulb]: LightBulbIcon,
   [NavIcons.book]: BookIcon,
   [NavIcons.analyze]: AnalyzeIcon,
+  [NavIcons.history]: HistoryIcon,
 }
