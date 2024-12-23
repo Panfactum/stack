@@ -37,3 +37,34 @@ export const VERSIONED_SECTIONS: VersionedSection = {
 >
   <Content components={mdxComponents} />
 </DocumentationLayout>
+
+<script>
+  document.addEventListener('click', function (event) {
+    // Check if the clicked element is an anchor inside a heading
+    if (
+      event.target.closest('a') &&
+      event.target.closest('h1, h2, h3, h4, h5, h6')
+    ) {
+      const anchor = event.target.closest('a')
+      const href = anchor.getAttribute('href')
+
+      if (href && href.startsWith('#')) {
+        // Combine the current page URL with the href
+        const fullUrl = `${window.location.origin}${window.location.pathname}${href}`
+
+        // Copy the full URL to the clipboard
+        navigator.clipboard
+          .writeText(fullUrl)
+          .then(() => {
+            console.log(`Copied to clipboard: ${fullUrl}`)
+          })
+          .catch((err) => {
+            console.error('Failed to copy text: ', err)
+          })
+
+        // Prevent the default action of scrolling to the anchor
+        event.preventDefault()
+      }
+    }
+  })
+</script>
