@@ -127,7 +127,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
                     <li class="flex items-center min-h-[20px] py-md text-sm text-quaternary font-semibold">
                       <a
                         href={`#${heading.slug}`}
-                        class={`${depthPadding(heading.depth) - 1}`}
+                        class={`${depthPadding(heading.depth - 1)}`}
                       >
                         {heading.text}
                       </a>
