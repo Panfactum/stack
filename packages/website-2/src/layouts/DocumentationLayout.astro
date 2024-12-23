@@ -34,8 +34,8 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
+    <title>{Astro.props.title}</title>
+    <meta name="description" content={Astro.props.description} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
 
@@ -45,8 +45,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
       ) : null
     }
 
-    <title>{Astro.props.title}</title>
-
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
