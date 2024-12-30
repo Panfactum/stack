@@ -16,6 +16,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 ### Fixed
 
 * The StatefulSets in [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) no longer need to be redeployed after each update of resource tags / labels.
+* `pf-tunnel` now binds to `127.0.0.1` instead of `localhost` to resolve potential connectivity problems on diverse operating systems.
 
 ## edge.24-12-19
 

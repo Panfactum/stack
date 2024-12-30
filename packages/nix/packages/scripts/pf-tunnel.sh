@@ -177,6 +177,6 @@ autossh \
   -o ConnectTimeout=1 \
   -N \
   -i "$KEY_FILE" -i "$SIGNED_PUBLIC_KEY_FILE" \
-  -L "localhost:$LOCAL_PORT:$REMOTE_ADDRESS" \
+  -L "127.0.0.1:$LOCAL_PORT:$REMOTE_ADDRESS" \
   -p "$BASTION_PORT" \
   "panfactum@$BASTION_DOMAIN"

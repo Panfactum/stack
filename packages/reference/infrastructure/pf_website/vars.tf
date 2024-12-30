@@ -24,3 +24,9 @@ variable "pf_module_ref" {
   description = "The git ref for Panfactum submodules"
   type = string
 }
+
+variable "test" {
+  description = "This is a est"
+  type = string
+  default = "0.0.7"
+}
