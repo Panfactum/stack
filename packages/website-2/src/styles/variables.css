@@ -1489,6 +1489,7 @@
           --colors-background-bg-brand-primary: var(--colors-brand-500, #3b81b0);
           --colors-background-bg-brand-primary-alt: var(--colors-gray-light-mode-50,
               #f9fafb);
+          --colors-background-bg-brand-primary-darker: var(--colors-brand-800, '#3b81b0');
           --colors-background-bg-brand-secondary: var(--colors-brand-600, #2f688e);
           --colors-background-bg-brand-section: var(--colors-background-bg-secondary,
               #161b26);
@@ -1983,6 +1984,7 @@
       --colors-background-bg-brand-primary: var(--colors-brand-500, #3b81b0);
       --colors-background-bg-brand-primary-alt: var(--colors-gray-light-mode-50,
           #f9fafb);
+      --colors-background-bg-brand-primary-darker: var(--colors-brand-800, '#3b81b0');
       --colors-background-bg-brand-secondary: var(--colors-brand-600, #2f688e);
       --colors-background-bg-brand-section: var(--colors-background-bg-secondary,
           #161b26);
