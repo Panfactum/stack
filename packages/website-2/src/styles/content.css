@@ -107,4 +107,8 @@
   h6[id] {
     scroll-margin-top: 90px;
   }
+
+  div[role='alert'] a {
+    @apply text-primary;
+  }
 }

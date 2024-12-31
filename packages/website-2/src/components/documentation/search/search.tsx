@@ -113,7 +113,16 @@ export default function Search({ clicked }: { clicked: ClickedCallback }) {
     )
   }
 
-  const crumbs = (crumbs: string[]) => crumbs.join(' > ')
+  const crumbs = (crumbs: string[]) => {
+    const joinedCrumbs = crumbs.map((crumb, index) => {
+      const crumbsLength = crumbs.length;
+      if (index === crumbsLength - 1) {
+        return <span className="text-primary font-bold">{crumb}</span>;
+      }
+      return <span>{crumb}{` > `}</span>;
+    });
+    return joinedCrumbs;
+  }
 
   const createHierarchy = (hierarchy: HitInterface['hierarchy']) => {
     // filter out the last index as that is the current page
