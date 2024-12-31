@@ -98,6 +98,9 @@ module "unseal_key" {
   restricted_reader_iam_arns = var.restricted_reader_iam_arns
 }
 
+/***************************************
+* AWS Permissions
+***************************************/
 
 data "aws_iam_policy_document" "sa" {
   statement {

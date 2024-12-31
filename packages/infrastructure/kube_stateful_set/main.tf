@@ -239,28 +239,6 @@ resource "kubectl_manifest" "vpa" {
   depends_on        = [kubectl_manifest.stateful_set]
 }
 
-resource "kubectl_manifest" "pdb" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = "${var.name}-pdb"
-      namespace = var.namespace
-      labels    = module.pod_template.labels
-    }
-    spec = {
-      selector = {
-        matchLabels = module.pod_template.match_labels
-      }
-      maxUnavailable             = var.max_unavailable
-      unhealthyPodEvictionPolicy = var.unhealthy_pod_eviction_policy
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [kubectl_manifest.stateful_set]
-}
-
 module "pvc_annotator" {
   source = "../kube_pvc_annotator"
 
@@ -274,4 +252,59 @@ module "pvc_annotator" {
     }
     labels = module.pod_template.labels
   } }
+}
+
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "${var.name}-pdb"
+      namespace = var.namespace
+      labels    = module.pod_template.labels
+      labels = merge(
+        module.pod_template.labels,
+        {
+          "panfactum.com/voluntary-disruption-window-id" = var.voluntary_disruption_window_enabled ? module.disruption_window_controller[0].disruption_window_id : "false"
+        }
+      )
+      annotations = {
+        "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
+        "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
+      }
+    }
+    spec = {
+      selector = {
+        matchLabels = module.pod_template.match_labels
+      }
+      maxUnavailable = var.voluntary_disruptions_enabled && !var.voluntary_disruption_window_enabled ? 1 : 0
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubectl_manifest.stateful_set]
+  ignore_fields = concat(
+    [
+      "metadata.annotations.panfactum.com/voluntary-disruption-window-start"
+    ],
+    var.voluntary_disruption_window_enabled ? [
+      "spec.maxUnavailable"
+    ] : []
+  )
+}
+
+/***************************************
+* Disruption Windows
+***************************************/
+
+module "disruption_window_controller" {
+  count  = var.voluntary_disruption_window_enabled ? 1 : 0
+  source = "../kube_disruption_window_controller"
+
+  namespace                   = var.namespace
+  vpa_enabled                 = var.vpa_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+
+  cron_schedule = var.voluntary_disruption_window_cron_schedule
 }

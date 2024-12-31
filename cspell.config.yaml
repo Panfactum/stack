@@ -205,7 +205,10 @@ words: [
   "Jetstream",
   "prepull",
   "prepuller",
-  "Prepuller"
+  "Prepuller",
+  "FLUSHALL",
+  "Noco",
+  "nocodb"
 ]
 languageSettings:
   - languageId: markdown,mdx

@@ -69,6 +69,11 @@ data "vault_policy_document" "superusers" {
     description  = "allow all on auth"
   }
   rule {
+    path         = "aws/*"
+    capabilities = ["sudo", "create", "read", "update", "patch", "delete", "list"]
+    description  = "allow all on aws secrets backend"
+  }
+  rule {
     path         = "sys/*"
     capabilities = ["sudo", "create", "read", "update", "patch", "delete", "list"]
     description  = "allow all on sys"

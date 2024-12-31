@@ -17,3 +17,8 @@ output "service_account_name" {
   description = "The service account used for the pods"
   value       = kubernetes_service_account.service_account.metadata[0].name
 }
+
+output "service_name" {
+  description = "The name of the service for the deployment"
+  value       = length(keys(local.service_ports)) > 0 ? module.service[0].service_name : null
+}

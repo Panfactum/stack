@@ -264,6 +264,21 @@ Type: `bool`
 
 Default: `false`
 
+### disabled\_commands
+
+Description: Commands that are disabled in Redis. This can be used to provide global protection against unsafe commands.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "FLUSHDB",
+  "FLUSHALL"
+]
+```
+
 ### helm\_version
 
 Description: The version of the bitnami/redis helm chart to use

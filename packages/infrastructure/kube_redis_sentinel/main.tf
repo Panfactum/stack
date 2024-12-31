@@ -206,6 +206,8 @@ resource "helm_release" "redis" {
           var.redis_flags
         )
 
+        disableCommands = var.disabled_commands
+
         extraEnvVars = [
           {
             name = "MEMORY_REQUEST"

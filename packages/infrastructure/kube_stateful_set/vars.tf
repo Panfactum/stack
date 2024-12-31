@@ -394,3 +394,27 @@ variable "linkerd_enabled" {
   type        = bool
   default     = true
 }
+
+variable "voluntary_disruptions_enabled" {
+  description = "Whether to enable voluntary disruptions of pods in this module."
+  type        = bool
+  default     = true
+}
+
+variable "voluntary_disruption_window_enabled" {
+  description = "Whether to confine voluntary disruptions of pods in this module to specific time windows"
+  type        = bool
+  default     = false
+}
+
+variable "voluntary_disruption_window_seconds" {
+  description = "The length of the disruption window in seconds"
+  type        = number
+  default     = 60 * 15
+}
+
+variable "voluntary_disruption_window_cron_schedule" {
+  description = "The times when disruption windows should start"
+  type        = string
+  default     = "0 0/4 * * *"
+}

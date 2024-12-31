@@ -16,6 +16,14 @@ terraform {
       source  = "panfactum/pf"
       version = "0.0.7"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.80.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.3"
+    }
   }
 }
 
@@ -25,6 +33,10 @@ locals {
 }
 
 data "pf_kube_labels" "labels" {
+  module = "vault_core_resources"
+}
+
+data "pf_aws_tags" "tags" {
   module = "vault_core_resources"
 }
 
@@ -47,6 +59,72 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
 resource "vault_mount" "db" {
   path = "db"
   type = "database"
+}
+
+/***************************************
+* AWS Secrets Backend
+***************************************/
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "vault" {
+  statement {
+    sid    = "AWSSecretsEngineUserManagement"
+    effect = "Allow"
+    actions = [
+      "iam:AttachUserPolicy",
+      "iam:CreateAccessKey",
+      "iam:CreateUser",
+      "iam:DeleteAccessKey",
+      "iam:DeleteUser",
+      "iam:DeleteUserPolicy",
+      "iam:DetachUserPolicy",
+      "iam:GetUser",
+      "iam:ListAccessKeys",
+      "iam:ListAttachedUserPolicies",
+      "iam:ListGroupsForUser",
+      "iam:ListUserPolicies",
+      "iam:PutUserPolicy",
+      "iam:AddUserToGroup",
+      "iam:RemoveUserFromGroup",
+      "iam:TagUser"
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/vault-*"]
+  }
+}
+
+resource "aws_iam_policy" "vault" {
+  name_prefix = "vault-"
+  policy      = data.aws_iam_policy_document.vault.json
+  tags        = data.pf_aws_tags.tags.tags
+}
+
+resource "random_id" "vault_user" {
+  byte_length = 8
+  prefix      = "vault-"
+}
+
+resource "aws_iam_user" "vault" {
+  name = random_id.vault_user.hex
+  tags = data.pf_aws_tags.tags.tags
+}
+
+resource "aws_iam_user_policy_attachment" "vault" {
+  policy_arn = aws_iam_policy.vault.arn
+  user       = aws_iam_user.vault.name
+}
+
+resource "aws_iam_access_key" "vault" {
+  user = aws_iam_user.vault.name
+}
+
+resource "vault_aws_secret_backend" "aws" {
+  path                      = "aws"
+  region                    = data.aws_region.current.name
+  description               = "Dynamically provisions IAM credentials"
+  access_key                = aws_iam_access_key.vault.id
+  secret_key                = aws_iam_access_key.vault.secret
+  default_lease_ttl_seconds = 60 * 60 * 16
 }
 
 /***************************************

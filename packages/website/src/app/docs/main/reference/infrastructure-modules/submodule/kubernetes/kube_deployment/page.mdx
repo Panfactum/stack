@@ -539,6 +539,38 @@ Type: `string`
 
 Default: `"RollingUpdate"`
 
+### voluntary\_disruption\_window\_cron\_schedule
+
+Description: The times when disruption windows should start
+
+Type: `string`
+
+Default: `"0 0/4 * * *"`
+
+### voluntary\_disruption\_window\_enabled
+
+Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
+
+Type: `bool`
+
+Default: `false`
+
+### voluntary\_disruption\_window\_seconds
+
+Description: The length of the disruption window in seconds
+
+Type: `number`
+
+Default: `900`
+
+### voluntary\_disruptions\_enabled
+
+Description: Whether to enable voluntary disruptions of pods in this module.
+
+Type: `bool`
+
+Default: `true`
+
 ### vpa\_enabled
 
 Description: Whether to enable the vertical pod autoscaler
@@ -570,6 +602,10 @@ Description: The labels unique to this Deployment that can be used to select any
 ### service\_account\_name
 
 Description: The service account used for the pods
+
+### service\_name
+
+Description: The name of the service for the deployment
 
 ## Maintainer Notes
 

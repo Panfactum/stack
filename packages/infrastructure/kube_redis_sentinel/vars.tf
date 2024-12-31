@@ -178,3 +178,9 @@ variable "node_image_cached_enabled" {
   type        = bool
   default     = true
 }
+
+variable "disabled_commands" {
+  description = "Commands that are disabled in Redis. This can be used to provide global protection against unsafe commands."
+  type        = list(string)
+  default     = ["FLUSHDB", "FLUSHALL"]
+}

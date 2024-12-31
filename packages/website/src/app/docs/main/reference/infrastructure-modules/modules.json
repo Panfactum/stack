@@ -146,6 +146,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_aws_creds",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_aws_ebs_csi",
       "type": "direct",
       "group": "kubernetes"
@@ -241,6 +246,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_grist",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_ingress",
       "type": "submodule",
       "group": "kubernetes"
@@ -298,6 +308,11 @@
     {
       "module": "kube_nats",
       "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_nocodb",
+      "type": "direct",
       "group": "kubernetes"
     },
     {
