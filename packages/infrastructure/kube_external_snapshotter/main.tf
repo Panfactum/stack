@@ -69,6 +69,8 @@ resource "helm_release" "external_snapshotter" {
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  atomic          = true
+  force_update    = true
   max_history     = 5
 
   values = [

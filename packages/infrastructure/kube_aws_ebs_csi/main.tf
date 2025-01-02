@@ -125,6 +125,8 @@ resource "helm_release" "ebs_csi_driver" {
   chart           = "aws-ebs-csi-driver"
   version         = var.aws_ebs_csi_driver_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

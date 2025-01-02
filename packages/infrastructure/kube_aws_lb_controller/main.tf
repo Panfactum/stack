@@ -406,6 +406,7 @@ resource "helm_release" "alb_controller" {
   chart           = "aws-load-balancer-controller"
   version         = var.alb_controller_helm_version
   recreate_pods   = false
+  atomic          = true
   force_update    = true
   cleanup_on_fail = true
   wait            = true

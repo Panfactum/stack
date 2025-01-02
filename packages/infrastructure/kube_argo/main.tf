@@ -308,6 +308,8 @@ resource "helm_release" "argo" {
   chart           = "argo-workflows"
   version         = var.argo_workflows_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
@@ -625,6 +627,8 @@ resource "helm_release" "argo_events" {
   chart           = "argo-events"
   version         = var.argo_events_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

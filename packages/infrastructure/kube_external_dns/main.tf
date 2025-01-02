@@ -164,6 +164,8 @@ resource "helm_release" "external_dns" {
   chart           = "external-dns"
   version         = var.external_dns_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

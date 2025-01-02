@@ -142,6 +142,7 @@ resource "helm_release" "vault" {
   repository      = "https://helm.releases.hashicorp.com"
   chart           = "vault"
   version         = var.vault_helm_version
+  atomic          = true
   recreate_pods   = false
   cleanup_on_fail = true
   wait            = true

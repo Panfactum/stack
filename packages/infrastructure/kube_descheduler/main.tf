@@ -102,6 +102,8 @@ resource "helm_release" "descheduler" {
   chart           = "descheduler"
   version         = var.descheduler_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

@@ -477,9 +477,10 @@ resource "helm_release" "prometheus_stack" {
   chart           = "kube-prometheus-stack"
   version         = var.kube_prometheus_stack_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
-  wait            = false
-  wait_for_jobs   = false
+  wait            = true
+  wait_for_jobs   = true
   max_history     = 5
 
   values = [
@@ -1205,6 +1206,7 @@ resource "helm_release" "prometheus_stack" {
     binary_path = "${path.module}/prometheus_kustomize/kustomize.sh"
   }
 
+  timeout    = 60 * 15
   depends_on = [module.grafana_db]
 }
 
@@ -1337,9 +1339,10 @@ resource "helm_release" "thanos" {
   chart           = "thanos"
   version         = var.thanos_chart_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
-  wait            = false
-  wait_for_jobs   = false
+  wait            = true
+  wait_for_jobs   = true
   max_history     = 5
 
   values = [
@@ -1632,6 +1635,7 @@ resource "helm_release" "thanos" {
     })
   ]
 
+  timeout    = 60 * 15
   depends_on = [helm_release.prometheus_stack, module.thanos_redis_cache]
 }
 

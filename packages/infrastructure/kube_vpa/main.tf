@@ -121,6 +121,8 @@ resource "helm_release" "vpa" {
   chart           = "vpa"
   version         = var.vertical_autoscaler_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

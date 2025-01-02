@@ -156,9 +156,11 @@ resource "helm_release" "runner" {
   chart           = "gha-runner-scale-set"
   version         = var.gha_runner_scale_set_helm_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  force_update    = true
   max_history     = 5
 
   values = [

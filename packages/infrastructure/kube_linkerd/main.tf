@@ -34,9 +34,7 @@ locals {
   namespace = module.namespace.namespace
 
   linkerd_root_ca_secret                   = "linkerd-identity-trust-roots" # MUST be named this
-  linkerd_root_issuer                      = "linkerd-root-issuer"
   linkerd_identity_issuer                  = "linkerd-identity-issuer"
-  linkerd_identity_ca_secret               = "linkerd-identity-issuer"
   linkerd_policy_validator_webhook_secret  = "linkerd-policy-validator-k8s-tls" # MUST be named this
   linkerd_proxy_injector_webhook_secret    = "linkerd-proxy-injector-k8s-tls"   # MUST be named this
   linkerd_profile_validator_webhook_secret = "linkerd-sp-validator-k8s-tls"     # MUST be named this
@@ -251,8 +249,6 @@ module "linkerd_profile_validator" {
   renew_before  = "1680h0m0s"
 }
 
-
-
 /***************************************
 * Linkerd
 ***************************************/
@@ -264,6 +260,7 @@ resource "helm_release" "linkerd_crds" {
   chart           = "linkerd-crds"
   version         = var.linkerd_helm_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
@@ -423,6 +420,7 @@ resource "helm_release" "linkerd" {
   chart           = "linkerd-control-plane"
   version         = var.linkerd_helm_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
@@ -887,6 +885,7 @@ resource "helm_release" "viz" {
   chart           = "linkerd-viz"
   version         = var.linkerd_helm_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

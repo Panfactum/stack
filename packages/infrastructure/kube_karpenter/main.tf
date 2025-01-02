@@ -543,6 +543,7 @@ resource "helm_release" "karpenter_crds" {
   chart           = "karpenter-crd"
   version         = var.karpenter_helm_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
@@ -561,9 +562,11 @@ resource "helm_release" "karpenter" {
   chart           = "karpenter"
   version         = var.karpenter_helm_version
   recreate_pods   = false
+  atomic          = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
+  force_update    = true
   skip_crds       = true # managed above
   max_history     = 5
 

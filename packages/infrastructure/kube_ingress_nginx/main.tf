@@ -154,9 +154,10 @@ resource "helm_release" "nginx_ingress" {
   chart           = "ingress-nginx"
   version         = var.nginx_ingress_helm_version
   recreate_pods   = false
+  atomic          = true
   force_update    = true
   cleanup_on_fail = true
-  wait            = false
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -393,6 +394,7 @@ resource "helm_release" "nginx_ingress" {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
 
+  timeout    = 60 * 30
   depends_on = [module.webhook_cert]
 }
 

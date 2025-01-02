@@ -179,6 +179,8 @@ resource "helm_release" "velero" {
   chart           = "velero"
   version         = var.velero_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

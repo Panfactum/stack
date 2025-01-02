@@ -17,6 +17,8 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 * This release adds some additional functionality to Vault which requires [vault_auth_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to be upgraded before any other module.
 
+* The `kube_rbac` and `kube_priority_classes` modules have been removed per the deprecation notice in `edge.24-12-13`.
+
 ### Added
 
 * Adds a module for deploying [Grist](https://www.getgrist.com/), a next-generation spreadsheet system: [kube_grist](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_grist).
@@ -27,6 +29,9 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 provide native support for voluntary disruption windows.
 
 ### Fixed
+
+* Helm charts deployed by Panfactum modules will not be automatically rolled back on deployment failure which should prevent
+several failure cases where manual intervention would have otherwise been necessary.
 
 * The StatefulSets in [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) no longer need to be redeployed after each update of resource tags / labels.
 

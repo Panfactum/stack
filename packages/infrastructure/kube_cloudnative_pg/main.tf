@@ -89,6 +89,8 @@ resource "helm_release" "cnpg" {
   chart           = "cloudnative-pg"
   version         = var.cloudnative_pg_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true

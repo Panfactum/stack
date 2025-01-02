@@ -153,6 +153,7 @@ resource "helm_release" "kyverno" {
   chart           = local.name
   version         = var.kyverno_helm_version
   recreate_pods   = false
+  atomic          = true
   force_update    = true
   cleanup_on_fail = true
   wait            = true

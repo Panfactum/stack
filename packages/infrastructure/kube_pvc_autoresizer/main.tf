@@ -66,6 +66,8 @@ resource "helm_release" "pvc_autoresizer" {
   chart           = "pvc-autoresizer"
   version         = var.pvc_autoresizer_helm_version
   recreate_pods   = false
+  atomic          = true
+  force_update    = true
   cleanup_on_fail = true
   wait            = true
   wait_for_jobs   = true
