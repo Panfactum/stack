@@ -35,7 +35,7 @@
   }
 
   section.footnotes {
-    @apply bg-brand-primary;
+    @apply bg-brand-primary-darker;
     @apply mx-[-16px] md:mx-[-32px] px-[16px] md:px-[32px] py-[16px];
 
     h2 {
@@ -75,12 +75,17 @@
   h1,
   h2,
   h3,
+  th,
   span {
     @apply text-primary;
   }
 
+  th {
+    white-space: nowrap;
+  }
+
   img {
-    @apply bg-[transparent] p-4 dark:bg-[#e9e8eb];
+    @apply bg-[transparent] dark:bg-[#e9e8eb];
   }
 
   strong {
@@ -101,5 +106,9 @@
   h5[id],
   h6[id] {
     scroll-margin-top: 90px;
+  }
+
+  div[role='alert'] a {
+    @apply text-primary;
   }
 }

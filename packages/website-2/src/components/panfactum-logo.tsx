@@ -1,7 +1,7 @@
-export function PanfactumLogo() {
+export function PanfactumLogo({ className }: { className?: string}) {
   return (
     <svg
-      className="text-primary"
+      className={`text-primary ${className}`}
       width="183"
       height="32"
       viewBox="0 0 183 32"

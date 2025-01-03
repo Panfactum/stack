@@ -105,7 +105,7 @@ export function DocsSidebar({
       <Collapsible defaultOpen={isActive} className="group/collapsible">
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButtonTreeItem asChild isActive={isActive}>
+            <SidebarMenuButton asChild isActive={isActive}>
               <div>
                 <span aria-selected={isActive} className="font-semibold">
                   {text}
@@ -122,7 +122,7 @@ export function DocsSidebar({
                   <path d="m9 18 6-6-6-6"></path>
                 </svg>
               </div>
-            </SidebarMenuButtonTreeItem>
+            </SidebarMenuButton>
           </CollapsibleTrigger>
         </SidebarMenuItem>
 
@@ -142,7 +142,7 @@ export function DocsSidebar({
 
                 return (
                   <SidebarMenuItem key={el.text}>
-                    <SidebarMenuButton asChild isActive={isActive}>
+                    <SidebarMenuButtonTreeItem asChild isActive={isActive}>
                       <a
                         href={sectionPath + el.path}
                         className="text-md"
@@ -151,7 +151,7 @@ export function DocsSidebar({
                       >
                         {el.text}
                       </a>
-                    </SidebarMenuButton>
+                    </SidebarMenuButtonTreeItem>
                   </SidebarMenuItem>
                 )
               })}
@@ -187,7 +187,7 @@ export function DocsSidebar({
       setOpenMobile={setOpenMobile}
     >
       <SidebarContent>
-        <SidebarMenu className="relative pb-20">
+        <SidebarMenu className="relative pb-0 md:pb-10">
           <div
             className={`flex flex-col gap-y-lg p-4 sticky h-full top-0 bg-primary z-top-navigation`}
           >

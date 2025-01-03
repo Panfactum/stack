@@ -16,6 +16,8 @@ export default {
     'bg-primary',
     'bg-secondary',
     'bg-brand-primary',
+    'bg-brand-primary-darker',
+    'bg-brand-overlay'
   ],
   theme: {
     colors: {
@@ -26,6 +28,7 @@ export default {
         DEFAULT: 'black',
       },
       'brand-primary': 'var(--colors-background-bg-brand-primary)',
+      'brand-primary-darker': 'var(--colors-background-bg-brand-primary-darker)',
       gradientBorder: `linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%)`,
     },
     extend: {
@@ -58,6 +61,7 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        'brand-overlay': 'hsl(var(--colors-background-bg-overlay))',
       },
       spacing: {
         none: '0px',

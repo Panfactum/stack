@@ -10,6 +10,8 @@ const showFooter =
   Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
 
 const redirect = Astro.props.redirect
+
+const hasDarkBackground = Astro.props.darkBackground ? Astro.props.darkBackground : false
 ---
 
 <html lang="en">
@@ -43,7 +45,7 @@ const redirect = Astro.props.redirect
         <HeaderNav
           currentPath={pathname}
           client:load
-          darkBackground={Astro.props.darkBackground}
+          darkBackground={hasDarkBackground}
           transition:persist
         />
       </div>

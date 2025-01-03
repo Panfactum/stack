@@ -12,18 +12,18 @@ import './header-nav.css'
 export interface HeaderNav {
   currentPath: string
   darkBackground: boolean
-  hasBorder: boolean
+  hasBorder?: boolean
 }
 
 export interface NavLinks {
   title: string
   url: string
-  override?: string
+  override?: string | null
 }
 
 const GITHUB_URL = 'https://github.com/Panfactum/stack'
 
-export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
+export function HeaderNav({ currentPath, hasBorder, darkBackground = false, ...props }: HeaderNav) {
   const { link: documentationPath } = useLastDocumentationPath()
 
   const [mobileOpened, setMobileOpened] = useState(false)
@@ -65,11 +65,11 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
       className={`flex items-center justify-center h-20 border-b w-full ${hasBorder ? 'border-primary' : 'border-[transparent]'}`}
     >
       <div
-        className={`container flex justify-between items-center self-stretch ${props.darkBackground ? 'dark' : ''} px-container-padding-mobile xl:px-container-padding-desktop`}
+        className={`container flex justify-between items-center self-stretch ${darkBackground ? 'dark' : ''} px-container-padding-mobile xl:px-container-padding-desktop`}
       >
         <div className="flex space-x-5xl">
           <a href="/">
-            <PanfactumLogo />
+            <PanfactumLogo className={`${darkBackground ? 'text-primary':'text-primary'}`} />
           </a>
           <nav className="hidden gap-x-xl lg:gap-x-5xl self-stretch text-base md:flex button-text-tertiary-fg">
             {navLinks.map((link) => {
@@ -77,7 +77,7 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
                 <Button
                   variant="ghost"
                   size="lg"
-                  className={`!px-0 ${props.darkBackground ? 'text-offWhite' : 'text-tertiary'} hover:text-primary shadow-none ${currentPath.includes(link.url) ? 'text-primary font-bold' : ''}`}
+                  className={`!px-0 hover:text-primary shadow-none ${currentPath.includes(link.url) ? darkBackground ? 'text-primary font-bold' : 'text-primary font-bold' :  'text-tertiary'}`}
                   asChild={true}
                   key={link.title}
                 >
@@ -106,7 +106,7 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
             onClick={() => setMobileOpened(!mobileOpened)}
             icon={mobileOpened ? faXmark : faBars}
             size={'2xl'}
-            className={`fg-secondary-text ${props.darkBackground ? 'dark' : ''}`}
+            className={`fg-secondary-text ${darkBackground ? 'dark' : ''}`}
           />
         </div>
       </div>
@@ -114,7 +114,7 @@ export function HeaderNav({ currentPath, hasBorder, ...props }: HeaderNav) {
         {mobileOpened && (
           <HeaderNavMobile
             currentPath={currentPath}
-            darkBackground={props.darkBackground}
+            darkBackground={darkBackground}
             open={mobileOpened}
             setMobileOpened={setMobileOpened}
             navLinks={navLinks}
