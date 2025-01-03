@@ -19,7 +19,7 @@ RUN apt update && \
   apt-get clean autoclean && \
   apt-get autoremove -y && \
   rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
-  npm i -g pnpm@8.6.12
+  npm i -g pnpm@9.14.2
 
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
