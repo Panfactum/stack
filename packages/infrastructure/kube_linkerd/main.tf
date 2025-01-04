@@ -369,6 +369,8 @@ resource "kubectl_manifest" "linkerd_cni_policy" {
                   {
                     name = "remove-taint"
 
+                    terminationGracePeriodSeconds = 10 // Accelerates node shutdown
+
                     # module.aws_pull_through is required as this isn't guaranteed to go through the global pod mutator
                     image = "${module.aws_pull_through.docker_hub_registry}/bitnami/kubectl:${data.kubectl_server_version.version.major}.${data.kubectl_server_version.version.minor}"
                     command = [
@@ -403,6 +405,10 @@ resource "kubectl_manifest" "linkerd_cni_policy" {
           }
         }
       ]
+      // If this fails, then the taint will NOT be removed by the CNI pod, BUT we have a background controller that runs periodically to do a taint fix-up
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 

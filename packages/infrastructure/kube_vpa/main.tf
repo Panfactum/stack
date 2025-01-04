@@ -565,6 +565,9 @@ resource "kubectl_manifest" "adjust_vpa_settings" {
           }
         }
       ]
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 

@@ -60,6 +60,9 @@ resource "kubectl_manifest" "update_image_cache" {
           }
         }
       }]
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 

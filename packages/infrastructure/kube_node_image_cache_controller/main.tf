@@ -204,6 +204,9 @@ resource "kubectl_manifest" "kyverno_policy" {
           }
         ]
       ])
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 

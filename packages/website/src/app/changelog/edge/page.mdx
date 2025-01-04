@@ -11,7 +11,7 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
-## Unreleased
+## edge.24-01-04
 
 ### Breaking Changes
 
@@ -29,6 +29,10 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 provide native support for voluntary disruption windows.
 
 ### Fixed
+
+* Addressed issue where pods could not be created if all Kyverno admission controllers are disrupted simultaneously. As the Kyverno admission controller
+is itself composed of pods, this would result in a cluster deadlock that required manual intervention. This degenerate behavior
+has been fully resolved in this release.
 
 * Addressed issue where the Kubernetes API server address was set incorrectly when deploying [kube_cilium](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cilium)
 with [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
@@ -322,6 +326,16 @@ several failure cases where manual intervention would have otherwise been necess
 * Fixed mount permissions in [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec).
 
 ## edge.24-11-13
+
+<MarkdownAlert severity="warning">
+    This release introduces [Kyverno](https://kyverno.io/docs/introduction/). Unfortunately, we discovered several issues
+    with our initial architecture that could cause degenerate cluster behavior eventually resulting in a full cluster shutdown.
+
+    Generally, this takes days to occur, so it is safe to upgrade to this release so long as you immediately continue to upgrade
+    to subsequent releases where the issues are resolved.
+
+    All issues were fully resolved in the `edge.25-01-04` release.
+</MarkdownAlert>
 
 ### Breaking Changes
 

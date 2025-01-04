@@ -215,7 +215,6 @@ resource "helm_release" "nats" {
 
   depends_on = [
     kubectl_manifest.sts_fixup,
-    kubectl_manifest.pvc_label_policy
   ]
 }
 
@@ -299,6 +298,18 @@ resource "kubectl_manifest" "sts_fixup" {
           }
         }
       ]
+      webhookConfiguration = {
+        matchConditions = [
+          {
+            name       = "name"
+            expression = "object.name == '${local.cluster_name}'"
+          },
+          {
+            name       = "namespace"
+            expression = "object.namespace == '${var.namespace}'"
+          }
+        ]
+      }
     }
   })
 
@@ -380,53 +391,6 @@ resource "kubectl_manifest" "vpa" {
 /***************************************
 * PVC Annotations
 ***************************************/
-
-// PVC labels cannot be applied via the STS template
-resource "kubectl_manifest" "pvc_label_policy" {
-  yaml_body = yamlencode({
-    apiVersion = "kyverno.io/v1"
-    kind       = "Policy"
-    metadata = {
-      name      = "${local.cluster_name}-add-pvc-labels"
-      namespace = var.namespace
-      labels    = data.pf_kube_labels.labels.labels
-    }
-    spec = {
-      useServerSideApply = true
-      rules = [{
-        name = "add-pvc-group-label"
-        match = {
-          any = [{
-            resources = {
-              kinds      = ["PersistentVolumeClaim"]
-              names      = ["data-${local.cluster_name}-*"]
-              operations = ["CREATE", "UPDATE"]
-            }
-          }]
-        }
-        mutate = {
-          mutateExistingOnPolicyUpdate = true
-          targets = [
-            {
-              apiVersion = "apps/v1"
-              kind       = "StatefulSet"
-              name       = "{{ request.object.metadata.name }}"
-            }
-          ]
-          patchStrategicMerge = {
-            metadata = {
-              labels = data.pf_kube_labels.labels.labels
-            }
-          }
-        }
-      }]
-    }
-  })
-
-  force_new         = true
-  force_conflicts   = true
-  server_side_apply = true
-}
 
 module "pvc_annotator" {
   source = "../kube_pvc_annotator"

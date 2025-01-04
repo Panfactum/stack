@@ -61,6 +61,9 @@ resource "kubectl_manifest" "sync_secret" {
           }
         } : k => v if v != null }
       ]
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
     }
   })
 
