@@ -285,11 +285,11 @@ Default: `"8.5.1"`
 
 ### instance\_type\_anti\_affinity\_required
 
-Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type. Defaults to true iff sla\_target >= 2.
 
 Type: `bool`
 
-Default: `true`
+Default: `null`
 
 ### log\_level
 

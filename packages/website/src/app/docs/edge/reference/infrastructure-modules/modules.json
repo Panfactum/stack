@@ -146,6 +146,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_aws_creds",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_aws_ebs_csi",
       "type": "direct",
       "group": "kubernetes"
@@ -241,6 +246,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_grist",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_ingress",
       "type": "submodule",
       "group": "kubernetes"
@@ -301,6 +311,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_nocodb",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_node_image_cache",
       "type": "submodule",
       "group": "kubernetes"
@@ -331,22 +346,12 @@
       "group": "kubernetes"
     },
     {
-      "module": "kube_priority_classes",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
       "module": "kube_pvc_annotator",
       "type": "submodule",
       "group": "kubernetes"
     },
     {
       "module": "kube_pvc_autoresizer",
-      "type": "direct",
-      "group": "kubernetes"
-    },
-    {
-      "module": "kube_rbac",
       "type": "direct",
       "group": "kubernetes"
     },

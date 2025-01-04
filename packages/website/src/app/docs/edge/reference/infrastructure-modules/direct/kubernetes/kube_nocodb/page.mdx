@@ -4,12 +4,17 @@ import ModuleHeader from "../../../ModuleHeader";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_authentik" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_authentik" status="stable" type="direct" />
+<ModuleHeader name="kube_nocodb" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_nocodb" status="alpha" type="direct" />
 
-# Authentik
+# NocoDB
 
-This module deploys an [Authentik](https://goauthentik.io/) instance to the
-Kubernetes cluster.
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
+<MarkdownAlert severity="warning">
+  We are waiting on some additional security features to be added to NocoDB before we officially support this module.
+</MarkdownAlert>
+
+This module deploys an [NocoDB](https://nocodb.com/) instance to the Kubernetes cluster.
 
 ## Providers
 
@@ -33,33 +38,15 @@ The following providers are needed by this module:
 
 The following input variables are required:
 
-### akadmin\_email
+### domain
 
-Description: The email address to use for the root authentik administrator. Warning: must be changed manually once applied.
-
-Type: `string`
-
-### email\_from\_address
-
-Description: The 'from' address to use for sent emails
+Description: The domain from which NocoDB will serve traffic
 
 Type: `string`
 
-### smtp\_host
+### superuser\_email
 
-Description: The SMTP server for email sending
-
-Type: `string`
-
-### smtp\_password
-
-Description: The password to use for SMTP authentication for email sending
-
-Type: `string`
-
-### smtp\_user
-
-Description: The user to use for SMTP authentication for email sending
+Description: The email address to use for the root NocoDB administrator. Warning: must be changed manually once applied.
 
 Type: `string`
 
@@ -67,13 +54,29 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### authentik\_helm\_version
+### attachment\_max\_allowed
 
-Description: The version of the Authentik helm chart to deploy
+Description: The maximum number of attachments allowed per cell.
 
-Type: `string`
+Type: `number`
 
-Default: `"2024.8.4"`
+Default: `10`
+
+### attachment\_max\_size\_mb
+
+Description: The maximum file size allowed for attachments in MB.
+
+Type: `number`
+
+Default: `20`
+
+### auth\_expires\_hours
+
+Description: How many hours that users' authentication is valid before expiring and requiring a new login.
+
+Type: `number`
+
+Default: `10`
 
 ### aws\_iam\_ip\_allow\_list
 
@@ -115,25 +118,9 @@ Type: `string`
 
 Default: `null`
 
-### domain
-
-Description: A list of domains from which authentik will serve traffic
-
-Type: `string`
-
-Default: `null`
-
-### error\_reporting\_enabled
-
-Description: True iff errors should be reported to Authentik for telemetry purposes
-
-Type: `bool`
-
-Default: `true`
-
 ### ingress\_enabled
 
-Description: Whether to enable ingress to the Authentik server
+Description: Whether to enable ingress to the NocoDB server
 
 Type: `bool`
 
@@ -141,7 +128,7 @@ Default: `false`
 
 ### log\_level
 
-Description: The log level for the Authentik pods
+Description: The log level for the NocoDB pods
 
 Type: `string`
 
@@ -161,15 +148,15 @@ Description: Kubernetes namespace to deploy the resources into
 
 Type: `string`
 
-Default: `"authentik"`
+Default: `"nocodb"`
 
-### node\_image\_cached\_enabled
+### nocodb\_version
 
-Description: Whether to add the container images to the node image cache for faster startup times
+Description: The version of NocoDB to use
 
-Type: `bool`
+Type: `string`
 
-Default: `true`
+Default: `"0.258.10"`
 
 ### panfactum\_scheduler\_enabled
 
@@ -182,6 +169,14 @@ Default: `true`
 ### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### secure\_attachments\_enabled
+
+Description: Enables access to attachments only through pre-signed URLs.
 
 Type: `bool`
 
@@ -207,22 +202,6 @@ Default: `true`
 
 The following outputs are exported:
 
-### akadmin\_bootstrap\_password
-
-Description: The initial password for the root akadmin user. Only used on initial bootstrapping.
-
-### akadmin\_bootstrap\_token
-
-Description: The initial API token for the root akadmin user. Only used on initial bootstrapping.
-
-### akadmin\_email
-
-Description: The email for the root akadmin user.
-
-### authentik\_url
-
-Description: n/a
-
 ### db\_admin\_role
 
 Description: n/a
@@ -243,17 +222,9 @@ Description: n/a
 
 Description: n/a
 
-### email\_templates\_configmap
-
-Description: n/a
-
-### media\_configmap
-
-Description: n/a
-
 ### namespace
 
-Description: n/a
+Description: The name of the namespace where NocoDB will be deployed.
 
 ### redis\_admin\_role
 
@@ -266,6 +237,18 @@ Description: n/a
 ### redis\_superuser\_role
 
 Description: n/a
+
+### s3\_bucket
+
+Description: The name of the S3 bucket where NocoDB will store attachments and other assets.
+
+### superuser\_email
+
+Description: The email for the superuser user.
+
+### superuser\_password
+
+Description: The password for the superuser user.
 
 ## Usage
 
