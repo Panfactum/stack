@@ -10,7 +10,7 @@ WORKDIR /code
 FROM base AS deps
 
 # Install package manager
-RUN npm i -g pnpm@8.6.12
+RUN npm i -g pnpm@9.14.2
 
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .

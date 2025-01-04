@@ -302,11 +302,11 @@ resource "kubectl_manifest" "sts_fixup" {
         matchConditions = [
           {
             name       = "name"
-            expression = "object.name == '${local.cluster_name}'"
+            expression = "request.name == '${local.cluster_name}'"
           },
           {
             name       = "namespace"
-            expression = "object.namespace == '${var.namespace}'"
+            expression = "request.namespace == '${var.namespace}'"
           }
         ]
       }

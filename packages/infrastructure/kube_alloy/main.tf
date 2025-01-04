@@ -26,16 +26,6 @@ terraform {
 locals {
   name      = "alloy"
   namespace = module.namespace.namespace
-
-  default_resources = {
-    requests = {
-      cpu    = "100m"
-      memory = "100Mi"
-    }
-    limits = {
-      memory = "130Mi"
-    }
-  }
 }
 
 data "pf_kube_labels" "labels" {
@@ -129,6 +119,12 @@ resource "helm_release" "alloy" {
         tolerations       = module.util.tolerations
         priorityClassName = "system-node-critical"
         podLabels         = module.util.labels
+        updateStrategy = {
+          rollingUpdate = {
+            maxUnavailable = "50%"
+            maxSurge       = 0
+          }
+        }
       }
       configReloader = {
         resources = {

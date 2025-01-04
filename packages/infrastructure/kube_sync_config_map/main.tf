@@ -61,9 +61,6 @@ resource "kubectl_manifest" "sync_config_map" {
         } : k => v if v != null }
       ]
     }
-    webhookConfiguration = {
-      failurePolicy = "Ignore"
-    }
   })
 
   force_conflicts   = true

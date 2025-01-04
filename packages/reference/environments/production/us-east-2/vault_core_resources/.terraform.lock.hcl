@@ -30,7 +30,10 @@ provider "registry.opentofu.org/hashicorp/aws" {
   version     = "5.80.0"
   constraints = "5.80.0"
   hashes = [
+    "h1:AzWX+yfyr80tEDK4KeuW7jrv0Vwc3ey3k5LlSNgHAqA=",
     "h1:JoC16JBBEQAl6WML0CtzXZ6xjJuTnDDYsCmG1fLnclc=",
+    "h1:RLfM1ji62WasileQ6RcGcMTagUwU1CrAQPkxw+Lpxq8=",
+    "h1:z1HH4XyEYXVbsp8Jc1sAsIE5IAiijOCqRSpH8OKiTnA=",
     "zh:2760f2847f77d9841166e45c47d45aebb5edc9074499002d9f5ce6f3d00fe7d0",
     "zh:2e9ad4857237e8daba6dc83c43d236b8c357b6fec52aef579615be9318f5a32a",
     "zh:61e3c674399b1a847cd1b42f26dfb7bdc971d98ac036d4b3ab35f341a77a4caf",
@@ -48,6 +51,9 @@ provider "registry.opentofu.org/hashicorp/helm" {
   version = "2.17.0"
   hashes = [
     "h1:69PnHoYrrDrm7C8+8PiSvRGPI55taqL14SvQR/FGM+g=",
+    "h1:ShIag7wqd5Rs+zYpVMpjAh+T0ozr4XGYfSTKWqceQBY=",
+    "h1:gy5bFfc81+K/Mi5KRQ6LfRJmgyaTxJnLTzDK+OYJAQg=",
+    "h1:ojHGbVqPy4ShrUnNL7jif6AnEwgc8vC8sP7f37/VBC8=",
     "zh:02690815e35131a42cb9851f63a3369c216af30ad093d05b39001d43da04b56b",
     "zh:27a62f12b29926387f4d71aeeee9f7ffa0ccb81a1b6066ee895716ad050d1b7a",
     "zh:2d0a5babfa73604b3fefc9dab9c87f91c77fce756c2e32b294e9f1290aed26c0",
@@ -59,6 +65,7 @@ provider "registry.opentofu.org/hashicorp/helm" {
     "zh:c5c8575c4458835c2acbc3d1ed5570589b14baa2525d8fbd04295c097caf41eb",
     "zh:e0877a5dac3de138e61eefa26b2f5a13305a17259779465899880f70e11314e0",
   ]
+  constraints = "2.17.0"
 }
 
 provider "registry.opentofu.org/hashicorp/kubernetes" {

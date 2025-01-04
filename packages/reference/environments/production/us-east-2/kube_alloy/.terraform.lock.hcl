@@ -27,23 +27,23 @@ provider "registry.opentofu.org/alekc/kubectl" {
 }
 
 provider "registry.opentofu.org/hashicorp/aws" {
-  version     = "5.82.0"
-  constraints = "5.82.0"
+  version     = "5.82.2"
+  constraints = "5.82.2"
   hashes = [
-    "h1:3ciyoYyQXydWJVMM3DOuSfw49U+iBmsoejxoC1nP9pQ=",
-    "h1:U86youC2fZKVgIsRskzlTfrUgxYT0rJx+aKUQYqfKW8=",
-    "h1:Wx5t+wX6z/6N8DzGMRu4MytH/X/kLToc+nYp468lLZU=",
-    "h1:cjOh730j+ofM9sonlRJvxWg3LUq65vYsNDtjBdQz9r0=",
-    "zh:0ed6d69d1d2c1a2fd4ba58a6704bb57e22a22639717acb38e021c58f17e65033",
-    "zh:28a693e995e6d45a694c24e9b09710b6e69dcdf17702b4abfb625af62f4d028c",
-    "zh:3398a683f18f2e2354857b14ecc75043248e688dc39e17ce19a54781f8c9db18",
-    "zh:3c85e969be5279254cbb4f20e7a98606baf426dd1f64551223859b56c4e5a5a5",
-    "zh:4c60c44d064ad6a1692ba7f2562c9e142cdfd08cd06def1ccbc199e83844894b",
-    "zh:6ab6a6c6b9f4526b3f2c482b31b4a648b76d04649dccf4bf01a06e88e64c9154",
-    "zh:b3810c116d4d6cdc1e1cf1cffc835ef2107bc8825568f8ac5584001c670ed763",
-    "zh:b85d04a7f4ae986e230b15c6a2f77b33cda5d4ed7d33fa0f201187ba1ae7ef3c",
-    "zh:c77c3dd39b254ba0987c5ce0220bef7b3ba0ac2fbd5c084341a7f0f8ccd4188f",
-    "zh:d0d60cde9cb8fb4d72afda5ade760a2690b3b3daa3450520b7ef00d91a8870ce",
+    "h1:65B6GjFmKobkuaO58AcDPUu/otnTR7qRTynWTgU5A7Q=",
+    "h1:9QRxRf9iCT7UPymoHdcif0DcKwKAM/PiQ75VBrl9W+o=",
+    "h1:HwdF1WwnK7Y6Z8fR4iqqljekNcmsbe3jlItid/WdWno=",
+    "h1:wEwqAP2jUhjiTUKJCrluI+MyHXyb2u6N+yTTCosk+d8=",
+    "zh:0c662b1f27119941e2329155070c8a81f6979e3d5e98296949f373c46487d84e",
+    "zh:56cbaeaf050174bb9ba9a00f31fe441365ffece6ad39254885c9d4e6517e27e3",
+    "zh:6e7f66c9f9955deb9ce0a2ae4b6df366b3b6bc3e23bca1fcdd4351ecab3ec907",
+    "zh:7971a22df020391ca20936584282d01f3380bcfc79260afbdf04d6b4d50cf75a",
+    "zh:7b8f2175447e64c9a9c9624818a597cd6c1609f379f7f8e3e179ee7394a467b7",
+    "zh:a805e26eb7f58e46b130decab79c0871dfd73206d7bd6c1793e27c2dc35fd8b6",
+    "zh:b6163e746c77d47269c0e3014bdc1f805152b3d94471dd6443373d91b848cf45",
+    "zh:c46872fd0c304852bd506c036f31dbe047a97036992319a3c594949538651680",
+    "zh:d586f1ef412f336ede54d720a78f11a64952a39bfe401e141d24826530cb2449",
+    "zh:ddaf2e1de0f1660ac31c5f1bebd40cc2b29e19f64bf41591c3b5df00dc268367",
   ]
 }
 
