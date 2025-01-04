@@ -30,6 +30,9 @@ provide native support for voluntary disruption windows.
 
 ### Fixed
 
+* Addressed issue where the Kubernetes API server address was set incorrectly when deploying [kube_cilium](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cilium)
+with [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+
 * Helm charts deployed by Panfactum modules will not be automatically rolled back on deployment failure which should prevent
 several failure cases where manual intervention would have otherwise been necessary.
 
@@ -95,6 +98,11 @@ several failure cases where manual intervention would have otherwise been necess
 
     While we are working with Authentik to develop a workaround, it may be a few more releases until this is resolved. If that
     is a problem, you should defer an upgrade to this version until the problem is fixed.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
 </MarkdownAlert>
 
 ### Breaking Changes
@@ -203,6 +211,12 @@ several failure cases where manual intervention would have otherwise been necess
   This will cause complete loss of any pending NATS messages in any Jetstream streams. For most users, this should be OK
   as NATS is primarily used for temporary storage as an event bus. However, if you cannot afford to lose your stream data, you
   should delay upgrading those modules until your cluster reaches `edge.24-12-22` which contains the fix.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+    Due to the default memory floor for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+    introduced in this release, inbound webhook events for Argo EventSource's may be rejected intermittently. `edge.25-01-04`
+    contains more sane defaults and includes more options for tuning the EventBus to handle different traffic load patterns.
 </MarkdownAlert>
 
 ### Breaking Changes

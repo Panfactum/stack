@@ -37,6 +37,10 @@ data "pf_kube_labels" "labels" {
 }
 data "pf_metadata" "metadata" {}
 
+data "aws_eks_cluster" "cluster" {
+  name = data.pf_metadata.metadata.kube_cluster_name // We must do this lookup since we set `data.pf_metadata.kube_api_server` is set to a VIP in the CI / CD pipeline (which doesn't work with the Cilium install)
+}
+
 module "util_controller" {
   source = "../kube_workload_utility"
 
@@ -187,7 +191,7 @@ resource "helm_release" "cilium" {
       // shifts so you MUST use the internal EKS API DNS name
       // in order for this to continue to work
       kubeProxyReplacement = true
-      k8sServiceHost       = trimprefix(local.cluster_url, "https://")
+      k8sServiceHost       = trimprefix(data.aws_eks_cluster.cluster.endpoint, "https://")
       k8sServicePort       = 443
 
       // Enhanced load balancing capabilities

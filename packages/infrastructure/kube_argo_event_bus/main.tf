@@ -19,36 +19,8 @@ terraform {
   }
 }
 
-locals {
-  default_resources = {
-    requests = {
-      memory = "100Mi"
-      cpu    = "100m"
-    }
-    limits = {
-      memory = "130Mi"
-    }
-  }
-}
-
-data "aws_region" "current" {}
-
 data "pf_kube_labels" "labels" {
   module = "kube_argo_event_bus"
-}
-
-module "util" {
-  source                               = "../kube_workload_utility"
-  workload_name                        = "argo-event-bus"
-  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
-  az_spread_required                   = true // stateful workload
-  extra_labels                         = data.pf_kube_labels.labels.labels
-}
-
-module "constants" {
-  source = "../kube_constants"
 }
 
 /***************************************
@@ -56,10 +28,48 @@ module "constants" {
 ***************************************/
 
 module "nats" {
-  source            = "../kube_nats"
-  minimum_memory_mb = 100
+  source = "../kube_nats"
+
+  helm_version = var.helm_version
 
   namespace = var.namespace
+
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
+  node_image_cached_enabled   = var.node_image_cached_enabled
+  monitoring_enabled          = var.monitoring_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  vpa_enabled                 = var.vpa_enabled
+
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
+  minimum_memory_mb                    = var.minimum_memory_mb
+
+  max_outstanding_catchup_mb = var.max_outstanding_catchup_mb
+  fsync_interval_seconds     = var.fsync_interval_seconds
+  ping_interval_seconds      = var.ping_interval_seconds
+  write_deadline_seconds     = var.write_deadline_seconds
+  max_payload_mb             = var.max_payload_mb
+  max_control_line_kb        = var.max_control_line_kb
+  max_connections            = var.max_connections
+
+  cert_manager_namespace                = var.cert_manager_namespace
+  vault_internal_url                    = var.vault_internal_url
+  vault_internal_pki_backend_mount_path = var.vault_internal_pki_backend_mount_path
+
+  persistence_storage_class_name                 = var.persistence_storage_class_name
+  persistence_backups_enabled                    = var.persistence_backups_enabled
+  persistence_initial_storage_gb                 = var.persistence_initial_storage_gb
+  persistence_storage_increase_gb                = var.persistence_storage_increase_gb
+  persistence_storage_increase_threshold_percent = var.persistence_storage_increase_threshold_percent
+  persistence_storage_limit_gb                   = var.persistence_storage_limit_gb
+
+  voluntary_disruptions_enabled             = var.voluntary_disruptions_enabled
+  voluntary_disruption_window_enabled       = var.voluntary_disruption_window_enabled
+  voluntary_disruption_window_cron_schedule = var.voluntary_disruption_window_cron_schedule
+  voluntary_disruption_window_seconds       = var.voluntary_disruption_window_seconds
 }
 
 /***************************************
@@ -73,7 +83,7 @@ resource "kubectl_manifest" "event_bus" {
     metadata = {
       name      = "default"
       namespace = var.namespace
-      labels    = module.util.labels
+      labels    = data.pf_kube_labels.labels.labels
     }
     spec = {
       jetstreamExotic = {

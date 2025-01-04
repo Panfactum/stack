@@ -31,6 +31,8 @@ data "pf_kube_labels" "labels" {
   module = "kube_nats"
 }
 
+data "pf_metadata" "metadata" {}
+
 resource "random_id" "id" {
   byte_length = 2
   prefix      = "nats-"
@@ -46,9 +48,9 @@ module "util" {
   arm_nodes_enabled                    = var.arm_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required
-  az_spread_required                   = true
-  lifetime_evictions_enabled           = false
+  instance_type_anti_affinity_required = var.instance_type_anti_affinity_required == null ? data.pf_metadata.metadata.sla_target >= 2 : var.instance_type_anti_affinity_required
+  az_spread_required                   = true  // stateful
+  lifetime_evictions_enabled           = false // stateful
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
