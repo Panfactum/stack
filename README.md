@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://panfactum.com/logo.svg" height="150" alt="authentik logo">
+    <img src="https://panfactum.com/logo.svg" height="150" alt="Panfactum logo">
 </p>
 
 ---
