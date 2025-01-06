@@ -104,11 +104,6 @@ several failure cases where manual intervention would have otherwise been necess
     is a problem, you should defer an upgrade to this version until the problem is fixed.
 </MarkdownAlert>
 
-<MarkdownAlert severity="warning">
-    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
-    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
-</MarkdownAlert>
-
 ### Breaking Changes
 
 * The `kube_rbac` module has been deprecated and will be removed in the next release. Please destroy any deployments of
@@ -147,6 +142,11 @@ several failure cases where manual intervention would have otherwise been necess
   where the `git_ref` could not be a branch name.
 
 ## edge.24-12-11
+
+<MarkdownAlert severity="warning">
+    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+</MarkdownAlert>
 
 ### Breaking Changes
 
