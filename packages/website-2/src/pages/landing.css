@@ -1,6 +1,137 @@
 .icon-box {
-    border: 2px solid;
-    border-color: #2F688E;
-    box-shadow: 0px 1px 2px 0px var(--colors-effects-shadows-shadow-xs), 0px -2px 0px 0px #1018280D inset, 0px 0px 0px 1px #1018282E inset;
-    background-color: #2F688E;
+  border: 2px solid;
+  border-color: #2f688e;
+  box-shadow:
+    0px 1px 2px 0px var(--colors-effects-shadows-shadow-xs),
+    0px -2px 0px 0px #1018280d inset,
+    0px 0px 0px 1px #1018282e inset;
+  background-color: #2f688e;
 }
+
+.scroll-container {
+    height: 100px;
+    width: 100%;
+    position: relative;
+    overflow: visible;
+}
+
+.scroll-wrapper {
+    display: flex;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: smoothScroll 30s linear infinite;
+}
+
+.move-icon {
+  flex: none;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  margin: 0 1rem;
+}
+
+.scroll-container.is-reversed .scroll-wrapper {
+    display: flex;
+    position: absolute;
+    overflow: visible;
+    white-space: nowrap;
+    top: 0px;
+    right: 0px;
+    animation: smoothScrollReverse 20s linear infinite;
+}
+
+
+
+@keyframes smoothScroll {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes smoothScrollReverse {
+    from {
+      transform: translate(-200%, 0);
+    }
+    to {
+      transform: translate(-100%, 0);
+    }
+  }
+  
+
+  /* Outer container to position the boxes */
+.fade-container {
+    position: relative;
+    width: 100%;
+    height: 80px;
+    overflow: hidden; 
+    display: flex;
+    justify-content: center;
+}
+  
+  /* Individual boxes */
+  .fade-box {
+    position: absolute;
+    height: 80px;
+    opacity: 0; /* Hidden by default */
+    transform: translateX(-100%), translateY(40px); /* Start slightly lower */
+    animation: fadeSlide 15s linear infinite; /* Duration = 5 boxes * 3s each */
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    border-radius: 5px;
+}
+  
+  /* Keyframes for the animation */
+  @keyframes fadeSlide {
+    0% {
+      opacity: 0;
+      transform: translateY(40px); /* Below the visible area */
+    }
+    10% {
+      opacity: 1;
+      transform: translateY(0); /* Slide into position */
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(0); /* Stay visible */
+    }
+    40% {
+      opacity: 0;
+      transform: translateY(-40px); /* Fade out and move upward */
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-40px); /* Stay hidden */
+    }
+  }
+  
+  /* Assign delays to each box for staggered animation */
+  .fade-box:nth-child(1) {
+    animation-delay: 0s;
+  }
+  
+  .fade-box:nth-child(2) {
+    animation-delay: 3s;
+  }
+  
+  .fade-box:nth-child(3) {
+    animation-delay: 6s;
+  }
+  
+  .fade-box:nth-child(4) {
+    animation-delay: 9s;
+  }
+  
+  .fade-box:nth-child(5) {
+    animation-delay: 12s;
+  }
+  
