@@ -61,7 +61,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
     <ClientRouter />
   </head>
 
-  <body class="font-inter bg-primary text-primary">
+  <body class="font-inter bg-primary text-primary overflow-y-scroll">
     <div
       class="fixed top-0 left-0 top-nav h-[80px] w-full bg-white dark:bg-primary z-50"
     >
@@ -72,8 +72,6 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
         hasBorder={hasBorder}
         transition:persist
       />
-
-      <slot name="hero" />
     </div>
 
     <div
@@ -81,7 +79,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
       style={{ minHeight: `calc(100vh - 80px)`, maxWidth: `1440px` }}
     >
       <nav
-        class="pt-[80px] lg:pt-0 lg:fixed lg:top-[80px] h-auto lg:h-[calc(100vh-80px)] doc-nav flex-none w-full lg:w-[324px]"
+        class="flex-none pt-[80px] lg:pt-0 lg:fixed lg:top-[80px] h-auto lg:h-[calc(100vh-80px)] doc-nav w-[330px]"
       >
         <aside class="hidden crumbs">
           {
@@ -103,11 +101,11 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
       </nav>
       <div
         style={{ '--sidebar-width': headings ? 0 : undefined }}
-        class={`w-full py-[24px] overflow-auto h-full pl-0 lg:pl-[324px] pt-16 sm:pt-8 lg:pt-[80px]`}
+        class={`flex-1 w-full overflow-auto h-full pl-0 lg:pl-[330px] pt-16 sm:pt-8 lg:pt-[80px]`}
       >
         <article
           style={{ '--sidebar-width': !headings ? 0 : undefined }}
-          class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] md:border-l border-secondary overflow-auto h-full`}
+          class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] md:border-l md:border-r border-secondary overflow-auto min-h-[calc(100vh-80px)] h-full`}
         >
           <slot />
         </article>
@@ -120,7 +118,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
           headings.length ? (
             <div
               slot="article-nav-links"
-              class="hidden xl:flex flex-col gap-y-[16px] border-l border-secondary py-[24px] px-[16px] lg:px-[32px]"
+              class="hidden xl:flex flex-col gap-y-[16px] py-[24px] px-[16px] lg:px-[32px]"
             >
               <span class="font-semibold text-md">On this page</span>
 
