@@ -432,11 +432,11 @@ data "aws_subnets" "node_groups" {
 
   lifecycle {
     precondition {
-      condition     = data.pf_metadata.metadata.sla_target >= 2 && length(local.node_subnets) >= 3
+      condition     = (data.pf_metadata.metadata.sla_target == 1 && length(local.node_subnets) >= 1) || length(local.node_subnets) >= 3
       error_message = "If the sla_target >= 2, then at least 3 node_subnets must be specified."
     }
     postcondition {
-      condition     = (data.pf_metadata.metadata.sla_target >= 2 && length(self.ids) >= 3) || (data.pf_metadata.metadata.sla_target >= 2 && length(self.ids) == 0)
+      condition     = (data.pf_metadata.metadata.sla_target == 1 && length(local.node_subnets) >= 1) || length(self.ids) >= 3
       error_message = "Subnets specified by node_subnets were not found in VPC ${var.vpc_id}. Ensure that the subnets exist before deploying this module."
     }
     postcondition {
