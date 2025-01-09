@@ -63,8 +63,14 @@ variable "max_node_cpu" {
   default     = 32
 }
 
-variable "node_ami_name" {
-  description = "The name of the AMI to use for the nodes that Karpenter creates."
+variable "arm64_node_ami_name" {
+  description = "The name of the AMI to use for the amd64 nodes that Karpenter creates."
   type        = string
   default     = "bottlerocket-aws-k8s-1.30-aarch64-v1.28.0-0ab4fab4"
+}
+
+variable "amd64_node_ami_name" {
+  description = "The name of the AMI to use for the amd64 nodes that Karpenter creates."
+  type        = string
+  default     = "bottlerocket-aws-k8s-1.30-x86_64-v1.28.0-0ab4fab4"
 }

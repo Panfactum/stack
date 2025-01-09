@@ -178,9 +178,14 @@ locals {
     subnetSelectorTerms        = [for subnet in data.aws_subnet.node_subnets : { id = subnet.id }]
     securityGroupSelectorTerms = [{ id = var.node_security_group_id }]
     instanceProfile            = var.node_instance_profile
-    amiSelectorTerms = [{
-      id = data.aws_ami.ami.id
-    }]
+    amiSelectorTerms = [
+      {
+        id = data.aws_ami.arm64_ami.id
+      },
+      {
+        id = data.aws_ami.amd64_ami.id
+      }
+    ]
 
     metadataOptions = {
       httpEndpoint            = "enabled"
@@ -216,9 +221,7 @@ locals {
     }
   }
 
-  node_labels = merge(var.node_labels, {
-    "panfactum.com/ami-name" = var.node_ami_name
-  })
+  node_labels = merge(var.node_labels)
 }
 
 data "pf_kube_labels" "labels" {
@@ -270,12 +273,30 @@ data "aws_subnet" "node_subnets" {
 }
 
 // This is purposefully pinned as AWS is known to publish AMI updates that break clusters
-data "aws_ami" "ami" {
+data "aws_ami" "arm64_ami" {
   most_recent = true
   owners      = ["amazon"]
   filter {
     name   = "name"
-    values = [var.node_ami_name]
+    values = [var.arm64_node_ami_name]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+data "aws_ami" "amd64_ami" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = [var.amd64_node_ami_name]
   }
   filter {
     name   = "root-device-type"
@@ -411,7 +432,9 @@ resource "kubectl_manifest" "burstable_node_pool" {
       template = {
         metadata = {
           labels = merge(local.node_labels, {
-            "panfactum.com/class" = "burstable"
+            "panfactum.com/ami-name" = var.amd64_node_ami_name
+            "panfactum.com/ami-id"   = data.aws_ami.amd64_ami.id
+            "panfactum.com/class"    = "burstable"
           })
         }
         spec = {
@@ -475,7 +498,9 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
       template = {
         metadata = {
           labels = merge(local.node_labels, {
-            "panfactum.com/class" = "burstable"
+            "panfactum.com/ami-name" = var.arm64_node_ami_name
+            "panfactum.com/ami-id"   = data.aws_ami.arm64_ami.id
+            "panfactum.com/class"    = "burstable"
           })
         }
         spec = {
@@ -542,7 +567,9 @@ resource "kubectl_manifest" "spot_node_pool" {
       template = {
         metadata = {
           labels = merge(local.node_labels, {
-            "panfactum.com/class" = "spot"
+            "panfactum.com/ami-name" = var.amd64_node_ami_name
+            "panfactum.com/ami-id"   = data.aws_ami.amd64_ami.id
+            "panfactum.com/class"    = "spot"
           })
         }
         spec = {
@@ -606,7 +633,9 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
       template = {
         metadata = {
           labels = merge(local.node_labels, {
-            "panfactum.com/class" = "spot"
+            "panfactum.com/ami-name" = var.arm64_node_ami_name
+            "panfactum.com/ami-id"   = data.aws_ami.arm64_ami.id
+            "panfactum.com/class"    = "spot"
           })
         }
         spec = {
@@ -673,7 +702,9 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
       template = {
         metadata = {
           labels = merge(local.node_labels, {
-            "panfactum.com/class" = "worker"
+            "panfactum.com/ami-name" = var.arm64_node_ami_name
+            "panfactum.com/ami-id"   = data.aws_ami.arm64_ami.id
+            "panfactum.com/class"    = "worker"
           })
         }
         spec = {
@@ -737,7 +768,9 @@ resource "kubectl_manifest" "on_demand_node_pool" {
       template = {
         metadata = {
           labels = merge(local.node_labels, {
-            "panfactum.com/class" = "worker"
+            "panfactum.com/ami-name" = var.amd64_node_ami_name
+            "panfactum.com/ami-id"   = data.aws_ami.amd64_ami.id
+            "panfactum.com/class"    = "worker"
           })
         }
         spec = {
