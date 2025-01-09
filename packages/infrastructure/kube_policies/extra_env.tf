@@ -9,129 +9,141 @@ locals {
       }
     }
   ]
-  common_env = [
-    {
-      name  = "CONTAINER_IMAGE"
-      value = "{{ element.image }}"
-    },
-    {
-      name  = "CONTAINER_IMAGE_TAG"
-      value = "{{ '{{element.image}}' | split(@, ':') | [-1:] | [0] }}"
-    },
-    {
-      name  = "CONTAINER_IMAGE_REPO"
-      value = "{{ '{{element.image}}' | split(@, '/') | [1:] | join('/', @)}}"
-    },
-    {
-      name  = "CONTAINER_IMAGE_REGISTRY"
-      value = "{{ '{{element.image}}' | split(@, '/') | [0] }}"
-    },
-    {
-      name  = "POD_TERMINATION_GRACE_PERIOD_SECONDS"
-      value = "{{ termSeconds }}"
-    },
-    {
-      name = "POD_IP"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "status.podIP"
+
+  // These are injected in REVERSE order
+  common_env = concat(
+    [for k, v in var.common_env : { name = k, value = v }],
+    [for k, v in var.common_secrets : { name = k, valueFrom = {
+      secretKeyRef = {
+        key      = k
+        name     = "common-secrets-from-kube-policies"
+        optional = false
+      }
+    } }],
+    [
+      {
+        name  = "CONTAINER_IMAGE"
+        value = "{{ element.image }}"
+      },
+      {
+        name  = "CONTAINER_IMAGE_TAG"
+        value = "{{ '{{element.image}}' | split(@, ':') | [-1:] | [0] }}"
+      },
+      {
+        name  = "CONTAINER_IMAGE_REPO"
+        value = "{{ '{{element.image}}' | split(@, '/') | [1:] | join('/', @)}}"
+      },
+      {
+        name  = "CONTAINER_IMAGE_REGISTRY"
+        value = "{{ '{{element.image}}' | split(@, '/') | [0] }}"
+      },
+      {
+        name  = "POD_TERMINATION_GRACE_PERIOD_SECONDS"
+        value = "{{ termSeconds }}"
+      },
+      {
+        name = "POD_IP"
+        valueFrom = {
+          fieldRef = {
+            apiVersion = "v1"
+            fieldPath  = "status.podIP"
+          }
+        }
+      },
+      {
+        name = "POD_NAME"
+        valueFrom = {
+          fieldRef = {
+            apiVersion = "v1"
+            fieldPath  = "metadata.name"
+          }
+        }
+      },
+      {
+        name  = "POD_NAMESPACE"
+        value = "{{ request.object.metadata.namespace }}"
+      },
+      {
+        name  = "NAMESPACE"
+        value = "{{ request.object.metadata.namespace }}"
+      },
+      {
+        name = "POD_SERVICE_ACCOUNT"
+        valueFrom = {
+          fieldRef = {
+            apiVersion = "v1"
+            fieldPath  = "spec.serviceAccountName"
+          }
+        }
+      },
+      {
+        name = "NODE_NAME"
+        valueFrom = {
+          fieldRef = {
+            apiVersion = "v1"
+            fieldPath  = "spec.nodeName"
+          }
+        }
+      },
+      {
+        name = "NODE_IP"
+        valueFrom = {
+          fieldRef = {
+            apiVersion = "v1"
+            fieldPath  = "status.hostIP"
+          }
+        }
+      },
+      {
+        name = "CONTAINER_CPU_REQUEST"
+        valueFrom = {
+          resourceFieldRef = {
+            resource = "requests.cpu"
+          }
+        }
+      },
+      {
+        name = "CONTAINER_MEMORY_REQUEST"
+        valueFrom = {
+          resourceFieldRef = {
+            resource = "requests.memory"
+          }
+        }
+      },
+      {
+        name = "CONTAINER_MEMORY_LIMIT"
+        valueFrom = {
+          resourceFieldRef = {
+            resource = "limits.memory"
+          }
+        }
+      },
+      {
+        name = "GOMEMLIMIT"
+        valueFrom = {
+          resourceFieldRef = {
+            resource = "requests.memory"
+          }
+        }
+      },
+      {
+        name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
+        valueFrom = {
+          resourceFieldRef = {
+            resource = "requests.ephemeral-storage"
+          }
+        }
+      },
+      {
+        name = "CONTAINER_EPHEMERAL_STORAGE_LIMIT"
+        valueFrom = {
+          resourceFieldRef = {
+            resource = "limits.ephemeral-storage"
+          }
         }
       }
-    },
-    {
-      name = "POD_NAME"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "metadata.name"
-        }
-      }
-    },
-    {
-      name  = "POD_NAMESPACE"
-      value = "{{ request.object.metadata.namespace }}"
-    },
-    {
-      name  = "NAMESPACE"
-      value = "{{ request.object.metadata.namespace }}"
-    },
-    {
-      name = "POD_SERVICE_ACCOUNT"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "spec.serviceAccountName"
-        }
-      }
-    },
-    {
-      name = "NODE_NAME"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "spec.nodeName"
-        }
-      }
-    },
-    {
-      name = "NODE_IP"
-      valueFrom = {
-        fieldRef = {
-          apiVersion = "v1"
-          fieldPath  = "status.hostIP"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_CPU_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.cpu"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_MEMORY_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.memory"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_MEMORY_LIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "limits.memory"
-        }
-      }
-    },
-    {
-      name = "GOMEMLIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.memory"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_EPHEMERAL_STORAGE_REQUEST"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "requests.ephemeral-storage"
-        }
-      }
-    },
-    {
-      name = "CONTAINER_EPHEMERAL_STORAGE_LIMIT"
-      valueFrom = {
-        resourceFieldRef = {
-          resource = "limits.ephemeral-storage"
-        }
-      }
-    }
-  ]
+    ]
+  )
 
   rule_add_environment_variables = var.environment_variable_injection_enabled ? [
     {
@@ -265,4 +277,19 @@ locals {
       }
     },
   ] : [null, null, null, null]
+}
+
+resource "kubernetes_secret" "common" {
+  metadata {
+    name      = "common-secrets-from-kube-policies"
+    namespace = "kyverno"
+    labels    = data.pf_kube_labels.labels.labels
+  }
+  data = var.common_secrets
+}
+
+module "secret_sync" {
+  source           = "../kube_sync_secret"
+  secret_name      = kubernetes_secret.common.metadata[0].name
+  secret_namespace = kubernetes_secret.common.metadata[0].namespace
 }

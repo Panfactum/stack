@@ -12,6 +12,13 @@ dependency "kyverno" {
   skip_outputs = true
 }
 
-inputs = {}
+inputs = {
+  common_env = {
+    james = "lee"
+  }
+  common_secrets = {
+    jack = "langston"
+  }
+}
 
 

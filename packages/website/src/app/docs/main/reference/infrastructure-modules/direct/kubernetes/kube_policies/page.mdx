@@ -78,6 +78,22 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### common\_env
+
+Description: Key-value pairs that will be injected into all containers in all pods in the cluster as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### common\_secrets
+
+Description: Key-values pairs that will be injected into all containers in all pods in the cluster as environment variables (but stored in a Secret resource)
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### default\_arm64\_toleration\_enabled
 
 Description: Whether pods should tolerate arm64 nodes by default

@@ -51,3 +51,15 @@ variable "extra_priority_classes" {
   type        = map(number)
   default     = {}
 }
+
+variable "common_env" {
+  description = "Key-value pairs that will be injected into all containers in all pods in the cluster as environment variables"
+  type        = map(string)
+  default     = {}
+}
+
+variable "common_secrets" {
+  description = "Key-values pairs that will be injected into all containers in all pods in the cluster as environment variables (but stored in a Secret resource)"
+  type        = map(string)
+  default     = {}
+}

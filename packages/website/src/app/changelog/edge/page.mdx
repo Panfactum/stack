@@ -11,11 +11,19 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 
 {/* lint disable no-duplicate-headings */}
 
-## Unreleased
+## edge.25-01-09
+
+### Added
+
+* [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) now has `common_env` and `common_secrets` inputs that inject environment variables into all containers in the
+cluster.
 
 ### Fixed
 
-* fixed the pre and post condition check for the `aws_eks` module for when `sla_target` is set to 1
+* Pins Bottlerocket OS AMIs to pre-tested versions as AWS occasionally publishes breaking AMI changes that can crash
+nodes in the cluster.
+
+* Fixes the pre- and post- condition check for the `aws_eks` module when `sla_target` is set to 1.
 
 ## edge.25-01-04
 
@@ -154,6 +162,27 @@ several failure cases where manual intervention would have otherwise been necess
 
 ## edge.24-12-11
 
+<<<<<<< HEAD
+||||||| parent of 15f4ab81 (release: edge.25-01-09)
+<MarkdownAlert severity="warning">
+    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+</MarkdownAlert>
+
+=======
+<MarkdownAlert severity="warning">
+    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+    AWS published an AMI update to their Bottlerocket OS on January 4, 2025 that breaks compatibility with all edge
+    release until `edge.25-01-09`. You should upgrade your `aws_eks` and `karpenter_node_pools` modules directly
+    to `edge.25-01-09` to avoid cluster disruption. You may need to manually tweak some inputs (e.g., `sla_target`, etc.)
+    to ensure proper deployment.
+</MarkdownAlert>
+
+>>>>>>> 15f4ab81 (release: edge.25-01-09)
 ### Breaking Changes
 
 * All terraform provider versions in Panfactum modules have been upgraded to [new values](/docs/edge/reference/infrastructure-modules/overview#provider-versions)

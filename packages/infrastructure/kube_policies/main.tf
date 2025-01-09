@@ -99,7 +99,8 @@ resource "kubectl_manifest" "panfactum_policies" {
   depends_on = [
     kubectl_manifest.linkerd_destination_global_context,
     kubectl_manifest.linkerd_identity_global_context,
-    kubectl_manifest.scheduler_global_context
+    kubectl_manifest.scheduler_global_context,
+    module.secret_sync
   ]
 }
 

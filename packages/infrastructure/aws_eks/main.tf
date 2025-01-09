@@ -459,16 +459,29 @@ resource "aws_ec2_tag" "node_subnet_tags" {
   value       = "owned"
 }
 
-// Latest bottlerocket image
-// See https://docs.aws.amazon.com/eks/latest/userguide/retrieve-ami-id-bottlerocket.html
-data "aws_ssm_parameter" "controller_ami" {
-  name = "/aws/service/bottlerocket/aws-k8s-${var.kube_version}/arm64/latest/image_id"
+// This is purposefully pinned as AWS is known to publish AMI updates that break clusters
+data "aws_ami" "controller_ami" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = [var.node_ami_name]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 }
 
 resource "aws_launch_template" "controller" {
   name_prefix = "controller-"
 
-  image_id = data.aws_ssm_parameter.controller_ami.insecure_value
+  image_id = data.aws_ami.controller_ami.id
 
   default_version         = 1
   disable_api_termination = false
@@ -564,7 +577,8 @@ resource "aws_eks_node_group" "controllers" {
     description = local.controller_nodes_description
   })
   labels = {
-    "panfactum.com/class" = "controller"
+    "panfactum.com/class"    = "controller"
+    "panfactum.com/ami-name" = var.node_ami_name
   }
   taint {
     effect = "NO_SCHEDULE"

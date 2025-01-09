@@ -179,7 +179,7 @@ locals {
     securityGroupSelectorTerms = [{ id = var.node_security_group_id }]
     instanceProfile            = var.node_instance_profile
     amiSelectorTerms = [{
-      alias = "bottlerocket@latest"
+      id = data.aws_ami.ami.id
     }]
 
     metadataOptions = {
@@ -215,6 +215,10 @@ locals {
       maxPods = 110
     }
   }
+
+  node_labels = merge(var.node_labels, {
+    "panfactum.com/ami-name" = var.node_ami_name
+  })
 }
 
 data "pf_kube_labels" "labels" {
@@ -264,6 +268,26 @@ data "aws_subnet" "node_subnets" {
     values = [each.value]
   }
 }
+
+// This is purposefully pinned as AWS is known to publish AMI updates that break clusters
+data "aws_ami" "ami" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = [var.node_ami_name]
+  }
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 
 /********************************************************************************************************************
 * Node Class
@@ -386,7 +410,7 @@ resource "kubectl_manifest" "burstable_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(var.node_labels, {
+          labels = merge(local.node_labels, {
             "panfactum.com/class" = "burstable"
           })
         }
@@ -450,7 +474,7 @@ resource "kubectl_manifest" "burstable_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(var.node_labels, {
+          labels = merge(local.node_labels, {
             "panfactum.com/class" = "burstable"
           })
         }
@@ -517,7 +541,7 @@ resource "kubectl_manifest" "spot_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(var.node_labels, {
+          labels = merge(local.node_labels, {
             "panfactum.com/class" = "spot"
           })
         }
@@ -581,7 +605,7 @@ resource "kubectl_manifest" "spot_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(var.node_labels, {
+          labels = merge(local.node_labels, {
             "panfactum.com/class" = "spot"
           })
         }
@@ -648,7 +672,7 @@ resource "kubectl_manifest" "on_demand_arm_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(var.node_labels, {
+          labels = merge(local.node_labels, {
             "panfactum.com/class" = "worker"
           })
         }
@@ -712,7 +736,7 @@ resource "kubectl_manifest" "on_demand_node_pool" {
     spec = {
       template = {
         metadata = {
-          labels = merge(var.node_labels, {
+          labels = merge(local.node_labels, {
             "panfactum.com/class" = "worker"
           })
         }

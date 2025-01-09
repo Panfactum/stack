@@ -112,6 +112,12 @@ variable "node_ebs_volume_size_gb" {
   default     = 40
 }
 
+variable "node_ami_name" {
+  description = "The name of the AMI to use for the controller nodes."
+  type        = string
+  default     = "bottlerocket-aws-k8s-1.30-aarch64-v1.28.0-0ab4fab4"
+}
+
 ################################################################################
 ## Access Control
 ################################################################################
