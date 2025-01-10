@@ -25,6 +25,9 @@ import { ListBlock, FeatureListBlock } from '@/components/ListBlock'
 import { GetStarted } from '@/components/marketing/GetStarted'
 
 import './landing.css'
+import LandingAnimation from '@/components/LandingAnimation.astro'
+import MasonryLayout from '@/components/MasonryLayout'
+import VariableSizeMasonry from '@/components/DndGrid/VariableSizeMasonry'
 
 const IMAGES = [
   [
@@ -259,6 +262,10 @@ const PRICES = [
       </div>
     </div>
   </HeroSection>
+
+  <VariableSizeMasonry client:only="react"  />
+
+  <LandingAnimation />
 
   <Section class="gap-4xl text-primary mb-16">
     <h2 class="text-tertiary text-md font-medium">Trusted by companies</h2>

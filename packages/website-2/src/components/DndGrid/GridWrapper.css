@@ -1,0 +1,15 @@
+.grid-wrapper {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(10, 10%);
+  grid-gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.grid-item {
+    background-color: pink;
+    grid-column: span 1;
+    grid-row: span 1;
+}
