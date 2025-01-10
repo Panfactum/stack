@@ -111,4 +111,20 @@
   div[role='alert'] a {
     @apply text-primary;
   }
+
+  .bg-dark-blue-gradient {
+    background: linear-gradient(26.57deg, #153245 8.33%, #224D69 91.67%);
+  }
+
+  .bg-light-blue-gradient {
+    background: linear-gradient(90deg, #2F688E 0%, #3B81B0 100%);
+  }
+
+  div.inner-ring {
+    border-color: rgba(255,255,255, 0.3);
+  }
+
+  div.outer-ring {
+    border-color: rgba(255,255,255, 0.1);
+  }
 }
