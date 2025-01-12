@@ -69,7 +69,7 @@
 
 .fade-container {
   position: relative;
-  height: 200px; /* Adjust based on your box height */
+  height: 176px; /* Adjust based on your box height */
   overflow: hidden;
   display: flex;
   justify-content: center;
