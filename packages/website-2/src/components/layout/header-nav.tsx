@@ -23,7 +23,7 @@ export interface NavLinks {
 
 const GITHUB_URL = 'https://github.com/Panfactum/stack'
 
-export function HeaderNav({ currentPath, hasBorder, darkBackground = false, ...props }: HeaderNav) {
+export function HeaderNav({ currentPath, hasBorder = true, darkBackground = false, ...props }: HeaderNav) {
   const { link: documentationPath } = useLastDocumentationPath()
 
   const [mobileOpened, setMobileOpened] = useState(false)

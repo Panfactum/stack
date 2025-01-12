@@ -9,7 +9,6 @@ import { buildBreadCrumbRoot } from '../components/documentation/DocsSidebar/Sid
 import Footer from '@/components/layout/footer.astro'
 
 const pathname = new URL(Astro.request.url).pathname
-const hasBorder = Astro.props.hasBorder ? Astro.props.hasBorder : false
 const headings = Astro.props.headings || []
 
 const showFooter =
@@ -69,7 +68,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
         currentPath={pathname}
         client:load
         darkBackground={Astro.props.darkBackground}
-        hasBorder={hasBorder}
+        hasBorder={Astro.props.hasBorder}
         transition:persist
       />
 
