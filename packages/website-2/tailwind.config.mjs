@@ -34,6 +34,9 @@ export default {
     extend: {
       maxWidth: {
         xl: '768px',
+        '2xl': '1024px',
+        '3xl': '1280px',
+        '4xl': '1536px',
       },
       minWidth: {
         sm: '480px',

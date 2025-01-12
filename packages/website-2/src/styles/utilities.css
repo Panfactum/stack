@@ -67,6 +67,10 @@
     @apply bg-[var(--component-colors-utility-gray-utility-gray-500)];
   }
 
+  .bg-utility-blue-50 {
+    @apply bg-[var(--component-colors-utility-blue-utility-blue-50)];
+  }
+
   .text-primary {
     @apply text-[var(--colors-text-text-primary-900)];
   }
@@ -103,6 +107,10 @@
     @apply text-[var(--colors-text-text-quaternary-500)];
   }
 
+  .text-utility-blue-700 {
+    @apply text-[var(--component-colors-utility-blue-utility-blue-700)];
+  }
+
   .fg-brand-primary {
     @apply bg-[var(--colors-foreground-fg-brand-primary-600)];
   }
@@ -133,6 +141,10 @@
 
   .border-utility-brand-200 {
     @apply border-[var(--component-colors-utility-brand-utility-brand-200)];
+  }
+
+  .border-utility-blue-200 {
+    @apply border-[var(--component-colors-utility-blue-utility-blue-200)];
   }
 
   .border-primary {

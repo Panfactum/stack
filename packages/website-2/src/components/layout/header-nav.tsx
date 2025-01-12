@@ -42,6 +42,10 @@ export function HeaderNav({ currentPath, hasBorder, darkBackground = false, ...p
       url: '/about',
     },
     {
+      title: 'Replaced Services',
+      url: '/services'
+    },
+    {
       title: 'Changelog',
       url: '/docs/changelog/edge',
     },
