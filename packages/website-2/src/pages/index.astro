@@ -29,6 +29,8 @@ import LandingAnimation from '@/components/LandingAnimation.astro'
 import MasonryLayout from '@/components/MasonryLayout'
 import VariableSizeMasonry from '@/components/DndGrid/VariableSizeMasonry'
 import ReplacedServicesSection from '@/components/ReplacedServices/ReplacedServicesSection.astro'
+import { PanfactumLogoAllWhite } from '@/components/panfactum-logo.tsx'
+import TestimonySection from '@/components/testimony/TestimonySection'
 
 const IMAGES = [
   [
@@ -209,6 +211,38 @@ const PRICES = [
     ],
   },
 ]
+
+const COMPARISON_CATEGORIES = [
+  'Lorem ipsum dolor silt amot',
+  'Lorem ipsum dolor silt amot',
+  'Lorem ipsum dolor silt amot',
+  'Lorem ipsum dolor silt amot',
+  'Lorem ipsum dolor silt amot',
+  'Lorem ipsum dolor silt amot',
+]
+
+const COMPANY_COMPARISON = [
+  {
+    name: 'Company 1',
+    data: ['Data', 'Data', 'Data', 'Data', 'Data', 'Data'],
+  },
+  {
+    name: 'Company 2',
+    data: ['Data', 'Data', 'Data', 'Data', 'Data', 'Data'],
+  },
+  {
+    name: 'Panfactum',
+    data: ['Data', 'Data', 'Data', 'Data', 'Data', 'Data'],
+  },
+]
+
+const GUARANTEES = [
+  'Access to base features',
+  'Basic reporting and analytics',
+  'Up to 10 individual users',
+  '20GB individual data each user',
+  'Basic chat and email support',
+]
 ---
 
 <Layout
@@ -265,29 +299,19 @@ const PRICES = [
     </div>
   </HeroSection>
 
-  <Section class="gap-4xl text-primary mb-16">
-    <h2 class="text-tertiary text-md font-medium">Trusted by companies</h2>
-    <div class="flex flex-wrap justify-center gap-4xl">
-      {
-        IMAGES.map((item, index) => (
-          <div class="col-span-1 flex items-center gap-4xl">
-            {item.map((innerItem) => (
-              <img
-                src={innerItem.url}
-                alt={innerItem.alt}
-                class={innerItem.class}
-              />
-            ))}
-          </div>
-        ))
-      }
-    </div>
+  <Section class="">
+    <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter">
+      The Panfactum framework
+    </h2>
+    <p class="text-xl text-tertiary my-0">
+      Learn more about the company and world-class team behind Panfactum.
+    </p>
   </Section>
 
   <Section class="gap-6xl text-primary">
     <div class="text-center">
-      <SectionKicker> Features </SectionKicker>
-      <SectionTitle class="max-w-[768px]">
+      <SectionKicker onBrand={true} class="mb-2"> Features </SectionKicker>
+      <SectionTitle class="max-w-[768px] leading-tight">
         Benchmark your platform engineering practice
       </SectionTitle>
     </div>
@@ -305,123 +329,206 @@ const PRICES = [
     </div>
   </Section>
 
-  <section class={`flex flex-col items-center py-7xl`}>
+  <section class={`hidden md:flex flex-col items-center py-7xl`}>
     <Section class={`gap-7xl text-primary`}>
       <div class="text-center flex flex-col mb-16">
-        <SectionKicker> Managed Services </SectionKicker>
+        <SectionKicker onBrand={true}> Managed Services </SectionKicker>
         <SectionTitle class="max-w-[768px] mx-auto">
           What does this replace?
         </SectionTitle>
         <SectionContent class="max-w-[768px] mx-auto">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </SectionContent>
       </div>
     </Section>
     <ReplacedServicesSection />
   </section>
 
-  <Section class="py-7xl gap-y-4xl text-primary">
-    <div class="text-center space-y-2 mb-8">
-      <SectionKicker> Pricing </SectionKicker>
-      <SectionTitle> Plans that fit your scale </SectionTitle>
-      <SectionContent>
-        Simple, transparent pricing that grows with you. Try any plan free for
-        30 days.
-      </SectionContent>
-    </div>
+  <section class={`flex flex-col items-center py-7xl bg-secondary`}>
+    <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter">
+      The Panfactum Group
+    </h2>
+    <p class="text-xl text-tertiary my-0">
+      Learn more about the company and world-class team behind Panfactum.
+    </p>
 
-    <div
-      class="sm:flex justify-between self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
-    >
-      <div class="flex items-start justify-between">
-        <div>
-          <h1 class="font-machina text-primary text-display-xs font-medium">
-            Open Source
-          </h1>
-          <p class="text-tertiary text-md">
-            Our most popular plan for small teams.
-          </p>
+    <Section class="gap-y-4xl py-4xl text-primary mb-8">
+      <div class="text-center space-y-2 mb-8">
+        <SectionTitle> Support plans that fit your scale </SectionTitle>
+        <SectionContent>
+          Simple, transparent pricing that grows with you. Try any plan free for
+          30 days.
+        </SectionContent>
+      </div>
+
+      <div
+        class="sm:flex justify-between self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <h1 class="font-machina text-primary text-display-xs font-medium">
+              Open Source
+            </h1>
+            <p class="text-tertiary text-md">
+              Our most popular plan for small teams.
+            </p>
+          </div>
+
+          <span
+            class="sm:hidden text-display-md font-medium font-machina text-primary leading-none"
+          >
+            Free
+          </span>
         </div>
-
         <span
-          class="sm:hidden text-display-md font-medium font-machina text-primary leading-none"
+          class="hidden sm:block self-start text-display-md font-medium font-machina text-primary leading-none"
         >
           Free
         </span>
       </div>
-      <span
-        class="hidden sm:block self-start text-display-md font-medium font-machina text-primary leading-none"
+
+      <div
+        class="flex flex-col self-stretch md:grid md:grid-cols-2 lg:grid-cols-3 gap-xl"
       >
-        Free
-      </span>
-    </div>
-
-    <div
-      class="flex flex-col self-stretch md:grid md:grid-cols-2 lg:grid-cols-3 gap-xl"
-    >
-      {
-        PRICES.map((price) => (
-          <div class="self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary">
-            <div class="flex flex-col self-start gap-4xl">
-              <div class="flex flex-col gap-y-xl">
-                <div class="flex justify-between">
-                  <h1 class="text-tertiary text-lg font-medium">
-                    {price.type}
-                  </h1>
-                  {price.popular && (
-                    <div class="flex items-center justify-center font-medium rounded-full h-[24px] border border-[#9AD3F1] bg-[#E6F4FC] dark:bg-[transparent] dark:text-[#70BFEB] px-2.5">
-                      Popular
-                    </div>
-                  )}
-                </div>
-
-                <div class="flex gap-xs items-baseline">
-                  <span class="text-display-md md:text-display-lg font-medium font-machina text-primary">
-                    {price.price}
-                  </span>
-                  <span class="text-md font-medium text-tertiary">
-                    {' '}
-                    per month{' '}
-                  </span>
-                </div>
-                <p class="text-tertiary text-md">{price.subtitle}</p>
-              </div>
-              <div class="flex flex-col gap-lg">
-                <Button variant={`primary`} size="xl" className="w-full">
-                  Subscribe
-                </Button>
-                <Button variant="secondary-gray" size="xl">
-                  Chat with sales
-                </Button>
-              </div>
-            </div>
-
-            <div class="flex flex-col py-4xl px-3xl gap-3xl">
-              <div class="flex flex-col gap-y-xs">
-                <h4 class="text-md font-semibold">Features</h4>
-                <p class="text-tertiary">
-                  Everything in <strong>{price.featureLabel}</strong> plus ...
-                </p>
-              </div>
-              <div class="flex flex-col gap-y-xl">
-                {price.featureList.map((feature) => (
-                  <div class="flex gap-x-lg items-center">
-                    <div class="text-[#2F688E]">
-                      <FontAwesomeIcon icon={faCircleCheck} size="xl" />
-                    </div>
-                    <span>{feature}</span>
+        {
+          PRICES.map((price) => (
+            <div class="self-stretch shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-primary">
+              <div class="flex flex-col self-start gap-4xl">
+                <div class="flex flex-col gap-y-xl">
+                  <div class="flex justify-between">
+                    <h1 class="text-tertiary text-lg font-medium">
+                      {price.type}
+                    </h1>
+                    {price.popular && (
+                      <div class="flex items-center justify-center font-medium rounded-full h-[24px] border border-[#9AD3F1] bg-[#E6F4FC] dark:bg-[transparent] dark:text-[#70BFEB] px-2.5">
+                        Popular
+                      </div>
+                    )}
                   </div>
-                ))}
+
+                  <div class="flex gap-xs items-baseline">
+                    <span class="text-display-md md:text-display-lg font-medium font-machina text-primary">
+                      {price.price}
+                    </span>
+                    <span class="text-md font-medium text-tertiary">
+                      {' '}
+                      per month{' '}
+                    </span>
+                  </div>
+                  <p class="text-tertiary text-md">{price.subtitle}</p>
+                </div>
+                <div class="flex flex-col gap-lg">
+                  <Button variant={`primary`} size="xl" className="w-full">
+                    Subscribe
+                  </Button>
+                  <Button variant="secondary-gray" size="xl">
+                    Chat with sales
+                  </Button>
+                </div>
+              </div>
+
+              <div class="flex flex-col py-4xl px-3xl gap-3xl">
+                <div class="flex flex-col gap-y-xs">
+                  <h4 class="text-md font-semibold">Features</h4>
+                  <p class="text-tertiary">
+                    Everything in <strong>{price.featureLabel}</strong> plus ...
+                  </p>
+                </div>
+                <div class="flex flex-col gap-y-xl">
+                  {price.featureList.map((feature) => (
+                    <div class="flex gap-x-lg items-center">
+                      <div class="text-[#2F688E]">
+                        <FontAwesomeIcon icon={faCircleCheck} size="xl" />
+                      </div>
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))
-      }
-    </div>
-  </Section>
+          ))
+        }
+      </div>
+    </Section>
 
-  <SectionFullWidth
+    <section class="hidden md:block gap-7xl text-primary w-full mb-28">
+      <div class="container max-w-[1344px] mx-auto px-[104px]">
+        <div
+          class="grid grid-cols-12 w-full border border-secondary rounded-lg overflow-hidden"
+        >
+          <div class="col-span-4 flex flex-col">
+            <div class="category-header is-cell bg-primary px-6"></div>
+            {
+              COMPARISON_CATEGORIES.map((category, catIndex) => (
+                <div
+                  id={`comparison-category-${catIndex}`}
+                  class={`
+                category-label is-cell 
+                text-sm font-regular text-secondary px-6
+                ${catIndex % 2 === 0 ? 'bg-primary' : 'bg-secondary'}
+              `}
+                >
+                  {category}
+                </div>
+              ))
+            }
+          </div>
+          <div class="col-span-8 grid grid-cols-3">
+            {
+              COMPANY_COMPARISON.map((company, companyIndex) =>
+                company.name !== 'Panfactum' ? (
+                  <div id={`comparison-company-${companyIndex}`}>
+                    <div class="company-data-header is-cell text-md font-bold text-secondary bg-secondary px-6">
+                      {company.name}
+                    </div>
+                    {company.data.map((dataItem, dataItemIndex) => (
+                      <div
+                        id={`comparison-data-item-${dataItemIndex}`}
+                        class={`
+                    company-data-item is-cell 
+                    text-sm font-regular text-secondary px-6 
+                    ${dataItemIndex % 2 === 0 ? 'bg-primary' : 'bg-secondary'}
+                  `}
+                      >
+                        {dataItem}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    id={`comparison-company-${companyIndex}`}
+                    class="is-panfactum bg-brand-700"
+                  >
+                    <div class="company-data-header is-cell text-md font-bold text-secondary p-0.5">
+                      <div class="flex items-center h-full w-full bg-brand-800 rounded-tr-lg px-6">
+                        <PanfactumLogoAllWhite className="w-[120px] h-auto" />
+                      </div>
+                    </div>
+                    {company.data.map((dataItem, dataItemIndex) => (
+                      <div
+                        id={`comparison-data-item-${dataItemIndex}`}
+                        class={`
+                          company-data-item is-cell 
+                          text-sm font-bold text-white px-6
+                        `}
+                      >
+                        {dataItem}
+                      </div>
+                    ))}
+                  </div>
+                ),
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <TestimonySection client:only="react" />
+  </section>
+
+  <!-- <SectionFullWidth
     sectionClass="bg-brand-section"
     class="gap-7xl text-primary"
   >
@@ -449,26 +556,60 @@ const PRICES = [
         ))
       }
     </div>
-  </SectionFullWidth>
+  </SectionFullWidth> -->
 
   <Section class="text-center gap-y-4xl text-primary">
-    <img
-      class="h-[40px] dark:filter dark:grayscale dark:invert"
-      src="/wild-crafted.png"
-      alt="Wild Crafted"
-    />
-    <HeadingWide>
-      We've been using Panfactum to revolutionize our development workflow and
-      can't imagine going back to traditional tools.
-    </HeadingWide>
-    <div class="flex flex-col gap-y-xl items-center">
-      <img src="/face.png" class="w-16" />
-      <div>
-        <span class="text-lg font-semibold">Amelle Laurent</span><br />
-        <span class="text-tertiary text-md"
-          >Engineering Manager, Wildcrafted</span
-        >
+    <div class="bg-brand-800 rounded-lg p-7xl flex flex-col items-center justify-center w-full">
+      <div class="flex items-center mb-6">
+        <div class="left-leaves">
+          <img src="./leaves-left.svg" alt="left wreath" class="w-full" />
+        </div>
+        <div class="flex flex-col items-center justify-center">
+          <div class="flex items-center justify-center">
+            {Array.from({ length: 5 }, (_, i) => (
+              <img src="./star.svg" alt="star" class="w-2xl" />
+            ))}
+          </div>
+          <p class="text-sm font-semibold text-white">
+            Will Save You Money or Else
+          </p>
+          <p class="text-xs font-medium text-[#cecfd2]">
+            2,000 + reviews
+          </p>
+        </div>
+        <div class="right-leaves">
+          <img src="./leaves-right.svg" alt="left wreath" class="w-full" />
+        </div>
       </div>
+
+      <p class="font-machina text-display-md font-semibold text-primary_on-brand">The Panfactum Guarantee</p>
+
+      <p class="text-xl font-regular mb-8" style={{ color: '#cecfd2' }}>
+        Join over 4,000+ startups already growing with Untitled.
+      </p>
+
+      <div class="flex flex-col items-center justify-center gap-4 mb-8">
+        {GUARANTEES.map((item, guaranteeIndex) => (
+          <div id={`garantees-item-${guaranteeIndex}`}  class="grid grid-cols-10 gap-4 w-[300px]">
+            <div class="col-span-1">
+              <svg width="22" height="23" viewBox="0 0 22 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6.5 11.7812L9.5 14.7812L15.5 8.78125M21 11.7812C21 17.3041 16.5228 21.7812 11 21.7812C5.47715 21.7812 1 17.3041 1 11.7812C1 6.2584 5.47715 1.78125 11 1.78125C16.5228 1.78125 21 6.2584 21 11.7812Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="col-span-9 text-left">
+              <p class="text-md font-regular text-secondary_on-brand">{item}</p>
+            </div>
+          </div>
+        ))}
+        
+      </div>
+
+      <div class="flex items-center justify-center gap-x-4">
+        <Button className="bg-brand-900" size="lg" style={{ color: '#cecfd2' }}>Learn more</Button>
+        <Button variant="primary">Get started</Button>
+      </div>
+
+      
     </div>
   </Section>
 

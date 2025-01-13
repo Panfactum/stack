@@ -7,10 +7,10 @@ const alertVariants = cva(
   {
     variants: {
       severity: {
-        info: 'bg-brand-primary border-brand text-foreground',
-        warning: 'bg-warning-primary border-warning text-foreground',
-        error: 'bg-error-primary border-error text-foreground',
-        success: 'bg-success-primary border-success text-foreground',
+        info: 'bg-brand-primary dark:bg-brand-docs-info border-brand text-foreground',
+        warning: 'bg-warning-primary dark:bg-brand-docs-warning border-warning text-foreground',
+        error: 'bg-error-primary dark:bg-brand-docs-error border-error text-foreground',
+        success: 'bg-success-primary dark:bg-brand-docs-success border-success text-foreground',
       },
     },
     defaultVariants: {
