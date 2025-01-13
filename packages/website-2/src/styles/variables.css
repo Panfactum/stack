@@ -52,6 +52,10 @@
     --colors-brand-800: #153245;
     --colors-brand-900: #091a25;
     --colors-brand-950: #040e12;
+    --colors-brand-doc-info: rgba(20, 52, 73, 1);
+    --colors-brand-doc-warning: rgba(39, 34, 29, 1);
+    --colors-brand-doc-success: rgba(23, 37, 31, 1);
+    --colors-brand-doc-error: rgba(38, 23, 22, 1);
     --colors-cyan-100: #cff9fe;
     --colors-cyan-200: #a5f0fc;
     --colors-cyan-25: #f5feff;
@@ -382,6 +386,7 @@
     --colors-background-bg-brand-primary: var(--colors-brand-50, #e6f4fc);
     --colors-background-bg-brand-primary-alt: var(--colors-brand-50, #e6f4fc);
     --colors-background-bg-brand-secondary: var(--colors-brand-100, #ceeaf8);
+    --colors-background-bg-brand-section-reversed: var(--colors-brand-600, #2f688e);
     --colors-background-bg-brand-section: var(--colors-brand-800, #153245);
     --colors-background-bg-brand-section-subtle: var(
       --colors-brand-700,
@@ -389,6 +394,10 @@
     );
     --colors-background-bg-brand-solid: var(--colors-brand-600, #2f688e);
     --colors-background-bg-brand-solid-hover: var(--colors-brand-700, #224d69);
+    --colors-background-bg-brand-docs-info: var(--colors-brand-doc-info, rgba(20, 52, 73, 1));
+    --colors-background-bg-brand-docs-warning: var(--colors-brand-doc-warning, rgba(39, 34, 29, 1));
+    --colors-background-bg-brand-docs-success: var(--colors-brand-doc-success, rgba(23, 37, 31, 1));
+    --colors-background-bg-brand-docs-error: var(--colors-brand-doc-error, rgba(38, 23, 22, 1));
     --colors-background-bg-disabled: var(--colors-gray-light-mode-100, #f2f5f7);
     --colors-background-bg-disabled-subtle: var(
       --colors-gray-light-mode-50,
@@ -413,6 +422,7 @@
       #e4e9ec
     );
     --colors-background-bg-secondary: var(--colors-gray-light-mode-50, #f9fafb);
+    --colors-background-bg-brand-section-reversed: var(--colors-brand-600, #2f688e);
     --colors-background-bg-secondary-solid: var(
       --colors-gray-light-mode-600,
       #475a67
@@ -1491,8 +1501,9 @@
               #f9fafb);
           --colors-background-bg-brand-primary-darker: var(--colors-brand-800, '#3b81b0');
           --colors-background-bg-brand-secondary: var(--colors-brand-600, #2f688e);
-          --colors-background-bg-brand-section: var(--colors-background-bg-secondary,
-              #161b26);
+          --colors-background-bg-brand-section: var(--colors-brand-600, #2f688e);
+          --colors-background-bg-brand-section-reversed: var(--colors-brand-600, #2f688e);
+          
           --colors-background-bg-brand-section-subtle: var(--colors-background-bg-primary,
               #ffffff);
           --colors-background-bg-brand-solid: var(--colors-brand-600, #2f688e);
@@ -1988,6 +1999,7 @@
       --colors-background-bg-brand-secondary: var(--colors-brand-600, #2f688e);
       --colors-background-bg-brand-section: var(--colors-background-bg-secondary,
           #161b26);
+      --colors-background-bg-brand-section-reversed: var(--colors-brand-600, #2f688e);
       --colors-background-bg-brand-section-subtle: var(--colors-background-bg-primary,
           #ffffff);
       --colors-background-bg-brand-solid: var(--colors-brand-600, #2f688e);

@@ -902,9 +902,9 @@ function SavingsTableElementContainer({
   brand?: boolean
 }) {
   return (
-    <td className={`py-xl px-3xl ${brand ? 'bg-brand-primary' : ''}`}>
+    <td className={`py-xl px-3xl ${brand ? 'bg-brand-primary dark:bg-brand-primary-darker' : ''}`}>
       <div
-        className={`flex items-center justify-start whitespace-nowrap ${bold ? 'font-semibold' : ''}`}
+        className={`flex items-center justify-start whitespace-nowrap text-secondary ${bold ? 'font-semibold' : ''}`}
       >
         {children}
       </div>
@@ -994,10 +994,10 @@ function InfrastructureSavingsTableRow(
 
   return (
     <tr
-      className={`m-0 ${brand ? 'bg-brand-secondary' : 'bg-primary'} border-b-[1px] border-r-[1px] border-solid border-secondary ${bold ? 'font-semibold' : ''}`}
+      className={`m-0 ${brand ? 'bg-brand-secondary dark:bg-brand-primary-darker' : 'bg-primary'} border-b-[1px] border-r-[1px] border-solid border-secondary ${bold ? 'font-semibold' : ''}`}
     >
       <th
-        className={`${brand ? 'bg-brand-secondary' : 'bg-secondary'} text-secondary tracking-wide text-left px-4 whitespace-nowrap font-medium`}
+        className={`${brand ? 'bg-brand-secondary dark:bg-brand-primary-darker' : 'bg-secondary'} text-secondary tracking-wide text-left px-4 whitespace-nowrap font-medium`}
       >
         {headerDescription === undefined ? (
           header

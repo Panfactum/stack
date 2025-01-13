@@ -32,7 +32,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
   margin: 0 1rem;
 }
 
@@ -138,3 +137,10 @@
   }
 }
   
+
+/* Landing Price Comparison Section */
+.is-cell {
+  height: 64px;
+  display: flex;
+  align-items: center;
+}

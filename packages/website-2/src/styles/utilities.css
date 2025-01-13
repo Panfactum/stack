@@ -19,6 +19,22 @@
     @apply bg-[var(--colors-background-bg-brand-primary)];
   }
 
+  .bg-brand-docs-info {
+    @apply bg-[var(--colors-background-bg-brand-docs-info)];
+  }
+
+  .bg-brand-docs-warning {
+    @apply bg-[var(--colors-background-bg-brand-docs-warning)];
+  }
+
+  .bg-brand-docs-success {
+    @apply bg-[var(--colors-background-bg-brand-docs-success)];
+  }
+
+  .bg-brand-docs-error {
+    @apply bg-[var(--colors-background-bg-brand-docs-error)];
+  }
+
   .bg-brand-secondary {
     @apply bg-[var(--colors-background-bg-brand-secondary)];
   }
@@ -69,6 +85,10 @@
 
   .bg-utility-blue-50 {
     @apply bg-[var(--component-colors-utility-blue-utility-blue-50)];
+  }
+
+  .bg-secondary-reversed {
+    @apply bg-[var(--colors-background-bg-brand-section-reversed)];
   }
 
   .text-primary {

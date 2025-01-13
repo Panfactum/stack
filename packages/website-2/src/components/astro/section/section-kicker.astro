@@ -4,7 +4,7 @@ const onBrand = Astro.props.onBrand ? Astro.props.onBrand : false
 ---
 
 <h3
-  class={`${onBrand ? 'text-secondary_on-brand' : 'text-primary'} text-sm md:text-md font-semibold ${className || ''}`}
+  class={`${onBrand ? 'text-brand-secondary' : 'text-primary'} text-sm md:text-md font-semibold ${className || ''}`}
 >
   <slot />
 </h3>
