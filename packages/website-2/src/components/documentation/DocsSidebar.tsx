@@ -187,7 +187,7 @@ export function DocsSidebar({
       setOpenMobile={setOpenMobile}
     >
       <SidebarContent>
-        <SidebarMenu className="relative pb-0 md:pb-10 pl-4 pr-4">
+        <SidebarMenu className="relative pb-0 md:pb-10 pl-4 pr-4 pt-4">
           <div
             className={`flex flex-col gap-y-lg sticky h-full top-0 bg-primary z-top-navigation`}
           >
@@ -239,7 +239,7 @@ export function DocsSidebar({
           <Spacer />
 
           {currentRoot && (
-            <SidebarGroup>
+            <SidebarGroup className="pt-4">
               <SidebarMenu>
                 {currentRoot.sub?.map((section) => {
                   const sectionBasePath = `${basePath}${currentRoot.notVersioned ? '' : `/${version}`}${currentRoot.path}`
