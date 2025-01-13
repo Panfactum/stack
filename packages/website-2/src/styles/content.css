@@ -47,7 +47,7 @@
     @apply top-0;
 
     a {
-      @apply text-sm text-brand-secondary font-medium border py-xxs px-sm bg-utility-brand-50 border-utility-brand-200 rounded-sm;
+      @apply text-sm text-brand-secondary font-medium border py-xxs px-sm bg-utility-brand-50 dark:bg-brand-primary-darker border-utility-brand-200 rounded-sm no-underline;
     }
   }
 

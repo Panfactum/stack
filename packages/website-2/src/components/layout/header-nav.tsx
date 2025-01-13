@@ -22,6 +22,7 @@ export interface NavLinks {
 }
 
 const GITHUB_URL = 'https://github.com/Panfactum/stack'
+const DISCORD_URL = 'https://discord.gg/panfactum'
 
 export function HeaderNav({ currentPath, hasBorder, darkBackground = false, ...props }: HeaderNav) {
   const { link: documentationPath } = useLastDocumentationPath()
@@ -39,6 +40,10 @@ export function HeaderNav({ currentPath, hasBorder, darkBackground = false, ...p
     {
       title: 'About',
       url: '/about',
+    },
+    {
+      title: 'Replaced Services',
+      url: '/services'
     },
     {
       title: 'Changelog',
@@ -89,7 +94,10 @@ export function HeaderNav({ currentPath, hasBorder, darkBackground = false, ...p
             })}
           </nav>
         </div>
-        <div className="hidden justify-end items-center space-x-lg md:flex ">
+        <div className="hidden justify-end items-center space-x-lg gap-x-4 md:flex ">
+          <a href={DISCORD_URL}>
+            <img src="/discord.svg" alt="discord-icon-link" />
+          </a>
           <a href={GITHUB_URL}>
             <FontAwesomeIcon
               icon={faGithub}

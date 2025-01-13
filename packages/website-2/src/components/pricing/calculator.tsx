@@ -443,7 +443,7 @@ export default function Calculator({
                 }
                 position={'right'}
               >
-                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   Resource Utilization %
                 </span>
               </Tooltip>
@@ -489,7 +489,7 @@ export default function Calculator({
                 title={'For example, PostgreSQL or MySQL'}
                 position={'right'}
               >
-                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   Relational Databases
                 </span>
               </Tooltip>
@@ -522,7 +522,7 @@ export default function Calculator({
                 title={'For example, Redis or memcached'}
                 position={'right'}
               >
-                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   Key-Value Databases
                 </span>
               </Tooltip>
@@ -579,7 +579,7 @@ export default function Calculator({
                 }
                 position={'right'}
               >
-                <span className="underline decoration-dotted decoration-black decoration-2 underline-offset-4">
+                <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   CI / CD
                 </span>
               </Tooltip>

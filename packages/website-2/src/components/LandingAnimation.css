@@ -1,0 +1,46 @@
+/* Container to hold the animation */
+.animate-container {
+    position: relative;
+    width: 400px; /* Width of the animation area */
+    height: 300px; /* Height of the animation area */
+    border: 1px solid #ccc; /* Optional border for visualization */
+    overflow: hidden; /* Ensure icons stay within bounds */
+    background-color: #f9f9f9;
+  }
+  
+  /* Placeholder icons */
+  .animate-icon {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    background-color: black; /* Black placeholder for icons */
+    offset-path: path("M 0 0 L 200 200 L 400 0"); /* Precise V-shaped path */
+    offset-distance: 0%;
+    transform-origin: center; /* Ensure rotation happens around the center */
+    animation: moveV 4s linear infinite; /* Linear animation for smoother motion */
+  }
+  
+  /* Delay animation for individual icons */
+  .animate-icon:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .animate-icon:nth-child(2) {
+    animation-delay: 0.5s;
+  }
+  .animate-icon:nth-child(3) {
+    animation-delay: 1s;
+  }
+  
+  /* Keyframes for motion along the V-shaped path */
+  @keyframes moveV {
+    0% {
+      offset-distance: 0%; /* Start at the top-left of the V */
+    }
+    50% {
+      offset-distance: 50%; /* Precisely at the bottom point of the V */
+    }
+    100% {
+      offset-distance: 100%; /* End at the top-right of the V */
+    }
+  }
+  

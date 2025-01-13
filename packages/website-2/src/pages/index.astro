@@ -25,6 +25,10 @@ import { ListBlock, FeatureListBlock } from '@/components/ListBlock'
 import { GetStarted } from '@/components/marketing/GetStarted'
 
 import './landing.css'
+import LandingAnimation from '@/components/LandingAnimation.astro'
+import MasonryLayout from '@/components/MasonryLayout'
+import VariableSizeMasonry from '@/components/DndGrid/VariableSizeMasonry'
+import ReplacedServicesSection from '@/components/ReplacedServices/ReplacedServicesSection.astro'
 
 const IMAGES = [
   [
@@ -299,6 +303,22 @@ const PRICES = [
       }
     </div>
   </Section>
+
+  <section class={`flex flex-col items-center py-7xl`}>
+    <Section class={`gap-7xl text-primary`}>
+      <div class="text-center flex flex-col mb-16">
+        <SectionKicker> Managed Services </SectionKicker>
+        <SectionTitle class="max-w-[768px] mx-auto">
+          What does this replace?
+        </SectionTitle>
+        <SectionContent class="max-w-[768px] mx-auto">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+          tempor incididunt ut labore et dolore magna aliqua.
+        </SectionContent>
+      </div>
+    </Section>
+    <ReplacedServicesSection />
+  </section>
 
   <Section class="py-7xl gap-y-4xl text-primary">
     <div class="text-center space-y-2 mb-8">

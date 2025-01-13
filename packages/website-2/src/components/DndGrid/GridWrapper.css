@@ -1,0 +1,25 @@
+.grid-wrapper {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(10, 88px);
+  grid-gap: 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  transition: all 0.25s ease;
+
+  @media screen and (max-width: 1280px) {
+    grid-template-columns: repeat(7, 88px);
+    grid-gap: 16px;
+  }
+
+  @media screen and (max-width: 768px) {
+    grid-template-columns: repeat(5, 88px);
+    grid-gap: 16px;
+  }
+
+  @media screen and (max-width: 640px) {
+    grid-template-columns: repeat(3, 88px);
+    grid-gap: 16px;
+  }
+}

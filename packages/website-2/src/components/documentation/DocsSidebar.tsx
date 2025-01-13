@@ -187,9 +187,9 @@ export function DocsSidebar({
       setOpenMobile={setOpenMobile}
     >
       <SidebarContent>
-        <SidebarMenu className="relative pb-0 md:pb-10">
+        <SidebarMenu className="relative pb-0 md:pb-10 pl-4 pr-4">
           <div
-            className={`flex flex-col gap-y-lg p-4 sticky h-full top-0 bg-primary z-top-navigation`}
+            className={`flex flex-col gap-y-lg sticky h-full top-0 bg-primary z-top-navigation`}
           >
             <Select
               value={$docStore.version}

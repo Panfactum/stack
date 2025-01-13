@@ -1,0 +1,2 @@
+.masonry-grid-item { border: 1px solid #e9e8eb; background-color: white; width: 72px; height: 72px; }
+.masonry-grid-item.is-expanded { width: 50%; }

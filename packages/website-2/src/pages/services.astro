@@ -1,0 +1,36 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import '../styles/global.css'
+import VariableSizeMasonry from "@/components/DndGrid/VariableSizeMasonry";
+import Section from '@/components/layout/section.astro';
+import SectionKicker from '@/components/astro/section/section-kicker.astro';
+import SectionTitle from '@/components/astro/section/section-title.astro';
+import SectionContent from '@/components/astro/section/section-content.astro';
+import ManagedServices from '@/components/ManagedServices';
+import SectionFullWidth from '@/components/layout/section-full-width.astro';
+---
+
+<Layout
+  darkBackground={false}
+  heroClass="bg-primary bg-[center_top] bg-cover bg-no-repeat"
+  isFixed={false}
+>
+    <section class={`flex flex-col items-center py-7xl`}>
+        <Section>
+            <div class="text-center flex flex-col mb-16">
+                <SectionKicker> Managed Services </SectionKicker>
+                <SectionTitle class="max-w-[768px] mx-auto">
+                    Get more value from your tools
+                </SectionTitle>
+                <SectionContent class="max-w-[768px] mx-auto">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+                    tempor incididunt ut labore et dolore magna aliqua.
+                </SectionContent>
+            </div>
+        </Section>
+
+        <ManagedServices>
+            <VariableSizeMasonry client:only="react" />
+        </ManagedServices>
+    </section>
+</Layout>
