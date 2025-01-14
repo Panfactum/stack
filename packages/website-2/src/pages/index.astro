@@ -238,7 +238,7 @@ const GUARANTEES = [
     <ReplacedServicesSection />
   </section>
 
-  <section class={`flex flex-col items-center py-7xl bg-secondary`}>
+  <section class={`dark flex flex-col items-center py-7xl bg-secondary`}>
     <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter">
       The Panfactum Group
     </h2>
@@ -251,10 +251,8 @@ const GUARANTEES = [
     <TestimonySection client:only="react" />
   </section>
 
-  <Section class="text-center gap-y-4xl text-primary">
-    <div
-      class="bg-brand-800 rounded-lg p-7xl flex flex-col items-center justify-center w-full"
-    >
+  <Section sectionClass="dark max-w-none bg-primary" class="text-center gap-y-4xl text-primary">
+    <div class="bg-brand-800 rounded-lg p-7xl flex flex-col items-center justify-center w-full max-w-[1216px] mx-auto">
       <div class="flex items-center mb-6">
         <div class="left-leaves">
           <img src="./leaves-left.svg" alt="left wreath" class="w-full" />
