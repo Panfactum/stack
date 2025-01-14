@@ -308,6 +308,12 @@ variable "extra_pod_labels" {
   default     = {}
 }
 
+variable "extra_service_annotations" {
+  description = "Annotations to add to the service"
+  type        = map(string)
+  default     = {}
+}
+
 variable "extra_service_labels" {
   description = "Extra service labels to use"
   type        = map(string)

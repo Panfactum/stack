@@ -158,6 +158,7 @@ module "service" {
     module.pod_template.labels,
     var.extra_service_labels
   )
+  extra_annotations = var.extra_service_annotations
 
   depends_on = [kubectl_manifest.deployment]
 }
