@@ -18,7 +18,7 @@
     ####################################
     # Programming Langauges
     ####################################
-    nodejs_20
+    nodejs_22
     nodePackages_latest.pnpm # nodejs package manager
     go
     upx # compressing go binaries

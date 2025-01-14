@@ -1,100 +1,170 @@
 ---
 import { PanfactumLogoAllWhite } from "@/components/panfactum-logo.tsx";
 import { clsx } from "clsx";
+import SectionContent from "../../components/astro/section/section-content.astro";
+import SectionTitle from "../../components/astro/section/section-title.astro";
 
 const COMPARISON_CATEGORIES = [
-  "Lorem ipsum dolor silt amot",
-  "Lorem ipsum dolor silt amot",
-  "Lorem ipsum dolor silt amot",
-  "Lorem ipsum dolor silt amot",
-  "Lorem ipsum dolor silt amot",
-  "Lorem ipsum dolor silt amot",
+  "Starting Point",
+  "Time to Launch",
+  "Quality",
+  "Initial Commitment",
+  "Guarantees",
+  "Expert Support",
+  "Annual Cost",
+  "Maintenance",
+  "Extensibility",
+  "Ecosystem",
 ];
 
 const COMPANY_COMPARISON = [
   {
-    name: "Company 1",
+    name: "DIY",
     data: ["Data", "Data", "Data", "Data", "Data", "Data"],
   },
   {
-    name: "Company 2",
+    name: "Consultant / Agency",
     data: ["Data", "Data", "Data", "Data", "Data", "Data"],
   },
   {
     name: "Panfactum",
-    data: ["Data", "Data", "Data", "Data", "Data", "Data"],
+    data: [, "Data", "Data", "Data", "Data", "Data"],
   },
 ];
+
+const TABLE_DATA = [
+  ["", "DIY", "Consultant / Agency", "Panfactum"],
+  [
+    "Cost",
+    "1+ full-time employee",
+    "Hidden and highly variable",
+    "Starting at $1,000 / month",
+  ],
+  [
+    "Time to Launch",
+    "3-12 months (highly variable)",
+    "3-12 months (highly variable)",
+    "< 30 days",
+  ],
+  [
+    "Quality",
+    "Unproven",
+    "Unproven",
+    "Open-source, battle-tested, framework w/ 100+ modules",
+  ],
+  [
+    "Initial Commitment",
+    "High",
+    "Medium (highly variable)",
+    "45-day, no-questions-asked refund period",
+  ],
+  [
+    "Spend Reduction",
+    "None",
+    "None / Limited",
+    "60%+ infrastructure savings or we pay the difference",
+  ],
+  [
+    "Expert Support",
+    "None",
+    "Limited",
+    "On-call support from the engineers behind Panfactum with guaranteed SLAs",
+  ],
+  [
+    "Maintenance",
+    "100% up to you",
+    "On request",
+    "Proactive, automatic upgrades",
+  ],
+  [
+    "Extensibility",
+    "100% up to you",
+    "Proprietary, closed-source",
+    "Extensible architecture built exclusively on open protocols and open source software",
+  ],
+  [
+    "Documentation",
+    "100% up to you",
+    "None / Limited",
+    "100s of pages including architecture reference and decision documents",
+  ],
+  [
+    "Audit / Compliance",
+    "100% up to you",
+    "Extra costs",
+    "SOC 2, Type 2 compliant out-of-the-box",
+  ],
+];
+
+const cellStyle = "flex min-h-[64px] items-center px-6";
+const getRowStyleByIndex = (index: number) =>
+  index % 2 !== 0 ? "bg-primary" : "bg-secondary";
 ---
 
-<section class="hidden md:block gap-7xl text-primary w-full mb-28">
-  <div class="container max-w-[1344px] mx-auto px-[104px]">
-    <div
-      class="grid grid-cols-12 w-full border border-secondary rounded-lg overflow-hidden"
-    >
-      <div class="col-span-4 flex flex-col">
-        <div class="category-header is-cell bg-primary px-6"></div>
-        {
-          COMPARISON_CATEGORIES.map((category, catIndex) => (
-            <div
-              id={`comparison-category-${catIndex}`}
-              class={`
-                category-label is-cell 
-                text-sm font-regular text-secondary px-6
-                ${catIndex % 2 === 0 ? "bg-primary" : "bg-secondary"}
-              `}
-            >
-              {category}
-            </div>
-          ))
-        }
-      </div>
-      <div class="col-span-8 grid grid-cols-3">
-        {
-          COMPANY_COMPARISON.map((company, companyIndex) =>
-            company.name !== "Panfactum" ? (
-              <div id={`comparison-company-${companyIndex}`}>
-                <div class="company-data-header is-cell text-md font-bold text-secondary bg-secondary px-6">
-                  {company.name}
-                </div>
-                {company.data.map((dataItem, dataItemIndex) => (
-                  <div
-                    id={`comparison-data-item-${dataItemIndex}`}
-                    class={clsx(
-                      "company-data-item is-cell text-sm font-regular text-secondary px-6",
-                      dataItemIndex % 2 === 0 ? "bg-primary" : "bg-secondary",
-                    )}
-                  >
-                    {dataItem}
-                  </div>
-                ))}
+<section class="hidden md:block gap-7xl w-full mb-28">
+  <div class="flex max-w-[1344px] mx-auto px-[104px] flex-col items-center">
+    <SectionTitle>Experience the Panfactum Service Difference</SectionTitle>
+    <div class="w-full border border-secondary rounded-lg overflow-hidden mt-8">
+      {
+        TABLE_DATA.map((data, rowNum) => {
+          if (rowNum == 0) {
+            return (
+              <div class="flex">
+                {data.map((companyName, colNum) => {
+                  const isFirstCol = colNum === 0;
+                  const isLastCol = colNum === 3;
+                  return (
+                    <div
+                      class={clsx(
+                        cellStyle,
+                        "text-md font-bold text-secondary py-0.5 flex justify-center px-0",
+                        isFirstCol ? "basis-1/3" : "basis-1/4",
+                        isLastCol
+                          ? "bg-brand-800 rounded-tr-lg"
+                          : "bg-secondary",
+                      )}
+                    >
+                      {isLastCol ? (
+                        <PanfactumLogoAllWhite className="w-[120px] h-auto" />
+                      ) : (
+                        companyName
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ) : (
-              <div
-                id={`comparison-company-${companyIndex}`}
-                class="is-panfactum bg-brand-700"
-              >
-                <div class="company-data-header is-cell text-md font-bold text-secondary p-0.5">
-                  <div class="flex items-center h-full w-full bg-brand-800 rounded-tr-lg px-6">
-                    <PanfactumLogoAllWhite className="w-[120px] h-auto" />
-                  </div>
-                </div>
-                {company.data.map((dataItem, dataItemIndex) => (
-                  <div
-                    id={`comparison-data-item-${dataItemIndex}`}
-                    class={`
-                          company-data-item is-cell 
-                          text-sm font-bold text-white px-6
-                        `}
-                  >
-                    {dataItem}
-                  </div>
-                ))}
+            );
+          } else {
+            return (
+              <div class="flex">
+                {data.map((content, colNum) => {
+                  const isFirstCol = colNum === 0;
+                  const isLastCol = colNum === 3;
+                  return (
+                    <div
+                      class={clsx(
+                        cellStyle,
+                        "text-sm py-3",
+                        isFirstCol
+                          ? "basis-1/3 font-semibold text-base"
+                          : "basis-1/4",
+                        isLastCol
+                          ? "font-bold text-white bg-brand-700"
+                          : [
+                              "font-regular text-secondary",
+                              getRowStyleByIndex(rowNum),
+                            ],
+                      )}
+                    >
+                      {content}
+                    </div>
+                  );
+                })}
               </div>
-            ),
-          )
-        }
-      </div>
+            );
+          }
+        })
+      }
     </div>
   </div>
 </section>
