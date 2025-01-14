@@ -1,38 +1,41 @@
 ---
-import '../styles/global.css'
-import { ClientRouter } from 'astro:transitions'
-import { SEO } from 'astro-seo'
-import { HeaderNav } from '@/components/layout/header-nav'
-import { Suspense } from 'react'
-import { DocsSidebar } from '@/components/documentation/DocsSidebar'
-import { buildBreadCrumbRoot } from '../components/documentation/DocsSidebar/SideNavVersions'
-import Footer from '@/components/layout/footer.astro'
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import { SEO } from "astro-seo";
+import { HeaderNav } from "@/components/layout/header-nav";
+import { Suspense } from "react";
+import { DocsSidebar } from "@/components/documentation/DocsSidebar";
+import { buildBreadCrumbRoot } from "../components/documentation/DocsSidebar/SideNavVersions";
+import Footer from "@/components/layout/footer.astro";
 
-const pathname = new URL(Astro.request.url).pathname
-const headings = Astro.props.headings || []
+const pathname = new URL(Astro.request.url).pathname;
+const headings = Astro.props.headings || [];
 
 const showFooter =
-  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
+  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true;
 
-const { redirect } = Astro.props
+const { redirect } = Astro.props;
 
 function depthPadding(depth: number) {
   if (depth === 1) {
-    return 'pl-0'
+    return "pl-0";
   } else if (depth === 2) {
-    return 'pl-md'
+    return "pl-md";
   } else if (depth === 3) {
-    return 'pl-xl'
+    return "pl-xl";
   } else if (depth === 4) {
-    return 'pl-3xl'
+    return "pl-3xl";
   } else if (depth === 5) {
-    return 'pl-4xl'
+    return "pl-4xl";
   } else {
-    return 'pl-5xl'
+    return "pl-5xl";
   }
 }
 
-const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
+const breadcrumbs = buildBreadCrumbRoot(
+  Astro.props.versionedSections,
+  pathname,
+);
 ---
 
 <html lang="en">
@@ -89,7 +92,7 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
         </aside>
         <Suspense>
           <DocsSidebar
-            client:only
+            client:only="react"
             currentPath={pathname}
             basePath="/docs"
             versionedSections={Astro.props.versionedSections}
@@ -99,11 +102,11 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
         <script src="./persist-sidebar-scroll.ts"></script>
       </nav>
       <div
-        style={{ '--sidebar-width': headings ? 0 : undefined }}
+        style={{ "--sidebar-width": headings ? 0 : undefined }}
         class={`flex-1 w-full overflow-auto h-full pl-0 lg:pl-[330px] pt-16 sm:pt-8 lg:pt-[80px]`}
       >
         <article
-          style={{ '--sidebar-width': !headings ? 0 : undefined }}
+          style={{ "--sidebar-width": !headings ? 0 : undefined }}
           class={`content xl:w-[calc(100%-var(--sidebar-width))] py-[24px] px-[16px] lg:px-[32px] md:border-l md:border-r border-secondary overflow-auto min-h-[calc(100vh-80px)] h-full`}
         >
           <slot />
@@ -140,26 +143,25 @@ const breadcrumbs = buildBreadCrumbRoot(Astro.props.versionedSections, pathname)
         }
       </div>
     </div>
-
   </body>
 </html>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", () => {
     const adjustScroll = () => {
-      const hash = window.location.hash
+      const hash = window.location.hash;
       if (hash) {
-        const element = document.querySelector(hash)
+        const element = document.querySelector(hash);
         if (element) {
           window.scrollTo({
             top: element.offsetTop - 100, // Adjust this value to match your fixed nav height
-            behavior: 'smooth',
-          })
+            behavior: "smooth",
+          });
         }
       }
-    }
-    window.addEventListener('popstate', adjustScroll)
-    window.addEventListener('hashchange', adjustScroll)
-    adjustScroll() // Adjust scroll on initial load if there's a hash
-  })
+    };
+    window.addEventListener("popstate", adjustScroll);
+    window.addEventListener("hashchange", adjustScroll);
+    adjustScroll(); // Adjust scroll on initial load if there's a hash
+  });
 </script>

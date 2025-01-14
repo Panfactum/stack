@@ -1,82 +1,87 @@
 ---
-import '../styles/global.css'
-import Layout from '../layouts/Layout.astro'
-import { Button } from '@/components/ui/button'
-import Section from '../components/layout/section.astro'
-import SectionFullWidth from '@/components/layout/section-full-width.astro'
-import Kicker from '@/components/astro/hero/kicker.astro'
-import Title from '@/components/astro/hero/title.astro'
-import Subtitle from '@/components/astro/hero/subtitle.astro'
-import SectionKicker from '@/components/astro/section/section-kicker.astro'
-import SectionTitle from '@/components/astro/section/section-title.astro'
-import SectionContent from '@/components/astro/section/section-content.astro'
-import ContactUs from '@/components/astro/forms/contact-us.astro'
-import { FeatureListBlock } from '@/components/ListBlock'
+import "../styles/global.css";
+import Layout from "../layouts/Layout.astro";
+import { Button } from "@/components/ui/button";
+import Section from "../components/layout/section.astro";
+import SectionFullWidth from "@/components/layout/section-full-width.astro";
+import Kicker from "@/components/astro/hero/kicker.astro";
+import Title from "@/components/astro/hero/title.astro";
+import Subtitle from "@/components/astro/hero/subtitle.astro";
+import SectionKicker from "@/components/astro/section/section-kicker.astro";
+import SectionTitle from "@/components/astro/section/section-title.astro";
+import SectionContent from "@/components/astro/section/section-content.astro";
+import ContactUs from "@/components/astro/forms/contact-us.astro";
+import { FeatureListBlock } from "@/components/ListBlock";
 
 const CORE_PLATFORM_VALUES = [
   {
-    icon: 'chat-bubble',
-    title: 'Self-Hostable',
+    icon: "chat-bubble",
+    title: "Self-Hostable",
     content:
-      'Software is easy to distribute, hardware is a commodity, and orchestration is a solved problem.',
+      "Software is easy to distribute, hardware is a commodity, and orchestration is a solved problem.",
   },
   {
-    icon: 'thunder-bolt',
-    title: 'Open Tooling & Standards',
+    icon: "thunder-bolt",
+    title: "Open Tooling & Standards",
     content:
-      'No standardized platform can cover 100% of the needs of every user, all the time.',
+      "No standardized platform can cover 100% of the needs of every user, all the time.",
   },
   {
-    icon: 'bar-chart-break',
-    title: 'Integrated Approach',
+    icon: "bar-chart-break",
+    title: "Integrated Approach",
     content:
-      'Our platform will Just Work™ out-of-the-box without users needing to understand all the underlying complexity on day one.',
+      "Our platform will Just Work™ out-of-the-box without users needing to understand all the underlying complexity on day one.",
   },
   {
-    icon: 'chat-happy',
-    title: 'Developer Productivity',
+    icon: "chat-happy",
+    title: "Developer Productivity",
     content:
-      'The success of most software companies is constrained by how quickly and robustly its engineers can write and deploy new software.',
+      "The success of most software companies is constrained by how quickly and robustly its engineers can write and deploy new software.",
   },
   {
-    icon: 'ownership',
-    title: 'Ownership',
+    icon: "ownership",
+    title: "Ownership",
     content:
-      'We believe a platform can only be successful if its users feel like they own it.',
+      "We believe a platform can only be successful if its users feel like they own it.",
   },
   {
-    icon: 'message-heart',
-    title: 'One More',
+    icon: "message-heart",
+    title: "One More",
     content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
   },
-]
+];
 
 const COMPANY_MEMBERS = [
   {
-    image: '/face.png',
-    name: 'Amélie Laurent',
-    role: 'Frontend Engineer',
+    image: "/face.png",
+    name: "Amélie Laurent",
+    role: "Frontend Engineer",
   },
   {
-    image: '/face.png',
-    name: 'Nikolas Gibbons',
-    role: 'Engineering Manager',
+    image: "/face.png",
+    name: "Nikolas Gibbons",
+    role: "Engineering Manager",
   },
   {
-    image: '/face.png',
-    name: 'Jack Langston',
-    role: 'Founder / CEO',
+    image: "/face.png",
+    name: "Jack Langston",
+    role: "Founder / CEO",
   },
   {
-    image: '/face.png',
-    name: 'James Lee',
-    role: 'Founder / CTO',
+    image: "/face.png",
+    name: "James Lee",
+    role: "Founder / CTO",
   },
-]
+];
 ---
 
-<Layout title="About" darkBackground={true} heroClass="bg-brand-section" hasBorder={false}>
+<Layout
+  title="About"
+  darkBackground={true}
+  heroClass="bg-brand-section"
+  hasBorder={false}
+>
   <Section slot="hero">
     <div class="flex flex-col gap-3xl items-center text-center max-w-[846px]">
       <Kicker> pæn • fak • tm </Kicker>
@@ -164,7 +169,7 @@ const COMPANY_MEMBERS = [
 
         <p>
           To fill this gap, I developed a consulting niche deploying a platform
-          "starter kit" for companies ranging from pre-seed startups to >$1B
+          "starter kit" for companies ranging from pre-seed startups to &gt;$1B
           organizations. In 2023, this kit formally became the Panfactum Stack
           that you see today.
         </p>

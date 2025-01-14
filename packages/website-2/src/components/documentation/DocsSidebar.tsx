@@ -1,27 +1,27 @@
-import { useStore } from '@nanostores/react'
-import { navigate } from 'astro:transitions/client'
-import * as React from 'react'
-import { type ReactNode, useState } from 'react'
+import { useStore } from "@nanostores/react";
+import { navigate } from "astro:transitions/client";
+import * as React from "react";
+import { type ReactNode, useState } from "react";
 import {
   buildBreadcrumbs,
   stripBasePath,
   type VersionedSection,
-} from '@/components/documentation/DocsSidebar/SideNavVersions.ts'
-import { iconMapping } from '@/components/documentation/DocsSidebar/icons.tsx'
-import type { NavIcons } from '@/components/documentation/DocsSidebar/types.ts'
-import { SearchButton } from '@/components/documentation/search/search-button.tsx'
+} from "@/components/documentation/DocsSidebar/SideNavVersions.ts";
+import { iconMapping } from "@/components/documentation/DocsSidebar/icons.tsx";
+import type { NavIcons } from "@/components/documentation/DocsSidebar/types.ts";
+import { SearchButton } from "@/components/documentation/search/search-button.tsx";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible.tsx'
+} from "@/components/ui/collapsible.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select.tsx'
+} from "@/components/ui/select.tsx";
 import {
   Sidebar,
   SidebarContent,
@@ -31,41 +31,41 @@ import {
   SidebarMenuButtonTreeItem,
   SidebarMenuItem,
   SidebarMenuSub,
-} from '@/components/ui/sidebar.tsx'
-import Spacer from '@/components/ui/spacer.tsx'
-import { useNavReferenceLink } from '@/hooks/useNavReferenceLink.ts'
-import { DOCS_VERSIONS, Versions } from '@/lib/constants.ts'
+} from "@/components/ui/sidebar.tsx";
+import Spacer from "@/components/ui/spacer.tsx";
+import { useNavReferenceLink } from "@/hooks/useNavReferenceLink.ts";
+import { DOCS_VERSIONS, Versions } from "@/lib/constants.ts";
 import {
   documentationStore,
   sectionLastPath,
   setNavigationReferences,
   setVersion,
-} from '@/stores/documentation-store.ts'
+} from "@/stores/documentation-store.ts";
 
 export interface SideNavSection {
-  text: string
-  path: string
-  icon?: NavIcons
-  notVersioned?: boolean
-  default?: boolean
-  sub?: SideNavSection[]
-  isActive?: boolean
+  text: string;
+  path: string;
+  icon?: NavIcons;
+  notVersioned?: boolean;
+  default?: boolean;
+  sub?: SideNavSection[];
+  isActive?: boolean;
 }
 
 export const SavedLink: React.FC<{
-  children: ReactNode
-  href: string
-  onClick: () => void
+  children: ReactNode;
+  href: string;
+  onClick: () => void;
 }> = ({ href, ...props }) => {
-  const { link } = useNavReferenceLink(href)
+  const { link } = useNavReferenceLink(href);
 
-  return <a href={link} {...props} />
-}
+  return <a href={link} {...props} />;
+};
 
 export interface DocSidebarProps {
-  currentPath: string
-  basePath: string
-  versionedSections: VersionedSection
+  currentPath: string;
+  basePath: string;
+  versionedSections: VersionedSection;
 }
 
 export function DocsSidebar({
@@ -73,33 +73,33 @@ export function DocsSidebar({
   basePath,
   versionedSections,
 }: DocSidebarProps) {
-  const $navRefStore = useStore(sectionLastPath)
-  const $docStore = useStore(documentationStore)
+  const $navRefStore = useStore(sectionLastPath);
+  const $docStore = useStore(documentationStore);
 
-  const version = $docStore.version as Versions
-  const isVersioned = currentPath.startsWith(`${basePath}/${version}`)
+  const version = $docStore.version as Versions;
+  const isVersioned = currentPath.startsWith(`${basePath}/${version}`);
 
-  const sections = versionedSections[version]
+  const sections = versionedSections[version];
 
-  const { path } = stripBasePath(currentPath)
+  const { path } = stripBasePath(currentPath);
   const currentRoot = sections.find((item) =>
-    ('/' + path).startsWith(item.path),
-  )
+    ("/" + path).startsWith(item.path),
+  );
 
   React.useEffect(() => {
     if (currentRoot) {
-      setNavigationReferences(currentRoot?.path, currentPath)
+      setNavigationReferences(currentRoot?.path, currentPath);
     }
-  }, [currentPath, currentRoot])
+  }, [currentPath, currentRoot]);
 
   interface SectionProp extends SideNavSection {
-    basePath: string
-    isChild?: boolean
+    basePath: string;
+    isChild?: boolean;
   }
 
-  const Section = ({ text, path, sub, basePath = '/' }: SectionProp) => {
-    const sectionPath = basePath + path
-    const isActive = !!(path && currentPath.includes(basePath + path))
+  const Section = ({ text, path, sub, basePath = "/" }: SectionProp) => {
+    const sectionPath = basePath + path;
+    const isActive = !!(path && currentPath.includes(basePath + path));
 
     return (
       <Collapsible defaultOpen={isActive} className="group/collapsible">
@@ -133,12 +133,12 @@ export function DocsSidebar({
                 if (el.sub) {
                   return (
                     <Section key={el.text} {...el} basePath={sectionPath} />
-                  )
+                  );
                 }
 
                 const isActive = !!(
                   el.path && currentPath.includes(sectionPath + el.path)
-                )
+                );
 
                 return (
                   <SidebarMenuItem key={el.text}>
@@ -153,30 +153,30 @@ export function DocsSidebar({
                       </a>
                     </SidebarMenuButtonTreeItem>
                   </SidebarMenuItem>
-                )
+                );
               })}
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>
-    )
-  }
+    );
+  };
 
   const handleVersionChange = (version: string) => {
     if (isVersioned) {
-      navigate(`${basePath}/${version}/${stripBasePath(currentPath).path}`)
+      navigate(`${basePath}/${version}/${stripBasePath(currentPath).path}`);
     } else {
-      setVersion(version)
+      setVersion(version);
     }
-  }
+  };
 
-  const strippedPath = stripBasePath(currentPath)
+  const strippedPath = stripBasePath(currentPath);
 
-  const crumbs = buildBreadcrumbs(sections, '/' + strippedPath.path)
-  const [openMobile, setOpenMobile] = useState(false)
+  const crumbs = buildBreadcrumbs(sections, "/" + strippedPath.path);
+  const [openMobile, setOpenMobile] = useState(false);
 
   const mainNavigationLinkActive = (path: string) => {
-    return !!(path && currentPath.includes(path))
-  }
+    return !!(path && currentPath.includes(path));
+  };
 
   return (
     <Sidebar
@@ -217,7 +217,7 @@ export function DocsSidebar({
                 asChild
               >
                 <SavedLink
-                  href={`${basePath}${item.notVersioned ? '' : `/${version}`}${item.path}`}
+                  href={`${basePath}${item.notVersioned ? "" : `/${version}`}${item.path}`}
                   onClick={() => setOpenMobile(false)}
                 >
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
@@ -242,7 +242,7 @@ export function DocsSidebar({
             <SidebarGroup className="pt-4">
               <SidebarMenu>
                 {currentRoot.sub?.map((section) => {
-                  const sectionBasePath = `${basePath}${currentRoot.notVersioned ? '' : `/${version}`}${currentRoot.path}`
+                  const sectionBasePath = `${basePath}${currentRoot.notVersioned ? "" : `/${version}`}${currentRoot.path}`;
 
                   if (section.sub) {
                     return (
@@ -251,7 +251,7 @@ export function DocsSidebar({
                         {...section}
                         basePath={sectionBasePath}
                       />
-                    )
+                    );
                   }
 
                   return (
@@ -270,7 +270,7 @@ export function DocsSidebar({
                         </a>
                       </SidebarMenuButtonTreeItem>
                     </SidebarMenuItem>
-                  )
+                  );
                 })}
               </SidebarMenu>
             </SidebarGroup>
@@ -278,5 +278,5 @@ export function DocsSidebar({
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

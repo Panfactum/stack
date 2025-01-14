@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion.tsx'
+} from "@/components/ui/accordion.tsx";
 
 export function Faq() {
   return (
@@ -176,5 +176,5 @@ export function Faq() {
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-  )
+  );
 }

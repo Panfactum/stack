@@ -1,47 +1,47 @@
 @font-face {
-  font-family: 'neue-machina';
-  src: url('/fonts/neue-machina/PPNeueMachina-PlainLight.woff2');
+  font-family: "neue-machina";
+  src: url("/fonts/neue-machina/PPNeueMachina-PlainLight.woff2");
   font-weight: 400;
 }
 
 @font-face {
-  font-family: 'neue-machina';
-  src: url('/fonts/neue-machina/PPNeueMachina-PlainMedium.woff2');
+  font-family: "neue-machina";
+  src: url("/fonts/neue-machina/PPNeueMachina-PlainMedium.woff2");
   font-weight: 500;
 }
 
 @font-face {
-  font-family: 'neue-machina';
-  src: url('/fonts/neue-machina/PPNeueMachina-PlainRegular.woff2');
+  font-family: "neue-machina";
+  src: url("/fonts/neue-machina/PPNeueMachina-PlainRegular.woff2");
   font-weight: 600;
 }
 
 @font-face {
-  font-family: 'neue-machina';
-  src: url('/fonts/neue-machina/PPNeueMachina-PlainUltrabold.woff2');
+  font-family: "neue-machina";
+  src: url("/fonts/neue-machina/PPNeueMachina-PlainUltrabold.woff2");
   font-weight: 700;
 }
 
 @font-face {
-  font-family: 'neue-montreal-mono';
-  src: url('/fonts/neue-montreal-mono/PPNeueMontrealMono-Light.woff2');
+  font-family: "neue-montreal-mono";
+  src: url("/fonts/neue-montreal-mono/PPNeueMontrealMono-Light.woff2");
   font-weight: 400;
 }
 
 @font-face {
-  font-family: 'neue-montreal-mono';
-  src: url('/fonts/neue-montreal-mono/PPNeueMontrealMono-Regular.woff2');
+  font-family: "neue-montreal-mono";
+  src: url("/fonts/neue-montreal-mono/PPNeueMontrealMono-Regular.woff2");
   font-weight: 500;
 }
 
 @font-face {
-  font-family: 'neue-montreal-mono';
-  src: url('/fonts/neue-montreal-mono/PPNeueMontrealMono-Medium.woff2');
+  font-family: "neue-montreal-mono";
+  src: url("/fonts/neue-montreal-mono/PPNeueMontrealMono-Medium.woff2");
   font-weight: 600;
 }
 
 @font-face {
-  font-family: 'neue-montreal-mono';
-  src: url('/fonts/neue-montreal-mono/PPNeueMontrealMono-Bold.woff2');
+  font-family: "neue-montreal-mono";
+  src: url("/fonts/neue-montreal-mono/PPNeueMontrealMono-Bold.woff2");
   font-weight: 700;
 }

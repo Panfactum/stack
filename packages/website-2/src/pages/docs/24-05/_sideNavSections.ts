@@ -1,1812 +1,1812 @@
-import type { SideNavSection } from '@/components/documentation/DocsSidebar.tsx'
-import { makeModuleDir } from '@/components/documentation/DocsSidebar/SideNavVersions.ts'
-import { NavIcons } from '@/components/documentation/DocsSidebar/types.ts'
-import modules from './_modules.json'
+import type { SideNavSection } from "@/components/documentation/DocsSidebar.tsx";
+import { makeModuleDir } from "@/components/documentation/DocsSidebar/SideNavVersions.ts";
+import { NavIcons } from "@/components/documentation/DocsSidebar/types.ts";
+import modules from "./_modules.json";
 
 export const SIDENAV_SECTIONS: SideNavSection[] = [
   {
-    text: 'Framework',
-    path: '/framework',
+    text: "Framework",
+    path: "/framework",
     icon: NavIcons.dataFlow,
     notVersioned: true,
     sub: [
       {
-        text: 'Framework',
-        path: '/framework',
+        text: "Framework",
+        path: "/framework",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'KPIs',
-            path: '/kpis',
+            text: "KPIs",
+            path: "/kpis",
           },
           {
-            text: 'Downtime Visibility',
-            path: '/downtime-visibility',
+            text: "Downtime Visibility",
+            path: "/downtime-visibility",
           },
           {
-            text: 'Security Backlog',
-            path: '/security-backlog',
+            text: "Security Backlog",
+            path: "/security-backlog",
           },
         ],
       },
       {
-        text: 'Pillars',
-        path: '/pillars',
+        text: "Pillars",
+        path: "/pillars",
         sub: [
           {
-            text: 'Automation',
-            path: '/automation',
+            text: "Automation",
+            path: "/automation",
           },
           {
-            text: 'Observability',
-            path: '/observability',
+            text: "Observability",
+            path: "/observability",
           },
           {
-            text: 'Security',
-            path: '/security',
+            text: "Security",
+            path: "/security",
           },
           {
-            text: 'Resiliency',
-            path: '/resiliency',
+            text: "Resiliency",
+            path: "/resiliency",
           },
           {
-            text: 'Performance',
-            path: '/performance',
+            text: "Performance",
+            path: "/performance",
           },
           {
-            text: 'Immediate Integration',
-            path: '/immediate-integration',
+            text: "Immediate Integration",
+            path: "/immediate-integration",
           },
           {
-            text: 'Efficiency',
-            path: '/efficiency',
+            text: "Efficiency",
+            path: "/efficiency",
           },
           {
-            text: 'Coordination',
-            path: '/coordination',
+            text: "Coordination",
+            path: "/coordination",
           },
         ],
       },
     ],
   },
   {
-    text: 'Guides',
-    path: '/guides',
+    text: "Guides",
+    path: "/guides",
     icon: NavIcons.book,
     sub: [
       {
-        text: 'Getting Started',
-        path: '/getting-started',
+        text: "Getting Started",
+        path: "/getting-started",
         sub: [
           {
-            text: 'Start Here',
-            path: '/start-here',
+            text: "Start Here",
+            path: "/start-here",
           },
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Install Tooling',
-            path: '/install-tooling',
+            text: "Install Tooling",
+            path: "/install-tooling",
           },
           {
-            text: 'Boot Developer Environment',
-            path: '/boot-developer-environment',
+            text: "Boot Developer Environment",
+            path: "/boot-developer-environment",
           },
           {
-            text: 'Connect to Infrastructure',
-            path: '/connect-to-infrastructure',
+            text: "Connect to Infrastructure",
+            path: "/connect-to-infrastructure",
           },
         ],
       },
       {
-        text: 'Bootstrapping Stack',
-        path: '/bootstrapping',
+        text: "Bootstrapping Stack",
+        path: "/bootstrapping",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Installing the Development Shell',
-            path: '/installing-devshell',
+            text: "Installing the Development Shell",
+            path: "/installing-devshell",
           },
           {
-            text: 'Preparing AWS',
-            path: '/preparing-aws',
+            text: "Preparing AWS",
+            path: "/preparing-aws",
           },
           {
-            text: 'Configuring Infrastructure-as-Code (IaC)',
-            path: '/configuring-infrastructure-as-code',
+            text: "Configuring Infrastructure-as-Code (IaC)",
+            path: "/configuring-infrastructure-as-code",
           },
           {
-            text: 'Bootstrapping IaC',
-            path: '/infrastructure-as-code',
+            text: "Bootstrapping IaC",
+            path: "/infrastructure-as-code",
           },
           {
-            text: 'DNS',
-            path: '/dns',
+            text: "DNS",
+            path: "/dns",
           },
           {
-            text: 'AWS Networking',
-            path: '/aws-networking',
+            text: "AWS Networking",
+            path: "/aws-networking",
           },
           {
-            text: 'Kubernetes Cluster',
-            path: '/kubernetes-cluster',
+            text: "Kubernetes Cluster",
+            path: "/kubernetes-cluster",
           },
           {
-            text: 'Internal Cluster Networking',
-            path: '/internal-cluster-networking',
+            text: "Internal Cluster Networking",
+            path: "/internal-cluster-networking",
           },
           {
-            text: 'Policy Controller',
-            path: '/policy-controller',
+            text: "Policy Controller",
+            path: "/policy-controller",
           },
           {
-            text: 'Storage Interfaces',
-            path: '/storage-interfaces',
+            text: "Storage Interfaces",
+            path: "/storage-interfaces",
           },
           {
-            text: 'Vault',
-            path: '/vault',
+            text: "Vault",
+            path: "/vault",
           },
           {
-            text: 'Certificate Management',
-            path: '/certificate-management',
+            text: "Certificate Management",
+            path: "/certificate-management",
           },
           {
-            text: 'Service Mesh',
-            path: '/service-mesh',
+            text: "Service Mesh",
+            path: "/service-mesh",
           },
           {
-            text: 'Autoscaling',
-            path: '/autoscaling',
+            text: "Autoscaling",
+            path: "/autoscaling",
           },
           {
-            text: 'Inbound Networking',
-            path: '/inbound-networking',
+            text: "Inbound Networking",
+            path: "/inbound-networking",
           },
           {
-            text: 'Maintenance Controllers',
-            path: '/maintenance-controllers',
+            text: "Maintenance Controllers",
+            path: "/maintenance-controllers",
           },
           {
-            text: 'Databases',
-            path: '/databases',
+            text: "Databases",
+            path: "/databases",
           },
           {
-            text: 'Identity Provider',
-            path: '/identity-provider',
+            text: "Identity Provider",
+            path: "/identity-provider",
           },
           {
-            text: 'Federated Auth',
-            path: '/federated-auth',
+            text: "Federated Auth",
+            path: "/federated-auth",
           },
           {
-            text: 'Review and Next Steps',
-            path: '/next-steps',
+            text: "Review and Next Steps",
+            path: "/next-steps",
           },
         ],
       },
       {
-        text: 'Stack Addons',
-        path: '/addons',
+        text: "Stack Addons",
+        path: "/addons",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Workflow Engine',
-            path: '/workflow-engine',
+            text: "Workflow Engine",
+            path: "/workflow-engine",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Creating Workflows',
-                path: '/creating-workflows',
+                text: "Creating Workflows",
+                path: "/creating-workflows",
               },
               {
-                text: 'Triggering Workflows',
-                path: '/triggering-workflows',
+                text: "Triggering Workflows",
+                path: "/triggering-workflows",
               },
               {
-                text: 'Prebuilt Workflows',
-                path: '/prebuilt-workflows',
+                text: "Prebuilt Workflows",
+                path: "/prebuilt-workflows",
               },
               {
-                text: 'Debugging',
-                path: '/debugging',
+                text: "Debugging",
+                path: "/debugging",
               },
             ],
           },
           {
-            text: 'Event Bus',
-            path: '/event-bus',
+            text: "Event Bus",
+            path: "/event-bus",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Use Cases',
-                path: '/use-cases',
+                text: "Use Cases",
+                path: "/use-cases",
               },
             ],
           },
           {
-            text: 'BuildKit',
-            path: '/buildkit',
+            text: "BuildKit",
+            path: "/buildkit",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Building Images',
-                path: '/building-images',
+                text: "Building Images",
+                path: "/building-images",
               },
               {
-                text: 'Debugging',
-                path: '/debugging',
+                text: "Debugging",
+                path: "/debugging",
               },
             ],
           },
           {
-            text: 'GitHub Actions',
-            path: '/github-actions',
+            text: "GitHub Actions",
+            path: "/github-actions",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        text: 'Development Shell',
-        path: '/development-shell',
-        sub: [
-          {
-            text: 'Customizing',
-            path: '/customizing',
-          },
-          {
-            text: 'Debugging',
-            path: '/debugging',
-          },
-        ],
-      },
-      {
-        text: 'Infrastructure-as-Code',
-        path: '/iac',
-        sub: [
-          {
-            text: 'Overview',
-            path: '/overview',
-          },
-          {
-            text: 'Repository Setup',
-            path: '/repo-setup',
-          },
-          {
-            text: 'Deploying Modules',
-            path: '/deploying-modules',
-          },
-          {
-            text: 'Developing First-Party Modules',
-            path: '/first-party-modules',
-          },
-          {
-            text: 'Extending Panfactum Configuration',
-            path: '/extending-panfactum',
-          },
-          {
-            text: 'Debugging',
-            path: '/debugging',
-          },
-        ],
-      },
-      {
-        text: 'Deploying Workloads',
-        path: '/deploying-workloads',
-        sub: [
-          {
-            text: 'Basics',
-            path: '/basics',
-          },
-          {
-            text: 'Networking',
-            path: '/networking',
-          },
-          {
-            text: 'Persistence',
-            path: '/persistence',
-          },
-          {
-            text: 'High Availability',
-            path: '/high-availability',
-          },
-          {
-            text: 'Permissions',
-            path: '/permissions',
-          },
-          {
-            text: 'Checklist',
-            path: '/checklist',
-          },
-        ],
-      },
-      {
-        text: 'CI / CD',
-        path: '/cicd',
-        sub: [
-          {
-            text: 'Getting Started',
-            path: '/getting-started',
-          },
-          {
-            text: 'Checking Out Code',
-            path: '/checking-out-code',
-          },
-          {
-            text: 'Rolling Deployments',
-            path: '/rolling-deployments',
-          },
-        ],
-      },
-      {
-        text: 'Networking',
-        path: '/networking',
-        sub: [
-          {
-            text: 'SSH Tunneling',
-            path: '/ssh-tunnel',
-          },
-          {
-            text: 'Database Connections',
-            path: '/database-connections',
-          },
-        ],
-      },
-      {
-        text: 'User Management',
-        path: '/user-management',
-        sub: [
-          {
-            text: 'Provisioning',
-            path: '/provisioning-new-user',
-          },
-          {
-            text: 'New User Setup',
-            path: '/setting-up-new-user',
-          },
-        ],
-      },
-      {
-        text: 'Panfactum Versioning',
-        path: '/versioning',
-        sub: [
-          {
-            text: 'Releases',
-            path: '/releases',
-          },
-          {
-            text: 'Pinning',
-            path: '/pinning',
-          },
-          {
-            text: 'Upgrading',
-            path: '/upgrading',
-            sub: [
-              {
-                text: 'General Guide',
-                path: '/general',
+                text: "Installing",
+                path: "/installing",
               },
             ],
           },
         ],
       },
       {
-        text: 'Contributing',
-        path: '/contributing',
+        text: "Development Shell",
+        path: "/development-shell",
         sub: [
           {
-            text: 'Getting Started',
-            path: '/getting-started',
+            text: "Customizing",
+            path: "/customizing",
           },
           {
-            text: 'Pull Requests',
-            path: '/pull-requests',
+            text: "Debugging",
+            path: "/debugging",
+          },
+        ],
+      },
+      {
+        text: "Infrastructure-as-Code",
+        path: "/iac",
+        sub: [
+          {
+            text: "Overview",
+            path: "/overview",
+          },
+          {
+            text: "Repository Setup",
+            path: "/repo-setup",
+          },
+          {
+            text: "Deploying Modules",
+            path: "/deploying-modules",
+          },
+          {
+            text: "Developing First-Party Modules",
+            path: "/first-party-modules",
+          },
+          {
+            text: "Extending Panfactum Configuration",
+            path: "/extending-panfactum",
+          },
+          {
+            text: "Debugging",
+            path: "/debugging",
+          },
+        ],
+      },
+      {
+        text: "Deploying Workloads",
+        path: "/deploying-workloads",
+        sub: [
+          {
+            text: "Basics",
+            path: "/basics",
+          },
+          {
+            text: "Networking",
+            path: "/networking",
+          },
+          {
+            text: "Persistence",
+            path: "/persistence",
+          },
+          {
+            text: "High Availability",
+            path: "/high-availability",
+          },
+          {
+            text: "Permissions",
+            path: "/permissions",
+          },
+          {
+            text: "Checklist",
+            path: "/checklist",
+          },
+        ],
+      },
+      {
+        text: "CI / CD",
+        path: "/cicd",
+        sub: [
+          {
+            text: "Getting Started",
+            path: "/getting-started",
+          },
+          {
+            text: "Checking Out Code",
+            path: "/checking-out-code",
+          },
+          {
+            text: "Rolling Deployments",
+            path: "/rolling-deployments",
+          },
+        ],
+      },
+      {
+        text: "Networking",
+        path: "/networking",
+        sub: [
+          {
+            text: "SSH Tunneling",
+            path: "/ssh-tunnel",
+          },
+          {
+            text: "Database Connections",
+            path: "/database-connections",
+          },
+        ],
+      },
+      {
+        text: "User Management",
+        path: "/user-management",
+        sub: [
+          {
+            text: "Provisioning",
+            path: "/provisioning-new-user",
+          },
+          {
+            text: "New User Setup",
+            path: "/setting-up-new-user",
+          },
+        ],
+      },
+      {
+        text: "Panfactum Versioning",
+        path: "/versioning",
+        sub: [
+          {
+            text: "Releases",
+            path: "/releases",
+          },
+          {
+            text: "Pinning",
+            path: "/pinning",
+          },
+          {
+            text: "Upgrading",
+            path: "/upgrading",
+            sub: [
+              {
+                text: "General Guide",
+                path: "/general",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        text: "Contributing",
+        path: "/contributing",
+        sub: [
+          {
+            text: "Getting Started",
+            path: "/getting-started",
+          },
+          {
+            text: "Pull Requests",
+            path: "/pull-requests",
           },
         ],
       },
     ],
   },
   {
-    text: 'Reference',
-    path: '/reference',
+    text: "Reference",
+    path: "/reference",
     icon: NavIcons.analyze,
     sub: [
       {
-        text: 'Releases',
-        path: '/releases',
+        text: "Releases",
+        path: "/releases",
         sub: [
           {
-            text: 'Supported Releases',
-            path: '/supported-releases',
+            text: "Supported Releases",
+            path: "/supported-releases",
           },
           {
-            text: 'Change Log',
-            path: '/changelog',
+            text: "Change Log",
+            path: "/changelog",
             sub: [
               {
-                text: 'Edge',
-                path: '/edge',
+                text: "Edge",
+                path: "/edge",
               },
               {
-                text: '24.04',
-                path: '/24-05',
+                text: "24.04",
+                path: "/24-05",
               },
             ],
           },
           {
-            text: 'Roadmap',
-            path: '/roadmap',
+            text: "Roadmap",
+            path: "/roadmap",
           },
         ],
       },
       {
-        text: 'Configuration',
-        path: '/configuration',
+        text: "Configuration",
+        path: "/configuration",
         sub: [
           {
-            text: 'Repository Variables',
-            path: '/repo-variables',
+            text: "Repository Variables",
+            path: "/repo-variables",
           },
           {
-            text: '.env Variables',
-            path: '/dotenv',
+            text: ".env Variables",
+            path: "/dotenv",
           },
           {
-            text: 'Terragrunt Variables',
-            path: '/terragrunt-variables',
+            text: "Terragrunt Variables",
+            path: "/terragrunt-variables",
           },
           {
-            text: 'SSH Config Files',
-            path: '/ssh',
+            text: "SSH Config Files",
+            path: "/ssh",
           },
           {
-            text: 'AWS Config Files',
-            path: '/aws',
+            text: "AWS Config Files",
+            path: "/aws",
           },
           {
-            text: 'K8s Config Files',
-            path: '/kubernetes',
+            text: "K8s Config Files",
+            path: "/kubernetes",
           },
           {
-            text: 'BuildKit Config Files',
-            path: '/buildkit',
+            text: "BuildKit Config Files",
+            path: "/buildkit",
           },
         ],
       },
       {
-        text: 'Infrastructure Modules',
-        path: '/infrastructure-modules',
+        text: "Infrastructure Modules",
+        path: "/infrastructure-modules",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Direct Modules',
-            path: '/direct',
+            text: "Direct Modules",
+            path: "/direct",
             sub: [
               {
-                text: 'AWS',
-                path: '/aws',
-                sub: makeModuleDir(modules.modules, 'aws', 'direct'),
+                text: "AWS",
+                path: "/aws",
+                sub: makeModuleDir(modules.modules, "aws", "direct"),
               },
               {
-                text: 'Authentik',
-                path: '/authentik',
-                sub: makeModuleDir(modules.modules, 'authentik', 'direct'),
+                text: "Authentik",
+                path: "/authentik",
+                sub: makeModuleDir(modules.modules, "authentik", "direct"),
               },
               {
-                text: 'Kubernetes',
-                path: '/kubernetes',
-                sub: makeModuleDir(modules.modules, 'kubernetes', 'direct'),
+                text: "Kubernetes",
+                path: "/kubernetes",
+                sub: makeModuleDir(modules.modules, "kubernetes", "direct"),
               },
               {
-                text: 'Vault',
-                path: '/vault',
-                sub: makeModuleDir(modules.modules, 'vault', 'direct'),
+                text: "Vault",
+                path: "/vault",
+                sub: makeModuleDir(modules.modules, "vault", "direct"),
               },
             ],
           },
           {
-            text: 'Submodules',
-            path: '/submodule',
+            text: "Submodules",
+            path: "/submodule",
             sub: [
               {
-                text: 'AWS',
-                path: '/aws',
-                sub: makeModuleDir(modules.modules, 'aws', 'submodule'),
+                text: "AWS",
+                path: "/aws",
+                sub: makeModuleDir(modules.modules, "aws", "submodule"),
               },
               {
-                text: 'Kubernetes',
-                path: '/kubernetes',
-                sub: makeModuleDir(modules.modules, 'kubernetes', 'submodule'),
+                text: "Kubernetes",
+                path: "/kubernetes",
+                sub: makeModuleDir(modules.modules, "kubernetes", "submodule"),
               },
               {
-                text: 'Workflows',
-                path: '/workflow',
-                sub: makeModuleDir(modules.modules, 'workflow', 'submodule'),
+                text: "Workflows",
+                path: "/workflow",
+                sub: makeModuleDir(modules.modules, "workflow", "submodule"),
               },
             ],
           },
         ],
       },
       {
-        text: 'Resource Tags',
-        path: '/resource-tags',
+        text: "Resource Tags",
+        path: "/resource-tags",
       },
       {
-        text: 'RBAC',
-        path: '/rbac',
+        text: "RBAC",
+        path: "/rbac",
       },
     ],
   },
-]
+];
 const SIDENAV_SECTIONS_EDGE: SideNavSection[] = [
   {
-    text: 'Framework',
-    path: '/framework',
+    text: "Framework",
+    path: "/framework",
     icon: NavIcons.dataFlow,
     notVersioned: true,
     sub: [
       {
-        text: 'Framework',
-        path: '/framework',
+        text: "Framework",
+        path: "/framework",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'KPIs',
-            path: '/kpis',
+            text: "KPIs",
+            path: "/kpis",
           },
           {
-            text: 'Downtime Visibility',
-            path: '/downtime-visibility',
+            text: "Downtime Visibility",
+            path: "/downtime-visibility",
           },
           {
-            text: 'Security Backlog',
-            path: '/security-backlog',
+            text: "Security Backlog",
+            path: "/security-backlog",
           },
         ],
       },
       {
-        text: 'Pillars',
-        path: '/pillars',
+        text: "Pillars",
+        path: "/pillars",
         sub: [
           {
-            text: 'Automation',
-            path: '/automation',
+            text: "Automation",
+            path: "/automation",
           },
           {
-            text: 'Observability',
-            path: '/observability',
+            text: "Observability",
+            path: "/observability",
           },
           {
-            text: 'Security',
-            path: '/security',
+            text: "Security",
+            path: "/security",
           },
           {
-            text: 'Resiliency',
-            path: '/resiliency',
+            text: "Resiliency",
+            path: "/resiliency",
           },
           {
-            text: 'Performance',
-            path: '/performance',
+            text: "Performance",
+            path: "/performance",
           },
           {
-            text: 'Immediate Integration',
-            path: '/immediate-integration',
+            text: "Immediate Integration",
+            path: "/immediate-integration",
           },
           {
-            text: 'Efficiency',
-            path: '/efficiency',
+            text: "Efficiency",
+            path: "/efficiency",
           },
           {
-            text: 'Coordination',
-            path: '/coordination',
+            text: "Coordination",
+            path: "/coordination",
           },
         ],
       },
     ],
   },
   {
-    text: 'Concepts',
-    path: '/concepts',
+    text: "Concepts",
+    path: "/concepts",
     icon: NavIcons.lightBulb,
     sub: [
       {
-        text: 'Infrastructure-as-Code',
-        path: '/iac',
+        text: "Infrastructure-as-Code",
+        path: "/iac",
       },
       {
-        text: 'Networking',
-        path: '/networking',
+        text: "Networking",
+        path: "/networking",
         sub: [
           {
-            text: 'Cryptography',
-            path: '/cryptography',
+            text: "Cryptography",
+            path: "/cryptography",
           },
           {
-            text: 'AWS Network Primitives',
-            path: '/aws-primitives',
+            text: "AWS Network Primitives",
+            path: "/aws-primitives",
           },
           {
-            text: 'Network Address Translation (NAT)',
-            path: '/nat',
+            text: "Network Address Translation (NAT)",
+            path: "/nat",
           },
           {
-            text: 'Subdomain Delegation',
-            path: '/subdomain-delegation',
+            text: "Subdomain Delegation",
+            path: "/subdomain-delegation",
           },
           {
-            text: 'Kubernetes Networking',
-            path: '/cluster-networking',
+            text: "Kubernetes Networking",
+            path: "/cluster-networking",
           },
         ],
       },
       {
-        text: 'Autoscaling',
-        path: '/autoscaling',
+        text: "Autoscaling",
+        path: "/autoscaling",
       },
       {
-        text: 'BuildKit',
-        path: '/buildkit',
+        text: "BuildKit",
+        path: "/buildkit",
       },
       {
-        text: 'CI / CD',
-        path: '/cicd',
+        text: "CI / CD",
+        path: "/cicd",
         sub: [
           {
-            text: 'Recommended Architecture',
-            path: '/recommended-architecture',
+            text: "Recommended Architecture",
+            path: "/recommended-architecture",
           },
           {
-            text: 'GHA',
-            path: '/gha',
+            text: "GHA",
+            path: "/gha",
           },
         ],
       },
     ],
   },
   {
-    text: 'Guides',
-    path: '/guides',
+    text: "Guides",
+    path: "/guides",
     icon: NavIcons.book,
     sub: [
       {
-        text: 'Getting Started',
-        path: '/getting-started',
+        text: "Getting Started",
+        path: "/getting-started",
         sub: [
           {
-            text: 'Start Here',
-            path: '/start-here',
+            text: "Start Here",
+            path: "/start-here",
           },
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Install Tooling',
-            path: '/install-tooling',
+            text: "Install Tooling",
+            path: "/install-tooling",
           },
           {
-            text: 'Boot Developer Environment',
-            path: '/boot-developer-environment',
+            text: "Boot Developer Environment",
+            path: "/boot-developer-environment",
           },
           {
-            text: 'Connect to Infrastructure',
-            path: '/connect-to-infrastructure',
+            text: "Connect to Infrastructure",
+            path: "/connect-to-infrastructure",
           },
         ],
       },
       {
-        text: 'Bootstrapping Stack',
-        path: '/bootstrapping',
+        text: "Bootstrapping Stack",
+        path: "/bootstrapping",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Installing the Development Shell',
-            path: '/installing-devshell',
+            text: "Installing the Development Shell",
+            path: "/installing-devshell",
           },
           {
-            text: 'Preparing AWS',
-            path: '/preparing-aws',
+            text: "Preparing AWS",
+            path: "/preparing-aws",
           },
           {
-            text: 'Configuring Infrastructure-as-Code (IaC)',
-            path: '/configuring-infrastructure-as-code',
+            text: "Configuring Infrastructure-as-Code (IaC)",
+            path: "/configuring-infrastructure-as-code",
           },
           {
-            text: 'Bootstrapping IaC',
-            path: '/infrastructure-as-code',
+            text: "Bootstrapping IaC",
+            path: "/infrastructure-as-code",
           },
           {
-            text: 'DNS',
-            path: '/dns',
+            text: "DNS",
+            path: "/dns",
           },
           {
-            text: 'AWS Networking',
-            path: '/aws-networking',
+            text: "AWS Networking",
+            path: "/aws-networking",
           },
           {
-            text: 'Kubernetes Cluster',
-            path: '/kubernetes-cluster',
+            text: "Kubernetes Cluster",
+            path: "/kubernetes-cluster",
           },
           {
-            text: 'Internal Cluster Networking',
-            path: '/internal-cluster-networking',
+            text: "Internal Cluster Networking",
+            path: "/internal-cluster-networking",
           },
           {
-            text: 'Policy Controller',
-            path: '/policy-controller',
+            text: "Policy Controller",
+            path: "/policy-controller",
           },
           {
-            text: 'Storage Interfaces',
-            path: '/storage-interfaces',
+            text: "Storage Interfaces",
+            path: "/storage-interfaces",
           },
           {
-            text: 'Vault',
-            path: '/vault',
+            text: "Vault",
+            path: "/vault",
           },
           {
-            text: 'Certificate Management',
-            path: '/certificate-management',
+            text: "Certificate Management",
+            path: "/certificate-management",
           },
           {
-            text: 'Service Mesh',
-            path: '/service-mesh',
+            text: "Service Mesh",
+            path: "/service-mesh",
           },
           {
-            text: 'Autoscaling',
-            path: '/autoscaling',
+            text: "Autoscaling",
+            path: "/autoscaling",
           },
           {
-            text: 'Inbound Networking',
-            path: '/inbound-networking',
+            text: "Inbound Networking",
+            path: "/inbound-networking",
           },
           {
-            text: 'Maintenance Controllers',
-            path: '/maintenance-controllers',
+            text: "Maintenance Controllers",
+            path: "/maintenance-controllers",
           },
           {
-            text: 'Databases',
-            path: '/databases',
+            text: "Databases",
+            path: "/databases",
           },
           {
-            text: 'Identity Provider',
-            path: '/identity-provider',
+            text: "Identity Provider",
+            path: "/identity-provider",
           },
           {
-            text: 'Federated Auth',
-            path: '/federated-auth',
+            text: "Federated Auth",
+            path: "/federated-auth",
           },
           {
-            text: 'Review and Next Steps',
-            path: '/next-steps',
+            text: "Review and Next Steps",
+            path: "/next-steps",
           },
         ],
       },
       {
-        text: 'Stack Addons',
-        path: '/addons',
+        text: "Stack Addons",
+        path: "/addons",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Workflow Engine',
-            path: '/workflow-engine',
+            text: "Workflow Engine",
+            path: "/workflow-engine",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Creating Workflows',
-                path: '/creating-workflows',
+                text: "Creating Workflows",
+                path: "/creating-workflows",
               },
               {
-                text: 'Triggering Workflows',
-                path: '/triggering-workflows',
+                text: "Triggering Workflows",
+                path: "/triggering-workflows",
               },
               {
-                text: 'Prebuilt Workflows',
-                path: '/prebuilt-workflows',
+                text: "Prebuilt Workflows",
+                path: "/prebuilt-workflows",
               },
               {
-                text: 'Debugging',
-                path: '/debugging',
+                text: "Debugging",
+                path: "/debugging",
               },
             ],
           },
           {
-            text: 'Event Bus',
-            path: '/event-bus',
+            text: "Event Bus",
+            path: "/event-bus",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Use Cases',
-                path: '/use-cases',
+                text: "Use Cases",
+                path: "/use-cases",
               },
             ],
           },
           {
-            text: 'BuildKit',
-            path: '/buildkit',
+            text: "BuildKit",
+            path: "/buildkit",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Building Images',
-                path: '/building-images',
+                text: "Building Images",
+                path: "/building-images",
               },
               {
-                text: 'Debugging',
-                path: '/debugging',
+                text: "Debugging",
+                path: "/debugging",
               },
             ],
           },
           {
-            text: 'GitHub Actions',
-            path: '/github-actions',
+            text: "GitHub Actions",
+            path: "/github-actions",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        text: 'Development Shell',
-        path: '/development-shell',
-        sub: [
-          {
-            text: 'Customizing',
-            path: '/customizing',
-          },
-          {
-            text: 'Debugging',
-            path: '/debugging',
-          },
-        ],
-      },
-      {
-        text: 'Infrastructure-as-Code',
-        path: '/iac',
-        sub: [
-          {
-            text: 'Overview',
-            path: '/overview',
-          },
-          {
-            text: 'Repository Setup',
-            path: '/repo-setup',
-          },
-          {
-            text: 'Deploying Modules',
-            path: '/deploying-modules',
-          },
-          {
-            text: 'Developing First-Party Modules',
-            path: '/first-party-modules',
-          },
-          {
-            text: 'Extending Panfactum Configuration',
-            path: '/extending-panfactum',
-          },
-          {
-            text: 'Debugging',
-            path: '/debugging',
-          },
-        ],
-      },
-      {
-        text: 'Deploying Workloads',
-        path: '/deploying-workloads',
-        sub: [
-          {
-            text: 'Basics',
-            path: '/basics',
-          },
-          {
-            text: 'Networking',
-            path: '/networking',
-          },
-          {
-            text: 'Persistence',
-            path: '/persistence',
-          },
-          {
-            text: 'High Availability',
-            path: '/high-availability',
-          },
-          {
-            text: 'Permissions',
-            path: '/permissions',
-          },
-          {
-            text: 'Checklist',
-            path: '/checklist',
-          },
-        ],
-      },
-      {
-        text: 'CI / CD',
-        path: '/cicd',
-        sub: [
-          {
-            text: 'Getting Started',
-            path: '/getting-started',
-          },
-          {
-            text: 'Checking Out Code',
-            path: '/checking-out-code',
-          },
-          {
-            text: 'Rolling Deployments',
-            path: '/rolling-deployments',
-          },
-        ],
-      },
-      {
-        text: 'Networking',
-        path: '/networking',
-        sub: [
-          {
-            text: 'SSH Tunneling',
-            path: '/ssh-tunnel',
-          },
-          {
-            text: 'Database Connections',
-            path: '/database-connections',
-          },
-        ],
-      },
-      {
-        text: 'User Management',
-        path: '/user-management',
-        sub: [
-          {
-            text: 'Provisioning',
-            path: '/provisioning-new-user',
-          },
-          {
-            text: 'New User Setup',
-            path: '/setting-up-new-user',
-          },
-        ],
-      },
-      {
-        text: 'Panfactum Versioning',
-        path: '/versioning',
-        sub: [
-          {
-            text: 'Releases',
-            path: '/releases',
-          },
-          {
-            text: 'Pinning',
-            path: '/pinning',
-          },
-          {
-            text: 'Upgrading',
-            path: '/upgrading',
-            sub: [
-              {
-                text: 'General Guide',
-                path: '/general',
+                text: "Installing",
+                path: "/installing",
               },
             ],
           },
         ],
       },
       {
-        text: 'Contributing',
-        path: '/contributing',
+        text: "Development Shell",
+        path: "/development-shell",
         sub: [
           {
-            text: 'Getting Started',
-            path: '/getting-started',
+            text: "Customizing",
+            path: "/customizing",
           },
           {
-            text: 'Pull Requests',
-            path: '/pull-requests',
+            text: "Debugging",
+            path: "/debugging",
+          },
+        ],
+      },
+      {
+        text: "Infrastructure-as-Code",
+        path: "/iac",
+        sub: [
+          {
+            text: "Overview",
+            path: "/overview",
+          },
+          {
+            text: "Repository Setup",
+            path: "/repo-setup",
+          },
+          {
+            text: "Deploying Modules",
+            path: "/deploying-modules",
+          },
+          {
+            text: "Developing First-Party Modules",
+            path: "/first-party-modules",
+          },
+          {
+            text: "Extending Panfactum Configuration",
+            path: "/extending-panfactum",
+          },
+          {
+            text: "Debugging",
+            path: "/debugging",
+          },
+        ],
+      },
+      {
+        text: "Deploying Workloads",
+        path: "/deploying-workloads",
+        sub: [
+          {
+            text: "Basics",
+            path: "/basics",
+          },
+          {
+            text: "Networking",
+            path: "/networking",
+          },
+          {
+            text: "Persistence",
+            path: "/persistence",
+          },
+          {
+            text: "High Availability",
+            path: "/high-availability",
+          },
+          {
+            text: "Permissions",
+            path: "/permissions",
+          },
+          {
+            text: "Checklist",
+            path: "/checklist",
+          },
+        ],
+      },
+      {
+        text: "CI / CD",
+        path: "/cicd",
+        sub: [
+          {
+            text: "Getting Started",
+            path: "/getting-started",
+          },
+          {
+            text: "Checking Out Code",
+            path: "/checking-out-code",
+          },
+          {
+            text: "Rolling Deployments",
+            path: "/rolling-deployments",
+          },
+        ],
+      },
+      {
+        text: "Networking",
+        path: "/networking",
+        sub: [
+          {
+            text: "SSH Tunneling",
+            path: "/ssh-tunnel",
+          },
+          {
+            text: "Database Connections",
+            path: "/database-connections",
+          },
+        ],
+      },
+      {
+        text: "User Management",
+        path: "/user-management",
+        sub: [
+          {
+            text: "Provisioning",
+            path: "/provisioning-new-user",
+          },
+          {
+            text: "New User Setup",
+            path: "/setting-up-new-user",
+          },
+        ],
+      },
+      {
+        text: "Panfactum Versioning",
+        path: "/versioning",
+        sub: [
+          {
+            text: "Releases",
+            path: "/releases",
+          },
+          {
+            text: "Pinning",
+            path: "/pinning",
+          },
+          {
+            text: "Upgrading",
+            path: "/upgrading",
+            sub: [
+              {
+                text: "General Guide",
+                path: "/general",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        text: "Contributing",
+        path: "/contributing",
+        sub: [
+          {
+            text: "Getting Started",
+            path: "/getting-started",
+          },
+          {
+            text: "Pull Requests",
+            path: "/pull-requests",
           },
         ],
       },
     ],
   },
   {
-    text: 'Reference',
-    path: '/reference',
+    text: "Reference",
+    path: "/reference",
     icon: NavIcons.analyze,
     sub: [
       {
-        text: 'Releases',
-        path: '/releases',
+        text: "Releases",
+        path: "/releases",
         sub: [
           {
-            text: 'Supported Releases',
-            path: '/supported-releases',
+            text: "Supported Releases",
+            path: "/supported-releases",
           },
           {
-            text: 'Change Log',
-            path: '/changelog',
+            text: "Change Log",
+            path: "/changelog",
             sub: [
               {
-                text: 'Edge',
-                path: '/edge',
+                text: "Edge",
+                path: "/edge",
               },
               {
-                text: '24.04',
-                path: '/24-05',
+                text: "24.04",
+                path: "/24-05",
               },
             ],
           },
           {
-            text: 'Roadmap',
-            path: '/roadmap',
+            text: "Roadmap",
+            path: "/roadmap",
           },
         ],
       },
       {
-        text: 'Configuration',
-        path: '/configuration',
+        text: "Configuration",
+        path: "/configuration",
         sub: [
           {
-            text: 'Repository Variables',
-            path: '/repo-variables',
+            text: "Repository Variables",
+            path: "/repo-variables",
           },
           {
-            text: '.env Variables',
-            path: '/dotenv',
+            text: ".env Variables",
+            path: "/dotenv",
           },
           {
-            text: 'Terragrunt Variables',
-            path: '/terragrunt-variables',
+            text: "Terragrunt Variables",
+            path: "/terragrunt-variables",
           },
           {
-            text: 'SSH Config Files',
-            path: '/ssh',
+            text: "SSH Config Files",
+            path: "/ssh",
           },
           {
-            text: 'AWS Config Files',
-            path: '/aws',
+            text: "AWS Config Files",
+            path: "/aws",
           },
           {
-            text: 'K8s Config Files',
-            path: '/kubernetes',
+            text: "K8s Config Files",
+            path: "/kubernetes",
           },
           {
-            text: 'BuildKit Config Files',
-            path: '/buildkit',
+            text: "BuildKit Config Files",
+            path: "/buildkit",
           },
         ],
       },
       {
-        text: 'Infrastructure Modules',
-        path: '/infrastructure-modules',
+        text: "Infrastructure Modules",
+        path: "/infrastructure-modules",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Direct Modules',
-            path: '/direct',
+            text: "Direct Modules",
+            path: "/direct",
             sub: [
               {
-                text: 'AWS',
-                path: '/aws',
-                sub: makeModuleDir(modules.modules, 'aws', 'direct'),
+                text: "AWS",
+                path: "/aws",
+                sub: makeModuleDir(modules.modules, "aws", "direct"),
               },
               {
-                text: 'Authentik',
-                path: '/authentik',
-                sub: makeModuleDir(modules.modules, 'authentik', 'direct'),
+                text: "Authentik",
+                path: "/authentik",
+                sub: makeModuleDir(modules.modules, "authentik", "direct"),
               },
               {
-                text: 'Kubernetes',
-                path: '/kubernetes',
-                sub: makeModuleDir(modules.modules, 'kubernetes', 'direct'),
+                text: "Kubernetes",
+                path: "/kubernetes",
+                sub: makeModuleDir(modules.modules, "kubernetes", "direct"),
               },
               {
-                text: 'Vault',
-                path: '/vault',
-                sub: makeModuleDir(modules.modules, 'vault', 'direct'),
+                text: "Vault",
+                path: "/vault",
+                sub: makeModuleDir(modules.modules, "vault", "direct"),
               },
             ],
           },
           {
-            text: 'Submodules',
-            path: '/submodule',
+            text: "Submodules",
+            path: "/submodule",
             sub: [
               {
-                text: 'AWS',
-                path: '/aws',
-                sub: makeModuleDir(modules.modules, 'aws', 'submodule'),
+                text: "AWS",
+                path: "/aws",
+                sub: makeModuleDir(modules.modules, "aws", "submodule"),
               },
               {
-                text: 'Kubernetes',
-                path: '/kubernetes',
-                sub: makeModuleDir(modules.modules, 'kubernetes', 'submodule'),
+                text: "Kubernetes",
+                path: "/kubernetes",
+                sub: makeModuleDir(modules.modules, "kubernetes", "submodule"),
               },
               {
-                text: 'Workflows',
-                path: '/workflow',
-                sub: makeModuleDir(modules.modules, 'workflow', 'submodule'),
+                text: "Workflows",
+                path: "/workflow",
+                sub: makeModuleDir(modules.modules, "workflow", "submodule"),
               },
             ],
           },
         ],
       },
       {
-        text: 'Resource Tags',
-        path: '/resource-tags',
+        text: "Resource Tags",
+        path: "/resource-tags",
       },
       {
-        text: 'RBAC',
-        path: '/rbac',
+        text: "RBAC",
+        path: "/rbac",
       },
     ],
   },
-]
+];
 const SIDENAV_SECTIONS_24_05: SideNavSection[] = [
   {
-    text: 'Framework',
-    path: '/framework',
+    text: "Framework",
+    path: "/framework",
     icon: NavIcons.dataFlow,
     notVersioned: true,
     sub: [
       {
-        text: 'Framework',
-        path: '/framework',
+        text: "Framework",
+        path: "/framework",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'KPIs',
-            path: '/kpis',
+            text: "KPIs",
+            path: "/kpis",
           },
           {
-            text: 'Downtime Visibility',
-            path: '/downtime-visibility',
+            text: "Downtime Visibility",
+            path: "/downtime-visibility",
           },
           {
-            text: 'Security Backlog',
-            path: '/security-backlog',
+            text: "Security Backlog",
+            path: "/security-backlog",
           },
         ],
       },
       {
-        text: 'Pillars',
-        path: '/pillars',
+        text: "Pillars",
+        path: "/pillars",
         sub: [
           {
-            text: 'Automation',
-            path: '/automation',
+            text: "Automation",
+            path: "/automation",
           },
           {
-            text: 'Observability',
-            path: '/observability',
+            text: "Observability",
+            path: "/observability",
           },
           {
-            text: 'Security',
-            path: '/security',
+            text: "Security",
+            path: "/security",
           },
           {
-            text: 'Resiliency',
-            path: '/resiliency',
+            text: "Resiliency",
+            path: "/resiliency",
           },
           {
-            text: 'Performance',
-            path: '/performance',
+            text: "Performance",
+            path: "/performance",
           },
           {
-            text: 'Immediate Integration',
-            path: '/immediate-integration',
+            text: "Immediate Integration",
+            path: "/immediate-integration",
           },
           {
-            text: 'Efficiency',
-            path: '/efficiency',
+            text: "Efficiency",
+            path: "/efficiency",
           },
           {
-            text: 'Coordination',
-            path: '/coordination',
+            text: "Coordination",
+            path: "/coordination",
           },
         ],
       },
     ],
   },
   {
-    text: 'Concepts',
-    path: '/concepts',
+    text: "Concepts",
+    path: "/concepts",
     icon: NavIcons.lightBulb,
     sub: [
       {
-        text: 'Infrastructure-as-Code',
-        path: '/iac',
+        text: "Infrastructure-as-Code",
+        path: "/iac",
       },
       {
-        text: 'Networking',
-        path: '/networking',
+        text: "Networking",
+        path: "/networking",
         sub: [
           {
-            text: 'Cryptography',
-            path: '/cryptography',
+            text: "Cryptography",
+            path: "/cryptography",
           },
           {
-            text: 'AWS Network Primitives',
-            path: '/aws-primitives',
+            text: "AWS Network Primitives",
+            path: "/aws-primitives",
           },
           {
-            text: 'Network Address Translation (NAT)',
-            path: '/nat',
+            text: "Network Address Translation (NAT)",
+            path: "/nat",
           },
           {
-            text: 'Subdomain Delegation',
-            path: '/subdomain-delegation',
+            text: "Subdomain Delegation",
+            path: "/subdomain-delegation",
           },
           {
-            text: 'Kubernetes Networking',
-            path: '/cluster-networking',
+            text: "Kubernetes Networking",
+            path: "/cluster-networking",
           },
         ],
       },
       {
-        text: 'Autoscaling',
-        path: '/autoscaling',
+        text: "Autoscaling",
+        path: "/autoscaling",
       },
       {
-        text: 'BuildKit',
-        path: '/buildkit',
+        text: "BuildKit",
+        path: "/buildkit",
       },
       {
-        text: 'CI / CD',
-        path: '/cicd',
+        text: "CI / CD",
+        path: "/cicd",
         sub: [
           {
-            text: 'Recommended Architecture',
-            path: '/recommended-architecture',
+            text: "Recommended Architecture",
+            path: "/recommended-architecture",
           },
           {
-            text: 'GHA',
-            path: '/gha',
+            text: "GHA",
+            path: "/gha",
           },
         ],
       },
     ],
   },
   {
-    text: 'Guides',
-    path: '/guides',
+    text: "Guides",
+    path: "/guides",
     icon: NavIcons.book,
     sub: [
       {
-        text: 'Getting Started',
-        path: '/getting-started',
+        text: "Getting Started",
+        path: "/getting-started",
         sub: [
           {
-            text: 'Start Here',
-            path: '/start-here',
+            text: "Start Here",
+            path: "/start-here",
           },
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Install Tooling',
-            path: '/install-tooling',
+            text: "Install Tooling",
+            path: "/install-tooling",
           },
           {
-            text: 'Boot Developer Environment',
-            path: '/boot-developer-environment',
+            text: "Boot Developer Environment",
+            path: "/boot-developer-environment",
           },
           {
-            text: 'Connect to Infrastructure',
-            path: '/connect-to-infrastructure',
+            text: "Connect to Infrastructure",
+            path: "/connect-to-infrastructure",
           },
         ],
       },
       {
-        text: 'Bootstrapping Stack',
-        path: '/bootstrapping',
+        text: "Bootstrapping Stack",
+        path: "/bootstrapping",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Installing the Development Shell',
-            path: '/installing-devshell',
+            text: "Installing the Development Shell",
+            path: "/installing-devshell",
           },
           {
-            text: 'Preparing AWS',
-            path: '/preparing-aws',
+            text: "Preparing AWS",
+            path: "/preparing-aws",
           },
           {
-            text: 'Configuring Infrastructure-as-Code (IaC)',
-            path: '/configuring-infrastructure-as-code',
+            text: "Configuring Infrastructure-as-Code (IaC)",
+            path: "/configuring-infrastructure-as-code",
           },
           {
-            text: 'Bootstrapping IaC',
-            path: '/infrastructure-as-code',
+            text: "Bootstrapping IaC",
+            path: "/infrastructure-as-code",
           },
           {
-            text: 'DNS',
-            path: '/dns',
+            text: "DNS",
+            path: "/dns",
           },
           {
-            text: 'AWS Networking',
-            path: '/aws-networking',
+            text: "AWS Networking",
+            path: "/aws-networking",
           },
           {
-            text: 'Kubernetes Cluster',
-            path: '/kubernetes-cluster',
+            text: "Kubernetes Cluster",
+            path: "/kubernetes-cluster",
           },
           {
-            text: 'Internal Cluster Networking',
-            path: '/internal-cluster-networking',
+            text: "Internal Cluster Networking",
+            path: "/internal-cluster-networking",
           },
           {
-            text: 'Policy Controller',
-            path: '/policy-controller',
+            text: "Policy Controller",
+            path: "/policy-controller",
           },
           {
-            text: 'Storage Interfaces',
-            path: '/storage-interfaces',
+            text: "Storage Interfaces",
+            path: "/storage-interfaces",
           },
           {
-            text: 'Vault',
-            path: '/vault',
+            text: "Vault",
+            path: "/vault",
           },
           {
-            text: 'Certificate Management',
-            path: '/certificate-management',
+            text: "Certificate Management",
+            path: "/certificate-management",
           },
           {
-            text: 'Service Mesh',
-            path: '/service-mesh',
+            text: "Service Mesh",
+            path: "/service-mesh",
           },
           {
-            text: 'Autoscaling',
-            path: '/autoscaling',
+            text: "Autoscaling",
+            path: "/autoscaling",
           },
           {
-            text: 'Inbound Networking',
-            path: '/inbound-networking',
+            text: "Inbound Networking",
+            path: "/inbound-networking",
           },
           {
-            text: 'Maintenance Controllers',
-            path: '/maintenance-controllers',
+            text: "Maintenance Controllers",
+            path: "/maintenance-controllers",
           },
           {
-            text: 'Databases',
-            path: '/databases',
+            text: "Databases",
+            path: "/databases",
           },
           {
-            text: 'Identity Provider',
-            path: '/identity-provider',
+            text: "Identity Provider",
+            path: "/identity-provider",
           },
           {
-            text: 'Federated Auth',
-            path: '/federated-auth',
+            text: "Federated Auth",
+            path: "/federated-auth",
           },
           {
-            text: 'Review and Next Steps',
-            path: '/next-steps',
+            text: "Review and Next Steps",
+            path: "/next-steps",
           },
         ],
       },
       {
-        text: 'Stack Addons',
-        path: '/addons',
+        text: "Stack Addons",
+        path: "/addons",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Workflow Engine',
-            path: '/workflow-engine',
+            text: "Workflow Engine",
+            path: "/workflow-engine",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Creating Workflows',
-                path: '/creating-workflows',
+                text: "Creating Workflows",
+                path: "/creating-workflows",
               },
               {
-                text: 'Triggering Workflows',
-                path: '/triggering-workflows',
+                text: "Triggering Workflows",
+                path: "/triggering-workflows",
               },
               {
-                text: 'Prebuilt Workflows',
-                path: '/prebuilt-workflows',
+                text: "Prebuilt Workflows",
+                path: "/prebuilt-workflows",
               },
               {
-                text: 'Debugging',
-                path: '/debugging',
+                text: "Debugging",
+                path: "/debugging",
               },
             ],
           },
           {
-            text: 'Event Bus',
-            path: '/event-bus',
+            text: "Event Bus",
+            path: "/event-bus",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Use Cases',
-                path: '/use-cases',
+                text: "Use Cases",
+                path: "/use-cases",
               },
             ],
           },
           {
-            text: 'BuildKit',
-            path: '/buildkit',
+            text: "BuildKit",
+            path: "/buildkit",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
+                text: "Installing",
+                path: "/installing",
               },
               {
-                text: 'Building Images',
-                path: '/building-images',
+                text: "Building Images",
+                path: "/building-images",
               },
               {
-                text: 'Debugging',
-                path: '/debugging',
+                text: "Debugging",
+                path: "/debugging",
               },
             ],
           },
           {
-            text: 'GitHub Actions',
-            path: '/github-actions',
+            text: "GitHub Actions",
+            path: "/github-actions",
             sub: [
               {
-                text: 'Installing',
-                path: '/installing',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        text: 'Development Shell',
-        path: '/development-shell',
-        sub: [
-          {
-            text: 'Customizing',
-            path: '/customizing',
-          },
-          {
-            text: 'Debugging',
-            path: '/debugging',
-          },
-        ],
-      },
-      {
-        text: 'Infrastructure-as-Code',
-        path: '/iac',
-        sub: [
-          {
-            text: 'Overview',
-            path: '/overview',
-          },
-          {
-            text: 'Repository Setup',
-            path: '/repo-setup',
-          },
-          {
-            text: 'Deploying Modules',
-            path: '/deploying-modules',
-          },
-          {
-            text: 'Developing First-Party Modules',
-            path: '/first-party-modules',
-          },
-          {
-            text: 'Extending Panfactum Configuration',
-            path: '/extending-panfactum',
-          },
-          {
-            text: 'Debugging',
-            path: '/debugging',
-          },
-        ],
-      },
-      {
-        text: 'Deploying Workloads',
-        path: '/deploying-workloads',
-        sub: [
-          {
-            text: 'Basics',
-            path: '/basics',
-          },
-          {
-            text: 'Networking',
-            path: '/networking',
-          },
-          {
-            text: 'Persistence',
-            path: '/persistence',
-          },
-          {
-            text: 'High Availability',
-            path: '/high-availability',
-          },
-          {
-            text: 'Permissions',
-            path: '/permissions',
-          },
-          {
-            text: 'Checklist',
-            path: '/checklist',
-          },
-        ],
-      },
-      {
-        text: 'CI / CD',
-        path: '/cicd',
-        sub: [
-          {
-            text: 'Getting Started',
-            path: '/getting-started',
-          },
-          {
-            text: 'Checking Out Code',
-            path: '/checking-out-code',
-          },
-          {
-            text: 'Rolling Deployments',
-            path: '/rolling-deployments',
-          },
-        ],
-      },
-      {
-        text: 'Networking',
-        path: '/networking',
-        sub: [
-          {
-            text: 'SSH Tunneling',
-            path: '/ssh-tunnel',
-          },
-          {
-            text: 'Database Connections',
-            path: '/database-connections',
-          },
-        ],
-      },
-      {
-        text: 'User Management',
-        path: '/user-management',
-        sub: [
-          {
-            text: 'Provisioning',
-            path: '/provisioning-new-user',
-          },
-          {
-            text: 'New User Setup',
-            path: '/setting-up-new-user',
-          },
-        ],
-      },
-      {
-        text: 'Panfactum Versioning',
-        path: '/versioning',
-        sub: [
-          {
-            text: 'Releases',
-            path: '/releases',
-          },
-          {
-            text: 'Pinning',
-            path: '/pinning',
-          },
-          {
-            text: 'Upgrading',
-            path: '/upgrading',
-            sub: [
-              {
-                text: 'General Guide',
-                path: '/general',
+                text: "Installing",
+                path: "/installing",
               },
             ],
           },
         ],
       },
       {
-        text: 'Contributing',
-        path: '/contributing',
+        text: "Development Shell",
+        path: "/development-shell",
         sub: [
           {
-            text: 'Getting Started',
-            path: '/getting-started',
+            text: "Customizing",
+            path: "/customizing",
           },
           {
-            text: 'Pull Requests',
-            path: '/pull-requests',
+            text: "Debugging",
+            path: "/debugging",
+          },
+        ],
+      },
+      {
+        text: "Infrastructure-as-Code",
+        path: "/iac",
+        sub: [
+          {
+            text: "Overview",
+            path: "/overview",
+          },
+          {
+            text: "Repository Setup",
+            path: "/repo-setup",
+          },
+          {
+            text: "Deploying Modules",
+            path: "/deploying-modules",
+          },
+          {
+            text: "Developing First-Party Modules",
+            path: "/first-party-modules",
+          },
+          {
+            text: "Extending Panfactum Configuration",
+            path: "/extending-panfactum",
+          },
+          {
+            text: "Debugging",
+            path: "/debugging",
+          },
+        ],
+      },
+      {
+        text: "Deploying Workloads",
+        path: "/deploying-workloads",
+        sub: [
+          {
+            text: "Basics",
+            path: "/basics",
+          },
+          {
+            text: "Networking",
+            path: "/networking",
+          },
+          {
+            text: "Persistence",
+            path: "/persistence",
+          },
+          {
+            text: "High Availability",
+            path: "/high-availability",
+          },
+          {
+            text: "Permissions",
+            path: "/permissions",
+          },
+          {
+            text: "Checklist",
+            path: "/checklist",
+          },
+        ],
+      },
+      {
+        text: "CI / CD",
+        path: "/cicd",
+        sub: [
+          {
+            text: "Getting Started",
+            path: "/getting-started",
+          },
+          {
+            text: "Checking Out Code",
+            path: "/checking-out-code",
+          },
+          {
+            text: "Rolling Deployments",
+            path: "/rolling-deployments",
+          },
+        ],
+      },
+      {
+        text: "Networking",
+        path: "/networking",
+        sub: [
+          {
+            text: "SSH Tunneling",
+            path: "/ssh-tunnel",
+          },
+          {
+            text: "Database Connections",
+            path: "/database-connections",
+          },
+        ],
+      },
+      {
+        text: "User Management",
+        path: "/user-management",
+        sub: [
+          {
+            text: "Provisioning",
+            path: "/provisioning-new-user",
+          },
+          {
+            text: "New User Setup",
+            path: "/setting-up-new-user",
+          },
+        ],
+      },
+      {
+        text: "Panfactum Versioning",
+        path: "/versioning",
+        sub: [
+          {
+            text: "Releases",
+            path: "/releases",
+          },
+          {
+            text: "Pinning",
+            path: "/pinning",
+          },
+          {
+            text: "Upgrading",
+            path: "/upgrading",
+            sub: [
+              {
+                text: "General Guide",
+                path: "/general",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        text: "Contributing",
+        path: "/contributing",
+        sub: [
+          {
+            text: "Getting Started",
+            path: "/getting-started",
+          },
+          {
+            text: "Pull Requests",
+            path: "/pull-requests",
           },
         ],
       },
     ],
   },
   {
-    text: 'Reference',
-    path: '/reference',
+    text: "Reference",
+    path: "/reference",
     icon: NavIcons.analyze,
     sub: [
       {
-        text: 'Releases',
-        path: '/releases',
+        text: "Releases",
+        path: "/releases",
         sub: [
           {
-            text: 'Supported Releases',
-            path: '/supported-releases',
+            text: "Supported Releases",
+            path: "/supported-releases",
           },
           {
-            text: 'Change Log',
-            path: '/changelog',
+            text: "Change Log",
+            path: "/changelog",
             sub: [
               {
-                text: 'Edge',
-                path: '/edge',
+                text: "Edge",
+                path: "/edge",
               },
               {
-                text: '24.04',
-                path: '/24-05',
+                text: "24.04",
+                path: "/24-05",
               },
             ],
           },
           {
-            text: 'Roadmap',
-            path: '/roadmap',
+            text: "Roadmap",
+            path: "/roadmap",
           },
         ],
       },
       {
-        text: 'Configuration',
-        path: '/configuration',
+        text: "Configuration",
+        path: "/configuration",
         sub: [
           {
-            text: 'Repository Variables',
-            path: '/repo-variables',
+            text: "Repository Variables",
+            path: "/repo-variables",
           },
           {
-            text: '.env Variables',
-            path: '/dotenv',
+            text: ".env Variables",
+            path: "/dotenv",
           },
           {
-            text: 'Terragrunt Variables',
-            path: '/terragrunt-variables',
+            text: "Terragrunt Variables",
+            path: "/terragrunt-variables",
           },
           {
-            text: 'SSH Config Files',
-            path: '/ssh',
+            text: "SSH Config Files",
+            path: "/ssh",
           },
           {
-            text: 'AWS Config Files',
-            path: '/aws',
+            text: "AWS Config Files",
+            path: "/aws",
           },
           {
-            text: 'K8s Config Files',
-            path: '/kubernetes',
+            text: "K8s Config Files",
+            path: "/kubernetes",
           },
           {
-            text: 'BuildKit Config Files',
-            path: '/buildkit',
+            text: "BuildKit Config Files",
+            path: "/buildkit",
           },
         ],
       },
       {
-        text: 'Infrastructure Modules',
-        path: '/infrastructure-modules',
+        text: "Infrastructure Modules",
+        path: "/infrastructure-modules",
         sub: [
           {
-            text: 'Overview',
-            path: '/overview',
+            text: "Overview",
+            path: "/overview",
           },
           {
-            text: 'Direct Modules',
-            path: '/direct',
+            text: "Direct Modules",
+            path: "/direct",
             sub: [
               {
-                text: 'AWS',
-                path: '/aws',
-                sub: makeModuleDir(modules.modules, 'aws', 'direct'),
+                text: "AWS",
+                path: "/aws",
+                sub: makeModuleDir(modules.modules, "aws", "direct"),
               },
               {
-                text: 'Authentik',
-                path: '/authentik',
-                sub: makeModuleDir(modules.modules, 'authentik', 'direct'),
+                text: "Authentik",
+                path: "/authentik",
+                sub: makeModuleDir(modules.modules, "authentik", "direct"),
               },
               {
-                text: 'Kubernetes',
-                path: '/kubernetes',
-                sub: makeModuleDir(modules.modules, 'kubernetes', 'direct'),
+                text: "Kubernetes",
+                path: "/kubernetes",
+                sub: makeModuleDir(modules.modules, "kubernetes", "direct"),
               },
               {
-                text: 'Vault',
-                path: '/vault',
-                sub: makeModuleDir(modules.modules, 'vault', 'direct'),
+                text: "Vault",
+                path: "/vault",
+                sub: makeModuleDir(modules.modules, "vault", "direct"),
               },
             ],
           },
           {
-            text: 'Submodules',
-            path: '/submodule',
+            text: "Submodules",
+            path: "/submodule",
             sub: [
               {
-                text: 'AWS',
-                path: '/aws',
-                sub: makeModuleDir(modules.modules, 'aws', 'submodule'),
+                text: "AWS",
+                path: "/aws",
+                sub: makeModuleDir(modules.modules, "aws", "submodule"),
               },
               {
-                text: 'Kubernetes',
-                path: '/kubernetes',
-                sub: makeModuleDir(modules.modules, 'kubernetes', 'submodule'),
+                text: "Kubernetes",
+                path: "/kubernetes",
+                sub: makeModuleDir(modules.modules, "kubernetes", "submodule"),
               },
               {
-                text: 'Workflows',
-                path: '/workflow',
-                sub: makeModuleDir(modules.modules, 'workflow', 'submodule'),
+                text: "Workflows",
+                path: "/workflow",
+                sub: makeModuleDir(modules.modules, "workflow", "submodule"),
               },
             ],
           },
         ],
       },
       {
-        text: 'Resource Tags',
-        path: '/resource-tags',
+        text: "Resource Tags",
+        path: "/resource-tags",
       },
       {
-        text: 'RBAC',
-        path: '/rbac',
+        text: "RBAC",
+        path: "/rbac",
       },
     ],
   },
-]
+];

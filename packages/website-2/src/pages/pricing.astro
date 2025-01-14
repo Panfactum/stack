@@ -1,48 +1,53 @@
 ---
-import '../styles/global.css'
-import Layout from '../layouts/Layout.astro'
-import Section from '../components/layout/section.astro'
+import "../styles/global.css";
+import Layout from "../layouts/Layout.astro";
+import Section from "../components/layout/section.astro";
 
-import { Button } from '@/components/ui/button'
-import { PricingTable } from '@/components/pricing/pricing-table'
-import { faIdBadge } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Faq } from '../components/marketing/faq'
+import { Button } from "@/components/ui/button";
+import { PricingTable } from "@/components/pricing/pricing-table";
+import { faIdBadge } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Faq } from "../components/marketing/faq";
 
-import Calculator from '@/components/pricing/calculator'
-import Spacer from '@/components/ui/spacer'
-import SectionFullWidth from '@/components/layout/section-full-width.astro'
-import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
-import SectionKicker from '@/components/astro/section/section-kicker.astro'
-import SectionTitle from '@/components/astro/section/section-title.astro'
-import { FeatureListBlock } from '@/components/ListBlock'
-import SectionContent from '@/components/astro/section/section-content.astro'
+import Calculator from "@/components/pricing/calculator";
+import Spacer from "@/components/ui/spacer";
+import SectionFullWidth from "@/components/layout/section-full-width.astro";
+import FaqAccordions from "@/components/astro/accordion/faq-accordion.astro";
+import SectionKicker from "@/components/astro/section/section-kicker.astro";
+import SectionTitle from "@/components/astro/section/section-title.astro";
+import { FeatureListBlock } from "@/components/ListBlock";
+import SectionContent from "@/components/astro/section/section-content.astro";
 
-const pathname = new URL(Astro.request.url).pathname
+const pathname = new URL(Astro.request.url).pathname;
 
 const DISCOUNTS = [
   {
-    icon: 'chat-bubble',
-    title: 'Annual Payment',
+    icon: "chat-bubble",
+    title: "Annual Payment",
     content:
-      '15% off for customers who pay annually. Does not include one-time services.',
+      "15% off for customers who pay annually. Does not include one-time services.",
   },
   {
-    icon: 'thunder-bolt',
-    title: 'Panfactum Partners',
+    icon: "thunder-bolt",
+    title: "Panfactum Partners",
     content:
-      'Up to 50% off for service providers implementing the Panfactum Stack for their clients. Learn more.',
+      "Up to 50% off for service providers implementing the Panfactum Stack for their clients. Learn more.",
   },
   {
-    icon: 'bar-chart-break',
-    title: 'Non-profits',
+    icon: "bar-chart-break",
+    title: "Non-profits",
     content:
-      '50% off for registered non-profit organizations. Does not include one-time services.',
+      "50% off for registered non-profit organizations. Does not include one-time services.",
   },
-]
+];
 ---
 
-<Layout title="Pricing" darkBackground={true} heroClass="bg-brand-section" hasBorder={false}>
+<Layout
+  title="Pricing"
+  darkBackground={true}
+  heroClass="bg-brand-section"
+  hasBorder={false}
+>
   <section slot="hero" class="flex space-y-7xl flex-col items-center py-9xl">
     <div
       class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
@@ -174,7 +179,7 @@ const DISCOUNTS = [
     <Calculator client:only="react" pathName={pathname} />
   </Section>
 
-  <Spacer className={''} />
+  <Spacer className={""} />
 
   <Section class="gap-6xl py-8">
     <div class="text-center">

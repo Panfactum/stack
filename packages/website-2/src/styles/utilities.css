@@ -201,6 +201,6 @@
   }
 
   .height-without-navigation-offset {
-    @apply max-h-screen
+    @apply max-h-screen;
   }
 }

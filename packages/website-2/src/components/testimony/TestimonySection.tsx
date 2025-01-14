@@ -1,35 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
 const TESTIMONIES = [
   {
-    image: './testimony-image.png',
+    image: "./testimony-image.png",
     quote: `Love the simplicity of the service and the prompt customer
                 support. We can’t imagine working without it.`,
-    name: 'Mathilide Lewis',
-    title: 'Head of Engineering, Layers',
-    saving: '$10,000',
-    savingPeriod: 'Saved/month',
+    name: "Mathilide Lewis",
+    title: "Head of Engineering, Layers",
+    saving: "$10,000",
+    savingPeriod: "Saved/month",
   },
   {
-    image: './testimony-image.png',
+    image: "./testimony-image.png",
     quote: `I hate every ape I see. From Chimpan A to Chimpanze.`,
-    name: 'Harry Mann',
-    title: 'Head of Marketing',
-    saving: '$30,000',
-    savingPeriod: 'Saved/month',
+    name: "Harry Mann",
+    title: "Head of Marketing",
+    saving: "$30,000",
+    savingPeriod: "Saved/month",
   },
   {
-    image: './testimony-image.png',
+    image: "./testimony-image.png",
     quote: `That's a problem for future Homer.  I don't ever want to be THAT guy.`,
-    name: 'Homer Simpson',
-    title: 'CEO',
-    saving: '$20,000',
-    savingPeriod: 'Saved/month',
+    name: "Homer Simpson",
+    title: "CEO",
+    saving: "$20,000",
+    savingPeriod: "Saved/month",
   },
-]
+];
 
 export default function TestimonySection() {
-  const [current, setCurrent] = useState(0)
+  const [current, setCurrent] = useState(0);
 
   // Automatically change the current testimony every 3 seconds
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function TestimonySection() {
             // Position all slides absolutely on top of each other
             // and transition the opacity for the fade effect
             className={`absolute inset-0 transition-opacity duration-1000 
-              ${index === current ? 'opacity-100 z-10' : 'opacity-0 z-0'}
+              ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"}
             `}
           >
             <div className="container max-w-[1344px] mx-auto px-8 md:px-[64px] lg:px-[104px] flex items-center">
@@ -97,7 +97,9 @@ export default function TestimonySection() {
           <div
             key={testimonyIndex}
             className={`w-4 h-4 cursor-pointer ${
-              testimonyIndex === current ? 'bg-brand-primary dark:bg-white' : 'bg-quaternary'
+              testimonyIndex === current
+                ? "bg-brand-primary dark:bg-white"
+                : "bg-quaternary"
             } rounded-full`}
             onClick={() => setCurrent(testimonyIndex)}
           ></div>
@@ -148,5 +150,5 @@ export default function TestimonySection() {
       </div>
     </section> */}
     </section>
-  )
+  );
 }

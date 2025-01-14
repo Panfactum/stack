@@ -1,6 +1,6 @@
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import './SortableItem.css'
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import "./SortableItem.css";
 
 const SortableItem = ({
   id,
@@ -10,30 +10,30 @@ const SortableItem = ({
   onClick,
   ...props
 }: {
-  id: number
-  className?: string
+  id: number;
+  className?: string;
   content: {
-    id: number
-    icon: string
-    title: string
-    category: string
-    content: string
-    avg_savings: number
-  }
-  isExpanded: boolean
-  onClick: () => void
+    id: number;
+    icon: string;
+    title: string;
+    category: string;
+    content: string;
+    avg_savings: number;
+  };
+  isExpanded: boolean;
+  onClick: () => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: id })
+    useSortable({ id: id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  }
+  };
 
   return (
     <li
-      className={`relative grid-item border border-primary ${isExpanded ? 'is-expanded p-6 bg-primary' : 'flex items-center justify-center bg-white'} ${className}`}
+      className={`relative grid-item border border-primary ${isExpanded ? "is-expanded p-6 bg-primary" : "flex items-center justify-center bg-white"} ${className}`}
       id={`grid-item-${content.id}`}
       ref={setNodeRef}
       style={style}
@@ -75,7 +75,7 @@ const SortableItem = ({
         />
       )}
     </li>
-  )
-}
+  );
+};
 
-export default SortableItem
+export default SortableItem;

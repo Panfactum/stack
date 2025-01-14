@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import type { ChangeEvent, ReactElement, KeyboardEvent } from 'react'
-import { useMemo, useState, useCallback } from 'react'
-import { useLocalStorage } from 'usehooks-ts'
-import SavingsTable from '@/components/pricing/savings-table'
-import { Button } from '@/components/ui/button.tsx'
-import { Input } from '@/components/ui/input.tsx'
-import { Label } from '@/components/ui/label.tsx'
-import { Slider } from '@/components/ui/slider.tsx'
-import { Toaster } from '@/components/ui/toaster.tsx'
-import Tooltip from '@/components/ui/tooltip.tsx'
-import { useToast } from '@/hooks/use-toast.ts'
+import type { ChangeEvent, ReactElement, KeyboardEvent } from "react";
+import { useMemo, useState, useCallback } from "react";
+import { useLocalStorage } from "usehooks-ts";
+import SavingsTable from "@/components/pricing/savings-table";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { Slider } from "@/components/ui/slider.tsx";
+import { Toaster } from "@/components/ui/toaster.tsx";
+import Tooltip from "@/components/ui/tooltip.tsx";
+import { useToast } from "@/hooks/use-toast.ts";
 
-const NUMBER = /^[0-9]+$/
+const NUMBER = /^[0-9]+$/;
 
 // Prevents non-integer inputs to form field
 function allowOnlyIntegers(event: KeyboardEvent) {
-  const value = event.key
+  const value = event.key;
   if (
     !event.shiftKey &&
     !event.ctrlKey &&
@@ -24,7 +24,7 @@ function allowOnlyIntegers(event: KeyboardEvent) {
     value.length === 1 &&
     !NUMBER.test(value)
   ) {
-    event.preventDefault()
+    event.preventDefault();
   }
 }
 
@@ -34,21 +34,21 @@ function setIntFromString(
   max = 100000,
 ) {
   if (value.length === 0) {
-    void setter(0)
+    void setter(0);
   } else if (NUMBER.test(value)) {
-    const intValue = parseInt(value)
+    const intValue = parseInt(value);
     if (intValue >= 0 && intValue <= max) {
-      void setter(intValue)
+      void setter(intValue);
     }
   }
 }
 
 function getQueryParams(name, url) {
-  const params = new URLSearchParams(new URL(url).search)
+  const params = new URLSearchParams(new URL(url).search);
 
-  const value = params.get(name)
+  const value = params.get(name);
 
-  return useState(value ? parseInt(value) : undefined)
+  return useState(value ? parseInt(value) : undefined);
 }
 
 // This function gets the value with the following precedence:
@@ -65,32 +65,32 @@ function useIntegerInput(
     `sc-${name}`,
     defaultValue,
     { initializeWithValue: false },
-  )
-  const [qsValue, setQSValue] = getQueryParams(name, window.location.href)
+  );
+  const [qsValue, setQSValue] = getQueryParams(name, window.location.href);
   const setValue = useCallback(
     (newValue: number) => {
-      setLocalValue(newValue)
-      setQSValue(newValue)
+      setLocalValue(newValue);
+      setQSValue(newValue);
     },
     [setLocalValue, setQSValue],
-  )
+  );
   const onValueChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value
-      setIntFromString(value, setValue, maxValue)
+      const value = event.target.value;
+      setIntFromString(value, setValue, maxValue);
     },
     [setValue, maxValue],
-  )
+  );
 
-  return [qsValue ?? localValue, setValue, onValueChange] as const
+  return [qsValue ?? localValue, setValue, onValueChange] as const;
 }
 
 function InputRow({
   children,
   title,
 }: {
-  children: ReactElement
-  title: string | ReactElement
+  children: ReactElement;
+  title: string | ReactElement;
 }) {
   return (
     <tr className="w-full flex flex-col items-start lg:flex-row py-4">
@@ -101,7 +101,7 @@ function InputRow({
         {children}
       </td>
     </tr>
-  )
+  );
 }
 
 function IntegerInput({
@@ -110,10 +110,10 @@ function IntegerInput({
   value,
   onChange,
 }: {
-  id: string
-  label: string
-  value: number
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+  id: string;
+  label: string;
+  value: number;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div className={`flex flex-1 flex-col self-stretch gap-y-sm`}>
@@ -123,154 +123,154 @@ function IntegerInput({
       <Input
         id={id}
         type="number"
-        className={'w-full'}
+        className={"w-full"}
         value={JSON.stringify(value)}
         onKeyDown={allowOnlyIntegers}
         onChange={onChange}
       />
     </div>
-  )
+  );
 }
 
 export default function Calculator({
   pathName,
   ...props
 }: {
-  pathName: string
+  pathName: string;
 }) {
   const [utilization, setUtilization, onUtilizationChange] = useIntegerInput(
-    'utilization',
+    "utilization",
     25,
     65,
-  )
+  );
   const [workloadCores, setWorkloadCores, onWorkloadCoresChange] =
-    useIntegerInput('workload-cores', 3)
+    useIntegerInput("workload-cores", 3);
   const [workloadMemory, setWorkloadMemory, onWorkloadMemoryChange] =
-    useIntegerInput('workload-memory', 6)
-  const [pgCores, setPGCores, onPGCoresChange] = useIntegerInput('pg-cores', 1)
+    useIntegerInput("workload-memory", 6);
+  const [pgCores, setPGCores, onPGCoresChange] = useIntegerInput("pg-cores", 1);
   const [pgMemory, setPGMemory, onPGMemoryChange] = useIntegerInput(
-    'pg-memory',
+    "pg-memory",
     2,
-  )
+  );
   const [pgStorage, setPGStorage, onPGStorageChange] = useIntegerInput(
-    'pg-storage',
+    "pg-storage",
     10,
-  )
-  const [kvCores, setKVCores, onKVCoresChange] = useIntegerInput('kv-cores', 1)
+  );
+  const [kvCores, setKVCores, onKVCoresChange] = useIntegerInput("kv-cores", 1);
   const [kvMemory, setKVMemory, onKVMemoryChange] = useIntegerInput(
-    'kv-memory',
+    "kv-memory",
     2,
-  )
+  );
   const [kvStorage, setKVStorage, onKVStorageChange] = useIntegerInput(
-    'kv-storage',
+    "kv-storage",
     0,
-  )
+  );
   const [vpcCount, setVPCCount, onVPCCountChange] = useIntegerInput(
-    'vpc-count',
+    "vpc-count",
     1,
-  )
+  );
   const [egressTraffic, setEgressTraffic, onEgressTrafficChange] =
-    useIntegerInput('egress-traffic', 100)
+    useIntegerInput("egress-traffic", 100);
   const [interAZTraffic, setInterAZTraffic, onInterAZTrafficChange] =
-    useIntegerInput('inter-az-traffic', 1000)
-  const [logs, setLogs, onLogsChange] = useIntegerInput('logs', 1000)
-  const [metrics, setMetrics, onMetricsChange] = useIntegerInput('metrics', 10)
-  const [spans, setSpans, onSpansChange] = useIntegerInput('spans', 10)
+    useIntegerInput("inter-az-traffic", 1000);
+  const [logs, setLogs, onLogsChange] = useIntegerInput("logs", 1000);
+  const [metrics, setMetrics, onMetricsChange] = useIntegerInput("metrics", 10);
+  const [spans, setSpans, onSpansChange] = useIntegerInput("spans", 10);
   const [employeeCount, setEmployees, onEmployeesChange] = useIntegerInput(
-    'employees',
+    "employees",
     10,
-  )
+  );
   const [developerCount, setDevelopers, onDevelopersChange] = useIntegerInput(
-    'developers',
+    "developers",
     10,
-  )
+  );
   const [cicdMinutes, setCICDMinutes, onCICDMinutesChange] = useIntegerInput(
-    'cicd-minutes',
+    "cicd-minutes",
     60 * 24 * 30,
-  )
+  );
   const [lablorCostHourly, __, onLaborCostHourlyChange] = useIntegerInput(
-    'labor-cost',
+    "labor-cost",
     100,
-  )
+  );
 
   const { setSmallPreset, setMediumPreset, setLargePreset, setSoloPreset } =
     useMemo(
       () => ({
         setSoloPreset: () => {
-          void setEmployees(1)
-          void setDevelopers(1)
-          void setVPCCount(1)
-          void setEgressTraffic(10)
-          void setInterAZTraffic(100)
-          void setWorkloadCores(1)
-          void setWorkloadMemory(2)
-          void setPGCores(1)
-          void setPGMemory(1)
-          void setPGStorage(10)
-          void setKVCores(0)
-          void setKVMemory(0)
-          void setKVStorage(0)
-          void setMetrics(0)
-          void setLogs(10)
-          void setSpans(0)
-          void setCICDMinutes(60 * 24 * 10)
+          void setEmployees(1);
+          void setDevelopers(1);
+          void setVPCCount(1);
+          void setEgressTraffic(10);
+          void setInterAZTraffic(100);
+          void setWorkloadCores(1);
+          void setWorkloadMemory(2);
+          void setPGCores(1);
+          void setPGMemory(1);
+          void setPGStorage(10);
+          void setKVCores(0);
+          void setKVMemory(0);
+          void setKVStorage(0);
+          void setMetrics(0);
+          void setLogs(10);
+          void setSpans(0);
+          void setCICDMinutes(60 * 24 * 10);
         },
         setSmallPreset: () => {
-          void setEmployees(5)
-          void setDevelopers(2)
-          void setVPCCount(1)
-          void setEgressTraffic(100)
-          void setInterAZTraffic(1000)
-          void setWorkloadCores(3)
-          void setWorkloadMemory(6)
-          void setPGCores(1)
-          void setPGMemory(2)
-          void setPGStorage(10)
-          void setKVCores(1)
-          void setKVMemory(2)
-          void setKVStorage(0)
-          void setMetrics(10)
-          void setLogs(10)
-          void setSpans(10)
-          void setCICDMinutes(60 * 24 * 30)
+          void setEmployees(5);
+          void setDevelopers(2);
+          void setVPCCount(1);
+          void setEgressTraffic(100);
+          void setInterAZTraffic(1000);
+          void setWorkloadCores(3);
+          void setWorkloadMemory(6);
+          void setPGCores(1);
+          void setPGMemory(2);
+          void setPGStorage(10);
+          void setKVCores(1);
+          void setKVMemory(2);
+          void setKVStorage(0);
+          void setMetrics(10);
+          void setLogs(10);
+          void setSpans(10);
+          void setCICDMinutes(60 * 24 * 30);
         },
         setMediumPreset: () => {
-          void setEmployees(50)
-          void setDevelopers(10)
-          void setVPCCount(3)
-          void setEgressTraffic(1000)
-          void setInterAZTraffic(10000)
-          void setWorkloadCores(15)
-          void setWorkloadMemory(30)
-          void setPGCores(10)
-          void setPGMemory(20)
-          void setPGStorage(100)
-          void setKVCores(10)
-          void setKVMemory(20)
-          void setKVStorage(10)
-          void setMetrics(100)
-          void setLogs(100)
-          void setSpans(100)
-          void setCICDMinutes(60 * 24 * 30 * 10)
+          void setEmployees(50);
+          void setDevelopers(10);
+          void setVPCCount(3);
+          void setEgressTraffic(1000);
+          void setInterAZTraffic(10000);
+          void setWorkloadCores(15);
+          void setWorkloadMemory(30);
+          void setPGCores(10);
+          void setPGMemory(20);
+          void setPGStorage(100);
+          void setKVCores(10);
+          void setKVMemory(20);
+          void setKVStorage(10);
+          void setMetrics(100);
+          void setLogs(100);
+          void setSpans(100);
+          void setCICDMinutes(60 * 24 * 30 * 10);
         },
         setLargePreset: () => {
-          void setEmployees(250)
-          void setDevelopers(50)
-          void setVPCCount(6)
-          void setEgressTraffic(10000)
-          void setInterAZTraffic(100000)
-          void setWorkloadCores(100)
-          void setWorkloadMemory(300)
-          void setPGCores(50)
-          void setPGMemory(200)
-          void setPGStorage(1000)
-          void setKVCores(25)
-          void setKVMemory(100)
-          void setKVStorage(100)
-          void setMetrics(250)
-          void setLogs(1000)
-          void setSpans(1000)
-          void setCICDMinutes(60 * 24 * 30 * 50)
+          void setEmployees(250);
+          void setDevelopers(50);
+          void setVPCCount(6);
+          void setEgressTraffic(10000);
+          void setInterAZTraffic(100000);
+          void setWorkloadCores(100);
+          void setWorkloadMemory(300);
+          void setPGCores(50);
+          void setPGMemory(200);
+          void setPGStorage(1000);
+          void setKVCores(25);
+          void setKVMemory(100);
+          void setKVStorage(100);
+          void setMetrics(250);
+          void setLogs(1000);
+          void setSpans(1000);
+          void setCICDMinutes(60 * 24 * 30 * 50);
         },
       }),
       [
@@ -292,44 +292,44 @@ export default function Calculator({
         setMetrics,
         setCICDMinutes,
       ],
-    )
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
+    );
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const closeSnackbar = useCallback(() => {
-    setSnackbarOpen(false)
-  }, [setSnackbarOpen])
+    setSnackbarOpen(false);
+  }, [setSnackbarOpen]);
 
-  const path = pathName
+  const path = pathName;
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const copyLinkToClipboard = useCallback(() => {
     const qs = new URLSearchParams([
-      ['utilization', JSON.stringify(utilization)],
-      ['workload-cores', JSON.stringify(workloadCores)],
-      ['workload-memory', JSON.stringify(workloadMemory)],
-      ['pg-cores', JSON.stringify(pgCores)],
-      ['pg-memory', JSON.stringify(pgMemory)],
-      ['pg-storage', JSON.stringify(pgStorage)],
-      ['kv-cores', JSON.stringify(kvCores)],
-      ['kv-memory', JSON.stringify(kvMemory)],
-      ['kv-storage', JSON.stringify(kvStorage)],
-      ['vpc-count', JSON.stringify(vpcCount)],
-      ['egress-traffic', JSON.stringify(egressTraffic)],
-      ['inter-az-traffic', JSON.stringify(interAZTraffic)],
-      ['logs', JSON.stringify(logs)],
-      ['metrics', JSON.stringify(metrics)],
-      ['spans', JSON.stringify(spans)],
-      ['employees', JSON.stringify(employeeCount)],
-      ['developers', JSON.stringify(developerCount)],
-      ['cicd-minutes', JSON.stringify(cicdMinutes)],
-      ['labor-cost', JSON.stringify(lablorCostHourly)],
-    ]).toString()
-    void navigator.clipboard.writeText(`https://panfactum.com${path}?${qs}`)
-    setSnackbarOpen(true)
+      ["utilization", JSON.stringify(utilization)],
+      ["workload-cores", JSON.stringify(workloadCores)],
+      ["workload-memory", JSON.stringify(workloadMemory)],
+      ["pg-cores", JSON.stringify(pgCores)],
+      ["pg-memory", JSON.stringify(pgMemory)],
+      ["pg-storage", JSON.stringify(pgStorage)],
+      ["kv-cores", JSON.stringify(kvCores)],
+      ["kv-memory", JSON.stringify(kvMemory)],
+      ["kv-storage", JSON.stringify(kvStorage)],
+      ["vpc-count", JSON.stringify(vpcCount)],
+      ["egress-traffic", JSON.stringify(egressTraffic)],
+      ["inter-az-traffic", JSON.stringify(interAZTraffic)],
+      ["logs", JSON.stringify(logs)],
+      ["metrics", JSON.stringify(metrics)],
+      ["spans", JSON.stringify(spans)],
+      ["employees", JSON.stringify(employeeCount)],
+      ["developers", JSON.stringify(developerCount)],
+      ["cicd-minutes", JSON.stringify(cicdMinutes)],
+      ["labor-cost", JSON.stringify(lablorCostHourly)],
+    ]).toString();
+    void navigator.clipboard.writeText(`https://panfactum.com${path}?${qs}`);
+    setSnackbarOpen(true);
     toast({
-      title: 'Copied stateful link to clipboard',
-    })
+      title: "Copied stateful link to clipboard",
+    });
   }, [
     utilization,
     workloadCores,
@@ -352,7 +352,7 @@ export default function Calculator({
     path,
     setSnackbarOpen,
     lablorCostHourly,
-  ])
+  ]);
 
   return (
     <>
@@ -364,25 +364,25 @@ export default function Calculator({
             </td>
             <td colSpan={4}>
               <div className="flex items-center gap-4">
-                <Button variant={'outline'} size={`sm`} onClick={setSoloPreset}>
+                <Button variant={"outline"} size={`sm`} onClick={setSoloPreset}>
                   Solo
                 </Button>
                 <Button
-                  variant={'outline'}
+                  variant={"outline"}
                   size={`sm`}
                   onClick={setSmallPreset}
                 >
                   Small
                 </Button>
                 <Button
-                  variant={'outline'}
+                  variant={"outline"}
                   size={`sm`}
                   onClick={setMediumPreset}
                 >
                   Medium
                 </Button>
                 <Button
-                  variant={'outline'}
+                  variant={"outline"}
                   size={`sm`}
                   onClick={setLargePreset}
                 >
@@ -391,7 +391,7 @@ export default function Calculator({
               </div>
             </td>
           </tr>
-          <InputRow title={'Organization'}>
+          <InputRow title={"Organization"}>
             <div className="flex items-center flex-col lg:flex-row gap-4">
               <IntegerInput
                 id="employee-count"
@@ -413,7 +413,7 @@ export default function Calculator({
               />
             </div>
           </InputRow>
-          <InputRow title={'Network'}>
+          <InputRow title={"Network"}>
             <div className="flex items-center flex-col lg:flex-row gap-4">
               <IntegerInput
                 id="vpc-count"
@@ -439,9 +439,9 @@ export default function Calculator({
             title={
               <Tooltip
                 title={
-                  'The average percent of provisioned resource capacity actually being used by your workloads. A normal range is 20-30% and a ceiling is 65% as you should always have hot spare capacity.'
+                  "The average percent of provisioned resource capacity actually being used by your workloads. A normal range is 20-30% and a ceiling is 65% as you should always have hot spare capacity."
                 }
-                position={'right'}
+                position={"right"}
               >
                 <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   Resource Utilization %
@@ -457,7 +457,7 @@ export default function Calculator({
                 max={1}
                 step={0.1}
                 onValueChange={([a]) => {
-                  setUtilization(a)
+                  setUtilization(a);
                 }}
                 className="flex-1"
               />
@@ -466,7 +466,7 @@ export default function Calculator({
               </div>
             </div>
           </InputRow>
-          <InputRow title={'Application Servers'}>
+          <InputRow title={"Application Servers"}>
             <div className="flex items-center gap-4">
               <IntegerInput
                 id="workload-cpu-cores"
@@ -486,8 +486,8 @@ export default function Calculator({
           <InputRow
             title={
               <Tooltip
-                title={'For example, PostgreSQL or MySQL'}
-                position={'right'}
+                title={"For example, PostgreSQL or MySQL"}
+                position={"right"}
               >
                 <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   Relational Databases
@@ -519,8 +519,8 @@ export default function Calculator({
           <InputRow
             title={
               <Tooltip
-                title={'For example, Redis or memcached'}
-                position={'right'}
+                title={"For example, Redis or memcached"}
+                position={"right"}
               >
                 <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   Key-Value Databases
@@ -549,7 +549,7 @@ export default function Calculator({
               />
             </div>
           </InputRow>
-          <InputRow title={'Observability'}>
+          <InputRow title={"Observability"}>
             <div className="flex items-center flex-col lg:flex-row gap-4">
               <IntegerInput
                 id="logs"
@@ -575,9 +575,9 @@ export default function Calculator({
             title={
               <Tooltip
                 title={
-                  'CPU-minutes are the number of minutes a CI/CD pipeline is running multiplied by the number of provisioned vCPUs. For example, in standard GHA this would be 2 / minute.'
+                  "CPU-minutes are the number of minutes a CI/CD pipeline is running multiplied by the number of provisioned vCPUs. For example, in standard GHA this would be 2 / minute."
                 }
-                position={'right'}
+                position={"right"}
               >
                 <span className="underline decoration-dotted decoration-primary dark:decoration-white decoration-2 underline-offset-4">
                   CI / CD
@@ -627,5 +627,5 @@ export default function Calculator({
         />*/}
       <Toaster />
     </>
-  )
+  );
 }

@@ -1,22 +1,22 @@
-import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ButtonGroup } from '@/components/ui/button-group.tsx'
-import { Button } from '@/components/ui/button.tsx'
+import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ButtonGroup } from "@/components/ui/button-group.tsx";
+import { Button } from "@/components/ui/button.tsx";
 
 interface Prop {
   qty: {
-    included: number
-    price: number
-  }
+    included: number;
+    price: number;
+  };
 
-  addl: number
+  addl: number;
 
-  onChange: (qty: number) => void
+  onChange: (qty: number) => void;
 }
 
 export function PricingTableQty({ qty, addl, onChange }: Prop) {
   if (!qty) {
-    return undefined
+    return undefined;
   }
 
   return (
@@ -46,5 +46,5 @@ export function PricingTableQty({ qty, addl, onChange }: Prop) {
         {qty.included} included • ${qty.price} each/mo
       </p>
     </>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { NavIcons } from './types.ts'
+import { NavIcons } from "./types.ts";
 
 function DataFlowIcon() {
   return (
@@ -17,7 +17,7 @@ function DataFlowIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }
 
 function LightBulbIcon() {
@@ -37,7 +37,7 @@ function LightBulbIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }
 
 function BookIcon() {
@@ -57,7 +57,7 @@ function BookIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }
 
 function AnalyzeIcon() {
@@ -77,7 +77,7 @@ function AnalyzeIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }
 
 function HistoryIcon() {
@@ -101,7 +101,7 @@ function HistoryIcon() {
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }
 
 export const iconMapping = {
@@ -110,4 +110,4 @@ export const iconMapping = {
   [NavIcons.book]: BookIcon,
   [NavIcons.analyze]: AnalyzeIcon,
   [NavIcons.history]: HistoryIcon,
-}
+};

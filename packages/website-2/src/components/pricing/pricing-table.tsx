@@ -1,67 +1,67 @@
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
+import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
 import {
   faMinus,
   faChevronDown,
   faChevronLeft,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { type FC, type ReactNode, useState, Fragment } from 'react'
-import { PricingHeader } from '@/components/pricing/pricing-header'
-import { PricingTableQty } from '@/components/pricing/pricing-table-qty'
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { type FC, type ReactNode, useState, Fragment } from "react";
+import { PricingHeader } from "@/components/pricing/pricing-header";
+import { PricingTableQty } from "@/components/pricing/pricing-table-qty";
 
 export enum FeatureName {
-  Clusters = 'Clusters',
-  ApplicationServices = 'Application Services',
-  Addons = 'Addons',
-  ImplementationSupport = 'Implementation Support',
-  SupportHours = 'Support Hours',
-  SupportSLA1 = 'Support SLAs - Priority 1',
-  SupportSLA2 = 'Support SLAs - Priority 2',
-  SupportSLA3 = 'Support SLAs - Priority 3',
-  DelegatedSystemAccess = 'Delegated System Access',
-  DedicatedSolutionEngineer = 'Dedicated Solution Engineer',
-  Training = 'Training',
-  ManagedSetup = 'Managed Setup',
-  ManagedUpgrades = 'Managed Upgrades',
-  ActiveMonitoring = 'Active Monitoring',
-  PlatformAssessment = 'Platform Assessments',
-  FractionalDevOps = 'Fractional DevOps',
-  BAACustomLicense = 'BAA / Custom License',
-  StableReleaseAccess = 'Stable Release Access',
-  RoadmapPrioritization = 'Roadmap Prioritization',
-  ChatIntegration = 'Chat Integration',
-  BareMetalSupport = 'Bare Metal Support',
+  Clusters = "Clusters",
+  ApplicationServices = "Application Services",
+  Addons = "Addons",
+  ImplementationSupport = "Implementation Support",
+  SupportHours = "Support Hours",
+  SupportSLA1 = "Support SLAs - Priority 1",
+  SupportSLA2 = "Support SLAs - Priority 2",
+  SupportSLA3 = "Support SLAs - Priority 3",
+  DelegatedSystemAccess = "Delegated System Access",
+  DedicatedSolutionEngineer = "Dedicated Solution Engineer",
+  Training = "Training",
+  ManagedSetup = "Managed Setup",
+  ManagedUpgrades = "Managed Upgrades",
+  ActiveMonitoring = "Active Monitoring",
+  PlatformAssessment = "Platform Assessments",
+  FractionalDevOps = "Fractional DevOps",
+  BAACustomLicense = "BAA / Custom License",
+  StableReleaseAccess = "Stable Release Access",
+  RoadmapPrioritization = "Roadmap Prioritization",
+  ChatIntegration = "Chat Integration",
+  BareMetalSupport = "Bare Metal Support",
 }
 
 interface Feature {
-  name: FeatureName
-  description?: ReactNode | string
+  name: FeatureName;
+  description?: ReactNode | string;
 }
 
 type Features = {
-  [key in FeatureName]: Feature
-}
+  [key in FeatureName]: Feature;
+};
 
 interface PlanFeature {
-  feature: Feature
-  name: FeatureName
-  included: boolean
-  hours?: number
+  feature: Feature;
+  name: FeatureName;
+  included: boolean;
+  hours?: number;
   qty?: {
-    included: number
-    price: number
-    additional?: number
-  }
+    included: number;
+    price: number;
+    additional?: number;
+  };
 }
 
 export interface Plan {
-  name: string
-  price: number
-  description: string
+  name: string;
+  price: number;
+  description: string;
   features: {
-    [key in FeatureName]: PlanFeature
-  }
-  popular: boolean
+    [key in FeatureName]: PlanFeature;
+  };
+  popular: boolean;
 }
 
 const featureOrder: FeatureName[] = [
@@ -85,8 +85,8 @@ const featureOrder: FeatureName[] = [
   FeatureName.StableReleaseAccess,
   FeatureName.RoadmapPrioritization,
   FeatureName.ChatIntegration,
-  FeatureName.BareMetalSupport
-]
+  FeatureName.BareMetalSupport,
+];
 
 export const features: Features = {
   [FeatureName.Clusters]: {
@@ -153,17 +153,17 @@ export const features: Features = {
   [FeatureName.ApplicationServices]: {
     name: FeatureName.ApplicationServices,
     description:
-      'Application Services are services that run your applications.',
+      "Application Services are services that run your applications.",
   },
   [FeatureName.Addons]: {
     name: FeatureName.Addons,
     description:
-      'Addons are additional services that can be added to your Panfactum account.',
+      "Addons are additional services that can be added to your Panfactum account.",
   },
   [FeatureName.ImplementationSupport]: {
     name: FeatureName.ImplementationSupport,
     description:
-      'Implementation Support is a service that helps you implement Panfactum.',
+      "Implementation Support is a service that helps you implement Panfactum.",
   },
   [FeatureName.SupportHours]: {
     name: FeatureName.SupportHours,
@@ -287,7 +287,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.SupportSLA2]: {
     name: FeatureName.SupportSLA2,
@@ -349,7 +348,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.SupportSLA3]: {
     name: FeatureName.SupportSLA3,
@@ -411,7 +409,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.DelegatedSystemAccess]: {
     name: FeatureName.DelegatedSystemAccess,
@@ -473,7 +470,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.DedicatedSolutionEngineer]: {
     name: FeatureName.DedicatedSolutionEngineer,
@@ -535,7 +531,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.Training]: {
     name: FeatureName.Training,
@@ -597,7 +592,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.ManagedSetup]: {
     name: FeatureName.ManagedSetup,
@@ -659,7 +653,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.ManagedUpgrades]: {
     name: FeatureName.ManagedUpgrades,
@@ -721,7 +714,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.ActiveMonitoring]: {
     name: FeatureName.ActiveMonitoring,
@@ -783,7 +775,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.PlatformAssessment]: {
     name: FeatureName.PlatformAssessment,
@@ -845,7 +836,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.FractionalDevOps]: {
     name: FeatureName.FractionalDevOps,
@@ -907,7 +897,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.BAACustomLicense]: {
     name: FeatureName.BAACustomLicense,
@@ -969,7 +958,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.StableReleaseAccess]: {
     name: FeatureName.StableReleaseAccess,
@@ -1031,7 +1019,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.RoadmapPrioritization]: {
     name: FeatureName.RoadmapPrioritization,
@@ -1093,7 +1080,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.ChatIntegration]: {
     name: FeatureName.ChatIntegration,
@@ -1155,7 +1141,6 @@ export const features: Features = {
         </p>
       </>
     ),
-
   },
   [FeatureName.BareMetalSupport]: {
     name: FeatureName.BareMetalSupport,
@@ -1217,15 +1202,15 @@ export const features: Features = {
         </p>
       </>
     ),
-  }
-}
+  },
+};
 
-export const plans: Plan[] = [ 
+export const plans: Plan[] = [
   {
-    name: 'Starter',
+    name: "Starter",
     price: 1000,
     popular: false,
-    description: 'Basic Features for up to 10 users',
+    description: "Basic Features for up to 10 users",
     features: {
       [FeatureName.Clusters]: {
         feature: features[FeatureName.Clusters],
@@ -1304,10 +1289,10 @@ export const plans: Plan[] = [
   },
 
   {
-    name: 'Growth',
+    name: "Growth",
     price: 5000,
     popular: true,
-    description: 'Basic Features for up to 10 users',
+    description: "Basic Features for up to 10 users",
     features: {
       [FeatureName.Clusters]: {
         name: FeatureName.Clusters,
@@ -1426,10 +1411,10 @@ export const plans: Plan[] = [
   },
 
   {
-    name: 'Enterprise',
+    name: "Enterprise",
     price: 10000,
     popular: false,
-    description: 'Basic Features for up to 10 users',
+    description: "Basic Features for up to 10 users",
     features: {
       [FeatureName.Clusters]: {
         name: FeatureName.Clusters,
@@ -1546,16 +1531,16 @@ export const plans: Plan[] = [
       },
     },
   },
-]
+];
 
 const PlanFeatureMobile = ({
   feature,
   addl,
   onChange,
 }: {
-  feature: PlanFeature | undefined
-  addl: number
-  onChange: (name: FeatureName, qty: number) => void
+  feature: PlanFeature | undefined;
+  addl: number;
+  onChange: (name: FeatureName, qty: number) => void;
 }) => {
   const render =
     !feature || !feature.included ? (
@@ -1572,7 +1557,7 @@ const PlanFeatureMobile = ({
       `${feature.hours} hours`
     ) : (
       <FontAwesomeIcon icon={faCircleCheck} size={`2xl`} />
-    )
+    );
 
   return (
     <>
@@ -1583,17 +1568,17 @@ const PlanFeatureMobile = ({
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
 const PlanFeatureDesktop = ({
   feature,
   addl,
   onChange,
 }: {
-  feature: PlanFeature | undefined
-  addl: number
-  onChange: (name: FeatureName, qty: number) => void
+  feature: PlanFeature | undefined;
+  addl: number;
+  onChange: (name: FeatureName, qty: number) => void;
 }) => {
   const render =
     !feature || !feature.included ? (
@@ -1610,7 +1595,7 @@ const PlanFeatureDesktop = ({
       `${feature.hours} hours`
     ) : (
       <FontAwesomeIcon icon={faCircleCheck} size={`xl`} color={`#3B81B0 `} />
-    )
+    );
 
   return (
     <>
@@ -1618,19 +1603,19 @@ const PlanFeatureDesktop = ({
         <div className={`flex flex-col gap-y-lg`}>{render}</div>
       </td>
     </>
-  )
-}
+  );
+};
 
 export interface AddlFeatures {
-  [planName: string]: { [featureName in FeatureName]?: number }
+  [planName: string]: { [featureName in FeatureName]?: number };
 }
 
 const FeatureDetailsContainer: FC<{
-  children: ReactNode
-  isVisible: boolean
+  children: ReactNode;
+  isVisible: boolean;
 }> = ({ children, isVisible }) => {
   if (!isVisible) {
-    return null
+    return null;
   }
 
   return (
@@ -1643,17 +1628,17 @@ const FeatureDetailsContainer: FC<{
         </div>
       </td>
     </tr>
-  )
-}
+  );
+};
 
 export function PricingTable() {
-  const [addl, setAddl] = useState<AddlFeatures>({})
+  const [addl, setAddl] = useState<AddlFeatures>({});
   const [expandedFeature, setExpandedFeature] = useState<FeatureName | null>(
     null,
-  )
+  );
   const toggleFeatureDetails = (featureName: FeatureName) => {
-    setExpandedFeature((prev) => (prev === featureName ? null : featureName))
-  }
+    setExpandedFeature((prev) => (prev === featureName ? null : featureName));
+  };
 
   const onChange = (
     planName: string,
@@ -1661,7 +1646,7 @@ export function PricingTable() {
     qty: number,
   ) => {
     if (qty < 0) {
-      return
+      return;
     }
 
     setAddl((prev) => ({
@@ -1670,14 +1655,14 @@ export function PricingTable() {
         ...prev[planName],
         [featureName]: qty,
       },
-    }))
-  }
+    }));
+  };
 
   return (
     <>
       <div className="flex flex-col lg:hidden self-stretch gap-y-6xl">
         {plans.map((plan) => {
-          const addlFeatures = addl[plan.name] || {}
+          const addlFeatures = addl[plan.name] || {};
 
           return (
             <div
@@ -1687,11 +1672,11 @@ export function PricingTable() {
               <PricingHeader plan={plan} addlFeatures={addlFeatures} />
 
               {featureOrder.map((name) => {
-                const feature = plan.features[name]
-                const featureAddl = addl[plan.name]?.[name] || 0
+                const feature = plan.features[name];
+                const featureAddl = addl[plan.name]?.[name] || 0;
 
                 if (!feature) {
-                  return null
+                  return null;
                 }
 
                 return (
@@ -1701,10 +1686,10 @@ export function PricingTable() {
                     addl={featureAddl}
                     onChange={onChange.bind(null, plan.name)}
                   />
-                )
+                );
               })}
             </div>
-          )
+          );
         })}
       </div>
 
@@ -1727,8 +1712,8 @@ export function PricingTable() {
           className={`[&>*:nth-child(odd)]:bg-secondary [&>*:nth-child(even)]:bg-primary text-sm text-tertiary`}
         >
           {featureOrder.map((name) => {
-            const feature = features[name]
-            const isVisible = expandedFeature === name
+            const feature = features[name];
+            const isVisible = expandedFeature === name;
 
             return (
               <Fragment key={name}>
@@ -1736,23 +1721,25 @@ export function PricingTable() {
                   <td
                     className={`min-w-[170px] text-start text-primary py-lg px-3xl font-medium whitespace-nowrap`}
                   >
-                    <div className={`flex items-center gap-2 ${feature.description ? 'cursor-pointer':''}`} onClick={() => toggleFeatureDetails(name)}>
-                      <span className="text-sm">
-                        {name}
-                      </span>
-                      
-                      {feature.description ? 
-                        (<FontAwesomeIcon
-                          className={`w-[12px] h-[12px] transition-transform ${isVisible ? '':'transform rotate-90'}`}
+                    <div
+                      className={`flex items-center gap-2 ${feature.description ? "cursor-pointer" : ""}`}
+                      onClick={() => toggleFeatureDetails(name)}
+                    >
+                      <span className="text-sm">{name}</span>
+
+                      {feature.description ? (
+                        <FontAwesomeIcon
+                          className={`w-[12px] h-[12px] transition-transform ${isVisible ? "" : "transform rotate-90"}`}
                           icon={faChevronDown}
                           size={`xs`}
                           color={`#98A8B3`}
-                        />) : null}
+                        />
+                      ) : null}
                     </div>
                   </td>
                   {plans.map((plan) => {
-                    const planFeature = plan.features[name]
-                    const featureAddl = addl[plan.name]?.[name] || 0
+                    const planFeature = plan.features[name];
+                    const featureAddl = addl[plan.name]?.[name] || 0;
 
                     return (
                       <PlanFeatureDesktop
@@ -1761,17 +1748,17 @@ export function PricingTable() {
                         addl={featureAddl}
                         onChange={onChange.bind(null, plan.name)}
                       />
-                    )
+                    );
                   })}
                 </tr>
                 <FeatureDetailsContainer isVisible={isVisible}>
                   {feature.description}
                 </FeatureDetailsContainer>
               </Fragment>
-            )
+            );
           })}
         </tbody>
       </table>
     </>
-  )
+  );
 }

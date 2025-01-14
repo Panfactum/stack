@@ -1,13 +1,13 @@
-import { faXmark } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { PanfactumLogo } from '@/components/panfactum-logo.tsx'
-import { Button } from '@/components/ui/button.tsx'
-import { HeaderNav, type NavLinks } from './header-nav.tsx'
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PanfactumLogo } from "@/components/panfactum-logo.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { HeaderNav, type NavLinks } from "./header-nav.tsx";
 
 interface MobileNav extends HeaderNav {
-  open: boolean
-  setMobileOpened: (open: boolean) => void
-  navLinks: NavLinks[]
+  open: boolean;
+  setMobileOpened: (open: boolean) => void;
+  navLinks: NavLinks[];
 }
 
 export function HeaderNavMobile({
@@ -21,37 +21,36 @@ export function HeaderNavMobile({
     >
       <div className="bg-primary">
         <div className="flex items-center justify-center h-20">
-        <div className="container flex justify-between px-container-padding-mobile">
-          <a href="/" onClick={() => setMobileOpened(false)}>
-            <PanfactumLogo className={`fill-blue-500`} />
-          </a>
+          <div className="container flex justify-between px-container-padding-mobile">
+            <a href="/" onClick={() => setMobileOpened(false)}>
+              <PanfactumLogo className={`fill-blue-500`} />
+            </a>
 
-          <FontAwesomeIcon
-            onClick={() => setMobileOpened(false)}
-            icon={faXmark}
-            size={'2xl'}
-            className={`fg-secondary-text ${props.darkBackground ? 'dark' : ''}`}
-          />
+            <FontAwesomeIcon
+              onClick={() => setMobileOpened(false)}
+              icon={faXmark}
+              size={"2xl"}
+              className={`fg-secondary-text ${props.darkBackground ? "dark" : ""}`}
+            />
+          </div>
+
+          <div className="flex justify-end items-center space-x-lg md:hidden"></div>
         </div>
-
-        <div className="flex justify-end items-center space-x-lg md:hidden"></div>
+        <div
+          className={`flex flex-col gap-md py-3xl px-xl border-b border-secondary`}
+        >
+          {props.navLinks.map((link) => (
+            <a
+              key={link.title}
+              href={`${link.url}/${link.override || ""}`}
+              className={`text-primary text-md font-semibold py-lg ${currentPath.includes(link.url) ? "!font-bold" : ""}`}
+              onClick={() => setMobileOpened(false)}
+            >
+              {link.title}
+            </a>
+          ))}
+        </div>
       </div>
-      <div
-        className={`flex flex-col gap-md py-3xl px-xl border-b border-secondary`}
-      >
-        {props.navLinks.map((link) => (
-          <a
-            key={link.title}
-            href={`${link.url}/${link.override || ''}`}
-            className={`text-primary text-md font-semibold py-lg ${currentPath.includes(link.url) ? '!font-bold' : ''}`}
-            onClick={() => setMobileOpened(false)}
-          >
-            {link.title}
-          </a>
-        ))}
-      </div>
-      </div>
-      
 
       <div
         className={`flex flex-col py-3xl px-container-padding-mobile gap-4xl`}
@@ -116,5 +115,5 @@ export function HeaderNavMobile({
         </div>
       </div>
     </div>
-  )
+  );
 }

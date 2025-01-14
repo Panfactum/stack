@@ -9,20 +9,20 @@
 }
 
 .scroll-container {
-    height: 100px;
-    width: 100%;
-    position: relative;
-    overflow: visible;
+  height: 100px;
+  width: 100%;
+  position: relative;
+  overflow: visible;
 }
 
 .scroll-wrapper {
-    display: flex;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    overflow: hidden;
-    white-space: nowrap;
-    animation: smoothScroll 30s linear infinite;
+  display: flex;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: smoothScroll 30s linear infinite;
 }
 
 .move-icon {
@@ -36,16 +36,14 @@
 }
 
 .scroll-container.is-reversed .scroll-wrapper {
-    display: flex;
-    position: absolute;
-    overflow: visible;
-    white-space: nowrap;
-    top: 0px;
-    right: 0px;
-    animation: smoothScrollReverse 20s linear infinite;
+  display: flex;
+  position: absolute;
+  overflow: visible;
+  white-space: nowrap;
+  top: 0px;
+  right: 0px;
+  animation: smoothScrollReverse 20s linear infinite;
 }
-
-
 
 @keyframes smoothScroll {
   from {
@@ -57,14 +55,13 @@
 }
 
 @keyframes smoothScrollReverse {
-    from {
-      transform: translate(-200%, 0);
-    }
-    to {
-      transform: translate(-100%, 0);
-    }
+  from {
+    transform: translate(-200%, 0);
   }
-
+  to {
+    transform: translate(-100%, 0);
+  }
+}
 
 .fade-container {
   position: relative;
@@ -113,30 +110,32 @@
 }
 
 @keyframes fadeSlide {
-  0%, 80% {
+  0%,
+  80% {
     opacity: 0;
     transform: translateY(40px);
   }
-  
+
   /* Fade in and slide up to position */
-  3%, 17% {
+  3%,
+  17% {
     opacity: 1;
     transform: translateY(0);
   }
-  
+
   /* Start fade out and slide up */
   20% {
     opacity: 0;
     transform: translateY(-40px);
   }
-  
+
   /* Keep element hidden until its next turn */
-  23%, 77% {
+  23%,
+  77% {
     opacity: 0;
     transform: translateY(40px);
   }
 }
-  
 
 /* Landing Price Comparison Section */
 .is-cell {

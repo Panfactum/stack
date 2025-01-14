@@ -1,10 +1,10 @@
 ---
-title: 'Bootstrapping Infrastructure-as-Code'
+title: "Bootstrapping Infrastructure-as-Code"
 ---
 
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
-import BootstrappingGuideNav from '../BootstrappingGuideNav'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Bootstrapping Infrastructure-as-Code
 
@@ -83,18 +83,18 @@ Let's perform a quick test to ensure sops is working properly.
    sops:
      kms:
        - arn: arn:aws:kms:us-east-2:143003111016:key/mrk-955687aaf5124a07837ae4e2a442f8ec
-         created_at: '2024-03-08T17:27:00Z'
+         created_at: "2024-03-08T17:27:00Z"
          enc: AQICAHgMz35tnCYOcZgsSkZfKep5SPbKOCK5kzijAQLnZXO3TAHQ6ctemzPMzRenMG2LWQjAAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM4JXy9Gd99htGiu7aAgEQgDuxh107pk18bFU5Q8vzeu1rI+u6+/7s7Xao5DUSE/86Uyvo7USMny58KqJnqUdIvGmj3xYqV5dVMGJxAQ==
          aws_profile: management-superuser
        - arn: arn:aws:kms:us-west-2:143003111016:key/mrk-955687aaf5124a07837ae4e2a442f8ec
-         created_at: '2024-03-08T17:27:00Z'
+         created_at: "2024-03-08T17:27:00Z"
          enc: AQICAHgMz35tnCYOcZgsSkZfKep5SPbKOCK5kzijAQLnZXO3TAFwqRvjtwaFuBNp9ppYc58OAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMagf0c2ADsKLKXBFQAgEQgDsP5rqepGI3MvwhtRVxmS6/hyWWDyqEbOIxYS1WybNinBggkfKNRTw0Z8vob2tuSg5ZUeRpABry/C84PA==
          aws_profile: management-superuser
      gcp_kms: []
      azure_kv: []
      hc_vault: []
      age: []
-     lastmodified: '2024-03-08T17:27:01Z'
+     lastmodified: "2024-03-08T17:27:01Z"
      mac: ENC[AES256_GCM,data:JwzOMNKLn5ETSQY6QiGmxkxLqzX6buvs5OccPZ/BVOdfvgUW8vsgv34l6UiOidHq71GeGo5G9sPHeNiFGWPgqBMNU/qUugt9qldHs5k/oo6e4wFIzOxkIT2NZ1CmLw/9vxw8ZWskWX43XPC8tQlu9NmxE65G7NSDTaHBIFVVG44=,iv:L1pBiv+2y066RNr9qppBjuCjgLkaui6yOGJ6iPSCg8w=,tag:kmN5KBJ7gkhvcnkV67/xjw==,type:str]
      pgp: []
      unencrypted_suffix: _unencrypted
@@ -139,8 +139,8 @@ Let's deploy it now:
    city: Developer Junction
    district_or_county: Marion
    state_or_region: CA
-   postal_code: '12345'
-   phone_number: '+15555555555'
+   postal_code: "12345"
+   phone_number: "+15555555555"
    email_address: spam@panfactum.com
    ```
 
@@ -177,8 +177,8 @@ Now that you are set up to deploy infrastructure-as-code, we are ready to setup 
 
 <BootstrappingGuideNav
   backHref={
-    '/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code'
+    "/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code"
   }
-  forwardHref={'/docs/edge/guides/bootstrapping/dns'}
+  forwardHref={"/docs/edge/guides/bootstrapping/dns"}
   stepNumber={5}
 />

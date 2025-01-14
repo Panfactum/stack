@@ -1,15 +1,15 @@
 ---
-title: 'Maintenance Controllers'
+title: "Maintenance Controllers"
 ---
 
-import { Image } from 'astro:assets'
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
-import BootstrappingGuideNav from '../BootstrappingGuideNav'
-import ebsDeleteImg from './ebs-delete.jpg'
-import ebsSnapshotsImg from './ebs-snapshots.jpg'
-import k9sBackupImg from './k9s-backup.jpg'
-import nodeImageCacheImg from './node-image-cache.jpg'
-import s3BackupImg from './s3-backup.jpg'
+import { Image } from "astro:assets";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+import ebsDeleteImg from "./ebs-delete.jpg";
+import ebsSnapshotsImg from "./ebs-snapshots.jpg";
+import k9sBackupImg from "./k9s-backup.jpg";
+import nodeImageCacheImg from "./node-image-cache.jpg";
+import s3BackupImg from "./s3-backup.jpg";
 
 # Maintenance Controllers
 
@@ -76,7 +76,7 @@ Let's deploy the node image cache controller now:
 
 Once this is deployed, you should see a pod running on each node that is working to pull and pin images to the node.
 
-<Image src={nodeImageCacheImg} alt={'Caching pods running on each node'} />
+<Image src={nodeImageCacheImg} alt={"Caching pods running on each node"} />
 
 ## PVC Autoresizer
 
@@ -311,7 +311,7 @@ Now that we have improved the overall stability and resiliency of the cluster, w
 additional databases to the cluster for more serious workloads.
 
 <BootstrappingGuideNav
-  backHref={'/docs/edge/guides/bootstrapping/inbound-networking'}
-  forwardHref={'/docs/edge/guides/bootstrapping/databases'}
+  backHref={"/docs/edge/guides/bootstrapping/inbound-networking"}
+  forwardHref={"/docs/edge/guides/bootstrapping/databases"}
   stepNumber={17}
 />

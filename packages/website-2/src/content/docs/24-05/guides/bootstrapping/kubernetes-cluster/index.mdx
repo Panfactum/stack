@@ -1,16 +1,16 @@
 ---
-title: 'Internal Cluster Networking'
+title: "Internal Cluster Networking"
 ---
 
-import { Image } from 'astro:assets'
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
-import ImageSvg from '@/components/ui/ImageSvg'
-import pullThroughCacheSvg from './pull-through-cache.svg?raw'
+import { Image } from "astro:assets";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import ImageSvg from "@/components/ui/ImageSvg";
+import pullThroughCacheSvg from "./pull-through-cache.svg?raw";
 
-import BootstrappingGuideNav from '../BootstrappingGuideNav'
-import eksDashboardImg from './eks-dashboard.jpg'
-import k9sNodesImg from './k9s-nodes.jpg'
-import k9sImg from './k9s.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+import eksDashboardImg from "./eks-dashboard.jpg";
+import k9sNodesImg from "./k9s-nodes.jpg";
+import k9sImg from "./k9s.jpg";
 
 # Kubernetes Cluster
 
@@ -242,7 +242,7 @@ To download this metadata:
 
    ```yaml
    clusters:
-     - module: 'production/us-east-2/aws_eks'
+     - module: "production/us-east-2/aws_eks"
    ```
 
    Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
@@ -277,8 +277,8 @@ To generate your kubeconfig:
 
    ```yaml
    clusters:
-     - name: 'production-primary'
-       aws_profile: 'production-superuser'
+     - name: "production-primary"
+       aws_profile: "production-superuser"
    ```
 
 2. Replace `name` with the name of the EKS cluster which can be found in `cluster_info`.
@@ -441,7 +441,7 @@ Congratulations! You have officially deployed Kubernetes using infrastructure-as
 Now that the cluster is running, we will begin working on the internal networking stack.
 
 <BootstrappingGuideNav
-  backHref={'/docs/edge/guides/bootstrapping/aws-networking'}
-  forwardHref={'/docs/edge/guides/bootstrapping/internal-cluster-networking'}
+  backHref={"/docs/edge/guides/bootstrapping/aws-networking"}
+  forwardHref={"/docs/edge/guides/bootstrapping/internal-cluster-networking"}
   stepNumber={8}
 />

@@ -20,11 +20,11 @@
 
   code {
     &:not(pre > code)::before {
-      content: '`'; /* Add backtick before the code content */
+      content: "`"; /* Add backtick before the code content */
     }
 
     &:not(pre > code)::after {
-      content: '`'; /* Add backtick after the code content */
+      content: "`"; /* Add backtick after the code content */
     }
   }
 
@@ -60,7 +60,7 @@
     width: 1rem; /* Set width for the icon */
     height: 1rem; /* Set height for the icon */
     background-color: transparent; /* Ensure the background is transparent */
-    background-image: url('/link.svg'); /* Replace with your desired icon */
+    background-image: url("/link.svg"); /* Replace with your desired icon */
     background-repeat: no-repeat;
     background-size: contain; /* Ensures the image scales properly */
     vertical-align: middle; /* Aligns with text, if any */
@@ -108,23 +108,23 @@
     scroll-margin-top: 90px;
   }
 
-  div[role='alert'] a {
+  div[role="alert"] a {
     @apply text-primary;
   }
 
   .bg-dark-blue-gradient {
-    background: linear-gradient(26.57deg, #153245 8.33%, #224D69 91.67%);
+    background: linear-gradient(26.57deg, #153245 8.33%, #224d69 91.67%);
   }
 
   .bg-light-blue-gradient {
-    background: linear-gradient(90deg, #2F688E 0%, #3B81B0 100%);
+    background: linear-gradient(90deg, #2f688e 0%, #3b81b0 100%);
   }
 
   div.inner-ring {
-    border-color: rgba(255,255,255, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   div.outer-ring {
-    border-color: rgba(255,255,255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }

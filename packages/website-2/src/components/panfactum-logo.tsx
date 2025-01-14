@@ -1,4 +1,4 @@
-export function PanfactumLogo({ className }: { className?: string}) {
+export function PanfactumLogo({ className }: { className?: string }) {
   return (
     <svg
       className={`text-primary ${className}`}
@@ -52,11 +52,10 @@ export function PanfactumLogo({ className }: { className?: string}) {
         fill="currentcolor"
       />
     </svg>
-  )
+  );
 }
 
-
-export function PanfactumLogoAllWhite({ className }: { className?: string}) {
+export function PanfactumLogoAllWhite({ className }: { className?: string }) {
   return (
     <svg
       className={`text-white ${className}`}
@@ -110,5 +109,5 @@ export function PanfactumLogoAllWhite({ className }: { className?: string}) {
         fill="currentcolor"
       />
     </svg>
-  )
+  );
 }

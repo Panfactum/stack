@@ -1,9 +1,9 @@
 ---
-const { onBrand } = Astro.props
+const { onBrand } = Astro.props;
 ---
 
 <div
-  class={`${onBrand ? 'bg-brand' : 'bg-primary'} flex items-center gap-2 text-sm lg:text-md h-[28px] border border-primary rounded-md p-1 h-[32px]`}
+  class={`${onBrand ? "bg-brand" : "bg-primary"} flex items-center gap-2 text-sm lg:text-md h-[28px] border border-primary rounded-md p-1 h-[32px]`}
 >
   <slot />
 </div>

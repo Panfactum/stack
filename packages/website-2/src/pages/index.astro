@@ -1,248 +1,185 @@
 ---
-import '../styles/global.css'
-import Layout from '../layouts/Layout.astro'
+import "../styles/global.css";
+import Layout from "../layouts/Layout.astro";
 
-import Hero from '@/components/typography/hero.astro'
-import HeadingWide from '@/components/typography/heading-wide.astro'
-import { Button } from '@/components/ui/button'
-import Badge from '@/components/astro/badge/badge.astro'
-import BadgeSmall from '@/components/astro/badge/badge-small.astro'
+import Hero from "@/components/typography/hero.astro";
+import HeadingWide from "@/components/typography/heading-wide.astro";
+import { Button } from "@/components/ui/button";
+import Badge from "@/components/astro/badge/badge.astro";
+import BadgeSmall from "@/components/astro/badge/badge-small.astro";
 
-import { faDiscord } from '@fortawesome/free-brands-svg-icons'
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faDiscord } from "@fortawesome/free-brands-svg-icons";
+import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import HeroSection from '../components/layout/hero-section.astro'
-import SectionFullWidth from '../components/layout/section-full-width.astro'
-import Section from '../components/layout/section.astro'
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import HeroSection from "../components/layout/hero-section.astro";
+import SectionFullWidth from "../components/layout/section-full-width.astro";
+import Section from "../components/layout/section.astro";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
-import FaqAccordions from '@/components/astro/accordion/faq-accordion.astro'
-import SectionKicker from '@/components/astro/section/section-kicker.astro'
-import SectionTitle from '@/components/astro/section/section-title.astro'
-import SectionContent from '@/components/astro/section/section-content.astro'
-import { ListBlock, FeatureListBlock } from '@/components/ListBlock'
-import { GetStarted } from '@/components/marketing/GetStarted'
+import FaqAccordions from "@/components/astro/accordion/faq-accordion.astro";
+import SectionKicker from "@/components/astro/section/section-kicker.astro";
+import SectionTitle from "@/components/astro/section/section-title.astro";
+import SectionContent from "@/components/astro/section/section-content.astro";
+import { ListBlock, FeatureListBlock } from "@/components/ListBlock";
+import { GetStarted } from "@/components/marketing/GetStarted";
 
-import './landing.css'
-import LandingAnimation from '@/components/LandingAnimation.astro'
-import MasonryLayout from '@/components/MasonryLayout'
-import VariableSizeMasonry from '@/components/DndGrid/VariableSizeMasonry'
-import ReplacedServicesSection from '@/components/ReplacedServices/ReplacedServicesSection.astro'
-import { PanfactumLogoAllWhite } from '@/components/panfactum-logo.tsx'
-import TestimonySection from '@/components/testimony/TestimonySection'
+import "./landing.css";
+import LandingAnimation from "@/components/LandingAnimation.astro";
+import MasonryLayout from "@/components/MasonryLayout";
+import VariableSizeMasonry from "@/components/DndGrid/VariableSizeMasonry";
+import ReplacedServicesSection from "@/components/ReplacedServices/ReplacedServicesSection.astro";
+import TestimonySection from "@/components/testimony/TestimonySection";
+import ComparisonSection from "./_index/ComparisonSection.astro";
 
 const IMAGES = [
   [
     {
-      url: '/odeao-labs.png',
-      alt: 'Odeao Labs',
+      url: "/odeao-labs.png",
+      alt: "Odeao Labs",
       class:
-        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+        "h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center",
     },
     {
-      url: '/kintsugi.png',
-      alt: 'Kintsugi',
+      url: "/kintsugi.png",
+      alt: "Kintsugi",
       class:
-        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+        "h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center",
     },
   ],
   [
     {
-      url: '/stacked.png',
-      alt: 'Stacked',
+      url: "/stacked.png",
+      alt: "Stacked",
       class:
-        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+        "h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center",
     },
     {
-      url: '/magnolia.png',
-      alt: 'Magnolia',
+      url: "/magnolia.png",
+      alt: "Magnolia",
       class:
-        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+        "h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center",
     },
   ],
   [
     {
-      url: '/warpspeed.png',
-      alt: 'Warpspeed',
+      url: "/warpspeed.png",
+      alt: "Warpspeed",
       class:
-        'h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center',
+        "h-[36px] md:h-[48px] dark:filter dark:grayscale dark:invert justify-self-center",
     },
   ],
-]
+];
 
 const FEATURES = [
   {
-    icon: 'shield',
-    title: 'Security',
+    icon: "shield",
+    title: "Security",
     content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   },
   {
-    icon: 'dollar',
-    title: 'Cost Savings',
+    icon: "dollar",
+    title: "Cost Savings",
     content:
-      'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.',
+      "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.",
   },
   {
-    icon: 'power',
-    title: 'High Availability',
+    icon: "power",
+    title: "High Availability",
     content:
-      'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam.',
+      "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam.",
   },
   {
-    icon: 'database',
-    title: 'Databases',
+    icon: "database",
+    title: "Databases",
     content:
-      'Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.',
+      "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.",
   },
   {
-    icon: 'code',
-    title: 'Local Development',
+    icon: "code",
+    title: "Local Development",
     content:
-      'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.',
+      "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.",
   },
   {
-    icon: 'ci-cd',
-    title: 'CI / CD',
+    icon: "ci-cd",
+    title: "CI / CD",
     content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.",
   },
   {
-    icon: 'eye',
-    title: 'Monitoring and Observability',
+    icon: "eye",
+    title: "Monitoring and Observability",
     content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.",
   },
   {
-    icon: 'qrCode',
-    title: 'Infrastructure-as-Code',
+    icon: "qrCode",
+    title: "Infrastructure-as-Code",
     content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.",
   },
   {
-    icon: 'flag',
-    title: 'Roadmap',
+    icon: "flag",
+    title: "Roadmap",
     content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.',
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec duieget dolor.",
   },
-]
-
-const SUPPORT_DREAMS = [
-  {
-    icon: 'chat-bubble',
-    title: 'Self-Hostable',
-    content:
-      'Streamline your development process with our integrated issue tracking and project management features.',
-  },
-  {
-    icon: 'thunder-bolt',
-    title: 'Open Tooling & Standards',
-    content:
-      'Get all the tools you need to deliver high-quality software with our comprehensive development platform.',
-  },
-  {
-    icon: 'bar-chart-break',
-    title: 'Integrated Approach',
-    content:
-      'Make data-driven decisions with our customizable dashboards and extensive reporting capabilities.',
-  },
-  {
-    icon: 'chat-happy',
-    title: 'Developer Productivity',
-    content:
-      'Work together in real-time with our integrated messaging and video conferencing features.',
-  },
-  {
-    icon: 'ownership',
-    title: 'Ownership',
-    content:
-      'Customize your development workflow with our vast collection of integrations and plugins.',
-  },
-  {
-    icon: 'message-heart',
-    title: 'One More',
-    content:
-      'Get help when you need it with our 24/7 technical support and comprehensive documentation.',
-  },
-]
+];
 
 const PRICES = [
   {
-    type: 'Starter',
+    type: "Starter",
     popular: true,
-    price: '$1000',
-    subtitle: 'Basic features for up to 10 users.',
+    price: "$1000",
+    subtitle: "Basic features for up to 10 users.",
     featureLabel: `Open Source`,
     featureList: [
-      'Access to basic features',
-      'Basic reporting and analytics',
-      'Up to 10 individual users',
-      '20GB individual data each user',
-      'Basic chat and email support',
+      "Access to basic features",
+      "Basic reporting and analytics",
+      "Up to 10 individual users",
+      "20GB individual data each user",
+      "Basic chat and email support",
     ],
   },
   {
-    type: 'Growth',
+    type: "Growth",
     popular: false,
-    price: '$5000',
-    subtitle: 'Advanced features and reporting.',
+    price: "$5000",
+    subtitle: "Advanced features and reporting.",
     featureLabel: `Starter`,
     featureList: [
-      'Access to basic features',
-      'Basic reporting and analytics',
-      'Up to 10 individual users',
-      '20GB individual data each user',
-      'Basic chat and email support',
+      "Access to basic features",
+      "Basic reporting and analytics",
+      "Up to 10 individual users",
+      "20GB individual data each user",
+      "Basic chat and email support",
     ],
   },
   {
-    type: 'Scale',
+    type: "Scale",
     popular: false,
-    price: '$10000',
-    subtitle: 'Unlimited features.',
+    price: "$10000",
+    subtitle: "Unlimited features.",
     featureLabel: `Growth`,
     featureList: [
-      'Access to basic features',
-      'Basic reporting and analytics',
-      'Up to 10 individual users',
-      '20GB individual data each user',
-      'Basic chat and email support',
+      "Access to basic features",
+      "Basic reporting and analytics",
+      "Up to 10 individual users",
+      "20GB individual data each user",
+      "Basic chat and email support",
     ],
   },
-]
-
-const COMPARISON_CATEGORIES = [
-  'Lorem ipsum dolor silt amot',
-  'Lorem ipsum dolor silt amot',
-  'Lorem ipsum dolor silt amot',
-  'Lorem ipsum dolor silt amot',
-  'Lorem ipsum dolor silt amot',
-  'Lorem ipsum dolor silt amot',
-]
-
-const COMPANY_COMPARISON = [
-  {
-    name: 'Company 1',
-    data: ['Data', 'Data', 'Data', 'Data', 'Data', 'Data'],
-  },
-  {
-    name: 'Company 2',
-    data: ['Data', 'Data', 'Data', 'Data', 'Data', 'Data'],
-  },
-  {
-    name: 'Panfactum',
-    data: ['Data', 'Data', 'Data', 'Data', 'Data', 'Data'],
-  },
-]
+];
 
 const GUARANTEES = [
-  'Access to base features',
-  'Basic reporting and analytics',
-  'Up to 10 individual users',
-  '20GB individual data each user',
-  'Basic chat and email support',
-]
+  "Access to base features",
+  "Basic reporting and analytics",
+  "Up to 10 individual users",
+  "20GB individual data each user",
+  "Basic chat and email support",
+];
 ---
 
 <Layout
@@ -412,8 +349,8 @@ const GUARANTEES = [
                       {price.price}
                     </span>
                     <span class="text-md font-medium text-tertiary">
-                      {' '}
-                      per month{' '}
+                      {" "}
+                      per month{" "}
                     </span>
                   </div>
                   <p class="text-tertiary text-md">{price.subtitle}</p>
@@ -451,165 +388,87 @@ const GUARANTEES = [
         }
       </div>
     </Section>
-
-    <section class="hidden md:block gap-7xl text-primary w-full mb-28">
-      <div class="container max-w-[1344px] mx-auto px-[104px]">
-        <div
-          class="grid grid-cols-12 w-full border border-secondary rounded-lg overflow-hidden"
-        >
-          <div class="col-span-4 flex flex-col">
-            <div class="category-header is-cell bg-primary px-6"></div>
-            {
-              COMPARISON_CATEGORIES.map((category, catIndex) => (
-                <div
-                  id={`comparison-category-${catIndex}`}
-                  class={`
-                category-label is-cell 
-                text-sm font-regular text-secondary px-6
-                ${catIndex % 2 === 0 ? 'bg-primary' : 'bg-secondary'}
-              `}
-                >
-                  {category}
-                </div>
-              ))
-            }
-          </div>
-          <div class="col-span-8 grid grid-cols-3">
-            {
-              COMPANY_COMPARISON.map((company, companyIndex) =>
-                company.name !== 'Panfactum' ? (
-                  <div id={`comparison-company-${companyIndex}`}>
-                    <div class="company-data-header is-cell text-md font-bold text-secondary bg-secondary px-6">
-                      {company.name}
-                    </div>
-                    {company.data.map((dataItem, dataItemIndex) => (
-                      <div
-                        id={`comparison-data-item-${dataItemIndex}`}
-                        class={`
-                    company-data-item is-cell 
-                    text-sm font-regular text-secondary px-6 
-                    ${dataItemIndex % 2 === 0 ? 'bg-primary' : 'bg-secondary'}
-                  `}
-                      >
-                        {dataItem}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    id={`comparison-company-${companyIndex}`}
-                    class="is-panfactum bg-brand-700"
-                  >
-                    <div class="company-data-header is-cell text-md font-bold text-secondary p-0.5">
-                      <div class="flex items-center h-full w-full bg-brand-800 rounded-tr-lg px-6">
-                        <PanfactumLogoAllWhite className="w-[120px] h-auto" />
-                      </div>
-                    </div>
-                    {company.data.map((dataItem, dataItemIndex) => (
-                      <div
-                        id={`comparison-data-item-${dataItemIndex}`}
-                        class={`
-                          company-data-item is-cell 
-                          text-sm font-bold text-white px-6
-                        `}
-                      >
-                        {dataItem}
-                      </div>
-                    ))}
-                  </div>
-                ),
-              )
-            }
-          </div>
-        </div>
-      </div>
-    </section>
+    <ComparisonSection />
 
     <TestimonySection client:only="react" />
   </section>
 
-  <!-- <SectionFullWidth
-    sectionClass="bg-brand-section"
-    class="gap-7xl text-primary"
-  >
-    <div class="flex flex-col gap-lg text-center">
-      <SectionKicker onBrand={true}> Support </SectionKicker>
-      <SectionTitle onBrand={true} class="mb-0">
-        Supporting your dreams
-      </SectionTitle>
-      <p class="text-tertiary_on-brand pt-0">
-        Intuitive code review analytics to help you optimize your development
-        workflow.
-      </p>
-    </div>
-
-    <div
-      class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl pb-8"
-    >
-      {
-        SUPPORT_DREAMS.map((item) => (
-          <ListBlock
-            icon={item.icon}
-            title={item.title}
-            content={item.content}
-          />
-        ))
-      }
-    </div>
-  </SectionFullWidth> -->
-
   <Section class="text-center gap-y-4xl text-primary">
-    <div class="bg-brand-800 rounded-lg p-7xl flex flex-col items-center justify-center w-full">
+    <div
+      class="bg-brand-800 rounded-lg p-7xl flex flex-col items-center justify-center w-full"
+    >
       <div class="flex items-center mb-6">
         <div class="left-leaves">
           <img src="./leaves-left.svg" alt="left wreath" class="w-full" />
         </div>
         <div class="flex flex-col items-center justify-center">
           <div class="flex items-center justify-center">
-            {Array.from({ length: 5 }, (_, i) => (
-              <img src="./star.svg" alt="star" class="w-2xl" />
-            ))}
+            {
+              Array.from({ length: 5 }, (_, i) => (
+                <img src="./star.svg" alt="star" class="w-2xl" />
+              ))
+            }
           </div>
           <p class="text-sm font-semibold text-white">
             Will Save You Money or Else
           </p>
-          <p class="text-xs font-medium text-[#cecfd2]">
-            2,000 + reviews
-          </p>
+          <p class="text-xs font-medium text-[#cecfd2]">2,000 + reviews</p>
         </div>
         <div class="right-leaves">
           <img src="./leaves-right.svg" alt="left wreath" class="w-full" />
         </div>
       </div>
 
-      <p class="font-machina text-display-md font-semibold text-primary_on-brand">The Panfactum Guarantee</p>
+      <p
+        class="font-machina text-display-md font-semibold text-primary_on-brand"
+      >
+        The Panfactum Guarantee
+      </p>
 
-      <p class="text-xl font-regular mb-8" style={{ color: '#cecfd2' }}>
+      <p class="text-xl font-regular mb-8" style={{ color: "#cecfd2" }}>
         Join over 4,000+ startups already growing with Untitled.
       </p>
 
       <div class="flex flex-col items-center justify-center gap-4 mb-8">
-        {GUARANTEES.map((item, guaranteeIndex) => (
-          <div id={`garantees-item-${guaranteeIndex}`}  class="grid grid-cols-10 gap-4 w-[300px]">
-            <div class="col-span-1">
-              <svg width="22" height="23" viewBox="0 0 22 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6.5 11.7812L9.5 14.7812L15.5 8.78125M21 11.7812C21 17.3041 16.5228 21.7812 11 21.7812C5.47715 21.7812 1 17.3041 1 11.7812C1 6.2584 5.47715 1.78125 11 1.78125C16.5228 1.78125 21 6.2584 21 11.7812Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+        {
+          GUARANTEES.map((item, guaranteeIndex) => (
+            <div
+              id={`garantees-item-${guaranteeIndex}`}
+              class="grid grid-cols-10 gap-4 w-[300px]"
+            >
+              <div class="col-span-1">
+                <svg
+                  width="22"
+                  height="23"
+                  viewBox="0 0 22 23"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.5 11.7812L9.5 14.7812L15.5 8.78125M21 11.7812C21 17.3041 16.5228 21.7812 11 21.7812C5.47715 21.7812 1 17.3041 1 11.7812C1 6.2584 5.47715 1.78125 11 1.78125C16.5228 1.78125 21 6.2584 21 11.7812Z"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div class="col-span-9 text-left">
+                <p class="text-md font-regular text-secondary_on-brand">
+                  {item}
+                </p>
+              </div>
             </div>
-            <div class="col-span-9 text-left">
-              <p class="text-md font-regular text-secondary_on-brand">{item}</p>
-            </div>
-          </div>
-        ))}
-        
+          ))
+        }
       </div>
 
       <div class="flex items-center justify-center gap-x-4">
-        <Button className="bg-brand-900" size="lg" style={{ color: '#cecfd2' }}>Learn more</Button>
+        <Button className="bg-brand-900" size="lg" style={{ color: "#cecfd2" }}
+          >Learn more</Button
+        >
         <Button variant="primary">Get started</Button>
       </div>
-
-      
     </div>
   </Section>
 

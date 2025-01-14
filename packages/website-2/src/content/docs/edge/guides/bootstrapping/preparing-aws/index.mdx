@@ -2,12 +2,12 @@
 title: Preparing AWS
 ---
 
-import { Image } from 'astro:assets'
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+import { Image } from "astro:assets";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
-import BootstrappingGuideNav from '../BootstrappingGuideNav'
-import createAccountImg from './aws-create-account.jpg'
-import securityCredentialImg from './aws-security-credentials.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+import createAccountImg from "./aws-create-account.jpg";
+import securityCredentialImg from "./aws-security-credentials.jpg";
 
 # Preparing AWS
 
@@ -105,8 +105,8 @@ Once you have decided on the set of environments, use the following steps to cre
 
    <Image
      src={createAccountImg}
-     alt={'Create accounts in AWS Organizations'}
-     placeholder={'blur'}
+     alt={"Create accounts in AWS Organizations"}
+     placeholder={"blur"}
    />
 
 4. Select "Add an AWS account" to create one account for each additional environment. Choose semantic names like
@@ -140,8 +140,8 @@ Repeat the following steps for **every account**:
 
    <Image
      src={securityCredentialImg}
-     alt={'Access security credentials'}
-     placeholder={'blur'}
+     alt={"Access security credentials"}
+     placeholder={"blur"}
    />
 
 3. Now is the perfect time to set up MFA for the root user. This is incredibly important as this user will (a) always
@@ -208,9 +208,9 @@ to configure terragrunt to begin deploying infrastructure.
 
 <BootstrappingGuideNav
   client:only="react"
-  backHref={'/docs/edge/guides/bootstrapping/installing-devshell'}
+  backHref={"/docs/edge/guides/bootstrapping/installing-devshell"}
   forwardHref={
-    '/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code'
+    "/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code"
   }
   stepNumber={3}
 />

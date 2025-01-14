@@ -2,16 +2,16 @@
 title: Databases
 ---
 
-import { Image } from 'astro:assets'
+import { Image } from "astro:assets";
 
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
-import BootstrappingGuideNav from '../BootstrappingGuideNav'
-import k9sPGClusterCreateImg from './k9s-pg-cluster-create.jpg'
-import k9sPGPodsImg from './k9s-pg-pods.jpg'
-import pgBackupS3Img from './pg-backup-s3.jpg'
-import pgAdminConnectionDetailsImg from './pgadmin-connection-details.jpg'
-import pgAdminDashboardImg from './pgadmin-dashboard.jpg'
-import pgAdminRegisterSeverImg from './pgadmin-register-server.jpg'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+import k9sPGClusterCreateImg from "./k9s-pg-cluster-create.jpg";
+import k9sPGPodsImg from "./k9s-pg-pods.jpg";
+import pgBackupS3Img from "./pg-backup-s3.jpg";
+import pgAdminConnectionDetailsImg from "./pgadmin-connection-details.jpg";
+import pgAdminDashboardImg from "./pgadmin-dashboard.jpg";
+import pgAdminRegisterSeverImg from "./pgadmin-register-server.jpg";
 
 # Databases
 
@@ -86,12 +86,12 @@ Let's deploy it now:
 
    <Image
      src={k9sPGClusterCreateImg}
-     alt={'PostgreSQL cluster created in k9s'}
+     alt={"PostgreSQL cluster created in k9s"}
    />
 
 6. Switch to the pods view (`:pods`) and notice several new pods will come up after approximately 2-3 minutes:
 
-   <Image src={k9sPGPodsImg} alt={'PostgreSQL pods running in the cluster'} />
+   <Image src={k9sPGPodsImg} alt={"PostgreSQL pods running in the cluster"} />
 
    Notice:
 
@@ -104,7 +104,7 @@ Let's deploy it now:
 
 7. Navigate to the S3 view in the AWS web console. Notice that a new bucket was created for the cluster:
 
-   <Image src={pgBackupS3Img} alt={'PostgreSQL WAL backups in S3'} />
+   <Image src={pgBackupS3Img} alt={"PostgreSQL WAL backups in S3"} />
 
    The cluster comes with a component that will automatically replicate the
    [PostgreSQL Write-Ahead Log (WAL)](https://www.postgresql.org/docs/current/wal-intro.html) to S3. This means
@@ -159,21 +159,21 @@ Let's try it out:
 
    <Image
      src={pgAdminRegisterSeverImg}
-     alt={'Register a new server with PgAdmin4'}
+     alt={"Register a new server with PgAdmin4"}
    />
 
 6. Set the connection details using the information displayed when you opened the tunnel:
 
    <Image
      src={pgAdminConnectionDetailsImg}
-     alt={'Add connection details to the new server configuration in PgAdmin4'}
+     alt={"Add connection details to the new server configuration in PgAdmin4"}
    />
 
 7. You should now see the main PgAdmin4 dashboard and can begin running commands against the database:
 
    <Image
      src={pgAdminDashboardImg}
-     alt={'PgAdmin4 dashboard for the test database'}
+     alt={"PgAdmin4 dashboard for the test database"}
    />
 
 #### Clean Up Test Database
@@ -228,7 +228,7 @@ custom database deployments.
 ## Next Steps
 
 <BootstrappingGuideNav
-  backHref={'/docs/edge/guides/bootstrapping/maintenance-controllers'}
-  forwardHref={'/docs/edge/guides/bootstrapping/identity-provider'}
+  backHref={"/docs/edge/guides/bootstrapping/maintenance-controllers"}
+  forwardHref={"/docs/edge/guides/bootstrapping/identity-provider"}
   stepNumber={18}
 />

@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import type { ChangeEvent } from 'react'
-import { useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, ReferenceLine } from 'recharts'
-import { Slider } from '@/components/ui/slider'
+import type { ChangeEvent } from "react";
+import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, ReferenceLine } from "recharts";
+import { Slider } from "@/components/ui/slider";
 
 function generateData(
   deviation: number,
@@ -11,39 +11,39 @@ function generateData(
   outlierMultiplier: number,
 ) {
   return Array.from(Array(100)).map((_, i) => {
-    const isBig = Math.random() < outlierPercent
-    const scalar = isBig ? outlierMultiplier * 10 : 10
+    const isBig = Math.random() < outlierPercent;
+    const scalar = isBig ? outlierMultiplier * 10 : 10;
     return {
       y: scalar + Math.floor(Math.random() * (scalar * deviation)),
       x: i,
-    }
-  })
+    };
+  });
 }
 
 function calcP90(data: Array<{ y: number }>) {
-  const values = data.map(({ y }) => y)
-  return values.sort((a, b) => (a < b ? -1 : 1))[90] || 0
+  const values = data.map(({ y }) => y);
+  return values.sort((a, b) => (a < b ? -1 : 1))[90] || 0;
 }
 
 function calcAvg(data: Array<{ y: number }>) {
-  const values = data.map(({ y }) => y)
+  const values = data.map(({ y }) => y);
   const sum = values.reduce((acc, val) => {
-    return acc + val
-  }, 0)
-  return sum / values.length
+    return acc + val;
+  }, 0);
+  return sum / values.length;
 }
 
 export default function ConsumptionEfficiencyChart() {
-  const [deviation, setDeviation] = useState(0.5)
-  const [outlierMultiplier, setOutlierMultiplier] = useState(5)
-  const [outlierChance, setOutlierChance] = useState(0.15)
+  const [deviation, setDeviation] = useState(0.5);
+  const [outlierMultiplier, setOutlierMultiplier] = useState(5);
+  const [outlierChance, setOutlierChance] = useState(0.15);
 
-  let efficiency = 1
-  let data: Array<{ y: number; x: number }> = []
-  let p90 = 0
-  let p90Plus = 0
-  let avg = 0
-  let loop = 0
+  let efficiency = 1;
+  let data: Array<{ y: number; x: number }> = [];
+  let p90 = 0;
+  let p90Plus = 0;
+  let avg = 0;
+  let loop = 0;
 
   // We juice the metrics a bit to ensure that randomness doesn't defeat the purpose of the example
   // eslint-disable-next-line no-unmodified-loop-condition
@@ -54,12 +54,12 @@ export default function ConsumptionEfficiencyChart() {
       outlierChance > 0.1 &&
       efficiency > 60)
   ) {
-    data = generateData(deviation, outlierChance, outlierMultiplier)
-    p90 = calcP90(data)
-    p90Plus = calcP90(data) * 1.15
-    avg = calcAvg(data)
-    efficiency = Math.floor((avg / p90Plus) * 100)
-    loop += 1
+    data = generateData(deviation, outlierChance, outlierMultiplier);
+    p90 = calcP90(data);
+    p90Plus = calcP90(data) * 1.15;
+    avg = calcAvg(data);
+    efficiency = Math.floor((avg / p90Plus) * 100);
+    loop += 1;
   }
 
   return (
@@ -114,13 +114,13 @@ export default function ConsumptionEfficiencyChart() {
         data={data}
         margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
       >
-        <XAxis dataKey={'x'} tick={false} />
+        <XAxis dataKey={"x"} tick={false} />
         <YAxis
           label={{
-            value: 'CPU (millicores)',
+            value: "CPU (millicores)",
             angle: -90,
-            position: 'insideLeft',
-            fill: 'black',
+            position: "insideLeft",
+            fill: "black",
           }}
           domain={[0, Math.floor(p90Plus * 1.1)]}
           allowDecimals={false}
@@ -128,32 +128,32 @@ export default function ConsumptionEfficiencyChart() {
         <ReferenceLine
           y={p90Plus}
           label={{
-            value: 'Resource Request',
+            value: "Resource Request",
             dy: 15,
             dx: 100,
-            fill: 'black',
-            stroke: '20',
+            fill: "black",
+            stroke: "20",
           }}
           stroke="red"
           strokeWidth={3}
-          ifOverflow={'visible'}
+          ifOverflow={"visible"}
           isFront={true}
         />
         <ReferenceLine
           y={p90}
-          label={{ value: 'P90', dy: 15, dx: -100, fill: 'black' }}
+          label={{ value: "P90", dy: 15, dx: -100, fill: "black" }}
           stroke="red"
           strokeDasharray="3 3"
           isFront={true}
         />
         <ReferenceLine
           y={avg}
-          label={{ value: 'Average', dy: 15, fill: 'black' }}
+          label={{ value: "Average", dy: 15, fill: "black" }}
           stroke="green"
           isFront={true}
         />
-        <Line type="monotone" dataKey="y" stroke={'#8884d8'} dot={false} />
+        <Line type="monotone" dataKey="y" stroke={"#8884d8"} dot={false} />
       </LineChart>
     </div>
-  )
+  );
 }

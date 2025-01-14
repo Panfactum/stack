@@ -6,5 +6,5 @@ export default function ImageSvg({ src, ...props }) {
       alt={props.alt}
       className="w-[80%] mx-auto block max-w-full object-contain h-fit py-4"
     />
-  )
+  );
 }

@@ -1,17 +1,19 @@
 ---
-import '../styles/global.css'
-import { ClientRouter } from 'astro:transitions'
-import { SEO } from 'astro-seo'
-import { HeaderNav } from '../components/layout/header-nav'
-import Footer from '../components/layout/footer.astro'
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import { SEO } from "astro-seo";
+import { HeaderNav } from "../components/layout/header-nav";
+import Footer from "../components/layout/footer.astro";
 
-const pathname = new URL(Astro.request.url).pathname
+const pathname = new URL(Astro.request.url).pathname;
 const showFooter =
-  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true
+  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true;
 
-const redirect = Astro.props.redirect
+const redirect = Astro.props.redirect;
 
-const hasDarkBackground = Astro.props.darkBackground ? Astro.props.darkBackground : false
+const hasDarkBackground = Astro.props.darkBackground
+  ? Astro.props.darkBackground
+  : false;
 ---
 
 <html lang="en">
@@ -36,7 +38,8 @@ const hasDarkBackground = Astro.props.darkBackground ? Astro.props.darkBackgroun
       rel="stylesheet"
     />
 
-    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"
+    ></script>
 
     <ClientRouter />
   </head>

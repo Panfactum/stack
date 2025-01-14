@@ -1,20 +1,20 @@
 ---
-const inputClass = `text-md h-[44px] bg-[transparent] border border-primary rounded-md px-3.5 w-full mt-1`
-const textareaClass = `text-md bg-[transparent] border border-primary rounded-md px-3.5 py-3 w-full mt-1`
+const inputClass = `text-md h-[44px] bg-[transparent] border border-primary rounded-md px-3.5 w-full mt-1`;
+const textareaClass = `text-md bg-[transparent] border border-primary rounded-md px-3.5 py-3 w-full mt-1`;
 
-if (Astro.request.method === 'POST') {
+if (Astro.request.method === "POST") {
   try {
-    const data = await Astro.request.formData()
-    const firstName = data.get('firstName')
-    const lastName = data.get('lastName')
-    const email = data.get('email')
-    const phone = data.get('phone')
-    const message = data.get('message')
-    const agreeToPrivacy = data.get('privacy')
+    const data = await Astro.request.formData();
+    const firstName = data.get("firstName");
+    const lastName = data.get("lastName");
+    const email = data.get("email");
+    const phone = data.get("phone");
+    const message = data.get("message");
+    const agreeToPrivacy = data.get("privacy");
     // SEND DATA
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      console.error(error.message);
     }
   }
 }

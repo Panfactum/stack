@@ -1,14 +1,14 @@
 ---
-title: 'Installing Self-hosted Runners for GitHub Actions'
+title: "Installing Self-hosted Runners for GitHub Actions"
 ---
 
-import { Image } from 'astro:assets'
+import { Image } from "astro:assets";
 
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
-import ExampleWorkflowImg from './example-workflow.jpg'
-import RegisteredRunnersImg from './registered-runners.jpg'
-import RunWorkflowImg from './run-workflow.jpg'
-import WorkflowCompleteImg from './workflow-complete.jpg'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import ExampleWorkflowImg from "./example-workflow.jpg";
+import RegisteredRunnersImg from "./registered-runners.jpg";
+import RunWorkflowImg from "./run-workflow.jpg";
+import WorkflowCompleteImg from "./workflow-complete.jpg";
 
 # Installing Self-hosted Runners for GitHub Actions
 
@@ -108,7 +108,7 @@ Let's create a test workflow in on of your repositories to verify that self-host
      test:
        runs-on: default # This should be the name of your runner in the `runners` input when you created it in the previous section
        steps:
-         - name: 'Hello world'
+         - name: "Hello world"
            shell: bash
            run: 'echo "Hello World"'
    ```

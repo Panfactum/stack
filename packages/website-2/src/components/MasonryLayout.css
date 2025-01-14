@@ -1,15 +1,20 @@
 .grid-item {
-    width: 50px;
-    height: 50px;
-    background-color: white; /* Black placeholder for icons */
+  width: 50px;
+  height: 50px;
+  background-color: white; /* Black placeholder for icons */
 }
 
 .grid-item.is-expanded {
-    width: 100px;
-    height: 100px;
+  width: 100px;
+  height: 100px;
 }
 
-
-
-.masonry-grid-item { border: 1px solid #e9e8eb; background-color: white; width: 72px; height: 72px; }
-.masonry-grid-item.is-expanded { width: 50%; }
+.masonry-grid-item {
+  border: 1px solid #e9e8eb;
+  background-color: white;
+  width: 72px;
+  height: 72px;
+}
+.masonry-grid-item.is-expanded {
+  width: 50%;
+}

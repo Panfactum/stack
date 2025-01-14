@@ -1,10 +1,10 @@
 ---
-import { Button } from '../ui/button'
-import { PanfactumLogo } from '../panfactum-logo'
-import { faGithub, faDiscord } from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Spacer from '../ui/spacer'
-import { COPYWRITE } from '../../lib/constants'
+import { Button } from "../ui/button";
+import { PanfactumLogo } from "../panfactum-logo";
+import { faGithub, faDiscord } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Spacer from "../ui/spacer";
+import { COPYWRITE } from "../../lib/constants";
 ---
 
 <footer
@@ -27,7 +27,7 @@ import { COPYWRITE } from '../../lib/constants'
         <input
           type="email"
           placeholder="Enter your email"
-          class="w-full border border-primary shadow-sm bg-primary md:w-auto md:flex-2 basis-2/6 rounded-md px-xl py-lg h-[44px] md:h-[44px] "
+          class="w-full border border-primary shadow-sm bg-primary md:w-auto md:flex-2 basis-2/6 rounded-md px-xl py-lg h-[44px] md:h-[44px]"
         />
         <Button
           variant={`primary`}
@@ -112,9 +112,9 @@ import { COPYWRITE } from '../../lib/constants'
           </p>
         </div>
         <div class="flex items-center gap-x-3xl text-quaternary">
-          <FontAwesomeIcon icon={faGithub} size={'xl'} />
+          <FontAwesomeIcon icon={faGithub} size={"xl"} />
 
-          <FontAwesomeIcon icon={faDiscord} size={'xl'} />
+          <FontAwesomeIcon icon={faDiscord} size={"xl"} />
         </div>
         <p>{COPYWRITE}</p>
       </div>

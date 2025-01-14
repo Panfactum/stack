@@ -1,8 +1,8 @@
 ---
-title: 'Building Images with BuildKit'
+title: "Building Images with BuildKit"
 ---
 
-import MarkdownAlert from '@/components/markdown/MarkdownAlert'
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 # Building Images with BuildKit
 
@@ -91,16 +91,16 @@ This requires some additional care:
   ```json5
   {
     schemaVersion: 2,
-    mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json',
+    mediaType: "application/vnd.docker.distribution.manifest.list.v2+json",
     manifests: [
       {
         platform: {
-          architecture: 'amd64',
+          architecture: "amd64",
         },
       },
       {
         platform: {
-          architecture: 'arm64',
+          architecture: "arm64",
         },
       },
     ],
@@ -141,13 +141,13 @@ and it will look something like this:
 ```json5
 {
   auths: {
-    'ghcr.io': {
-      auth: 'some auth token',
+    "ghcr.io": {
+      auth: "some auth token",
     },
   },
   credHelpers: {
-    '<buildkit-account-id>.dkr.ecr.<buildkit-region>.amazonaws.com': 'panfactum',
-    'public.ecr.aws': 'panfactum',
+    "<buildkit-account-id>.dkr.ecr.<buildkit-region>.amazonaws.com": "panfactum",
+    "public.ecr.aws": "panfactum",
   },
 }
 ```

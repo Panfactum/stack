@@ -1,0 +1,100 @@
+---
+import { PanfactumLogoAllWhite } from "@/components/panfactum-logo.tsx";
+import { clsx } from "clsx";
+
+const COMPARISON_CATEGORIES = [
+  "Lorem ipsum dolor silt amot",
+  "Lorem ipsum dolor silt amot",
+  "Lorem ipsum dolor silt amot",
+  "Lorem ipsum dolor silt amot",
+  "Lorem ipsum dolor silt amot",
+  "Lorem ipsum dolor silt amot",
+];
+
+const COMPANY_COMPARISON = [
+  {
+    name: "Company 1",
+    data: ["Data", "Data", "Data", "Data", "Data", "Data"],
+  },
+  {
+    name: "Company 2",
+    data: ["Data", "Data", "Data", "Data", "Data", "Data"],
+  },
+  {
+    name: "Panfactum",
+    data: ["Data", "Data", "Data", "Data", "Data", "Data"],
+  },
+];
+---
+
+<section class="hidden md:block gap-7xl text-primary w-full mb-28">
+  <div class="container max-w-[1344px] mx-auto px-[104px]">
+    <div
+      class="grid grid-cols-12 w-full border border-secondary rounded-lg overflow-hidden"
+    >
+      <div class="col-span-4 flex flex-col">
+        <div class="category-header is-cell bg-primary px-6"></div>
+        {
+          COMPARISON_CATEGORIES.map((category, catIndex) => (
+            <div
+              id={`comparison-category-${catIndex}`}
+              class={`
+                category-label is-cell 
+                text-sm font-regular text-secondary px-6
+                ${catIndex % 2 === 0 ? "bg-primary" : "bg-secondary"}
+              `}
+            >
+              {category}
+            </div>
+          ))
+        }
+      </div>
+      <div class="col-span-8 grid grid-cols-3">
+        {
+          COMPANY_COMPARISON.map((company, companyIndex) =>
+            company.name !== "Panfactum" ? (
+              <div id={`comparison-company-${companyIndex}`}>
+                <div class="company-data-header is-cell text-md font-bold text-secondary bg-secondary px-6">
+                  {company.name}
+                </div>
+                {company.data.map((dataItem, dataItemIndex) => (
+                  <div
+                    id={`comparison-data-item-${dataItemIndex}`}
+                    class={clsx(
+                      "company-data-item is-cell text-sm font-regular text-secondary px-6",
+                      dataItemIndex % 2 === 0 ? "bg-primary" : "bg-secondary",
+                    )}
+                  >
+                    {dataItem}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                id={`comparison-company-${companyIndex}`}
+                class="is-panfactum bg-brand-700"
+              >
+                <div class="company-data-header is-cell text-md font-bold text-secondary p-0.5">
+                  <div class="flex items-center h-full w-full bg-brand-800 rounded-tr-lg px-6">
+                    <PanfactumLogoAllWhite className="w-[120px] h-auto" />
+                  </div>
+                </div>
+                {company.data.map((dataItem, dataItemIndex) => (
+                  <div
+                    id={`comparison-data-item-${dataItemIndex}`}
+                    class={`
+                          company-data-item is-cell 
+                          text-sm font-bold text-white px-6
+                        `}
+                  >
+                    {dataItem}
+                  </div>
+                ))}
+              </div>
+            ),
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>

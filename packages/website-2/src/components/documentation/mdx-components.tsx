@@ -1,7 +1,7 @@
 import {
   discordServerLink,
   replaceVersionPlaceholders,
-} from '@/lib/constants.ts'
+} from "@/lib/constants.ts";
 
 export const mdxComponents = {
   code: ({ children, ...props }) => {
@@ -11,20 +11,20 @@ export const mdxComponents = {
         ...children.props,
         value: replaceVersionPlaceholders(children.props.value),
       },
-    }
+    };
 
-    return <code {...props}>{child}</code>
+    return <code {...props}>{child}</code>;
   },
 
   a: ({ children, ...props }) => {
     const updatedProps = {
       ...props,
       href: replaceVersionPlaceholders(props.href).replaceAll(
-        '__discordServerLink__',
+        "__discordServerLink__",
         discordServerLink,
       ),
-    }
+    };
 
-    return <a {...updatedProps}>{children}</a>
+    return <a {...updatedProps}>{children}</a>;
   },
-}
+};
