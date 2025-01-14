@@ -33,7 +33,7 @@ const SortableItem = ({
 
   return (
     <li
-      className={`relative grid-item border border-primary ${isExpanded ? 'is-expanded p-6 bg-primary' : 'flex items-center justify-center bg-white'} ${className}`}
+      className={`relative grid-item border border-primary ${isExpanded ? 'is-expanded p-6 bg-transparent' : 'flex items-center justify-center'} ${className}`}
       id={`grid-item-${content.id}`}
       ref={setNodeRef}
       style={style}
@@ -42,7 +42,7 @@ const SortableItem = ({
     >
       {isExpanded && (
         <div className="flex items-start gap-6">
-          <div className="flex-none p-4 bg-white border border-primary w-fit rounded-md">
+          <div className="flex-none p-4 border border-primary w-fit rounded-md">
             <img
               src={`/${content.icon}`}
               className="w-[58px] h-[58px]"
