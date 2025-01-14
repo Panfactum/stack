@@ -15,6 +15,7 @@ import {
 import React, { useEffect, useState } from "react";
 import GridWrapper from "./GridWrapper";
 import SortableItem from "./SortableItem";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 function moveItemInArray(array: any[], fromIndex: number, toIndex: number) {
   if (
@@ -849,16 +850,37 @@ const VariableSizeMasonry = () => {
 
   return (
     <>
-      <div className="tab grid grid-cols-4 items-center justify-items-center w-full gap-4 mb-16 border-b border-primary">
+      <div className="hidden md:grid tab grid-cols-4 items-center justify-items-center w-full gap-4 mb-16 border-b border-primary md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
         {tabs.map((tab, index) => (
           <div
             key={`tab-item-${index}`}
-            className={`tab text-md py-2 w-full flex items-center justify-center cursor-pointer ${currentTab === tab ? "font-semibold border-b-2 border-brand-secondary text-brand-secondary" : "text-quaternary"}`}
+            className={`tab col-span-1 text-md py-2 w-full flex items-center justify-center cursor-pointer ${currentTab === tab ? 'font-semibold border-b-2 border-brand-secondary text-brand-secondary' : 'text-quaternary'}`}
             onClick={() => setCurrentTab(tab)}
           >
             {tab}
           </div>
         ))}
+      </div>
+      <div className="flex justify-center max-w-none w-64 mx-auto sm:max-w-md sm:w-full md:hidden mb-8">
+        <div className="max-w-md w-full z-50">
+          <Select
+            value={currentTab}
+            onValueChange={(value) => setCurrentTab(value as TabOptions)}
+
+          >
+            <SelectTrigger className="border-secondary h-[46px]">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {tabs.map((tab) => (
+                <SelectItem key={`tab-${tab}`} value={tab}>
+                  {tab}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
       </div>
       <div className="max-w-3xl mx-auto">
         <GridWrapper>

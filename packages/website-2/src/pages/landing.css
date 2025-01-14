@@ -12,16 +12,12 @@
   height: 100px;
   width: 100%;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .scroll-wrapper {
-  display: flex;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  overflow: hidden;
-  white-space: nowrap;
+  display: inline-flex;      /* or flex with flex: none on each icon */
+  white-space: nowrap;       /* so icons don’t wrap to the next line */
   animation: smoothScroll 30s linear infinite;
 }
 
@@ -36,13 +32,7 @@
 }
 
 .scroll-container.is-reversed .scroll-wrapper {
-  display: flex;
-  position: absolute;
-  overflow: visible;
-  white-space: nowrap;
-  top: 0px;
-  right: 0px;
-  animation: smoothScrollReverse 20s linear infinite;
+  animation: smoothScrollReverse 40s linear infinite;
 }
 
 @keyframes smoothScroll {
@@ -56,10 +46,10 @@
 
 @keyframes smoothScrollReverse {
   from {
-    transform: translate(-200%, 0);
+    transform: translate(-25%, 0);
   }
   to {
-    transform: translate(-100%, 0);
+    transform: translate(0, 0);
   }
 }
 

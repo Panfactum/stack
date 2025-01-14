@@ -41,6 +41,7 @@ import {
   setNavigationReferences,
   setVersion,
 } from "@/stores/documentation-store.ts";
+import './DocsSidebar.css'
 
 export interface SideNavSection {
   text: string;
@@ -187,7 +188,7 @@ export function DocsSidebar({
       setOpenMobile={setOpenMobile}
     >
       <SidebarContent>
-        <SidebarMenu className="relative pb-0 md:pb-10 pl-4 pr-4 pt-4">
+        <SidebarMenu className="relative pb-0 md:pb-10 pl-4 pr-4">
           <div
             className={`flex flex-col gap-y-lg sticky h-full top-0 bg-primary z-top-navigation`}
           >
@@ -212,7 +213,7 @@ export function DocsSidebar({
           {sections.map((item) => (
             <SidebarMenuItem key={item.text}>
               <SidebarMenuButton
-                className="h-[44px] active:bg-white"
+                className="h-[44px] active:bg-brand-primary-darker has-darker-active-bg"
                 isActive={mainNavigationLinkActive(item.path)}
                 asChild
               >
@@ -239,7 +240,7 @@ export function DocsSidebar({
           <Spacer />
 
           {currentRoot && (
-            <SidebarGroup className="pt-4">
+            <SidebarGroup>
               <SidebarMenu>
                 {currentRoot.sub?.map((section) => {
                   const sectionBasePath = `${basePath}${currentRoot.notVersioned ? "" : `/${version}`}${currentRoot.path}`;
