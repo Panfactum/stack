@@ -35,8 +35,8 @@ export function HeaderNav({
   const [mobileOpened, setMobileOpened] = useState(false);
   const [navLinks, setNavLinks] = useState<NavLinks[]>([
     {
-      title: "Pricing",
-      url: "/pricing",
+      title: "Support",
+      url: "/support",
     },
     {
       title: "Docs",
