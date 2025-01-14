@@ -37,8 +37,6 @@ const SortableItem = ({
       id={`grid-item-${content.id}`}
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
     >
       {isExpanded && (
         <div className="flex items-start gap-6">
@@ -70,7 +68,7 @@ const SortableItem = ({
         <img
           src={`/${content.icon}`}
           alt={`move-icon-${content.id}`}
-          className="absolute z-[401] cursor-pointer"
+          className="absolute z-[50] cursor-pointer"
           onClick={onClick}
         />
       )}

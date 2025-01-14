@@ -850,19 +850,19 @@ const VariableSizeMasonry = () => {
 
   return (
     <>
-      <div className="hidden md:grid tab grid-cols-4 items-center justify-items-center w-full gap-4 mb-16 border-b border-primary">
+      <div className="hidden md:grid tab grid-cols-4 items-center justify-items-center w-full gap-4 mb-16 border-b border-primary md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
         {tabs.map((tab, index) => (
           <div
             key={`tab-item-${index}`}
-            className={`tab text-md py-2 w-full flex items-center justify-center cursor-pointer ${currentTab === tab ? 'font-semibold border-b-2 border-brand-secondary text-brand-secondary' : 'text-quaternary'}`}
+            className={`tab col-span-1 text-md py-2 w-full flex items-center justify-center cursor-pointer ${currentTab === tab ? 'font-semibold border-b-2 border-brand-secondary text-brand-secondary' : 'text-quaternary'}`}
             onClick={() => setCurrentTab(tab)}
           >
             {tab}
           </div>
         ))}
       </div>
-      <div className="flex justify-center md:hidden">
-        <div className="max-w-md w-full">
+      <div className="flex justify-center max-w-none w-64 mx-auto sm:max-w-md sm:w-full md:hidden mb-8">
+        <div className="max-w-md w-full z-50">
           <Select
             value={currentTab}
             onValueChange={(value) => setCurrentTab(value as TabOptions)}
