@@ -64,6 +64,15 @@
   animation: rootImageRotate 5s;
 }
 
+.circling-icons {
+  animation: circlingIcons 20s infinite linear;
+}
+
+.is-circle-icon {
+  width: 64px;
+  height: 64px;
+}
+
 .elevated-square-image {
   top: -6%;
   left: 50%;
@@ -182,5 +191,15 @@
 
   100% {
     transform: rotate3d(1, 0, 0, 47deg);
+  }
+}
+
+@keyframes circlingIcons {
+  0% {
+    transform: rotate(0);
+  }
+
+  100% {
+    transform: rotate(-360deg);
   }
 }
