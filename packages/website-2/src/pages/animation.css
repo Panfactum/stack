@@ -6,7 +6,7 @@
 
 /* Rotating SVG */
 .rotating-svg {
-  animation: rotateQuarter 6s linear infinite; /* Rotate infinitely */
+  animation: rotatingPlanets 12s linear infinite; /* Rotate infinitely */
 }
 
 /* Keyframes for quarter rotation with pauses */
@@ -37,6 +37,16 @@
   }
   100% {
     transform: rotate(360deg); /* Rotate infinitely */
+  }
+}
+
+@keyframes rotatingPlanets {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
   }
 }
 

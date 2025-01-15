@@ -32,10 +32,10 @@ export default function RootOrbitSVG_02() {
         <circle 
           cx="42"
           cy="42"
-          r="36"
+          r="24"
           fill="#3b81b0"
           stroke="#153245"
-          stroke-width="12"
+          stroke-width="6"
         />
       </g>
   
@@ -43,10 +43,10 @@ export default function RootOrbitSVG_02() {
         <circle 
           cx="42"
           cy="42"
-          r="36"
+          r="24"
           fill="#3b81b0"
           stroke="#153245"
-          stroke-width="12"
+          stroke-width="6"
         />
       </g>
   
@@ -54,10 +54,10 @@ export default function RootOrbitSVG_02() {
         <circle 
           cx="42"
           cy="42"
-          r="36"
+          r="24"
           fill="#3b81b0"
           stroke="#153245"
-          stroke-width="12"
+          stroke-width="6"
         />
       </g>
   
@@ -65,10 +65,10 @@ export default function RootOrbitSVG_02() {
         <circle 
           cx="42"
           cy="42"
-          r="36"
+          r="24"
           fill="#3b81b0"
           stroke="#153245"
-          stroke-width="12"
+          stroke-width="6"
         />
       </g>
     </g>
