@@ -49,14 +49,30 @@
   transform: rotate3d(1, 0, 0, 47deg);
 }
 
-.root-square-image {
+.animation-cube:hover {
+  animation: rotateCube 5s;
+}
+
+.root-square-image img {
+  position: absolute;
+  transition: all;
+  transition-duration: 400;
+  transform: rotate(45deg);
+}
+
+.animation-cube:hover .root-square-image img {
+  animation: rootImageRotate 5s;
 }
 
 .elevated-square-image {
-  top: -10%;
+  top: -6%;
   left: 50%;
-  transform: translateX(-55%) rotateZ(45deg);
+  transform: translateX(-48%) rotateZ(45deg);
   z-index: 50;
+}
+
+.animation-cube:hover .elevated-square-image {
+  animation: cubeUpDown 5s;
 }
 
 .icon-rows-2 {
@@ -108,9 +124,23 @@
 }
 
 @keyframes cubeUpDown {
+  0% {
+    top: -6%;
+    transform: translateX(-48%) rotateZ(45deg);
+  }
+
+  50% {
+    top: 30%;
+    transform: translateX(-48%) rotateZ(0deg);
+  }
+
+  100% {
+    top: -6%;
+    transform: translateX(-48%) rotateZ(45deg);
+  }
 }
 
-@keyframe elevatedImageRotate {
+@keyframes elevatedImageRotate {
   0% {
     transform: translateX(-55%) rotateZ(45deg);
     top: -10%;
@@ -127,13 +157,30 @@
   }
 }
 
-@keyframe rootImageRotate {
+@keyframes rootImageRotate {
   0% {
+    transform: rotate(45deg);
   }
 
   50% {
+    transform: rotate(0);
   }
 
   100% {
+    transform: rotate(45deg);
+  }
+}
+
+@keyframes rotateCube {
+  0% {
+    transform: rotate3d(1, 0, 0, 47deg);
+  }
+
+  50% {
+    transform: rotate3d(1, 0, 0, 0deg);
+  }
+
+  100% {
+    transform: rotate3d(1, 0, 0, 47deg);
   }
 }
