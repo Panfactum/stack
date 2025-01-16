@@ -153,7 +153,7 @@ data "aws_subnets" "control_plane_subnets" {
       error_message = "Not enough subnets were found for the EKS control plane in VPC ${var.vpc_id}. Ensure that the subnets exist before deploying this module."
     }
     postcondition {
-      condition     = length(self.ids) >= length(local.control_plane_subnets)
+      condition     = length(self.ids) <= length(local.control_plane_subnets)
       error_message = "Duplicate control plane subnets with the same name found in ${var.vpc_id}. Subnets in the same VPC must have unique Name tags."
     }
   }
