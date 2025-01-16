@@ -181,13 +181,20 @@ const GUARANTEES = [
     </div>
   </HeroSection>
 
-  <Section class="">
-    <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter">
+  <Section>
+    <h2 class="font-machina text-primary text-display-md sm:text-display-lg mb-2 tracking-tighter text-center">
       The Panfactum Framework
     </h2>
-    <p class="text-xl text-tertiary my-0">
-      Learn more about the company and world-class team behind Panfactum.
+    <p class="sm:text-lg text-tertiary my-0 max-w-2xl">
+        An integrated set of infrastructure-as-code modules, local tooling, and comprehensive guides focused on providing a
+        self-hosted architecture that enables organizations of any industry or scale to:
     </p>
+      <ul class="sm:text-lg text-tertiary max-w-2xl list-disc list-inside px-4 pt-2 flex flex-col gap-2">
+          <li>Quickly setup and production-harden their Amazon Web Services (AWS) and Kubernetes systems</li>
+          <li>Safely and easily deploy over 100 open-source utilities that replace expensive, proprietary managed services</li>
+          <li>Extend the system arbitrarily using familiar tooling and open standards such as OpenTofu/Terraform, Nix, and Kubernetes</li>
+      </ul>
+
   </Section>
 
   <Section class="gap-6xl text-primary">
