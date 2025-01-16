@@ -1,0 +1,215 @@
+.svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Rotating SVG */
+  .rotating-svg {
+    animation: rotatingPlanets 12s linear infinite; /* Rotate infinitely */
+  }
+  
+  /* Keyframes for quarter rotation with pauses */
+  @keyframes rotateQuarter {
+    0% {
+      transform: rotate(0deg);
+    }
+    12.5% {
+      transform: rotate(90deg); /* Rotate 90 degrees */
+    }
+    25% {
+      transform: rotate(90deg); /* Pause */
+    }
+    37.5% {
+      transform: rotate(180deg); /* Rotate another 90 degrees */
+    }
+    50% {
+      transform: rotate(180deg); /* Pause */
+    }
+    62.5% {
+      transform: rotate(270deg); /* Rotate another 90 degrees */
+    }
+    75% {
+      transform: rotate(270deg); /* Pause */
+    }
+    87.5% {
+      transform: rotate(360deg); /* Rotate another 90 degrees */
+    }
+    100% {
+      transform: rotate(360deg); /* Rotate infinitely */
+    }
+  }
+  
+  @keyframes rotatingPlanets {
+    0% {
+      transform: rotate(0deg);
+    }
+  
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animation-cube {
+    transform-style: preserve-3d;
+    position: relative;
+    width: 700px;
+    height: 700px;
+    perspective: 1000px;
+    transform: rotate3d(1, 0, 0, 47deg);
+  }
+  
+  .animation-cube:hover {
+    animation: rotateCube 5s;
+  }
+  
+  .root-square-image img {
+    position: absolute;
+    transition: all;
+    transition-duration: 400;
+    transform: rotate(45deg);
+  }
+  
+  .animation-cube:hover .root-square-image img {
+    animation: rootImageRotate 5s;
+  }
+  
+  .circling-icons {
+    animation: circlingIcons 20s infinite linear;
+  }
+  
+  .is-circle-icon {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .elevated-square-image {
+    top: -6%;
+    left: 50%;
+    transform: translateX(-48%) rotateZ(45deg);
+    z-index: 50;
+  }
+  
+  .animation-cube:hover .elevated-square-image {
+    animation: cubeUpDown 5s;
+  }
+  
+  .icon-rows-2 {
+    transform: rotate(360deg);
+  }
+  
+  .icon-rows-1 .icon-3 {
+    animation: iconUpDown 5s infinite;
+  }
+  
+  .icon-rows-1 .icon-4 {
+    animation: iconUpDown 5s infinite 3s;
+  }
+  
+  .icon-rows-2 .icon-1 {
+    animation: iconLeftRight 5s infinite 6s;
+  }
+  
+  .icon-rows-2 .icon-2 {
+    animation: iconLeftRight 5s infinite 9s;
+  }
+  
+  @keyframes iconUpDown {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-135px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes iconLeftRight {
+    0% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-135px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+  
+  .animation-cube:hover .elevted-square-image {
+    animation: elevatedImageRotate 5s infinite;
+  }
+  
+  @keyframes cubeUpDown {
+    0% {
+      top: -6%;
+      transform: translateX(-48%) rotateZ(45deg);
+    }
+  
+    50% {
+      top: 30%;
+      transform: translateX(-48%) rotateZ(0deg);
+    }
+  
+    100% {
+      top: -6%;
+      transform: translateX(-48%) rotateZ(45deg);
+    }
+  }
+  
+  @keyframes elevatedImageRotate {
+    0% {
+      transform: translateX(-55%) rotateZ(45deg);
+      top: -10%;
+    }
+  
+    50% {
+      transform: translateX(-55%) rotateZ(0deg);
+      top: 10%;
+    }
+  
+    100% {
+      transform: translate(-55%) rotateZ(45deg);
+      top: 32%;
+    }
+  }
+  
+  @keyframes rootImageRotate {
+    0% {
+      transform: rotate(45deg);
+    }
+  
+    50% {
+      transform: rotate(0);
+    }
+  
+    100% {
+      transform: rotate(45deg);
+    }
+  }
+  
+  @keyframes rotateCube {
+    0% {
+      transform: rotate3d(1, 0, 0, 47deg);
+    }
+  
+    50% {
+      transform: rotate3d(1, 0, 0, 0deg);
+    }
+  
+    100% {
+      transform: rotate3d(1, 0, 0, 47deg);
+    }
+  }
+  
+  @keyframes circlingIcons {
+    0% {
+      transform: rotate(0);
+    }
+  
+    100% {
+      transform: rotate(-360deg);
+    }
+  }

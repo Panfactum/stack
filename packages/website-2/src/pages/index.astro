@@ -24,7 +24,11 @@ import SectionContent from "@/components/astro/section/section-content.astro";
 import { ListBlock, FeatureListBlock } from "@/components/ListBlock";
 import { GetStarted } from "@/components/marketing/GetStarted";
 
+import CircleSVG from '@/components/svg/Circle';
+import RootOrbitSVG from '@/components/svg/RootOrbit';
+import RootOrbitSVG_02 from '@/components/svg/RootOrbit_02';
 import "./landing.css";
+import "./animation.css";
 import LandingAnimation from "@/components/LandingAnimation.astro";
 import MasonryLayout from "@/components/MasonryLayout";
 import VariableSizeMasonry from "@/components/DndGrid/VariableSizeMasonry";
@@ -188,6 +192,53 @@ const GUARANTEES = [
           Connect
         </Button>
         <GetStarted size="xl" />
+      </div>
+
+      <div class="flex items-center justify-center flex-col">
+        <div class="animation-cube flex items-center justify-center relative">
+          <div>
+            <div class="root-square-image flex items-center justify-center">
+              <img src="animation/KuberImage.png" alt="Kuber" class="w-[256px] h-[256px]" />
+            </div>
+            <div class="absolute elevated-square-image is-elevated transform rotate-45">
+              <div class="relative flex items-center gap-4">
+                <img src="animation/PanfactumImage.png" alt="Panfactum-Image" class="flex-none w-[256px] h-[256px] z-10" />
+                <div class="absolute -right-36 icon-rows-2 flex-none flex flex-col place-items-center">
+                  <img src="animation/lock-key-icon.png" alt="lock-key-image" class="icon-1 w-[128px] h-[128px] z-50" />
+                  <img src="animation/argo-icon.png" alt="argo-image" class="icon-2 w-[128px] h-[128px] z-50" />
+                </div>
+              </div>
+              <div class="absolute -bottom-36 icon-rows-1 flex justify-start">
+                <img src="animation/RedisImage.png" alt="redis-image" class="icon-3 w-[128px] h-[128px]" />
+                <img src="animation/FerrisWheelImage.png" alt="ferris-wheel-image" class="icon-4 w-[128px] h-[128px]" />
+              </div>
+            </div>
+          </div>
+
+          <div class="svg-container absolute z-20">
+            <div class="circling-icons absolute w-[512px] h-[512px] z-50">
+              <div class="icon-1 is-circle-icon absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <img src="animation/circle-icon-1.png" alt="circle-icon-1" class="w-[64px]" />
+              </div>
+              <div class="icon-2 is-circle-icon absolute left-0 top-[37%] transform translate-y-1/2 -translate-x-1/2">
+                <img src="animation/circle-icon-2.png" alt="circle-icon-1" class="w-[64px]" />
+
+              </div>
+              <div class="icon-3 is-circle-icon absolute right-0 top-[37%] transform translate-y-1/2 translate-x-1/2">
+                <img src="animation/circle-icon-3.png" alt="circle-icon-1" class="w-[64px]" />
+
+              </div>
+              <div class="icon-4 is-circle-icon absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+                <img src="animation/circle-icon-4.png" alt="circle-icon-1" class="w-[64px]" />
+
+              </div>
+            </div>
+            <div class="rotating-svg">
+              <RootOrbitSVG_02 />
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </HeroSection>
