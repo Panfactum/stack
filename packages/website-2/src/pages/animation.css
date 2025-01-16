@@ -60,7 +60,7 @@
   }
   
   .animation-cube:hover {
-    animation: rotateCube 5s;
+    animation: rotateCube 10s;
   }
   
   .root-square-image img {
@@ -71,7 +71,7 @@
   }
   
   .animation-cube:hover .root-square-image img {
-    animation: rootImageRotate 5s;
+    animation: rootImageRotate 10s;
   }
   
   .circling-icons {
@@ -86,42 +86,51 @@
   .elevated-square-image {
     top: -6%;
     left: 50%;
-    transform: translateX(-48%) rotateZ(45deg);
+    transform: translateX(-50%) rotateZ(45deg);
     z-index: 50;
   }
   
   .animation-cube:hover .elevated-square-image {
-    animation: cubeUpDown 5s;
+    animation: cubeUpDown 10s;
   }
   
   .icon-rows-2 {
     transform: rotate(360deg);
   }
   
-  .icon-rows-1 .icon-3 {
-    animation: iconUpDown 5s infinite;
+  .animation-cube:hover .icon-rows-1 .icon-3 {
+    animation: iconUpDown 10s infinite;
   }
   
-  .icon-rows-1 .icon-4 {
-    animation: iconUpDown 5s infinite 3s;
+  .animation-cube:hover .icon-rows-1 .icon-4 {
+    animation: iconUpDown 10s infinite 0.5s;
   }
   
-  .icon-rows-2 .icon-1 {
-    animation: iconLeftRight 5s infinite 6s;
+  .animation-cube:hover .icon-rows-2 .icon-1 {
+    animation: iconLeftRight 10s infinite;
   }
   
-  .icon-rows-2 .icon-2 {
-    animation: iconLeftRight 5s infinite 9s;
+  .animation-cube:hover .icon-rows-2 .icon-2 {
+    animation: iconLeftRight 10s infinite 0.5s;
   }
   
   @keyframes iconUpDown {
     0% {
       transform: translateY(0);
     }
+    12% {
+      transform: translateY(-135px);
+    }
+    25% {
+      transform: translateY(0);
+    }
     50% {
       transform: translateY(-135px);
     }
-    100% {
+    75% {
+      transform: translateY(-135px);
+    }
+    100%{
       transform: translateY(0);
     }
   }
@@ -130,10 +139,19 @@
     0% {
       transform: translateX(0);
     }
+    12% {
+      transform: translateX(-135px);
+    }
+    25% {
+      transform: translateX(0);
+    }
     50% {
       transform: translateX(-135px);
     }
-    100% {
+    75% {
+      transform: translateX(-135px);
+    }
+    100%{
       transform: translateX(0);
     }
   }
@@ -145,22 +163,32 @@
   @keyframes cubeUpDown {
     0% {
       top: -6%;
-      transform: translateX(-48%) rotateZ(45deg);
+      transform: translateX(-50%) rotateZ(45deg);
+    }
+
+    25% {
+      top: -6%;
+      transform: translateX(-50%) rotateZ(45deg);
     }
   
     50% {
       top: 30%;
-      transform: translateX(-48%) rotateZ(0deg);
+      transform: translateX(-50%) rotateZ(0deg);
     }
   
     100% {
       top: -6%;
-      transform: translateX(-48%) rotateZ(45deg);
+      transform: translateX(-50%) rotateZ(45deg);
     }
   }
   
   @keyframes elevatedImageRotate {
     0% {
+      transform: translateX(-55%) rotateZ(45deg);
+      top: -10%;
+    }
+
+    25% {
       transform: translateX(-55%) rotateZ(45deg);
       top: -10%;
     }
@@ -180,6 +208,10 @@
     0% {
       transform: rotate(45deg);
     }
+
+    25% {
+      transform: rotate(45deg);
+    }
   
     50% {
       transform: rotate(0);
@@ -192,6 +224,10 @@
   
   @keyframes rotateCube {
     0% {
+      transform: rotate3d(1, 0, 0, 47deg);
+    }
+
+    25% {
       transform: rotate3d(1, 0, 0, 47deg);
     }
   
