@@ -71,10 +71,10 @@ export function HeaderNav({
       className={`flex items-center justify-center h-20 border-b w-full ${hasBorder ? "border-primary" : "border-[transparent]"}`}
     >
       <div
-        className={`container flex justify-between items-center self-stretch ${darkBackground ? "dark" : ""} px-container-padding-mobile xl:px-container-padding-desktop`}
+        className={`container flex justify-between items-center self-stretch ${darkBackground ? "dark" : ""} px-container-padding-mobile sm:px-container-padding-desktop`}
       >
         <div className="flex space-x-5xl">
-          <a href="/">
+          <a href="/" className="min-w-[182px]">
             <PanfactumLogo
               className={`${darkBackground ? "text-primary" : "text-primary"}`}
             />

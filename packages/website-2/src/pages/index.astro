@@ -32,6 +32,10 @@ import ReplacedServicesSection from "@/components/ReplacedServices/ReplacedServi
 import TestimonySection from "@/components/testimony/TestimonySection";
 import ComparisonSection from "./_index/ComparisonSection.astro";
 import PricingSection from "./_index/PricingSection.astro";
+import {PanfactumLogo} from "../components/panfactum-logo";
+import {PanfactumMarkWhite} from "../components/panfactum-mark";
+
+import React from "react";
 
 const IMAGES = [
   [
@@ -146,7 +150,7 @@ const GUARANTEES = [
 >
   <HeroSection
     slot="hero"
-    class="flex space-y-6xl flex-col items-center py-4xl"
+    class="flex space-y-6xl flex-col items-center "
   >
     <div
       class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
@@ -154,28 +158,13 @@ const GUARANTEES = [
       <div
         class="flex flex-col gap-3xl items-center text-center md:max-w-[888px]"
       >
-        <Badge>
-          <BadgeSmall>
-            <div
-              class="flex items-center justify-center w-[12px] h-[12px] bg-[#CEEAF8] dark:bg-[#091A25] rounded-full"
-            >
-              <div class="w-[6px] h-[6px] bg-[#3B81B0] rounded-full"></div>
-            </div>Alpha feature
-          </BadgeSmall>
-          Check out the Web UI
-          <FontAwesomeIcon
-            icon={faArrowRight}
-            className="!h-[15px] !w-[15px] text-[#7289DA] dark:text-[#333741] mr-1"
-          />
-        </Badge>
-
-        <Hero> Cloud native system for platform engineering </Hero>
+          <PanfactumLogo className="hidden sm:inline-block text-white"/>
+          <PanfactumMarkWhite className="inline-block sm:hidden max-w-[108px]"/>
         <p
-          class="text-tertiary_on-brand text-lg md:text-xl max-w-[830px] dark:text-[#94969C]"
+          class="text-tertiary_on-brand text-lg md:text-xl max-w-[600px] dark:text-[#94969C]"
         >
-          The Panfactum Stack is an integrated set of OpenTofu (Terraform)
-          modules and local tooling aimed at providing the best experience for
-          building, deploying, and managing software on AWS and Kubernetes.
+          Cut your cloud costs by up to 90% and improve your system resiliency, security, and capabilities with the #1 open-source
+          framework for platform engineers.
         </p>
       </div>
 
@@ -194,7 +183,7 @@ const GUARANTEES = [
 
   <Section class="">
     <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter">
-      The Panfactum framework
+      The Panfactum Framework
     </h2>
     <p class="text-xl text-tertiary my-0">
       Learn more about the company and world-class team behind Panfactum.

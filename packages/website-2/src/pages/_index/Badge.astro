@@ -1,0 +1,22 @@
+---
+
+import {faArrowRight} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Badge from "../../components/astro/badge/badge.astro";
+import BadgeSmall from "../../components/astro/badge/badge-small.astro";
+---
+
+<Badge>
+    <BadgeSmall>
+        <div
+                class="flex items-center justify-center w-[12px] h-[12px] bg-[#CEEAF8] dark:bg-[#091A25] rounded-full"
+        >
+            <div class="w-[6px] h-[6px] bg-[#3B81B0] rounded-full"></div>
+        </div>Alpha feature
+    </BadgeSmall>
+    Check out the Web UI
+    <FontAwesomeIcon
+            icon={faArrowRight}
+            className="!h-[15px] !w-[15px] text-[#7289DA] dark:text-[#333741] mr-1"
+    />
+</Badge>
