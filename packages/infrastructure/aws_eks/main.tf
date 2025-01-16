@@ -255,7 +255,7 @@ data "aws_ssm_parameter" "controller_ami" {
 resource "aws_launch_template" "controller" {
   name_prefix = "controller-"
 
-  image_id = data.aws_ssm_parameter.controller_ami.insecure_value
+  image_id = "ami-00ef7413ff2fc66cf"
 
   default_version         = 1
   disable_api_termination = false

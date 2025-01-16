@@ -173,7 +173,10 @@ locals {
     securityGroupSelectorTerms = [{ id = var.node_security_group_id }]
     instanceProfile            = var.node_instance_profile
     amiSelectorTerms = [{
-      alias = "bottlerocket@latest"
+      #alias = "bottlerocket@latest"
+      id = "ami-00ef7413ff2fc66cf"
+    }, {
+      id = "ami-02f2e3225a32f2362"
     }]
 
     metadataOptions = {
