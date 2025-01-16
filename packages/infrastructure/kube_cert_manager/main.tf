@@ -281,10 +281,10 @@ resource "helm_release" "cert_manager" {
           }
         }]
         // this must be inject-ca-from-secret to override the chart default
-        mutatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? {} : {
+        mutatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? null : {
           "cert-manager.io/inject-ca-from-secret" = "${local.namespace}/${local.webhook_secret}"
         }
-        validatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? {} : {
+        validatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? null : {
           "cert-manager.io/inject-ca-from-secret" = "${local.namespace}/${local.webhook_secret}"
         }
 
