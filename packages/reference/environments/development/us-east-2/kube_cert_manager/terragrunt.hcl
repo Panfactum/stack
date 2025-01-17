@@ -18,5 +18,5 @@ dependency "kyverno" {
 }
 
 inputs = {
-  self_generated_certs_enabled = true
+  self_generated_certs_enabled = false
 }
