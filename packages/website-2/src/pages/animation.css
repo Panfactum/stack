@@ -59,9 +59,9 @@
     transform: rotate3d(1, 0, 0, 47deg);
   }
   
-  .animation-cube:hover {
+  /*.animation-cube:hover {
     animation: rotateCube 10s;
-  }
+  }*/
   
   .root-square-image img {
     position: absolute;
