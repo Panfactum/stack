@@ -14,11 +14,14 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 ## Unreleased
 
 ### Added
-* Ability to pass in extra service annotations through kube_deployment module
+
+* Adds ability to pass in extra service annotations through kube_deployment module
 
 ### Fixed
-* Fixed `aws_eks` subnet validation check
 
+* Fixes bug that prevented [kube_cert_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) from being deployed when `self_generated_certs_enabled` was set to `true`.
+
+* Fixes `aws_eks` subnet validation check that prevented module deployment in some valid scenarios
 
 ## edge.25-01-09
 

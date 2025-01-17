@@ -18,5 +18,7 @@ dependency "kyverno" {
 }
 
 inputs = {
+
+  // When bootstrapping, change this to true
   self_generated_certs_enabled = false
 }
