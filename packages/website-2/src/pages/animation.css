@@ -97,62 +97,44 @@
   .icon-rows-2 {
     transform: rotate(360deg);
   }
-  
-  .animation-cube:hover .icon-rows-1 .icon-3 {
-    animation: iconUpDown 10s infinite;
+
+  .animation-cube .icon-rows-1 .icon-3 {
+    animation: iconUpDown 3s infinite;
   }
   
-  .animation-cube:hover .icon-rows-1 .icon-4 {
-    animation: iconUpDown 10s infinite 0.5s;
+  .animation-cube .icon-rows-1 .icon-4 {
+    animation: iconUpDown 3s infinite 0.5s;
+  }
+
+  .animation-cube .icon-rows-2 .icon-1 {
+    animation: iconLeftRight 3s infinite 0.75s;
   }
   
-  .animation-cube:hover .icon-rows-2 .icon-1 {
-    animation: iconLeftRight 10s infinite;
-  }
-  
-  .animation-cube:hover .icon-rows-2 .icon-2 {
-    animation: iconLeftRight 10s infinite 0.5s;
+  .animation-cube .icon-rows-2 .icon-2 {
+    animation: iconLeftRight 3s infinite 1.25s;
   }
   
   @keyframes iconUpDown {
     0% {
-      transform: translateY(0);
-    }
-    12% {
       transform: translateY(-135px);
-    }
-    25% {
-      transform: translateY(0);
     }
     50% {
-      transform: translateY(-135px);
-    }
-    75% {
-      transform: translateY(-135px);
-    }
-    100%{
       transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-135px);
     }
   }
   
   @keyframes iconLeftRight {
     0% {
-      transform: translateX(0);
-    }
-    12% {
       transform: translateX(-135px);
-    }
-    25% {
-      transform: translateX(0);
     }
     50% {
-      transform: translateX(-135px);
-    }
-    75% {
-      transform: translateX(-135px);
-    }
-    100%{
       transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-135px);
     }
   }
   

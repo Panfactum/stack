@@ -194,16 +194,47 @@ const GUARANTEES = [
               <div class="relative flex items-center gap-4">
                 <img src="animation/PanfactumImage.png" alt="Panfactum-Image" class="flex-none w-[256px] h-[256px] z-10" />
                 <div class="absolute -right-36 icon-rows-2 flex-none flex flex-col place-items-center">
-                  <img src="animation/lock-key-icon.png" alt="lock-key-image" class="icon-1 w-[128px] h-[128px] z-50" />
-                  <img src="animation/argo-icon.png" alt="argo-image" class="icon-2 w-[128px] h-[128px] z-50" />
+                  <img src="animation/lock-key-icon.png" alt="lock-key-image" class="icon-1 w-[128px] h-[128px] z-50 transform -translate-x-[135px]" />
+                  <img src="animation/argo-icon.png" alt="argo-image" class="icon-2 w-[128px] h-[128px] z-50 transform -translate-x-[135px]" />
                 </div>
               </div>
               <div class="absolute -bottom-36 icon-rows-1 flex justify-start">
-                <img src="animation/RedisImage.png" alt="redis-image" class="icon-3 w-[128px] h-[128px]" />
-                <img src="animation/FerrisWheelImage.png" alt="ferris-wheel-image" class="icon-4 w-[128px] h-[128px]" />
+                <img src="animation/RedisImage.png" alt="redis-image" class="icon-3 w-[128px] h-[128px] transform -translate-y-[135px]" />
+                <img src="animation/FerrisWheelImage.png" alt="ferris-wheel-image" class="icon-4 w-[128px] h-[128px] transform -translate-y-[135px]" />
               </div>
             </div>
           </div>
+
+          <script>
+            const upDownImages = [
+              'animation/lock-key-icon.png',
+              'animation/RedisImage.png',
+              'animation/FerrisWheelImage.png',
+              'animation/argo-icon.png',
+            ];
+
+            // Get all image elements
+            const imgElements = Array.from(document.querySelectorAll('.elevated-square-image [class^="icon-"]'));
+
+            // Ensure the initial images are unique
+            imgElements.forEach((imgElement, index) => {
+              const image = upDownImages.shift(); // Get an image
+              imgElement.src = image; // Assign it to the current card
+            });
+
+            // Handle `animationiteration` with image rotation
+            imgElements.forEach((imgElement) => {
+              imgElement.addEventListener('animationiteration', () => {
+                // Remove the current image from the array
+                const currentImage = imgElement.src;
+                upDownImages.push(currentImage); // Check the current image back in
+
+                // Assign a new image
+                const newImage = upDownImages.shift(); // Get the next image
+                imgElement.src = newImage; // Assign it to the current card
+              });
+            });
+          </script>
 
           <div class="svg-container absolute z-20">
             <div class="circling-icons absolute w-[512px] h-[512px] z-50">
