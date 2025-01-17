@@ -6,8 +6,8 @@ aws_region: "us-east-2" # The AWS region to use for the aws provider
 aws_secondary_region: "us-west-2" # The secondary/backup region to use for the aws_secondary provider
 
 # Kubernetes
-#kube_config_context: "production-primary"
-#kube_api_server: "https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com"
+kube_config_context: "development-primary"
+kube_api_server: "https://C2ACE84A0D1F454A44F84AA663EC6B1D.gr7.us-east-2.eks.amazonaws.com"
 
 # Vault
 # vault_addr: "https://vault.prod.panfactum.com"
@@ -15,8 +15,8 @@ aws_secondary_region: "us-west-2" # The secondary/backup region to use for the a
 # Extra inputs
 extra_inputs:
   enhanced_ha_enabled: false
-  vpa_enabled: true
-  panfactum_scheduler_enabled: true
+  vpa_enabled: false
+  panfactum_scheduler_enabled: false
   monitoring_enabled: false # ALPHA do not enable
   pull_through_cache_enabled: true
 
