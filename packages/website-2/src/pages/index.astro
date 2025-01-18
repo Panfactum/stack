@@ -149,16 +149,17 @@ const GUARANTEES = [
 
 <Layout
   darkBackground={true}
-  heroClass="bg-brand-section lg:bg-hero-pattern bg-[center_top] bg-cover bg-no-repeat"
+  heroClass="bg-brand-section lg:bg-hero-pattern bg-[center_top] bg-cover bg-no-repeat overflow-hidden"
   isFixed={false}
   hasBorder={false}
 >
   <HeroSection
     slot="hero"
-    class="flex space-y-6xl flex-col items-center "
+    class="flex space-y-6xl flex-col items-center overflow-visible"
+    sectionClass="md:pb-0"
   >
     <div
-      class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
+      class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop pb-0"
     >
       <div
         class="flex flex-col gap-3xl items-center text-center md:max-w-[888px]"
@@ -184,94 +185,98 @@ const GUARANTEES = [
         <GetStarted size="xl" />
       </div>
 
-      <div class="flex items-center justify-center flex-col">
-        <div class="animation-cube flex items-center justify-center relative">
-          <div>
-            <div class="root-square-image flex items-center justify-center">
-              <img src="animation/KuberImage.png" alt="Kuber" class="w-[256px] h-[256px]" />
-            </div>
-            <div class="absolute elevated-square-image is-elevated transform rotate-45">
-              <div class="relative flex items-center gap-4">
-                <img src="animation/PanfactumImage.png" alt="Panfactum-Image" class="flex-none w-[256px] h-[256px] z-10" />
-                <div class="absolute -right-36 icon-rows-2 flex-none flex flex-col place-items-center">
-                  <img src="animation/lock-key-icon.png" alt="lock-key-image" class="icon-1 w-[128px] h-[128px] z-50 transform -translate-x-[135px]" />
-                  <img src="animation/argo-icon.png" alt="argo-image" class="icon-2 w-[128px] h-[128px] z-50 transform -translate-x-[135px]" />
+      <div class="hidden md:flex">
+        <div class="relative h-[600px]">
+          <div class="animation-cube flex-1 flex items-center justify-center relative">
+            <div>
+              <div class="root-square-image flex items-center justify-center">
+                <img src="animation/KuberImage.png" alt="Kuber" class="w-[256px] h-[256px]" />
+              </div>
+              <div class="absolute elevated-square-image is-elevated transform rotate-45">
+                <div class="relative flex items-center gap-4">
+                  <img src="animation/PanfactumImage.png" alt="Panfactum-Image" class="flex-none w-[256px] h-[256px] z-10" />
+                  <div class="absolute -right-36 icon-rows-2 flex-none flex flex-col place-items-center">
+                    <img src="animation/lock-key-icon.png" alt="lock-key-image" class="icon-1 w-[128px] h-[128px] z-50 transform -translate-x-[135px]" />
+                    <img src="animation/argo-icon.png" alt="argo-image" class="icon-2 w-[128px] h-[128px] z-50 transform -translate-x-[135px]" />
+                  </div>
+                </div>
+                <div class="absolute -bottom-36 icon-rows-1 flex justify-start">
+                  <img src="animation/RedisImage.png" alt="redis-image" class="icon-3 w-[128px] h-[128px] transform -translate-y-[135px]" />
+                  <img src="animation/FerrisWheelImage.png" alt="ferris-wheel-image" class="icon-4 w-[128px] h-[128px] transform -translate-y-[135px]" />
                 </div>
               </div>
-              <div class="absolute -bottom-36 icon-rows-1 flex justify-start">
-                <img src="animation/RedisImage.png" alt="redis-image" class="icon-3 w-[128px] h-[128px] transform -translate-y-[135px]" />
-                <img src="animation/FerrisWheelImage.png" alt="ferris-wheel-image" class="icon-4 w-[128px] h-[128px] transform -translate-y-[135px]" />
+            </div>
+  
+            <script>
+              const upDownImages = [
+                'animation/lock-key-icon.png',
+                'animation/RedisImage.png',
+                'animation/FerrisWheelImage.png',
+                'animation/argo-icon.png',
+                'animation/cert-manager.png',
+                'animation/cilium.png',
+                'animation/core-dns.png',
+                'animation/grafana.png',
+                'animation/karpenter.png',
+                'animation/keda.png',
+                'animation/linkerd.png',
+                'animation/nats.png',
+                'animation/postgres.png',
+                'animation/prometheus.png',
+                'animation/vault.png',
+                'animation/velero.png'
+              ];
+  
+              // Get all image elements
+              const imgElements = Array.from(document.querySelectorAll('.elevated-square-image [class^="icon-"]'));
+  
+              // Ensure the initial images are unique
+              imgElements.forEach((imgElement, index) => {
+                const image = upDownImages.shift(); // Get an image
+                imgElement.src = image; // Assign it to the current card
+              });
+  
+              // Handle `animationiteration` with image rotation
+              imgElements.forEach((imgElement) => {
+                imgElement.addEventListener('animationiteration', () => {
+                  // Remove the current image from the array
+                  const currentImage = imgElement.src;
+                  upDownImages.push(currentImage); // Check the current image back in
+  
+                  // Assign a new image
+                  const newImage = upDownImages.shift(); // Get the next image
+                  imgElement.src = newImage; // Assign it to the current card
+                });
+              });
+            </script>
+  
+            <div class="svg-container absolute z-20">
+              <div class="circling-icons absolute w-[512px] h-[512px] z-50">
+                <div class="icon-1 is-circle-icon absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <img src="animation/circle-icon-1.png" alt="circle-icon-1" class="w-[64px]" />
+                </div>
+                <div class="icon-2 is-circle-icon absolute left-0 top-[37%] transform translate-y-1/2 -translate-x-1/2">
+                  <img src="animation/circle-icon-2.png" alt="circle-icon-1" class="w-[64px]" />
+  
+                </div>
+                <div class="icon-3 is-circle-icon absolute right-0 top-[37%] transform translate-y-1/2 translate-x-1/2">
+                  <img src="animation/circle-icon-3.png" alt="circle-icon-1" class="w-[64px]" />
+  
+                </div>
+                <div class="icon-4 is-circle-icon absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+                  <img src="animation/circle-icon-4.png" alt="circle-icon-1" class="w-[64px]" />
+  
+                </div>
+              </div>
+              <div class="rotating-svg">
+                <RootOrbitSVG_02 />
               </div>
             </div>
           </div>
-
-          <script>
-            const upDownImages = [
-              'animation/lock-key-icon.png',
-              'animation/RedisImage.png',
-              'animation/FerrisWheelImage.png',
-              'animation/argo-icon.png',
-              'animation/cert-manager.png',
-              'animation/cilium.png',
-              'animation/core-dns.png',
-              'animation/grafana.png',
-              'animation/karpenter.png',
-              'animation/keda.png',
-              'animation/linkerd.png',
-              'animation/nats.png',
-              'animation/postgres.png',
-              'animation/prometheus.png',
-              'animation/vault.png',
-              'animation/velero.png'
-            ];
-
-            // Get all image elements
-            const imgElements = Array.from(document.querySelectorAll('.elevated-square-image [class^="icon-"]'));
-
-            // Ensure the initial images are unique
-            imgElements.forEach((imgElement, index) => {
-              const image = upDownImages.shift(); // Get an image
-              imgElement.src = image; // Assign it to the current card
-            });
-
-            // Handle `animationiteration` with image rotation
-            imgElements.forEach((imgElement) => {
-              imgElement.addEventListener('animationiteration', () => {
-                // Remove the current image from the array
-                const currentImage = imgElement.src;
-                upDownImages.push(currentImage); // Check the current image back in
-
-                // Assign a new image
-                const newImage = upDownImages.shift(); // Get the next image
-                imgElement.src = newImage; // Assign it to the current card
-              });
-            });
-          </script>
-
-          <div class="svg-container absolute z-20">
-            <div class="circling-icons absolute w-[512px] h-[512px] z-50">
-              <div class="icon-1 is-circle-icon absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <img src="animation/circle-icon-1.png" alt="circle-icon-1" class="w-[64px]" />
-              </div>
-              <div class="icon-2 is-circle-icon absolute left-0 top-[37%] transform translate-y-1/2 -translate-x-1/2">
-                <img src="animation/circle-icon-2.png" alt="circle-icon-1" class="w-[64px]" />
-
-              </div>
-              <div class="icon-3 is-circle-icon absolute right-0 top-[37%] transform translate-y-1/2 translate-x-1/2">
-                <img src="animation/circle-icon-3.png" alt="circle-icon-1" class="w-[64px]" />
-
-              </div>
-              <div class="icon-4 is-circle-icon absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-                <img src="animation/circle-icon-4.png" alt="circle-icon-1" class="w-[64px]" />
-
-              </div>
-            </div>
-            <div class="rotating-svg">
-              <RootOrbitSVG_02 />
-            </div>
+          <div class="hidden lg:flex absolute bottom-0 right-0 w-[775px] mascot-image flex-none justify-start items-end transform translate-x-[550px]">
+            <img src="./mascot.png" alt="mascot" class="object-fit object-left-bottom w-full h-full" />
           </div>
         </div>
-
       </div>
     </div>
   </HeroSection>
@@ -330,10 +335,10 @@ const GUARANTEES = [
   </section>
 
   <section class={`dark flex flex-col items-center py-7xl bg-secondary`}>
-    <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter">
+    <h2 class="font-machina text-primary text-display-lg mb-2 tracking-tighter px-4">
       The Panfactum Group
     </h2>
-    <p class="text-xl text-tertiary my-0">
+    <p class="text-xl text-tertiary my-0 px-4">
       You focus on shipping software. We handle your cloud infrastructure.
     </p>
     <PricingSection />

@@ -54,7 +54,7 @@
     transform-style: preserve-3d;
     position: relative;
     width: 700px;
-    height: 700px;
+    height: 675px;
     perspective: 1000px;
     transform: rotate3d(1, 0, 0, 47deg);
   }
