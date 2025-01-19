@@ -27,12 +27,12 @@ const Tooltip: React.FC<TooltipProps> = ({
 
       {/* Tooltip */}
       <p
-        className={`z-40 absolute bg-primary-solid dark:bg-primary 
+        className={`z-50 absolute bg-primary-solid dark:bg-primary 
           px-3 py-2 
           text-sm text-white 
           rounded shadow-md 
           hidden group-hover:inline-block transition-opacity duration-200 w-fit min-w-[275px]
-          border bordrer-border
+          border
           ${pos}`}
         style={{ whiteSpace: "pre-lines" }}
       >

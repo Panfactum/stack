@@ -22,4 +22,11 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
+
+  .tippy-box {
+    @apply bg-primary border-none dark:border-solid border-2 dark:text-offWhite p-2 z-10 !important;
+  }
+  .tippy-arrow:before {
+    @apply text-primary dark:m-[-1px] dark:text-white z-0;
+  }
 }

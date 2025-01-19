@@ -15,7 +15,13 @@ import {
 import React, { useEffect, useState } from "react";
 import GridWrapper from "./GridWrapper";
 import SortableItem from "./SortableItem";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 function moveItemInArray(array: any[], fromIndex: number, toIndex: number) {
   if (
@@ -854,7 +860,7 @@ const VariableSizeMasonry = () => {
         {tabs.map((tab, index) => (
           <div
             key={`tab-item-${index}`}
-            className={`tab col-span-1 text-md py-2 w-full flex items-center justify-center cursor-pointer ${currentTab === tab ? 'font-semibold border-b-2 border-brand-secondary text-brand-secondary' : 'text-quaternary'}`}
+            className={`tab col-span-1 text-md py-2 w-full flex items-center justify-center cursor-pointer ${currentTab === tab ? "font-semibold border-b-2 border-brand-secondary text-brand-secondary" : "text-quaternary"}`}
             onClick={() => setCurrentTab(tab)}
           >
             {tab}
@@ -866,7 +872,6 @@ const VariableSizeMasonry = () => {
           <Select
             value={currentTab}
             onValueChange={(value) => setCurrentTab(value as TabOptions)}
-
           >
             <SelectTrigger className="border-secondary h-[46px]">
               <SelectValue placeholder="Select a category" />
@@ -880,7 +885,6 @@ const VariableSizeMasonry = () => {
             </SelectContent>
           </Select>
         </div>
-
       </div>
       <div className="max-w-3xl mx-auto">
         <GridWrapper>

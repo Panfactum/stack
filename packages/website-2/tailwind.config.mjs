@@ -17,12 +17,14 @@ export default {
     "bg-brand-primary",
     "bg-brand-primary-darker",
     "bg-brand-overlay",
+    "tippy-box",
+      "tippy-arrow"
   ],
   theme: {
     colors: {
       black: "#000",
       white: "#fff",
-      offWhite: "#ededed",
+      offWhite: "#dcdcdc",
       primary: {
         DEFAULT: "black",
       },

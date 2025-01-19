@@ -47,6 +47,7 @@
     "astro": "^5.0.5",
     "astro-expressive-code": "^0.38.3",
     "astro-seo": "^0.8.4",
+    "astro-tooltips": "^0.6.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "1.2.1",
     "eslint": "^8.0.0",

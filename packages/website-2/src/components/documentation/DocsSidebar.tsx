@@ -41,7 +41,7 @@ import {
   setNavigationReferences,
   setVersion,
 } from "@/stores/documentation-store.ts";
-import './DocsSidebar.css'
+import "./DocsSidebar.css";
 
 export interface SideNavSection {
   text: string;

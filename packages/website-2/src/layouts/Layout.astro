@@ -14,6 +14,8 @@ const redirect = Astro.props.redirect;
 const hasDarkBackground = Astro.props.darkBackground
   ? Astro.props.darkBackground
   : false;
+
+import { Tooltips } from "astro-tooltips";
 ---
 
 <html lang="en">
@@ -21,7 +23,7 @@ const hasDarkBackground = Astro.props.darkBackground
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-
+    <Tooltips interactive={false} delay={[15, 50]} />
     <SEO title={Astro.props.title} description={Astro.props.description} />
 
     {

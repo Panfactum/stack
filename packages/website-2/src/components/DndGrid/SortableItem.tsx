@@ -33,7 +33,7 @@ const SortableItem = ({
 
   return (
     <li
-    className={`relative grid-item border border-primary ${isExpanded ? 'is-expanded p-6 bg-transparent' : 'flex items-center justify-center'} ${className}`}
+      className={`relative grid-item border border-primary ${isExpanded ? "is-expanded p-6 bg-transparent" : "flex items-center justify-center"} ${className}`}
       id={`grid-item-${content.id}`}
       ref={setNodeRef}
       style={style}

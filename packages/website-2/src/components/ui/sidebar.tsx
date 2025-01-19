@@ -324,7 +324,7 @@ const sidebarMenuButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'hover:bg-brand-primary dark:hover:bg-brand-primary-darker',
+        default: "hover:bg-brand-primary dark:hover:bg-brand-primary-darker",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
@@ -334,7 +334,7 @@ const sidebarMenuButtonVariants = cva(
         lg: "h-12 text-sm group-data-[collapsible=icon]:!p-0",
       },
       isActive: {
-        true: 'bg-brand-primary font-semibold dark:bg-brand-primary-darker data-[state=open]:hover:bg-brand-primary-darker data-[state=open]:hover:text-sidebar-accent-foreground',
+        true: "bg-brand-primary font-semibold dark:bg-brand-primary-darker data-[state=open]:hover:bg-brand-primary-darker data-[state=open]:hover:text-sidebar-accent-foreground",
         false: "",
       },
     },
@@ -350,7 +350,7 @@ const sidebarMenuButtonVariantsTreeItem = cva(
   {
     variants: {
       variant: {
-        default: 'hover:bg-brand-primary dark:hover:bg-brand-700',
+        default: "hover:bg-brand-primary dark:hover:bg-brand-700",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
@@ -360,7 +360,7 @@ const sidebarMenuButtonVariantsTreeItem = cva(
         lg: "h-12 text-sm group-data-[collapsible=icon]:!p-0",
       },
       isActive: {
-        true: 'bg-brand-primary font-semibold dark:bg-brand-primary-darker hover:bg-brand-primary-darker',
+        true: "bg-brand-primary font-semibold dark:bg-brand-primary-darker hover:bg-brand-primary-darker",
         false: "bg-[transparent]",
       },
     },

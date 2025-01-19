@@ -8,9 +8,9 @@ import Section from "../../components/layout/section.astro";
 
 const PRICES = [
   {
-    type: "Starter",
+    type: "Cloud Setup",
     popular: false,
-    price: 1000,
+    price: 500,
     subtitle:
       "Best for early-stage companies without a significant infrastructure footprint.",
     featureList: [
@@ -22,9 +22,9 @@ const PRICES = [
     ],
   },
   {
-    type: "Growth",
-    popular: true,
-    price: 5000,
+    type: "Panfactum Kubernetes Cluster",
+    popular: false,
+    price: 750,
     subtitle:
       "Great for companies of all sizes who want a production-hardened infrastructure platform that Just Works™.",
     featureLabel: `Starter`,
@@ -38,8 +38,9 @@ const PRICES = [
     ],
   },
   {
-    type: "Scale",
+    type: "Workload Deployment",
     popular: false,
+    price: 250,
     subtitle:
       "For those looking to run their infrastructure on bare metal for maximum cost savings.",
     featureLabel: `Growth`,
@@ -114,7 +115,7 @@ const moneyFormatter = new Intl.NumberFormat("en-US", {
                     </span>
                     <span class="text-md font-medium text-tertiary">
                       {" "}
-                      per month{" "}
+                      / month{" "}
                     </span>
                   </>
                 ) : (
@@ -124,16 +125,6 @@ const moneyFormatter = new Intl.NumberFormat("en-US", {
                 )}
               </div>
               <p class="text-tertiary text-md">{price.subtitle}</p>
-            </div>
-            <div class="flex flex-col gap-lg">
-              <Button
-                variant="primary"
-                size="xl"
-                className="w-full"
-                href="/support"
-              >
-                Learn More
-              </Button>
             </div>
           </div>
 

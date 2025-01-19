@@ -1,0 +1,161 @@
+---
+import RootOrbit from "./RootOrbit.astro";
+import "./animation.css";
+
+import TerragruntIcon from "./images/terragrunt.jpg";
+import NixIcon from "./images/nix.jpg";
+import TiltIcon from "./images/tilt.jpg";
+import TofuIcon from "./images/tofu.jpg";
+import KubernetesSquare from "./images/kubernetes-square.jpg";
+import PanfactumSquare from "./images/panfactum-square.jpg";
+
+import { Image } from "astro:assets";
+
+const { small = false } = Astro.props;
+---
+
+<div
+  class={small
+    ? "max-h-[200px] [transform:scale(0.5)]"
+    : "max-h-[300px] [transform:scale(0.66)]"}
+>
+  <div class="w-[700px] h-[700px] [transform:rotate3d(1,0,0,47deg)]">
+    <script>
+      const logos = [
+        { src: "animation/authentik-square.jpg", alt: "Authentik logo" },
+        { src: "animation/redis-square.jpg", alt: "Redis logo" },
+        {
+          src: "animation/canary-checker-square.jpg",
+          alt: "Canary Checker logo",
+        },
+        { src: "animation/argo-square.jpg", alt: "Argo logo" },
+        { src: "animation/cert-manager-square.jpg", alt: "cert-manager logo" },
+        { src: "animation/cilium-square.jpg", alt: "Cilium logo" },
+        { src: "animation/core-dns-square.jpg", alt: "CoreDNS logo" },
+        { src: "animation/grafana-square.jpg", alt: "Grafana logo" },
+        { src: "animation/karpenter-square.jpg", alt: "Karpenter logo" },
+        { src: "animation/keda-square.jpg", alt: "KEDA logo" },
+        { src: "animation/grafana-square.jpg", alt: "Grafana logo" },
+        { src: "animation/linkerd-square.jpg", alt: "Linkerd logo" },
+        { src: "animation/nats-square.jpg", alt: "NATS logo" },
+        { src: "animation/postgres-square.jpg", alt: "PostgreSQL logo" },
+        { src: "animation/prometheus-square.jpg", alt: "Prometheus logo" },
+        { src: "animation/vault-square.jpg", alt: "Vault logo" },
+        { src: "animation/velero-square.jpg", alt: "Velero logo" },
+      ];
+
+      // Get all image elements that hold the logos
+      const imgElements: HTMLImageElement[] = Array.from(
+        document.querySelectorAll(".hero-icon"),
+      );
+
+      // Utility fx for swapping logos on the image elements
+      const swapLogo = (imgElement: HTMLImageElement) => {
+        const newLogo = logos.shift();
+        if (newLogo) {
+          imgElement.src = newLogo.src;
+          imgElement.alt = newLogo.alt;
+        }
+      };
+
+      // Init the logos
+      imgElements.forEach(swapLogo);
+
+      // Swap the logo after each animation loop
+      imgElements.forEach((imgElement) => {
+        imgElement.addEventListener("animationiteration", () => {
+          logos.push({ src: imgElement.src, alt: imgElement.alt });
+          swapLogo(imgElement);
+        });
+      });
+    </script>
+
+    <div class="absolute w-[512px] h-[512px]">
+      <Image
+        src={PanfactumSquare}
+        alt="Stylized Panfactum logo"
+        height="256"
+        width="256"
+        class="absolute top-[-128px] left-[calc(50%_-_128px)] rotate-45 z-30 rounded-3xl drop-shadow-2xl"
+      />
+      <Image
+        src={KubernetesSquare}
+        alt="Kubernetes logo"
+        height="256"
+        width="256"
+        class="absolute top-[calc(50%_-_128px)] left-[calc(50%_-_128px)] rotate-45 z-20 rounded-3xl drop-shadow-2"
+      />
+      <div
+        class="absolute left-[95px] top-[-12px] flex gap-[28px] z-20 rotate-45"
+      >
+        <img
+          src="animation/authentik-square.jpg"
+          alt="Authentik logo"
+          width="105"
+          height="105"
+          id="hero-icon-1"
+          class="hero-icon rounded-lg drop-shadow-2xl border-primary border-solid border-2"
+        />
+        <img
+          src="animation/authentik-square.jpg"
+          alt="Authentik logo"
+          width="105"
+          height="105"
+          id="hero-icon-2"
+          class="hero-icon rounded-lg drop-shadow-2xl border-primary border-solid border-2"
+        />
+      </div>
+      <div
+        class="absolute right-[95px] top-[-12px] flex gap-[28px] z-20 -rotate-45"
+      >
+        <img
+          src="animation/authentik-square.jpg"
+          alt="Authentik logo"
+          width="105"
+          height="105"
+          id="hero-icon-3"
+          class="hero-icon rounded-lg drop-shadow-2xl border-primary border-solid border-2"
+        />
+        <img
+          src="animation/authentik-square.jpg"
+          alt="Authentik logo"
+          width="105"
+          height="105"
+          id="hero-icon-4"
+          class="hero-icon rounded-lg drop-shadow-2xl border-primary border-solid border-2"
+        />
+      </div>
+      <div class="circling-icons absolute w-full h-full z-10">
+        <Image
+          src={TerragruntIcon}
+          alt="Terragrunt icon"
+          width="64"
+          height="64"
+          class="absolute -top-[32px] left-[calc(50%_-_32px)] rounded-[50%] circling-icon"
+        />
+        <Image
+          src={NixIcon}
+          alt="Nix icon"
+          width="64"
+          height="64"
+          class="absolute -left-[32px] top-[calc(50%_-_32px)] rounded-[50%] circling-icon"
+        />
+        <Image
+          src={TiltIcon}
+          alt="Tilt icon"
+          width="64"
+          height="64"
+          class="absolute -right-[32px] top-[calc(50%_-_32px)] rounded-[50%] circling-icon"
+        />
+        <Image
+          src={TofuIcon}
+          alt="Tofu icon"
+          width="64"
+          height="64"
+          class="absolute left-[calc(50%_-_32px)] -bottom-[32px] rounded-[50%] circling-icon"
+        />
+      </div>
+      <RootOrbit />
+    </div>
+  </div>
+</div>
