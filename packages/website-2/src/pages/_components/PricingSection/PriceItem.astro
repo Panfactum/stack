@@ -1,0 +1,45 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  price: number;
+  period?: string;
+}
+const { title, description, price, period } = Astro.props;
+
+const moneyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  trailingZeroDisplay: "stripIfInteger",
+});
+
+const priceText = price === 0 ? "Free" : moneyFormatter.format(price);
+---
+
+<div
+  class="flex flex-wrap gap-y-8 justify-between w-full shadow-md px-3xl pt-4xl pb-3xl border border-secondary rounded-md bg-offWhite dark:bg-primary"
+>
+  <div class="max-w-full sm:max-w-lg xl:max-w-[800px]">
+    <h4
+      class="font-machina text-primary dark:text-offWhite text-display-xs font-medium"
+    >
+      {title}
+    </h4>
+    <p class="text-tertiary text-md xl:text-lg">
+      {description}
+    </p>
+  </div>
+
+  <div
+    class="font-semibold font-machina leading-none min-w-[150px] flex justify-left items-center gap-2"
+  >
+    <span
+      class="text-display-xs md:text-display-sm text-primary dark:text-offWhite"
+    >
+      {priceText}
+    </span>
+    <span class="text-md font-medium text-tertiary">
+      {period}
+    </span>
+  </div>
+</div>

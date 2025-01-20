@@ -1,0 +1,33 @@
+---
+import HeroAnimation from "./HeroAnimation/HeroAnimation.astro";
+---
+
+<div
+  class="flex flex-wrap-reverse lg:flex-nowrap justify-center items-center gap-16 pt-8"
+>
+  <div class="flex flex-col gap-4">
+    <p class="sm:text-lg my-0 max-w-2xl text-primary dark:text-offWhite">
+      An integrated set of self-hosted infrastructure-as-code modules, local
+      tooling, and comprehensive guides built for engineers who want to:
+    </p>
+    <ul
+      class="sm:text-lg text-primary dark:text-offWhite max-w-2xl list-disc list-inside px-4 pt-2 flex flex-col gap-4"
+    >
+      <li>
+        Quickly deploy production-ready Amazon Web Services (AWS) accounts and
+        Kubernetes clusters
+      </li>
+      <li>
+        Seamlessly integrate over 100 open-source utilities that replace
+        expensive, proprietary managed services
+      </li>
+      <li>
+        Use familiar tooling and open standards such as OpenTofu/Terraform, Nix,
+        and Kubernetes
+      </li>
+    </ul>
+  </div>
+  <div class="hidden sm:block">
+    <HeroAnimation scale={0.6} />
+  </div>
+</div>

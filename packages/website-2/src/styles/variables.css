@@ -437,7 +437,10 @@
       --colors-gray-light-mode-200,
       #e4e9ec
     );
-    --colors-background-bg-secondary: var(--colors-gray-light-mode-50, #f9fafb);
+    --colors-background-bg-secondary: var(
+      --colors-background-bg-brand-section,
+      #f9fafb
+    );
     --colors-background-bg-brand-section-reversed: var(
       --colors-brand-600,
       #2f688e
@@ -1513,6 +1516,7 @@
     --height-with-navigation-offset: calc(100vh - 80px);
 
     --height-without-navigation-offset: 100vh;
+
     .dark {
       --colors-brand-primary_alt: rgba(22, 27, 38, 1);
       --colors-background-bg-active: var(--colors-gray-dark-mode-800, #1f242f);

@@ -1,0 +1,18 @@
+---
+interface Props {
+  class?: string;
+  background?: "primary" | "secondary";
+}
+
+const { class: className, background = "primary" } = Astro.props;
+---
+
+<h2
+  class:list={[
+    "font-machina text-black text-display-sm text-center text-balance px-8 md:text-display-md font-semibold mb-xl tracking-tight max-w-[768px] leading-tight text-balance",
+    background === "primary" ? "text-primary" : "text-offWhite",
+    className,
+  ]}
+>
+  <slot />
+</h2>

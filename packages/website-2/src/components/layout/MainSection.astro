@@ -1,0 +1,27 @@
+---
+import MainSectionSubtitle from "./MainSectionSubtitle.astro";
+import MainSectionTitle from "./MainSectionTitle.astro";
+
+interface Props {
+  background?: "primary" | "secondary";
+  title?: string;
+  subtitle?: string;
+}
+const { background = "primary", title, subtitle } = Astro.props;
+---
+
+<section
+  class:list={[background === "primary" ? "bg-primary" : "bg-secondary"]}
+>
+  <div
+    class="container flex flex-col items-center py-7xl max-w-[1200px] px-4 md:px-4 mx-auto"
+  >
+    {title && <MainSectionTitle title={title} background={background} />}
+    {
+      subtitle && (
+        <MainSectionSubtitle subtitle={subtitle} background={background} />
+      )
+    }
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,72 @@
+---
+import SectionKicker from "../SectionKicker.astro";
+import SectionTitle from "../SectionTitle.astro";
+import FeatureListBlock from "./FeatureListBlock.astro";
+import SubSection from "../../../components/layout/SubSection.astro";
+
+const FEATURES = [
+  {
+    icon: "dollar",
+    title: "Cost Savings",
+    content:
+      "Hyper-optimized to provide the lowest workload costs when running Kubernetes on AWS. Save up to 90% compared to the default EKS setup.",
+  },
+  {
+    icon: "shield",
+    title: "Security",
+    content:
+      "RBAC, zero-trust networking, automatically rotating credentials, audit logging, self-hosted identity provider w/ SSO integrations.",
+  },
+  {
+    icon: "power",
+    title: "High Availability",
+    content:
+      "Up to 99.999% uptime attainment with resiliency for datacenter outages. Achieve 99.999999999% data durability.",
+  },
+  {
+    icon: "database",
+    title: "Databases",
+    content: "Modules for the most popular databases: PostgreSQL, Redis, NATS",
+  },
+  {
+    icon: "code",
+    title: "DevShell",
+    content:
+      "Purpose-built local environment for managing your cloud infrastructure. Support for Linux, MacOS, and Windows.",
+  },
+  {
+    icon: "ci-cd",
+    title: "CI / CD",
+    content:
+      "10x faster image builds than GitHub actions at 10% the price. Out-of-the-box configurations of infrastructure-as-code deployment pipelines.",
+  },
+  {
+    icon: "eye",
+    title: "Monitoring and Observability",
+    content:
+      "A full self-hosted monitoring suite that includes metrics, logging, tracing, synthetic tests, and alerting.",
+  },
+  {
+    icon: "qrCode",
+    title: "Infrastructure-as-Code",
+    content:
+      "All your infrastructure, fully codified. Be ready for SOC 2 Type 2, HITRUST, and ISO 27001.",
+  },
+  {
+    icon: "flag",
+    title: "Open Source",
+    content:
+      "Built exclusively on the most popular open-source tooling and standards. Infinitely extendable with no risk of vendor-lock.",
+  },
+] as const;
+---
+
+<SubSection kicker="Features" title="Production-ready from day one">
+  <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">
+    {
+      FEATURES.map(({ icon, title, content }) => (
+        <FeatureListBlock icon={icon} title={title} content={content} />
+      ))
+    }
+  </div>
+</SubSection>

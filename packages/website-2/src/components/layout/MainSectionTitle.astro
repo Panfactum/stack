@@ -1,0 +1,16 @@
+---
+interface Props {
+  title: string;
+  background?: "primary" | "secondary";
+}
+const { title, background = "primary" } = Astro.props;
+---
+
+<h2
+  class:list={[
+    "font-machina font-semibold text-display-md sm:text-display-lg mb-2 text-center",
+    background === "primary" ? "text-primary" : "text-offWhite",
+  ]}
+>
+  {title}
+</h2>

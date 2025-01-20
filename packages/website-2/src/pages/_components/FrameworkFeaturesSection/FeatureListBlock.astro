@@ -1,0 +1,54 @@
+---
+import BarBreak from "./images/bar-break.astro";
+import ChatBubble from "./images/chat-bubble.astro";
+import ChatHappy from "./images/chat-happy.astro";
+import ThunderBolt from "./images/thunder-bolt.astro";
+import Ownership from "./images/ownership.astro";
+import MessageHeart from "./images/message-heart.astro";
+import Shield from "./images/shield.astro";
+import Dollar from "./images/dollar.astro";
+import Power from "./images/power.astro";
+import Database from "./images/database.astro";
+import Code from "./images/code.astro";
+import CICD from "./images/cicd.astro";
+import Eye from "./images/eye.astro";
+import QRCode from "./images/qr-code.astro";
+import Flag from "./images/flag.astro";
+
+const ICONS = {
+  "chat-bubble": ChatBubble,
+  thunderbolt: ThunderBolt,
+  "bar-chart-break": BarBreak,
+  "chat-happy": ChatHappy,
+  ownership: Ownership,
+  "message-heart": MessageHeart,
+  shield: Shield,
+  dollar: Dollar,
+  power: Power,
+  database: Database,
+  code: Code,
+  "ci-cd": CICD,
+  eye: Eye,
+  qrCode: QRCode,
+  flag: Flag,
+};
+
+interface Props {
+  icon: keyof typeof ICONS;
+  title: string;
+  content: string;
+}
+
+const { icon, title, content } = Astro.props;
+const Icon = ICONS[icon];
+---
+
+<div class="flex flex-col items-center gap-xl text-center max-w-[384px]">
+  <div
+    class="w-[48px] h-[48px] flex items-center justify-center border border-primary rounded-md p-[14px] shadow bg-primary"
+  >
+    <Icon />
+  </div>
+  <h4 class="text-primary text-lg md:text-xl font-semibold">{title}</h4>
+  <p class="text-tertiary text-md max-w-[378px]">{content}</p>
+</div>

@@ -1,0 +1,288 @@
+---
+import { Button } from "@/components/ui/button";
+import "./ReplacedServicesSection.css";
+import ReplacedServiceIcon from "./ReplacedServiceIcon.astro";
+import SectionContent from "@/components/astro/section/section-content.astro";
+import SubSection from "@/components/layout/SubSection.astro";
+import datadogLogo from "./images/datadog.svg";
+import rdsLogo from "./images/rds.webp";
+import oktaLogo from "./images/okta.png";
+import sentryLogo from "./images/sentry.webp";
+import newRelicLogo from "./images/new-relic.svg";
+import dynaTraceLogo from "./images/dynatrace.png";
+import sysdigLogo from "./images/sysdig.svg";
+import netlifyLogo from "./images/netlify.svg";
+import elasticSearchLogo from "./images/elasticsearch.svg";
+import ecsLogo from "./images/ecs.png";
+import lambdaLogo from "./images/awslambda.png";
+import cloudflareLogo from "./images/cloudflare.svg";
+import spaceliftLogo from "./images/spacelift.png";
+import airtableLogo from "./images/airtable.svg";
+import incidentIOLogo from "./images/incidentio.png";
+import pagerDutyLogo from "./images/pagerduty.svg";
+import sqsLogo from "./images/sqs.png";
+import entraLogo from "./images/entra.svg";
+import githubActionsLogo from "./images/githubactions.png";
+import circleCILogo from "./images/circleci.svg";
+import zapierLogo from "./images/zapier.png";
+import fivetranLogo from "./images/fivetran.png";
+import harnessLogo from "./images/harness.svg";
+import namespaceLogo from "./images/namespace.svg";
+import renderLogo from "./images/render.svg";
+import railwayLogo from "./images/railway.svg";
+import herokuLogo from "./images/heroku.svg";
+import flyIOLogo from "./images/flyio.jpg";
+import buddyLogo from "./images/buddy.png";
+import vercelLogo from "./images/vercel.svg";
+import terraformCloudLogo from "./images/terraform.png";
+import env0Logo from "./images/env0.jpg";
+import alertOpsLogo from "./images/alertops.webp";
+import fullStoryLogo from "./images/fullstory.jpg";
+import metabaseLogo from "./images/metabase.png";
+
+const ICONS = [
+  {
+    src: datadogLogo.src,
+    name: "DataDog",
+  },
+  {
+    src: rdsLogo.src,
+    name: "AWS RDS",
+  },
+  {
+    src: oktaLogo.src,
+    name: "Okta",
+  },
+  {
+    src: sentryLogo.src,
+    name: "Sentry",
+  },
+  {
+    src: newRelicLogo.src,
+    name: "New Relic",
+  },
+  {
+    src: dynaTraceLogo.src,
+    name: "Dynatrace",
+  },
+  {
+    src: sysdigLogo.src,
+    name: "Sysdig",
+  },
+  {
+    src: netlifyLogo.src,
+    name: "Netlify",
+  },
+  {
+    src: elasticSearchLogo.src,
+    name: "Elasticsearch",
+  },
+  {
+    src: ecsLogo.src,
+    name: "AWS ECS",
+  },
+  {
+    src: lambdaLogo.src,
+    name: "AWS Lambda",
+  },
+  {
+    src: cloudflareLogo.src,
+    name: "Cloudflare",
+  },
+  {
+    src: spaceliftLogo.src,
+    name: "Spacelift",
+  },
+  {
+    src: airtableLogo.src,
+    name: "Airtable",
+  },
+  {
+    src: incidentIOLogo.src,
+    name: "Incident.io",
+  },
+  {
+    src: pagerDutyLogo.src,
+    name: "PagerDuty",
+  },
+  {
+    src: sqsLogo.src,
+    name: "AWS SQS",
+  },
+];
+
+const ICONS2 = [
+  {
+    src: entraLogo.src,
+    name: "Microsoft Entra ID",
+  },
+  {
+    src: githubActionsLogo.src,
+    name: "GitHub Actions",
+  },
+  {
+    src: circleCILogo.src,
+    name: "CircleCI",
+  },
+  {
+    src: zapierLogo.src,
+    name: "Zapier",
+  },
+  {
+    src: fivetranLogo.src,
+    name: "Fivetran",
+  },
+  {
+    src: harnessLogo.src,
+    name: "Harness",
+  },
+  {
+    src: namespaceLogo.src,
+    name: "Namespace",
+  },
+  {
+    src: renderLogo.src,
+    name: "Render",
+  },
+  {
+    src: railwayLogo.src,
+    name: "Railway",
+  },
+  {
+    src: herokuLogo.src,
+    name: "Heroku",
+  },
+  {
+    src: flyIOLogo.src,
+    name: "Fly.io",
+  },
+  {
+    src: buddyLogo.src,
+    name: "Buddy",
+  },
+  {
+    src: vercelLogo.src,
+    name: "Vercel",
+  },
+  {
+    src: terraformCloudLogo.src,
+    name: "Terraform Cloud",
+  },
+  {
+    src: env0Logo.src,
+    name: "env0",
+  },
+  {
+    src: alertOpsLogo.src,
+    name: "AlertOps",
+  },
+  {
+    src: fullStoryLogo.src,
+    name: "Fullstory",
+  },
+  {
+    src: metabaseLogo.src,
+    name: "Metabase",
+  },
+];
+---
+
+<script>
+  let fadeRunning = false;
+  const fadeIcon = () => {
+    if (fadeRunning) {
+      return;
+    }
+
+    const elements = document.querySelectorAll(".move-icon");
+
+    // Create a map to group elements by their `move-icon-id-X` class
+    const groupedElements: { [className: string]: Element[] } = {};
+    elements.forEach((el) => {
+      const matchingClass = Array.from(el.classList).find((cls) =>
+        cls.startsWith("move-icon-id-"),
+      );
+      if (matchingClass) {
+        if (!groupedElements[matchingClass]) {
+          groupedElements[matchingClass] = [];
+        }
+        groupedElements[matchingClass].push(el);
+      }
+    });
+
+    // Filter elements that do not already have the `move-icon-removed` class
+    const eligibleElements = Array.from(elements).filter(
+      (el) => !el.classList.contains("faded"),
+    );
+
+    if (eligibleElements.length > 0) {
+      // Pick a random element from the filtered list
+      const randomIndex = Math.floor(Math.random() * eligibleElements.length);
+      const randomElement = eligibleElements[randomIndex];
+
+      // Add the `move-icon-removed` class to the selected element
+      randomElement.classList.add("faded");
+
+      // Apply `move-icon-removed` class to all elements in the same group
+      const matchingClass = Array.from(randomElement.classList).find((cls) =>
+        cls.startsWith("move-icon-id-"),
+      );
+      if (matchingClass && groupedElements[matchingClass]) {
+        groupedElements[matchingClass].forEach((el) => {
+          el.classList.add("faded");
+        });
+      }
+    } else {
+      // If no eligible elements are found, remove the `move-icon-removed` class from all elements
+      Object.values(groupedElements).forEach((group) => {
+        group.forEach((el) => el.classList.remove("faded"));
+      });
+    }
+    fadeRunning = false;
+  };
+
+  // Wait for the DOM content to load before running the script
+  document.addEventListener("DOMContentLoaded", () => {
+    setInterval(fadeIcon, 1000);
+  });
+</script>
+
+<SubSection
+  kicker="Managed Services"
+  title="What can you replace?"
+  subtitle="Stop wasting time wrangling dozens of expensive, proprietary services."
+>
+  <div class="w-full">
+    <div class="pb-8">
+      <div class="scroll-container mb-4">
+        <div class="scroll-wrapper flex w-fit">
+          {
+            ICONS.concat(ICONS).map(({ src, name }, index) => (
+              <ReplacedServiceIcon
+                name={name}
+                src={src}
+                key={`${name}-${index}`}
+              />
+            ))
+          }
+        </div>
+      </div>
+      <div class="scroll-container mb-4">
+        <div class="scroll-wrapper-reverse flex w-fit">
+          {
+            ICONS2.concat(ICONS2).map(({ src, name }, index) => (
+              <ReplacedServiceIcon
+                name={name}
+                src={src}
+                key={`${name}-${index}`}
+              />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-center">
+      <Button variant="primary" size="xl"> Learn What You Can Save </Button>
+    </div>
+  </div>
+</SubSection>
