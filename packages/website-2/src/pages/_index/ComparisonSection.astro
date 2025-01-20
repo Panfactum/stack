@@ -1,36 +1,7 @@
 ---
 import { PanfactumLogoAllWhite } from "@/components/panfactum-logo.tsx";
 import { clsx } from "clsx";
-import SectionContent from "../../components/astro/section/section-content.astro";
-import SectionTitle from "../../components/astro/section/section-title.astro";
-
-const COMPARISON_CATEGORIES = [
-  "Starting Point",
-  "Time to Launch",
-  "Quality",
-  "Initial Commitment",
-  "Guarantees",
-  "Expert Support",
-  "Annual Cost",
-  "Maintenance",
-  "Extensibility",
-  "Ecosystem",
-];
-
-const COMPANY_COMPARISON = [
-  {
-    name: "DIY",
-    data: ["Data", "Data", "Data", "Data", "Data", "Data"],
-  },
-  {
-    name: "Consultant / Agency",
-    data: ["Data", "Data", "Data", "Data", "Data", "Data"],
-  },
-  {
-    name: "Panfactum",
-    data: [, "Data", "Data", "Data", "Data", "Data"],
-  },
-];
+import SectionTitle from "@/components/astro/section/section-title.astro";
 
 const TABLE_DATA = [
   ["", "DIY", "Consultant / Agency", "Panfactum"],
@@ -99,10 +70,12 @@ const TABLE_DATA = [
 const cellStyle = "flex min-h-[64px] items-center px-6";
 const getRowStyleByIndex = (index: number) =>
   index % 2 !== 0 ? "bg-primary" : "bg-secondary";
+const getPFRowStyleByIndex = (index: number) =>
+  index % 2 !== 0 ? "bg-[#153245cc]" : "";
 ---
 
-<section class="hidden md:block gap-7xl w-full mb-28">
-  <div class="flex max-w-[1344px] mx-auto px-[104px] flex-col items-center">
+<section class="hidden md:block gap-7xl w-full">
+  <div class="flex max-w-[1344px] mx-auto px-8 flex-col items-center">
     <SectionTitle>Experience the Panfactum Service Difference</SectionTitle>
     <div class="w-full border border-secondary rounded-lg overflow-hidden mt-8">
       {
@@ -117,7 +90,7 @@ const getRowStyleByIndex = (index: number) =>
                     <div
                       class={clsx(
                         cellStyle,
-                        "text-md font-bold text-secondary py-0.5 flex justify-center px-0",
+                        "text-md lg:text-lg font-bold text-secondary py-0.5 flex justify-center px-0",
                         isFirstCol ? "basis-1/3" : "basis-1/4",
                         isLastCol
                           ? "bg-brand-800 rounded-tr-lg"
@@ -125,7 +98,7 @@ const getRowStyleByIndex = (index: number) =>
                       )}
                     >
                       {isLastCol ? (
-                        <PanfactumLogoAllWhite className="w-[120px] h-auto" />
+                        <PanfactumLogoAllWhite className="w-[120px] lg:w-[150px] h-auto" />
                       ) : (
                         companyName
                       )}
@@ -144,12 +117,15 @@ const getRowStyleByIndex = (index: number) =>
                     <div
                       class={clsx(
                         cellStyle,
-                        "text-sm py-3",
+                        "text-sm lg:text-md py-3",
                         isFirstCol
-                          ? "basis-1/3 font-semibold text-base"
+                          ? "basis-1/3 font-semibold text-md lg:text-lg"
                           : "basis-1/4",
                         isLastCol
-                          ? "font-bold text-white bg-brand-700"
+                          ? [
+                              "font-semibold text-offWhite bg-brand-800 min-w-[160px]",
+                              getPFRowStyleByIndex(rowNum),
+                            ]
                           : [
                               "font-regular text-secondary",
                               getRowStyleByIndex(rowNum),

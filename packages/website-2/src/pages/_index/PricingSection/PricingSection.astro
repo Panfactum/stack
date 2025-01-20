@@ -1,0 +1,35 @@
+---
+import SectionTitle from "@/components/astro/section/section-title.astro";
+import Section from "@/components/layout/section.astro";
+import PriceItem from "./PriceItem.astro";
+---
+
+<Section class="gap-y-4xl py-4xl text-primary mb-8">
+  <div class="text-center text-balance">
+    <SectionTitle> Simple, Usage-based Pricing </SectionTitle>
+  </div>
+
+  <PriceItem
+    title="The Panfactum Framework"
+    description="Our full infrastructure framework is completely free and open source. No support plan needed."
+    price={0}
+  />
+  <PriceItem
+    title="Cloud Foundations"
+    description="Boostrap your organization for automated IaC deployments and configure your AWS ecosystem for compatibility with deployments of Panfactum Kubernetes clusters."
+    price={500}
+    period="/ month"
+  />
+  <PriceItem
+    title="Panfactum Kubernetes Cluster"
+    description="We perform end-to-end lifecycle management of a production-ready Kubernetes cluster with all Panfactum addons installed."
+    price={750}
+    period="/ month"
+  />
+  <PriceItem
+    title="Workload Deployment"
+    description="We configure, harden, and deploy one of your workloads to a Panfactum Kubernetes cluster."
+    price={250}
+    period="/ month"
+  />
+</Section>
