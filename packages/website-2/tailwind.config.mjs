@@ -18,7 +18,8 @@ export default {
     "bg-brand-primary-darker",
     "bg-brand-overlay",
     "tippy-box",
-      "tippy-arrow"
+      "tippy-arrow",
+      "bg-gray-50"
   ],
   theme: {
     colors: {
@@ -33,6 +34,7 @@ export default {
         "var(--colors-background-bg-brand-primary-darker)",
       gradientBorder: `linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%)`,
       "offset-secondary": "var(--colors-brand-600, #2f688e)",
+      ...theme.colors
     },
     extend: {
       maxWidth: {

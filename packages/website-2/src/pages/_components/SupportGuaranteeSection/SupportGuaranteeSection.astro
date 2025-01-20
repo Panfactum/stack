@@ -1,0 +1,50 @@
+---
+import SubSection from "@/components/layout/SubSection.astro";
+import Shield from "./Shield.astro";
+import CheckIcon from "@/components/ui/CheckIcon.astro";
+import { Button } from "@/components/ui/button";
+
+const GUARANTEES = [
+  "Free savings assessment before starting",
+  "If we don't hit the savings target within 60 days, we pay the difference",
+  "45-day, no-questions asked refund period",
+];
+---
+
+<SubSection>
+  <div
+    class="bg-gradient-to-r from-brand-700 to-brand-600 dark:from-brand-800 dark:to-brand-700 rounded-lg p-5xl flex flex-col items-center justify-center w-full relative"
+  >
+    <img
+      src="/hero-pattern.svg"
+      alt="Background grid"
+      class="absolute top-0 left-[25%] h-[100%] w-[50%]"
+    />
+    <Shield />
+    <p class="font-machina text-display-md font-semibold text-primary_on-brand">
+      The Panfactum Guarantee
+    </p>
+
+    <p class="text-xl font-regular mb-8 text-primary_on-brand">
+      We save you money or our service is free.
+    </p>
+
+    <div class="flex flex-col gap-4 mb-8">
+      {
+        GUARANTEES.map((item, guaranteeIndex) => (
+          <div class="grid grid-cols-10 gap-4 max-w-[600px]">
+            <div class="col-span-1">
+              <CheckIcon />
+            </div>
+            <div class="col-span-9 text-left">
+              <p class="text-md font-regular text-primary_on-brand">{item}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+    <a href="/support" class="z-10">
+      <Button variant="outline" size="lg"> Learn more</Button>
+    </a>
+  </div>
+</SubSection>

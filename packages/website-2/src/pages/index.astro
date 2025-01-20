@@ -7,7 +7,7 @@ import TestimonySection from "@/components/testimony/TestimonySection";
 import ComparisonSection from "./_components/ComparisonSection.astro";
 import PricingSection from "./_components/PricingSection/PricingSection.astro";
 import SupportPlanFeatureSection from "./_components/SupportPlanFeatureSection/SupportPlanFeatureSection.astro";
-import SupportGuaranteeSection from "./_components/SupportGuaranteeSection.astro";
+import SupportGuaranteeSection from "./_components/SupportGuaranteeSection/SupportGuaranteeSection.astro";
 import FrameworkFeaturesSection from "./_components/FrameworkFeaturesSection/FrameworkFeaturesSection.astro";
 import React from "react";
 import FrameworkSummarySection from "./_components/FrameworkSummarySection.astro";
@@ -37,6 +37,6 @@ import MainSection from "../components/layout/MainSection.astro";
     <PricingSection />
     <ComparisonSection />
     <SupportGuaranteeSection />
-    <TestimonySection client:only="react" />
+    <!--<TestimonySection client:only="react" />-->
   </MainSection>
 </Layout>
