@@ -26,33 +26,28 @@ const { scale = 1 } = Astro.props;
 >
   <script>
     const logos = [
-      { src: "animation/authentik-square.jpg", alt: "Authentik logo" },
-      { src: "animation/redis-square.jpg", alt: "Redis logo" },
+      { src: "/public/animation/authentik-square.jpg", alt: "Authentik logo" },
+      { src: "/public/animation/redis-square.jpg", alt: "Redis logo" },
       {
-        src: "animation/canary-checker-square.jpg",
+        src: "/public/animation/canary-checker-square.jpg",
         alt: "Canary Checker logo",
       },
-      { src: "animation/argo-square.jpg", alt: "Argo logo" },
-      { src: "animation/cert-manager-square.jpg", alt: "cert-manager logo" },
-      { src: "animation/cilium-square.jpg", alt: "Cilium logo" },
-      { src: "animation/core-dns-square.jpg", alt: "CoreDNS logo" },
-      { src: "animation/grafana-square.jpg", alt: "Grafana logo" },
-      { src: "animation/karpenter-square.jpg", alt: "Karpenter logo" },
-      { src: "animation/keda-square.jpg", alt: "KEDA logo" },
-      { src: "animation/grafana-square.jpg", alt: "Grafana logo" },
-      { src: "animation/linkerd-square.jpg", alt: "Linkerd logo" },
-      { src: "animation/nats-square.jpg", alt: "NATS logo" },
-      { src: "animation/postgres-square.jpg", alt: "PostgreSQL logo" },
-      { src: "animation/prometheus-square.jpg", alt: "Prometheus logo" },
-      { src: "animation/vault-square.jpg", alt: "Vault logo" },
-      { src: "animation/velero-square.jpg", alt: "Velero logo" },
+      { src: "/public/animation/argo-square.jpg", alt: "Argo logo" },
+      { src: "/animation/cert-manager-square.jpg", alt: "cert-manager logo" },
+      { src: "/animation/cilium-square.jpg", alt: "Cilium logo" },
+      { src: "/animation/core-dns-square.jpg", alt: "CoreDNS logo" },
+      { src: "/animation/grafana-square.jpg", alt: "Grafana logo" },
+      { src: "/animation/karpenter-square.jpg", alt: "Karpenter logo" },
+      { src: "/animation/keda-square.jpg", alt: "KEDA logo" },
+      { src: "/animation/grafana-square.jpg", alt: "Grafana logo" },
+      { src: "/animation/linkerd-square.jpg", alt: "Linkerd logo" },
+      { src: "/animation/nats-square.jpg", alt: "NATS logo" },
+      { src: "/animation/postgres-square.jpg", alt: "PostgreSQL logo" },
+      { src: "/animation/prometheus-square.jpg", alt: "Prometheus logo" },
+      { src: "/animation/vault-square.jpg", alt: "Vault logo" },
+      { src: "/public/animation/velero-square.jpg", alt: "Velero logo" },
     ];
-
-    // Get all image elements that hold the logos
-    const imgElements: HTMLImageElement[] = Array.from(
-      document.querySelectorAll(".hero-icon"),
-    );
-
+    
     // Utility fx for swapping logos on the image elements
     const swapLogo = (imgElement: HTMLImageElement) => {
       const newLogo = logos.shift();
@@ -62,16 +57,24 @@ const { scale = 1 } = Astro.props;
       }
     };
 
-    // Init the logos
-    imgElements.forEach(swapLogo);
+    document.addEventListener('astro:page-load', () => {
 
-    // Swap the logo after each animation loop
-    imgElements.forEach((imgElement) => {
-      imgElement.addEventListener("animationiteration", () => {
-        logos.push({ src: imgElement.src, alt: imgElement.alt });
-        swapLogo(imgElement);
+      // Get all image elements that hold the logos
+      const imgElements: HTMLImageElement[] = Array.from(
+        document.querySelectorAll(".hero-icon"),
+      );
+
+      // Init the logos
+      imgElements.forEach(swapLogo);
+
+      // Swap the logo after each animation loop
+      imgElements.forEach((imgElement) => {
+        imgElement.addEventListener("animationiteration", () => {
+          logos.push({ src: imgElement.src, alt: imgElement.alt });
+          swapLogo(imgElement);
+        });
       });
-    });
+    })
   </script>
   <style define:vars={{ scale }}>
     .circling-planets {
@@ -189,7 +192,7 @@ const { scale = 1 } = Astro.props;
       }}
     >
       <img
-        src="animation/authentik-square.jpg"
+        src="/public/animation/authentik-square.jpg"
         alt="Authentik logo"
         width={105 * scale}
         height={105 * scale}
@@ -200,7 +203,7 @@ const { scale = 1 } = Astro.props;
         }}
       />
       <img
-        src="animation/authentik-square.jpg"
+        src="/public/animation/authentik-square.jpg"
         alt="Authentik logo"
         width={105 * scale}
         height={105 * scale}
@@ -220,7 +223,7 @@ const { scale = 1 } = Astro.props;
       }}
     >
       <img
-        src="animation/authentik-square.jpg"
+        src="/public/animation/authentik-square.jpg"
         alt="Authentik logo"
         width={105 * scale}
         height={105 * scale}
@@ -231,7 +234,7 @@ const { scale = 1 } = Astro.props;
         }}
       />
       <img
-        src="animation/authentik-square.jpg"
+        src="/animation/authentik-square.jpg"
         alt="Authentik logo"
         width={105 * scale}
         height={105 * scale}
