@@ -50,10 +50,10 @@
 
 @keyframes smoothScroll {
   from {
-    transform: translate(0, 0);
+    transform: translate(-10%, 0);
   }
   to {
-    transform: translate(calc(-50% - 10px), 0);
+    transform: translate(calc(-60% - 10px), 0);
   }
 }
 
