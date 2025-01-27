@@ -1,6 +1,5 @@
 ---
-import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CheckIcon from "@/components/icons/check-circle.svg";
 
 interface Props {
   description: string;
@@ -9,9 +8,9 @@ interface Props {
 const { description } = Astro.props;
 ---
 
-<div class="flex gap-x-lg items-center">
+<div class="flex items-center gap-x-3">
   <div class="text-brand-500">
-    <FontAwesomeIcon icon={faCircleCheck} size="xl" />
+    <CheckIcon size="30" />
   </div>
-  <span class="text-md xl:text-lg text-offWhite">{description}</span>
+  <span class="text-display-xs">{description}</span>
 </div>

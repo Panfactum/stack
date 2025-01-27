@@ -1,55 +1,46 @@
----
-title: "Terraform / OpenTofu Bootstrap Resources"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="tf_bootstrap_resources"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/tf_bootstrap_resources"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="tf_bootstrap_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/tf_bootstrap_resources" status="stable" type="direct" />
 
 # Terraform / OpenTofu Bootstrap Resources
 
 Sets up the AWS resources necessary to begin using OpenTofu (Terraform) in an AWS account:
 
-- S3 state bucket
+* S3 state bucket
 
-- DynamoDB lock table
+* DynamoDB lock table
 
 Provides the following features over the default Terragrunt bootstrapped resources:
 
-- Multi-region replication for dynamodb tables
+* Multi-region replication for dynamodb tables
 
-- Lifecycle transitions for S3 objects to cheaper storage tiers
+* Lifecycle transitions for S3 objects to cheaper storage tiers
 
-- Point-in-time backups retained for 24 hours via [AWS Backup](https://aws.amazon.com/backup/)
+* Point-in-time backups retained for 24 hours via [AWS Backup](https://aws.amazon.com/backup/)
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### lock_table
+### lock\_table
 
 Description: The name of the dynamodb terraform lock table..
 
 Type: `string`
 
-### state_bucket
+### state\_bucket
 
 Description: The name of the terraform state bucket.
 
@@ -69,7 +60,7 @@ No notes
 
 ## Maintainer Notes
 
-- This module MUST be deployed in the ops environment. It defines its own aws provider for this reason.
+* This module MUST be deployed in the ops environment. It defines its own aws provider for this reason.
   As a result, it uses its own aws profile which must be passed in as an input argument.
 
 {/* eslint-enable import/order */}

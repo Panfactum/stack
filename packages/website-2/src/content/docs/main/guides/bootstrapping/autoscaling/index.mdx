@@ -1,16 +1,12 @@
----
-title: Autoscaling
----
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
 
-import { Image } from "astro:assets";
-
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import k9sClusterCapacityImg from './k9s-cluster-capacity.jpg';
+import k9sPodMetricsProvided from './k9s-pod-metrics-provided.jpg';
+import k9sPodMetricsImg from './k9s-pod-metrics.jpg';
+import k9sVPAImg from './k9s-vpa.jpg';
+import spotNodeLabelImg from './spot-node-label.jpg';
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
-import k9sClusterCapacityImg from "./k9s-cluster-capacity.jpg";
-import k9sPodMetricsProvided from "./k9s-pod-metrics-provided.jpg";
-import k9sPodMetricsImg from "./k9s-pod-metrics.jpg";
-import k9sVPAImg from "./k9s-vpa.jpg";
-import spotNodeLabelImg from "./spot-node-label.jpg";
 
 # Autoscaling
 
@@ -22,19 +18,19 @@ Deploy the necessary metrics and autoscaling components to automatically rightsi
 
 In Kubernetes, there are three distinct flavors of autoscaling:
 
-- [Horizontal Pod Autoscaling (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/): A built-in controller
+* [Horizontal Pod Autoscaling (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/): A built-in controller
   that adjusts the **number of pods** for a Deployment or StatefulSet. This can be extended to incorporate event-driven
   autoscaling with tools like [KEDA](https://keda.sh/).
 
-- [Vertical Pod Autoscaling (VPA)](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler): A specific controller
+* [Vertical Pod Autoscaling (VPA)](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler): A specific controller
   that can be installed to automatically adjust the **resource requests and limits** of pods based on historical usage.
 
-- Cluster Autoscaling: A category of controllers that will adjust **the number of nodes** running in the cluster. The two
+* Cluster Autoscaling: A category of controllers that will adjust **the number of nodes** running in the cluster. The two
   most popular projects are the [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
   and [Karpenter](https://karpenter.sh/).
 
 The Panfactum stack makes use of all three types of autoscaling. To learn more about autoscaling
-and resource optimization, see our [concept docs.](/docs/edge/concepts/autoscaling)
+and resource optimization, see our [concept docs.](/docs/main/concepts/autoscaling)
 
 ## Deploy Metrics Server
 
@@ -43,13 +39,13 @@ CPU and memory usage. Interestingly, this is not built-in to Kubernetes by defau
 powered by [an API extension](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/)
 provided by the [metrics-server](https://github.com/kubernetes-sigs/metrics-server) project.
 
-We provide a module to deploy the server: [kube_metrics_server](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_metrics_server).
+We provide a module to deploy the server: [kube\_metrics\_server](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_metrics_server).
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `kube_linkerd` module called `kube_metrics_server`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_metrics_server/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_metrics_server/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -61,11 +57,11 @@ Let's test to ensure it is working as intended:
 
 2. Notice that k9s is now reporting your total cluster resource utilization:
 
-   <Image src={k9sClusterCapacityImg} alt="Cluster capacity displayed in k9s" />
+   <MarkdownImage src={k9sClusterCapacityImg} alt="Cluster capacity displayed in k9s" />
 
 3. Navigate to the pods view. Notice that all pods are now reporting CPU and memory metrics:
 
-   <Image src={k9sPodMetricsImg} alt="Pod metrics displayed in k9s" />
+   <MarkdownImage src={k9sPodMetricsImg} alt="Pod metrics displayed in k9s" />
 
    The `N/A` fields for the `/R` and `/L` columns indicate that many pods have not had their
    [resource requests (R) or limits (L)](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) set.
@@ -74,7 +70,7 @@ Let's test to ensure it is working as intended:
 4. To diagnose utilization issues in the cluster, we bundle a CLI utility called `kube-capacity` for consolidating
    granular metrics across the entire cluster. Run `kube-capacity -uc` now:
 
-   ```shell
+   ```shellsession
    NODE                                         NAMESPACE            POD                                                 CONTAINER                 CPU REQUESTS   CPU LIMITS    CPU UTIL    MEMORY REQUESTS   MEMORY LIMITS   MEMORY UTIL
    *                                            *                    *                                                   *                         1240m (21%)    3700m (63%)   514m (8%)   1740Mi (9%)       5334Mi (29%)    4596Mi (25%)
    ....
@@ -123,19 +119,19 @@ Now that we are capturing resource utilization data,
 we can use the vertical pod autoscaler to automatically rightsize your pod's CPU and memory
 [resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) based on historical usage.
 
-We provide a module to deploy the VPA: [kube_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa).
+We provide a module to deploy the VPA: [kube\_vpa](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vpa).
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `kube_metrics_server` module called `kube_vpa`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_vpa/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_vpa/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
-5. In your `region.yaml`, set `extra_inputs.vpa_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
+5. In your `region.yaml`, set `extra_inputs.vpa_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
    This will turn on the VPA for all modules in this cluster in the next apply.
 
 6. Navigate up to the directory containing all your modules (this should be the parent of `kube_vpa`). Run
@@ -145,27 +141,23 @@ Let's deploy it now:
 7. After all these modules are updated, you should now see many VPA resources in k9s (`:vpa`). After a minute or two, they
    should begin to provide resource estimates:
 
-   <Image src={k9sVPAImg} alt="VPA resources in k9s" />
+   <MarkdownImage src={k9sVPAImg} alt="VPA resources in k9s" />
 
 8. Return to the pod view. Notice that all request columns are populated as well as the memory limit column:
 
-   <Image
-     src={k9sPodMetricsProvided}
-     alt="Resource requests and limits are set"
-   />
+   <MarkdownImage src={k9sPodMetricsProvided} alt="Resource requests and limits are set" />
 
-   - We set **requests** for both CPU and memory so that the Kubernetes scheduler can
+   * We set **requests** for both CPU and memory so that the Kubernetes scheduler can
      accurately decide which nodes have enough resources available for pods during the pod-to-node assignment phase.
 
-   - We set **memory limits** so that memory leaks in any application will not consume unbounded memory on the node
+   * We set **memory limits** so that memory leaks in any application will not consume unbounded memory on the node
      and thus cause all other pods on the node to crash with OOM errors.
 
-   - We do **not set cpu limits** because if a node's CPU is constrained, CPU will automatically be shared
-     across all pods _proportional to each pod's CPU request._ [^3]
+   * We do **not set cpu limits** because if a node's CPU is constrained, CPU will automatically be shared
+     across all pods *proportional to each pod's CPU request.* [^3]
 
-   [^3]:
-       In general, it is best to avoid setting CPU limits in order to allow CPU to occasionally spike as needed. If the
-       CPU utilization remains high, _cluster autoscaling_ will kick in to provision net new nodes.
+   [^3]: In general, it is best to avoid setting CPU limits in order to allow CPU to occasionally spike as needed. If the
+       CPU utilization remains high, *cluster autoscaling* will kick in to provision net new nodes.
 
 <MarkdownAlert severity="info">
   When you first install the VPA, you will see many pods evicted over the first few hours. As the VPA collects
@@ -173,11 +165,10 @@ Let's deploy it now:
   settings significantly deviate from an updated recommendation, the VPA will evict the pod to update its
   resource settings.
 
-Unfortunately, there is currently no way for a pod to have its resources updated in-place.
+  Unfortunately, there is currently no way for a pod to have its resources updated in-place.
 
-That said, we provide [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
-for all of the Panfactum components, so you should not see any service disruptions despite the evictions.
-
+  That said, we provide [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+  for all of the Panfactum components, so you should not see any service disruptions despite the evictions.
 </MarkdownAlert>
 
 ## Deploy Karpenter
@@ -189,26 +180,26 @@ setup for your organization.
 Fortunately, a new tool has emerged, [Karpenter](https://karpenter.sh/), which provides both more flexibility, better
 performance, and better cost optimization. Specifically:
 
-- You do not need to choose instance types in advance as it will query your cloud providers
-  API for the _entire_ list of available instance types and prices and then spin up the instance types
+* You do not need to choose instance types in advance as it will query your cloud providers
+  API for the *entire* list of available instance types and prices and then spin up the instance types
   that are the best fit for your workloads at the lowest cost
 
-- If you allow it, it will prioritize utilizing [spot
+* If you allow it, it will prioritize utilizing [spot
   instances](https://aws.amazon.com/ec2/spot/) for around a **70% discount** over list price. Moreover, it will periodically
   check if existing workloads can be migrated to cheaper instances as prices change over time.
 
-- It incorporates the functionality provided by the [aws-node-termination-handler](https://github.com/aws/aws-node-termination-handler)
+* It incorporates the functionality provided by the [aws-node-termination-handler](https://github.com/aws/aws-node-termination-handler)
   removing the need to run it altogether.
 
-- It scales extremely well with the ability to spin up and down 100s of nodes at a time.
+* It scales extremely well with the ability to spin up and down 100s of nodes at a time.
 
-We provide an infrastructure module to deploy it: [kube_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter).
+We provide an infrastructure module to deploy it: [kube\_karpenter](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_karpenter).
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `kube_vpa` module called `kube_karpenter`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -220,23 +211,23 @@ Karpenter requires some instructions about how to perform autoscaling such as wh
 to use for the underlying nodes. It looks for those instructions in [NodePool](https://karpenter.sh/docs/concepts/nodepools/) custom resources.
 
 The Panfactum stack comes with several classes of NodePools which are defined in
-the [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) module:
+the [kube\_karpenter\_node\_pools](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) module:
 
-- `burstable`
-  - [burstable, T-family instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
-  - [spot nodes](https://aws.amazon.com/ec2/spot/)
-  - highest scheduling preference
-  - assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
-    - `{ key = "burstable", value = "true", effect = "NoSchedule" }`
-    - `{ key = "spot", value = "true", effect = "NoSchedule" }`
-- `spot`
-  - general purpose [spot nodes](https://aws.amazon.com/ec2/spot/)
-  - highest scheduling preference
-  - assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
-    - `{ key = "spot", value = "true", effect = "NoSchedule" }`
-- `worker`
-  - standard on-demand instance types
-  - base scheduling preference
+* `burstable`
+  * [burstable, T-family instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
+  * [spot nodes](https://aws.amazon.com/ec2/spot/)
+  * highest scheduling preference
+  * assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
+    * `{ key = "burstable", value = "true", effect = "NoSchedule" }`
+    * `{ key = "spot", value = "true", effect = "NoSchedule" }`
+* `spot`
+  * general purpose [spot nodes](https://aws.amazon.com/ec2/spot/)
+  * highest scheduling preference
+  * assigned the following [taints](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/):
+    * `{ key = "spot", value = "true", effect = "NoSchedule" }`
+* `worker`
+  * standard on-demand instance types
+  * base scheduling preference
 
 All nodes are labeled with their class via `panfactum.com/class`. [^1]
 
@@ -246,9 +237,9 @@ Let's deploy the NodePools now:
 
 1. Create a new directory adjacent to your `kube_karpenter` module called `kube_karpenter_node_pools`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl).
 
-3. For `node_subnets`, we _strongly_ recommend using the same subnets you used in the `aws_eks` module for `node_subnets` unless you have a specific reason not to.
+3. For `node_subnets`, we *strongly* recommend using the same subnets you used in the `aws_eks` module for `node_subnets` unless you have a specific reason not to.
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -275,10 +266,7 @@ recognizes that additional nodes need to be schedule.
 
 5. Describe some of the new nodes by pressing `d` when highlighting one. Notice that many of these new nodes are spot instances.
 
-   <Image
-     src={spotNodeLabelImg}
-     alt="Labels indicating that Karpenter spun up spot instances"
-   />
+   <MarkdownImage src={spotNodeLabelImg} alt="Labels indicating that Karpenter spun up spot instances" />
 
 6. Scale `cert-manager-webhook` back down to `2`. Karpenter will automatically take care of the node
    cleanup and de-provisioning. This will happen slower than the scale-up as scaling down happens in batches
@@ -305,24 +293,23 @@ Instead, the default scheduler will try to spread pods evenly across nodes rathe
 them on as few nodes as possible. This hinders Karpenter's ability to efficiently de-provision nodes, and can result in significant
 wasted resources. [^6]
 
-[^6]:
-    [This article](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money) provides a
+[^6]: [This article](https://clickhouse.com/blog/packing-kubernetes-pods-more-efficiently-saving-money) provides a
     great real world example of how this impacted a company running Kubernetes clusters in AWS.
 
-We provide an alternative scheduler in [kube_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+We provide an alternative scheduler in [kube\_scheduler](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
 (`panfactum`) that implements the bin-packing scheduling algorithm. Typically, this results in a 25-33% cost reduction.
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `kube_karpenter` module called `kube_scheduler`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_scheduler/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_scheduler/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
-5. In your `region.yaml`, set `extra_inputs.panfactum_scheduler_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
+5. In your `region.yaml`, set `extra_inputs.panfactum_scheduler_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
    This will instruct all modules in this cluster to use this new scheduler instead of the default EKS one.
 
 6. Re-deploy all Kubernetes modules.
@@ -331,8 +318,4 @@ Let's deploy it now:
 
 Now that autoscaling is active, we can proceed to set up inbound networking for our cluster.
 
-<BootstrappingGuideNav
-  backHref={"/docs/edge/guides/bootstrapping/service-mesh"}
-  forwardHref={"/docs/edge/guides/bootstrapping/inbound-networking"}
-  stepNumber={15}
-/>
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/service-mesh"} forwardHref={"/docs/main/guides/bootstrapping/inbound-networking"} stepNumber={15} />

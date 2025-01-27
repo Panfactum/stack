@@ -1,0 +1,24 @@
+---
+import SubSectionKicker from "./SubSectionKicker.astro";
+import SubSectionTitle from "./SubSectionTitle.astro";
+interface Props {
+  class?: string;
+  kicker?: string;
+  title?: string;
+}
+const { kicker, title, class: className } = Astro.props;
+---
+
+<section
+  class:list={[
+    "flex flex-col items-center justify-center py-16 w-full",
+    className,
+  ]}
+>
+  <div class="flex flex-col items-center justify-center gap-2 pb-8">
+    {kicker && <SubSectionKicker>{kicker}</SubSectionKicker>}
+    {title && <SubSectionTitle>{title}</SubSectionTitle>}
+  </div>
+
+  <slot />
+</section>

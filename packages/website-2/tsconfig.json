@@ -1,14 +1,17 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
     "baseUrl": ".",
     "paths": {
-      "react": ["./node_modules/@types/react"],
       "~/*": ["./"],
       "@/*": ["./src/*"]
-    }
+    },
+    "types": [
+      "./src/env.d.ts",
+      "./src/astro-assets.d.ts"
+    ]
   },
   "include": [
     "src/**/*.d.ts",
@@ -16,5 +19,6 @@
     "src/**/*.tsx",
     "src/**/*.astro",
     "src/**/*.mdx"
-  ]
+  ],
+
 }

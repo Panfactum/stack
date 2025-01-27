@@ -1,19 +1,10 @@
----
-title: "Authentik"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_authentik"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_authentik"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="kube_authentik" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_authentik" status="stable" type="direct" />
 
 # Authentik
 
@@ -24,55 +15,49 @@ Kubernetes cluster.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### akadmin_email
+### akadmin\_email
 
 Description: The email address to use for the root authentik administrator. Warning: must be changed manually once applied.
 
 Type: `string`
 
-### eks_cluster_name
-
-Description: The name of the EKS cluster.
-
-Type: `string`
-
-### email_from_address
+### email\_from\_address
 
 Description: The 'from' address to use for sent emails
 
 Type: `string`
 
-### smtp_host
+### smtp\_host
 
 Description: The SMTP server for email sending
 
 Type: `string`
 
-### smtp_password
+### smtp\_password
 
 Description: The password to use for SMTP authentication for email sending
 
 Type: `string`
 
-### smtp_user
+### smtp\_user
 
 Description: The user to use for SMTP authentication for email sending
 
@@ -82,15 +67,15 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### authentik_helm_version
+### authentik\_helm\_version
 
 Description: The version of the Authentik helm chart to deploy
 
 Type: `string`
 
-Default: `"2024.4.2"`
+Default: `"2024.8.4"`
 
-### aws_iam_ip_allow_list
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -98,7 +83,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cdn_mode_enabled
+### cdn\_mode\_enabled
 
 Description: Whether to enable CDN mode for the Vault ingress
 
@@ -106,7 +91,7 @@ Type: `bool`
 
 Default: `true`
 
-### db_recovery_directory
+### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
@@ -114,7 +99,7 @@ Type: `string`
 
 Default: `null`
 
-### db_recovery_mode_enabled
+### db\_recovery\_mode\_enabled
 
 Description: Whether to enable recovery mode for the PostgreSQL database
 
@@ -122,7 +107,7 @@ Type: `bool`
 
 Default: `false`
 
-### db_recovery_target_time
+### db\_recovery\_target\_time
 
 Description: If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data.
 
@@ -138,23 +123,15 @@ Type: `string`
 
 Default: `null`
 
-### enhanced_ha_enabled
+### error\_reporting\_enabled
 
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
-
-### error_reporting_enabled
-
-Description: True iff errors should be reported to authentik for telemetry purposes
+Description: True iff errors should be reported to Authentik for telemetry purposes
 
 Type: `bool`
 
 Default: `true`
 
-### ingress_enabled
+### ingress\_enabled
 
 Description: Whether to enable ingress to the Authentik server
 
@@ -162,15 +139,15 @@ Type: `bool`
 
 Default: `false`
 
-### log_level
+### log\_level
 
-Description: The log level for the operator pods
+Description: The log level for the Authentik pods
 
 Type: `string`
 
-Default: `"error"`
+Default: `"debug"`
 
-### monitoring_enabled
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -186,7 +163,15 @@ Type: `string`
 
 Default: `"authentik"`
 
-### panfactum_scheduler_enabled
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
+
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -194,7 +179,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -202,7 +187,15 @@ Type: `bool`
 
 Default: `true`
 
-### vpa_enabled
+### sla\_target
+
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+
+Type: `number`
+
+Default: `3`
+
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -214,35 +207,35 @@ Default: `true`
 
 The following outputs are exported:
 
-### akadmin_bootstrap_password
+### akadmin\_bootstrap\_password
 
 Description: The initial password for the root akadmin user. Only used on initial bootstrapping.
 
-### akadmin_bootstrap_token
+### akadmin\_bootstrap\_token
 
 Description: The initial API token for the root akadmin user. Only used on initial bootstrapping.
 
-### akadmin_email
+### akadmin\_email
 
 Description: The email for the root akadmin user.
 
-### authentik_url
+### authentik\_url
 
 Description: n/a
 
-### db_admin_role
+### db\_admin\_role
 
 Description: n/a
 
-### db_reader_role
+### db\_reader\_role
 
 Description: n/a
 
-### db_recovery_directory
+### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
-### db_superuser_role
+### db\_superuser\_role
 
 Description: n/a
 
@@ -250,11 +243,11 @@ Description: n/a
 
 Description: n/a
 
-### email_templates_configmap
+### email\_templates\_configmap
 
 Description: n/a
 
-### media_configmap
+### media\_configmap
 
 Description: n/a
 
@@ -262,15 +255,15 @@ Description: n/a
 
 Description: n/a
 
-### redis_admin_role
+### redis\_admin\_role
 
 Description: n/a
 
-### redis_reader_role
+### redis\_reader\_role
 
 Description: n/a
 
-### redis_superuser_role
+### redis\_superuser\_role
 
 Description: n/a
 

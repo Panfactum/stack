@@ -1,203 +1,335 @@
+/*
+All Variables referenced in this file are stored in the variables.css file.
+This file contextualizes those variables for usage in various places throughout
+the website.
+ */
+
 @layer utilities {
+  /****************************************************
+  **************   Font Sizes    **********************
+  *****************************************************/
+
+  .text-display-2xl {
+    @apply text-6xl md:text-7xl lg:text-8xl;
+  }
+
+  .text-display-xl {
+    @apply text-4xl md:text-5xl lg:text-5xl;
+  }
+
+  .text-display-lg {
+    @apply text-3xl md:text-4xl lg:text-4xl;
+  }
+
+  .text-display-md {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+
+  .text-display-sm {
+    @apply text-lg md:text-xl lg:text-2xl;
+  }
+
+  .text-display-xs {
+    @apply text-base md:text-lg lg:text-xl;
+  }
+
+  /****************************************************
+  **************   Background Colors    ***************
+  *****************************************************/
+
+  /*
+  Questions:
+
+  1. What is the difference b/w "brand" and the non-brand background colors?
+  2. What is the difference b/w "solid" and "primary"?
+  3. What are the _alt colors?
+  4. Why do some have dark mode variants and not others?
+ */
+
+  /* Primaries */
+  /* Very light / very dark */
   .bg-primary {
-    @apply bg-[var(--colors-background-bg-primary)];
+    @apply bg-gray-light-mode-200 dark:bg-gray-dark-mode-950;
+    @apply text-primary-on-light;
   }
 
-  .bg-primary_alt {
-    @apply bg-[var(--colors-background-bg-primary-alt)];
+  .bg-primary .text-secondary {
+    @apply text-secondary-on-light;
   }
 
-  .bg-primary-solid {
-    @apply bg-[var(--colors-background-bg-primary-solid)];
+  .bg-primary .text-tertiary {
+    @apply text-tertiary-on-light;
   }
 
+  .bg-primary .btn-primary {
+    @apply btn-primary-on-light;
+  }
+
+  .bg-primary .btn-secondary {
+    @apply btn-secondary-on-light;
+  }
+
+  /* Secondaries */
+  /* Dark blue / light grey */
+  /* Use when you need a significant contrast with a primary background */
   .bg-secondary {
-    @apply bg-[var(--colors-background-bg-secondary)];
+    @apply bg-brand-800 dark:bg-gray-dark-mode-900;
+    @apply text-primary-on-dark;
   }
 
-  .bg-brand-primary {
-    @apply bg-[var(--colors-background-bg-brand-primary)];
+  .bg-secondary
+    .text-secondary:not(
+      .bg-secondary :is(.bg-primary, .bg-tertiary) .text-secondary
+    ) {
+    @apply text-secondary-on-dark;
   }
 
-  .bg-brand-primary_alt {
-    @apply bg-[var(--colors-brand-primary_alt)];
+  .bg-secondary
+    .text-tertiary:not(
+      .bg-secondary :is(.bg-primary, .bg-tertiary) .text-tertiary
+    ) {
+    @apply text-tertiary-on-dark;
   }
 
+  .bg-secondary
+    .btn-primary:not(
+      .bg-secondary :is(.bg-primary, .bg-tertiary) .btn-primary
+    ) {
+    @apply btn-primary-on-dark;
+  }
+
+  .bg-secondary
+    .btn-secondary:not(
+      .bg-secondary :is(.bg-primary, .bg-tertiary) .btn-secondary
+    ) {
+    @apply btn-secondary-on-dark;
+  }
+
+  /* Tertiary */
+  /* Light grey / dark grey */
+  /* Use when you need a subtle contrast with the primary background */
+  .bg-tertiary {
+    @apply bg-gray-light-mode-300 dark:bg-gray-neutral-900;
+    @apply text-primary-on-light;
+  }
+
+  .bg-tertiary
+    .text-secondary:not(
+      .bg-tertiary :is(.bg-secondary, .bg-primary) .text-secondary
+    ) {
+    @apply text-secondary-on-light;
+  }
+
+  .bg-tertiary
+    .text-tertiary:not(
+      .bg-tertiary :is(.bg-secondary, .bg-primary) .text-tertiary
+    ) {
+    @apply text-tertiary-on-light;
+  }
+
+  .bg-tertiary
+    .btn-primary:not(
+      .bg-tertiary :is(.bg-primary, .bg-secondary) .btn-primary
+    ) {
+    @apply btn-primary-on-light;
+  }
+
+  .bg-tertiary
+    .btn-secondary:not(
+      .bg-tertiary :is(.bg-primary, .bg-secondary) .btn-secondary
+    ) {
+    @apply btn-secondary-on-light;
+  }
+
+  /* Accent - Light */
+  .bg-accent-light {
+    @apply bg-brand-500 dark:bg-brand-600;
+    @apply text-primary-on-dark;
+  }
+
+  .bg-accent-light .text-secondary {
+    @apply text-secondary-on-dark;
+  }
+
+  .bg-accent-light .text-tertiary {
+    @apply text-tertiary-on-dark;
+  }
+
+  /* Accent */
+  .bg-accent {
+    @apply bg-brand-650 dark:bg-brand-750;
+    @apply text-primary-on-dark;
+  }
+
+  .bg-accent .text-secondary {
+    @apply text-secondary-on-dark;
+  }
+
+  .bg-accent .text-tertiary {
+    @apply text-tertiary-on-dark;
+  }
+
+  /* Accent - Dark */
+  .bg-accent-dark {
+    @apply bg-brand-700 dark:bg-brand-800;
+    @apply text-primary-on-dark;
+  }
+
+  .bg-accent-dark .text-secondary {
+    @apply text-secondary-on-dark;
+  }
+
+  .bg-accent-dark .text-tertiary {
+    @apply text-tertiary-on-dark;
+  }
+
+  /* Docs */
   .bg-brand-docs-info {
-    @apply bg-[var(--colors-background-bg-brand-docs-info)];
+    @apply bg-[var(--colors-brand-doc-info)];
   }
 
   .bg-brand-docs-warning {
-    @apply bg-[var(--colors-background-bg-brand-docs-warning)];
+    @apply bg-[var(--colors-brand-doc-warning)];
   }
 
   .bg-brand-docs-success {
-    @apply bg-[var(--colors-background-bg-brand-docs-success)];
+    @apply bg-[var(--colors-brand-doc-success)];
   }
 
   .bg-brand-docs-error {
-    @apply bg-[var(--colors-background-bg-brand-docs-error)];
+    @apply bg-[var(--colors-brand-doc-error)];
   }
 
-  .bg-brand-secondary {
-    @apply bg-[var(--colors-background-bg-brand-secondary)];
-  }
+  /* Success */
 
   .bg-success-primary {
-    @apply bg-[var(--colors-background-bg-success-primary)];
+    @apply bg-success-50 dark:bg-success-500;
   }
 
-  .bg-warning-solid {
-    @apply bg-[var(--colors-background-bg-warning-solid)];
+  /* Error */
+
+  .bg-error-primary {
+    @apply bg-error-50 dark:bg-error-500;
   }
 
   .bg-error-solid {
-    @apply bg-[var(--colors-background-bg-error-solid)];
+    @apply bg-error-600;
   }
 
-  .bg-error-primary {
-    @apply bg-[var(--colors-background-bg-error-primary)];
-  }
+  /* Warnings */
 
-  .bg-brand-section {
-    @apply bg-[var(--colors-background-bg-brand-section)];
-  }
-
-  .bg-secondary_alt {
-    @apply bg-[var(--colors-background-bg-secondary-alt)];
-  }
-
-  .bg-quaternary {
-    @apply bg-[var(--colors-background-bg-quaternary)];
+  .bg-warning-solid {
+    @apply bg-warning-600;
   }
 
   .bg-warning-primary {
-    @apply bg-[var(--colors-background-bg-warning-primary)];
+    @apply bg-warning-50 dark:bg-warning-500;
   }
 
-  .bg-utility-brand-50 {
-    @apply bg-[var(--component-colors-utility-brand-utility-brand-50)];
+  /****************************************************
+  **************   Font Colors    ***************
+  *****************************************************/
+
+  .text-primary-on-dark {
+    @apply text-white dark:text-gray-dark-mode-50;
   }
 
-  .bg-utility-brand-500 {
-    @apply bg-[var(--component-colors-utility-brand-utility-brand-500)];
+  .text-primary-on-light {
+    @apply text-gray-light-mode-900 dark:text-gray-dark-mode-50;
   }
 
-  .bg-utility-gray-500 {
-    @apply bg-[var(--component-colors-utility-gray-utility-gray-500)];
+  .text-secondary-on-dark {
+    @apply text-white dark:text-gray-dark-mode-300;
   }
 
-  .bg-utility-blue-50 {
-    @apply bg-[var(--component-colors-utility-blue-utility-blue-50)];
+  .text-secondary-on-light {
+    @apply text-gray-light-mode-900 dark:text-gray-dark-mode-300;
   }
 
-  .bg-secondary-reversed {
-    @apply bg-[var(--colors-background-bg-brand-section-reversed)];
+  .text-tertiary-on-dark {
+    @apply text-white dark:text-gray-dark-mode-300;
   }
 
-  .text-primary {
-    @apply text-[var(--colors-text-text-primary-900)];
+  .text-tertiary-on-light {
+    @apply text-gray-light-mode-900 dark:text-gray-dark-mode-300;
   }
 
-  .text-secondary {
-    @apply text-[var(--colors-text-text-secondary-700)];
+  /****************************************************
+  **************   Button Colors    ***************
+  *****************************************************/
+
+  .btn-common {
+    @apply cursor-pointer font-semibold transition-colors;
   }
 
-  .text-secondary_on-brand {
-    @apply text-[var(--colors-text-text-secondary-on-brand)];
+  .btn-primary-on-light {
+    @apply btn-common text-white bg-brand-550 hover:bg-accent-dark ring-1 ring-brand-500 dark:ring-brand-700;
   }
 
-  .text-brand-secondary {
-    @apply text-[var(--colors-text-text-brand-secondary-700)];
+  .btn-primary-on-dark {
+    @apply btn-common text-white bg-brand-550 hover:bg-accent-dark ring-1 ring-brand-500 dark:ring-brand-700;
   }
 
-  .text-brand-tertiary {
-    @apply text-[var(--colors-text-text-brand-tertiary-600)];
+  .btn-secondary-on-light {
+    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-light-mode-300 dark:bg-gray-dark-mode-900 dark:hover:bg-gray-dark-mode-800 ring-1 ring-gray-cool-300  dark:ring-gray-warm-800;
   }
 
-  .text-primary_on-brand {
-    @apply text-[var(--colors-text-text-primary-on-brand)];
+  .btn-secondary-on-dark {
+    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-dark-mode-300 dark:bg-gray-cool-900 hover:dark:bg-gray-cool-800 ring-2 dark:ring-1 ring-gray-cool-300 dark:ring-gray-warm-800;
   }
 
-  .text-tertiary {
-    @apply text-[var(--colors-text-text-tertiary-600)];
-  }
-
-  .text-tertiary_on-brand {
-    @apply text-[var(--colors-text-text-tertiary-on-brand)];
-  }
-
-  .text-quaternary {
-    @apply text-[var(--colors-text-text-quaternary-500)];
-  }
-
-  .text-utility-blue-700 {
-    @apply text-[var(--component-colors-utility-blue-utility-blue-700)];
-  }
-
-  .fg-brand-primary {
-    @apply bg-[var(--colors-foreground-fg-brand-primary-600)];
-  }
-
-  .fg-secondary-text {
-    @apply text-[var(--colors-foreground-fg-secondary-700)];
-  }
-
-  .fg-warning-primary {
-    @apply text-[var(--colors-foreground-fg-warning-primary)];
-  }
-
-  .fg-senary {
-    @apply text-[var(--colors-foreground-fg-senary-300)];
-  }
-
-  .icon-fg-github {
-    @apply text-[var(--component-colors-components-icons-social-icons-social-icon-fg-github)];
-  }
-
-  .border-brand {
-    @apply border-[var(--colors-border-border-brand)];
-  }
-
-  .border-utility-brand-50 {
-    @apply border-[var(--component-colors-utility-brand-utility-brand-50)];
-  }
-
-  .border-utility-brand-200 {
-    @apply border-[var(--component-colors-utility-brand-utility-brand-200)];
-  }
-
-  .border-utility-blue-200 {
-    @apply border-[var(--component-colors-utility-blue-utility-blue-200)];
-  }
+  /****************************************************
+  **************   Border Colors    ***************
+  *****************************************************/
 
   .border-primary {
-    @apply border-[var(--colors-border-border-primary)];
+    @apply border-[var(--colors-gray-light-mode-300)] dark:border-[var(--colors-gray-dark-mode-700)];
   }
 
   .border-secondary {
-    @apply border-[var(--colors-border-border-secondary)];
+    @apply border-[var(--colors-gray-light-mode-200)] dark:border-[var(--colors-gray-dark-mode-800)];
+  }
+
+  .border-brand {
+    @apply border-[var(--colors-brand-500)] dark:border-[var(--colors-brand-400)];
+  }
+
+  .border-utility-brand-50 {
+    @apply border-[var(--colors-brand-50)] dark:border-[var(--colors-brand-950)];
+  }
+
+  .border-utility-brand-200 {
+    @apply border-[var(--colors-brand-200)] dark:border-[var(--colors-brand-800)];
+  }
+
+  .border-utility-blue-200 {
+    @apply border-[var(--colors-blue-200)] dark:border-[var(--colors-blue-800)];
   }
 
   .border-warning {
-    @apply border-[var(--colors-foreground-fg-warning-primary)];
+    @apply border-[var(--colors-warning-600)] dark:border-[var(--colors-warning-500)];
   }
 
   .border-success {
-    @apply border-[var(--colors-foreground-fg-success-primary)];
+    @apply border-[var(--colors-success-600)] dark:border-[var(--colors-success-500)];
   }
 
   .border-error {
-    @apply border-[var(--colors-foreground-fg-error-primary)];
+    @apply border-[var(--colors-error-600)] dark:border-[var(--colors-error-500)];
   }
 
-  .bg-border-secondary {
-    @apply bg-[var(--colors-border-border-secondary)];
+  /****************************************************
+  **************   Other    ***************************
+  *****************************************************/
+
+  /* This should NOT be in the global stylesheet for fuck's sake */
+  .icon-fg-github {
+    @apply text-[var(--colors-base-black)] dark:text-[var(--colors-base-white)];
   }
 
   .scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: var(--colors-scrollbar-thumb) transparent;
+    scrollbar-color: var(--colors-gray-light-mode-300) transparent;
   }
 
   .height-with-navigation-offset {
@@ -206,5 +338,16 @@
 
   .height-without-navigation-offset {
     @apply max-h-screen;
+  }
+
+  .tippy-box {
+    @apply bg-primary border-none dark:border-solid border-2 dark:text-offWhite p-2 z-10 !important;
+  }
+  .tippy-arrow:before {
+    @apply dark:m-[-1px] dark:text-white z-0;
+  }
+
+  .react-tooltip {
+    @apply bg-primary border-2 border-offWhite max-w-[80vw] overflow-hidden !important;
   }
 }

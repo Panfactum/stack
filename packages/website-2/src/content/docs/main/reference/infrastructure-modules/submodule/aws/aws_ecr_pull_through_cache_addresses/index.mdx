@@ -1,19 +1,10 @@
----
-title: "AWS ECR Pull Through Cache Address"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_ecr_pull_through_cache_addresses"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ecr_pull_through_cache_addresses"
-  status="stable"
-  type="submodule"
-/>
+<ModuleHeader name="aws_ecr_pull_through_cache_addresses" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache_addresses" status="stable" type="submodule" />
 
 # AWS ECR Pull Through Cache Address
 
@@ -23,7 +14,7 @@ Used to find the pull through cache address for the AWS account
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
 ## Required Inputs
 
@@ -33,7 +24,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -45,25 +36,25 @@ Default: `true`
 
 The following outputs are exported:
 
-### docker_hub_registry
+### docker\_hub\_registry
 
-Description: For use as the image_registry when sourcing public images hosted at docker.io
+Description: For use as the image\_registry when sourcing public images hosted at docker.io
 
-### ecr_public_registry
+### ecr\_public\_registry
 
-Description: For use as the image_registry when sourcing public images hosted at public.ecr.aws
+Description: For use as the image\_registry when sourcing public images hosted at public.ecr.aws
 
-### github_registry
+### github\_registry
 
-Description: For use as the image_registry when sourcing public images hosted at ghcr.io
+Description: For use as the image\_registry when sourcing public images hosted at ghcr.io
 
-### kubernetes_registry
+### kubernetes\_registry
 
-Description: For use as the image_registry when sourcing public images hosted at registry.k8s.io
+Description: For use as the image\_registry when sourcing public images hosted at registry.k8s.io
 
-### quay_registry
+### quay\_registry
 
-Description: For use as the image_registry when sourcing public images hosted at quay.io
+Description: For use as the image\_registry when sourcing public images hosted at quay.io
 
 ## Usage
 

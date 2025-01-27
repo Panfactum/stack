@@ -33,7 +33,7 @@
 .scroll-wrapper {
   column-gap: 20px;
   white-space: nowrap;
-  animation: smoothScroll 30s linear infinite;
+  animation: smoothScroll 60s linear infinite;
   &:hover {
     animation-play-state: paused;
   }
@@ -42,7 +42,7 @@
 .scroll-wrapper-reverse {
   column-gap: 20px;
   white-space: nowrap;
-  animation: smoothScrollReverse 30s linear infinite;
+  animation: smoothScrollReverse 60s linear infinite;
   &:hover {
     animation-play-state: paused;
   }

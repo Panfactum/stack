@@ -1,0 +1,38 @@
+---
+
+import StatusChip, { type Status } from "./StatusChip.astro";
+import TypeChip, { type Type } from "./TypeChip.astro";
+import { replaceVersionPlaceholders } from "../../../lib/constants";
+import GithubIcon from "../../icons/github.svg";
+
+interface Props {
+  status: Status;
+  sourceHref: string;
+  type: Type;
+  name: string;
+}
+
+const { status, sourceHref, type, name } = Astro.props;
+const href = replaceVersionPlaceholders(sourceHref);
+---
+
+<div
+  class="border-secondary mb-3 mt-1 flex flex-wrap gap-x-5 gap-y-2 border-b-2 border-solid py-1"
+>
+  <div class="flex items-center gap-3">
+    <code
+      data-reference={name}
+      class="code inline-block w-fit !text-sm font-medium sm:!text-base"
+    >
+      {name}
+    </code>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <StatusChip status={status} />
+    <TypeChip type={type} />
+    <a href={href}>
+      <GithubIcon />
+    </a>
+  </div>
+</div>

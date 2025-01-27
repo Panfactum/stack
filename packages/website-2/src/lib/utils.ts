@@ -10,7 +10,7 @@ export const CURRENCY_FORMAT = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 0,
 });
-export const CURRENCY_FORMAT_PRECISE = new Intl.NumberFormat("en-US", {
+export const CFP = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 2,

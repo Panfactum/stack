@@ -1,9 +1,8 @@
 ---
 title: "AWS Networking"
 ---
-
-import { Image } from "astro:assets";
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
 import natImg from "./nat.jpg";
 import vpcImg from "./vpc.jpg";
 
@@ -113,11 +112,11 @@ We will now deploy the [aws_vpc](/docs/edge/reference/infrastructure-modules/dir
 
 5. Ensure that your VPC looks similar to the following:
 
-   <Image src={vpcImg} alt="VPC viewed from the AWS web console" />
+   <MarkdownImage src={vpcImg} alt="VPC viewed from the AWS web console" />
 
 6. Ensure that your NAT nodes are running and healthy:
 
-   <Image src={natImg} alt="NAT nodes viewed from the AWS web console" />
+   <MarkdownImage src={natImg} alt="NAT nodes viewed from the AWS web console" />
 
    Note that each node should have a Public IPv4 address which should match its [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html).
    All traffic from your cluster will appear to originate from one of these IP addresses, and they will remain the same for the lifetime of your VPC.

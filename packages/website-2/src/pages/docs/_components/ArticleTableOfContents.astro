@@ -1,0 +1,56 @@
+---
+export interface ArticleHeadingMetadata {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: ArticleHeadingMetadata[];
+}
+
+const { headings } = Astro.props;
+
+const depthPadding = (depth: number) => {
+  if (depth === 1) {
+    return "pl-0";
+  } else if (depth === 2) {
+    return "pl-md";
+  } else if (depth === 3) {
+    return "pl-xl";
+  } else if (depth === 4) {
+    return "pl-3xl";
+  } else if (depth === 5) {
+    return "pl-4xl";
+  } else {
+    return "pl-5xl";
+  }
+};
+---
+
+<div class="float-right hidden min-w-[--toc-width] xl:block">
+  {
+    headings.length ? (
+      <nav
+        aria-label="Table of Contents"
+        class="fixed top-[--header-height] flex h-[calc(100vh_-_var(--header-height))] w-[--toc-width] flex-col gap-y-4 overflow-y-auto px-4 pt-4"
+      >
+        <span class="text-display-xs font-semibold">On this page</span>
+
+        <ul class="text-tertiary flex flex-col gap-y-4">
+          {headings.filter((heading) => heading.depth > 1)
+            .map((heading) => (
+              <li class="flex min-h-[20px] items-center text-sm font-semibold">
+                <a
+                  href={`#${heading.slug}`}
+                  class:list={`${depthPadding(heading.depth - 1)}`}
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </nav>
+    ) : null
+  }
+</div>

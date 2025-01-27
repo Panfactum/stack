@@ -1,26 +1,17 @@
----
-title: "GHA Runners"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_gha_runners"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_gha_runners"
-  status="beta"
-  type="direct"
-/>
+<ModuleHeader name="kube_gha_runners" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_gha_runners" status="beta" type="direct" />
 
 # GHA Runners
 
 This module provides deployments of [self-hosted GHA runners](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/deploying-runner-scale-sets-with-actions-runner-controller)
 that can be targeted in GHA workflows.
 
-For installation instructions, see our [guide](/docs/edge/guides/addons/github-actions/installing).
+For installation instructions, see our [guide](/docs/main/guides/addons/github-actions/installing).
 
 ## Usage
 
@@ -71,21 +62,21 @@ in the cluster while sitting idle.
 
 The following providers are needed by this module:
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### github_token
+### github\_token
 
 Description: The GitHub token that the runners will use to register with GitHub
 
@@ -99,16 +90,17 @@ Type:
 
 ```hcl
 map(object({
-    github_config_url     = string # The url for the organization or repository that the runners will belong to
-    min_replicas          = optional(number, 0)
-    max_replicas          = optional(number, 25)
-    action_runner_image   = optional(string)
-    action_runner_version = optional(string, "latest")
-    tmp_space_gb          = optional(number, 1)   # The number of GB of disk space to allocate to the runner
-    memory_mb             = optional(number, 250) # The number of MB of memory to allocate to the runner
-    cpu_millicores        = optional(number, 100) # The number of millicores of cpu to allocate to the runner
-    arm_nodes_enabled     = optional(bool, true)  # Whether to allow this runner to run on arm64 nodes
-    spot_nodes_enabled    = optional(bool, true)  # Whether to allow this runner to run on spot nodes
+    github_config_url              = string # The url for the organization or repository that the runners will belong to
+    min_replicas                   = optional(number, 0)
+    max_replicas                   = optional(number, 25)
+    action_runner_image_registry   = optional(string, "ghcr.io")
+    action_runner_image_repository = optional(string, "actions/actions-runner")
+    action_runner_image_tag        = optional(string, "latest")
+    tmp_space_gb                   = optional(number, 1)   # The number of GB of disk space to allocate to the runner
+    memory_mb                      = optional(number, 250) # The number of MB of memory to allocate to the runner
+    cpu_millicores                 = optional(number, 100) # The number of millicores of cpu to allocate to the runner
+    arm_nodes_enabled              = optional(bool, true)  # Whether to allow this runner to run on arm64 nodes
+    spot_nodes_enabled             = optional(bool, true)  # Whether to allow this runner to run on spot nodes
   }))
 ```
 
@@ -116,7 +108,7 @@ map(object({
 
 The following input variables are optional (have default values):
 
-### extra_env_secrets
+### extra\_env\_secrets
 
 Description: A key-value mapping of extra secret environment variables for the runner pods
 
@@ -124,7 +116,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra_pod_annotations
+### extra\_pod\_annotations
 
 Description: Annotations to add to every runner pod
 
@@ -132,7 +124,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra_pod_labels
+### extra\_pod\_labels
 
 Description: Labels to add to every runner pod
 
@@ -140,23 +132,23 @@ Type: `map(string)`
 
 Default: `{}`
 
-### gha_runner_scale_set_helm_version
+### gha\_runner\_scale\_set\_helm\_version
 
-Description: The version of the actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
+Description: The version of the  actions-runner-controller-charts/gha-runner-scale-set helm chart to deploy
 
 Type: `string`
 
 Default: `"0.9.3"`
 
-### node_image_cache_enabled
+### node\_image\_cache\_enabled
 
-Description: Whether to use kube-fledged to cache images locally for better startup performance
+Description: Whether to cache images locally for better startup performance
 
 Type: `bool`
 
 Default: `true`
 
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -164,7 +156,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 

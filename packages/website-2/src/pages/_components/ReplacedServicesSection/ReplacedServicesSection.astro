@@ -1,18 +1,8 @@
 ---
-import { Button } from "@/components/ui/button";
+/* eslint-disable import/order,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access */
+import Button from "../../../components/astro/ui/Button.astro";
 import "./ReplacedServicesSection.css";
 import ReplacedServiceIcon from "./ReplacedServiceIcon.astro";
-import SectionContent from "@/components/astro/section/section-content.astro";
-import SubSection from "@/components/layout/SubSection.astro";
-import datadogLogo from "./images/datadog.svg";
-import rdsLogo from "./images/rds.webp";
-import oktaLogo from "./images/okta.png";
-import sentryLogo from "./images/sentry.webp";
-import newRelicLogo from "./images/new-relic.svg";
-import dynaTraceLogo from "./images/dynatrace.png";
-import sysdigLogo from "./images/sysdig.svg";
-import netlifyLogo from "./images/netlify.svg";
-import elasticSearchLogo from "./images/elasticsearch.svg";
 import ecsLogo from "./images/ecs.png";
 import lambdaLogo from "./images/awslambda.png";
 import cloudflareLogo from "./images/cloudflare.svg";
@@ -37,8 +27,18 @@ import vercelLogo from "./images/vercel.svg";
 import terraformCloudLogo from "./images/terraform.png";
 import env0Logo from "./images/env0.jpg";
 import alertOpsLogo from "./images/alertops.webp";
+import datadogLogo from "./images/datadog.svg";
+import dynaTraceLogo from "./images/dynatrace.png";
+import elasticSearchLogo from "./images/elasticsearch.svg";
 import fullStoryLogo from "./images/fullstory.jpg";
 import metabaseLogo from "./images/metabase.png";
+import netlifyLogo from "./images/netlify.svg";
+import newRelicLogo from "./images/new-relic.svg";
+import oktaLogo from "./images/okta.png";
+import rdsLogo from "./images/rds.webp";
+import sentryLogo from "./images/sentry.webp";
+import sysdigLogo from "./images/sysdig.svg";
+import SubSection from "../../../components/astro/layout/SubSection.astro";
 
 const ICONS = [
   {
@@ -250,7 +250,6 @@ const ICONS2 = [
 <SubSection
   kicker="Managed Services"
   title="What can you replace?"
-  subtitle="Stop wasting time wrangling dozens of expensive, proprietary services."
 >
   <div class="w-full">
     <div class="pb-8">
@@ -282,7 +281,7 @@ const ICONS2 = [
       </div>
     </div>
     <div class="flex justify-center">
-      <Button variant="primary" size="xl"> Learn What You Can Save </Button>
+      <Button size="lg"> Learn What You Can Save </Button>
     </div>
   </div>
 </SubSection>

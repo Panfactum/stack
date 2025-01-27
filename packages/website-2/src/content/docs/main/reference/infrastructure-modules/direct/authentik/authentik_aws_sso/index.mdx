@@ -1,19 +1,10 @@
----
-title: "AWS SSO with Authentik"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="authentik_aws_sso"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/authentik_aws_sso"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="authentik_aws_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/authentik_aws_sso" status="stable" type="direct" />
 
 # AWS SSO with Authentik
 
@@ -21,57 +12,57 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.2.0/docs) (2024.2.0)
+* [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### authentik_domain
+### authentik\_domain
 
 Description: The domain name of the authentik instance
 
 Type: `string`
 
-### authentik_namespace
+### authentik\_namespace
 
 Description: The kubernetes namespace where Authentik is deployed
 
 Type: `string`
 
-### aws_acs_url
+### aws\_acs\_url
 
 Description: The ACS url provided by AWS when configuring an external identity provider
 
 Type: `string`
 
-### aws_issuer
+### aws\_issuer
 
 Description: The Issuer url provided by AWS when configuring an external identity provider
 
 Type: `string`
 
-### aws_sign_in_url
+### aws\_sign\_in\_url
 
 Description: The sign-in url provided by AWS when configuring an external identity provider
 
 Type: `string`
 
-### media_configmap
+### media\_configmap
 
 Description: The configmap holding the static media that Authentik will use
 
 Type: `string`
 
-### organization_name
+### organization\_name
 
 Description: The name of your organization
 
@@ -81,7 +72,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### allowed_groups
+### allowed\_groups
 
 Description: Only members of these groups can access AWS
 
@@ -89,7 +80,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### aws_scim_enabled
+### aws\_scim\_enabled
 
 Description: Whether to enable SCIM with AWS
 
@@ -97,7 +88,7 @@ Type: `bool`
 
 Default: `false`
 
-### aws_scim_token
+### aws\_scim\_token
 
 Description: The SCIM token provided by AWS
 
@@ -105,7 +96,7 @@ Type: `string`
 
 Default: `""`
 
-### aws_scim_url
+### aws\_scim\_url
 
 Description: The SCIM endpoint provided by AWS
 
@@ -113,7 +104,7 @@ Type: `string`
 
 Default: `""`
 
-### ui_description
+### ui\_description
 
 Description: The description to display in the Authentik web dashboard
 
@@ -121,7 +112,7 @@ Type: `string`
 
 Default: `"Amazon Web Services - IAM Identity Center SSO Login"`
 
-### ui_group
+### ui\_group
 
 Description: The section in the Authentik web dashboard that this will appear in
 
@@ -133,7 +124,7 @@ Default: `"Amazon Web Services"`
 
 The following outputs are exported:
 
-### saml_metadata
+### saml\_metadata
 
 Description: n/a
 

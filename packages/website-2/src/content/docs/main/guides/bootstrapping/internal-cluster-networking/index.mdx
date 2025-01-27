@@ -1,21 +1,16 @@
----
-title: "Internal Cluster Networking"
----
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
 
-import { Image } from "astro:assets";
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
-
+import ciliumLaunchImg from './cilium-launch.jpg'
+import corednsImg from './coredns.jpg'
+import nodesReadyImg from './nodes-ready.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
-import ciliumLaunchImg from "./cilium-launch.jpg";
-import corednsImg from "./coredns.jpg";
-import nodesReadyImg from "./nodes-ready.jpg";
 
 # Internal Cluster Networking
 
 ## Objective
 
-Install the basic Kubernetes cluster networking primitives via the [kube_core_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
-and [kube_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.
+Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+and [kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.
 
 ## Background
 
@@ -23,14 +18,14 @@ In the Panfactum stack, we use [CoreDNS](https://coredns.io/) to handle
 cluster DNS resolution and [Cilium](https://docs.cilium.io) to handle all the L3/L4 networking in our Kubernetes cluster.
 
 In this guide, we won't go into detail about the underlying design decisions and network concepts, so
-we recommend reviewing the [concept documentation](/docs/edge/concepts/networking/cluster-networking) for more
+we recommend reviewing the [concept documentation](/docs/main/concepts/networking/cluster-networking) for more
 information.
 
 ## Deploy Cilium
 
 Cilium provides workloads in your clusters with network interfaces that allow them to connect with each other and the wider
 internet. Without this controller, your pods would not be able to communicate. We provide a module
-for deploying Cilium: [kube_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
+for deploying Cilium: [kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
 
 Let's deploy it now.
 
@@ -38,7 +33,7 @@ Let's deploy it now.
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_cilium`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -46,17 +41,17 @@ Let's deploy it now.
 
 5. If the deployment succeeds, you should see the various cilium pods running:
 
-   <Image src={ciliumLaunchImg} alt="Cilium launched successfully" />
+   <MarkdownImage src={ciliumLaunchImg} alt="Cilium launched successfully" />
 
    Additionally, all the nodes should now be in the `Ready` state:
 
-   <Image src={nodesReadyImg} alt="Nodes are ready" />
+   <MarkdownImage src={nodesReadyImg} alt="Nodes are ready" />
 
 ## Deploy CoreDNS
 
 Kubernetes provides human-readable DNS names for pods and services running inside the cluster (e.g., `my-service.namespace.svc.cluster.local`);
 however, it does not come with its own DNS servers. The standard way to provide this functionality is via CoreDNS.
-We provide a module to deploy CoreDNS called [kube_core_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
+We provide a module to deploy CoreDNS called [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
 
 Let's deploy it now.
 
@@ -64,51 +59,27 @@ Let's deploy it now.
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_core_dns`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_core_dns/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_core_dns/terragrunt.hcl).
 
-3. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
+3. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/main/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
    you should use a `service_ip` of `172.20.0.10` as this is the well-known DNS IP in Kubernetes.
 
 4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
-6. If the deployment succeeds, you should see a `core-dns` deployment with 2/2 pods running:
+6. If the deployment succeeds, you should see a `core-dns` deployment with either 1/2 or 2/2 pods running:
 
-   <Image src={corednsImg} alt="CoreDNS launched successfully" />
+   <MarkdownImage src={corednsImg} alt="CoreDNS launched successfully" />
 
-## Run Network Tests
-
-<MarkdownAlert severity="warning">
-  This test takes awhile to complete, but please run it before continuing. If
-  something is broken, it will break other components in non-obvious ways.
-  Additionally, the fix will usually require re-provisioning your entire
-  cluster.
-</MarkdownAlert>
-
-Cilium comes with a [companion CLI tool](https://github.com/cilium/cilium-cli) that is bundled with the Panfactum devShell.
-We will use that to test that cilium is working as intended:
-
-1. Run `cilium connectivity test`.
-
-2. Wait about 20-30 minutes for the test to complete.
-
-3. If everything completes successfully, you should receive a message like this:
-
-   ```shell
-   ✅ All 46 tests (472 actions) successful, 18 tests skipped, 0 scenarios skipped.
-   ```
-
-4. Unfortunately, the test does not clean up after itself. You should run `kubectl delete ns cilium-test` to remove
-   the test resources.
+   If you see only 1/2 pods running, that is because we force the CoreDNS pods to run on nodes with different instance types
+   for high-availability. However, the cluster won't be able to dynamically provision the new instance types until
+   you complete the [autoscaling section](/docs/main/guides/bootstrapping/autoscaling) of the bootstrapping guide.
+   Once you complete that guide section, you will see that both CoreDNS pods have launched successfully. This should
+   not have any impact in the interim.
 
 ### Next Steps
 
-Now that basic networking is working within the cluster, we will configure your storage
-drivers.
+Now that basic networking is working, we will configure a policy engine for the cluster.
 
-<BootstrappingGuideNav
-  backHref={"/docs/edge/guides/bootstrapping/kubernetes-cluster"}
-  forwardHref={"/docs/edge/guides/bootstrapping/policy-controller"}
-  stepNumber={9}
-/>
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/kubernetes-cluster"} forwardHref={"/docs/main/guides/bootstrapping/policy-controller"} stepNumber={9} />

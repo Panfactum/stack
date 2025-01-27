@@ -1,10 +1,6 @@
 @layer base {
   * {
-    @apply border-border;
     box-sizing: border-box;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 
   html {
@@ -23,10 +19,31 @@
     -moz-appearance: textfield;
   }
 
-  .tippy-box {
-    @apply bg-primary border-none dark:border-solid border-2 dark:text-offWhite p-2 z-10 !important;
+  /* Scrollbar */
+  * {
+    scrollbar-gutter: stable;
   }
-  .tippy-arrow:before {
-    @apply text-primary dark:m-[-1px] dark:text-white z-0;
+
+  @supports selector(*::-webkit-scrollbar) {
+    *::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    *::-webkit-scrollbar-track {
+      @apply bg-gray-light-mode-300 dark:bg-gray-dark-mode-800;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      @apply border-[2px] border-solid border-gray-light-mode-300 bg-gray-light-mode-500 dark:border-gray-dark-mode-800 dark:bg-gray-dark-mode-600;
+      border-radius: 14px;
+    }
+  }
+
+  @supports not selector(*::-webkit-scrollbar) {
+    * {
+      scrollbar-gutter: stable;
+      @apply [scrollbar-color:var(--colors-gray-dark-mode-500)_var(--colors-gray-dark-mode-300)] dark:[scrollbar-color:var(--colors-gray-dark-mode-600)_var(--colors-gray-dark-mode-800)];
+    }
   }
 }

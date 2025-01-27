@@ -1,19 +1,10 @@
----
-title: "Kubernetes Ingress"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_ingress"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_ingress"
-  status="stable"
-  type="submodule"
-/>
+<ModuleHeader name="kube_ingress" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_ingress" status="stable" type="submodule" />
 
 # Kubernetes Ingress
 
@@ -22,15 +13,53 @@ resources in a Kubernetes cluster.
 
 ## Usage
 
+### Basics
+
+This module provides the ability to create a set of routing rules for a given set of domains (`var.domains`) using
+Kubernetes Ingresses.
+
+It works as follows:
+
+1. For all domains in `domains`, ensure that a DNS record is configured to point to the domain to this cluster's NGINX
+   ingress controller (via [kube\_external\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns))
+   and provide the ingress controller a TLS certificate for the domains
+   (via [kube\_cert\_manager](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager)).
+
+2. When the ingress controller receives a request to a domain in `domains`, first apply the rate limits and redirect rules.
+
+3. Next, the request's path is compared to the `path_prefix` in every config of `ingress_configs`.
+   If the request path is prefixed with `path_prefix`, use the settings in that config object. [^90]
+
+4. Apply CORS handling, rewrite rules, and any other request modification before forwarding the request to the Kubernetes
+   service indicated by the config's `service` and `service_port` values.
+
+5. When receiving a response form the upstream, perform any response modifications before forwarding the response to the
+   initiating client.
+
+[^90]: If multiple path prefixes match, the longest `path_prefix` value wins.
+
+### TLS Certificates
+
+[kube\_cert\_issuers](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers) provides a global
+default cert for all covered domains and first-level subdomains (via [wildcard SANs](https://sectigostore.com/page/wildcard-san-certificates/)).
+This is stored at `cert-manager/ingress-tls`.
+
+However, if you need coverage for second-level or greater subdomains on the ingresses for this module, you will need
+a dedicated TLS cert. To generate this cert, set `generate_cert_enabled` to `true`.
+
+We use Let's Encrypt as the CA for your certificate requests. They provide certificates for free, but also impose
+[rate limits](https://letsencrypt.org/docs/rate-limits/). If you need to raise your rate limits,
+you can [submit a rate limits adjustment request](https://isrg.formstack.com/forms/rate_limit_adjustment_request).
+
 ### CDN
 
 If you want to provide a [CDN](https://en.wikipedia.org/wiki/Content_delivery_network) in front of the created Ingresses
-for performance and security improvements, see the [kube_aws_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
+for performance and security improvements, see the [kube\_aws\_cdn](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn) module.
 
 **Additionally, this module must be deployed with `cdn_mode_enabled` set to `true`.**
 
 CDN configuration can be supplied via the `cdn` configuration field on each element of `ingress_configs`. The individual
-settings are described in more detail [here](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn).
+settings are described in more detail [here](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn).
 
 ### Redirect Rules
 
@@ -55,6 +84,51 @@ to `https://vault.panfactum.com/some/path`.
 Note that the `source` value can use regex capture groups (e.g., `(/.*)`) that can then be referenced in
 `target` (e.g., `$1`).
 
+### Rewrite Rules
+
+You can use `rewrite_rules` in each `ingress_config` to rewrite the request's path *before* forwarding to the request
+to the upstream service.
+
+Rewrite rules work as follows:
+
+1. The appropriate configuration from `ingress_configs` is chosen based on its `path_prefix`.
+
+2. Each rule in `rewrite_rules` is applied as follows. The request's path ***without the `path_prefix`*** is compared against the `match` regex. Iff
+   that regex matches, then the ***path after the `path_prefix`*** is transformed to `rewrite`. [^91] [^92] Regex capture groups are allowed in `match`
+   and can be used in `rewrite`.
+
+3. Iff `remove_prefix` is `true`, prefix is removed from the request.
+
+4. The request is then forwarded to the upstream service.
+
+[^91]: If multiple rewrite rules match, the one with the longest `match` regex applies.
+
+[^92]: Note that we do not allow transforming the entire path at this phase because that would impact which config
+    from `ingress_configs` would match. If you need that behavior, a `redirect_rule` would be more appropriate than
+    a `rewrite_rule`.
+
+For example, consider a `kube_ingress` module with the following `ingress_configs` list:
+
+```hcl
+ingress_configs = [
+  {
+    path_prefix = "/a"
+    remove_prefix = true
+    rewrite_rules = [
+      {
+        match = "(.*)"
+        rewrite = "/1$1"
+      }
+    ]
+    service = "foo"
+    port = 80
+  }
+]
+```
+
+If the ingress receives a request with path `/a/b/c`, then the path will be mutated to `/1/b/c` before being sent to `foo:80`.
+If `remove_prefix` were false, then the path would be mutated to `/a/1/b/c` before being forwarded.
+
 ### Headers
 
 #### CORS Headers
@@ -68,20 +142,20 @@ Variables prefixed with `cors_` control the behavior.
 
 A few important notes:
 
-- If cors handling is enabled, `OPTIONS` requests will not be forwarded to the upstream server.
+* If cors handling is enabled, `OPTIONS` requests will not be forwarded to the upstream server.
 
-- Our CORS handling this will overwrite any CORS headers returned from the upstream server.
+* Our CORS handling this will overwrite any CORS headers returned from the upstream server.
 
-- Due to [problems in the default NGINX ingress controller behavior](https://github.com/kubernetes/ingress-nginx/issues/8469),
+* Due to [problems in the default NGINX ingress controller behavior](https://github.com/kubernetes/ingress-nginx/issues/8469),
   we implement our own CORS handling logic that fixes many issues in the default behavior. If you would
   rather use the default behavior, set `cors_native_handling_enabled` to `true`.
 
-- As a convenience, by default we allow the following popular headers in `Access-Control-Allow-Headers`: `DNT`, `Keep-Alive`,
+* As a convenience, by default we allow the following popular headers in `Access-Control-Allow-Headers`: `DNT`, `Keep-Alive`,
   `User-Agent`, `X-Requested-With`, `If-Modified-Since`, `Cache-Control`, `Content-Disposition`, `Content-Type`, `Range`,
   `Authorization`, `Cookies`, `Referrer`, `Accept`, `sec-ch-ua`, `sec-ch-ua-mobile`, `sec-ch-ua-platform`, `X-Suggested-File-Name`,
   `Cookie`. You can change this via `cors_allowed_headers`.
 
-- As a convenience, by default we expose the following popular headers in `Access-Control-Expose-Headers`: `Content-Encoding`, `Date`,
+* As a convenience, by default we expose the following popular headers in `Access-Control-Expose-Headers`: `Content-Encoding`, `Date`,
   `Location`, `X-Frame-Options`, `X-Content-Type-Options`, `Permissions-Policy`, `X-XSS-Protection`, `Vary`, `Cross-Origin-Response-Policy`,
   `Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`, `Content-Security-Policy`, `Referrer-Policy`. You can change this via `cors_exposed_headers`.
 
@@ -147,8 +221,7 @@ setting the `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy`
 headers and enable the `crossOriginIsolated` state in the underlying
 webpages. [^1]
 
-[^1]:
-    The default setting for `cross_origin_opener_policy` is `same-origin`
+[^1]: The default setting for `cross_origin_opener_policy` is `same-origin`
     which will break sites loading SSO pop-ups from different origins as it may
     block communication between the two windows. Change
     the value to `same-origin-allow-popups` to restore functionality.
@@ -166,8 +239,8 @@ Disable this by setting `x_content_type_options_enabled` to `false`.
 We set the following legacy headers to safe values by default, but
 they can be overridden:
 
-- [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options): `SAMEORIGIN`
-- [X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection): `1; mode=block`
+* [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options): `SAMEORIGIN`
+* [X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection): `1; mode=block`
 
 #### Extra Static Headers
 
@@ -177,13 +250,13 @@ You can specify extra static headers via the `extra_response_headers` input obje
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -195,7 +268,7 @@ Description: Which domains the generated ingresses will listen on
 
 Type: `list(string)`
 
-### ingress_configs
+### ingress\_configs
 
 Description: A list of ingress names to the configuration to use for the ingress
 
@@ -211,6 +284,18 @@ list(object({
     # The backing Kubernetes service
     service      = string
     service_port = number
+
+    # Rules for mutating the request path before it is forwarded to the upstream service
+    rewrite_rules = optional(list(object({
+      match   = string
+      rewrite = string
+    })), [])
+
+    # TLS Config
+    tls_secret_name = optional(string) # The name of the secret containing the cert-manager provided public TLS certificate. Will override any certs generated by this module.
+
+    # Misc
+    extra_annotations = optional(map(string), {}) # Extra annotations that will only apply to this ingress_config
 
     # CDN Configuration
     cdn = optional(object({
@@ -295,7 +380,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### cdn_mode_enabled
+### cdn\_mode\_enabled
 
 Description: Whether a CDN should be used in front of the ingresses
 
@@ -303,7 +388,7 @@ Type: `bool`
 
 Default: `false`
 
-### cors_allow_credentials
+### cors\_allow\_credentials
 
 Description: Whether to set the 'Access-Control-Allow-Credentials' header to 'true'
 
@@ -311,7 +396,7 @@ Type: `bool`
 
 Default: `true`
 
-### cors_allowed_headers
+### cors\_allowed\_headers
 
 Description: Extra headers to allow on CORS requests
 
@@ -342,7 +427,7 @@ Default:
 ]
 ```
 
-### cors_allowed_methods
+### cors\_allowed\_methods
 
 Description: The methods to allow on CORS requests
 
@@ -351,10 +436,18 @@ Type: `list(string)`
 Default:
 
 ```json
-["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"]
+[
+  "GET",
+  "HEAD",
+  "POST",
+  "OPTIONS",
+  "PUT",
+  "PATCH",
+  "DELETE"
+]
 ```
 
-### cors_allowed_origins_any
+### cors\_allowed\_origins\_any
 
 Description: Whether to allow any origin on CORS requests
 
@@ -362,7 +455,7 @@ Type: `bool`
 
 Default: `false`
 
-### cors_allowed_origins_self
+### cors\_allowed\_origins\_self
 
 Description: Whether the ingress domains should be allowed origins on CORS requests
 
@@ -370,7 +463,7 @@ Type: `bool`
 
 Default: `true`
 
-### cors_allowed_origins_sibling_domains
+### cors\_allowed\_origins\_sibling\_domains
 
 Description: Whether sibling domains of the ingress domains should be allowed origins on CORS requests
 
@@ -378,7 +471,7 @@ Type: `bool`
 
 Default: `true`
 
-### cors_allowed_origins_subdomains
+### cors\_allowed\_origins\_subdomains
 
 Description: Whether subdomains of the ingress domains should be allowed origins on CORS requests
 
@@ -386,7 +479,7 @@ Type: `bool`
 
 Default: `true`
 
-### cors_enabled
+### cors\_enabled
 
 Description: Whether to enable CORS response handling in NGINX
 
@@ -394,7 +487,7 @@ Type: `bool`
 
 Default: `false`
 
-### cors_exposed_headers
+### cors\_exposed\_headers
 
 Description: The extra headers to expose in CORS responses
 
@@ -420,7 +513,7 @@ Default:
 ]
 ```
 
-### cors_extra_allowed_origins
+### cors\_extra\_allowed\_origins
 
 Description: Extra origins allowed on CORS requests
 
@@ -428,7 +521,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cors_max_age_seconds
+### cors\_max\_age\_seconds
 
 Description: Controls how long the CORS preflight requests are allowed to be cached
 
@@ -436,7 +529,7 @@ Type: `number`
 
 Default: `86400`
 
-### cors_native_handling_enabled
+### cors\_native\_handling\_enabled
 
 Description: Whether to use the native NGINX-ingress annotations to handle cors rather than the Panfactum logic
 
@@ -444,7 +537,7 @@ Type: `bool`
 
 Default: `false`
 
-### cross_origin_embedder_policy
+### cross\_origin\_embedder\_policy
 
 Description: The value for the Cross-Origin-Embedder-Policy header
 
@@ -452,7 +545,7 @@ Type: `string`
 
 Default: `"require-corp"`
 
-### cross_origin_isolation_enabled
+### cross\_origin\_isolation\_enabled
 
 Description: Whether to enable the Cross-Origin-Opener-Policy header
 
@@ -460,7 +553,7 @@ Type: `bool`
 
 Default: `false`
 
-### cross_origin_opener_policy
+### cross\_origin\_opener\_policy
 
 Description: The value for the Cross-Origin-Opener-Policy header
 
@@ -468,7 +561,7 @@ Type: `string`
 
 Default: `"same-origin"`
 
-### cross_origin_resource_policy
+### cross\_origin\_resource\_policy
 
 Description: The value for the Cross-Origin-Resource-Policy header
 
@@ -476,7 +569,7 @@ Type: `string`
 
 Default: `"same-site"`
 
-### csp_base_uri
+### csp\_base\_uri
 
 Description: The base-uri content security policy
 
@@ -484,7 +577,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_connect_src
+### csp\_connect\_src
 
 Description: The connect-src content security policy
 
@@ -492,7 +585,7 @@ Type: `string`
 
 Default: `"'self' ws:"`
 
-### csp_default_src
+### csp\_default\_src
 
 Description: The default-src content security policy
 
@@ -500,7 +593,7 @@ Type: `string`
 
 Default: `"'self'"`
 
-### csp_enabled
+### csp\_enabled
 
 Description: Whether the Content-Security-Policy header should be added to responses
 
@@ -508,7 +601,7 @@ Type: `bool`
 
 Default: `false`
 
-### csp_fenced_frame_src
+### csp\_fenced\_frame\_src
 
 Description: The fenced-frame-src content security policy
 
@@ -516,7 +609,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_font_src
+### csp\_font\_src
 
 Description: The font-src content security policy
 
@@ -524,7 +617,7 @@ Type: `string`
 
 Default: `"'self' https: data:"`
 
-### csp_form_action
+### csp\_form\_action
 
 Description: The form-action content security policy
 
@@ -532,7 +625,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_frame_ancestors
+### csp\_frame\_ancestors
 
 Description: The frame-ancestors content security policy
 
@@ -540,7 +633,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_frame_src
+### csp\_frame\_src
 
 Description: The frame-src content security policy
 
@@ -548,7 +641,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_img_src
+### csp\_img\_src
 
 Description: The img-src content security policy
 
@@ -556,7 +649,7 @@ Type: `string`
 
 Default: `"'self' data:"`
 
-### csp_manifest_src
+### csp\_manifest\_src
 
 Description: The manifest-src content security policy
 
@@ -564,7 +657,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_media_src
+### csp\_media\_src
 
 Description: The media-src content security policy
 
@@ -572,7 +665,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_non_html
+### csp\_non\_html
 
 Description: The full content security policy for non-HTML responses
 
@@ -580,7 +673,7 @@ Type: `string`
 
 Default: `"default-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests"`
 
-### csp_object_src
+### csp\_object\_src
 
 Description: The object-src content security policy
 
@@ -588,7 +681,7 @@ Type: `string`
 
 Default: `"'none'"`
 
-### csp_override
+### csp\_override
 
 Description: Whether to override the Content-Security-Response header if set from the upstream server
 
@@ -596,7 +689,7 @@ Type: `bool`
 
 Default: `false`
 
-### csp_report_to
+### csp\_report\_to
 
 Description: The report-to content security policy
 
@@ -604,7 +697,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_report_uri
+### csp\_report\_uri
 
 Description: The report-uri content security policy
 
@@ -612,7 +705,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_sandbox
+### csp\_sandbox
 
 Description: The sandbox content security policy
 
@@ -620,7 +713,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_script_src
+### csp\_script\_src
 
 Description: The script-src content security policy
 
@@ -628,7 +721,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_script_src_elem
+### csp\_script\_src\_elem
 
 Description: The script-src-elem content security policy
 
@@ -636,7 +729,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_style_src
+### csp\_style\_src
 
 Description: The style-src content security policy
 
@@ -644,7 +737,7 @@ Type: `string`
 
 Default: `"'self'"`
 
-### csp_style_src_attr
+### csp\_style\_src\_attr
 
 Description: The style-src-attr content security policy
 
@@ -652,7 +745,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_style_src_elem
+### csp\_style\_src\_elem
 
 Description: The style-src-elem content security policy
 
@@ -660,7 +753,7 @@ Type: `string`
 
 Default: `null`
 
-### csp_worker_src
+### csp\_worker\_src
 
 Description: The worker-src content security policy
 
@@ -668,15 +761,15 @@ Type: `string`
 
 Default: `null`
 
-### extra_annotations
+### extra\_annotations
 
-Description: Extra annotations to add to the ingress objects
+Description: Extra annotations to add to all the ingress objects
 
 Type: `map(string)`
 
 Default: `{}`
 
-### extra_configuration_snippet
+### extra\_configuration\_snippet
 
 Description: An extra NGINX configuration snippet to add to the route handlers
 
@@ -684,7 +777,7 @@ Type: `string`
 
 Default: `""`
 
-### extra_response_headers
+### extra\_response\_headers
 
 Description: A key-value mapping of extra headers to add to every response
 
@@ -692,7 +785,15 @@ Type: `map(string)`
 
 Default: `{}`
 
-### permissions_policy_accelerometer
+### generate\_cert\_enabled
+
+Description: Whether to generate a new cert for these ingresses. In most cases this is unnecessary as the default cert for cluster provides sufficient coverage. However, this may be necessary for nested subdomains.
+
+Type: `bool`
+
+Default: `false`
+
+### permissions\_policy\_accelerometer
 
 Description: The permissions policy for the accelerometer directive
 
@@ -700,7 +801,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_ambient_light_sensor
+### permissions\_policy\_ambient\_light\_sensor
 
 Description: The permissions policy for the ambient-light-sensor directive
 
@@ -708,7 +809,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_autoplay
+### permissions\_policy\_autoplay
 
 Description: The permissions policy for the autoplay directive
 
@@ -716,7 +817,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_battery
+### permissions\_policy\_battery
 
 Description: The permissions policy for the battery directive
 
@@ -724,7 +825,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_bluetooth
+### permissions\_policy\_bluetooth
 
 Description: The permissions policy for the bluetooth directive
 
@@ -732,7 +833,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_camera
+### permissions\_policy\_camera
 
 Description: The permissions policy for the camera directive
 
@@ -740,7 +841,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_display_capture
+### permissions\_policy\_display\_capture
 
 Description: The permissions policy for the display-capture directive
 
@@ -748,7 +849,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_document_domain
+### permissions\_policy\_document\_domain
 
 Description: The permissions policy for the document-domain directive
 
@@ -756,7 +857,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_enabled
+### permissions\_policy\_enabled
 
 Description: Whether to enable the Permissions-Policy header in HTML responses.
 
@@ -764,7 +865,7 @@ Type: `bool`
 
 Default: `false`
 
-### permissions_policy_encrypted_media
+### permissions\_policy\_encrypted\_media
 
 Description: The permissions policy for the encrypted-media directive
 
@@ -772,7 +873,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_execution_while_not_rendered
+### permissions\_policy\_execution\_while\_not\_rendered
 
 Description: The permissions policy for the execution-while-not-rendered directive
 
@@ -780,7 +881,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_execution_while_out_of_viewport
+### permissions\_policy\_execution\_while\_out\_of\_viewport
 
 Description: The permissions policy for the execution-while-out-of-viewport directive
 
@@ -788,7 +889,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_fullscreen
+### permissions\_policy\_fullscreen
 
 Description: The permissions policy for the fullscreen directive
 
@@ -796,7 +897,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_gamepad
+### permissions\_policy\_gamepad
 
 Description: The permissions policy for the gamepad directive
 
@@ -804,7 +905,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_geolocation
+### permissions\_policy\_geolocation
 
 Description: The permissions policy for the geolocation directive
 
@@ -812,7 +913,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_gyroscope
+### permissions\_policy\_gyroscope
 
 Description: The permissions policy for the gyroscope directive
 
@@ -820,7 +921,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_hid
+### permissions\_policy\_hid
 
 Description: The permissions policy for the hid directive
 
@@ -828,7 +929,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_identity_credentials_get
+### permissions\_policy\_identity\_credentials\_get
 
 Description: The permissions policy for the identity-credentials-get directive
 
@@ -836,7 +937,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_idle_detection
+### permissions\_policy\_idle\_detection
 
 Description: The permissions policy for the idle-detection directive
 
@@ -844,7 +945,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_local_fonts
+### permissions\_policy\_local\_fonts
 
 Description: The permissions policy for the local-fonts directive
 
@@ -852,7 +953,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_magnetometer
+### permissions\_policy\_magnetometer
 
 Description: The permissions policy for the magnetometer directive
 
@@ -860,7 +961,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_microphone
+### permissions\_policy\_microphone
 
 Description: The permissions policy for the microphone directive
 
@@ -868,7 +969,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_midi
+### permissions\_policy\_midi
 
 Description: The permissions policy for the midi directive
 
@@ -876,7 +977,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_otp_credentials
+### permissions\_policy\_otp\_credentials
 
 Description: The permissions policy for the otp-credentials directive
 
@@ -884,7 +985,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_override
+### permissions\_policy\_override
 
 Description: Whether to override the Permissions-Policy header if set from the upstream server
 
@@ -892,7 +993,7 @@ Type: `bool`
 
 Default: `false`
 
-### permissions_policy_payment
+### permissions\_policy\_payment
 
 Description: The permissions policy for the payment directive
 
@@ -900,7 +1001,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_picture_in_picture
+### permissions\_policy\_picture\_in\_picture
 
 Description: The permissions policy for the picture-in-picture directive
 
@@ -908,7 +1009,7 @@ Type: `string`
 
 Default: `"(self)"`
 
-### permissions_policy_publickey_credentials_create
+### permissions\_policy\_publickey\_credentials\_create
 
 Description: The permissions policy for the publickey-credentials-create directive
 
@@ -916,7 +1017,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_publickey_credentials_get
+### permissions\_policy\_publickey\_credentials\_get
 
 Description: The permissions policy for the publickey-credentials-get directive
 
@@ -924,7 +1025,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_screen_wake_lock
+### permissions\_policy\_screen\_wake\_lock
 
 Description: The permissions policy for the screen-wake-lock directive
 
@@ -932,7 +1033,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_serial
+### permissions\_policy\_serial
 
 Description: The permissions policy for the serial directive
 
@@ -940,7 +1041,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_speaker_selection
+### permissions\_policy\_speaker\_selection
 
 Description: The permissions policy for the speaker-selection directive
 
@@ -948,7 +1049,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_storage_access
+### permissions\_policy\_storage\_access
 
 Description: The permissions policy for the storage-access directive
 
@@ -956,7 +1057,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_usb
+### permissions\_policy\_usb
 
 Description: The permissions policy for the usb directive
 
@@ -964,7 +1065,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_web_share
+### permissions\_policy\_web\_share
 
 Description: The permissions policy for the web-share directive
 
@@ -972,7 +1073,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_window_management
+### permissions\_policy\_window\_management
 
 Description: The permissions policy for the window-management directive
 
@@ -980,7 +1081,7 @@ Type: `string`
 
 Default: `"()"`
 
-### permissions_policy_xr_spatial_tracking
+### permissions\_policy\_xr\_spatial\_tracking
 
 Description: The permissions policy for the xr-spatial-tracking directive
 
@@ -988,7 +1089,7 @@ Type: `string`
 
 Default: `"()"`
 
-### rate_limiting_enabled
+### rate\_limiting\_enabled
 
 Description: Whether to enable rate limiting
 
@@ -996,7 +1097,7 @@ Type: `bool`
 
 Default: `true`
 
-### redirect_rules
+### redirect\_rules
 
 Description: A list of redirect rules that the ingress will match against before sending requests to the upstreams
 
@@ -1012,7 +1113,7 @@ list(object({
 
 Default: `[]`
 
-### referrer_policy
+### referrer\_policy
 
 Description: The value for Referrer-Policy header.
 
@@ -1020,7 +1121,7 @@ Type: `string`
 
 Default: `"no-referrer"`
 
-### x_content_type_options_enabled
+### x\_content\_type\_options\_enabled
 
 Description: Whether X-Content-Type-Options should be set to nosniff
 
@@ -1028,7 +1129,7 @@ Type: `bool`
 
 Default: `true`
 
-### x_frame_options
+### x\_frame\_options
 
 Description: The value for the X-Frame-Options header.
 
@@ -1036,7 +1137,7 @@ Type: `string`
 
 Default: `"SAMEORIGIN"`
 
-### x_xss_protection
+### x\_xss\_protection
 
 Description: The value for the X-XSS-Protection header.
 
@@ -1048,9 +1149,9 @@ Default: `"1; mode=block"`
 
 The following outputs are exported:
 
-### cdn_origin_configs
+### cdn\_origin\_configs
 
-Description: Configuration to be passed to the kube_cdn module to configure the CDN
+Description: Configuration to be passed to the kube\_cdn module to configure the CDN
 
 ## Maintainer Notes
 

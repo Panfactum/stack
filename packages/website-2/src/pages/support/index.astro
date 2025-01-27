@@ -1,0 +1,53 @@
+---
+
+import FaqAccordions from "@/components/astro/accordion/faq-accordion.astro";
+import Layout from "@/layouts/Layout.astro";
+
+import PriceCalculator from "./_components/solid/PriceCalculator/PriceCalculator";
+import SavingsCalculator from "./_components/solid/SavingsCalculator/SavingsCalculator";
+import MainSection from "../../components/astro/layout/MainSection.astro";
+---
+
+<Layout
+  title="Pricing"
+  description="Support plan pricing"
+  heroClass="bg-secondary"
+  hasBorder={false}
+>
+  <section slot="hero" class="flex flex-col items-center space-y-16 py-24">
+    <div class="container flex flex-col items-center space-y-12">
+      <div class="flex max-w-[846px] flex-col items-center gap-5 text-center">
+        <h1 class="text-display-lg font-machina font-medium leading-none">
+          Support Plans
+        </h1>
+        <p class="text-display-sm pt-0">
+          Simple, transparent pricing that is guaranteed to save you money.
+        </p>
+      </div>
+    </div>
+  </section>
+  <MainSection title="Pricing">
+    <PriceCalculator background="primary" client:load />
+  </MainSection>
+  <MainSection title="Estimated Savings" background="secondary">
+    <SavingsCalculator background="secondary" client:load />
+  </MainSection>
+
+  <MainSection title="Frequently Asked Questions">
+    <FaqAccordions />
+
+    <!--<div-->
+    <!--  class="gap-y-xl bg-secondary py-4xl px-2xl flex w-full flex-col items-center rounded-xl text-center"-->
+    <!--&gt;-->
+    <!--  <img src="/face.png" class="w-16" alt="Panfactum engineer" />-->
+    <!--  <h2 class="text-xl font-semibold">Still have questions?</h2>-->
+    <!--  <p class="text-tertiary  max-w-[303px] md:max-w-none md:text-lg">-->
+    <!--    Can’t find the answer you’re looking for? Please chat to our friendly-->
+    <!--    team.-->
+    <!--  </p>-->
+    <!--  <Button variant="primary" class=" h-[48px]"-->
+    <!--    >Get in touch</Button-->
+    <!--  >-->
+    <!--</div>-->
+  </MainSection>
+</Layout>

@@ -1,16 +1,11 @@
----
-title: "Building Images with BuildKit"
----
-
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert  from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Building Images with BuildKit
 
 This guide focuses on best practices and techniques for writing Dockerfiles and building
 container images using Panfactum's [BuildKit](https://github.com/moby/buildkit) system. [^1]
 
-[^1]:
-    Even though we do not recommend using the [Docker Engine](https://docs.docker.com/engine/), we still use conventions from the Docker ecosystem
+[^1]: Even though we do not recommend using the [Docker Engine](https://docs.docker.com/engine/), we still use conventions from the Docker ecosystem
     such as Dockerfiles and .dockerignore files as the BuildKit ecosystem assumes their use.
 
 The practices covered here assume basic familiarity with using Dockerfiles and building images. If you would like a tutorial
@@ -19,10 +14,9 @@ from first-principles, see this [guide.](https://depot.dev/blog/docker-build-ima
 ## Building Images
 
 <MarkdownAlert severity="info">
-  As you review the best ways to construct your images and build processes, it
-  may be helpful to review the overall BuildKit [architecture
-  documentation](/docs/edge/concepts/buildkit#architecture) to gain a better
-  understanding of the major moving parts.
+  As you review the best ways to construct your images and build processes, it may be helpful to review the overall
+  BuildKit [architecture documentation](/docs/main/concepts/buildkit#architecture) to gain a better understanding
+  of the major moving parts.
 </MarkdownAlert>
 
 ### Basics
@@ -33,19 +27,19 @@ builds.
 
 Panfactum wraps that CLI in a command called `pf-buildkit-build` that provides extra functionality:
 
-- Turns on BuildKit if it is scaled-to-zero
-- Establishes a network tunnel to the remote BuildKit servers
-- Load balances across available BuildKit instances
-- Authenticates with ECR in the region where BuildKit is running
-- Multiplexes the build across both `amd64` and `arm64` builds; combines the results into a [multi-platform image](https://docs.docker.com/build/building/multi-platform/)
-- Adds a shared S3 layer cache
+* Turns on BuildKit if it is scaled-to-zero
+* Establishes a network tunnel to the remote BuildKit servers
+* Load balances across available BuildKit instances
+* Authenticates with ECR in the region where BuildKit is running
+* Multiplexes the build across both `amd64` and `arm64` builds; combines the results into a [multi-platform image](https://docs.docker.com/build/building/multi-platform/)
+* Adds a shared S3 layer cache
 
 `pf-buildkit-build` **passes all arguments to** `buildctl` except:
 
-- `--repo`: The ECR repo to push the image to.
-- `--tag`: The tag to use for the generated image.
-- `--context`: A file system path to the [build context](https://docs.docker.com/build/building/context/)
-- `--file`: A file system path to the Dockerfile
+* `--repo`: The ECR repo to push the image to.
+* `--tag`: The tag to use for the generated image.
+* `--context`: A file system path to the [build context](https://docs.docker.com/build/building/context/)
+* `--file`: A file system path to the Dockerfile
 
 As an example, consider the command `pf-buildkit-build --repo=example --tag=foo --context=. --file=./Dockerfile --opt target=bar`.
 
@@ -71,7 +65,7 @@ build performance, especially since the build context must be transferred over t
 
 For these reasons, we recommend an ignore-by-default approach:
 
-```sh
+```txt
 # Ignore-by-default
 *
 # Example of including a specific file or directory
@@ -85,32 +79,33 @@ reduce runtime costs, `pf-buildkit-build` builds [multi-platform images](https:/
 
 This requires some additional care:
 
-- Your base images must also be multi-platform. To verify this, run `podman manifest inspect <image>` and examine
+* Your base images must also be multi-platform. To verify this, run `podman manifest inspect <image>` and examine
   the results:
 
   ```json5
+
   {
-    schemaVersion: 2,
-    mediaType: "application/vnd.docker.distribution.manifest.list.v2+json",
-    manifests: [
-      {
-        platform: {
-          architecture: "amd64",
-        },
-      },
-      {
-        platform: {
-          architecture: "arm64",
-        },
-      },
-    ],
+      "schemaVersion": 2,
+      "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+      "manifests": [
+          {
+              "platform": {
+                  "architecture": "amd64",
+              }
+          },
+          {
+              "platform": {
+                  "architecture": "arm64",
+              }
+          }
+      ]
   }
   ```
 
   You must see that the manifests array contains support for at minimum the `amd64` and `arm64` platforms in the
   `platform.architecture` field.
 
-- Your build commands must be multi-platform. For example, you cannot simply download binaries for one cpu architecture inside your image; you
+* Your build commands must be multi-platform. For example, you cannot simply download binaries for one cpu architecture inside your image; you
   must parameterize these commands based on the current platform. See [these docs](https://docs.docker.com/build/building/multi-platform/#cross-compilation)
   for information on how to do this.
 
@@ -140,15 +135,15 @@ and it will look something like this:
 
 ```json5
 {
-  auths: {
-    "ghcr.io": {
-      auth: "some auth token",
-    },
-  },
-  credHelpers: {
-    "<buildkit-account-id>.dkr.ecr.<buildkit-region>.amazonaws.com": "panfactum",
-    "public.ecr.aws": "panfactum",
-  },
+	"auths": {
+		"ghcr.io": {
+			"auth": "some auth token"
+		}
+	},
+	"credHelpers": {
+		"<buildkit-account-id>.dkr.ecr.<buildkit-region>.amazonaws.com": "panfactum",
+		"public.ecr.aws": "panfactum"
+	}
 }
 ```
 
@@ -164,9 +159,9 @@ to take care of managing and connecting to the BuildKit instances.
 
 Here are some helpful starter tips:
 
-- Use `pf-buildkit-tunnel` to establish a remote tunnel to a BuildKit instance of the specified CPU architecture.
-- Set `BUILDKIT_HOST` to the `tcp://127.0.0.1:<local-tunnel-port>`.
-- Use [manifest-tool](https://github.com/estesp/manifest-tool) to create the multi-platform manifest if desired. This comes
+* Use `pf-buildkit-tunnel` to establish a remote tunnel to a BuildKit instance of the specified CPU architecture.
+* Set `BUILDKIT_HOST` to the `tcp://127.0.0.1:<local-tunnel-port>`.
+* Use [manifest-tool](https://github.com/estesp/manifest-tool) to create the multi-platform manifest if desired. This comes
   included in the devShell.
 
 ### Clearing the Cache
@@ -283,6 +278,6 @@ about the source of truth for configuration settings.
 
 For additional recommendation, you can use these resources:
 
-- Docker's [Best Practice Guide](https://docs.docker.com/build/building/best-practices/)
-- Red Hat's [Dockerfile Security Tips](https://developers.redhat.com/articles/2023/03/23/10-tips-writing-secure-maintainable-dockerfiles)
-- Consider running a [Dockerfile linter](https://github.com/hadolint/hadolint) to catch potential problems
+* Docker's [Best Practice Guide](https://docs.docker.com/build/building/best-practices/)
+* Red Hat's [Dockerfile Security Tips](https://developers.redhat.com/articles/2023/03/23/10-tips-writing-secure-maintainable-dockerfiles)
+* Consider running a [Dockerfile linter](https://github.com/hadolint/hadolint) to catch potential problems

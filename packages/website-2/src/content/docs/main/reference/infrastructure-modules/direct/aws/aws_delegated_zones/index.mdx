@@ -1,19 +1,10 @@
----
-title: "AWS Delegated Zones"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_delegated_zones"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_delegated_zones"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="aws_delegated_zones" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_delegated_zones" status="stable" type="direct" />
 
 # AWS Delegated Zones
 
@@ -21,23 +12,23 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### root_domain_names
+### root\_domain\_names
 
 Description: Root domain names that need to be delegated.
 
 Type: `set(string)`
 
-### subdomain_identifiers
+### subdomain\_identifiers
 
 Description: The subdomain path segments
 
@@ -51,7 +42,7 @@ No optional inputs.
 
 The following outputs are exported:
 
-### record_manager_role_arn
+### record\_manager\_role\_arn
 
 Description: The ARN of the IAM role used to manage DNS records.
 

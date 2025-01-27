@@ -1,12 +1,8 @@
----
-title: "Installing BuildKit"
----
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
+import MarkdownSVGImage from "@/components/solid/markdown/MarkdownImgSvg";
 
-import { Image } from "astro:assets";
-import ImageSvg from "@/components/ui/ImageSvg";
-
-import BuildKitImg from "./buildkit.svg?raw";
-import ECRImg from "./erc.jpg";
+import BuildKitImg from './buildkit.svg?raw'
+import ECRImg from './erc.jpg'
 
 # Installing BuildKit
 
@@ -29,10 +25,10 @@ and [Gitpod](https://github.com/gitpod-io/gitpod).
 In the Panfactum stack, we deploy BuildKit into a Kubernetes cluster as a standalone set of
 servers that can be used by CI / CD pipelines and local developers alike. Centralizing the build processes provides many benefits:
 
-- The build cache is shared across all users allowing for 10-100x faster build times.
-- [Multi-platform container images](https://docs.docker.com/build/building/multi-platform/) become trivial to create, allowing
+* The build cache is shared across all users allowing for 10-100x faster build times.
+* [Multi-platform container images](https://docs.docker.com/build/building/multi-platform/) become trivial to create, allowing
   developers to easily generate images that run on both amd64 and arm64 architectures.
-- Every developer does not need a beefy machine to build images as teams can rely on the elastic capacity
+* Every developer does not need a beefy machine to build images as teams can rely on the elastic capacity
   of the cloud.
 
 ## Prepare for Installation
@@ -41,26 +37,26 @@ Before you install BuildKit, you must first decide where it should run.
 
 In general, you should aim to achieve the following architecture: [^3]
 
-<ImageSvg src={BuildKitImg} alt="BuildKit deployment architecture" />
+<MarkdownSVGImage src={BuildKitImg} alt="BuildKit deployment architecture" />
 
-[^3]: A more detailed architectural overview can be found [here](/docs/edge/concepts/buildkit).
+[^3]: A more detailed architectural overview can be found [here](/docs/main/concepts/buildkit).
 
-1. BuildKit should run in the _lowest_ environment for the following reasons:
+1. BuildKit should run in the *lowest* environment for the following reasons:
 
-   - All developers should have direct access to the build servers as they will use them in their daily development workflow.
-   - Builds are bursty workloads that may cause disruption to workloads running on the same node. For example, they
+   * All developers should have direct access to the build servers as they will use them in their daily development workflow.
+   * Builds are bursty workloads that may cause disruption to workloads running on the same node. For example, they
      might saturate the network bandwidth by downloading many dependencies all at once.
-   - BuildKit runs arbitrary code [^1] with elevated privileges as build processes
+   * BuildKit runs arbitrary code [^1] with elevated privileges as build processes
      are given more permissions than runtime processes. If code does escape the build sandbox, it should not be able
      to access your sensitive systems.
 
 2. BuildKit runs inside a Kubernetes cluster. If you have multiple clusters in your environment, you only need to deploy
    BuildKit to one.
 
-3. BuildKit should push generated images to an [Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/) in the _same_
+3. BuildKit should push generated images to an [Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/) in the *same*
    environment where it itself is hosted so that it does not need to be granted cross-environment permissions.
 
-4. _All_ environments will have permission to pull images from this registry as every build should only be done _once_ (not per-environment). This
+4. *All* environments will have permission to pull images from this registry as every build should only be done *once* (not per-environment). This
    ensures that container behavior will not change as code is promoted across environments. Additionally,
    images should be [configured as immutable](https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html) so that they can not be tampered with after creation.
 
@@ -70,14 +66,14 @@ Once you have chosen the cluster you will deploy BuildKit to, you are ready for 
 
 ## Install the Module
 
-We provide a module, [kube_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit), for
+We provide a module, [kube\_buildkit](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_buildkit), for
 deploying the BuildKit servers.
 
 Let's deploy it now:
 
 1. In the region with the cluster you wish to deploy BuildKit to, add a new directory called `kube_buildkit`.
 
-2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_buildkit/terragrunt.hcl).
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_buildkit/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -94,22 +90,21 @@ By default, the builders are sized at 2 vCPU / 8 GB RAM, but you can adjust thes
 We recommend pushing new container images to [AWS Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/) as this
 is the easiest way to consume images from within your Kubernetes clusters.
 
-We provide a module for configuring ECR with your image repositories: [aws_ecr_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos). [^2]
+We provide a module for configuring ECR with your image repositories: [aws\_ecr\_repos](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_repos). [^2]
 
-Note that a _registry_ is the domain name (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com`), a _repository_ is a specific namespace
-for images in the registry (e.g., `my_image`), and a _tag_ is an arbitrary identifier for _single_ image in the repository.
+Note that a *registry* is the domain name (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com`), a *repository* is a specific namespace
+for images in the registry (e.g., `my_image`), and a *tag* is an arbitrary identifier for *single* image in the repository.
 Together these form a unique image identifier (e.g., `5555555555.dkr.ecr.us-east-2.amazonaws.com/my_image:some_tag`) which conveniently
 also specifies where to push and pull the image from.
 
-[^2]:
-    We also supply [aws_ecr_public_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) for deploying
+[^2]: We also supply [aws\_ecr\_public\_repos](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) for deploying
     [public repositories](https://docs.aws.amazon.com/AmazonECR/latest/public/public-repositories.html).
 
 Let's set up a test image repository, so we can demonstrate how to build images with BuildKit:
 
 1. Adjacent to your `kube_buildkit` directory, add a new directory called `aws_ecr_repos`.
 
-2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_ecr_repos/terragrunt.hcl).
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ecr_repos/terragrunt.hcl).
 
 3. For now, set `ecr_repositories` to `{ test = {} }`. This creates a test repository that you can push images to. You can add additional repositories later.
 
@@ -121,7 +116,7 @@ Let's set up a test image repository, so we can demonstrate how to build images 
 
 To connect your local tooling to both the BuildKit servers and your ECR repositories, you must add some additional
 configuration to your repository. Specifically, you must create a `<buildkit_dir>/config.yaml`
-([reference docs](/docs/edge/reference/configuration/buildkit)).
+([reference docs](/docs/main/reference/configuration/buildkit)).
 
 Let's do this now:
 
@@ -156,7 +151,7 @@ Let's test this out.
 
    For these reasons, we recommend an ignore-by-default approach:
 
-   ```sh
+   ```txt
    # Ignore-by-default
    *
    # Example of including a specific file or directory
@@ -173,7 +168,7 @@ Let's test this out.
 
    If all goes well, you should see output that looks like this:
 
-   ```shell
+   ```shellsession
    statefulset.apps/buildkit-arm64 scaled
    statefulset.apps/buildkit-amd64 scaled
    arm64: Waiting 599 seconds for at least one BuildKit replica to become available...
@@ -215,14 +210,14 @@ Let's test this out.
 4. Log into the AWS web console and navigate to the ECR. Select the "test" repository under the Private Registry section. Notice that
    your image should now be available.
 
-<Image src={ECRImg} alt="Image is available in ECR" />
+   <MarkdownImage src={ECRImg} alt="Image is available in ECR" />
 
-Notice there are three entries: one for each system architecture (`amd64` and `arm64`) and the multi-platform manifest that is
-labeled as an Image Index.
+   Notice there are three entries: one for each system architecture (`amd64` and `arm64`) and the multi-platform manifest that is
+   labeled as an Image Index.
 
-The multi-platform manifest allows you to use a single tag (in this case `test`), and the right image (either `test-amd64` or
-`test-arm64`) for your system architecture will automatically be pulled from the registry. This unlocks the ability to create
-a _single_ deployment that can run either amd64 or arm64 nodes.
+   The multi-platform manifest allows you to use a single tag (in this case `test`), and the right image (either `test-amd64` or
+   `test-arm64`) for your system architecture will automatically be pulled from the registry. This unlocks the ability to create
+   a *single* deployment that can run either amd64 or arm64 nodes.
 
 5. You can now pull and run this image locally as well: `podman run --rm -it 891377197483.dkr.ecr.us-east-2.amazonaws.com/test:test`.
    Replace `891377197483.dkr.ecr.us-east-2.amazonaws.com` with your registry name (click `Copy URI`).
@@ -233,8 +228,8 @@ a _single_ deployment that can run either amd64 or arm64 nodes.
 
 BuildKit is now ready for your organization to use. We recommend taking a look at the following guides for putting it to use:
 
-- [Core techniques for building images](/docs/edge/guides/addons/buildkit/building-images)
+* [Core techniques for building images](/docs/main/guides/addons/buildkit/building-images)
 
-- Building images in CI pipelines (TODO)
+* Building images in CI pipelines (TODO)
 
-- Using BuildKit in local development (TODO)
+* Using BuildKit in local development (TODO)

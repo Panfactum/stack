@@ -1,19 +1,10 @@
----
-title: "AWS Authentication via Kubernetes Service Account"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_sa_auth_aws"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_sa_auth_aws"
-  status="stable"
-  type="submodule"
-/>
+<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
 
 # AWS Authentication via Kubernetes Service Account
 
@@ -31,22 +22,10 @@ See [the IRSA docs](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-f
 
 ```hcl
 module "example_deployment" {
-  source     = "github.com/Panfactum/stack.git//packages/infrastructure/kube_deployment?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source     = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
 
   name       = "example"
   namespace  = var.namespace
-
-  ...
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 
 data "aws_iam_policy_document" "example" {
@@ -72,21 +51,11 @@ data "aws_iam_policy_document" "example" {
 }
 
 module "aws_permissions" {
-  source     = "github.com/Panfactum/stack.git//packages/infrastructure/kube_sa_auth_aws?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source     = "${var.pf_module_source}kube_sa_auth_aws${var.pf_module_ref}"
+   
   service_account           = module.example_deployment.service_account_name
   service_account_namespace = var.namespace
-  eks_cluster_name          = var.eks_cluster_name
   iam_policy_json           = data.aws_iam_policy_document.example.json
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
@@ -95,7 +64,7 @@ module "aws_permissions" {
 To mitigate credential exfiltration attacks,
 generated credentials may only be used by pods running inside the cluster's subnets. These
 subnets are subnets with the `kubernetes.io/cluster/<cluster_name>` tag set. This is automatically
-configured by the [aws_eks](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_eks) module.
+configured by the [aws\_eks](/docs/main/reference/infrastructure-modules/submodule/aws/aws_eks) module.
 
 If you need to allow additional entities to use these credentials, you must manually
 add their CIDRs to the `ip_allow_list` input.
@@ -107,11 +76,11 @@ the following:
 
 1. The pod's service account has the `eks.amazonaws.com/role-arn` annotation set.
 2. Each container have the following environment variables set (should be set automatically):
-   - `AWS_ROLE_ARN`
-   - `AWS_WEB_IDENTITY_TOKEN_FILE`
+   * `AWS_ROLE_ARN`
+   * `AWS_WEB_IDENTITY_TOKEN_FILE`
 
-If both of those statements are true, that means that _authentication_ via IRSA (OIDC) is working
-correctly; however, _authorization_ might still be broken.
+If both of those statements are true, that means that *authentication* via IRSA (OIDC) is working
+correctly; however, *authorization* might still be broken.
 
 To verify, use the AWS console to check the following:
 
@@ -129,37 +98,31 @@ Event History](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-c
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### eks_cluster_name
-
-Description: The name of the EKS cluster that contains the service account.
-
-Type: `string`
-
-### iam_policy_json
+### iam\_policy\_json
 
 Description: An IAM policy document in rendered JSON string form.
 
 Type: `string`
 
-### service_account
+### service\_account
 
 Description: The name of the service account that should be able to assume the AWS permissions.
 
 Type: `string`
 
-### service_account_namespace
+### service\_account\_namespace
 
 Description: The namespace of the service account.
 
@@ -169,7 +132,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### annotate_service_account
+### annotate\_service\_account
 
 Description: Whether or not to annotate the service account
 
@@ -177,7 +140,7 @@ Type: `bool`
 
 Default: `true`
 
-### ip_allow_list
+### ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -189,19 +152,19 @@ Default: `[]`
 
 The following outputs are exported:
 
-### policy_arn
+### policy\_arn
 
 Description: The ARN of the policy assigned to the role.
 
-### role_arn
+### role\_arn
 
 Description: The ARN of the role created for the service account.
 
-### role_name
+### role\_name
 
 Description: The name of the role created for the service account.
 
-### service_account_annotations
+### service\_account\_annotations
 
 Description: The annotations to apply to the service account
 

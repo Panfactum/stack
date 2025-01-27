@@ -1,0 +1,16 @@
+@tailwind utilities;
+
+@layer utilities {
+}
+
+.integer-slider {
+  @apply w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-0 outline-0 border-0 ring-0 shadow-none;
+}
+.integer-slider::-webkit-slider-thumb,
+.integer-slider::-moz-range-thumb {
+  @apply w-2.5 h-2.5 -mt-5 appearance-none rounded-full transition-all duration-150 ease-in-out bg-brand-500 ring-2 ring-white;
+}
+.integer-slider::-webkit-slider-runnable-track,
+.integer-slider::-moz-range-track {
+  @apply w-full h-2 rounded-full bg-white;
+}

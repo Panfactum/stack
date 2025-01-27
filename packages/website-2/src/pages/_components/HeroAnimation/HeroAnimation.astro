@@ -1,14 +1,14 @@
 ---
-import RootOrbit from "./RootOrbit.astro";
+import { Image } from "astro:assets";
 
-import TerragruntIcon from "./images/terragrunt.jpg";
+import RootOrbit from "./RootOrbit.astro";
+import KubernetesSquare from "./images/kubernetes-square.jpg";
 import NixIcon from "./images/nix.jpg";
+import PanfactumSquare from "./images/panfactum-square.jpg";
+import TerragruntIcon from "./images/terragrunt.jpg";
 import TiltIcon from "./images/tilt.jpg";
 import TofuIcon from "./images/tofu.jpg";
-import KubernetesSquare from "./images/kubernetes-square.jpg";
-import PanfactumSquare from "./images/panfactum-square.jpg";
 
-import { Image } from "astro:assets";
 
 interface Props {
   scale?: number;
@@ -18,7 +18,7 @@ const { scale = 1 } = Astro.props;
 ---
 
 <div
-  class={`relative`}
+  class:list={`relative`}
   style={{
     "min-width": `calc((512px + 64px) * ${scale})`,
     "min-height": `calc(532px * ${scale})`,
@@ -168,7 +168,7 @@ const { scale = 1 } = Astro.props;
       alt="Stylized Panfactum logo"
       height={256 * scale}
       width={256 * scale}
-      class="absolute rotate-45 z-30 drop-shadow-2xl"
+      class="absolute z-30 rotate-45 drop-shadow-2xl"
       style={{
         top: `calc(-128px * ${scale})`,
         left: `calc(50% - (128px * ${scale}))`,
@@ -180,7 +180,7 @@ const { scale = 1 } = Astro.props;
       alt="Kubernetes logo"
       height={256 * scale}
       width={256 * scale}
-      class="absolute rotate-45 z-20 drop-shadow-2"
+      class="absolute z-20 rotate-45"
       style={{
         top: `calc(50% - (128px * ${scale}))`,
         left: `calc(50% - (128px * ${scale}))`,
@@ -188,7 +188,7 @@ const { scale = 1 } = Astro.props;
       }}
     />
     <div
-      class="absolute flex z-20 rotate-45"
+      class="absolute z-20 flex rotate-45"
       style={{
         left: `calc(95px * ${scale})`,
         top: `calc(-12px * ${scale})`,
@@ -201,7 +201,7 @@ const { scale = 1 } = Astro.props;
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-1"
-        class="hero-icon drop-shadow-2xl border-primary border-solid border-2"
+        class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
         }}
@@ -212,14 +212,14 @@ const { scale = 1 } = Astro.props;
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-2"
-        class="hero-icon drop-shadow-2xl border-primary border-solid border-2"
+        class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
         }}
       />
     </div>
     <div
-      class="absolute flex z-20 -rotate-45"
+      class="absolute z-20 flex -rotate-45"
       style={{
         right: `calc(95px * ${scale})`,
         top: `calc(-12px * ${scale})`,
@@ -232,7 +232,7 @@ const { scale = 1 } = Astro.props;
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-3"
-        class="hero-icon drop-shadow-2xl border-primary border-solid border-2"
+        class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
         }}
@@ -243,19 +243,19 @@ const { scale = 1 } = Astro.props;
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-4"
-        class="hero-icon drop-shadow-2xl border-primary border-solid border-2"
+        class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
         }}
       />
     </div>
-    <div class="circling-icons absolute w-full h-full z-10">
+    <div class="circling-icons absolute z-10 size-full">
       <Image
         src={TerragruntIcon}
         alt="Terragrunt icon"
         width={64 * scale}
         height={64 * scale}
-        class="absolute rounded-[50%] circling-icon"
+        class="circling-icon absolute rounded-[50%]"
         style={{
           top: `calc(-32px * ${scale})`,
           left: `calc(50% - (32px * ${scale}))`,
@@ -266,7 +266,7 @@ const { scale = 1 } = Astro.props;
         alt="Nix icon"
         width={64 * scale}
         height={64 * scale}
-        class="absolute rounded-[50%] circling-icon"
+        class="circling-icon absolute rounded-[50%]"
         style={{
           left: `calc(-32px * ${scale})`,
           top: `calc(50% - (32px * ${scale}))`,
@@ -277,7 +277,7 @@ const { scale = 1 } = Astro.props;
         alt="Tilt icon"
         width={64 * scale}
         height={64 * scale}
-        class="absolute rounded-[50%] circling-icon"
+        class="circling-icon absolute rounded-[50%]"
         style={{
           right: `calc(-32px * ${scale})`,
           top: `calc(50% - (32px * ${scale}))`,
@@ -288,7 +288,7 @@ const { scale = 1 } = Astro.props;
         alt="Tofu icon"
         width={64 * scale}
         height={64 * scale}
-        class="absolute rounded-[50%] circling-icon"
+        class="circling-icon absolute rounded-[50%]"
         style={{
           bottom: `calc(-32px * ${scale})`,
           left: `calc(50% - (32px * ${scale}))`,

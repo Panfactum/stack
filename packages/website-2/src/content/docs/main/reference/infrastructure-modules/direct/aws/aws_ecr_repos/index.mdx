@@ -1,19 +1,10 @@
----
-title: "AWS ECR Repositories"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_ecr_repos"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ecr_repos"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="aws_ecr_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_repos" status="stable" type="direct" />
 
 # AWS ECR Repositories
 
@@ -22,7 +13,7 @@ directly to AWS.
 
 ## Pulling and Pushing Images Locally
 
-We cover this in the [BuildKit guide](/docs/edge/guides/addons/buildkit/installing).
+We cover this in the [BuildKit guide](/docs/main/guides/addons/buildkit/installing).
 
 ## Pulling and Pushing Images Across Accounts
 
@@ -34,7 +25,7 @@ image artifacts across environments rather than rebuilding for each environment.
 
 IAM users and roles in other accounts must still have the
 [appropriate permissions to interact with ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html).
-We provide this automatically for Kubernetes clusters deployed with the [aws_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+We provide this automatically for Kubernetes clusters deployed with the [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks)
 module.
 
 ## Image Immutability
@@ -64,15 +55,15 @@ three means to do so:
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### ecr_repositories
+### ecr\_repositories
 
 Description: A mapping of names to configuration of the repositories to create.
 
@@ -99,11 +90,11 @@ No optional inputs.
 
 The following outputs are exported:
 
-### aws_account_id
+### aws\_account\_id
 
 Description: n/a
 
-### aws_region
+### aws\_region
 
 Description: n/a
 

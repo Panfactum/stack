@@ -1,7 +1,3 @@
----
-title: "Releases"
----
-
 # Releases
 
 ## Edge Releases
@@ -46,28 +42,28 @@ For example, `24-01.5` represents the fifth patch to the major version released 
 While this deviates from the normal practice of many open source projects which tend to use [semantic versioning](https://semver.org/),
 we do this for good reasons:
 
-- The stack is not a standalone utility, but rather a packaging of 100s of utilities that all work together.
+* The stack is not a standalone utility, but rather a packaging of 100s of utilities that all work together.
   Regardless of whether new functionality is added, we MUST update our component systems regularly
   to keep up with the ecosystems that we target (e.g., Kubernetes). In many
   ways, it resembles a package registry like [nixpkgs](https://github.com/NixOS/nixpkgs). We take inspiration from these
   registries which have time-based vs. functionality-based release names.
 
-- With time-based releases, _every_ release should be considered a major release with functionality changes that consumers
+* With time-based releases, *every* release should be considered a major release with functionality changes that consumers
   should review for potential breaking changes. This could be conveyed using an integer for a major version number (e.g., `1`, `2`, `3`, etc.). However,
   we can do better: the version timecode `<YY>-<MM>`. This retains the sortable property of integers, but
   adds additional contextual information that reflects our time-based release practices.
 
-- The version timecode allows users to immediately know whether that version is still officially supported
+* The version timecode allows users to immediately know whether that version is still officially supported
   by Panfactum maintainers. See the support policy below.
 
-- We additionally provide a patch number for when we backport bug fixes to previous releases. While we could simply
+* We additionally provide a patch number for when we backport bug fixes to previous releases. While we could simply
   update each `<YY>-<MM>` release directly, a patch number provides the following benefits:
 
-  - Many utilities use caches and/or lockfiles. Even if we update branch `<YY>-<MM>`, there is no guarantee that you
+  * Many utilities use caches and/or lockfiles. Even if we update branch `<YY>-<MM>`, there is no guarantee that you
     would receive the new updates (e.g., `flake.lock` would prevent this with nix flakes). Providing a patch ensures
     that those caches and/or lockfiles would receive the new code.
 
-  - There are several automations such as [renovate](https://docs.renovatebot.com/) or [dependabot](https://docs.github.com/en/code-security/dependabot)
+  * There are several automations such as [renovate](https://docs.renovatebot.com/) or [dependabot](https://docs.github.com/en/code-security/dependabot)
     that will notify you if code changes, but only if you cut a new discrete release number. For critical items like
     security patches, we want our users to be able to receive notifications if they should update immediately.
 
@@ -92,12 +88,12 @@ For example, version `24-01.X` will receive support until the end of January 202
 
 "Significant" will be determined by a combination of the following criteria:
 
-- Does it impact the recommended way to utilize the stack?
+* Does it impact the recommended way to utilize the stack?
 
-- Does it create a clear impairment of intended functionality or a clear security vulnerability for users of the stack?
+* Does it create a clear impairment of intended functionality or a clear security vulnerability for users of the stack?
 
 If the answer to both of these questions is "yes," then it is likely:
 
-- We will attempt to resolve the issue within 30 days
+* We will attempt to resolve the issue within 30 days
 
-- We will patch supported releases
+* We will patch supported releases

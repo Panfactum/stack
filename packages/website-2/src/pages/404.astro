@@ -1,10 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import MainSection from "@/components/layout/MainSection.astro";
-import { Button } from "@/components/ui/button";
+
+import MainSection from "../components/astro/layout/MainSection.astro";
+import Button from "../components/astro/ui/Button.astro";
 ---
 
-<Layout darkBackground={true} showFooter={false} heroClass="bg-brand-section">
+<Layout heroClass="bg-secondary" title="Not found" description="404 Page">
   <MainSection>
     <h1>Page Not Found</h1>
     <p>

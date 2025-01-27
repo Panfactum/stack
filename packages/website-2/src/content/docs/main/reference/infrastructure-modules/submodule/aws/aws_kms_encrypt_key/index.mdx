@@ -1,19 +1,10 @@
----
-title: "AWS KMS Encryption Key"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_kms_encrypt_key"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_kms_encrypt_key"
-  status="stable"
-  type="submodule"
-/>
+<ModuleHeader name="aws_kms_encrypt_key" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_kms_encrypt_key" status="stable" type="submodule" />
 
 # AWS KMS Encryption Key
 
@@ -24,9 +15,9 @@ users and administrators of the key.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -48,7 +39,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### admin_iam_arns
+### admin\_iam\_arns
 
 Description: List of IAM arns for key admins.
 
@@ -56,7 +47,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### log_delivery_enabled
+### log\_delivery\_enabled
 
 Description: Whether to allow the delivery.logs.amazonaws.com service to use the key
 
@@ -64,7 +55,7 @@ Type: `bool`
 
 Default: `false`
 
-### reader_iam_arns
+### reader\_iam\_arns
 
 Description: List of IAM arns for users who can use the key for encryption and decryption.
 
@@ -72,7 +63,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### replication_enabled
+### replication\_enabled
 
 Description: Whether to replicate the key to another region
 
@@ -80,7 +71,7 @@ Type: `bool`
 
 Default: `true`
 
-### restricted_reader_iam_arns
+### restricted\_reader\_iam\_arns
 
 Description: List of IAM arns for users who can only view the key.
 
@@ -88,7 +79,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### superuser_iam_arns
+### superuser\_iam\_arns
 
 Description: List of IAM arns for key superusers.
 
@@ -100,7 +91,7 @@ Default: `[]`
 
 The following outputs are exported:
 
-### alias_arn
+### alias\_arn
 
 Description: n/a
 

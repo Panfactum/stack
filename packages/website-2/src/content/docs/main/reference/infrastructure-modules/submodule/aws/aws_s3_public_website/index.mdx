@@ -1,19 +1,10 @@
----
-title: "Public Files Hosted in S3 Bucket"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_s3_public_website"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_s3_public_website"
-  status="beta"
-  type="submodule"
-/>
+<ModuleHeader name="aws_s3_public_website" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_s3_public_website" status="beta" type="submodule" />
 
 # Public Files Hosted in S3 Bucket
 
@@ -22,26 +13,44 @@ public URL. The URL for each file is `https://{var.domain}/path/to/file/in/bucke
 
 Under the hood, this module passes most arguments to either
 
-- `aws_cdn` ([docs](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn)); or
-- `aws_s3_private_bucket` ([docs](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket))
+* `aws_cdn` ([docs](/docs/main/reference/infrastructure-modules/submodule/aws/aws_cdn)); or
+* `aws_s3_private_bucket` ([docs](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket))
 
 so see the documentation for those modules for more information about various input settings.
+
+## Usage
+
+### Default Error Pages
+
+Often you will want to have a page to load if a client requests an asset not found in the S3 bucket. To configure
+the page that gets loaded, set the `not_found_path` input variable. It requires an absolute path from the root of the bucket.
+
+### Re-routing to Default Files
+
+Often you will want to re-route requests from file-less paths
+(e.g., `/some/page`) to paths for a default file in the corresponding folders (e.g., `/some/page/index.html`).
+
+The `default_file` input allows you to specify the filename that requests will be re-routed to (e.g., `/some/page/` -> `/some/page/${var.default_file}`.
+
+By default, this re-routing occurs for all requests with paths that do not contain a `.`.
+To instead only re-route if the path is to a directory or has a trailing slash (e.g., `/some/page/`),
+set `default_file_strict` to `false`.
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### bucket_name
+### bucket\_name
 
 Description: The name of the s3 bucket.
 
@@ -63,7 +72,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### cors_additional_allowed_origins
+### cors\_additional\_allowed\_origins
 
 Description: Specifies which origins are allowed besides the domain name specified
 
@@ -71,7 +80,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cors_allowed_headers
+### cors\_allowed\_headers
 
 Description: Specifies which headers are allowed for CORS requests.
 
@@ -80,10 +89,12 @@ Type: `list(string)`
 Default:
 
 ```json
-["Content-Length"]
+[
+  "Content-Length"
+]
 ```
 
-### cors_allowed_methods
+### cors\_allowed\_methods
 
 Description: Specifies which methods are allowed. Can be GET, PUT, POST, DELETE or HEAD.
 
@@ -92,10 +103,13 @@ Type: `list(string)`
 Default:
 
 ```json
-["GET", "HEAD"]
+[
+  "GET",
+  "HEAD"
+]
 ```
 
-### cors_expose_headers
+### cors\_expose\_headers
 
 Description: Specifies expose header in the response.
 
@@ -103,7 +117,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### cors_max_age_seconds
+### cors\_max\_age\_seconds
 
 Description: Time in seconds that the browser can cache the response for a preflight CORS request.
 
@@ -111,7 +125,7 @@ Type: `number`
 
 Default: `3600`
 
-### default_cache_behavior
+### default\_cache\_behavior
 
 Description: The default configuration for requests that hit the CloudFront distribution.
 
@@ -146,7 +160,23 @@ object({
 
 Default: `{}`
 
-### expire_after_days
+### default\_file
+
+Description: A default file name to use when no file is specified (/some/file/ => /some/file/index.html). If this is '', no default file extension will be applied.
+
+Type: `string`
+
+Default: `"index.html"`
+
+### default\_file\_strict
+
+Description: Iff true, then all requests with paths that do not contain a `.` will have the `default_file` appended.
+
+Type: `bool`
+
+Default: `true`
+
+### expire\_after\_days
 
 Description: Whether objects older than indicated days should be deleted. (0 to disable)
 
@@ -154,7 +184,7 @@ Type: `number`
 
 Default: `0`
 
-### expire_old_versions
+### expire\_old\_versions
 
 Description: Whether old object versions should be expired.
 
@@ -162,7 +192,7 @@ Type: `bool`
 
 Default: `true`
 
-### force_destroy
+### force\_destroy
 
 Description: Whether the bucket can be deleted if objects still exist in it.
 
@@ -170,7 +200,7 @@ Type: `bool`
 
 Default: `false`
 
-### geo_restriction_list
+### geo\_restriction\_list
 
 Description: A list of ISO 3166 country codes for the geographic restriction list (works for both whitelist and blacklist)
 
@@ -178,7 +208,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### geo_restriction_type
+### geo\_restriction\_type
 
 Description: What type of geographic restrictions to you want to apply to CDN clients. Must be one of: none, blacklist, whitelist.
 
@@ -186,7 +216,7 @@ Type: `string`
 
 Default: `"none"`
 
-### intelligent_transitions_enabled
+### intelligent\_transitions\_enabled
 
 Description: Whether objects should be subject to intelligent access tiering.
 
@@ -194,7 +224,7 @@ Type: `bool`
 
 Default: `true`
 
-### logging_cookies_enabled
+### logging\_cookies\_enabled
 
 Description: Whether cookies should be included in the CloudFront request logs
 
@@ -202,7 +232,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging_enabled
+### logging\_enabled
 
 Description: Whether request logging should be enabled for the CloudFront distribution
 
@@ -210,7 +240,7 @@ Type: `bool`
 
 Default: `false`
 
-### logging_expire_after_days
+### logging\_expire\_after\_days
 
 Description: The number of days after which CloudFront logs will be deleted. (0 to disable)
 
@@ -218,9 +248,17 @@ Type: `number`
 
 Default: `0`
 
-### path_match_behaviors
+### not\_found\_path
 
-Description: Similar to default_cache_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '\*.jpg').
+Description: The bucket path to return when the HTTP request path isn't found in the S3 bucket
+
+Type: `string`
+
+Default: `"/404.html"`
+
+### path\_match\_behaviors
+
+Description: Similar to default\_cache\_behavior but allows you to specify specific rules for certain path patterns. The keys for this map are the path patterns (e.g., '\*.jpg').
 
 Type:
 
@@ -253,15 +291,30 @@ map(object({
 
 Default: `{}`
 
-### price_class
+### price\_class
 
-Description: The price class for the CDN. Must be one of: PriceClass_All, PriceClass_200, PriceClass_100.
+Description: The price class for the CDN. Must be one of: PriceClass\_All, PriceClass\_200, PriceClass\_100.
 
 Type: `string`
 
 Default: `"PriceClass_100"`
 
-### timed_transitions_enabled
+### rewrite\_rules
+
+Description: Rewrite rules to add for the path resolution
+
+Type:
+
+```hcl
+list(object({
+    match   = string
+    rewrite = string
+  }))
+```
+
+Default: `[]`
+
+### timed\_transitions\_enabled
 
 Description: Whether objects should be transitioned to lower storage tiers after a certain amount of time.
 
@@ -269,7 +322,7 @@ Type: `bool`
 
 Default: `false`
 
-### versioning_enabled
+### versioning\_enabled
 
 Description: Whether object versioning is enabled.
 
@@ -281,11 +334,11 @@ Default: `false`
 
 The following outputs are exported:
 
-### bucket_arn
+### bucket\_arn
 
 Description: n/a
 
-### bucket_name
+### bucket\_name
 
 Description: n/a
 

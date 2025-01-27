@@ -4,8 +4,10 @@
 @tailwind utilities;
 
 .content {
-  @apply prose md:prose-base max-w-full text-primary;
-
+  @apply prose md:prose-base max-w-full;
+  *, *::marker {
+    @apply text-primary-on-light;
+  }
   @apply prose-h1:font-medium prose-h1:font-machina prose-h1:break-words;
   @apply prose-h2:py-2 prose-h2:mt-10 prose-h2:border-b prose-h2:border-primary prose-h2:break-words;
   @apply prose-h3:break-words;
@@ -14,9 +16,9 @@
   @apply prose-h6:break-words;
 
   @apply prose-td:border prose-th:border prose-td:border-secondary prose-th:border-secondary;
-  @apply prose-td:py-lg prose-td:px-3xl prose-th:py-lg prose-th:px-3xl prose-th:bg-secondary;
-  @apply prose-a:text-brand-secondary prose-a:underline;
-  @apply prose-code:font-montreal prose-code:font-semibold prose-code:text-primary;
+  @apply prose-td:py-3 prose-td:px-6 prose-th:py-3 prose-th:px-6 prose-th:bg-secondary;
+  @apply prose-a:underline;
+  @apply prose-code:font-montreal prose-code:font-semibold;
 
   code {
     &:not(pre > code)::before {
@@ -35,8 +37,7 @@
   }
 
   section.footnotes {
-    @apply bg-brand-primary-darker;
-    @apply mx-[-16px] md:mx-[-32px] px-[16px] md:px-[32px] py-[16px];
+    @apply -mx-6 px-6 py-4 bg-tertiary dark:bg-secondary;
 
     h2 {
       @apply m-0;
@@ -47,7 +48,7 @@
     @apply top-0;
 
     a {
-      @apply text-sm text-brand-secondary font-medium border py-xxs px-sm bg-utility-brand-50 dark:bg-brand-primary-darker border-utility-brand-200 rounded-sm no-underline;
+      @apply text-sm font-medium border py-0.5 px-1.5 btn-secondary-on-light rounded no-underline;
     }
   }
 
@@ -72,24 +73,12 @@
     filter: brightness(1.2); /* Lightens the icon on hover */
   }
 
-  h1,
-  h2,
-  h3,
-  th,
-  span {
-    @apply text-primary;
-  }
-
   th {
     white-space: nowrap;
   }
 
   img {
-    @apply bg-[transparent] dark:bg-[#e9e8eb];
-  }
-
-  strong {
-    @apply text-primary;
+    @apply bg-transparent dark:bg-white;
   }
 
   /*h1[id]::before {
@@ -105,11 +94,11 @@
   h4[id],
   h5[id],
   h6[id] {
-    scroll-margin-top: 90px;
+    scroll-margin-top: var(--header-height);
   }
 
   div[role="alert"] a {
-    @apply text-primary;
+    @apply text-primary-on-dark;
   }
 
   .bg-dark-blue-gradient {

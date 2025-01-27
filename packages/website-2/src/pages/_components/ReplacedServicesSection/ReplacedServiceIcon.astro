@@ -13,8 +13,8 @@ const { src, name, key } = Astro.props;
 <div
   title={name}
   id={key}
-  class={clsx(
-    "move-icon border border-secondary rounded-md bg-offWhite overflow-visible",
+  class:list={clsx(
+    "move-icon border-secondary overflow-visible rounded-md border bg-offWhite",
     `move-icon-id-${name.replace(/\s+/g, "-").toLowerCase()}`,
   )}
 >

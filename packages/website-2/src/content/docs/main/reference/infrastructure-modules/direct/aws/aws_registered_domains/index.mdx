@@ -1,19 +1,10 @@
----
-title: "AWS Registered Domains"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_registered_domains"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_registered_domains"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="aws_registered_domains" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_registered_domains" status="stable" type="direct" />
 
 # AWS Registered Domains
 
@@ -21,179 +12,179 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+* [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### admin_address_line_1
+### admin\_address\_line\_1
 
 Description: The street address (1) of the domain admin contact
 
 Type: `string`
 
-### admin_city
+### admin\_city
 
 Description: The city of the domain admin contact
 
 Type: `string`
 
-### admin_country_code
+### admin\_country\_code
 
 Description: The country code of the domain admin contact
 
 Type: `string`
 
-### admin_email_address
+### admin\_email\_address
 
 Description: The email address of the domain contact
 
 Type: `string`
 
-### admin_first_name
+### admin\_first\_name
 
 Description: The first name of the domain admin contact
 
 Type: `string`
 
-### admin_last_name
+### admin\_last\_name
 
 Description: The last name of the domain admin contact
 
 Type: `string`
 
-### admin_phone_number
+### admin\_phone\_number
 
 Description: The phone number of the domain contact
 
 Type: `string`
 
-### admin_state
+### admin\_state
 
 Description: The state or province of the domain admin contact
 
 Type: `string`
 
-### admin_zip_code
+### admin\_zip\_code
 
 Description: The ZIP code of the domain admin contact
 
 Type: `string`
 
-### domain_names
+### domain\_names
 
 Description: Domain names that will be managed by this module
 
 Type: `set(string)`
 
-### registrant_address_line_1
+### registrant\_address\_line\_1
 
 Description: The street address (1) of the domain registrant contact
 
 Type: `string`
 
-### registrant_city
+### registrant\_city
 
 Description: The city of the domain registrant contact
 
 Type: `string`
 
-### registrant_country_code
+### registrant\_country\_code
 
 Description: The country code of the domain registrant contact
 
 Type: `string`
 
-### registrant_email_address
+### registrant\_email\_address
 
 Description: The email address of the domain contact
 
 Type: `string`
 
-### registrant_first_name
+### registrant\_first\_name
 
 Description: The first name of the domain registrant contact
 
 Type: `string`
 
-### registrant_last_name
+### registrant\_last\_name
 
 Description: The last name of the domain registrant contact
 
 Type: `string`
 
-### registrant_phone_number
+### registrant\_phone\_number
 
 Description: The phone number of the domain contact
 
 Type: `string`
 
-### registrant_state
+### registrant\_state
 
 Description: The state or province of the domain registrant contact
 
 Type: `string`
 
-### registrant_zip_code
+### registrant\_zip\_code
 
 Description: The ZIP code of the domain registrant contact
 
 Type: `string`
 
-### tech_address_line_1
+### tech\_address\_line\_1
 
 Description: The street address (1) of the domain tech contact
 
 Type: `string`
 
-### tech_city
+### tech\_city
 
 Description: The city of the domain tech contact
 
 Type: `string`
 
-### tech_country_code
+### tech\_country\_code
 
 Description: The country code of the domain tech contact
 
 Type: `string`
 
-### tech_email_address
+### tech\_email\_address
 
 Description: The email address of the domain contact
 
 Type: `string`
 
-### tech_first_name
+### tech\_first\_name
 
 Description: The first name of the domain tech contact
 
 Type: `string`
 
-### tech_last_name
+### tech\_last\_name
 
 Description: The last name of the domain tech contact
 
 Type: `string`
 
-### tech_phone_number
+### tech\_phone\_number
 
 Description: The phone number of the domain contact
 
 Type: `string`
 
-### tech_state
+### tech\_state
 
 Description: The state or province of the domain tech contact
 
 Type: `string`
 
-### tech_zip_code
+### tech\_zip\_code
 
 Description: The ZIP code of the domain tech contact
 
@@ -203,7 +194,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### additional_account_ids_with_record_access
+### additional\_account\_ids\_with\_record\_access
 
 Description: Additional AWS account IDs for accounts that can assume with record manager role
 
@@ -211,7 +202,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### admin_address_line_2
+### admin\_address\_line\_2
 
 Description: The street address (2) of the domain admin contact
 
@@ -219,15 +210,15 @@ Type: `string`
 
 Default: `null`
 
-### admin_contact_type
+### admin\_contact\_type
 
-Description: The type of the contact. Defaults to PERSON if admin_organization_name is not provided. Otherwise, defaults to COMPANY.
+Description: The type of the contact. Defaults to PERSON if admin\_organization\_name is not provided. Otherwise, defaults to COMPANY.
 
 Type: `string`
 
 Default: `"DEFAULT"`
 
-### admin_organization_name
+### admin\_organization\_name
 
 Description: The name of the organization that the admin contact works for
 
@@ -235,7 +226,7 @@ Type: `string`
 
 Default: `null`
 
-### enable_auto_renew
+### enable\_auto\_renew
 
 Description: Whether to enable automatic domain renewal
 
@@ -243,7 +234,7 @@ Type: `bool`
 
 Default: `true`
 
-### enable_privacy_protection
+### enable\_privacy\_protection
 
 Description: Whether to enable Whois privacy protection
 
@@ -251,7 +242,7 @@ Type: `bool`
 
 Default: `true`
 
-### enable_transfer_lock
+### enable\_transfer\_lock
 
 Description: Whether to enable domain transfer lock
 
@@ -259,7 +250,7 @@ Type: `bool`
 
 Default: `true`
 
-### registrant_address_line_2
+### registrant\_address\_line\_2
 
 Description: The street address (2) of the domain registrant contact
 
@@ -267,15 +258,15 @@ Type: `string`
 
 Default: `null`
 
-### registrant_contact_type
+### registrant\_contact\_type
 
-Description: The type of the contact. Defaults to PERSON if registrant_organization_name is not provided. Otherwise, defaults to COMPANY.
+Description: The type of the contact. Defaults to PERSON if registrant\_organization\_name is not provided. Otherwise, defaults to COMPANY.
 
 Type: `string`
 
 Default: `"DEFAULT"`
 
-### registrant_organization_name
+### registrant\_organization\_name
 
 Description: The name of the organization that the registrant contact works for
 
@@ -283,7 +274,7 @@ Type: `string`
 
 Default: `null`
 
-### tech_address_line_2
+### tech\_address\_line\_2
 
 Description: The street address (2) of the domain tech contact
 
@@ -291,15 +282,15 @@ Type: `string`
 
 Default: `null`
 
-### tech_contact_type
+### tech\_contact\_type
 
-Description: The type of the contact. Defaults to PERSON if tech_organization_name is not provided. Otherwise, defaults to COMPANY.
+Description: The type of the contact. Defaults to PERSON if tech\_organization\_name is not provided. Otherwise, defaults to COMPANY.
 
 Type: `string`
 
 Default: `"DEFAULT"`
 
-### tech_organization_name
+### tech\_organization\_name
 
 Description: The name of the organization that the tech contact works for
 
@@ -315,7 +306,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### record_manager_role_arn
+### record\_manager\_role\_arn
 
 Description: The ARN of the IAM role used to manage DNS records.
 
@@ -336,9 +327,9 @@ it only removes them from the terraform state.
 
 There are three different domain contacts:
 
-- Registrant: The owner of the domain
-- Admin: The person responsible for administrative decisions about the domain
-- Tech: The person responsible for executing changes for the domain
+* Registrant: The owner of the domain
+* Admin: The person responsible for administrative decisions about the domain
+* Tech: The person responsible for executing changes for the domain
 
 It is possible for the same person to serve multiple roles.
 

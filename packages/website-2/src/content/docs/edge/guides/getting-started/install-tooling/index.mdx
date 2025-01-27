@@ -2,8 +2,7 @@
 title: "Install Tooling"
 ---
 
-import { Suspense } from "react";
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 import NextSteps from "./NextSteps";
 
 # Install Tooling
@@ -49,6 +48,4 @@ in order to enable functionality such as Nix flakes.
 
 ## Next Steps
 
-<Suspense>
-  <NextSteps client:only="react" />
-</Suspense>
+<NextSteps client:idle />

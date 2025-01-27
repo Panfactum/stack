@@ -1,19 +1,10 @@
----
-title: "Vault OAuth2 Proxy"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_vault_proxy"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vault_proxy"
-  status="stable"
-  type="submodule"
-/>
+<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_vault_proxy" status="stable" type="submodule" />
 
 # Vault OAuth2 Proxy
 
@@ -24,7 +15,7 @@ that requires authentication with the cluster's Vault instance.
 
 ### Setup
 
-This module is intended to be used in conjunction with the [kube_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+This module is intended to be used in conjunction with the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
 module. `domain` should be set to a domain used in `kube_ingress` and the `upstream_ingress_annotations` output
 should be passed to the `extra_annotations` input of `kube_ingress`.
 
@@ -40,24 +31,24 @@ the whole process adds very little overhead.
 There are a few means to validate users. Each of these can be used simultaneously, and a user must meet **all**
 the constraints to be authorized.
 
-- **allowed_email_domains**: Email domains that are allowed (sourced from Authentik)
-- **allowed_vault_roles**: The user's role in the cluster's Vault instance (one of `rbac-superusers`, `rbac-admins`, `rbac-readers`, `rbac-restricted-readers`)
+* **allowed\_email\_domains**: Email domains that are allowed (sourced from Authentik)
+* **allowed\_vault\_roles**: The user's role in the cluster's Vault instance (one of `rbac-superusers`, `rbac-admins`, `rbac-readers`, `rbac-restricted-readers`)
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -75,7 +66,7 @@ Description: The namespace to deploy the proxy into
 
 Type: `string`
 
-### vault_domain
+### vault\_domain
 
 Description: The domain of the Vault instance running in the cluster.
 
@@ -85,7 +76,7 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### allowed_email_domains
+### allowed\_email\_domains
 
 Description: Email domains allowed to authenticate with the proxy
 
@@ -94,10 +85,12 @@ Type: `list(string)`
 Default:
 
 ```json
-["*"]
+[
+  "*"
+]
 ```
 
-### allowed_vault_roles
+### allowed\_vault\_roles
 
 Description: Roles from Vault that are allowed to access the upstream resources
 
@@ -106,10 +99,15 @@ Type: `set(string)`
 Default:
 
 ```json
-["rbac-superusers", "rbac-admins", "rbac-readers", "rbac-restricted-readers"]
+[
+  "rbac-superusers",
+  "rbac-admins",
+  "rbac-readers",
+  "rbac-restricted-readers"
+]
 ```
 
-### az_spread_preferred
+### az\_spread\_preferred
 
 Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
 
@@ -117,7 +115,7 @@ Type: `bool`
 
 Default: `true`
 
-### instance_type_anti_affinity_required
+### instance\_type\_anti\_affinity\_required
 
 Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
 
@@ -125,15 +123,15 @@ Type: `bool`
 
 Default: `true`
 
-### oauth2_proxy_helm_version
+### oauth2\_proxy\_helm\_version
 
 Description: The version of the descheduler helm chart to deploy
 
 Type: `string`
 
-Default: `"7.5.4"`
+Default: `"7.8.1"`
 
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -141,7 +139,7 @@ Type: `bool`
 
 Default: `true`
 
-### path_prefix
+### path\_prefix
 
 Description: Path prefix for the ingress resource. Should be the same path prefix used by the upstream ingress resource.
 
@@ -149,7 +147,7 @@ Type: `string`
 
 Default: `"/"`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -157,7 +155,7 @@ Type: `bool`
 
 Default: `true`
 
-### vpa_enabled
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -169,7 +167,7 @@ Default: `true`
 
 The following outputs are exported:
 
-### upstream_ingress_annotations
+### upstream\_ingress\_annotations
 
 Description: Annotations to add to the upstream ingress
 

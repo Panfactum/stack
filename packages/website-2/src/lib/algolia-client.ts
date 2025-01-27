@@ -19,17 +19,12 @@ export function algoliaClient(appId: string, apiKey: string) {
       body: data ? JSON.stringify(data) : undefined,
     };
 
-    try {
-      const response = await fetch(url, config);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const result = (await response.json()) as T;
-      return result;
-    } catch (error) {
-      console.error("Error making request:", error);
-      throw error;
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    const result = (await response.json()) as T;
+    return result;
   };
 
   return {

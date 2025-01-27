@@ -1,51 +1,46 @@
----
-title: "Terragrunt Variables"
----
-
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Terragrunt Variables
 
 ## Folder Setup
 
 <MarkdownAlert severity="info">
-  For a complete example, see [our reference
-  architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
+  For a complete example, see [our reference architecture](https://github.com/Panfactum/stack/tree/main/packages/reference/environments).
 </MarkdownAlert>
 
-Your environments folder at `environments_dir` **must** have three levels of scoping for the [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code):
+Your environments folder at `environments_dir` **must** have three levels of scoping for the [configuration-as-code](/docs/main/concepts/iac#configuration-as-code):
 
-- environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
+* environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
 
-  - region: A separation of your deployments according to their physical location (e.g., `us-west-2`)
+  * region: A separation of your deployments according to their physical location (e.g., `us-west-2`)
 
-    - module: A separation of your deployments based on the specific infrastructures module being deployed
+    * module: A separation of your deployments based on the specific infrastructures module being deployed
 
 Accordingly, there are four levels of configuration for parameterizing the behavior of `panfactum.hcl`:
 
-- `global.yaml`: Found at the root of `environments_dir`
+* `global.yaml`: Found at the root of `environments_dir`
 
-- `environment.yaml`: Found at the root of each environment subdirectory
+* `environment.yaml`: Found at the root of each environment subdirectory
 
-- `region.yaml`: Found at the root of each region subdirectory
+* `region.yaml`: Found at the root of each region subdirectory
 
-- `module.yaml`: Found in each module subdirectory
+* `module.yaml`: Found in each module subdirectory
 
 A few rules about these files:
 
-- These files are optional, but you will use them to configure your providers and other behavior.
+* These files are optional, but you will use them to configure your providers and other behavior.
 
-- They can each contain _any and every key_ found below.
+* They can each contain *any and every key* found below.
 
-- You should commit these files to version control.
+* You should commit these files to version control.
 
-- Conflicts are resolved via specificity (e.g., conflicting `module.yaml` values will override `region.yaml` values which in turn will override `environment.yaml` values, etc.).
+* Conflicts are resolved via specificity (e.g., conflicting `module.yaml` values will override `region.yaml` values which in turn will override `environment.yaml` values, etc.).
 
-- Each file has an optional, user-specific counterpart named `*.user.yaml` (e.g., `region.user.yaml`).
+* Each file has an optional, user-specific counterpart named `*.user.yaml` (e.g., `region.user.yaml`).
 
-  - Values in these files override the values in their counterparts for local development purposes (e.g., `region.user.yaml` overrides values in `region.yaml`).
+  * Values in these files override the values in their counterparts for local development purposes (e.g., `region.user.yaml` overrides values in `region.yaml`).
 
-  - These files are not committed to version-control; each user will have their own set of values.
+  * These files are not committed to version-control; each user will have their own set of values.
 
 **Ultimately your environments folder should look something like this:**
 
@@ -84,13 +79,14 @@ files (or their `*.user.yaml` counterparts) inside the environments directory.
 
 ### Metadata
 
-Used for consistency across labels and tags.
+Sets properties that will impact all Panfactum modules in the module tree.
 
-| Variable      | Type        | Description                                                                  | Recommended File   |
-| :------------ | :---------- | :--------------------------------------------------------------------------- | :----------------- |
-| `environment` | string      | The name of the environment                                                  | `environment.yaml` |
-| `region`      | string      | The name of the region                                                       | `region.yaml`      |
-| `extra_tags`  | map(string) | An object containing extra tags to add to all resources in the current scope | Any                |
+| Variable      | Type                      | Description                                                                                                                                                                                            | Recommended File   |
+|:--------------|:--------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|
+| `environment` | string                    | The name of the environment. Used for descriptions and tags.                                                                                                                                           | `environment.yaml` |
+| `region`      | string                    | The name of the region. Used for descriptions and tags.                                                                                                                                                | `region.yaml`      |
+| `sla_target`  | number (`1`, `2`, or `3`) | Sets the desired [SLA Level](https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability). The defaults for Panfactum modules will be automatically adjusted based on the SLA target. Defaults to `3`. | `environment.yaml` |
+| `extra_tags`  | map(string)               | An object containing extra tags to add to all resources in the current scope                                                                                                                           | Any                |
 
 ### Inputs
 
@@ -104,13 +100,13 @@ Used to pass extra inputs to all modules in the scope.
 
 Used to configure the `terraform.source` [option](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#terraform) when deploying a module.
 
-| Variable                      | Type    | Description                                                                                                                                                                                                                                                                                                                                             | Recommended File   |
-| :---------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------- |
-| `version`                     | string  | Configures `include.panfactum.locals.source`. The version of the local modules from the `iac_dir` directory you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`repo_url` in `panfactum.yaml`) or `local` to indicate you want to deploy the local version of the code. | `environment.yaml` |
-| `pf_stack_version`            | string  | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack)                                                                                      | `environment.yaml` |
-| `pf_stack_local_path`         | string  | Iff `pf_stack_version` is `local`, then this should be an ABSOLUTE path to root of a local copy of the `https://github.com/Panfactum/stack` repository on your local filesystem. The code from this local repository will be used when you deploy Panfactum modules or submodules.                                                                      | `global.user.yaml` |
-| `pf_stack_local_use_relative` | boolean | Controls whether Terragrunt provides `pf_module_source` as an absolute or relative path when `pf_stack_version` is `local`. By default this is `true` as this improves performance and allows automatic code updates. However, relative paths will not work if using Panfactum submodules in first-party IaC submodules.                                | `global.user.yaml` |
-| `module`                      | string  | If using `include.panfactum.locals.source`, defines which module from the `iac_dir` directory to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory.                                                                                   | `module.yaml`      |
+| Variable                      | Type    | Description                                                                                                                                                                                                                                                                                                                                              | Recommended File   |
+| :---------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `version`                     | string  | Configures `include.panfactum.locals.source`. The version of the local modules from the `iac_dir` directory you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`repo_url` in `panfactum.yaml`) or `local` to indicate you want to deploy the local version of the code. | `environment.yaml` |
+| `pf_stack_version`            | string  | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack)                                                                                       | `environment.yaml` |
+| `pf_stack_local_path`         | string  | Iff `pf_stack_version` is `local`, then this should be an ABSOLUTE path to root of a local copy of the `https://github.com/Panfactum/stack` repository on your local filesystem. The code from this local repository will be used when you deploy Panfactum modules or submodules.                                                                       | `global.user.yaml` |
+| `pf_stack_local_use_relative` | boolean | Controls whether Terragrunt provides `pf_module_source` as an absolute or relative path when `pf_stack_version` is `local`. By default this is `true` as this improves performance and allows automatic code updates. However, relative paths will not work if using Panfactum submodules in first-party IaC submodules.                                 | `global.user.yaml` |
+| `module`                      | string  | If using `include.panfactum.locals.source`, defines which module from the `iac_dir` directory to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory.                                                                                    | `module.yaml`      |
 
 ### State Backend Setup
 
@@ -141,8 +137,8 @@ Some providers have additional configuration values that must be set.
 | `aws_secondary_profile`    | string | The AWS profile that will be used for secondary provider authentication | `environment.yaml` |
 | `aws_secondary_region`     | string | The AWS region to use for the secondary provider                        | `region.yaml`      |
 
-_Note: The `aws` provider is actually a set of two different `aws` provider configurations: a primary and secondary.
-The secondary is used in some Panfactum modules to configure things like backups in a secondary region._
+*Note: The `aws` provider is actually a set of two different `aws` provider configurations: a primary and secondary.
+The secondary is used in some Panfactum modules to configure things like backups in a secondary region.*
 
 #### `kubernetes` Provider
 

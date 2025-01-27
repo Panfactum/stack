@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Loop through all directories and subdirectories
 find . -type f -name "page.mdx" | while read -r file; do

@@ -1,19 +1,10 @@
----
-title: "Kubernetes cert-manager"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_cert_manager"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_cert_manager"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="kube_cert_manager" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cert_manager" status="stable" type="direct" />
 
 # Kubernetes cert-manager
 
@@ -23,15 +14,15 @@ This module provides our standard set up for [cert-manager](https://cert-manager
 
 The following providers are needed by this module:
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
@@ -41,7 +32,7 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
-### canary_enabled
+### canary\_enabled
 
 Description: Whether to add canary checks to the deployed systems
 
@@ -49,23 +40,15 @@ Type: `bool`
 
 Default: `false`
 
-### cert_manager_version
+### cert\_manager\_version
 
 Description: The version of cert-manager to deploy
 
 Type: `string`
 
-Default: `"1.14.4"`
+Default: `"1.16.2"`
 
-### enhanced_ha_enabled
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
-
-### log_verbosity
+### log\_verbosity
 
 Description: The log verbosity (0-9) for the cert-manager pods
 
@@ -73,7 +56,7 @@ Type: `number`
 
 Default: `0`
 
-### monitoring_enabled
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -81,7 +64,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -89,7 +72,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -97,7 +80,7 @@ Type: `bool`
 
 Default: `true`
 
-### self_generated_certs_enabled
+### self\_generated\_certs\_enabled
 
 Description: Whether to enable self-generated webhook certs (only use on initial installation)
 
@@ -105,7 +88,15 @@ Type: `bool`
 
 Default: `true`
 
-### vpa_enabled
+### sla\_target
+
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+
+Type: `number`
+
+Default: `3`
+
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -121,7 +112,7 @@ The following outputs are exported:
 
 Description: n/a
 
-### service_account
+### service\_account
 
 Description: n/a
 

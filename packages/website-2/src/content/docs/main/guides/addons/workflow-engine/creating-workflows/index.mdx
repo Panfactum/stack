@@ -1,31 +1,26 @@
----
-title: "Creating Workflows"
----
-
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Creating Workflows
 
 ## Objective
 
-Demonstrate how to use the [wf_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec)
+Demonstrate how to use the [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec)
 submodule to create Argo Workflow resources.
 
 ## Prerequisites
 
 You should ensure you have completed the following guides before continuing:
 
-- [Installing the Argo Workflow Engine](/docs/edge/guides/addons/workflow-engine/installing)
-- [Developing First-party IaC Modules](/docs/edge/guides/iac/first-party-modules)
-- [Argo's Getting Started Guide for Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/walk-through/)
+* [Installing the Argo Workflow Engine](/docs/main/guides/addons/workflow-engine/installing)
+* [Developing First-party IaC Modules](/docs/main/guides/iac/first-party-modules)
+* [Argo's Getting Started Guide for Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/walk-through/)
 
 <MarkdownAlert severity="warning">
   This guide is NOT meant to be a tutorial on how to use Argo Workflows nor an overview of all of
   the capabilities that are available. For that, you should see [Argo's Getting Started Tutorial](https://argo-workflows.readthedocs.io/en/latest/walk-through/).
 
-This guide is meant to be a short introduction to how to effectively create and deploy Argo Workflows
-as a part of the Panfactum Stack. It assumes basic familiarity with the core Argo Workflow concepts.
-
+  This guide is meant to be a short introduction to how to effectively create and deploy Argo Workflows
+  as a part of the Panfactum Stack. It assumes basic familiarity with the core Argo Workflow concepts.
 </MarkdownAlert>
 
 ## Background
@@ -35,10 +30,10 @@ complexity compared to simpler but less robust tools. Building a Workflow from s
 endeavor due to the amount of configuration knobs available.
 
 We have created a submodule,
-[wf_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), that aims to simplify the process
+[wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec), that aims to simplify the process
 by applying sane defaults that are compatible with the Panfactum Stack architecture.
 
-_wf_ is shorthand for "workflow," but why _spec_?
+*wf* is shorthand for "workflow," but why *spec*?
 
 Well, a [Workflow](https://argo-workflows.readthedocs.io/en/latest/workflow-concepts/#the-workflow)
 only defines a **single** run of the workflow execution graph. This is not very useful when you want to
@@ -63,7 +58,6 @@ module "workflow_spec" {
 
   name                        = "example"
   namespace                   = local.namespace
-  eks_cluster_name            = var.eks_cluster_name
 
   entrypoint = "entry"
   templates = [
@@ -124,7 +118,7 @@ resource "kubectl_manifest" "workflow_template" {
 A few critical points to notice:
 
 1. In the example, `module.workflow_spec` instantiates the Panfactum `wf_spec` module, but critically this module
-   does **not** create a Workflow; it only creates the [_specification_ for a workflow.](https://argo-workflows.readthedocs.io/en/latest/fields/#workflowspec)
+   does **not** create a Workflow; it only creates the [*specification* for a workflow.](https://argo-workflows.readthedocs.io/en/latest/fields/#workflowspec)
 
    However, the above example **does** create a WorkflowTemplate resource via `kubectl_manifest.workflow_template`.
    This WorkflowTemplate uses the `workflow_spec` output of the `module.workflow_spec` module for it's `spec` field.
@@ -132,23 +126,19 @@ A few critical points to notice:
 2. The `templates` array defines all the nodes in the workflow's execution graph. There are many different types of
    [Templates](https://argo-workflows.readthedocs.io/en/latest/fields/#template), but the most common are:
 
-   - A [Container Template](https://argo-workflows.readthedocs.io/en/latest/workflow-concepts/#container) (for running a single container in a Pod)
-   - A [DAG Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/) (for defining an execution graph of other templates)
-   - A [Container Set Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/) (for defining an execution graph of _containers_ within a _single_ Pod)
-   - A [Kubernetes Resource Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/) (for performing CRUD operations against Kubernetes resources)
-   - A [Suspend Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/) (for suspending a Workflow)
+   * A [Container Template](https://argo-workflows.readthedocs.io/en/latest/workflow-concepts/#container) (for running a single container in a Pod)
+   * A [DAG Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/) (for defining an execution graph of other templates)
+   * A [Container Set Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/) (for defining an execution graph of *containers* within a *single* Pod)
+   * A [Kubernetes Resource Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/kubernetes-resources/) (for performing CRUD operations against Kubernetes resources)
+   * A [Suspend Template](https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/) (for suspending a Workflow)
 
    <MarkdownAlert severity="warning">
-     The [HTTP
-     Template](https://argo-workflows.readthedocs.io/en/latest/http-template/)
-     is currently broken
-     ([issue](https://github.com/argoproj/argo-workflows/issues/10340)).
-     Instead, use a container template to call into `curl` (or equivalent
-     alternative).
+     The [HTTP Template](https://argo-workflows.readthedocs.io/en/latest/http-template/) is currently broken ([issue](https://github.com/argoproj/argo-workflows/issues/10340)). Instead,
+     use a container template to call into `curl` (or equivalent alternative).
    </MarkdownAlert>
 
 3. You might want to override one or more pod-level defaults for a template (example: provide certain tolerations for some
-   pods but not others). See the `second-template` template above as an example.
+   pods but not others).  See the `second-template` template above as an example.
 
    Note that OpenTofu supports self-references (i.e., using a module's outputs as a part of its inputs) since values
    are lazily evaluated. As a result, we have given the `wf_spec` module outputs such as `tolerations`, `volumes`, `env`, etc.,
@@ -168,7 +158,7 @@ A few critical points to notice:
 ### Field Casing in Templates
 
 When defining templates for your workflow spec, you must use [camelCase](https://en.wikipedia.org/wiki/Camel_case)
-instead of [snake_case](https://en.wikipedia.org/wiki/Snake_case) as we pass through the `templates` input directly
+instead of [snake\_case](https://en.wikipedia.org/wiki/Snake_case) as we pass through the `templates` input directly
 to the generated Kubernetes manifest (and Kubernetes expects camelCase).
 
 ### Resource Requests and Limits
@@ -181,42 +171,40 @@ You can also use the `default_resources` input of `wf_spec` to set a sensible de
 ### Advanced Workflow Patterns
 
 For more details and examples on common workflow patterns that you might wish to deploy,
-see the documentation for [wf_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec).
+see the documentation for [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
 
 ## Workflow Checklist
 
 Below is a set of questions that we recommend asking when you create a Workflow using `wf_spec`:
 
-- Can your pods run on `arm64` nodes? If **not**, did you set `arm_nodes_enabled` to `false`? [^4]
-- Can your pods tolerate disruptions? If **not**, set `disruptions_enabled` to `false` to avoid all voluntary disruptions. Additionally, you
+* Can your pods run on `arm64` nodes? If **not**, did you set `arm_nodes_enabled` to `false`? [^4]
+* Can your pods tolerate disruptions? If **not**, set `disruptions_enabled` to `false` to avoid all voluntary disruptions. Additionally, you
   might want to set `spot_nodes_enabled` to `false` to avoid the (small) chance of spot node preemption. [^3]
-- Are your pods a good fit for [burstable spot (T-family) instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)? If so, set `burstable_nodes_enabled` to `true` to save additional money.
-- How many times do you want each node in the workflow to retry on failure? Have you set `retry_max_attempts` to the appropriate
+* Are your pods a good fit for [burstable spot (T-family) instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)? If so, set `burstable_nodes_enabled` to `true` to save additional money.
+* How many times do you want each node in the workflow to retry on failure? Have you set `retry_max_attempts` to the appropriate
   value? Have you tuned the retry backoff parameters, `retry_backoff_initial_duration_seconds` and `retry_backoff_max_duration_seconds`?
-- Can multiple instances of this workflow be running at once? If so, have you increased `workflow_parallelism`?
-- Do you want limit the number of active pods that can be running at a single time in a workflow? If so, have you set `pod_parallelism`?
-- Have you set the appropriate resource requests and limits for all your containers?
-- Have you set an appropriate timeout for the workflow via `active_deadline_seconds`?
-- Do the pods in the workflow need to communicate with the AWS API? Have you added the necessary
+* Can multiple instances of this workflow be running at once? If so, have you increased `workflow_parallelism`?
+* Do you want limit the number of active pods that can be running at a single time in a workflow? If so, have you set `pod_parallelism`?
+* Have you set the appropriate resource requests and limits for all your containers?
+* Have you set an appropriate timeout for the workflow via `active_deadline_seconds`?
+* Do the pods in the workflow need to communicate with the AWS API? Have you added the necessary
   permissions via `extra_aws_permissions`?
-- Do the pods in the workflow need to communicate with the Kubernetes API? Have you added the necessary
+* Do the pods in the workflow need to communicate with the Kubernetes API? Have you added the necessary
   permissions to the ServiceAccount (referenced via the `wf_spec.service_account_name` output)?
-- Do your workflow containers need to write to disk? If so, have you set `tmp_directories`?
-- Do your workflow containers need access to a common set of environment variables? If so, have you set `common_env` and/or `common_secrets`?
-- Do your workflow containers need access to mounted Secrets or ConfigMaps? If so, have you set `config_map_mounts` and/or `secret_mounts`?
-- Can your workflows containers run as user `1000`? If not, have you explicitly set `uid`? If the containers need to run as root, have you set `run_as_root` to `true`?
-- Do you need to [parameterize the Workflow](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/)? If so, did you add `arguments`?
+* Do your workflow containers need to write to disk? If so, have you set `tmp_directories`?
+* Do your workflow containers need access to a common set of environment variables? If so, have you set `common_env` and/or `common_secrets`?
+* Do your workflow containers need access to mounted Secrets or ConfigMaps? If so, have you set `config_map_mounts` and/or `secret_mounts`?
+* Can your workflows containers run as user `1000`? If not, have you explicitly set `uid`? If the containers need to run as root, have you set `run_as_root` to `true`?
+* Do you need to [parameterize the Workflow](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/)? If so, did you add `arguments`?
 
-[^3]:
-    Note that both of these will significantly increase the cost of running this workflow. If the workflow
+[^3]: Note that both of these will significantly increase the cost of running this workflow. If the workflow
     runs very often, you may want to architect your workflow to be able to tolerate the occasional disruption
     so you at least keep `spot_nodes_enabled` as `true`.
 
-[^4]:
-    Running on `arm64` nodes will save about 20% of your workflow costs, so it might be worth it to create
-    a multi-platform image. See our [guide.](/docs/edge/guides/addons/buildkit/building-images)
+[^4]: Running on `arm64` nodes will save about 20% of your workflow costs, so it might be worth it to create
+    a multi-platform image. See our [guide.](/docs/main/guides/addons/buildkit/building-images)
 
 ## Examples
 
-- The Argo project provides [100+ examples](https://github.com/argoproj/argo-workflows/tree/main/examples) of various Workflow patterns.
-- You provide many [prebuilt WorkflowTemplates](/docs/edge/guides/addons/workflow-engine/prebuilt-workflows) that you can examine for best practices.
+* The Argo project provides [100+ examples](https://github.com/argoproj/argo-workflows/tree/main/examples) of various Workflow patterns.
+* You provide many [prebuilt WorkflowTemplates](/docs/main/guides/addons/workflow-engine/prebuilt-workflows) that you can examine for best practices.

@@ -1,17 +1,11 @@
----
-title: "Installing the Workflow Engine"
----
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
 
-import { Image } from "astro:assets";
-
-import MarkdownImage from "@/components/markdown/MarkdownImage";
-
-import DashboardImg from "./argo_dashboard.jpg";
-import WorkflowExecutionImg from "./workflow-execution.jpg";
-import WorkflowLogsImg from "./workflow-logs.jpg";
-import WorkflowTemplateSubmitImg from "./workflow-templates-submit.jpg";
-import WorkflowTemplatesImg from "./workflow-templates.jpg";
-import WorkflowsImg from "./workflows.jpg";
+import DashboardImg from './argo_dashboard.jpg'
+import WorkflowExecutionImg from './workflow-execution.jpg'
+import WorkflowLogsImg from './workflow-logs.jpg'
+import WorkflowTemplateSubmitImg from './workflow-templates-submit.jpg'
+import WorkflowTemplatesImg from './workflow-templates.jpg'
+import WorkflowsImg from './workflows.jpg'
 
 # Installing the Workflow Engine
 
@@ -34,49 +28,48 @@ orchestrate the execution of pods and containers inside your Kubernetes clusters
 
 Workflows have many use cases:
 
-- a part of your core business logic (e.g., kicking off an async task when receiving a user request)
-- the driver of your CI / CD platform (e.g., orchestrating testing and deployments of new code)
-- an ETL tool (e.g., periodically moving data from one system to another)
-- and much, much more.
+* a part of your core business logic (e.g., kicking off an async task when receiving a user request)
+* the driver of your CI / CD platform (e.g., orchestrating testing and deployments of new code)
+* an ETL tool (e.g., periodically moving data from one system to another)
+* and much, much more.
 
 We strongly prefer Argo Workflows over other workflow alternatives for the following reasons:
 
-- Language-agnostic; as long as your code can be containerized, it can be run in a workflow.
-- Manged via declarative IaC (through [Kubernetes custom resources for Argo](https://argo-workflows.readthedocs.io/en/latest/fields/)).
-- Provides an integrated web dashboard that (a) provides granular execution and debugging information, (b) the ability for
+* Language-agnostic; as long as your code can be containerized, it can be run in a workflow.
+* Manged via declarative IaC (through [Kubernetes custom resources for Argo](https://argo-workflows.readthedocs.io/en/latest/fields/)).
+* Provides an integrated web dashboard that (a) provides granular execution and debugging information, (b) the ability for
   non-technical users to create and manage workflows, and (c) integrations into our SSO framework.
-- Includes a companion CLI that can be used to easily script workflow execution.
-- Comprehensive options for managing workflow concurrency, step dependencies, retries, rate limits, artifacts, etc.
+* Includes a companion CLI that can be used to easily script workflow execution.
+* Comprehensive options for managing workflow concurrency, step dependencies, retries, rate limits, artifacts, etc.
   (much more flexibility and control than we have found in any other workflow engine).
-- Straightforward mechanisms for templating and parameterization.
-- Deep integrations with Kubernetes, allowing it to benefit from all the other utilities installed in the Panfactum Stack.
-- A long history and stable future as a [CNCF](https://www.cncf.io/projects/argo/)-maintained project.
+* Straightforward mechanisms for templating and parameterization.
+* Deep integrations with Kubernetes, allowing it to benefit from all the other utilities installed in the Panfactum Stack.
+* A long history and stable future as a [CNCF](https://www.cncf.io/projects/argo/)-maintained project.
 
 ### Argo Events
 
 While workflows can be triggered manually or via a cron schedule, [Argo Events](https://argoproj.github.io/argo-events/)
 allows them to be triggered via events from external systems. [^1]
 
-[^1]:
-    Argo Events can also be used to trigger many more actions than just Argo Workflows. See our
-    [Event Bus Addon](/docs/edge/guides/addons/event-bus/installing) guide.
+[^1]: Argo Events can also be used to trigger many more actions than just Argo Workflows. See our
+    [Event Bus Addon](/docs/main/guides/addons/event-bus/installing) guide.
 
 Events can be inbound webhooks, messages in a message queue, or any other [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/)
 that Argo Events supports.
 
-Because you will often want these types of external triggers, we install both Argo Workflows _and_ Argo Events
+Because you will often want these types of external triggers, we install both Argo Workflows *and* Argo Events
 in this guide even though they are separate projects.
 
 ## Installing
 
-We provide a module, [kube_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo), that
+We provide a module, [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo), that
 deploys the controllers for both Argo Workflows and Argo Events.
 
 Let's deploy it now:
 
 1. In the region with the cluster that you wish to deploy the workflow engine to, add a new directory called `kube_argo`.
 
-2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_argo/terragrunt.hcl).
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_argo/terragrunt.hcl).
 
    1. The `argo_domain` will be the domain where the Argo web UI will be exposed.
 
@@ -93,8 +86,7 @@ Let's deploy it now:
 In the `kube_argo` module, we create a [WorkflowTemplate](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/)
 called `test` in the `argo` namespace. [^2] We will use this to create a Workflow and test if Argo Workflows is functioning correctly.
 
-[^2]:
-    A WorkflowTemplate is used to create Workflows. A Workflow is a single run of an execution graph (i.e., every
+[^2]: A WorkflowTemplate is used to create Workflows. A Workflow is a single run of an execution graph (i.e., every
     Workflow is executed exactly once).
 
 ### Web UI
@@ -104,27 +96,24 @@ Let's first approach this task from the integrated web UI:
 1. In a web browser, navigate to the domain you supplied for `argo_domain`. You should be met with a screen
    that looks like this:
 
-<Image src={DashboardImg} alt="Argo Workflow dashboard" />
+   <MarkdownImage src={DashboardImg} alt="Argo Workflow dashboard" />
 
 2. Click "Login" and you will be asked to authenticate with the Vault instance running the cluster. After supplying your
    credentials, you will be redirected to a landing page showing recently run Workflows (yours will likely be empty):
 
-<Image src={WorkflowsImg} alt="Recently executed Argo Workflows" />
+   <MarkdownImage src={WorkflowsImg} alt="Recently executed Argo Workflows" />
 
 3. Select "Workflow Templates", the second menu item on the left-hand navigation. On this page, you will see all
    the WorkflowTemplates that can be used to create new Workflows:
 
-<Image src={WorkflowTemplatesImg} alt="Workflow templates" />
+   <MarkdownImage src={WorkflowTemplatesImg} alt="Workflow templates" />
 
-You should see the `test` template.
-If you do not see any templates, ensure you have selected `argo` in the namespace filter.
+   You should see the `test` template.
+   If you do not see any templates, ensure you have selected `argo` in the namespace filter.
 
 4. Select the `test` template and click "+ Submit" to open the submission drawer:
 
-<Image
-  src={WorkflowTemplateSubmitImg}
-  alt="Submitting the test WorkflowTemplate"
-/>
+   <MarkdownImage src={WorkflowTemplateSubmitImg} alt="Submitting the test WorkflowTemplate" />
 
 5. The Workflow that gets generated from the `test` template
    will simply run a container that prints whatever string you supply as the
@@ -132,11 +121,11 @@ If you do not see any templates, ensure you have selected `argo` in the namespac
 
 6. You will be redirected to a live view of the Workflow execution graph:
 
-<Image src={WorkflowExecutionImg} alt="Workflow execution graph" />
+   <MarkdownImage src={WorkflowExecutionImg} alt="Workflow execution graph" />
 
 7. Click "Logs" to verify the generated pods printed your message:
 
-<Image src={WorkflowLogsImg} alt="Workflow logs" />
+   <MarkdownImage src={WorkflowLogsImg} alt="Workflow logs" />
 
 ### CLI
 
@@ -149,7 +138,7 @@ in the Panfactum devShell:
 
    like this:
 
-   ```shell
+   ```shellsession
    Name:                test-w9vtr
    Namespace:           argo
    ServiceAccount:      unset
@@ -165,7 +154,7 @@ in the Panfactum devShell:
 4. Run `argo logs -n argo <workflow-name>` where `<workflow-name>` is the generated name from step 2. Verify that
    your message was successfully printed:
 
-   ```shell
+   ```shellsession
    test-w9vtr-test-1726256991: {"argo":true,"level":"info","msg":"capturing logs","time":"2024-07-25T20:09:37.490Z"}
    test-w9vtr-test-1726256991: You entered: Hi!
    test-w9vtr-test-1726256991: Workflow completed successfully.
@@ -179,13 +168,13 @@ Congratulations! You have successfully deployed and tested the Workflow Engine a
 However, we have just barely scratched the surface of what is possible with Argo Workflows and Events. To dive deeper,
 check out the following resources:
 
-- For a brief overview of all the capabilities of Argo Workflows, we strongly recommend
+* For a brief overview of all the capabilities of Argo Workflows, we strongly recommend
   working through [these Argo Workflow tutorials.](https://argo-workflows.readthedocs.io/en/latest/walk-through/)
 
-- To start creating your own custom Workflows, take a look at [our documentation](/docs/edge/guides/addons/workflow-engine/creating-workflows).
+* To start creating your own custom Workflows, take a look at [our documentation](/docs/main/guides/addons/workflow-engine/creating-workflows).
 
-- Deploy some of [our pre-built Workflows](/docs/edge/guides/addons/workflow-engine/prebuilt-workflows) for common tasks in the Panfactum Stack
+* Deploy some of [our pre-built Workflows](/docs/main/guides/addons/workflow-engine/prebuilt-workflows) for common tasks in the Panfactum Stack
 
-- Learn how to use Workflows for your CI / CD system [here.](/docs/edge/guides/cicd/getting-started)
+* Learn how to use Workflows for your CI / CD system [here.](/docs/main/guides/cicd/getting-started)
 
-- Learn more about how to leverage Argo Events [here.](/docs/edge/guides/addons/event-bus/installing)
+* Learn more about how to leverage Argo Events [here.](/docs/main/guides/addons/event-bus/installing)

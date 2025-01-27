@@ -1,13 +1,15 @@
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
+import type { Component } from "solid-js";
+
+import MarkdownGuideNav from "@/components/solid/markdown/MarkdownGuideNav";
 
 interface BootstrappingGuideNavProps {
-  backHref?: string;
-  forwardHref?: string;
+  backHref: string;
+  forwardHref: string;
   stepNumber: number;
 }
-export default function BootstrappingGuideNav(
-  props: BootstrappingGuideNavProps,
-) {
+const BootstrappingGuideNav: Component<BootstrappingGuideNavProps> = (
+  props,
+) => {
   return (
     <MarkdownGuideNav
       {...props}
@@ -15,4 +17,6 @@ export default function BootstrappingGuideNav(
       progressLabel={"Panfactum Bootstrapping Guide:"}
     />
   );
-}
+};
+
+export default BootstrappingGuideNav;

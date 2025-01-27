@@ -1,19 +1,10 @@
----
-title: "AWS Load Balancer Controller"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_aws_lb_controller"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_aws_lb_controller"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="kube_aws_lb_controller" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_aws_lb_controller" status="stable" type="direct" />
 
 # AWS Load Balancer Controller
 
@@ -23,27 +14,21 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
 The following input variables are required:
-
-### eks_cluster_name
-
-Description: The name of the EKS cluster that this is being deployed to
-
-Type: `string`
 
 ### subnets
 
@@ -51,7 +36,7 @@ Description: List of subnet names to deploy load balancers into. Must be in at l
 
 Type: `set(string)`
 
-### vpc_id
+### vpc\_id
 
 Description: The ID of the VPC to use for AWS networked resources
 
@@ -61,15 +46,15 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### alb_controller_helm_version
+### alb\_controller\_helm\_version
 
 Description: The version of aws-application-loadbalancer-controller helm chart to deploy
 
 Type: `string`
 
-Default: `"1.8.0"`
+Default: `"1.11.0"`
 
-### aws_iam_ip_allow_list
+### aws\_iam\_ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -77,15 +62,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### enhanced_ha_enabled
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
-
-### log_level
+### log\_level
 
 Description: The log level for the ALB controller pods
 
@@ -93,7 +70,7 @@ Type: `string`
 
 Default: `"warning"`
 
-### monitoring_enabled
+### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
 
@@ -101,7 +78,7 @@ Type: `bool`
 
 Default: `false`
 
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -109,7 +86,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -117,7 +94,15 @@ Type: `bool`
 
 Default: `true`
 
-### vpa_enabled
+### sla\_target
+
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+
+Type: `number`
+
+Default: `3`
+
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 

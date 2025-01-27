@@ -1,47 +1,38 @@
----
-title: "Argo Workflow Specification"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="wf_spec"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/wf_spec"
-  status="beta"
-  type="submodule"
-/>
+<ModuleHeader name="wf_spec" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_spec" status="beta" type="submodule" />
 
 # Argo Workflow Specification
 
 The primary purpose of this submodule is to create a Workflow spec (`workflow_spec` output) that ensures compatibility
-with the Panfactum deployment of Argo Workflows (deployed via [kube_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo))
+with the Panfactum deployment of Argo Workflows (deployed via [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo))
 and applies sensible defaults for usage in the overall Panfactum Stack.
 
 In particular, this module takes care of the following:
 
-- Assigns AWS permissions to the Workflow's ServiceAccount that allows the Workflow's templates to store
+* Assigns AWS permissions to the Workflow's ServiceAccount that allows the Workflow's templates to store
   artifacts and logs in S3.
-- Assigns the necessary Kubernetes permissions to the Workflow's ServiceAccount that allows the Workflow to launch
+* Assigns the necessary Kubernetes permissions to the Workflow's ServiceAccount that allows the Workflow to launch
   and record its status with the Argo Workflow controller.
-- Sets up basic Workflow parallelism, timeouts, and retry configurations
-- Assigns defaults for pods created by the Workflow (affinities, tolerations, volumes, security context, scheduler, etc.)
-- Provides recommended container defaults (`container_defaults` output)
-- Disables pod disruptions (overridable)
+* Sets up basic Workflow parallelism, timeouts, and retry configurations
+* Assigns defaults for pods created by the Workflow (affinities, tolerations, volumes, security context, scheduler, etc.)
+* Provides recommended container defaults (`container_defaults` output)
+* Disables pod disruptions (overridable)
 
 However, the core Workflow logic (defined via `templates`, `arguments`, and `entrypoint`) is left completely
 up to the user to define. For more information on the available values for these fields, see the official
 Argo documentation:
 
-- [Template](https://argo-workflows.readthedocs.io/en/latest/fields/#template)
-- [Arguments](https://argo-workflows.readthedocs.io/en/latest/fields/#arguments)
+* [Template](https://argo-workflows.readthedocs.io/en/latest/fields/#template)
+* [Arguments](https://argo-workflows.readthedocs.io/en/latest/fields/#arguments)
 
 ## Usage
 
-For a basic introduction of how to use this module, see our [guide on creating Workflows](/docs/edge/guides/addons/workflow-engine/creating-workflows).
+For a basic introduction of how to use this module, see our [guide on creating Workflows](/docs/main/guides/addons/workflow-engine/creating-workflows).
 
 Below we cover some more advanced patterns that you will likely find useful when working with Workflows in the Panfactum Stack.
 
@@ -50,16 +41,16 @@ Below we cover some more advanced patterns that you will likely find useful when
 Workflows are most useful when you need to define a multistep operation. Argo Workflows provides several means
 to do this, but we recommend the following for almost all use cases:
 
-- [DAG Templates](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/): For defining the execution graph across multiple other templates
-- [ContainerSet Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/): For defining an execution graph inside a _single_ pod
+* [DAG Templates](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/): For defining the execution graph across multiple other templates
+* [ContainerSet Template](https://argo-workflows.readthedocs.io/en/latest/container-set-template/): For defining an execution graph inside a *single* pod
 
 ContainerSets can be run faster as all steps will share the same execution context and can share disk space. However,
 they have a couple drawbacks:
 
-- All containers in the ContainerSet will consume Kubernetes resources (CPU and memory requests) [even when they are not running](https://argo-workflows.readthedocs.io/en/latest/container-set-template/#resource-requests).
-- They can only be used to orchestrate containers and not other types of templates.
+* All containers in the ContainerSet will consume Kubernetes resources (CPU and memory requests) [even when they are not running](https://argo-workflows.readthedocs.io/en/latest/container-set-template/#resource-requests).
+* They can only be used to orchestrate containers and not other types of templates.
 
-DAGs offer the most flexibility as they can define a graph of _any_ set of templates, but every template in the execution graph will require creating its own Pod.
+DAGs offer the most flexibility as they can define a graph of *any* set of templates, but every template in the execution graph will require creating its own Pod.
 Generally, this isn't an issue, but it does add some additional time (to create each pod) and can cause issues when trying to share large amounts of data between steps.
 
 If you do need to share large amounts of data between pods in a DAG, you can use the
@@ -77,7 +68,7 @@ providing the relevant parameter to the template:
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   # By default, all pods will have this ConfigMap included as a volume
   config_map_mounts = {
@@ -100,11 +91,11 @@ module "workflow_spec" {
 ```
 
 Critically, all overrides are **shallow-merged by key**. This makes it possible to drop defaults (as in the example above),
-but if you wanted to _add_ a new volume, you would need to explicitly concatenate to the original defaults.
+but if you wanted to *add* a new volume, you would need to explicitly concatenate to the original defaults.
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
   templates = [
     {
       volumes   = concat(
@@ -125,16 +116,15 @@ that can be used as building blocks for overrides.
 Often you will want to supply inputs to workflows so to adjust how they behave. Argo calls
 inputs "parameters" and provides documentation on this functionality [here](https://argo-workflows.readthedocs.io/en/latest/walk-through/parameters/). [^1]
 
-[^1]:
-    Technically, there are two types of inputs: parameters (values) and artifacts (files), but we will
+[^1]: Technically, there are two types of inputs: parameters (values) and artifacts (files), but we will
     just focus on parameters in this section.
 
-Note that _both_ Workflows as a whole _and_ their individual templates can be parameterized
+Note that *both* Workflows as a whole *and* their individual templates can be parameterized
 although the syntax is slightly different. A Workflow has `arguments` and a template has `inputs`:
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   # These will show up in the the Argo web UI and you can pass them in when
   # creating a Workflow from a WorkflowTemplate programmatically
@@ -190,15 +180,15 @@ module "workflow_spec" {
 }
 ```
 
-Oftentimes, you may want to set the _same_ parameters on a Workflow and each of its
-templates _and_ automatically pass through the values. We provide a convenience
+Oftentimes, you may want to set the *same* parameters on a Workflow and each of its
+templates *and* automatically pass through the values. We provide a convenience
 utility to do this via the `passthrough_parameters` input.
 
 For example:
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
   passthrough_parameters = [
     {
       name = "foo"
@@ -238,7 +228,7 @@ is equivalent to
 
 ```hcl
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
   arguments = {
     parameters = [
       {
@@ -301,7 +291,7 @@ module "workflow_spec" {
 ```
 
 This can be helpful when you aim to reference a template defined on one Workflow from a completely separate Workflow
-as described [here](/docs/edge/guides/addons/workflow-engine/triggering-workflows#from-other-workflows). This ensures
+as described [here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows). This ensures
 that regardless of how a template is executed, it will have the same parameterization capabilities.
 
 ### Conditional DAG Nodes (Tasks)
@@ -318,11 +308,11 @@ powerful and less error-prone.
 By default, Workflows created by the `wf_spec` module will automatically retry template execution on failure. You can tune
 the behavior by adjusting the following inputs:
 
-- `retry_backoff_initial_duration_seconds`
-- `retry_backoff_max_duration_seconds`
-- `retry_max_attempts` (set to `0` to disable retries)
-- `retry_expression`
-- `retry_policy`
+* `retry_backoff_initial_duration_seconds`
+* `retry_backoff_max_duration_seconds`
+* `retry_max_attempts` (set to `0` to disable retries)
+* `retry_expression`
+* `retry_policy`
 
 Retries are done on a **per-template** basis and the above inputs set the default behavior for each
 template; the entire Workflow will never retry.
@@ -336,10 +326,10 @@ note that the template-level timeout is **reset on every retry.**
 
 There are three different levels of concurrency controls that you can use:
 
-- `pod_parallelism`: If set, limits how many pods in a single Workflow instance that can be running at once.
-- `workflow_parallelism`: Number of instances of this Workflow that can be running at once. See [mutexes and semaphores for Workflows](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization)
+* `pod_parallelism`: If set, limits how many pods in a single Workflow instance that can be running at once.
+* `workflow_parallelism`: Number of instances of this Workflow that can be running at once. See [mutexes and semaphores for Workflows](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization)
   for more information.
-- [Template-level mutexes and semaphores](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization):
+* [Template-level mutexes and semaphores](https://argo-workflows.readthedocs.io/en/latest/synchronization/#template-level-synchronization):
   Allows blocking individual templates from running.
   Can use the same mutex / semaphore across many workflows. Useful for locking access to certain resources (e.g., deploying to an environment).
 
@@ -369,7 +359,7 @@ data "aws_iam_policy_document" "permissions" {
 }
 
 module "workflow_spec" {
-  source  = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   extra_aws_permissions = data.aws_iam_policy_document.permissions.json
 }
@@ -400,54 +390,52 @@ resource "kubernetes_cluster_role_binding" "permissions" {
 }
 
 module "workflow_spec" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 }
 ```
+
+### Workflow Labels
+
+In addition to the statically defined labels for the generated Workflows via `extra_workflow_labels`,
+you can also specify dynamically generated labels.
+This can be helpful for easily searching for workflows based on their runtime properties (e.g., parameter inputs).
+
+We provide two means to do this:
+
+* `labels_from_parameters`: Specify a list of parameters. Generated workflows will have labels added where the key is the parameter
+  name and the value is the parameter value.
+
+* `labels_from`: Specify an arbitrary [labelsFrom](https://argo-workflows.readthedocs.io/en/latest/fields/#labelvaluefrom) configuration
+  for the generated Workflows. The configuration is merged with `labels_from_parameters`.
 
 ### Using the Panfactum devShell
 
 We make the Panfactum devShell available as a container image that can be run in a
 workflow. The specific image tag that is compatible with your version of the Panfactum stack can be sourced from the outputs of the
-[kube_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
+[kube\_constants](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_constants) submodule. The below code
 snippet shows an example:
 
 ```hcl
 module "constants" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_constants?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
-}
-
-module "pull_through" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/aws_ecr_pull_through_cache_addresses?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
-  pull_through_cache_enabled = var.pull_through_cache_enabled
+  source = "${var.pf_module_source}kube_constants${var.pf_module_ref}"
 }
 
 module "example_wf" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name                    = "example"
   namespace               = var.namespace
-  eks_cluster_name        = var.eks_cluster_name
 
   entrypoint = "example"
   templates = [
     {
       name    = "example"
       container = {
-        image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+        image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
         command = ["/some-command-here"]
       }
     }
   ]
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
@@ -473,18 +461,17 @@ resource "kubernetes_config_map" "wf_scripts" {
 }
 
 module "example_wf" {
-  source = "github.com/Panfactum/stack.git//packages/infrastructure/wf_spec?ref=__PANFACTUM_VERSION_EDGE__" # pf-update
+  source = "${var.pf_module_source}wf_spec${var.pf_module_ref}"
 
   name                    = "example"
   namespace               = var.namespace
-  eks_cluster_name        = var.eks_cluster_name
 
   entrypoint = "example"
   templates = [
     {
       name    = "example"
       container = {
-        image = "${module.pull_through.ecr_public_registry}/${module.constants.panfactum_image}:${module.constants.panfactum_image_version}"
+        image = "${module.constants.images.devShell.registry}/${module.constants.images.devShell.repository}:${module.constants.images.devShell.tag}"
         command = ["/scripts/example.sh"] # Execute the mounted script
       }
     }
@@ -496,16 +483,6 @@ module "example_wf" {
       mount_path = "/scripts"
     }
   }
-
-  # pf-generate: pass_vars
-  pf_stack_version = var.pf_stack_version
-  pf_stack_commit  = var.pf_stack_commit
-  environment      = var.environment
-  region           = var.region
-  pf_root_module   = var.pf_root_module
-  is_local         = var.is_local
-  extra_tags       = var.extra_tags
-  # end-generate
 }
 ```
 
@@ -515,9 +492,9 @@ When a Workflow completes, it isn't automatically deleted. It is still
 
 Workflow objects will be automatically deleted from the Kubernetes cluster based on the following inputs:
 
-- `workflow_delete_seconds_after_completion`
-- `workflow_delete_seconds_after_failure`
-- `workflow_delete_seconds_after_success`
+* `workflow_delete_seconds_after_completion`
+* `workflow_delete_seconds_after_failure`
+* `workflow_delete_seconds_after_success`
 
 When a Workflow is deleted, all the other Kubernetes objects that it owns are also deleted (e.g., Pods, Artifacts, etc.).
 
@@ -528,29 +505,23 @@ outlive the Workflow.
 
 A common pattern is to compose multiple smaller Workflows into a larger Workflow. We provide
 guidance on implementing that pattern
-[here](/docs/edge/guides/addons/workflow-engine/triggering-workflows#from-other-workflows).
+[here](/docs/main/guides/addons/workflow-engine/triggering-workflows#from-other-workflows).
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
 ## Required Inputs
 
 The following input variables are required:
-
-### eks_cluster_name
-
-Description: The name of the EKS cluster that contains the service account.
-
-Type: `string`
 
 ### entrypoint
 
@@ -580,7 +551,7 @@ Type: `any`
 
 The following input variables are optional (have default values):
 
-### active_deadline_seconds
+### active\_deadline\_seconds
 
 Description: Duration in seconds relative to the workflow start time which the workflow is allowed to run before the controller terminates the Workflow
 
@@ -588,7 +559,7 @@ Type: `number`
 
 Default: `86400`
 
-### archive_logs_enabled
+### archive\_logs\_enabled
 
 Description: Whether logs should be archived and made available in the Argo web UI
 
@@ -618,7 +589,7 @@ Default:
 }
 ```
 
-### arm_nodes_enabled
+### arm\_nodes\_enabled
 
 Description: Whether to allow Pods to schedule on arm64 nodes
 
@@ -626,7 +597,7 @@ Type: `bool`
 
 Default: `true`
 
-### burstable_nodes_enabled
+### burstable\_nodes\_enabled
 
 Description: Whether to allow Pods to schedule on burstable nodes
 
@@ -634,7 +605,7 @@ Type: `bool`
 
 Default: `false`
 
-### cluster_workflow_template_ref
+### cluster\_workflow\_template\_ref
 
 Description: Name is the resource name of the ClusterWorkflowTemplate template ([https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/](https://argo-workflows.readthedocs.io/en/stable/cluster-workflow-templates/))
 
@@ -642,7 +613,7 @@ Type: `string`
 
 Default: `null`
 
-### common_env
+### common\_env
 
 Description: Key pair values of the environment variables for each container
 
@@ -650,7 +621,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### common_env_from_config_maps
+### common\_env\_from\_config\_maps
 
 Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
 
@@ -665,7 +636,7 @@ map(object({
 
 Default: `{}`
 
-### common_env_from_secrets
+### common\_env\_from\_secrets
 
 Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
 
@@ -680,7 +651,7 @@ map(object({
 
 Default: `{}`
 
-### common_secrets
+### common\_secrets
 
 Description: Key pair values of secrets to add to the containers as environment variables
 
@@ -688,7 +659,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### config_map_mounts
+### config\_map\_mounts
 
 Description: A mapping of ConfigMap names to their mount configuration in the containers of the Workflow
 
@@ -703,7 +674,7 @@ map(object({
 
 Default: `{}`
 
-### controller_node_required
+### controller\_node\_required
 
 Description: Whether the Pods must be scheduled on a controller node
 
@@ -711,7 +682,7 @@ Type: `bool`
 
 Default: `false`
 
-### default_container_image
+### default\_container\_image
 
 Description: The default container image to use
 
@@ -719,7 +690,7 @@ Type: `string`
 
 Default: `"docker.io/library/busybox:1.36.1"`
 
-### default_resources
+### default\_resources
 
 Description: The default container resources to use
 
@@ -752,7 +723,7 @@ Default:
 }
 ```
 
-### delete_artifacts_on_deletion
+### delete\_artifacts\_on\_deletion
 
 Description: Change the default behavior to delete artifacts on workflow deletion
 
@@ -760,7 +731,7 @@ Type: `bool`
 
 Default: `false`
 
-### disruptions_enabled
+### disruptions\_enabled
 
 Description: Whether disruptions should be enabled for Pods in the Workflow
 
@@ -768,7 +739,7 @@ Type: `bool`
 
 Default: `false`
 
-### dns_policy
+### dns\_policy
 
 Description: The DNS policy for the Pods
 
@@ -776,7 +747,7 @@ Type: `string`
 
 Default: `"ClusterFirst"`
 
-### extra_aws_permissions
+### extra\_aws\_permissions
 
 Description: Extra JSON-encoded AWS permissions to assign to the Workflow's service account
 
@@ -784,7 +755,7 @@ Type: `string`
 
 Default: `"{}"`
 
-### extra_labels
+### extra\_labels
 
 Description: Extra labels to assign to all resources in this workflow
 
@@ -792,7 +763,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra_pod_annotations
+### extra\_pod\_annotations
 
 Description: Annotations to add to the Pods in the Workflow
 
@@ -800,7 +771,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra_pod_labels
+### extra\_pod\_labels
 
 Description: Extra Pod labels to use
 
@@ -808,7 +779,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### extra_tolerations
+### extra\_tolerations
 
 Description: Extra tolerations to add to the Pods
 
@@ -825,7 +796,7 @@ list(object({
 
 Default: `[]`
 
-### extra_workflow_labels
+### extra\_workflow\_labels
 
 Description: Extra labels to add to the Workflow object
 
@@ -841,7 +812,7 @@ Type: `any`
 
 Default: `{}`
 
-### ip_allow_list
+### ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -849,7 +820,23 @@ Type: `list(string)`
 
 Default: `[]`
 
-### linux_capabilities
+### labels\_from
+
+Description: Additional values from the spec.workflowMetadata.labelsFrom field. Will be merged with labels\_from\_parameters.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### labels\_from\_parameters
+
+Description: A list of parameter names that will be added as labels when the Workflow is created. The label values will be set as the parameter values.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### linux\_capabilities
 
 Description: Extra linux capabilities to add to containers by default
 
@@ -857,7 +844,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### mount_owner
+### mount\_owner
 
 Description: The ID of the group that owns the mounted volumes
 
@@ -865,7 +852,7 @@ Type: `number`
 
 Default: `1000`
 
-### node_preferences
+### node\_preferences
 
 Description: Node label preferences for the Pods
 
@@ -873,7 +860,7 @@ Type: `map(object({ weight = number, operator = string, values = list(string) })
 
 Default: `{}`
 
-### node_requirements
+### node\_requirements
 
 Description: Node label requirements for the Pods
 
@@ -881,7 +868,7 @@ Type: `map(list(string))`
 
 Default: `{}`
 
-### on_exit
+### on\_exit
 
 Description: A template reference which is invoked at the end of the workflow, irrespective of the success, failure, or error of the primary template.
 
@@ -889,7 +876,7 @@ Type: `string`
 
 Default: `null`
 
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
 
@@ -897,7 +884,7 @@ Type: `bool`
 
 Default: `true`
 
-### passthrough_parameters
+### passthrough\_parameters
 
 Description: Workflow paramaters that should automatically passthrough to every template on the workflow
 
@@ -916,7 +903,7 @@ list(object({
 
 Default: `[]`
 
-### pod_delete_delay_seconds
+### pod\_delete\_delay\_seconds
 
 Description: The number of seconds after Workflow completion that Pods will be deleted
 
@@ -924,7 +911,7 @@ Type: `number`
 
 Default: `180`
 
-### pod_parallelism
+### pod\_parallelism
 
 Description: Limits the max total parallel pods that can execute at the same time in a workflow
 
@@ -940,7 +927,7 @@ Type: `number`
 
 Default: `null`
 
-### priority_class_name
+### priority\_class\_name
 
 Description: The default priority class to use for Pods in the Workflow
 
@@ -956,7 +943,7 @@ Type: `bool`
 
 Default: `false`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -964,7 +951,7 @@ Type: `bool`
 
 Default: `true`
 
-### read_only
+### read\_only
 
 Description: Whether the generated containers default to read-only root filesystems
 
@@ -972,7 +959,7 @@ Type: `bool`
 
 Default: `true`
 
-### retry_backoff_initial_duration_seconds
+### retry\_backoff\_initial\_duration\_seconds
 
 Description: The initial number of seconds to wait before the next retry in an exponential backoff strategy
 
@@ -980,7 +967,7 @@ Type: `number`
 
 Default: `30`
 
-### retry_backoff_max_duration_seconds
+### retry\_backoff\_max\_duration\_seconds
 
 Description: The maximum number of seconds to wait before the next retry in an exponential backoff strategy
 
@@ -988,7 +975,7 @@ Type: `number`
 
 Default: `3600`
 
-### retry_expression
+### retry\_expression
 
 Description: Expression is a condition expression for when a node will be retried. If it evaluates to false, the node will not be retried and the retry strategy will be ignored.
 
@@ -996,7 +983,7 @@ Type: `string`
 
 Default: `null`
 
-### retry_max_attempts
+### retry\_max\_attempts
 
 Description: The maximum number of allowable retries
 
@@ -1004,7 +991,7 @@ Type: `number`
 
 Default: `5`
 
-### retry_policy
+### retry\_policy
 
 Description: The policy that determines when the Workflow will be retried
 
@@ -1012,7 +999,7 @@ Type: `string`
 
 Default: `"Always"`
 
-### run_as_root
+### run\_as\_root
 
 Description: Whether to enable running as root in the Pods
 
@@ -1020,7 +1007,7 @@ Type: `bool`
 
 Default: `false`
 
-### secret_mounts
+### secret\_mounts
 
 Description: A mapping of Secret names to their mount configuration in the containers of the Workflow
 
@@ -1035,7 +1022,7 @@ map(object({
 
 Default: `{}`
 
-### spot_nodes_enabled
+### spot\_nodes\_enabled
 
 Description: Whether to allow Pods to schedule on spot nodes
 
@@ -1051,7 +1038,7 @@ Type: `bool`
 
 Default: `false`
 
-### tmp_directories
+### tmp\_directories
 
 Description: A mapping of temporary directory names (arbitrary) to their configuration
 
@@ -1075,7 +1062,7 @@ Type: `number`
 
 Default: `1000`
 
-### volume_mounts
+### volume\_mounts
 
 Description: A mapping of names to configuration for temporary PersistentVolumeClaims used by all Pods in the Workflow
 
@@ -1092,7 +1079,7 @@ map(object({
 
 Default: `{}`
 
-### workflow_annotations
+### workflow\_annotations
 
 Description: Annotations to add to the Workflow object
 
@@ -1100,7 +1087,7 @@ Type: `map(string)`
 
 Default: `{}`
 
-### workflow_delete_seconds_after_completion
+### workflow\_delete\_seconds\_after\_completion
 
 Description: The number of seconds after workflow completion that the Workflow object will be deleted
 
@@ -1108,7 +1095,7 @@ Type: `number`
 
 Default: `3600`
 
-### workflow_delete_seconds_after_failure
+### workflow\_delete\_seconds\_after\_failure
 
 Description: The number of seconds after workflow failure that the Workflow object will be deleted
 
@@ -1116,7 +1103,7 @@ Type: `number`
 
 Default: `3600`
 
-### workflow_delete_seconds_after_success
+### workflow\_delete\_seconds\_after\_success
 
 Description: The number of seconds after workflow success that the Workflow object will be deleted
 
@@ -1124,7 +1111,7 @@ Type: `number`
 
 Default: `3600`
 
-### workflow_parallelism
+### workflow\_parallelism
 
 Description: Number of concurrent instances of this Workflow allowed to be running at any given time
 
@@ -1144,19 +1131,19 @@ Description: The affinity added to each Pod by default
 
 Description: The arguments to the workflow
 
-### aws_role_arn
+### aws\_role\_arn
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### aws_role_name
+### aws\_role\_name
 
 Description: The name of the AWS role used by the Workflow's Service Account
 
-### container_defaults
+### container\_defaults
 
 Description: Default options for every container spec
 
-### container_security_context
+### container\_security\_context
 
 Description: The security context to be applied to each container in each Pod generated by this Workflow
 
@@ -1164,7 +1151,7 @@ Description: The security context to be applied to each container in each Pod ge
 
 Description: The environment variables to be added to each container in each Pod generated by this Workflow
 
-### generate_name
+### generate\_name
 
 Description: The prefix for generating Workflow names from this spec
 
@@ -1172,7 +1159,7 @@ Description: The prefix for generating Workflow names from this spec
 
 Description: The default labels assigned to all resources in this Workflow
 
-### match_labels
+### match\_labels
 
 Description: The labels unique to this deployment that can be used to select the Pods in this Workflow
 
@@ -1180,11 +1167,11 @@ Description: The labels unique to this deployment that can be used to select the
 
 Description: The non-prefix name of the Workflow spec (should be used for naming derived resources like WorkflowTemplates)
 
-### service_account_name
+### service\_account\_name
 
 Description: The default service account used for the Pods
 
-### template_parameters
+### template\_parameters
 
 Description: The default parameters set on each template
 
@@ -1192,7 +1179,7 @@ Description: The default parameters set on each template
 
 Description: Tolerations added to each Pod by default
 
-### volume_mounts
+### volume\_mounts
 
 Description: The volume mounts to be applied to the main container in each Pod generated by this Workflow
 
@@ -1200,7 +1187,7 @@ Description: The volume mounts to be applied to the main container in each Pod g
 
 Description: The volume specification to be applied to all pods generated by this Workflow
 
-### workflow_spec
+### workflow\_spec
 
 Description: The specification for the Workflow
 

@@ -1,103 +1,139 @@
----
-title: "Elastic Kubernetes Service (EKS)"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="aws_eks"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_eks"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="aws_eks" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_eks" status="stable" type="direct" />
 
 # Elastic Kubernetes Service (EKS)
+
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 This module provides our standard setup for a configurable AWS EKS Cluster.
 It includes:
 
-- An [EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). This cluster defines the Kubernetes control plane (managed by AWS) and provisions it to the specified set of availability zones.
+* An [EKS Cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html). This cluster defines the Kubernetes control plane (managed by AWS) and provisions it to the specified set of availability zones.
 
-- A [KMS key](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for encrypting the control plane data at-rest.
+* A [KMS key](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) for encrypting the control plane data at-rest.
 
-- A set of controller [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
-  with a static size for running cluster-critical
-  controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
-  Autoscaled nodes are deployed via our [kube_karpenter](/docs/edge/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
+* Setup of [EKS Access Entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html).
 
-- [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html)
-  for both the cluster control plane and for the node groups.
+* A set of "controller" [node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) with a static size for running cluster-critical controllers. Nodes use the [Bottlerocket](https://bottlerocket.dev/) distribution.
+  Autoscaled nodes are deployed via our [kube\_karpenter](/docs/main/reference/infrastructure-modules/kubernetes/kube_karpenter) module.
 
-  - The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic.
-  - The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
+* [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for both the cluster control plane and for the node groups.
+  * The control plane accepts inbound traffic from the nodes and can make arbitrary outbound traffic.
+  * The nodes accept inbound traffic from the control plane, from each other, and can make arbitrary outbound traffic.
 
-- Subnet tags that controllers in our other modules depend upon.
+* Subnet tags that controllers in our other modules depend upon.
 
-- The requisite infrastructure for using
-  [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
+* The requisite infrastructure for using [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
 
-- Logging for the control plane components via
-  [AWS Cloudwatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html).
+## Usage
 
-Additionally, we use the following [EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html):
+### Installation
 
-- [coredns](https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html)
+#### Choose Control Plane Subnets
+
+Control plane subnets are the subnets within which AWS will deploy the EKS-managed Kubernetes API servers.
+
+By default, the control plane subnets will be any subnet named `PUBLIC_A`, `PUBLIC_B`, or `PUBLIC_C` in the VPC indicated
+by the `vpc_id` input as these are the subnets created by the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+
+If you need to overwrite the default module behavior, you can specify `control_plane_subnets`. This input takes **at least 2** subnets (each in a different AZ).
+
+#### Choose Node Subnets
+
+<MarkdownAlert severity="warning">
+  Your node subnets **cannot** be changed without downtime in the future.
+</MarkdownAlert>
+
+Node subnets are the subnets within which your actual workloads will run once deployed to the Kubernetes cluster.
+
+By default, the node subnets will be any subnet named `PRIVATE_A`, `PRIVATE_B`, or `PRIVATE_C` in the VPC indicated
+by the `vpc_id` input as these are the subnets created by the [aws\_vpc](/docs/main/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+
+If you need to overwrite the default module behavior, you can specify `node_subnets`.
+
+For an [SLA target of level 2 or above](/docs/main/guides/deploying-workloads/high-availability), you MUST provide **at least 3** subnets (each in a different AZ).
+
+### Overriding the Service CIDR
+
+Kubernetes requires that you specify a range of IP addresses that can be allocated to [Services](https://kubernetes.io/docs/concepts/services-networking/service/) deployed in Kubernetes. This
+is called the [Service CIDR](https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/).
+
+We provide a default CIDR range of `172.20.0.0/16`. We strongly discourage overriding this default unless you
+have a demonstrated need.
+
+If you do override with the `service_cidr` input, you MUST provide a private CIDR range that does not conflict with your VPC or any of its subnets. That
+is because Kubernetes performs its own routing and networking independently of AWS.
+
+You will also need to choose a `dns_service_ip` which **must** be in the `service_cidr`. If you use the
+`172.20.0.0/16` CIDR, then you should use `172.20.0.10` as this is the EKS default.
+
+#### Post-install Steps
+
+This module is intended to be installed as a part of [this guide](/docs/main/guides/bootstrapping/kubernetes-cluster) which includes manual steps
+that must be run after applying the module.
+
+## RBAC
+
+This module configures access to the cluster via [EKS Access Entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html).
+
+See the below table for our standard Kubernetes groups, the AWS principals linked to each group (configured through this module's
+input variables), and the description of the intended permission level:
+
+| Kubernetes Group        | Default AWS Principals Linked       | Extra AWS Principals Linked            | Permission Level                                                                                                                                                                                                            |
+| ----------------------- | ----------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pf:superusers`         | Superuser SSO Role, `root` IAM User | `var.superuser_principal_arns`         | Full access to everything in the cluster. ([AmazonEKSClusterAdminPolicy](https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html#access-policy-permissions-amazoneksclusteradminpolicy))            |
+| `pf:admins`             | Admin SSO Role                      | `var.admin_princiapl_arns`             | Write access to everything besides core cluster utilities. ([AmazonEKSAdminViewPolicy](https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html#access-policy-permissions-amazoneksadminviewpolicy)) |
+| `pf:readers`            | Reader SSO Role                     | `var.reader_principal_arns`            | Read access to all resources (including secrets). ([AmazonEKSEditPolicy](https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html#access-policy-permissions-amazonekseditpolicy))                    |
+| `pf:restricted-readers` | RestrictedReader SSO Role           | `var.restricted_reader_principal_arns` | Read access to all resources (not including secrets). ([AmazonEKSViewPolicy](https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html#access-policy-permissions-amazoneksviewpolicy.json))           |
+
+The SSO roles are installed into each account via [aws\_iam\_identity\_center\_permissions](/docs/main/reference/infrastructure-modules/direct/aws/aws_iam_identity_center_permissions)
+and are automatically discovered by this module. Users with access to a particular AWS IAM SSO role will have the corresponding permissions in all Panfactum clusters in
+that AWS account.
+
+You can explicitly grant additional AWS IAM principals (users and roles) access via the input variables outlined above (e.g., `var.superuser_principal_arns`).
+
+Note that extra permissions are given to the `pf:admins` and `pf:restricted-readers` Kubernetes groups
+in the [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies). AWS doesn't install
+permissions that cover CRDs, so we add them ourselves once the cluster is instantiated.
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### cluster_description
+### cluster\_description
 
 Description: The purpose of the EKS cluster.
 
 Type: `string`
 
-### cluster_name
+### cluster\_name
 
 Description: The name of the EKS cluster resource.
 
 Type: `string`
 
-### control_plane_subnets
-
-Description: List of subnet names for the control plane. Must be in at least two different availability zones.
-
-Type: `set(string)`
-
-### dns_service_ip
-
-Description: The IP address of the cluster's DNS service. Must be inside the service_cidr range.
-
-Type: `string`
-
-### node_subnets
+### node\_subnets
 
 Description: List of names for subnets that controller nodes should be deployed to
 
 Type: `list(string)`
 
-### service_cidr
-
-Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
-
-Type: `string`
-
-### vpc_id
+### vpc\_id
 
 Description: The id for the VPC that the cluster should be deployed into
 
@@ -107,15 +143,15 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### admin_iam_arns
+### bootstrap\_cluster\_creator\_admin\_privileges
 
-Description: List of IAM arns for encryption key admins.
+Description: Whether to give cluster admin privileges to the cluster creator implicitly. Cannot be changed after cluster creation. For backwards compatibility purposes only.
 
-Type: `list(string)`
+Type: `bool`
 
-Default: `[]`
+Default: `false`
 
-### bootstrap_mode_enabled
+### bootstrap\_mode\_enabled
 
 Description: Whether the cluster is being bootstrapped and does not yet have the autoscaler enabled.
 
@@ -123,7 +159,7 @@ Type: `bool`
 
 Default: `false`
 
-### control_plane_logging
+### control\_plane\_logging
 
 Description: Which log streams to turn on for the control plane (will be sent to Cloudwatch and forwarded to DataDog)
 
@@ -131,23 +167,23 @@ Type: `set(string)`
 
 Default: `[]`
 
-### core_dns_addon_enabled
+### control\_plane\_subnets
 
-Description: FOR BACKWARDS COMPATIBILITY AND MIGRATIONS ONLY
+Description: List of subnet names for the control plane. Must be in at least two different availability zones.
 
-Type: `bool`
+Type: `set(string)`
 
-Default: `false`
+Default: `[]`
 
-### coredns_version
+### dns\_service\_ip
 
-Description: The version to use for the coredns EKS add-on.
+Description: The IP address of the cluster's DNS service. Must be inside the service\_cidr range.
 
 Type: `string`
 
-Default: `"v1.11.1-eksbuild.6"`
+Default: `"172.20.0.10"`
 
-### enable_public_access
+### enable\_public\_access
 
 Description: Whether the cluster control plane should be available from the public internet.
 
@@ -155,15 +191,71 @@ Type: `bool`
 
 Default: `true`
 
-### kube_version
+### extended\_support\_enabled
+
+Description: Whether to enable extended support for EOL Kubernetes versions.
+
+Type: `bool`
+
+Default: `true`
+
+### extra\_admin\_principal\_arns
+
+Description: Grants read-write access to most resources (not included top-level cluster configuration) to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_reader\_principal\_arns
+
+Description: Grants read access to all resources (including secrets) to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_restricted\_reader\_principal\_arns
+
+Description: Grants read access to all resources (not including secrets) to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### extra\_superuser\_principal\_arns
+
+Description: Grants read-write access to all resources to the indicated principals.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### kube\_version
 
 Description: Desired Kubernetes version to use for all subsystems. Use only major and minor specifiers as patches will be automatically applied.
 
 Type: `string`
 
-Default: `"1.29"`
+Default: `"1.30"`
 
-### node_security_groups
+### node\_ami\_name
+
+Description: The name of the AMI to use for the controller nodes.
+
+Type: `string`
+
+Default: `"bottlerocket-aws-k8s-1.30-aarch64-v1.28.0-0ab4fab4"`
+
+### node\_ebs\_volume\_size\_gb
+
+Description: The size of the EBS volume in GiB to use for each node.
+
+Type: `number`
+
+Default: `40`
+
+### node\_security\_groups
 
 Description: Names of security groups allowed to communicate directly with the cluster nodes.
 
@@ -171,7 +263,7 @@ Type: `set(string)`
 
 Default: `[]`
 
-### public_access_cidrs
+### public\_access\_cidrs
 
 Description: IP address ranges that can access the public control plane API endpoint.
 
@@ -180,70 +272,64 @@ Type: `set(string)`
 Default:
 
 ```json
-["0.0.0.0/0"]
+[
+  "0.0.0.0/0"
+]
 ```
 
-### reader_iam_arns
+### root\_user\_access\_entry\_enabled
 
-Description: List of IAM arns for users who can use the encryption key for encryption and decryption.
+Description: Whether to enable the root user access entry
 
-Type: `list(string)`
+Type: `bool`
 
-Default: `[]`
+Default: `true`
 
-### restricted_reader_iam_arns
+### service\_cidr
 
-Description: List of IAM arns for users who can only view the encryption key.
+Description: CIDR block that kubernetes will use for assigning service and pod ID addresses.
 
-Type: `list(string)`
+Type: `string`
 
-Default: `[]`
-
-### superuser_iam_arns
-
-Description: List of IAM arns for encryption key superusers.
-
-Type: `list(string)`
-
-Default: `[]`
+Default: `"172.20.0.0/16"`
 
 ## Outputs
 
 The following outputs are exported:
 
-### cluster_ca_data
+### cluster\_ca\_data
 
 Description: The CA certificate for the Kubernetes API server
 
-### cluster_name
+### cluster\_name
 
 Description: The name of the EKS cluster
 
-### cluster_region
+### cluster\_region
 
 Description: The AWS region to which the EKS cluster is deployed
 
-### cluster_url
+### cluster\_url
 
 Description: The URL for the Kubernetes API server
 
-### dns_service_ip
+### dns\_service\_ip
 
 Description: The IP address of the cluster's DNS service.
 
-### node_instance_profile
+### node\_instance\_profile
 
 Description: The instance profile assigned to controller nodes
 
-### node_role_arn
+### node\_role\_arn
 
 Description: The ARN of the role assigned to controller nodes
 
-### node_security_group_id
+### node\_security\_group\_id
 
 Description: ID of the security group assigned to controller nodes
 
-### user_data
+### user\_data
 
 Description: The user data file provided to the controller nodes
 

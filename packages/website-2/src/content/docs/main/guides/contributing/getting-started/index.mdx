@@ -1,12 +1,7 @@
----
-title: "Getting Started"
----
-
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 <MarkdownAlert severity="info">
-  By contributing to this project, you implicitly agree to follow our [Code of
-  Conduct](https://github.com/Panfactum/stack/blob/main/CODE_OF_CONDUCT.md).
+  By contributing to this project, you implicitly agree to follow our [Code of Conduct](https://github.com/Panfactum/stack/blob/main/CODE_OF_CONDUCT.md).
 </MarkdownAlert>
 
 # Getting Started
@@ -20,7 +15,7 @@ website. Making changes to the Panfactum stack means updating this repository.
 1. Follow GitHub's instructions for [forking the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
    If you plan on being a regular contributor, make sure you follow the instructions for syncing the fork with the upstream repo.
 
-2. Follow the installation steps outlined in the Stack's [getting started guide](/docs/edge/guides/getting-started/install-tooling)
+2. Follow the installation steps outlined in the Stack's [getting started guide](/docs/main/guides/getting-started/install-tooling)
    to ensure that you have the necessary utilities to launch the Stack's developer environment. You do NOT need
    to do any of the subsequent steps in that guide.
 
@@ -33,20 +28,20 @@ The project is broken into "packages" which can be found under the [packages dir
 
 We currently have the following packages:
 
-- [nix](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/nix): Contains BOTH the local development environment for
+* [nix](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/nix): Contains BOTH the local development environment for
   users of the Panfactum stack.
 
-- [infrastructure](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure): Contains all the
+* [infrastructure](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure): Contains all the
   infrastructure-as-code modules that comprise the Panfactum stack
 
-- [website](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/website): Contains the source code for this website
+* [website](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/website): Contains the source code for this website
 
-- [reference](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/reference): Contains a complete deployment
+* [reference](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference): Contains a complete deployment
   of the Panfactum stack that developers can use as a reference point for their own organization
 
-- [eslint](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/eslint): Contains shared linting rules for all our
+* [eslint](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/eslint): Contains shared linting rules for all our
   Typescript / Javascript projects
 
 ## Next Steps
 
-- [Open a pull request](/docs/edge/guides/contributing/pull-requests)
+* [Open a pull request](/docs/main/guides/contributing/pull-requests)

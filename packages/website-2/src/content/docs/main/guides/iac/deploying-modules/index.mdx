@@ -1,8 +1,4 @@
----
-title: "Deploying Modules"
----
-
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Deploying Modules
 
@@ -10,44 +6,43 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This guide assumes:
 
-- You have prior experience working with infrastructure tools such as
-  OpenTofu (Terraform) and Terragrunt. If you are not, please review the [concept docs](/docs/edge/concepts/iac)
+* You have prior experience working with infrastructure tools such as
+  OpenTofu (Terraform) and Terragrunt. If you are not, please review the [concept docs](/docs/main/concepts/iac)
   before proceeding.
 
-- You have completed the necessary [repository setup guide](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code).
+* You have completed the necessary [repository setup guide](/docs/main/guides/bootstrapping/configuring-infrastructure-as-code).
 
 ## Using Terragrunt to Deploy Modules
 
 In the Panfactum stack, we use [Terragrunt](https://terragrunt.gruntwork.io/) to configure and deploy OpenTofu / Terraform modules.
 
-The [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) for each deployed module is stored in your repository's
+The [configuration-as-code](/docs/main/concepts/iac#configuration-as-code) for each deployed module is stored in your repository's
 environments folder. [^1] Terragrunt uses an extended
 version of the [Hashicorp Configuration Language (HCL)](https://developer.hashicorp.com/terraform/language/syntax/configuration)
 to define each module's deployment configuration. If you are new to terragrunt, you should review the basics
 of the syntax [here](https://terragrunt.gruntwork.io/docs/getting-started/configuration/).
 
-[^1]:
-    This folder lives in your stack repository, is defined by the repo variable `environments_dir`,
-    and was created when running `pf-update-terragrunt`. For more information, see our [repository setup guide](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
+[^1]: This folder lives in your stack repository, is defined by the repo variable `environments_dir`,
+    and was created when running `pf-update-terragrunt`. For more information, see our [repository setup guide](/docs/main/guides/bootstrapping/configuring-infrastructure-as-code)
 
 Terragrunt wraps `tofu` / `terraform` CLI and contains the same subcommands (e.g., `apply`, `plan`, etc.). Simply
-navigate to the module subdirectory in your environments folder and run the desired command (e.g., `terragrunt apply`).
+navigate to the module subdirectory in your environments folder and run the desired command  (e.g., `terragrunt apply`).
 
-While Terragrunt should have been properly configured when completing the [bootstrapping guide](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code),
-you can review the standard Panfactum configuration [rules here](/docs/edge/reference/configuration/terragrunt-variables).
+While Terragrunt should have been properly configured when completing the [bootstrapping guide](/docs/main/guides/bootstrapping/configuring-infrastructure-as-code),
+you can review the standard Panfactum configuration [rules here](/docs/main/reference/configuration/terragrunt-variables).
 
 ### Local Deployments
 
 When working with modules locally, it can be helpful to override your organization's values in the [standard terragrunt
-configuration files.](/docs/edge/reference/configuration/terragrunt-variables) For example, you may want to use a different provider configuration to pull in your specific
+configuration files.](/docs/main/reference/configuration/terragrunt-variables) For example, you may want to use a different provider configuration to pull in your specific
 AWS profile, or you may want to test a specific module version.
 
 Each of the standard files has `.user.yaml` counterparts that will override the normal file values:
 
-- `global.yaml`: `global.user.yaml`
-- `environment.yaml`: `environment.user.yaml`
-- `region.yaml`: `region.user.yaml`
-- `module.yaml`: `module.user.yaml`
+* `global.yaml`: `global.user.yaml`
+* `environment.yaml`: `environment.user.yaml`
+* `region.yaml`: `region.user.yaml`
+* `module.yaml`: `module.user.yaml`
 
 These files are automatically ignored by version control.
 
@@ -106,27 +101,27 @@ inputs = {
 ### Versioning
 
 The Terragrunt configuration values on the primary integration branch
-(set by the `repo_primary_branch` [repo variable](/docs/edge/reference/configuration/repo-variables)) are the values
+(set by the `repo_primary_branch` [repo variable](/docs/main/reference/configuration/repo-variables)) are the values
 that will be deployed by CI / CD pipelines. As a result, the source-of-truth for what is running **every environment** is consolidated in this
 branch's environments folder.
 
-However, this is only the [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code). The
+However, this is only the [configuration-as-code](/docs/main/concepts/iac#configuration-as-code). The
 infrastructure modules (i.e., infrastructure-as-code) may be pinned to specific versions via the `terraform.source`
 field.
 
-We provide two [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables) for setting the module version:
+We provide two [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables) for setting the module version:
 
-- `pf_stack_version`: the [Panfactum module](/docs/edge/reference/infrastructure-modules/overview) version to use; used
+* `pf_stack_version`: the [Panfactum module](/docs/main/reference/infrastructure-modules/overview) version to use; used
   by `include.panfactum.locals.pf_stack_source`. (See below)
 
-- `version`: the [first-party module](/docs/edge/guides/iac/first-party-modules) version to use; used by
+* `version`: the [first-party module](/docs/main/guides/iac/first-party-modules) version to use; used by
   `include.panfactum.locals.source`.
 
 ### Deploying Panfactum Modules
 
-[Example](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/global/aws_delegated_zones_production/terragrunt.hcl)
+[Example](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_delegated_zones_production/terragrunt.hcl)
 
-If you are deploying a [Panfactum module](/docs/edge/reference/infrastructure-modules/overview), use
+If you are deploying a [Panfactum module](/docs/main/reference/infrastructure-modules/overview), use
 `include.panfactum.locals.pf_stack_source` to dynamically construct the `terraform.source`. This adds version management,
 caching, and other convenience functionality. For example:
 
@@ -136,40 +131,39 @@ terraform {
 }
 ```
 
-We use the following [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables) to construct `include.panfactum.locals.pf_stack_source`:
+We use the following [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables) to construct `include.panfactum.locals.pf_stack_source`:
 
-- `pf_stack_version`: Check [here](/docs/edge/reference/releases) for the full list of available releases. This should
+* `pf_stack_version`: Check [here](/docs/main/reference/releases) for the full list of available releases. This should
   be the same version as used for the Panfactum devShell. We recommend setting this in your `environment.yaml` so that functionality
   remains consistent across an entire environment.
 
-- `module`: The name of the module to deploy. Defaults to the directory name if not provided. Should be set in the `module.yaml`.
+* `module`: The name of the module to deploy. Defaults to the directory name if not provided. Should be set in the `module.yaml`.
 
 ### Setting up Providers
 
 **Before you deploy a module**, you must setup your [OpenTofu (Terraform) providers](https://opentofu.org/docs/language/providers/).
 
-We provide ready-made configuration for many providers (see the [full list here](/docs/edge/reference/configuration/terragrunt-variables#providers)).
+We provide ready-made configuration for many providers (see the [full list here](/docs/main/reference/configuration/terragrunt-variables#providers)).
 
 We also provide a convenience command, `pf-tf-init`, that will automatically inspect the sourced
 infrastructure module and add the correct providers and provider hashes to your `.terraform.lock.hcl` files. [^3]
 
-[^3]:
-    This uses `terragrunt providers` under the hood. `terragrunt providers` can be used to provide
+[^3]: This uses `terragrunt providers` under the hood. `terragrunt providers` can be used to provide
     more granular information about the required providers such as their versions.
 
 Some providers require extra configuration variables. To view each provider's required
-configuration variables, see the [reference docs](/docs/edge/reference/configuration/terragrunt-variables#providers).
+configuration variables, see the [reference docs](/docs/main/reference/configuration/terragrunt-variables#providers).
 
 Generally, you will want to configure a provider on an environment-wide or region-wide basis (i.e.,
 in the `environment.yaml` or `region.yaml` files).
 
 ### Using Secrets
 
-[Example](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/management/global/aws_account/terragrunt.hcl)
+[Example](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/management/global/aws_account/terragrunt.hcl)
 
 Secrets are encrypted and stored directly inside the repository just like any other configuration setting.
 The Panfactum stack uses [sops](https://github.com/getsops/sops) for ensuring this is done securely and in a manner
-that integrates with terragrunt. See our [guide for setting up sops](/docs/edge/guides/bootstrapping/infrastructure-as-code).
+that integrates with terragrunt. See our [guide for setting up sops](/docs/main/guides/bootstrapping/infrastructure-as-code).
 
 Assuming you have an encrypted file called `secrets.yaml` adjacent to your `terragrunt.hcl`, you
 can access its values using the following syntax: [^2]
@@ -184,13 +178,12 @@ inputs = {
 }
 ```
 
-[^2]:
-    Note that you must use the `get_terragrunt_dir()` function to resolve the filepath. This will
+[^2]: Note that you must use the `get_terragrunt_dir()` function to resolve the filepath. This will
     ensure a stable location regardless of how terragrunt is run.
 
 ### Defining the Dependency Graph
 
-[Example](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl)
+[Example](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl)
 
 Typically, there will be an order in which your infrastructure modules
 must be deployed and updated. For example, you will need to launch your Kubernetes cluster before you can deploy
@@ -202,22 +195,21 @@ This will ensure that modules are always updated in the desired order. Additiona
 to pass the outputs of one module into the inputs of another.
 
 <MarkdownAlert severity="warning">
-  Do not add dependencies that cross environment boundaries. Our CI paradigm
-  scopes permissions to a single environment at a time, so dependencies that
-  cross environments will always lack the appropriate permissions to apply
-  successfully.
+  Do not add dependencies that cross environment boundaries. Our CI paradigm scopes permissions to a single
+  environment at a time, so dependencies that cross environments will always lack the appropriate permissions
+  to apply successfully.
 </MarkdownAlert>
 
 ### Resource Tagging
 
-All Panfactum modules deploy resources with [standard tags / labels.](/docs/edge/reference/resource-tags).
+All Panfactum modules deploy resources with [standard tags / labels.](/docs/main/reference/resource-tags).
 
 You can add arbitrary additional tags by setting `extra_tags` in any of the following files:
 
-- `global.yaml`
-- `environment.yaml`
-- `region.yaml`
-- `module.yaml`
+* `global.yaml`
+* `environment.yaml`
+* `region.yaml`
+* `module.yaml`
 
 `extra_tags` is an object where the keys and values must both be strings.
 
@@ -232,36 +224,33 @@ many modules at once.
 
 Shared inputs to groups of modules can be supplied by setting `extra_inputs` in any of the following files:
 
-- `global.yaml`
-- `environment.yaml`
-- `region.yaml`
-- `module.yaml`
+* `global.yaml`
+* `environment.yaml`
+* `region.yaml`
+* `module.yaml`
 
-For a list of all the common input variables see this [reference list.](/docs/edge/reference/infrastructure-modules/overview#common-variables)
+For a list of all the common input variables see this [reference list.](/docs/main/reference/infrastructure-modules/overview#common-variables)
 
 ### Using a Local Copy of Panfactum Modules
 
 You may want to make modifications to Panfactum modules found in the [Stack repository](https://github.com/Panfactum/stack/tree/main/packages/infrastructure)
 and deploy them to your infrastructure.
 
-You can easily do this for any set of modules by manipulating a few [Terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables#module-source):
+You can easily do this for any set of modules by manipulating a few [Terragrunt variables](/docs/main/reference/configuration/terragrunt-variables#module-source):
 
 1. Clone the Panfactum Stack repository to your local machine (`git clone https://github.com/Panfactum/stack.git`).
 
 2. Set `pf_stack_version` to `local`.
 
-3. Set `pf_stack_local_path` to an _absolute path_ to the local copy of the Panfactum Stack repository you cloned in step 1.
+3. Set `pf_stack_local_path` to an *absolute path* to the local copy of the Panfactum Stack repository you cloned in step 1.
 
-Now when you next run `terragrunt apply`, the local module code will be used. This applies to _both_ Panfactum direct
-modules _and_ submodules. [^6]
+Now when you next run `terragrunt apply`, the local module code will be used. This applies to *both* Panfactum direct
+modules *and* submodules. [^6]
 
-[^6]:
-    For submodules, this works via the `pf_module_source` input provided to your modules by Terragrunt. See the
-    [first-party IaC development documentation for more information.](/docs/edge/guides/iac/first-party-modules#using-panfactum-submodules)
+[^6]: For submodules, this works via the `pf_module_source` input provided to your modules by Terragrunt. See the
+    [first-party IaC development documentation for more information.](/docs/main/guides/iac/first-party-modules#using-panfactum-submodules)
 
 <MarkdownAlert severity="warning">
-  If using local modules, be sure to set `pf_stack_local_path` in your
-  `*.user.yaml` Terragrunt variable files, *not* in the configuration files that
-  you commit to your repository. This value will be specific to your local
-  machine.
+  If using local modules, be sure to set `pf_stack_local_path` in your `*.user.yaml` Terragrunt variable files, *not* in the
+  configuration files that you commit to your repository. This value will be specific to your local machine.
 </MarkdownAlert>

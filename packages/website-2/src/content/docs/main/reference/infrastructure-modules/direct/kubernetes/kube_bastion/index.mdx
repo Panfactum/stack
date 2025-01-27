@@ -1,19 +1,10 @@
----
-title: "Kubernetes Ingress Bastion"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_bastion"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_bastion"
-  status="stable"
-  type="direct"
-/>
+<ModuleHeader name="kube_bastion" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_bastion" status="stable" type="direct" />
 
 # Kubernetes Ingress Bastion
 
@@ -25,25 +16,25 @@ to private network resources.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.0/docs) (3.6.0)
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.5/docs) (4.0.5)
+* [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
 
-- [vault](https://registry.terraform.io/providers/hashicorp/vault/3.25.0/docs) (3.25.0)
+* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
 The following input variables are required:
 
-### bastion_domains
+### bastion\_domains
 
 Description: The domain names of the bastion
 
@@ -53,7 +44,7 @@ Type: `list(string)`
 
 The following input variables are optional (have default values):
 
-### bastion_image_version
+### bastion\_image\_version
 
 Description: The version of the image to use for the deployment
 
@@ -61,7 +52,7 @@ Type: `string`
 
 Default: `"17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"`
 
-### bastion_port
+### bastion\_port
 
 Description: The port the bastion should use for the ssh server
 
@@ -69,15 +60,7 @@ Type: `number`
 
 Default: `45459`
 
-### enhanced_ha_enabled
-
-Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
-
-Type: `bool`
-
-Default: `true`
-
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -85,7 +68,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -93,7 +76,15 @@ Type: `bool`
 
 Default: `true`
 
-### ssh_cert_lifetime_seconds
+### sla\_target
+
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+
+Type: `number`
+
+Default: `3`
+
+### ssh\_cert\_lifetime\_seconds
 
 Description: The lifetime of SSH certs provisioned by Vault
 
@@ -101,7 +92,7 @@ Type: `number`
 
 Default: `28800`
 
-### vpa_enabled
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
 
@@ -113,15 +104,15 @@ Default: `true`
 
 The following outputs are exported:
 
-### bastion_domains
+### bastion\_domains
 
 Description: The domains the SSH server is available on
 
-### bastion_host_public_key
+### bastion\_host\_public\_key
 
 Description: The bastion host's public key for mutual verification
 
-### bastion_port
+### bastion\_port
 
 Description: The port the SSH server is available on in each domain
 

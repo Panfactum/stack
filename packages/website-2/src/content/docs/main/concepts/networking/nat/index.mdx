@@ -1,9 +1,6 @@
----
-title: "Network Address Translation (NAT)"
----
+import MarkdownSVGImage from "@/components/solid/markdown/MarkdownImgSvg";
 
-import ImageSvg from "@/components/ui/ImageSvg";
-import natSvg from "./nat.svg?raw";
+import natImg from './nat.svg?raw'
 
 # Network Address Translation (NAT)
 
@@ -16,30 +13,30 @@ NAT is deployed in almost every network, and you are likely accessing this site 
 
 For us, NAT provides two key benefits:
 
-- External resources cannot initiate connections to your internal resources, but your resources can initiate arbitrary connections
+* External resources cannot initiate connections to your internal resources, but your resources can initiate arbitrary connections
   to external resources.
 
-- You do not need to assign expensive public IP addresses to your 100s of internal systems in order to get internet access.
+* You do not need to assign expensive public IP addresses to your 100s of internal systems in order to get internet access.
 
 ## AWS
 
 In AWS, this works as follows:
 
-<ImageSvg width={"1000px"} alt="AWS NAT Diagram" src={natSvg} />
+<MarkdownSVGImage width={"1000px"} alt="AWS NAT Diagram" src={natImg} />
 
 The above diagram demonstrates how nodes in private subnets will connect with an external service at public ip `7.7.7.7`.
 These are the important takeaways:
 
-- Traffic will be routed to the NAT node _in the same AZ_.
+* Traffic will be routed to the NAT node *in the same AZ*.
 
-- The NAT nodes have _both_ a private ip (`10.X.0.1`) and a public IP
+* The NAT nodes have *both* a private ip (`10.X.0.1`) and a public IP
   (`5.5.5.X`). The EC2 nodes only have private IPs.
 
-- The NAT node will receive the request, exchange the source IP header with its own public IP and then forward
+* The NAT node will receive the request, exchange the source IP header with its own public IP and then forward
   the request onward to the external service. When the external service responds, it will send the traffic to the NAT node as that
   is what it sees as the source IP. The NAT node will then restore the original source header and then forward the response back to the originating EC2 node.
 
-- The external service at `7.7.7.7` can never initiate requests to the EC2 nodes directly.
+* The external service at `7.7.7.7` can never initiate requests to the EC2 nodes directly.
 
-- The routing (configuring requests from EC2 nodes to IP addresses outside of `10.0.0.0/8` to be sent to the NAT node at `10.0.0.1`)
+* The routing (configuring requests from EC2 nodes to IP addresses outside of `10.0.0.0/8` to be sent to the NAT node at `10.0.0.1`)
   is accomplished by setting up [VPC Route Tables](https://docs.aws.amazon.com/vpc/latest/userguide/WorkWithRouteTables.html).

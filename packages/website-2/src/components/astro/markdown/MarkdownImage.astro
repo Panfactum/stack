@@ -1,0 +1,15 @@
+---
+import { Picture } from "astro:assets";
+import type { ComponentProps } from 'astro/types';
+
+type PictureProps = ComponentProps<typeof Picture>;
+type Props = PictureProps
+
+---
+
+<Picture
+  {...Astro.props}
+  sizes="(max-width: 24rem) 24rem, (max-width: 40rem) 40rem, 46rem"
+  formats={["avif", "webp"]}
+  breakpoints={[400, 640, 740, 960, 1280]}
+/>

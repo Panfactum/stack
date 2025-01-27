@@ -1,0 +1,109 @@
+---
+import {Picture} from "astro:assets";
+
+import FooterMascot from "./FooterMascot.webp"
+import { COPYWRITE, DISCORD_URL, GITHUB_URL } from "../../../lib/constants";
+import DiscordIcon from "../../icons/discord.svg";
+import GithubIcon from "../../icons/github.svg";
+import PanfactumLogo from "../../icons/panfactum-logo.svg";
+---
+
+<footer
+  class="bg-primary flex flex-col items-center overflow-x-hidden px-8 pt-12"
+>
+  <div class="container mx-auto flex max-w-screen-xl flex-col gap-y-12 px-4">
+    <div
+      class="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+    >
+    <!--  <div class="flex flex-col gap-4 min-w-24">-->
+    <!--    <h2 class="text-sm font-semibold text-tertiary">Features</h2>-->
+    <!--    <div class="flex flex-col gap-3">-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold">CI / CD</a>-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold"-->
+    <!--        >Local Development</a-->
+    <!--      >-->
+    <!--    </div>-->
+    <!--  </div>-->
+
+    <!--  <div class="flex flex-col gap-4 min-w-24">-->
+    <!--    <h2 class="text-sm font-semibold text-tertiary">&nbsp;</h2>-->
+    <!--    <div class="flex flex-col gap-3">-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold"-->
+    <!--        >Cost Savings</a-->
+    <!--      >-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold"-->
+    <!--        >Local Development</a-->
+    <!--      >-->
+    <!--    </div>-->
+    <!--  </div>-->
+
+    <!--  <div class="flex flex-col gap-4 min-w-24">-->
+    <!--    <h2 class="text-sm font-semibold text-tertiary">Docs</h2>-->
+    <!--    <div class="flex flex-col gap-3">-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold"-->
+    <!--        >Getting Started</a-->
+    <!--      >-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold"-->
+    <!--        >Bootstrapping</a-->
+    <!--      >-->
+    <!--    </div>-->
+    <!--  </div>-->
+
+    <!--  <div class="flex flex-col gap-4 min-w-[96px]">-->
+    <!--    <h2 class="text-sm text-tertiary font-semibold">Company</h2>-->
+    <!--    <div class="flex flex-col gap-3">-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold">About</a>-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold">Mission</a>-->
+    <!--    </div>-->
+    <!--  </div>-->
+
+    <!--  <div class="flex flex-col gap-4 min-w-[96px]">-->
+    <!--    <h2 class="text-sm font-semibold text-tertiary">Resources</h2>-->
+    <!--    <div class="flex flex-col gap-3">-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold"-->
+    <!--        >Getting Started</a-->
+    <!--      >-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold">K8s Cluster</a-->
+    <!--      >-->
+    <!--    </div>-->
+    <!--  </div>-->
+
+    <!--  <div class="flex flex-col gap-4 min-w-[96x]">-->
+    <!--    <h2 class="text-sm font-semibold text-tertiary">Legal</h2>-->
+    <!--    <div class="flex flex-col gap-3">-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold">Terms</a>-->
+    <!--      <a href="#" class="text-md text-tertiary font-semibold">FAQ</a>-->
+    <!--    </div>-->
+    <!--  </div>-->
+    <!--</div>-->
+
+    <div class="flex flex-col justify-between sm:flex-row">
+      <div class="flex flex-col gap-8">
+        <div class="flex flex-col gap-6">
+          <PanfactumLogo />
+          <p class="text-tertiary">
+            Cloud native system for platform engineering
+          </p>
+        </div>
+        <div class="text-quaternary flex items-center gap-x-6">
+          <a href={GITHUB_URL}>
+            <GithubIcon size="36" />
+          </a>
+          <a href={DISCORD_URL}>
+            <DiscordIcon size="48" />
+          </a>
+        </div>
+        <p>{COPYWRITE}</p>
+      </div>
+
+      <Picture
+        class="hidden max-w-128 translate-x-1/4 self-end lg:block"
+        sizes="(max-width: 24rem) 24rem, (max-width: 40rem) 40rem, 46rem"
+        formats={["avif", "webp"]}
+        breakpoints={[400, 640, 740, 960, 1280]}
+        src={FooterMascot}
+        alt="Panfactum Mascot"
+      />
+    </div>
+  </div>
+</footer>

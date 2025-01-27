@@ -1,37 +1,67 @@
----
-title: "Overview"
----
-
 # Overview
 
 This directory contains reference documentation for all the Panfactum OpenTofu (Terraform) modules which can be found
-[here](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure).
+[here](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure).
 
 ## Module Types
 
 We categorize each module into one of the following types:
 
-- **Direct:** Intended to be deployed directly into your system via Terragrunt.
-- **Submodule:** Intended to be used as [child module](https://opentofu.org/docs/language/modules/) in your own OpenTofu modules.
+* **Direct:** Intended to be deployed directly into your system via Terragrunt.
+* **Submodule:** Intended to be used as [child module](https://opentofu.org/docs/language/modules/) in your own OpenTofu modules.
 
 ## Common Variables
 
 Many (not all) modules share these variables which mutate module behavior in a standard way. These are **not**
 automatically injected by Terragrunt and require manual configuration, however we recommend setting them on
-a regional or environmental basis using the `extra_inputs` [Terragrunt variable.](/docs/edge/reference/configuration/terragrunt-variables#inputs)
+a regional or environmental basis using the `extra_inputs` [Terragrunt variable.](/docs/main/reference/configuration/terragrunt-variables#inputs)
 
 While these **are** documented on each module's individual reference page, we also provide a complete
 list here for convenience:
 
-| Value                         | Type           | Default | Description                                                                                                                                                                                                                                                                          |
-| ----------------------------- | -------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pull_through_cache_enabled`  | `bool`         | `false` | Whether to use the pull through cached provided by [aws_ecr_pull_through_cache](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache) for sourcing container images rather than directly pulling from public registries.                                |
-| `node_image_cache_enabled`    | `bool`         | `false` | Whether to pre-pull images to every node. Requires the [kube_fledged](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_fledged) operator to have been deployed.                                                                                                    |
-| `enhanced_ha_enabled`         | `bool`         | `true`  | Whether Kubernetes modules should be deployed with enhanced high-availability (HA) scheduling constraints to improve availability. Disabling will change availability from 99.99% to 99.9% but will save approximately 33% in base cluster costs.                                    |
-| `panfactum_scheduler_enabled` | `bool`         | `false` | Whether to use the bin-packing scheduler provided by [kube_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler). Using this will reduce cluster costs by approximately 25-33% with no additional impact, but requires the scheduler be deployed. |
-| `vpa_enabled`                 | `bool`         | `false` | Whether to automatically enable vertical pod autoscaling for the Pods in the Kubernetes module. Requires [kube_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) to have been deployed.                                                                   |
-| `monitoring_enabled`          | `bool`         | `false` | (Alpha) Whether to automatically install Prometheus scrapers and Grafana dashboards for the components in the module. Requires [kube_monitoring](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring) to have been deployed.                               |
-| `canary_enabled`              | `bool`         | `false` | (Alpha) Whether to install synthetic healthchecks for the components in the module. Requires [kube_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) to have been deployed.                                                                             |
-| `eks_cluster_name`            | `string`       | N/A     | The name of the EKS cluster where the module is deployed to. Used for setting up IAM permissions.                                                                                                                                                                                    |
-| `aws_iam_ip_allow_list`       | `list(string)` | `[]`    | All created IAM roles are only allowed to be used by internal IP addresses. This allows you to provide extra CIDR blocks from which IAM roles can be used.                                                                                                                           |
-| `vault_domain`                | `string`       | N/A     | The public domain name of Vault running in the cluster where the module is deployed. Used to set up federated authz/n.                                                                                                                                                               |
+| Value                         | Type                        | Default | Description                                                                                                                                                                                                                                                                           |
+| ----------------------------- | --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pull_through_cache_enabled`  | `bool`                      | `false` | Whether to use the pull through cached provided by [aws\_ecr\_pull\_through\_cache](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache) for sourcing container images rather than directly pulling from public registries.                             |
+| `node_image_cache_enabled`    | `bool`                      | `false` | Whether to pre-pull images to every node. Requires the [kube\_fledged](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_fledged) operator to have been deployed.                                                                                                    |
+| `sla_target`                  | `number` (`1`, `2`, or `3`) | `3`     | The [uptime SLA level](/docs/main/guides/deploying-workloads/high-availability) that will be targeted in the module deployment. Trades off increased uptime for higher runtime costs.                                                                                                 |
+| `panfactum_scheduler_enabled` | `bool`                      | `true`  | Whether to use the bin-packing scheduler provided by [kube\_scheduler](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_scheduler). Using this will reduce cluster costs by approximately 25-33% with no additional impact, but requires the scheduler be deployed. |
+| `vpa_enabled`                 | `bool`                      | `false` | Whether to automatically enable vertical pod autoscaling for the Pods in the Kubernetes module. Requires [kube\_vpa](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_vpa) to have been deployed.                                                                   |
+| `monitoring_enabled`          | `bool`                      | `false` | (Alpha) Whether to automatically install Prometheus scrapers and Grafana dashboards for the components in the module. Requires [kube\_monitoring](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_monitoring) to have been deployed.                               |
+| `canary_enabled`              | `bool`                      | `false` | (Alpha) Whether to install synthetic healthchecks for the components in the module. Requires [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo) to have been deployed.                                                                             |
+| `aws_iam_ip_allow_list`       | `list(string)`              | `[]`    | All created IAM roles are only allowed to be used by internal IP addresses. This allows you to provide extra CIDR blocks from which IAM roles can be used.                                                                                                                            |
+| `vault_domain`                | `string`                    | N/A     | The public domain name of Vault running in the cluster where the module is deployed. Used to set up federated authz/n.                                                                                                                                                                |
+
+## Provider Versions
+
+You must use the following versions for each provider in your first-party IaC modules in order to ensure
+compatibility with Panfactum submodules:
+
+| Provider   | Version    |
+| :--------- | :--------- |
+| authentik  | `2024.8.4` |
+| aws        | `5.80.0`   |
+| helm       | `2.12.1`   |
+| kubernetes | `2.34.0`   |
+| kubectl    | `2.1.3`    |
+| pf         | `0.0.7`    |
+| random     | `3.6.3`    |
+| tls        | `4.0.6`    |
+| vault      | `4.5.0`    |
+
+You can set the versions in the `terraform` block:
+
+```hcl
+terraform {
+  required_providers {
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "2.1.3"
+    }
+    pf = {
+      source  = "panfactum/pf"
+      version = "0.0.4"
+    }
+    ...
+  }
+}
+```

@@ -1,22 +1,23 @@
-"use client";
+import type { Component } from "solid-js";
+import { isServer } from "solid-js/web";
 
-import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
+import MarkdownGuideNav from "@/components/solid/markdown/MarkdownGuideNav";
 
 // We use this component to make it clear to people who are following
 // the bootstrapping guide that they should return to the bootstrapping
 // guide instead of continuing to the rest of the "getting started" guide.
-export default function NextSteps() {
-  // get bootstrappiing = true from query string
-  const isBootstrapping = window.location.search.includes("bootstrapping=true");
+const NextSteps: Component = () => {
+  const isBootstrapping =
+    !isServer && window.location.search.includes("bootstrapping=true");
 
   if (isBootstrapping) {
     return (
-      <div className="mt-2 flex flex-col gap-2">
+      <div class="mt-2 flex flex-col gap-2">
         <p>
           Now that you have the core tooling installed, you can{" "}
           <a
             href="/docs/edge/guides/bootstrapping/installing-devshell#install-prerequisite-tooling"
-            className="text-primary underline hover:cursor-pointer"
+            class="text-primary underline hover:cursor-pointer"
           >
             return to the bootstrapping guide.
           </a>
@@ -25,7 +26,7 @@ export default function NextSteps() {
     );
   } else {
     return (
-      <div className="mt-2 flex flex-col gap-2">
+      <div class="mt-2 flex flex-col gap-2">
         We are now ready to launch your organization&apos;s developer
         environment.
         <MarkdownGuideNav
@@ -40,4 +41,6 @@ export default function NextSteps() {
       </div>
     );
   }
-}
+};
+
+export default NextSteps;

@@ -1,42 +1,38 @@
 ---
-import { PanfactumLogo } from "@/components/panfactum-logo";
+import DiscordIcon from "@/components/icons/discord.svg";
+import PanfactumLogo from "@/components/icons/panfactum-logo.svg";
+import GetStartedButton from "@/components/solid/ui/GetStartedButton.tsx";
+
 import HeroAnimation from "./HeroAnimation/HeroAnimation.astro";
-import { Button } from "@/components/ui/button";
-import { faDiscord } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { GetStarted } from "@/components/marketing/GetStarted";
+import Button from "../../components/astro/ui/Button.astro";
+import { DISCORD_URL } from "../../lib/constants";
 ---
 
-<section class="flex flex-col items-center py-7xl">
-  <div
-    class="container px-container-padding-mobile xl:px-container-padding-desktop"
-  >
-    <div
-      class="container flex flex-col items-center space-y-6xl px-container-padding-mobile xl:px-container-padding-desktop"
-    >
+<section class="flex flex-col items-center py-16">
+  <div class="container px-4 xl:px-8">
+    <div class="container flex flex-col items-center gap-8 px-4 xl:px-8">
       <div
-        class="flex flex-col gap-3xl items-center text-center md:max-w-[888px]"
+        class="flex flex-col items-center gap-6 text-center md:max-w-[888px]"
       >
-        <PanfactumLogo className="hidden sm:inline-block text-white" />
+        <PanfactumLogo />
         <div class="block sm:hidden">
           <HeroAnimation scale={0.5} />
         </div>
-        <p class="text-lg md:text-xl max-w-[600px] text-offWhite font-semibold">
+        <p class="text-display-xs max-w-[600px] font-semibold">
           Cut cloud costs by up to 90% and improve your system capabilities,
           resiliency, and security with the #1 open-source framework for
           managing cloud infrastructure.
         </p>
       </div>
 
-      <div class="flex gap-x-lg">
-        <Button variant="secondary-gray" size="xl">
-          <FontAwesomeIcon
-            icon={faDiscord}
-            className="!h-[18px] !w-[22.5px] text-[#7289DA]"
-          />
-          Connect
-        </Button>
-        <GetStarted size="xl" />
+      <div class="flex gap-x-3">
+        <a href={DISCORD_URL}>
+          <Button variant="secondary" class="flex items-center gap-2">
+            <DiscordIcon size="26" />
+            Connect
+          </Button>
+        </a>
+        <GetStartedButton />
       </div>
     </div>
   </div>

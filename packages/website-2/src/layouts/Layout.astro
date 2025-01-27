@@ -1,68 +1,38 @@
 ---
-import "../styles/global.css";
-import { ClientRouter } from "astro:transitions";
-import { SEO } from "astro-seo";
-import { HeaderNav } from "../components/layout/header-nav";
-import Footer from "../components/layout/footer.astro";
+import CommonHead from "./CommonHead.astro";
+import Footer from "../components/astro/layout/Footer.astro";
+import Header from "../components/astro/layout/Header.astro";
 
-const pathname = new URL(Astro.request.url).pathname;
-const showFooter =
-  Astro.props.showFooter !== undefined ? Astro.props.showFooter : true;
-
-const redirect = Astro.props.redirect;
-
-const hasDarkBackground = Astro.props.darkBackground
-  ? Astro.props.darkBackground
-  : false;
-
-import { Tooltips } from "astro-tooltips";
+interface Props {
+  redirect?: string;
+  title: string;
+  description: string;
+  heroClass?: string;
+  hasBorder?: boolean;
+}
+const {
+  redirect,
+  title,
+  description,
+  heroClass = "",
+  hasBorder = false,
+} = Astro.props;
 ---
 
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <CommonHead title={title} description={description} redirect={redirect}>
     <meta name="generator" content={Astro.generator} />
-    <Tooltips interactive={false} delay={[15, 50]} />
-    <SEO title={Astro.props.title} description={Astro.props.description} />
-
-    {
-      redirect ? (
-        <meta http-equiv="refresh" content={`0; url=${redirect}`} />
-      ) : null
-    }
-
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-      rel="stylesheet"
-    />
-
-    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"
-    ></script>
-
-    <ClientRouter />
-  </head>
-
-  <body class="font-inter bg-primary text-primary">
-    <div class={`${Astro.props.heroClass}`}>
-      <div class="flex items-center justify-center h-20">
-        <HeaderNav
-          currentPath={pathname}
-          client:load
-          darkBackground={hasDarkBackground}
-          transition:persist
-          hasBorder={Astro.props.hasBorder}
-        />
-      </div>
-
+  </CommonHead>
+  <body class="bg-primary w-screen max-w-[100vw] font-inter">
+    <div class:list={heroClass}>
+      <Header
+        transition:persist
+        hasBorder={hasBorder}
+        background={"transparent"}
+      />
       <slot name="hero" />
     </div>
-
     <slot />
-
-    {showFooter ? <Footer /> : null}
+    <Footer />
   </body>
 </html>

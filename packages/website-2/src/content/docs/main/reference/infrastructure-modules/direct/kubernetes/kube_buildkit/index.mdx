@@ -1,19 +1,10 @@
----
-title: "Moby BuildKit"
----
-
-import ModuleHeader from "../../../ModuleHeader";
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
 
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader
-  name="kube_buildkit"
-  sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_buildkit"
-  status="beta"
-  type="direct"
-/>
+<ModuleHeader name="kube_buildkit" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_buildkit" status="beta" type="direct" />
 
 # Moby BuildKit
 
@@ -21,37 +12,31 @@ import ModuleHeader from "../../../ModuleHeader";
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.70.0/docs) (5.70.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.0.4/docs) (2.0.4)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.27.0/docs) (2.27.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.3/docs) (0.0.3)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
-The following input variables are required:
-
-### eks_cluster_name
-
-Description: The name of the EKS cluster.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
 
-### buildkit_image_version
+### buildkit\_image\_version
 
 Description: The version of BuildKit to use
 
 Type: `string`
 
-Default: `"v0.14.1-rootless"`
+Default: `"v0.18.1-rootless"`
 
-### cache_clear_cron
+### cache\_clear\_cron
 
 Description: A cron expression for how often the BuildKit cache should be cleared.
 
@@ -59,7 +44,7 @@ Type: `string`
 
 Default: `"0 0 * * 0"`
 
-### cpu_millicores
+### cpu\_millicores
 
 Description: The number of cpus millicores to request for the buildkit pod
 
@@ -67,7 +52,7 @@ Type: `number`
 
 Default: `2000`
 
-### initial_storage_gb
+### initial\_storage\_gb
 
 Description: The initial number of GB to use for the local image temp storage
 
@@ -75,7 +60,7 @@ Type: `number`
 
 Default: `25`
 
-### ip_allow_list
+### ip\_allow\_list
 
 Description: A list of IPs that can use the service account token to authenticate with AWS API
 
@@ -83,7 +68,7 @@ Type: `list(string)`
 
 Default: `[]`
 
-### max_replicas
+### max\_replicas
 
 Description: The maximum number of replicas of buildkit to use
 
@@ -91,7 +76,7 @@ Type: `number`
 
 Default: `10`
 
-### max_storage_gb
+### max\_storage\_gb
 
 Description: The maximum number of GB to use for the local image temp storage
 
@@ -99,7 +84,7 @@ Type: `number`
 
 Default: `250`
 
-### memory_mb
+### memory\_mb
 
 Description: The amount of memory in MB to request for the buildkit pod
 
@@ -107,7 +92,7 @@ Type: `number`
 
 Default: `8000`
 
-### min_replicas
+### min\_replicas
 
 Description: The minimum number of replicas of buildkit to use
 
@@ -115,15 +100,7 @@ Type: `number`
 
 Default: `1`
 
-### panfactum_image_version
-
-Description: The version of the Panfactum image to use for maintenance tasks
-
-Type: `string`
-
-Default: `"95508e2e860c95cee40e61245c8f588b6b73a39b"`
-
-### panfactum_scheduler_enabled
+### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
 
@@ -131,7 +108,7 @@ Type: `bool`
 
 Default: `true`
 
-### pull_through_cache_enabled
+### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
 
@@ -139,7 +116,7 @@ Type: `bool`
 
 Default: `true`
 
-### scale_down_delay_seconds
+### scale\_down\_delay\_seconds
 
 Description: How long since the last build was initiated that BuildKit will be automatically scaled to zero
 
@@ -147,7 +124,7 @@ Type: `number`
 
 Default: `1800`
 
-### vpa_enabled
+### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled. Does not apply to the actual BuildKit containers.
 
@@ -159,19 +136,19 @@ Default: `true`
 
 The following outputs are exported:
 
-### cache_bucket_name
+### cache\_bucket\_name
 
 Description: n/a
 
-### cache_bucket_region
+### cache\_bucket\_region
 
 Description: n/a
 
-### ecr_registry
+### ecr\_registry
 
 Description: n/a
 
-### eks_cluster_name
+### eks\_cluster\_name
 
 Description: n/a
 

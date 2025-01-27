@@ -60,10 +60,10 @@ const FAQ_QA = [
 <div class="accordion">
   {
     FAQ_QA.map((item, index) => (
-      <div class="accordion-item border-b border-secondary">
+      <div class="accordion-item border-secondary border-b">
         <input type="checkbox" id={`accordion-${index + 1}`} hidden />
         <label
-          class="accordion-header text-primary text-lg font-medium"
+          class="accordion-header text-lg font-medium"
           for={`accordion-${index + 1}`}
         >
           {item.label}
@@ -103,9 +103,6 @@ const FAQ_QA = [
           </div>
         </label>
         <div class="accordion-content text-tertiary">
-          {item.content.map((contentItem) => (
-            <p class="pb-4">{contentItem}</p>
-          ))}
         </div>
       </div>
     ))

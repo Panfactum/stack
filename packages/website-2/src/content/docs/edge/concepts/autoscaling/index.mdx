@@ -2,10 +2,8 @@
 title: "Autoscaling"
 ---
 
-import ImageSvg from "@/components/ui/ImageSvg";
-import scheduleConstraintSvg from "./schedule-constraint.svg?raw";
-
-import ConsumptionEfficiencyChart from "./ConsumptionEfficiencyChart";
+import ScheduleConstraintImg from "./schedule-constraint.png";
+import MarkdownImg from "@/components/astro/markdown/MarkdownImage.astro";
 
 # Autoscaling
 
@@ -84,7 +82,7 @@ gap between the average resource usage and P90 usage.**
 
 Let's visualize this:
 
-<ConsumptionEfficiencyChart client:only="react" />
+TODO - FIXME
 
 As you can see, the tighter the spread of usage values, the better the consumption efficiency.
 
@@ -146,7 +144,10 @@ However, each of these constraints prevents the Kubernetes scheduler from bin-pa
 consider the following scenario where topology spread constraints are applied to ensure the pods are spread evenly
 across AZs:
 
-<ImageSvg src={scheduleConstraintSvg} alt="Impact of scheduling constraints" />
+<MarkdownImg
+  src={ScheduleConstraintImg}
+  alt="Impact of scheduling constraints"
+/>
 
 Even when accounting for constraints, you might find that your provisioning efficiency is lower than expected. There are
 a few common misconceptions that can decrease efficiency:

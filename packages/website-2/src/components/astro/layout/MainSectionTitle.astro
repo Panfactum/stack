@@ -1,0 +1,13 @@
+---
+interface Props {
+  title: string;
+  background?: "primary" | "secondary";
+}
+const { title } = Astro.props;
+---
+
+<h2
+  class:list={["font-machina font-semibold text-display-xl mb-2 text-center"]}
+>
+  {title}
+</h2>

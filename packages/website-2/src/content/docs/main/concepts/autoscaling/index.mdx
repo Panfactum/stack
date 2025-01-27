@@ -1,11 +1,5 @@
----
-title: "Autoscaling"
----
-
-import ImageSvg from "@/components/ui/ImageSvg";
-import scheduleConstraintSvg from "./schedule-constraint.svg?raw";
-
-import ConsumptionEfficiencyChart from "./ConsumptionEfficiencyChart";
+import ScheduleConstraintImg from "./schedule-constraint.svg?raw"
+import MarkdownSVGImage from "@/components/solid/markdown/MarkdownImgSvg";
 
 # Autoscaling
 
@@ -13,14 +7,14 @@ import ConsumptionEfficiencyChart from "./ConsumptionEfficiencyChart";
 
 In the Panfactum stack, there are three distinct flavors of autoscaling:
 
-- [Horizontal Pod Autoscaling (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/): A built-in controller
+* [Horizontal Pod Autoscaling (HPA)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/): A built-in controller
   that adjusts the **number of pods** in a replicated service (e.g., Deployment, StatefulSet, etc.). This can be
   extended with tools like [KEDA](https://keda.sh/).
 
-- [Vertical Pod Autoscaling (VPA)](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler): A specific controller
+* [Vertical Pod Autoscaling (VPA)](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler): A specific controller
   that can be installed to automatically adjust the **resource requests and limits** of pods based on historical usage.
 
-- Cluster Autoscaling: A category of controllers that will adjust **the number of nodes** running in the cluster.
+* Cluster Autoscaling: A category of controllers that will adjust **the number of nodes** running in the cluster.
   [Karpenter](https://karpenter.sh/) runs the cluster autoscaling in the Panfactum stack.
 
 Horizontal and vertical autoscaling are opt-in and required creating specific autoscaling manifests. Cluster autoscaling
@@ -28,31 +22,30 @@ occurs automatically.
 
 ## Resource Utilization
 
-A key benefit of autoscaling is maximizing _resource utilization_. Importantly, there are two core
+A key benefit of autoscaling is maximizing *resource utilization*. Importantly, there are two core
 components of overall utilization:
 
 $$
 \left( \frac{\text{Consumed resources}}{\text{Requested resources}} \right) \times \left( \frac{\text{Requested resources}}{\text{Provisioned resources}} \right) = \frac{\text{Consumed resources}}{\text{Provisioned resources}}
 $$
 
-We call the first term _consumption_ efficiency, the second term _provisioning_ efficiency, and the result _net_ efficiency / overall utilization.
+We call the first term *consumption* efficiency, the second term *provisioning* efficiency, and the result *net* efficiency / overall utilization.
 
-Why do we have the concept of _requested resources_ in addition to consumed resources? In short, multi-node scheduling
+Why do we have the concept of *requested resources* in addition to consumed resources? In short, multi-node scheduling
 orchestrators like Kubernetes must know in advance how many resources the workload intends to use in order to ensure the workload is placed on a node with sufficient
 free resources available. [^2]
 
-[^2]:
-    Requested resources are the resources the workload requested be made available _before_ it started running
+[^2]: Requested resources are the resources the workload requested be made available *before* it started running
     while consumed resources are the resources actually used.
 
 Let's run through a simple example:
 
-- A workload requests 780 MB of memory.
-- However, throughout its lifetime, the workload actually only used an average of 400 MB of memory, resulting in
+* A workload requests 780 MB of memory.
+* However, throughout its lifetime, the workload actually only used an average of 400 MB of memory, resulting in
   a 51% consumption efficiency.
-- Since EC2 instances only come in discrete
+* Since EC2 instances only come in discrete
   sizes, a 1 GB EC2 node was provisioned, resulting in 78% provisioning efficiency.
-- Altogether, this produced
+* Altogether, this produced
   a 40% net efficiency (51% x 78%).
 
 We look at these numbers independently as they require different approaches to optimize.
@@ -68,12 +61,10 @@ of the workload.
 To achieve in this, we utilize the VPA to automatically calculate and adjust requests based on historical usage. However,
 the VPA does not simply request the average resource utilization. Instead, it calculates requests as the 90th percentile (P90) usage x 115%. [^1] [^3]
 
-[^1]:
-    How far back the VPA looks for percentile calculations is configurable, and in the Panfactum stack we have it prioritize data
+[^1]: How far back the VPA looks for percentile calculations is configurable, and in the Panfactum stack we have it prioritize data
     from the trailing four hours. We have found this allows for good balance between responsive scaling and system stability.
 
-[^3]:
-    For memory, the VPA also tracks OOM events and ensures that enough memory is provisioned to avoid future OOMs. This
+[^3]: For memory, the VPA also tracks OOM events and ensures that enough memory is provisioned to avoid future OOMs. This
     typically results in a higher request than the 90th percentile x 115%.
 
 Why? This ensures the workload is requesting enough resources to operate even under the heaviest load spikes, preventing
@@ -84,7 +75,7 @@ gap between the average resource usage and P90 usage.**
 
 Let's visualize this:
 
-<ConsumptionEfficiencyChart client:only="react" />
+FIX ME
 
 As you can see, the tighter the spread of usage values, the better the consumption efficiency.
 
@@ -102,7 +93,7 @@ There are three key practices that help hit that target range:
 2. **Ensure that every workload input consumes similar amounts of resources.**
 
    For example, consider an application server to a few dozen API endpoints. In this example, every incoming request
-   is an _input_.
+   is an *input*.
 
    The majority of requests are served relatively quickly. However, one endpoint processes image uploads
    and performs a significant amount of CPU and memory when processing the request. Requests to this endpoint will increase
@@ -132,40 +123,40 @@ requests and will even attempt to consolidate nodes when resource requests shrin
 also attempt to honor the scheduling constraints used by the Kubernetes scheduler for assigning pods to nodes.
 Scheduling constraints include:
 
-- [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
-- [Topology Spread Constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
-- [Node and Pod (Anti-)Affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
+* [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+* [Topology Spread Constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/)
+* [Node and Pod (Anti-)Affinities](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
 
 Among other things, these constraints allow us to define a system that is highly available by
 
-- Spreading workload pods evenly across availability zones
-- Preventing pods in the same workload unit from running on the same underlying EC2 node
-- Preventing pods from running on spot or burstable instances
+* Spreading workload pods evenly across availability zones
+* Preventing pods in the same workload unit from running on the same underlying EC2 node
+* Preventing pods from running on spot or burstable instances
 
 However, each of these constraints prevents the Kubernetes scheduler from bin-packing pods as tightly as possible. For example,
 consider the following scenario where topology spread constraints are applied to ensure the pods are spread evenly
 across AZs:
 
-<ImageSvg src={scheduleConstraintSvg} alt="Impact of scheduling constraints" />
+<MarkdownSVGImage src={ScheduleConstraintImg} alt="Impact of scheduling constraints" />
 
 Even when accounting for constraints, you might find that your provisioning efficiency is lower than expected. There are
 a few common misconceptions that can decrease efficiency:
 
-- Karpenter does not run a global bin-packing optimization algorithm. When attempting to optimize provisioned resources,
+* Karpenter does not run a global bin-packing optimization algorithm. When attempting to optimize provisioned resources,
   it only looks to see if (a) one node can be completely removed, (b)
   two nodes can be consolidated, or (c) one node can be replaced with one of a smaller size. While global bin-packing would
   result in higher efficiency, it is too computationally expensive to run continuously.
 
-- Using "preferred" scheduling constraints such as `ScheduleAnyway` (topology spread) or `preferredDuringSchedulingIgnoredDuringExecution`
+* Using "preferred" scheduling constraints such as `ScheduleAnyway` (topology spread) or `preferredDuringSchedulingIgnoredDuringExecution`
   (pod affinities) are treated as **requirements** by Karpenter when it is performing its scale-up and scale-down calculations. [^4]
 
-  This can prevent Karpenter from triggering node removal even if pods _could_ be scheduled on other nodes. Karpenter makes
+  This can prevent Karpenter from triggering node removal even if pods *could* be scheduled on other nodes. Karpenter makes
   the assumption that your preferences should be respected even if that comes at increased cost.
 
   As a result, do not use preferences unless you intended for the system to actively attempt to achieve your preferences
   even at increased cost.
 
-- Karpenter will not replace [spot nodes](https://aws.amazon.com/ec2/spot/) with cheaper spot nodes of similar size
+* Karpenter will not replace [spot nodes](https://aws.amazon.com/ec2/spot/) with cheaper spot nodes of similar size
   unless there are at least 15 cheaper instance types. Spot node pricing fluctuates regularly and this would result
   in a continuous replacement loop. Instead, Karpenter waits until it is confident that spot pricing is consistently lower
   with other instance types before it triggers replacement.
@@ -174,7 +165,7 @@ a few common misconceptions that can decrease efficiency:
   we limit node lifetimes to 24 hours to force replacement of nodes and allow a chance at cheaper instances at least
   once per day.
 
-- The "allocatable" resources on each node will be smaller than the AWS list spec. For example, a `t4g.medium` instance
+* The "allocatable" resources on each node will be smaller than the AWS list spec. For example, a `t4g.medium` instance
   comes with 4 GiB of memory but only about 3.25 GiB will be available in Kubernetes. This is because about 500-750 MiB of resources
   are reserved by the host operating system components such as the [kubelet](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/)
   and [containerd.](https://containerd.io/).
@@ -186,7 +177,7 @@ a few common misconceptions that can decrease efficiency:
   than many, small nodes. In the Panfactum stack, the smallest node that can be provisioned is 2 vCPU / 4 GiB for this
   reason.
 
-[^4]: If a preference cannot be met during scale-up, Karpenter _will_ try again without it.
+[^4]: If a preference cannot be met during scale-up, Karpenter *will* try again without it.
 
 ## Storage Autoscaling
 
@@ -201,20 +192,20 @@ grow automatically without manual intervention.
 
 While this is convenient, there are a few important considerations to remain mindful of:
 
-- This auto-scaling is opt-in and requires [adding explicit annotations to your PVCs](https://github.com/topolvm/pvc-autoresizer?tab=readme-ov-file#how-to-use).
-- This only allows for volume expansion, not reduction.
-- Resizing can only happen once every six hours (AWS limitation); as a result, your maximum hourly data increase rate must never
+* This auto-scaling is opt-in and requires [adding explicit annotations to your PVCs](https://github.com/topolvm/pvc-autoresizer?tab=readme-ov-file#how-to-use).
+* This only allows for volume expansion, not reduction.
+* Resizing can only happen once every six hours (AWS limitation); as a result, your maximum hourly data increase rate must never
   exceed the value for `resize.topolvm.io/increase` / 6.
 
 Ultimately, this means you will always still be responsible for choosing an initial disk size and growth rate.
 
 ## Common Issues
 
-- All autoscalers respect [PodDisruptionBudgets (PDBs)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) and will
-  not resize / evict pods if this would violate a PDB. As a result, ensure you design your workloads so that pods _can_ be disrupted
+* All autoscalers respect [PodDisruptionBudgets (PDBs)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) and will
+  not resize / evict pods if this would violate a PDB. As a result, ensure you design your workloads so that pods *can* be disrupted
   during regular operations without causing system downtime. Otherwise, autoscaling will not work properly.
 
-- The VPA will not automatically scale [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) including
+* The VPA will not automatically scale [init containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) including
   [native sidecars](https://kubernetes.io/blog/2023/08/25/native-sidecar-containers/) ([open issue](https://github.com/kubernetes/autoscaler/issues/6691)).
 
   This is particularly impactful to the Linkerd sidecars used in the stack. While we have provided default resource
@@ -222,5 +213,5 @@ Ultimately, this means you will always still be responsible for choosing an init
   for workloads that exceed the default limits. Alternatively, you can set `config.alpha.linkerd.io/proxy-enable-native-sidecar` to `false`
   in your pod annotations to run the proxy as a regular, non-init container (though be mindful of the tradeoffs).
 
-- EKS node groups are not automatically scaled. We provide static sizing for these groups in the `aws_eks` module. This is
+* EKS node groups are not automatically scaled. We provide static sizing for these groups in the `aws_eks` module. This is
   required because Karpenter cannot run on nodes that it itself provisioned.
