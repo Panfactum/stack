@@ -23,7 +23,7 @@ const {
   <CommonHead title={title} description={description} redirect={redirect}>
     <meta name="generator" content={Astro.generator} />
   </CommonHead>
-  <body class="bg-primary w-screen max-w-[100vw] font-inter">
+  <body class="bg-primary w-screen max-w-[100vw] font-inter overflow-x-hidden overflow-y-scroll">
     <div class:list={heroClass}>
       <Header
         transition:persist
