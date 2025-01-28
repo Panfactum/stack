@@ -40,10 +40,10 @@
 
   sup {
     @apply top-0;
+  }
 
-    a {
-      @apply text-sm font-medium border py-0.5 px-1.5 btn-secondary-on-light rounded no-underline;
-    }
+  sup a {
+    @apply text-sm font-medium border py-0.5 px-1.5 btn-secondary-on-light rounded no-underline;
   }
 
   .katex-html {

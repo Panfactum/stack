@@ -13,6 +13,7 @@ import remarkMath from "remark-math";
 import compress from "@playform/compress"
 import inline from "@playform/inline"
 import { imageService } from "@unpic/astro/service";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
@@ -80,6 +81,7 @@ export default defineConfig({
       critters: {
         preloadFonts: false, // Done by astro-font
         keyframes: "none", // Animations not critical
+        compress: false // This messes up styles
       }
     }),
     compress({
@@ -117,4 +119,10 @@ export default defineConfig({
       mode: 'sprite'
     }
   },
+  vite: {
+    plugins: [visualizer({
+      emitFile: true,
+      filename: "stats.html"
+    })]
+  }
 });
