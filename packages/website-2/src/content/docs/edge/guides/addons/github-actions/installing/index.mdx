@@ -1,14 +1,10 @@
----
-title: "Installing Self-hosted Runners for GitHub Actions"
----
-
-import { Image } from "astro:assets";
-
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
-import ExampleWorkflowImg from "./example-workflow.jpg";
-import RegisteredRunnersImg from "./registered-runners.jpg";
-import RunWorkflowImg from "./run-workflow.jpg";
-import WorkflowCompleteImg from "./workflow-complete.jpg";
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
+
+import ExampleWorkflowImg from './example-workflow.jpg'
+import RegisteredRunnersImg from './registered-runners.jpg'
+import RunWorkflowImg from './run-workflow.jpg'
+import WorkflowCompleteImg from './workflow-complete.jpg'
 
 # Installing Self-hosted Runners for GitHub Actions
 
@@ -20,28 +16,27 @@ to leverage your Panfactum clusters for executing GHA workflows.
 ## Background and Limitations
 
 <MarkdownAlert severity="warning">
-  Please ensure you have read this section and the associated links thoroughly
-  before continuing.
+  Please ensure you have read this section and the associated links thoroughly before continuing.
 </MarkdownAlert>
 
 GitHub Actions are **not** the recommended method for setting up CI / CD in Panfactum clusters. We
-provide a full set of guides for our recommended architecture [here](/docs/edge/guides/cicd/getting-started).
+provide a full set of guides for our recommended architecture [here](/docs/main/guides/cicd/getting-started).
 
 Additionally, GitHub Actions have many shortcomings compared to a more full-featured, Kubernetes-native workflow
-engine such as Argo Workflows. See our detailed analysis and list of limitations [here](/docs/edge/concepts/cicd/gha).
+engine such as Argo Workflows. See our detailed analysis and list of limitations [here](/docs/main/concepts/cicd/gha).
 
 ## Install the Runner Controller
 
 To begin using self-hosted runners, you must first install the [Actions Runner Controller (ARC)](https://github.com/actions/actions-runner-controller)
 which is a Kubernetes operator that orchestrates and scales the runners based on Kubernetes custom resources.
 
-We provide a module to deploy this controller: [kube_gha](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_gha).
+We provide a module to deploy this controller: [kube\_gha](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha).
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_gha`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_gha/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_gha/terragrunt.hcl).
 
 3. Run `pf-tf-init` in the directory to enable the required providers.
 
@@ -53,26 +48,25 @@ You should now see a new Deployment running in the `gha` namespace called `gha-c
 
 The controller allows you to create various "runners" which are the pods that will actually execute your GHA code.
 
-To create runners, you will use our [kube_gha_runners](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners) module.
+To create runners, you will use our [kube\_gha\_runners](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners) module.
 
 Let's deploy one type of runner now:
 
 1. Create a new directory adjacent to your `kube_gha` module called `kube_gha_runners`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_gha_runners/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_gha_runners/terragrunt.hcl).
 
    1. Follow [GitHub's documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/authenticating-to-the-github-api#authenticating-arc-with-a-personal-access-token-classic) to provision a
       Classic Personal Access Token (PAT) with the correct permissions. Provide this token
-      as an input via `github_token`. Make sure that the token is [encrypted with sops.](/docs/edge/guides/iac/deploying-modules#using-secrets)
+      as an input via `github_token`. Make sure that the token is [encrypted with sops.](/docs/main/guides/iac/deploying-modules#using-secrets)
 
    2. The `runners` input is a key-value map that defines the different runner groups that your workflow jobs can target. The keys
-      are the names of the groups and the values are their configuration. See the [module documentation](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners)
+      are the names of the groups and the values are their configuration. See the [module documentation](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_gha_runners)
       for information on the various configuration values.
 
       <MarkdownAlert severity="warning">
-        The names of your runners must be globally unique to your organization.
-        So if you install runners in multiple clusters, they cannot have
-        identical names.
+        The names of your runners must be globally unique to your organization. So if you install runners in multiple clusters,
+        they cannot have identical names.
       </MarkdownAlert>
 
    3. The only required configuration value is the `github_config_url` which defines where in GitHub your runners will be registered
@@ -87,10 +81,7 @@ Let's deploy one type of runner now:
 Assuming you have registered runners to your organization, you should now be able to see your runners in your GitHub organization's
 settings:
 
-<Image
-  src={RegisteredRunnersImg}
-  alt="Runners successfully registered with GitHub"
-/>
+<MarkdownImage src={RegisteredRunnersImg} alt="Runners successfully registered with GitHub" />
 
 ## Test the Runner
 
@@ -118,32 +109,22 @@ Let's create a test workflow in on of your repositories to verify that self-host
 4. Open the GitHub repository in a web browser. Navigate to the Actions tab. You should see the "Example" workflow in the
    left-hand sidebar:
 
-<Image
-  src={ExampleWorkflowImg}
-  alt="Workflow is registered with the repository"
-/>
+   <MarkdownImage src={ExampleWorkflowImg} alt="Workflow is registered with the repository" />
 
 5. Select the workflow. You should now see an option to run the workflow:
 
-<Image
-  src={RunWorkflowImg}
-  alt="Workflow details with option to run the workflow manually"
-/>
+   <MarkdownImage src={RunWorkflowImg} alt="Workflow details with option to run the workflow manually" />
 
 6. Run the workflow. Within a minute, the workflow job should begin, and you should see the runner pod in your cluster.
    It should complete successfully after one to two minutes.
 
-<Image src={WorkflowCompleteImg} alt="Workflow completed successfully" />
+   <MarkdownImage src={WorkflowCompleteImg} alt="Workflow completed successfully" />
 
-{" "}
-
-<MarkdownAlert severity="info">
-  If the workflow is stuck in a pending state, double check that your runner is
-  available on the repository by visiting Actions > Runners > Self-hosted
-  runners. Additionally, make sure that the `runs-on` value in your
-  `.github/workflows/example.yaml` matches the name of at least one runner in
-  this view.
-</MarkdownAlert>
+   <MarkdownAlert severity="info">
+     If the workflow is stuck in a pending state, double check that your runner is available on the repository
+     by visiting Actions > Runners > Self-hosted runners. Additionally, make sure that the `runs-on` value in your
+     `.github/workflows/example.yaml` matches the name of at least one runner in this view.
+   </MarkdownAlert>
 
 Congratulations! You have successfully installed self-hosted GHA runners and can now run GHA workflows inside your
 Panfactum clusters.

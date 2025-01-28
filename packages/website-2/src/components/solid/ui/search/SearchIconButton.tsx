@@ -25,7 +25,7 @@ const SearchIconButton: Component<SearchButtonProps> = (props) => {
   return (
     <button
       class={clsx(
-        "border-primary bg-primary hover:bg-secondary ring-offset-background focus-within:ring-ring flex h-10 cursor-pointer items-center gap-4 rounded-md border px-3 text-sm shadow-sm focus-within:ring-1 focus-within:ring-offset-2",
+        "border-primary bg-primary hover:bg-secondary   flex h-10 cursor-pointer items-center gap-4 rounded-md border px-3 text-sm shadow-sm focus-within:ring-1 focus-within:ring-offset-2",
         props.class,
       )}
       on:click={() => { isSearchModalOpen.set(true); }}

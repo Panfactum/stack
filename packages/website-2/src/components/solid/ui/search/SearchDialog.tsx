@@ -130,7 +130,7 @@ const _SearchDialog: Component = () => {
           }
         />
         <div class="fixed left-0 top-0 z-[100] w-screen max-w-[100vw]">
-          <Dialog.Content class="max-w-5/6 md:left-1/5 relative left-[calc(100%_/_12)] top-16 w-5/6 sm:left-[calc(100%_/_8)] sm:w-3/4 md:w-3/5 lg:left-1/4 lg:w-1/2">
+          <Dialog.Content class="relative left-[calc(100%_/_12)] top-16 w-5/6 max-w-5/6 sm:left-[calc(100%_/_8)] sm:w-3/4 md:left-1/5 md:w-3/5 lg:left-1/4 lg:w-1/2">
             <Dialog.Title class={`sr-only`}>Search Panfactum Docs</Dialog.Title>
             <TextField
               name="search"
@@ -141,7 +141,7 @@ const _SearchDialog: Component = () => {
               <TextField.Label class="sr-only">
                 Search Panfactum documentation
               </TextField.Label>
-              <div class="text-gray-300 grid h-full w-12 place-items-center">
+              <div class=" grid h-full w-12 place-items-center">
                 <HiSolidMagnifyingGlass />
               </div>
               <TextField.Input
@@ -153,7 +153,7 @@ const _SearchDialog: Component = () => {
               />
               <Show when={query()}>
                 <button
-                  class="bg-primary hover:bg-gray-dark rounded-full dark:bg-[#1f2428]"
+                  class="bg-primary  rounded-full dark:bg-[#1f2428]"
                   on:click={() => setQuery("")}
                 >
                   <IoCloseOutline />
@@ -172,7 +172,7 @@ const _SearchDialog: Component = () => {
                     on:click={() => {isSearchModalOpen.set(false)}}
                     class="cursor-pointer py-4"
                   >
-                    <h4 class="text-md font-bold">
+                    <h4 class=" font-bold">
                       {Object.values(hit.hierarchy)
                         .filter(Boolean)
                         .slice(0, -1)
@@ -180,7 +180,7 @@ const _SearchDialog: Component = () => {
                     </h4>
                     {/* eslint-disable solid/no-innerhtml,jsx-a11y/heading-has-content */}
                     <h2
-                      class="text-md mb-3 font-bold"
+                      class=" mb-3 font-bold"
                       innerHTML={hit._highlightResult?.headingText?.value}
                     />
                     {/* eslint-enable solid/no-innerhtml,jsx-a11y/heading-has-content */}

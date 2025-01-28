@@ -50,11 +50,11 @@ export const BooleanInput: Component<BooleanInputProps> = (props) => {
           type="checkbox"
           id={props.id}
           class={clsx(
-            "relative h-7 w-[3.25rem] rounded-full !bg-none p-px",
+            "relative h-7 w-[3.25rem] !bg-none p-px",
             "transition-all duration-200 ease-in-out before:translate-x-0 checked:before:translate-x-full",
             "rounded-full text-transparent  hover:checked:bg-brand-500 focus:ring-0 focus:checked:bg-brand-500 disabled:opacity-50",
             "checked:border-brand-600 checked:bg-brand-500 checked:text-brand-500 disabled:pointer-events-none",
-            "dark:bg-neutral-800  dark:focus:ring-offset-gray-600 border-gray-warm-500 before:inline-block before:size-6 dark:checked:border-blue-500 dark:checked:bg-brand-500",
+            "border-gray-warm-500 before:inline-block before:size-6 dark:checked:border-blue-500 dark:checked:bg-brand-500",
             "before:rounded-full before:bg-gray-light-mode-400  before:shadow checked:before:bg-gray-light-mode-400",
             "before:ring-0 before:transition before:duration-200 before:ease-in-out dark:before:bg-white dark:checked:before:bg-white",
             background === "primary"

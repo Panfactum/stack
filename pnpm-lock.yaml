@@ -392,6 +392,9 @@ importers:
       '@kobalte/core':
         specifier: ^0.13.7
         version: 0.13.7(solid-js@1.9.4)
+      '@nanostores/persistent':
+        specifier: ^0.10.2
+        version: 0.10.2(nanostores@0.11.3)
       '@nanostores/solid':
         specifier: ^0.5.0
         version: 0.5.0(nanostores@0.11.3)(solid-js@1.9.4)
@@ -452,6 +455,9 @@ importers:
       astro-tooltips:
         specifier: ^0.6.2
         version: 0.6.2
+      button:
+        specifier: link:@kobalte/core/button
+        version: link:@kobalte/core/button
       clsx:
         specifier: 1.2.1
         version: 1.2.1
@@ -542,6 +548,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
+      tooltip:
+        specifier: link:@kobalte/core/tooltip
+        version: link:@kobalte/core/tooltip
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -2538,6 +2547,12 @@ packages:
       '@mui/system': ^5.8.0
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
+
+  '@nanostores/persistent@0.10.2':
+    resolution: {integrity: sha512-BEndnLhRC+yP7gXTESepBbSj8XNl8OXK9hu4xAgKC7MWJHKXnEqJMqY47LUyHxK6vYgFnisyHmqq+vq8AUFyIg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      nanostores: ^0.9.0 || ^0.10.0 || ^0.11.0
 
   '@nanostores/solid@0.5.0':
     resolution: {integrity: sha512-bui454Om+smaCFK259D618i01Rb0w+o9uVcwZWlZqMOOQZXuqPR6azyF7tA++skBUlTDty4sB9XDt/1HDsh/CA==}
@@ -12199,6 +12214,10 @@ snapshots:
       react-transition-group: 4.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
+
+  '@nanostores/persistent@0.10.2(nanostores@0.11.3)':
+    dependencies:
+      nanostores: 0.11.3
 
   '@nanostores/solid@0.5.0(nanostores@0.11.3)(solid-js@1.9.4)':
     dependencies:

@@ -23,20 +23,20 @@ const MobileNav: Component<MobileNavProps> = (props) => {
       <Dialog.Portal>
         <Dialog.Overlay
           class={
-            "bg-black/80 dark:bg-secondary/70 fixed inset-0 z-50 backdrop-blur-sm"
+            "bg-black/80 fixed inset-0 z-50 backdrop-blur-sm"
           }
         />
         <Dialog.Content
           class={`fixed top-0 z-[100] flex max-h-[80vh] w-screen flex-col overflow-y-scroll ${props.background === "primary" ? "bg-secondary" : "bg-primary"}`}
         >
           <div class="flex h-[--header-height] items-center justify-between px-4">
-            {/* eslint-disable solid/no-innerhtml */}
+            {/* eslint-disable solid/no-innerhtml,jsx-a11y/anchor-has-content */}
             <a
-              innerHTML={PanfactumLogo as string}
+              innerHTML={PanfactumLogo}
               href="/"
               class="flex h-full max-w-[75%]  items-center [&>svg]:h-3/5"
             />
-            {/* eslint-enable solid/no-innerhtml */}
+            {/* eslint-enable solid/no-innerhtml,jsx-a11y/anchor-has-content */}
 
             <Dialog.CloseButton>
               <IoClose class="size-12" />

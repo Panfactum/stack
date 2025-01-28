@@ -1,0 +1,169 @@
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="aws_s3_private_bucket" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_s3_private_bucket" status="stable" type="submodule" />
+
+# Private S3 Bucket
+
+This module provides our standard configuration for private S3 buckets.
+
+Notably it includes:
+
+* versioning
+
+* access control
+
+* storage tiering and expiration
+
+* encryption
+
+* public access blocks
+
+* ownership controls
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+## Required Inputs
+
+The following input variables are required:
+
+### bucket\_name
+
+Description: The name of the s3 bucket.
+
+Type: `string`
+
+### description
+
+Description: A statement of purpose for the S3 bucket.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### access\_policy
+
+Description: AWS access policy for the bucket.
+
+Type: `string`
+
+Default: `null`
+
+### acl\_aws\_logs\_delivery\_enabled
+
+Description: Whether the ACL for awslogsdelivery is enabled
+
+Type: `bool`
+
+Default: `false`
+
+### acl\_enabled
+
+Description: Whether to allow ACL use on the bucket
+
+Type: `bool`
+
+Default: `false`
+
+### audit\_log\_enabled
+
+Description: Whether the bucket's audit log should be stored.
+
+Type: `bool`
+
+Default: `false`
+
+### expire\_after\_days
+
+Description: Whether objects older than indicated days should be deleted. (0 to disable)
+
+Type: `number`
+
+Default: `0`
+
+### expire\_old\_versions
+
+Description: Whether old object versions should be expired.
+
+Type: `bool`
+
+Default: `true`
+
+### force\_destroy
+
+Description: Whether the bucket can be deleted if objects still exist in it.
+
+Type: `bool`
+
+Default: `false`
+
+### intelligent\_transitions\_enabled
+
+Description: Whether objects should be subject to intelligent access tiering.
+
+Type: `bool`
+
+Default: `true`
+
+### kms\_master\_key\_id
+
+Description: If provided, will use this CMK for bucket encryption (SSS-KMS) rather than the SSE-S3 key
+
+Type: `string`
+
+Default: `null`
+
+### timed\_transitions\_enabled
+
+Description: Whether objects should be transitioned to lower storage tiers after a certain amount of time.
+
+Type: `bool`
+
+Default: `false`
+
+### versioning\_enabled
+
+Description: Whether object versioning is enabled.
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+The following outputs are exported:
+
+### bucket\_arn
+
+Description: n/a
+
+### bucket\_id
+
+Description: n/a
+
+### bucket\_name
+
+Description: n/a
+
+### regional\_domain\_name
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

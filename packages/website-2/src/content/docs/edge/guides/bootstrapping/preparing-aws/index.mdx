@@ -1,13 +1,9 @@
----
-title: Preparing AWS
----
-
-import { Image } from "astro:assets";
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
 
+import createAccountImg from './aws-create-account.jpg'
+import securityCredentialImg from './aws-security-credentials.jpg'
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
-import createAccountImg from "./aws-create-account.jpg";
-import securityCredentialImg from "./aws-security-credentials.jpg";
 
 # Preparing AWS
 
@@ -33,18 +29,15 @@ The email and password you used to create this account are referred to as **root
 ## Create an AWS Organization
 
 <MarkdownAlert severity="info">
-  If you already have an AWS organization, you may skip this step. However, make
-  sure that you have
-  [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html)
-  to your organization's management account.
+  If you already have an AWS organization, you may skip this step. However, make sure that you have [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to your
+  organization's management account.
 </MarkdownAlert>
 
-An _AWS organization_ allows you to centrally manage a set of AWS accounts from a central _management account._ This
+An *AWS organization* allows you to centrally manage a set of AWS accounts from a central *management account.* This
 provides an easier mechanism to manage billing, security, and compliance needs. For more information, review
 the [AWS documentation](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html) on organizations. [^1]
 
-[^1]:
-    One would think that you would _first_ create an AWS organization before individual accounts. However,
+[^1]: One would think that you would *first* create an AWS organization before individual accounts. However,
     the concept of an "Organization" was created many years after accounts, and this feature is very much "bolted-on." That said,
     it is incredibly useful and a significant step up from the days of managing each account completely independently.
 
@@ -56,40 +49,39 @@ You do **not** need to create organizational units (OUs) or governance policies 
 
 You will want to create **one account for each environment** your organization intends to use.
 
-An _environment_ is a set of infrastructure components that is isolated from the infrastructure
+An *environment* is a set of infrastructure components that is isolated from the infrastructure
 components of other environments. In other words, what happens to one environment should not impact what happens
 to another. [^2]
 
-[^2]:
-    There are exceptions to this rule such as the _management environment_ which is used to set governance policies
+[^2]: There are exceptions to this rule such as the *management environment* which is used to set governance policies
     for other environments.
 
 Here are some guidelines to think about as you are choosing your set of environments:
 
-- You can always add more as needed in the future.
+* You can always add more as needed in the future.
 
-- You will always have the `management` environment which contains root configurations for many utilities such as AWS. This includes the
+* You will always have the `management` environment which contains root configurations for many utilities such as AWS. This includes the
   initial AWS account that you created above.
 
-- If you are a solo developer or early stage team, you might need just one additional environment: `production`. This environment would
+* If you are a solo developer or early stage team, you might need just one additional environment: `production`. This environment would
   receive new changes immediately and make them live to all users.
 
-- As your organization scales, you will likely want to adopt the practice of _promoting changes_ across a set of environments.
+* As your organization scales, you will likely want to adopt the practice of *promoting changes* across a set of environments.
   We recommend the following setup:
 
-  - `development`: The _integration_ environment. New changes are immediately deployed to this environment and made available
+  * `development`: The *integration* environment. New changes are immediately deployed to this environment and made available
     to internal stakeholders. If you follow [GitHub flow](https://githubflow.github.io/) [^3], code merged to your
     `main` branch gets deployed here.
 
-  - `staging`: (Optional) If you have end-to-end test suites, code from `development` will be periodically promoted here
+  * `staging`: (Optional) If you have end-to-end test suites, code from `development` will be periodically promoted here
     to test for production-readiness.
     It is important to keep a dedicated environment for end-to-end tests as you will frequently reset the environment to a clean starting state which may cause collaboration
     problems if done directly in `development`.
 
-  - `production`: Once testing in `development` (or `staging`) has been completed, changes are promoted to `production` to make
+  * `production`: Once testing in `development` (or `staging`) has been completed, changes are promoted to `production` to make
     new code live to all users.
 
-- If you have a _really_ large organization, you might create separate sets of `development`, `staging`, and `production` environments for each
+* If you have a *really* large organization, you might create separate sets of `development`, `staging`, and `production` environments for each
   organization unit. Typically, this would be done only when each organization unit is managed completely independently of one another.
 
 [^3]: We assume you do.
@@ -98,16 +90,12 @@ Once you have decided on the set of environments, use the following steps to cre
 
 1. Login to your management account using your root credentials.
 
-2. Navigate to the _AWS Organizations_ pane.
+2. Navigate to the *AWS Organizations* pane.
 
-3. Navigate to the _AWS accounts_ tab in the sidebar. You should see something that look like the below image. Notice
+3. Navigate to the *AWS accounts* tab in the sidebar. You should see something that look like the below image. Notice
    that you should also see "management account" label in your account list.
 
-   <Image
-     src={createAccountImg}
-     alt={"Create accounts in AWS Organizations"}
-     placeholder={"blur"}
-   />
+   <MarkdownImage src={createAccountImg} alt={"Create accounts in AWS Organizations"} placeholder={"blur"} />
 
 4. Select "Add an AWS account" to create one account for each additional environment. Choose semantic names like
    `<your_organization>-development`. Ensure that you have access to the email addresses you enter for each account's
@@ -121,8 +109,7 @@ Once you have decided on the set of environments, use the following steps to cre
 
 [^4]: Tip: Use group inboxes for managing these accounts to reduce your [bus factor risk](https://en.wikipedia.org/wiki/Bus_factor).
 
-[^5]:
-    Tip: While AWS forces you to use a unique email address for each account, you can sometimes use the `+` trick
+[^5]: Tip: While AWS forces you to use a unique email address for each account, you can sometimes use the `+` trick
     to create multiple email addresses for the same inbox ([example](https://gmail.googleblog.com/2008/03/2-hidden-ways-to-get-more-from-your.html)).
 
 ## Create Access Keys for Each Account
@@ -138,11 +125,7 @@ Repeat the following steps for **every account**:
 
 2. Use the dropdown in the top right to access the "Security credentials" pane
 
-   <Image
-     src={securityCredentialImg}
-     alt={"Access security credentials"}
-     placeholder={"blur"}
-   />
+   <MarkdownImage src={securityCredentialImg} alt={"Access security credentials"} placeholder={"blur"} />
 
 3. Now is the perfect time to set up MFA for the root user. This is incredibly important as this user will (a) always
    exist and (b) have complete access to all of your AWS systems. Select "Assign MFA device" from the Multi-factor
@@ -156,8 +139,8 @@ Repeat the following steps for **every account**:
 
    2. Save **both** the access key id and secret access key in a safe place. We will need them in the next steps.
 
-5. Open your [stack repo](/docs/edge/guides/bootstrapping/installing-devshell) locally. We will be setting up your [AWS configuration and
-   credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) files in your `aws_dir` directory ([reference](/docs/edge/reference/configuration/repo-variables))
+5. Open your [stack repo](/docs/main/guides/bootstrapping/installing-devshell) locally. We will be setting up your [AWS configuration and
+   credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) files in your `aws_dir` directory ([reference](/docs/main/reference/configuration/repo-variables))
    which by default is the `.aws` folder in your repo. We keep this configuration in the repo so that it does not interact with other
    settings already present on your computer.
 
@@ -206,11 +189,4 @@ Repeat the following steps for **every account**:
 Once you are able to successfully utilize the `aws` CLI to interact with each account, you are ready
 to configure terragrunt to begin deploying infrastructure.
 
-<BootstrappingGuideNav
-  client:only="react"
-  backHref={"/docs/edge/guides/bootstrapping/installing-devshell"}
-  forwardHref={
-    "/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code"
-  }
-  stepNumber={3}
-/>
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/installing-devshell"} forwardHref={"/docs/main/guides/bootstrapping/configuring-infrastructure-as-code"} stepNumber={3} />

@@ -1,12 +1,8 @@
----
-title: "AWS Configuration Files"
----
-
 # AWS Configuration Files
 
 ## config.yaml
 
-[Example File](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/reference/.aws/config.yaml)
+[Example File](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference/.aws/config.yaml)
 
 This file instructs the `pf-update-aws --build` command how to generate the aws config file (`config`) which is used
 by the AWS CLI and SDK.
@@ -37,7 +33,7 @@ extra_roles = optional(list(object({
 | `module`             | (Optional) A path from `<environments_dir>` to your `aws_iam_identity_center_permissions` module (if using) | `management/global/aws_iam_identity_center_permissions` |
 | `extra_roles`        | (Optional) Additional statically configured extra roles to use                                              | See below                                               |
 
-### extra_roles
+### extra\_roles
 
 This is a list containing objects with the following fields:
 

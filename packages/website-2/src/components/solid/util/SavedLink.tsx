@@ -1,4 +1,3 @@
-import { prefetch } from "astro:prefetch";
 import {
   createSignal,
   onMount,
@@ -83,9 +82,7 @@ const SavedLink: ParentComponent<SavedLinkProps> = (props) => {
     <a
       {...rest}
       href={href()}
-      on:mouseenter={() => {
-        prefetch(href());
-      }}
+      data-astro-prefetch={"hover"}
     >
       {props.children}
     </a>

@@ -1,14 +1,10 @@
----
-title: "Connect to Infrastructure"
----
-
-import { Image } from "astro:assets";
 import MarkdownGuideNav from "@/components/solid/markdown/MarkdownGuideNav";
+import MarkdownImage from "@/components/astro/markdown/MarkdownImage.astro";
 
-import awsImg from "./aws.jpg";
-import dashboardImg from "./dashboard.jpg";
-import eksImg from "./eks.jpg";
-import k9sImg from "./k9s.jpg";
+import awsImg from './aws.jpg'
+import dashboardImg from './dashboard.jpg'
+import eksImg from './eks.jpg'
+import k9sImg from './k9s.jpg'
 
 # Connect to Infrastructure
 
@@ -21,14 +17,14 @@ Retrieve credentials for connecting to the various components of your organizati
 To access live infrastructure, you must first have an account in your organization's [identity provider (IdP)](https://en.wikipedia.org/wiki/Identity_provider). [^1]
 This account with be used to sign in to all service providers.
 
-[^1]: The IdP itself should have already been provisioned in the [bootstrapping guide.](/docs/edge/guides/bootstrapping/identity-provider)
+[^1]: The IdP itself should have already been provisioned in the [bootstrapping guide.](/docs/main/guides/bootstrapping/identity-provider)
 
-If your organization's administrators have not already [provisioned your account](/docs/edge/guides/user-management/provisioning-new-user), ask them now. You
-will need to follow [this guide](/docs/edge/guides/user-management/setting-up-new-user) to set up your user for the first time.
+If your organization's administrators have not already [provisioned your account](/docs/main/guides/user-management/provisioning-new-user), ask them now. You
+will need to follow [this guide](/docs/main/guides/user-management/setting-up-new-user) to set up your user for the first time.
 
 Once your user is provisioned, make sure you are able to access your organization's Authentik dashboard: [^2]
 
-<Image src={dashboardImg} alt="Authentik dashboard" />
+<MarkdownImage src={dashboardImg} alt="Authentik dashboard" />
 
 [^2]: If you are not sure the URL, ask an organization administrator or refer to your organization's internal documentation.
 
@@ -39,7 +35,7 @@ The applications you see will vary based on your organization's settings.
 If your organization granted you AWS access, you should see AWS in your Authentik dashboard. You can click on the app
 to get brought to the access portal showing your individual account access:
 
-<Image src={awsImg} alt="AWS access portal" />
+<MarkdownImage src={awsImg} alt="AWS access portal" />
 
 Your visible accounts and roles will vary based on your organization's settings.
 
@@ -66,7 +62,7 @@ Let's confirm this works:
 
 3. Run `aws sts get-caller-identity`. This should successfully return a result that looks like this:
 
-   ```shell
+   ```shellsession
    891377197483    arn:aws:sts::891377197483:assumed-role/AWSReservedSSO_Superuser_ed8b0abf4bb50ae8/jack@panfactum.com     AROA47CRYUGV33VTVQCPO:jack@panfactum.com
    ```
 
@@ -85,11 +81,10 @@ the Web UI: [^3]
 
 5. You should see a dashboard that looks like this:
 
-   <Image src={eksImg} alt="EKS dashboard" />
+   <MarkdownImage src={eksImg} alt="EKS dashboard" />
 
-[^3]:
-    You can see what accounts and regions your clusters are deployed to by examining the `environments_dir` folder in your
-    repository (defaults to `environments`). SearchInputButton for `aws_eks` module folders. Ask an organization administrator if your need further guidance.
+[^3]: You can see what accounts and regions your clusters are deployed to by examining the `environments_dir` folder in your
+    repository (defaults to `environments`). Search for `aws_eks` module folders. Ask an organization administrator if your need further guidance.
 
 ### Kubernetes CLI Access
 
@@ -101,7 +96,7 @@ We provide an easy way to do this by performing the following actions within you
 1. Copy the `config.user.example.yaml` file in your `kube_dir` folder (defaults to `.kube`) to `config.user.yaml`.
 
 2. Update the `config.user.yaml` to include the clusters you want to access and what AWS profile you want to use for that access. See
-   the [reference docs](/docs/edge/reference/configuration/kubernetes#config.user.yaml) for the specific syntax.
+   the [reference docs](/docs/main/reference/configuration/kubernetes#config.user.yaml) for the specific syntax.
 
 3. Run `pf-update-kube` to create your kubeconfig file.
 
@@ -109,7 +104,7 @@ We provide an easy way to do this by performing the following actions within you
 
 5. Run `kubectl cluster-info` and you should see a successful result like the following:
 
-   ```shell
+   ```shellsession
    Kubernetes control plane is running at https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com
    CoreDNS is running at https://83063DDB274B2A04B6A7DC29DCB1740E.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
@@ -121,7 +116,7 @@ will reference it often in our documentation, so you should gain familiarity.
 
 Launch it now via `k9s`:
 
-<Image src={k9sImg} alt="EKS dashboard" />
+<MarkdownImage src={k9sImg} alt="EKS dashboard" />
 
 ## Next Steps
 
@@ -129,15 +124,10 @@ Launch it now via `k9s`:
 
 Here are some ideas for next steps:
 
-- [Learn how to deploy infrastructure using infrastructure-as-code](/docs/edge/guides/iac/deploying-modules)
+* [Learn how to deploy infrastructure using infrastructure-as-code](/docs/main/guides/iac/deploying-modules)
 
-- [Customize your organization's devShell](/docs/edge/guides/development-shell/customizing)
+* [Customize your organization's devShell](/docs/main/guides/development-shell/customizing)
 
-- [Connect to databases](/docs/edge/guides/networking/database-connections)
+* [Connect to databases](/docs/main/guides/networking/database-connections)
 
-<MarkdownGuideNav
-  backHref={"/docs/edge/guides/getting-started/boot-developer-environment"}
-  stepNumber={4}
-  totalSteps={4}
-  progressLabel={"Getting Started Guide:"}
-/>
+<MarkdownGuideNav backHref={"/docs/main/guides/getting-started/boot-developer-environment"} stepNumber={4} totalSteps={4} progressLabel={"Getting Started Guide:"} />

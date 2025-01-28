@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import {clsx} from "clsx";
 import { type Component, createSignal } from "solid-js";
 
 import Modal from "@/components/solid/ui/Modal.tsx";

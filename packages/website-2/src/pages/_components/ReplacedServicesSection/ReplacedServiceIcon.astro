@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { src, name, key } = Astro.props;
+const className = `move-icon-id-${name.replace(/\s+/g, "-").toLowerCase()}`
 ---
 
 <div
@@ -15,7 +16,7 @@ const { src, name, key } = Astro.props;
   id={key}
   class:list={clsx(
     "move-icon border-secondary overflow-visible rounded-md border bg-offWhite",
-    `move-icon-id-${name.replace(/\s+/g, "-").toLowerCase()}`,
+    className
   )}
 >
   <img src={src} alt={name} class="rounded-[3px]" />

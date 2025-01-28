@@ -1,7 +1,3 @@
----
-title: "Customizing the devShell"
----
-
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Customizing the devShell
@@ -43,8 +39,7 @@ to be added to your devShell. There are a few common ways to do this:
 ### From nixpkgs
 
 <MarkdownAlert severity="info">
-  [This search interface](https://www.nixhub.io/) is very helpful for finding
-  specific versions of packages that are available in the nixpkgs repository.
+  [This search interface](https://www.nixhub.io/) is very helpful for finding specific versions of packages that are available in the nixpkgs repository.
 </MarkdownAlert>
 
 [nixpkgs](https://github.com/NixOS/nixpkgs) is the **largest** software repository in the world ([reference](https://repology.org/repositories/graphs)),
@@ -57,7 +52,7 @@ To add a package such as `nodejs_20`, update your `flake.nix` with the following
   inputs = {
     flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
     panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
-+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
++   nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; # 'nixos-24.05' can be any ref from the nixpkgs repo https://github.com/NixOS/nixpkgs
   };
 
 + outputs = { nixpkgs, panfactum, flake-utils, ... }@inputs:
@@ -92,9 +87,8 @@ In general, we recommend pinning the commit directly in the `flake.nix` to avoid
 `nixpkgs.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";`.
 
 <MarkdownAlert severity="warning">
-  If you are not pinning the nixpkgs commit hash in your `flake.nix`, running
-  `nix flake update` will likely change the versions of the packages that are
-  installed.
+  If you are not pinning the nixpkgs commit hash in your `flake.nix`, running `nix flake update` will likely
+  change the versions of the packages that are installed.
 </MarkdownAlert>
 
 You may find that your want to include specific versions of separately tools
@@ -106,8 +100,8 @@ commits of "views" of nixpkgs:
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
-+    nixpkgs1.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
-+    nixpkgs2.url = "github:NixOS/nixpkgs/dd53ef232cf8398c6832dcc9e6c4194bf109e70e";
++   nixpkgs1.url = "github:NixOS/nixpkgs/c8e74c2f83fe12b4e5a8bd1abbc090575b0f7611";
++   nixpkgs2.url = "github:NixOS/nixpkgs/dd53ef232cf8398c6832dcc9e6c4194bf109e70e";
   };
 
 + outputs = { nixpkgs1, nixpkgs2, panfactum, flake-utils, ... }@inputs:
@@ -253,7 +247,7 @@ or automatically running any other repository maintenance activities.
 
 You can add the hook as follows:
 
-```nix
+```diff lang="nix"
 {
   inputs = {
     flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems

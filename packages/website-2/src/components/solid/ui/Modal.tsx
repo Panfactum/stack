@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import {clsx} from "clsx";
 import { type ParentComponent } from "solid-js";
 
 interface ModalProps {
@@ -8,7 +8,7 @@ interface ModalProps {
   title: string;
 }
 
-// TODO: Animate the transitions with a simple fade effect
+// TODO: This needs to be replaced with the Kobalte modal which is much better
 
 const Modal: ParentComponent<ModalProps> = (props) => {
   return (
@@ -41,7 +41,7 @@ const Modal: ParentComponent<ModalProps> = (props) => {
             " flex flex-col items-center gap-4",
             "relative max-h-[80vh] max-w-[80vw] overflow-x-hidden overflow-y-scroll",
             "transition-all duration-200 ease-in-out",
-            "bg-primary  dark:shadow-neutral-700/70 pointer-events-auto rounded-xl border shadow-sm",
+            "bg-primary pointer-events-auto rounded-xl border shadow-sm",
             "p-4",
             props.open ? "opacity-100" : "opacity-50",
           )}

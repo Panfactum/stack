@@ -81,12 +81,12 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
           on:click={toggleIsOpen}
           class={clsx(
             "border-primary flex w-full items-center justify-between rounded-md border px-4 py-2 text-sm",
-            " hover:bg-gray-50 focus:ring-indigo-500 h-12 shadow focus:outline-none focus:ring-2",
+            "h-12 shadow focus:outline-none focus:ring-2",
           )}
         >
           {selectedOption()}
           <svg
-            class="text-gray-500 ml-2 size-5"
+            class="ml-2 size-5"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -105,14 +105,14 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
             ref={setSelectEl}
             class={clsx(
               "border-primary bg-primary absolute right-0 z-10 mt-2 w-56 origin-top-right cursor-pointer border",
-              "rounded-md shadow-lg ring-1 ring-black ring-opacity-5",
+              "rounded-md shadow-lg ring-1 ring-black",
             )}
           >
             <div class="py-1">
               <For each={props.options}>{({ id, name }) => (
                 <div
                   on:click={createOnSelect(id)}
-                  class=" hover:bg-gray-100 hover:text-gray-900 block px-4 py-2 text-sm hover:font-semibold"
+                  class="block px-4 py-2 text-sm hover:font-semibold"
                 >
                   {name}
                 </div>

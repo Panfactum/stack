@@ -1,7 +1,3 @@
----
-title: "Bootstrapping Infrastructure-as-Code"
----
-
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 import BootstrappingGuideNav from "../BootstrappingGuideNav";
@@ -18,8 +14,8 @@ To begin deploying infrastructure, you will first need both a state backend and 
 
 We provide two infrastructure modules that define both those resources:
 
-- [tf_bootstrap_resources](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
-- [aws_kms_encrypt_key](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
+* [tf\_bootstrap\_resources](/docs/main/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
+* [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
 
 Deploying these modules for the first time is a bit cumbersome as they have circular references. [^1]
 
@@ -40,30 +36,30 @@ For **every** environment:
 ## sops
 
 Terragrunt uses [sops](https://github.com/getsops/sops) to store secret configuration values. This allows you to commit
-secrets _in encrypted form_ directly to version control which comes with a host of benefits:
+secrets *in encrypted form* directly to version control which comes with a host of benefits:
 
-- All of your settings for all infrastructure can now be found in a _single_ location.
+* All of your settings for all infrastructure can now be found in a *single* location.
 
-- You do not need a separate change management or CI/CD process for secrets and non-secret values.
+* You do not need a separate change management or CI/CD process for secrets and non-secret values.
 
-- You will implicitly have an audit log of all changes.
+* You will implicitly have an audit log of all changes.
 
-- You can utilize sops for other git ops activities in addition to deploying infrastructure modules (e.g., performing automatic
+* You can utilize sops for other git ops activities in addition to deploying infrastructure modules (e.g., performing automatic
   rotations).
 
-The above bootstrapping process sets up sops to use _AWS KMS_ for the encryption keys (via `.sops.yaml`).
+The above bootstrapping process sets up sops to use *AWS KMS* for the encryption keys (via `.sops.yaml`).
 KMS provides several benefits:
 
-- sops uses _transit encryption_. As a result, the encryption keys never leave the key store. By using KMS, _no one_
+* sops uses *transit encryption*. As a result, the encryption keys never leave the key store. By using KMS, *no one*
   in your organization will ever have access to the encryption keys which means you do not need to rotate
   these keys (and thus all secrets encrypted with them) every time you offboard a member of your organization.
 
-- KMS allows you to replicate the encryption keys across multiple regions, ensuring you will never lose access.
+* KMS allows you to replicate the encryption keys across multiple regions, ensuring you will never lose access.
 
-- KMS will provide an audit log for every time a secret value is _accessed_ which will augment the `git` commit history that
-  records every time a secret is _changed._
+* KMS will provide an audit log for every time a secret value is *accessed* which will augment the `git` commit history that
+  records every time a secret is *changed.*
 
-- Access to each KMS key will inherit our AWS role-based access control paradigm. As keys are scoped to each environment,
+* Access to each KMS key will inherit our AWS role-based access control paradigm. As keys are scoped to each environment,
   access to secrets will automatically align with environment permissions. In other words, users with access
   to one environment will have access to that environment's secrets but not necessary secrets in other environments.
 
@@ -77,7 +73,6 @@ Let's perform a quick test to ensure sops is working properly.
 
 2. Run `sops -e -i test.yaml` {/* spellchecker: disable */}((e)ncrypt (i)n-place).{/* spellchecker: enable */} The file contents should be transformed into something like the following:
    {/* spellchecker: disable */}
-
    ```yaml
    foo: ENC[AES256_GCM,data:JJWK,iv:iF2zywZM3DWObiJCPsaPzETwnlQ1q2lh+zgHfCmk/PM=,tag:m2Ii1IlH05fT/TE4SStWIA==,type:str]
    sops:
@@ -100,7 +95,6 @@ Let's perform a quick test to ensure sops is working properly.
      unencrypted_suffix: _unencrypted
      version: 3.8.1
    ```
-
    {/* spellchecker: enable */}
    This file is now **safe** to commit to version control.
 
@@ -109,23 +103,21 @@ Let's perform a quick test to ensure sops is working properly.
 4. Delete the file.
 
 <MarkdownAlert severity="info">
-  The initial values for `.sops.yaml` are a *recommendation*, and you should
-  adapt this file in whatever way best meets your organization's preferences.
-  The full specification can be found
-  [here](https://github.com/getsops/sops?tab=readme-ov-file#using-sopsyaml-conf-to-select-kms-pgp-and-age-for-new-files).
+  The initial values for `.sops.yaml` are a *recommendation*, and you should adapt this file
+  in whatever way best meets your organization's preferences. The full specification can be found [here](https://github.com/getsops/sops?tab=readme-ov-file#using-sopsyaml-conf-to-select-kms-pgp-and-age-for-new-files).
 </MarkdownAlert>
 
 ## Deploy the AWS Account Module
 
 Now that you have both the state backends and encryption keys established, we can start deploying infrastructure.
-The first resource will be the [aws_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
+The first resource will be the [aws\_account](/docs/main/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
 to your account including setting up its alias and contact information.
 
 Let's deploy it now:
 
 1. In **every** environment's `global` region, create an `aws_account` directory.
 
-2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
 
    Note the addition of this line `secrets = yamldecode(sops_decrypt_file("secrets.yaml"))` which demonstrates how
    terragrunt and sops integrate with one another.
@@ -153,32 +145,23 @@ Let's deploy it now:
 6. Run `terragrunt apply` in the module directory.
 
 <MarkdownAlert severity="warning">
-  Because the KMS key ARNs are embedded in every encrypted sops file, you
-  **cannot** simply copy and paste the secrets files across environments as they
-  will still be bound to the original environment. If you need to copy secrets
-  to another environment, first decrypt the file (`sops -d`), then copy it to
-  the proper directory, then encrypt it (`sops -e -i`).
+  Because the KMS key ARNs are embedded in every encrypted sops file, you **cannot** simply copy and paste the secrets files
+  across environments as they will still be bound to the original environment. If you need to copy secrets to another
+  environment, first decrypt the file (`sops -d`), then copy it to the proper directory, then encrypt it (`sops -e -i`).
 </MarkdownAlert>
 
 <MarkdownAlert severity="warning">
   If you are using an existing AWS account, you may see the following error:
   `Service role name AWSServiceRoleForEC2Spot has been taken in this account, please try a different suffix`.
 
-Resolve this error by importing the service-linked role into your state:
-`terragrunt import aws_iam_service_linked_role.spot arn:aws:iam::<your_account_id>:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
+  Resolve this error by importing the service-linked role into your state:
+  `terragrunt import aws_iam_service_linked_role.spot arn:aws:iam::<your_account_id>:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot`
 
-Replace `<your_account_id>` with the account id for this account.
-
+  Replace `<your_account_id>` with the account id for this account.
 </MarkdownAlert>
 
 ## Next Steps
 
 Now that you are set up to deploy infrastructure-as-code, we are ready to setup DNS.
 
-<BootstrappingGuideNav
-  backHref={
-    "/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code"
-  }
-  forwardHref={"/docs/edge/guides/bootstrapping/dns"}
-  stepNumber={5}
-/>
+<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/configuring-infrastructure-as-code"} forwardHref={"/docs/main/guides/bootstrapping/dns"} stepNumber={5} />

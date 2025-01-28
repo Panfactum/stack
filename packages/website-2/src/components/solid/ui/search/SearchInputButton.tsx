@@ -25,7 +25,7 @@ const SearchInputButton: Component<SearchButtonProps> = (props) => {
 
   return (
     <button
-      class="border-primary bg-primary hover:bg-secondary ring-offset-background focus-within:ring-ring flex h-10 cursor-pointer items-center gap-4 rounded-md border px-3 text-sm shadow-sm focus-within:ring-1 focus-within:ring-offset-2"
+      class="border-primary bg-primary hover:bg-secondary   flex h-10 cursor-pointer items-center gap-4 rounded-md border px-3 text-sm shadow-sm focus-within:ring-1 focus-within:ring-offset-2"
       on:click={() => { isSearchModalOpen.set(true); }}
       aria-controls={SEARCH_MODAL_ID}
       aria-haspopup={true}

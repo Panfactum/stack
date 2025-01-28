@@ -1,3 +1,4 @@
+import { Button as KobalteButton } from "@kobalte/core/button";
 import { clsx } from "clsx";
 import type { JSX, ParentComponent } from "solid-js";
 
@@ -14,26 +15,22 @@ const variants = {
   tertiary: "btn-tertiary",
 };
 
-export interface ButtonProps {
+export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement>
+{
   size?: "sm" | "md" | "lg" | "xl";
   variant?: "primary" | "secondary";
-  class?: string;
-  id?: string;
-  onClick?: JSX.EventHandler<HTMLButtonElement, MouseEvent>;
 }
 const Button: ParentComponent<ButtonProps> = (props) => {
   return (
-    <button
+    <KobalteButton
+      as={"button"}
+      {...props}
       class={clsx(
         sizes[props.size ?? "md"],
         variants[props.variant ?? "primary"],
         props.class,
       )}
-      id={props.id}
-      on:click={props.onClick}
-    >
-      {props.children}
-    </button>
+    />
   );
 };
 

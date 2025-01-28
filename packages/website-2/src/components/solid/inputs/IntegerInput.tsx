@@ -84,8 +84,8 @@ export const IntegerInput: Component<IntegerInputProps> = (props) => {
         max={`${props.max}`}
         class={clsx(
           "flex h-[46px] w-full rounded-md",
-          "border-1 border-gray-warm-300 focus:border-white dark:border-gray-dark-mode-700 dark:focus:border-gray-dark-mode-700",
-          "text-md px-[14px] py-[10px] shadow focus:ring-2 focus:ring-gray-warm-300 dark:focus:ring-gray-dark-mode-700",
+          "border border-gray-warm-300 focus:border-white dark:border-gray-dark-mode-700 dark:focus:border-gray-dark-mode-700",
+          " px-[14px] py-[10px] shadow focus:ring-2 focus:ring-gray-warm-300 dark:focus:ring-gray-dark-mode-700",
           "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
           background === "primary" ? "bg-transparent" : "bg-primary",
         )}

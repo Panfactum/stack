@@ -1,0 +1,543 @@
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_cron_job" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cron_job" status="stable" type="submodule" />
+
+# Kubernetes CronJob
+
+Provides a production-hardened instance of a Kubernetes [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
+with the following enhancements:
+
+* Standardized resource labels
+* Pod and container security hardening
+* Temporary directory mounting
+* [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) mounting
+* [Downward-API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) integrations
+* Service account configuration with default permissions
+* Integration with the Panfactum bin-packing scheduler
+* High-availability scheduling constraints
+* [Readiness and liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) configurations
+* Automatic reloading via the [Reloader](https://github.com/stakater/Reloader)
+* [Vertical pod autoscaling](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+* [Pod disruption budget](https://kubernetes.io/docs/tasks/run-application/configure-pdb/)
+* [Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) switches for the various Panfactum node classes
+
+## Usage
+
+### Basics
+
+This module follows the basic workload deployment patterns describe in [this guide](/docs/main/guides/deploying-workloads/basics).
+
+### Scheduling
+
+This module's has inputs that map one-for-one to the [standard Kubernetes CronJob API.](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#cronjobspec-v1-batch)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+## Required Inputs
+
+The following input variables are required:
+
+### containers
+
+Description: A list of container configurations for the Pod
+
+Type:
+
+```hcl
+list(object({
+    name                    = string                           # A unique name for the container within the pod
+    init                    = optional(bool, false)            # Iff true, the container will be an init container
+    image_registry          = string                           # The URL for a container image registry (e.g., docker.io)
+    image_repository        = string                           # The path to the image repository within the registry (e.g., library/nginx)
+    image_tag               = string                           # The tag for a specific image within the repository (e.g., 1.27.1)
+    image_pin_enabled       = optional(bool, true)             # Whether the image should be pinned to every node regardless of whether the container is running or not (speeds up startup times)
+    image_prepull_enabled   = optional(bool, true)             # Whether the image will be prepulled to nodes when the nodes are first created (speeds up startup times)
+    command                 = list(string)                     # The command to be run as the root process inside the container
+    working_dir             = optional(string, null)           # The directory the command will be run in. If left null, will default to the working directory set by the image
+    image_pull_policy       = optional(string, "IfNotPresent") # Sets the container's ImagePullPolicy
+    minimum_memory          = optional(number, 100)            #The minimum amount of memory in megabytes
+    maximum_memory          = optional(number, null)           #The maximum amount of memory in megabytes
+    memory_limit_multiplier = optional(number, 1.3)            # memory limits = memory request x this value
+    minimum_cpu             = optional(number, 10)             # The minimum amount of cpu millicores
+    maximum_cpu             = optional(number, null)           # The maximum amount of cpu to allow (in millicores)
+    privileged              = optional(bool, false)            # Whether to allow the container to run in privileged mode
+    run_as_root             = optional(bool, false)            # Whether to run the container as root
+    uid                     = optional(number, 1000)           # user to use when running the container if not root
+    linux_capabilities      = optional(list(string), [])       # Default is drop ALL
+    readonly                = optional(bool, true)             # Whether to use a readonly file system
+    env                     = optional(map(string), {})        # Environment variables specific to the container
+  }))
+```
+
+### cron\_schedule
+
+Description: The cron expression to use for the CronJob
+
+Type: `string`
+
+### name
+
+Description: The name of this CronJob
+
+Type: `string`
+
+### namespace
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### active\_deadline\_seconds
+
+Description: Specifies the duration in seconds relative to the startTime that the job may be continuously active before the system tries to terminate it; value must be positive integer.
+
+Type: `number`
+
+Default: `86400`
+
+### arm\_nodes\_enabled
+
+Description: Whether to allow Pods to schedule on arm64 nodes
+
+Type: `bool`
+
+Default: `true`
+
+### backoff\_limit
+
+Description: Specifies the number of retries before marking the Job failed.
+
+Type: `number`
+
+Default: `6`
+
+### burstable\_nodes\_enabled
+
+Description: Whether to allow Pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### cilium\_required
+
+Description: True iff the Cilium CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
+### common\_env
+
+Description: Key pair values of the environment variables for each container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### common\_env\_from\_config\_maps
+
+Description: Environment variables that are sourced from existing Kubernetes ConfigMaps. The keys are the environment variables names and the values are the ConfigMap references.
+
+Type:
+
+```hcl
+map(object({
+    config_map_name = string
+    key             = string
+  }))
+```
+
+Default: `{}`
+
+### common\_env\_from\_secrets
+
+Description: Environment variables that are sourced from existing Kubernetes Secrets. The keys are the environment variables names and the values are the Secret references.
+
+Type:
+
+```hcl
+map(object({
+    secret_name = string
+    key         = string
+  }))
+```
+
+Default: `{}`
+
+### common\_secrets
+
+Description: Key pair values of secrets to add to the containers as environment variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### concurrency\_policy
+
+Description: Specifies how to treat concurrent executions of a Job.
+
+Type: `string`
+
+Default: `"Forbid"`
+
+### config\_map\_mounts
+
+Description: A mapping of ConfigMap names to their mount configuration in the containers of the CronJob
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the ConfigMap
+    optional   = optional(bool, false) # Whether the Pod can launch if this ConfigMap does not exist
+  }))
+```
+
+Default: `{}`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `false`
+
+### cron\_job\_annotations
+
+Description: Annotations to add to the generated CronJob
+
+Type: `map(string)`
+
+Default: `{}`
+
+### disruptions\_enabled
+
+Description: Whether to enable disrupting the Pods in the middle of execution.
+
+Type: `bool`
+
+Default: `false`
+
+### dns\_policy
+
+Description: The DNS policy for the Pod
+
+Type: `string`
+
+Default: `"ClusterFirst"`
+
+### extra\_annotations
+
+Description: A map of extra annotations that will be added to the CronJob (not the pods)
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_labels
+
+Description: A map of extra labels that will be added to the CronJob (not the pods)
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_pod\_annotations
+
+Description: Annotations to add to the pods in the CronJob
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_pod\_labels
+
+Description: Extra pod labels to use
+
+Type: `map(string)`
+
+Default: `{}`
+
+### extra\_tolerations
+
+Description: Extra tolerations to add to the Pods
+
+Type:
+
+```hcl
+list(object({
+    key      = optional(string)
+    operator = string
+    value    = optional(string)
+    effect   = optional(string)
+  }))
+```
+
+Default: `[]`
+
+### failed\_jobs\_history\_limit
+
+Description: The number of failed jobs to retain
+
+Type: `number`
+
+Default: `1`
+
+### job\_annotations
+
+Description: Annotations to add to generated Job resources
+
+Type: `map(string)`
+
+Default: `{}`
+
+### linkerd\_enabled
+
+Description: True iff the Linkerd sidecar should be injected into the pods
+
+Type: `bool`
+
+Default: `true`
+
+### linkerd\_required
+
+Description: True iff the Linkerd CNI is required to be installed on a node prior to scheduling on it
+
+Type: `bool`
+
+Default: `true`
+
+### mount\_owner
+
+Description: The ID of the group that owns the mounted volumes
+
+Type: `number`
+
+Default: `1000`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
+
+### node\_preferences
+
+Description: Node label preferences for the Pods
+
+Type: `map(object({ weight = number, operator = string, values = list(string) }))`
+
+Default: `{}`
+
+### node\_requirements
+
+Description: Node label requirements for the Pods
+
+Type: `map(list(string))`
+
+Default: `{}`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum Pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### pod\_completions
+
+Description: Specifies the desired number of successfully finished Pods the Job should be run with.
+
+Type: `number`
+
+Default: `1`
+
+### pod\_parallelism
+
+Description: Specifies the maximum desired number of Pods the Job should run at any given time.
+
+Type: `number`
+
+Default: `1`
+
+### pod\_replacement\_policy
+
+Description: Specifies when to create replacement Pods
+
+Type: `string`
+
+Default: `"Failed"`
+
+### pod\_version\_labels\_enabled
+
+Description: Whether to add version labels to the Pod. Useful for ensuring pods do not get recreated on frequent updates.
+
+Type: `bool`
+
+Default: `true`
+
+### priority\_class\_name
+
+Description: The priority class to use for Pods in the CronJob
+
+Type: `string`
+
+Default: `null`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### restart\_policy
+
+Description: The Pod restart policy
+
+Type: `string`
+
+Default: `"OnFailure"`
+
+### secret\_mounts
+
+Description: A mapping of Secret names to their mount configuration in the containers of the CronJob
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the Secret
+    optional   = optional(bool, false) # Whether the Pod can launch if this Secret does not exist
+  }))
+```
+
+Default: `{}`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow Pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
+### starting\_deadline\_seconds
+
+Description: Optional deadline in seconds for starting the job if it misses scheduled time for any reason. Missed jobs executions will be counted as failed ones.
+
+Type: `number`
+
+Default: `900`
+
+### successful\_jobs\_history\_limit
+
+Description: The number of successful jobs to retain
+
+Type: `number`
+
+Default: `0`
+
+### suspend
+
+Description: Whether the CronJob is suspended
+
+Type: `bool`
+
+Default: `false`
+
+### termination\_grace\_period\_seconds
+
+Description: The number of seconds to wait for graceful termination before forcing termination
+
+Type: `number`
+
+Default: `30`
+
+### tmp\_directories
+
+Description: A mapping of temporary directory names (arbitrary) to their configuration
+
+Type:
+
+```hcl
+map(object({
+    mount_path = string                # Where in the containers to mount the temporary directories
+    size_mb    = optional(number, 100) # The number of MB to allocate for the directory
+    node_local = optional(bool, false) # If true, the temporary storage will come from the host node rather than a PVC
+  }))
+```
+
+Default: `{}`
+
+### ttl\_seconds\_after\_finished
+
+Description: limits the lifetime of a Job that has finished execution (either Complete or Failed). After this time, it is eligible to be automatically deleted.
+
+Type: `number`
+
+Default: `600`
+
+### update\_type
+
+Description: The type of update that the CronJob should use
+
+Type: `string`
+
+Default: `"RollingUpdate"`
+
+### vpa\_enabled
+
+Description: Whether to enable the Vertical Pod Autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### labels
+
+Description: The default labels assigned to all resources in this Workflow
+
+### match\_labels
+
+Description: The labels unique to this Workflow that can be used to select any pods in this Workflow
+
+### service\_account\_name
+
+Description: The service account used for the pods
+
+## Maintainer Notes
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

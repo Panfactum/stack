@@ -44,7 +44,7 @@ const VersionSelector: Component = () => {
     >
       <Select.Trigger
         aria-label="Documentation Version"
-        class="border-primary ring-offset-background flex h-10 w-full items-center justify-between whitespace-nowrap rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+        class="border-primary  flex h-10 w-full items-center justify-between whitespace-nowrap rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span>{selectedVersion()?.text}</span>
         <FiChevronDown />

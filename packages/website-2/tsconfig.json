@@ -3,22 +3,19 @@
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "strictNullChecks": true,
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["./"],
       "@/*": ["./src/*"]
-    },
-    "types": [
-      "./src/env.d.ts",
-      "./src/astro-assets.d.ts"
-    ]
+    }
   },
   "include": [
-    "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.astro",
-    "src/**/*.mdx"
+    "src/**/*.mdx",
+    ".astro/types.d.ts"
   ],
-
 }

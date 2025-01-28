@@ -1,7 +1,3 @@
----
-title: "Checking out Git Repositories"
----
-
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Checking out Git Repositories
@@ -27,23 +23,23 @@ pf-wf-git-checkout \
 
 In addition to checking out the repo, this command does the following:
 
-- Persists the authentication information for the repository so that future `git`
+* Persists the authentication information for the repository so that future `git`
   commands on the repository do not need to be explicitly authenticated.
 
-- Enables [Git LFS](https://git-lfs.com/) tooling and pulls any associated files if the repo uses LFS.
+* Enables [Git LFS](https://git-lfs.com/) tooling and pulls any associated files if the repo uses LFS.
 
-- Changes the current working directory to the local repository directory.
+* Changes the current working directory to the local repository directory.
 
 You can use the Panfactum devShell and scripts like this in your workflows by following
-[this guide section](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec#using-the-panfactum-devshell).
+[this guide section](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec#using-the-panfactum-devshell).
 
 We recommend running this script as one of the first parts [ContainerSet template.](https://argo-workflows.readthedocs.io/en/latest/container-set-template/)
-You can find a full example of this in action [here.](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/wf_dockerfile_build)
+You can find a full example of this in action [here.](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_dockerfile_build)
 
 <MarkdownAlert severity="warning">
-  Note that this performs a shallow clone, so if you need to interact with
-  commits other than what is supplied by `--checkout`, you will need to
-  explicitly `git fetch` them first.
+  Note that this performs a shallow clone, so if you need to interact with commits
+  other than what is supplied by `--checkout`, you will need to explicitly `git fetch` them
+  first.
 </MarkdownAlert>
 
 ## Credentials
@@ -55,15 +51,15 @@ The authentication provided to this command ultimately resolves to this format:
 While this is supported by all major git hosting providers, the exact values may differ
 for `username` and `password`. Below we outline some common scenarios:
 
-- Using a GitHub classic [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic):
-  - `username`: the account's username
-  - `password`: the PAT
-- Using a GitHub fine-grained [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token):
-  - `username`: set to `oauth2`
-  - `password`: the PAT
-- Using a GitLab [Personal Access Token (PAT)](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html):
-  - `username`: the account's username
-  - `password`: the PAT
-- Using a Bitbucket [Repository Access Token (RAT)](https://support.atlassian.com/bitbucket-cloud/docs/using-access-tokens/):
-  - `username`: set to `x-token-auth`
-  - `password`: the RAT
+* Using a GitHub classic [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic):
+  * `username`: the account's username
+  * `password`: the PAT
+* Using a GitHub fine-grained [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token):
+  * `username`: set to `oauth2`
+  * `password`: the PAT
+* Using a GitLab [Personal Access Token (PAT)](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html):
+  * `username`: the account's username
+  * `password`: the PAT
+* Using a Bitbucket [Repository Access Token (RAT)](https://support.atlassian.com/bitbucket-cloud/docs/using-access-tokens/):
+  * `username`: set to `x-token-auth`
+  * `password`: the RAT

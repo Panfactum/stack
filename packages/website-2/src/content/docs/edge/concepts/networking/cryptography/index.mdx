@@ -1,9 +1,6 @@
----
-title: "Cryptography in Networking"
----
+import MarkdownSVGImage from "@/components/solid/markdown/MarkdownImgSvg";
 
-import ImageSvg from "@/components/solid/markdown/MarkdownImgSvg";
-import tlsMotivationSvg from "./tls-motivation.svg?raw";
+import tlsMotivationImg from './tls-motivation.svg?raw'
 
 # Cryptography in Networking
 
@@ -11,11 +8,11 @@ Cryptography is fundamental to modern networking. You will find it in nearly eve
 
 Cryptography provides three critical capabilities:
 
-- Encryption: How to prevent third parties from snooping on transmitted data
+* Encryption: How to prevent third parties from snooping on transmitted data
 
-- Authentication: How to verify the identity of the sender and/or recipient
+* Authentication: How to verify the identity of the sender and/or recipient
 
-- Integrity: How to prevent transmitted data from tampering
+* Integrity: How to prevent transmitted data from tampering
 
 ## Foundational Concepts
 
@@ -26,52 +23,52 @@ foundational concepts.
 
 Also called asymmetric cryptography, [public key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography)
 differs from symmetric cryptography [^1] in that there
-are _two_ mathematically related, but not identical keys used in cryptographic operations (as opposed to one).
+are *two* mathematically related, but not identical keys used in cryptographic operations (as opposed to one).
 We use this type of cryptography for two purposes:
 
 [^1]: Such as encrypting a file with a password
 
-- Encryption: One key encrypts the data and only the _other_ key can decrypt it. [^2]
+* Encryption: One key encrypts the data and only the *other* key can decrypt it. [^2]
 
-- Digital signatures: One key signs arbitrary data to produce a signature, and another entity can use the _other_ key
+* Digital signatures: One key signs arbitrary data to produce a signature, and another entity can use the *other* key
   to verify the signature was produced by the first key. [^3]
 
 [^2]: A good example would be using `ssh` to connect to a server.
 
 [^3]: A good example would be [signing your git commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
 
-The benefit over symmetric encryption is that _one_ of the two keys can be shared publicly without introducing any
+The benefit over symmetric encryption is that *one* of the two keys can be shared publicly without introducing any
 vulnerability. This creates an easy way to securely share data between
 parties without having to coordinate in advance (i.e., connecting to a remote server). [^4]
 
 [^4]: Hence the name "public key cryptography"
 
-There are _many_ algorithms used to construct the keys, but all are in service of the above premise.
+There are *many* algorithms used to construct the keys, but all are in service of the above premise.
 
 For more details, we recommend taking a moment to review these learning resources:
 
-- [Article](https://ssd.eff.org/module/deep-dive-end-end-encryption-how-do-public-key-encryption-systems-work)
+* [Article](https://ssd.eff.org/module/deep-dive-end-end-encryption-how-do-public-key-encryption-systems-work)
 
-- [Video](https://www.youtube.com/watch?v=GSIDS_lvRv4)
+* [Video](https://www.youtube.com/watch?v=GSIDS_lvRv4)
 
 ### X.509 Certificates
 
 [X.509](https://en.wikipedia.org/wiki/X.509) is a global standard that builds on top of public key
-cryptography to introduce the concept of _certificates_.
+cryptography to introduce the concept of *certificates*.
 
 Quite simply, a certificate is a public key
 with some additional associated metadata. As cryptographic keys are random data, adding additional
 metadata can be critical for accomplishing goals like providing identifying information
 about the keyholder.
 
-X.509 also introduces the concept of _certificate authorities_ (CAs) which can be used to verify
+X.509 also introduces the concept of *certificate authorities* (CAs) which can be used to verify
 the content of the certificate metadata using digital signatures.
 
 This is a complex standard, so we recommend taking a moment to review these brief learning resources:
 
-- [Article](https://www.ssl.com/faqs/what-is-an-x-509-certificate/)
+* [Article](https://www.ssl.com/faqs/what-is-an-x-509-certificate/)
 
-- [Video](https://www.youtube.com/watch?v=kAaIYRJoJkc)
+* [Video](https://www.youtube.com/watch?v=kAaIYRJoJkc)
 
 ## TLS
 
@@ -83,38 +80,38 @@ which you probably use every time you connect to a site over the internet.
 
 We recommend the following learning resources for a brief overview of how the protocol itself works:
 
-- [Article](https://www.cloudflare.com/learning/ssl/what-happens-in-a-tls-handshake/)
+* [Article](https://www.cloudflare.com/learning/ssl/what-happens-in-a-tls-handshake/)
 
-- [Video](https://www.youtube.com/watch?v=86cQJ0MMses)
+* [Video](https://www.youtube.com/watch?v=86cQJ0MMses)
 
 ### Motivation for TLS
 
-When you use the internet, your traffic is routed across many _untrusted_ computers (routers) before finally
+When you use the internet, your traffic is routed across many *untrusted* computers (routers) before finally
 reaching your destination. Due to the way the internet works, you have no control what route is taken
 nor any ability to influence the behavior of these intermediate computers.
 
 Consider the scenario when one of these intermediate computers is nefarious. This creates a man-in-the-middle (MITM) attack:
 
-<ImageSvg src={tlsMotivationSvg} alt="MITM Attacker" />
+<MarkdownSVGImage src={tlsMotivationImg} alt="MITM Attacker" />
 
-This attacker can do _any_ of the following:
+This attacker can do *any* of the following:
 
-- Read the data you transmit (e.g., your passwords and bank credentials)
+* Read the data you transmit (e.g., your passwords and bank credentials)
 
-- Impersonate the computer that you are trying to reach
+* Impersonate the computer that you are trying to reach
 
-- Inject bad data into the messages sent between you and your destination
+* Inject bad data into the messages sent between you and your destination
 
 Due to the severity of this attack, the industry standard for organizations is a [zero trust security model](https://en.wikipedia.org/wiki/Zero_trust_security_model)
-where you assume any intermediate computer _could_ be an attacker and implement the appropriate safeguards.
+where you assume any intermediate computer *could* be an attacker and implement the appropriate safeguards.
 
 TLS (and similar protocols) are one such safeguard as it prevents MITM attacks by:
 
-- Verifying the identity of the server sending you data
+* Verifying the identity of the server sending you data
 
-- Encrypting the transmitted data
+* Encrypting the transmitted data
 
-- Preventing any mutation of the transmitted data
+* Preventing any mutation of the transmitted data
 
 ### Certificate Authorities
 
@@ -141,27 +138,25 @@ CA by adding the CA's public key to the computer's trust list. [^8]
 
 [^7]: In the Panfactum stack, we use [Vault](https://www.vaultproject.io/) as our CA.
 
-[^8]:
-    How to do this varies heavily with your particular operating system and setup. In the Panfactum stack,
+[^8]: How to do this varies heavily with your particular operating system and setup. In the Panfactum stack,
     we accomplish this using the [Linkerd2 service mesh](https://linkerd.io/) and [trust-manager](https://cert-manager.io/docs/trust/trust-manager/).
 
-[^9]:
-    "Private" is in quotes here because it is private in the technical sense (i.e., is not accessibly via a public IP)
+[^9]: "Private" is in quotes here because it is private in the technical sense (i.e., is not accessibly via a public IP)
     but not in the semantic sense (i.e., guaranteed that no one is intercepting the traffic). Consider infrastructure
     hosted by a cloud provider. Not only does the organization and its employees have access to your traffic, but so do all the devices
     facilitating the provider's network, each device having its own manufacturer and exploitable software stack.
 
 Finally, there is the concept of a [self-signed certificate](https://en.wikipedia.org/wiki/Self-signed_certificate)
-which serves as its _own_ CA. Obviously, this provides no additional trust value and is used
+which serves as its *own* CA. Obviously, this provides no additional trust value and is used
 either for testing purposes or as the [root certificate](https://en.wikipedia.org/wiki/Root_certificate) used by a trusted CA.
 
 ### Mutual TLS (mTLS)
 
 In standard TLS, only the server presents a certificate for identification. This works well when you
-want _any_ computer to be able to connect to your server. However, in many situations you only
-want _particular_ clients to be able to connect.
+want *any* computer to be able to connect to your server. However, in many situations you only
+want *particular* clients to be able to connect.
 
-Using _mutual_ TLS, both the client and server present their
+Using *mutual* TLS, both the client and server present their
 own certificates for identity verification. This allows the server to decide if it wants to allow the client
 to connect based on its identity.
 
@@ -204,7 +199,7 @@ said about TLS applies for SSH in the Panfactum stack.
 [Virtual Private Networks (VPNs)](https://en.wikipedia.org/wiki/Virtual_private_network) are another popular
 use of network cryptography that you may be familiar with, especially in a professional setting.
 
-VPNs were invented to solve the problem of securely connecting to _an entire_
+VPNs were invented to solve the problem of securely connecting to *an entire*
 [local area networks (LAN)](https://www.cloudflare.com/learning/network-layer/what-is-a-lan/)
 over an untrusted intermediary network (such as the internet). This can be used to connect a remote
 computer to a private network or even to connect multiple private networks to one another.
@@ -214,20 +209,20 @@ computer to a private network or even to connect multiple private networks to on
 VPNs are often the default choice when IT teams want to connect a worker's computer to an organization's private network.
 We believe this is an inappropriate use case for the following reasons:
 
-- A typical VPN setup will allow access to _all_ networked resources in the private network by default.
+* A typical VPN setup will allow access to *all* networked resources in the private network by default.
   This is an allow-by-default security posture that leads to security vulnerabilities and runs counter to a zero trust architecture.
 
-- The most popular VPN solutions have massive surface areas due to their number of supported
+* The most popular VPN solutions have massive surface areas due to their number of supported
   deployment scenarios. This significantly increases the attack surface. For example, here is the [vulnerability
   list for OpenVPN](https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=openvpn). [^11]
 
-- A typical VPN setup will route _all_ network traffic from the remote machine to the private network. This introduces problems:
+* A typical VPN setup will route *all* network traffic from the remote machine to the private network. This introduces problems:
 
-  - Organizations incur significant costs for non-work traffic routed though metered networks (e.g., AWS). [^10]
+  * Organizations incur significant costs for non-work traffic routed though metered networks (e.g., AWS). [^10]
 
-  - Users experience degraded network performance as internet bandwidth is shared across all VPN users.
+  * Users experience degraded network performance as internet bandwidth is shared across all VPN users.
 
-  - Users sacrifice privacy unnecessarily by allowing their organization to view their internet traffic.
+  * Users sacrifice privacy unnecessarily by allowing their organization to view their internet traffic.
 
 [^10]: For some clients, we have seen VPNs and related charges account for over 25% of their entire AWS bill!
 
@@ -236,16 +231,16 @@ We believe this is an inappropriate use case for the following reasons:
 While a VPN can be an attractive solution for site-to-site connections, we recommend using more purpose-built
 software for exposing private network resources to internal stakeholders. Generally, there are three options:
 
-- Gate private resources _individually_ with a publicly available authenticating proxies such as
+* Gate private resources *individually* with a publicly available authenticating proxies such as
   [Oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy), ideally using role-based access control and SSO.
 
-- Provision an overlay networking solution such as [ZeroTier](https://www.zerotier.com/) which provides more granular control
+* Provision an overlay networking solution such as [ZeroTier](https://www.zerotier.com/) which provides more granular control
   of access to individual resources and traffic routing.
 
-- Utilize a point-to-point proxy solution such as [ssh tunneling](https://www.ssh.com/academy/ssh/tunneling-example) which enables
-  users to expose _individual_ private network resources on local computer ports.
+* Utilize a point-to-point proxy solution such as [ssh tunneling](https://www.ssh.com/academy/ssh/tunneling-example) which enables
+  users to expose *individual* private network resources on local computer ports.
 
-Any of these solutions would offer increased security, improved user experience, _and_ reduced costs compared to a VPN.
+Any of these solutions would offer increased security, improved user experience, *and* reduced costs compared to a VPN.
 
 ### WireGuard
 

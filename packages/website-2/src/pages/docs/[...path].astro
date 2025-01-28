@@ -11,7 +11,7 @@ import { Versions } from "../../lib/constants";
 
 export async function getStaticPaths() {
   const docs = await getCollection("docs");
-  return docs.map((doc: any) => {
+  return docs.map((doc) => {
     return {
       params: { path: doc.id },
       props: { entry: doc },

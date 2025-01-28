@@ -1,0 +1,118 @@
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="aws_kms_encrypt_key" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_kms_encrypt_key" status="stable" type="submodule" />
+
+# AWS KMS Encryption Key
+
+Creates a multi-region KMS key used for encryption. Provides the ability to assign
+users and administrators of the key.
+
+## Providers
+
+The following providers are needed by this module:
+
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+## Required Inputs
+
+The following input variables are required:
+
+### description
+
+Description: The description of the KMS key.
+
+Type: `string`
+
+### name
+
+Description: The name of the KMS key.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### admin\_iam\_arns
+
+Description: List of IAM arns for key admins.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### log\_delivery\_enabled
+
+Description: Whether to allow the delivery.logs.amazonaws.com service to use the key
+
+Type: `bool`
+
+Default: `false`
+
+### reader\_iam\_arns
+
+Description: List of IAM arns for users who can use the key for encryption and decryption.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### replication\_enabled
+
+Description: Whether to replicate the key to another region
+
+Type: `bool`
+
+Default: `true`
+
+### restricted\_reader\_iam\_arns
+
+Description: List of IAM arns for users who can only view the key.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### superuser\_iam\_arns
+
+Description: List of IAM arns for key superusers.
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### alias\_arn
+
+Description: n/a
+
+### arn
+
+Description: The ARN of the KMS key
+
+### arn2
+
+Description: The ARN of the backup key
+
+### id
+
+Description: n/a
+
+## Usage
+
+1. The keys provisioned by this module must be manually deleted as deletion prevention in terraform
+   is enabled.
+2. This is a multi-region module so it requires the secondary aws provider to be enabled. This is to keep everything in sync.
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

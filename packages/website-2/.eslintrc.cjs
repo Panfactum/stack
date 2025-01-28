@@ -13,6 +13,7 @@ module.exports = {
     "plugin:tailwindcss/recommended"
   ],
   parserOptions: {
+    tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
     extraFileExtensions: ['.astro']
   },
@@ -47,9 +48,9 @@ module.exports = {
   },
   settings: {
     "import/resolver": {
-      // You will also need to install and configure the TypeScript resolver
-      // See also https://github.com/import-js/eslint-import-resolver-typescript#configuration
-      "typescript": true,
+      "typescript": {
+        project: "./tsconfig.json"
+      },
       "node": true,
     },
     "import/extensions": [
@@ -61,9 +62,11 @@ module.exports = {
     },
     tailwindcss: {
       whitelist: [
-          "circling-icon",
-          "circling-planets",
-          "hero-icon",
+        "circling-icon",
+        "circling-icons",
+        "circling-planets",
+        "hero-icon",
+        "text-primary",
       ]
     }
   },
@@ -109,6 +112,11 @@ module.exports = {
     {
       files: ["*.astro"],
       plugins: ["astro"],
+      // This is required b/c astro files do their own fancy type checking.
+      // We run this via `astro check`, so it is unnecessary for eslint to run it
+      // AND eslint will actually incorrect certain imports (e.g., images) as any which
+      // will cause issues
+      extends: ['plugin:@typescript-eslint/disable-type-checked'],
       env: {
         node: true,
         "astro/astro": true,
@@ -126,6 +134,25 @@ module.exports = {
         "astro/no-conflict-set-directives": "error",
         "astro/no-unused-define-vars-in-style": "error",
       },
-    }
+    },
+    {
+      // Define the configuration for `<script>` tag when using `client-side-ts` processor.
+      // Script in `<script>` is assigned a virtual file name with the `.ts` extension.
+      files: ["**/*.astro/*.ts", "*.astro/*.ts"],
+      env: {
+        browser: true,
+        es2020: true,
+      },
+      parser: "@typescript-eslint/parser",
+      parserOptions: {
+        sourceType: "module",
+      },
+      rules: {
+        // If you are using "prettier/prettier" rule,
+        // you don't need to format inside <script> as it will be formatted as a `.astro` file.
+        "prettier/prettier": "off",
+      },
+    },
   ],
+
 }

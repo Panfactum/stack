@@ -1,9 +1,6 @@
----
-title: "Subdomain Delegation"
----
+import MarkdownSVGImage from "@/components/solid/markdown/MarkdownImgSvg";
 
-import ImageSvg from "@/components/solid/markdown/MarkdownImgSvg";
-import subdomainDelegationSvg from "./subdomain-delegation.svg?raw";
+import subdomainDelegationImg from './subdomain-delegation.svg?raw'
 
 # Subdomain Delegation
 
@@ -27,31 +24,31 @@ We believe subdomain delegation is worth the added complexity for the following 
 
 ## AWS Example
 
-<ImageSvg width={"1000px"} alt="AWS NAT Diagram" src={subdomainDelegationSvg} />
+<MarkdownSVGImage width={"1000px"} alt="AWS NAT Diagram" src={subdomainDelegationImg} />
 
 Here are the important notes:
 
-- In AWS, the DNS Server is represented by a [delegation set](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/route-53-concepts.html#route-53-concepts-reusable-delegation-set)
+* In AWS, the DNS Server is represented by a [delegation set](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/route-53-concepts.html#route-53-concepts-reusable-delegation-set)
   which is actually a set of four mirrored nameservers.
 
-- The DNS zone is represented by a [Route53 hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html)
+* The DNS zone is represented by a [Route53 hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html)
   which is identified by its apex / root domain name.
 
-- When you register a domain with AWS, that "registers" the nameservers of your production account's DNS servers as
+* When you register a domain with AWS, that "registers" the nameservers of your production account's DNS servers as
   the [authoritative name servers](https://en.wikipedia.org/wiki/Name_server) for that root domain. This means
   that this name server is the source of truth for all records under this root domain.
 
-- When you create subdomain hosted zones in other accounts, you can manually register the nameservers for this account
+* When you create subdomain hosted zones in other accounts, you can manually register the nameservers for this account
   as the authoritative nameservers for this subdomain. You do this by creating [NS records](https://www.cloudflare.com/learning/dns/dns-records/dns-ns-record/)
   in the parent zone that point to the nameservers for this account.
 
-- When you query a delegated domain name (i.e., `dig test.dev.panfactum.com`), the resolution process works as follows: [^1]
+* When you query a delegated domain name (i.e., `dig test.dev.panfactum.com`), the resolution process works as follows: [^1]
 
-  - Check the `.com` [TLD](https://en.wikipedia.org/wiki/Top-level_domain) for the nameservers of `panfactum.com`.
+  * Check the `.com` [TLD](https://en.wikipedia.org/wiki/Top-level_domain) for the nameservers of `panfactum.com`.
 
-  - Check the nameservers for `panfactum.com` (in the production account) for the [A record](https://www.cloudflare.com/learning/dns/dns-records/dns-a-record/) `test.dev.panfactum.com`. Notice that there are
+  * Check the nameservers for `panfactum.com` (in the production account) for the [A record](https://www.cloudflare.com/learning/dns/dns-records/dns-a-record/) `test.dev.panfactum.com`. Notice that there are
     `NS` records delegating `dev.panfactum.com` to another nameserver (in the development account).
 
-  - Check the nameservers for `dev.panfactum.com` for the A record `test.dev.panfactum.com`. Notice that this record exists. Return the associated IP address.
+  * Check the nameservers for `dev.panfactum.com` for the A record `test.dev.panfactum.com`. Notice that this record exists. Return the associated IP address.
 
 [^1]: This is simplified process. For a more complete overview, we recommend [this video](https://www.youtube.com/watch?v=g6R9gRWIIK8).

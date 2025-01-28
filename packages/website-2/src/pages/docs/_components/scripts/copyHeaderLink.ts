@@ -1,3 +1,6 @@
+
+// TODO: Convert into custom element
+
 document.addEventListener("click", function (event) {
   // Check if the clicked element is an anchor inside a heading
 
@@ -16,7 +19,7 @@ document.addEventListener("click", function (event) {
         const fullUrl = `${window.location.origin}${window.location.pathname}${href}`;
 
         // Copy the full URL to the clipboard
-        navigator.clipboard.writeText(fullUrl);
+        void navigator.clipboard.writeText(fullUrl);
 
         // Prevent the default action of scrolling to the anchor
         event.preventDefault();

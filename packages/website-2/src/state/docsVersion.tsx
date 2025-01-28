@@ -47,6 +47,7 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
         const suffix = pathname.substring(
           `${DOCS_BASE_PATH}/${_docsVersion()}`.length,
         );
+        /* eslint-disable-next-line @typescript-eslint/no-unsafe-call */
         void navigate(`${DOCS_BASE_PATH}/${newVersion}${suffix}`);
       }
       setTimeout(() => {
@@ -62,7 +63,7 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
     if (v) {
       _setDocsVersion(v);
     } else {
-      // Note to future self: Do NOT try to use makePersisted
+      // Note to future self: Do NOT try to use makePersisted / persistentAtom
       // as it will not actually trigger the update.
       // Note sure wtf is going on with that, but this custom handling works just fine.
       setTimeout(() => {

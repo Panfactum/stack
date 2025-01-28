@@ -1,7 +1,3 @@
----
-title: "Suspending and Resuming the EKS Clusters"
----
-
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 
 # Suspending and Resuming the EKS Clusters
@@ -11,9 +7,8 @@ import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
 Shut down an idle cluster to save costs without deleting cluster data, with the ability to fully recover.
 
 <MarkdownAlert severity="warning">
-  This script is **not** intended for use on production clusters. It is designed
-  for non-production clusters, particularly during the bootstrapping process for
-  idle clusters.
+  This script is **not** intended for use on production clusters.
+  It is designed for non-production clusters, particularly during the bootstrapping process for idle clusters.
 </MarkdownAlert>
 
 ## Background
@@ -31,17 +26,16 @@ These resources are considered non-essential during periods when the cluster is 
 
 Before running the suspend or resume script, the following must be completed:
 
-1. [**Set up AWS Root Profile**](/docs/edge/guides/bootstrapping/preparing-aws#create-access-keys-for-each-account): Ensure you have configured an AWS root profile that the script will use to interact with the necessary AWS services.
+1. [**Set up AWS Root Profile**](/docs/main/guides/bootstrapping/preparing-aws#create-access-keys-for-each-account): Ensure you have configured an AWS root profile that the script will use to interact with the necessary AWS services.
 
-2. [**Update the `.kube/config.user.yaml`**](/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig): Run `pf-update-kube` to ensure your Kubernetes configuration is up to date and ready for cluster operations.
+2. [**Update the `.kube/config.user.yaml`**](/docs/main/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig): Run `pf-update-kube` to ensure your Kubernetes configuration is up to date and ready for cluster operations.
 
 ## Suspending a Cluster
 
 <MarkdownAlert severity="warning">
   You are about to suspend the cluster. Please note that the cluster's certificates will expire in 90 days. If the cluster is not resumed before then, the certificates will not be renewed automatically, and the cluster may require manual intervention to recover.
 
-To avoid this, ensure that you run the resume script before the 90-day limit to allow the cluster to gracefully renew its certificates and restore its normal operation.
-
+  To avoid this, ensure that you run the resume script before the 90-day limit to allow the cluster to gracefully renew its certificates and restore its normal operation.
 </MarkdownAlert>
 
 To suspend the AWS resources:

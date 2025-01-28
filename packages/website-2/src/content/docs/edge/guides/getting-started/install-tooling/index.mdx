@@ -1,9 +1,6 @@
----
-title: "Install Tooling"
----
-
 import MarkdownAlert from "@/components/astro/markdown/MarkdownAlert.astro";
-import NextSteps from "./NextSteps";
+
+import NextSteps from "./NextSteps"
 
 # Install Tooling
 
@@ -13,9 +10,9 @@ Install the necessary tooling to begin working with the Panfactum stack.
 
 ## Supported Systems
 
-- Linux
-- macOS (Intel or ARM, `Sonoma` or later)
-- Windows (via `WSLv2`)
+* Linux
+* macOS (Intel or ARM, `Sonoma` or later)
+* Windows (via `WSLv2`)
 
 ## Installation
 
@@ -33,19 +30,20 @@ Please install these tools:
   Note that you should install nix using the [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer). This
   is NOT the [installer found on the NixOS website](https://nixos.org/download/).
 
-If you choose **not** use this installer,
-you will need to ensure that you complete these [extra setup steps manually](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#installation-differences)
-in order to enable functionality such as Nix flakes.
-
+  If you choose **not** use this installer,
+  you will need to ensure that you complete these [extra setup steps manually](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#installation-differences)
+  in order to enable functionality such as Nix flakes.
 </MarkdownAlert>
 
 ### Installation Notes
 
-- Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
+* Make sure that you hook `direnv` into your shell via [these instructions](https://direnv.net/docs/hook.html).
 
-- If you are using an earlier version of macOS, you may run into [this issue](https://github.com/DeterminateSystems/nix-installer/issues/558) where the `nix` binary
+* If you are using an earlier version of macOS, you may run into [this issue](https://github.com/DeterminateSystems/nix-installer/issues/558) where the `nix` binary
   cannot be found. Add `export PATH="$NIX_LINK/bin:/nix/var/nix/profiles/default/bin:$PATH` to your `~/.zshrc` to resolve the issue.
 
 ## Next Steps
 
-<NextSteps client:idle />
+
+<NextSteps />
+

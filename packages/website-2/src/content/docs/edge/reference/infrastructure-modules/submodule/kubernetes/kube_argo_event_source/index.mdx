@@ -1,0 +1,123 @@
+import ModuleHeader from "@/components/astro/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+
+<ModuleHeader name="kube_argo_event_source" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_argo_event_source" status="beta" type="submodule" />
+
+# Argo Event Source
+
+Deploys an [EventSource](https://argoproj.github.io/argo-events/concepts/event_source/)
+resource as a part of the
+[Argo Events architecture](https://argoproj.github.io/argo-events/concepts/architecture/).
+
+The EventSource is a Deployment that consumes data
+from external sources (push and pull) and then publishes events on an
+[EventBus.](https://argoproj.github.io/argo-events/concepts/eventbus/)
+
+## Providers
+
+The following providers are needed by this module:
+
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+## Required Inputs
+
+The following input variables are required:
+
+### event\_source\_spec
+
+Description: The specification of the EventSource. See [https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec](https://github.com/argoproj/argo-events/blob/master/api/event-source.md#eventsourcespec)
+
+Type: `any`
+
+### name
+
+Description: The name of the Sensor
+
+Type: `string`
+
+### namespace
+
+Description: The namespace to deploy the Sensor into.
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### az\_spread\_preferred
+
+Description: Whether to enable topology spread constraints to spread pods across availability zones (with ScheduleAnyways)
+
+Type: `bool`
+
+Default: `true`
+
+### event\_bus\_name
+
+Description: The EventBus to read from. Should almost always be 'default'.
+
+Type: `string`
+
+Default: `"default"`
+
+### instance\_type\_anti\_affinity\_required
+
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
+
+Type: `bool`
+
+Default: `true`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### replicas
+
+Description: The number of replicas to run in the underlying deployment. Read this before changing the defaults: [https://argoproj.github.io/argo-events/eventsources/ha/](https://argoproj.github.io/argo-events/eventsources/ha/). Do NOT mix active-active and active-passive if using more than one replica.
+
+Type: `number`
+
+Default: `1`
+
+### spot\_nodes\_enabled
+
+Description: Whether EventSource pods can be run on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
+### vpa\_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### service\_account\_name
+
+Description: n/a
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

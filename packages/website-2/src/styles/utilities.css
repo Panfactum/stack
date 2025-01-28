@@ -339,15 +339,4 @@ the website.
   .height-without-navigation-offset {
     @apply max-h-screen;
   }
-
-  .tippy-box {
-    @apply bg-primary border-none dark:border-solid border-2 dark:text-offWhite p-2 z-10 !important;
-  }
-  .tippy-arrow:before {
-    @apply dark:m-[-1px] dark:text-white z-0;
-  }
-
-  .react-tooltip {
-    @apply bg-primary border-2 border-offWhite max-w-[80vw] overflow-hidden !important;
-  }
 }
