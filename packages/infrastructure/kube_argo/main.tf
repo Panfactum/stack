@@ -424,7 +424,7 @@ resource "helm_release" "argo" {
           create = false
           name   = kubernetes_service_account.argo_server.metadata[0].name
         }
-        authModes = ["sso"]
+        authModes = ["sso", "client"]
         sso = {
           enabled     = true
           issuer      = vault_identity_oidc_provider.argo.issuer
