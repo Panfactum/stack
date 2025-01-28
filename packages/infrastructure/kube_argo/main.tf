@@ -267,6 +267,7 @@ module "database" {
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time
+  vpa_enabled = var.vpa_enabled
 }
 
 /***************************************
