@@ -271,11 +271,11 @@ the website.
   }
 
   .btn-secondary-on-light {
-    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-light-mode-300 dark:bg-gray-dark-mode-900 dark:hover:bg-gray-dark-mode-800 ring-1 ring-gray-cool-300  dark:ring-gray-warm-800;
+    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-light-mode-300 dark:bg-gray-dark-mode-900 dark:hover:bg-gray-dark-mode-800 ring-1 ring-gray-dark-mode-300  dark:ring-gray-warm-800;
   }
 
   .btn-secondary-on-dark {
-    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-dark-mode-300 dark:bg-gray-cool-900 hover:dark:bg-gray-cool-800 ring-2 dark:ring-1 ring-gray-cool-300 dark:ring-gray-warm-800;
+    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-dark-mode-300 dark:bg-gray-dark-mode-900 hover:dark:bg-gray-dark-mode-800 ring-2 dark:ring-1 ring-gray-dark-mode-300 dark:ring-gray-warm-800;
   }
 
   /****************************************************
@@ -283,60 +283,34 @@ the website.
   *****************************************************/
 
   .border-primary {
-    @apply border-[var(--colors-gray-light-mode-300)] dark:border-[var(--colors-gray-dark-mode-700)];
+    @apply border-gray-light-mode-300 dark:border-gray-dark-mode-700;
   }
 
   .border-secondary {
-    @apply border-[var(--colors-gray-light-mode-200)] dark:border-[var(--colors-gray-dark-mode-800)];
+    @apply border-gray-light-mode-200 dark:border-gray-dark-mode-800;
   }
 
   .border-brand {
-    @apply border-[var(--colors-brand-500)] dark:border-[var(--colors-brand-400)];
+    @apply border-brand-500 dark:border-brand-400;
   }
 
   .border-utility-brand-50 {
-    @apply border-[var(--colors-brand-50)] dark:border-[var(--colors-brand-950)];
+    @apply border-brand-50 dark:border-brand-950;
   }
 
   .border-utility-brand-200 {
-    @apply border-[var(--colors-brand-200)] dark:border-[var(--colors-brand-800)];
-  }
-
-  .border-utility-blue-200 {
-    @apply border-[var(--colors-blue-200)] dark:border-[var(--colors-blue-800)];
+    @apply border-brand-200 dark:border-brand-800;
   }
 
   .border-warning {
-    @apply border-[var(--colors-warning-600)] dark:border-[var(--colors-warning-500)];
+    @apply border-warning-600 dark:border-warning-500;
   }
 
   .border-success {
-    @apply border-[var(--colors-success-600)] dark:border-[var(--colors-success-500)];
+    @apply border-success-600 dark:border-success-500;
   }
 
   .border-error {
-    @apply border-[var(--colors-error-600)] dark:border-[var(--colors-error-500)];
-  }
-
-  /****************************************************
-  **************   Other    ***************************
-  *****************************************************/
-
-  /* This should NOT be in the global stylesheet for fuck's sake */
-  .icon-fg-github {
-    @apply text-[var(--colors-base-black)] dark:text-[var(--colors-base-white)];
-  }
-
-  .scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: var(--colors-gray-light-mode-300) transparent;
-  }
-
-  .height-with-navigation-offset {
-    @apply max-h-[--height-with-navigation-offset];
-  }
-
-  .height-without-navigation-offset {
-    @apply max-h-screen;
+    @apply border-error-600 dark:border-error-500;
   }
 }

@@ -11,6 +11,7 @@ import rehypeWrap from "rehype-wrap-all";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import compress from "@playform/compress"
+import inline from "@playform/inline"
 import { imageService } from "@unpic/astro/service";
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
@@ -75,6 +76,12 @@ export default defineConfig({
     }),
     mdx(),
     sitemap(),
+    inline({
+      critters: {
+        preloadFonts: false, // Done by astro-font
+        keyframes: "none", // Animations not critical
+      }
+    }),
     compress({
       HTML: {
         "html-minifier-terser": {

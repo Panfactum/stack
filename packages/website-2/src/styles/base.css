@@ -43,7 +43,7 @@
   @supports not selector(*::-webkit-scrollbar) {
     * {
       scrollbar-gutter: stable;
-      @apply [scrollbar-color:var(--colors-gray-dark-mode-500)_var(--colors-gray-dark-mode-300)] dark:[scrollbar-color:var(--colors-gray-dark-mode-600)_var(--colors-gray-dark-mode-800)];
+      @apply [scrollbar-color:theme(colors.gray.dark-mode.500)_theme(colors.gray.dark-mode.300)] dark:[scrollbar-color:theme(colors.gray.dark-mode.600)_theme(colors.gray.dark-mode.800)];
     }
   }
 }
