@@ -33,7 +33,7 @@ const MobileNav: Component<MobileNavProps> = (props) => {
             {/* eslint-disable solid/no-innerhtml,jsx-a11y/anchor-has-content */}
             <a
               innerHTML={PanfactumLogo}
-              href="/packages/website-2/public"
+              href="/"
               class="flex h-full max-w-[75%]  items-center [&>svg]:h-3/5"
             />
             {/* eslint-enable solid/no-innerhtml,jsx-a11y/anchor-has-content */}
