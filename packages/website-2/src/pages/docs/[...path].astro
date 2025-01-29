@@ -1,12 +1,12 @@
 ---
 import { getCollection, render } from "astro:content";
 
-import MarkdownAnchorTag from "@/components/astro/markdown/MarkdownAnchorTag.astro";
 
 import DocumentationLayout from "./_components/DocumentationLayout.astro";
 import type { DocsMetadata } from "./_components/types";
 import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_EDGE } from "./_edge/sideNavSections";
 import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_MAIN } from "./_main/sideNavSections";
+import MarkdownAnchorTag from "../../components/markdown/MarkdownAnchorTag.astro";
 import { Versions } from "../../lib/constants";
 
 export async function getStaticPaths() {

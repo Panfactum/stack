@@ -10,7 +10,7 @@ import {
   onMount,
 } from "solid-js";
 
-import SearchIconButton from "@/components/solid/ui/search/SearchIconButton.tsx";
+import SearchIconButton from "@/components/ui/search/SearchIconButton.tsx";
 import { DOCS_BASE_PATH } from "@/pages/docs/_components/constants.ts";
 import SidebarContent from "@/pages/docs/_components/sidebar/SidebarContent.tsx";
 import type { DocsMetadata } from "@/pages/docs/_components/types.ts";
@@ -128,7 +128,7 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
           <Dialog.Portal>
             <Dialog.Overlay
               class={
-                "bg-black/80 fixed inset-0 z-50 backdrop-blur-sm"
+                "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
               }
             />
             <Dialog.Content class="bg-primary fixed left-0 top-0 z-[200] flex h-screen w-[--sidebar-width] flex-col overflow-y-scroll pt-8">

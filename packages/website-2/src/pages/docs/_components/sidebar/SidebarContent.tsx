@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 
-import SearchInputButton from "@/components/solid/ui/search/SearchInputButton.tsx";
+import SearchInputButton from "@/components/ui/search/SearchInputButton.tsx";
 import SidebarSectionList from "@/pages/docs/_components/sidebar/SidebarSectionList.tsx";
 import SidebarSubSectionList from "@/pages/docs/_components/sidebar/SidebarSubSectionList.tsx";
 import VersionSelector from "@/pages/docs/_components/sidebar/VersionSelector.tsx";

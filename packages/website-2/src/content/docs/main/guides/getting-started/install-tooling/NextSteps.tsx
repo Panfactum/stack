@@ -1,7 +1,7 @@
 import {type Component, Show} from "solid-js";
 import { isServer } from "solid-js/web";
 
-import MarkdownGuideNav from "@/components/solid/markdown/MarkdownGuideNav";
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav.tsx";
 
 // We use this component to make it clear to people who are following
 // the bootstrapping guide that they should return to the bootstrapping

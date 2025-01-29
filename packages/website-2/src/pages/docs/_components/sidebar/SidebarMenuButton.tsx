@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { FiChevronDown } from "solid-icons/fi";
 import {Show, type Component } from "solid-js";
 
-import SavedLink from "@/components/solid/util/SavedLink.tsx";
+import SavedLink from "@/components/util/SavedLink.tsx";
 interface SidebarMenuButtonProps {
   isActive: boolean;
   text: string;

@@ -1,6 +1,4 @@
 ---
-import Header from "@/components/astro/layout/Header.astro";
-import SearchDialog from "@/components/solid/ui/search/SearchDialog";
 import CommonHead from "@/layouts/CommonHead.astro";
 
 import ArticleTableOfContents, {
@@ -8,6 +6,8 @@ import ArticleTableOfContents, {
 } from "./ArticleTableOfContents.astro";
 import DocsSidebar from "./sidebar/DocsSidebar";
 import { type DocsMetadata } from "./types";
+import SearchDialog from "../../../components/ui/search/SearchDialog";
+import Header from "../../../layouts/Header.astro";
 
 
 const pathname = new URL(Astro.request.url).pathname;

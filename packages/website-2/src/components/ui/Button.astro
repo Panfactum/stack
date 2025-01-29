@@ -1,0 +1,9 @@
+---
+import SolidButton, { type ButtonProps } from "./Button";
+
+interface Props extends ButtonProps {}
+---
+
+<SolidButton {...Astro.props} client:idle>
+  <slot />
+</SolidButton>
