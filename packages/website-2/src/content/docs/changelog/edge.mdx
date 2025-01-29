@@ -28,6 +28,8 @@ the Argo Workflows server to allow direct access to its API programmatically.
 
 ### Fixed
 
+* Applied fix for [argo-events write hole issue](https://github.com/argoproj/argo-events/pull/3449) in [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo).
+
 * Fixes bug that prevented [kube_cert_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) from being deployed when `self_generated_certs_enabled` was set to `true`.
 
 * Fixes `aws_eks` subnet validation check that prevented module deployment in some valid scenarios
