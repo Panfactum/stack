@@ -153,6 +153,9 @@ export default {
       minWidth: {
         sm: "480px",
       },
+      blur: {
+        xs: "1px"
+      },
       spacing: {
         "1.5": "0.375rem",
         "3.5": "0.875rem",
