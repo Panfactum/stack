@@ -41,7 +41,7 @@ const {
     isFixed ? "md:fixed top-0 z-10" : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
   ]}
 >
-  <div class="flex h-full items-center gap-8">
+  <div class="flex h-full items-center gap-16">
     <a
       href="/"
       class="flex h-full max-w-[75%] items-center md:w-[230px]"
@@ -63,14 +63,14 @@ const {
         )
       }
     </a>
-    <nav class="mt-4 hidden gap-x-10 md:flex" aria-label="Primary">
+    <nav class="hidden gap-x-10 md:flex" aria-label="Primary">
       {NAV_LINKS.map((link) => (
           <SavedLink
             defaultHref={link.url}
             id={link.title}
             data-astro-prefetch="viewport"
             class:list={[
-              "bg-transparent font-bold cursor-pointer",
+              "bg-transparent font-bold cursor-pointer text-display-xs",
               background === "transparent"
                 ? "hover:text-gray-light-mode-400"
                 : "hover:text-brand-600 dark:hover:text-secondary",

@@ -2,7 +2,6 @@
 import DiscordIcon from "@/components/icons/discord.svg";
 import PanfactumLogo from "@/components/icons/panfactum-logo.svg";
 
-
 import HeroAnimation from "./HeroAnimation/HeroAnimation.astro";
 import Button from "../../components/ui/Button.astro";
 import GetStartedButton from "../../components/ui/GetStartedButton.tsx";
@@ -15,7 +14,9 @@ import { DISCORD_URL } from "../../lib/constants";
       <div
         class="flex flex-col items-center gap-6 text-center md:max-w-[888px]"
       >
-        <PanfactumLogo />
+          <div class="hidden sm:block w-full h-full">
+              <PanfactumLogo />
+          </div>
         <div class="block sm:hidden">
           <HeroAnimation scale={0.5} />
         </div>
