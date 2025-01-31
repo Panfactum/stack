@@ -1,0 +1,1806 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
+# Edge Releases
+
+*Edge releases do not receive patches nor make any backwards compatibility guarantees.
+Learn more [here](/docs/edge/guides/versioning/releases).*
+
+*To use stable Panfactum releases, please see [our available licenses](/stack/pricing).*
+
+*To upgrade your Panfactum stack version, please follow the instructions in the [upgrade guide.](/docs/edge/guides/versioning/upgrading/general)*
+
+{/* lint disable no-duplicate-headings */}
+
+## Unreleased
+
+### Added
+
+* Adds ability to pass in extra service annotations through kube_deployment module
+* Adds [authentik_atlas_mongodb_sso](docs/edge/reference/infrastructure-modules/direct/authentik/authentik_atlas_mongodb_sso) module for setting up the Authentik Application and Provider for Atlas MongoDB
+
+### Fixed
+
+* Fixes bug that prevented [kube_cert_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) from being deployed when `self_generated_certs_enabled` was set to `true`.
+
+* Fixes `aws_eks` subnet validation check that prevented module deployment in some valid scenarios
+
+## edge.25-01-09
+
+### Added
+
+* [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies) now has `common_env` and `common_secrets` inputs that inject environment variables into all containers in the
+cluster.
+
+### Fixed
+
+* Pins Bottlerocket OS AMIs to pre-tested versions as AWS occasionally publishes breaking AMI changes that can crash
+nodes in the cluster.
+
+* Fixes the pre- and post- condition check for the `aws_eks` module when `sla_target` is set to 1.
+
+## edge.25-01-04
+
+### Breaking Changes
+
+* This release adds some additional functionality to Vault which requires [vault_auth_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to be upgraded before any other module.
+
+* The `kube_rbac` and `kube_priority_classes` modules have been removed per the deprecation notice in `edge.24-12-13`.
+
+### Added
+
+* Adds a module for deploying [Grist](https://www.getgrist.com/), a next-generation spreadsheet system: [kube_grist](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_grist).
+
+* Adds an alternative mechanism for creating dynamically-rotated AWS credentials for when IRSA is not an option: [kube_aws_creds](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_creds).
+
+* [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) now
+provide native support for voluntary disruption windows.
+
+### Fixed
+
+* Addressed issue where pods could not be created if all Kyverno admission controllers are disrupted simultaneously. As the Kyverno admission controller
+is itself composed of pods, this would result in a cluster deadlock that required manual intervention. This degenerate behavior
+has been fully resolved in this release.
+
+* Addressed issue where the Kubernetes API server address was set incorrectly when deploying [kube_cilium](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cilium)
+with [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+
+* Helm charts deployed by Panfactum modules will not be automatically rolled back on deployment failure which should prevent
+several failure cases where manual intervention would have otherwise been necessary.
+
+* The StatefulSets in [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) no longer need to be redeployed after each update of resource tags / labels.
+
+* `pf-tunnel` now binds to `127.0.0.1` instead of `localhost` to resolve potential connectivity problems on diverse operating systems.
+
+## edge.24-12-19
+
+### Breaking Changes
+
+* Introduces the concept of [SLA Target Levels](/docs/main/guides/deploying-workloads/high-availability#sla-levels).
+  This makes it easier to (a) know what uptime you can expect from Panfactum deployments, and (b) make it easier to adjust the cost-to-availability
+  tradeoff for entire subsections of the deployment.
+
+  This features comes with the following changes:
+
+  * Provides a new [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#metadata), `sla_target`, that can be used to set the target level for a particular scope (e.g., environment, region, module).
+    It defaults to `3`.
+  * The default behavior for Panfactum modules will now automatically adjust to the provided `sla_target`.
+  * The `enhanced_ha_enabled` input has been removed from all modules. The previous behavior
+    when `enhanced_ha_enabled` was set to `true` (the default) is now equivalent to setting `sla_target` to `3` (the default).
+
+* This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
+  * `pf`: 0.0.5 -> 0.0.7
+
+### Added
+
+* Adds support for arbitrary path rewriting in [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress),
+  [kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn),
+  [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn), and
+  [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website).
+
+* [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) now supports
+  sourcing base images from private ECR repositories.
+
+* Adds `not_found_path` to [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) to facilitate
+  specifying the asset to load when no object exists at the requested path.
+
+* Adds `custom_error_responses` to [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) which can be used to overwrite error
+  responses from the upstream origin.
+
+### Fixed
+
+* Addressed conflicting PDB issue with the [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+  module that prevented vertical autoscaling from working.
+
+* Standard Panfactum environment variables for Kubernetes workloads are now injected *before* user-defined environment variables to make them
+  available for use in [dependent variables.](https://kubernetes.io/docs/tasks/inject-data-application/define-interdependent-environment-variables/)
+
+* Standard Panfactum environment variables for Kubernetes workloads will no longer override user-defined environment variables.
+
+* Addressed issue where the CRDS in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
+  were not automatically upgraded.
+
+* Fixed incorrect AWS permissions in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+
+## edge.24-12-13
+
+<MarkdownAlert severity="warning">
+    This Authentik upgrade contains [a problem](https://github.com/goauthentik/authentik/issues/12321) that will result in updates
+    to group names not automatically synchronizing with AWS.
+
+    While we are working with Authentik to develop a workaround, it may be a few more releases until this is resolved. If that
+    is a problem, you should defer an upgrade to this version until the problem is fixed.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+</MarkdownAlert>
+
+### Breaking Changes
+
+* The `kube_rbac` module has been deprecated and will be removed in the next release. Please destroy any deployments of
+  it **after upgrading [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)**.
+
+  Kubernetes access control has now been moved to the [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module using
+  [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html). This provides several benefits:
+
+  * Kubernetes RBAC now works out-of-the-box, making cluster bootstrapping simpler.
+  * Accidental lock-out is now fully prevented.
+  * One fewer location where custom SSO roles need to be synchronized.
+
+* The `kube_priority_classes` module has been consolidated with [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+  in order to remove a superfluous bootstrapping step. Please destroy any deployments of it **immediately before upgrading
+  [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)**.
+
+* `eks_cluster_name` is no longer an input to most submodules as it is now dynamically resolved based on which
+  cluster you are deploying to.
+
+* This release upgrades the following terraform provider versions which will need to be updated in first-party IaC:
+  * `pf`: 0.0.4 -> 0.0.5
+  * `authentik`: 2024.6.1 -> 2024.8.4
+
+### Changed
+
+* Upgrades Authentik in [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+  to 2024.8.2 ([release notes](https://docs.goauthentik.io/docs/releases/2024.8)).
+
+### Fixed
+
+* Adds correct permissions to allow users to retry specific Workflow nodes in Argo Workflows.
+
+* Adds automatic NATS connection retries to Argo Events components.
+
+* Addresses issue in [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+  where the `git_ref` could not be a branch name.
+
+## edge.24-12-11
+
+<MarkdownAlert severity="warning">
+    This release contains an bug that will cause Cilium to crash if deployed via [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+    Please ensure you upgrade to `edge.25-01-04` locally before re-enabling CI/CD deployments for the core infrastructure.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+    AWS published an AMI update to their Bottlerocket OS on January 4, 2025 that breaks compatibility with all edge
+    release until `edge.25-01-09`. You should upgrade your `aws_eks` and `karpenter_node_pools` modules directly
+    to `edge.25-01-09` to avoid cluster disruption. You may need to manually tweak some inputs (e.g., `sla_target`, etc.)
+    to ensure proper deployment.
+</MarkdownAlert>
+
+### Breaking Changes
+
+* All terraform provider versions in Panfactum modules have been upgraded to [new values](/docs/edge/reference/infrastructure-modules/overview#provider-versions)
+  so any first-party IaC modules that utilize Panfactum submodules will need to have their provider versions upgraded as well.
+
+* This release upgrades many components of the Panfactum Stack. Generally, none of these upgrades should require any action on your part. However,
+  see the release notes for each component for more information:
+  * [Kubernetes](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.30.md): 1.29 -> 1.30
+  * [Authentik](https://docs.goauthentik.io/docs/releases/2024.6): 2024.4.2 -> 2024.6.4
+  * [Argo Workflows](https://argo-workflows.readthedocs.io/en/latest/upgrading/#upgrading-to-v36): 3.5 -> 3.6
+  * [Karpenter](https://karpenter.sh/docs/upgrading/upgrade-guide/): 1.0 -> 1.1
+  * [Redis](https://redis.io/blog/announcing-redis-community-edition-and-redis-stack-74/): 7.2 -> 7.4
+  * [Velero](https://velero.io/docs/main/upgrade-to-1.15/): 1.13 -> 1.15
+  * [VPA](https://github.com/kubernetes/autoscaler/releases/tag/vertical-pod-autoscaler-1.2.0): 1.1 -> 1.2
+  * [PostgreSQL](https://www.postgresql.org/docs/release/16.6/): 16.4 -> 16.6
+
+### Added
+
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) and [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) can
+  now configure each node's root volume size via `node_ebs_volume_size_gb`.
+
+### Fixed
+
+* Addresses issue where non-HA clusters could not recover when many nodes are disrupted at once.
+
+## edge.24-12-10
+
+### Breaking Changes
+
+* This release changes the way that public ingress TLS certificates are provisioned in order to avoid
+  hitting rate limits on large clusters. **This architectural update requires that the modules
+  be upgraded in the following order:**
+
+  * [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+  * [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx). **To avoid service disruptions,
+    you MUST wait until all the old NGINX pods have been fully terminated before proceeding.**
+  * The remainder of the modules may be updated in any order.
+
+### Fixed
+
+* Adds `bootstrap_cluster_creator_admin_privileges` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) to provide
+  backwards compatibility with clusters that were created with this field set to `true`.
+
+* Temporary Authentik disruptions caused by PostgreSQL database failovers have been mitigated.
+
+## edge.24-12-05
+
+<MarkdownAlert severity="warning">
+  When upgrading `aws_eks` to this version, you may receive an error about attempting to recreate the cluster due to this change:
+
+  ```shell-session
+  bootstrap_cluster_creator_admin_permissions = true -> false # forces replacement
+  ```
+
+  To workaround this issue, upgrade the `aws_eks` module directly to `edge.24-12-10` and set the new
+  `bootstrap_cluster_creator_admin_privileges` input to `true`.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+  [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) in this version contains a bug
+  that forces redeployment of the underlying NATS StatefulSet on every tag / label update. This also impacts
+  [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) which utilizes
+  NATS under the hood.
+
+  This will cause complete loss of any pending NATS messages in any Jetstream streams. For most users, this should be OK
+  as NATS is primarily used for temporary storage as an event bus. However, if you cannot afford to lose your stream data, you
+  should delay upgrading those modules until your cluster reaches `edge.24-12-22` which contains the fix.
+</MarkdownAlert>
+
+<MarkdownAlert severity="warning">
+    Due to the default memory floor for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus)
+    introduced in this release, inbound webhook events for Argo EventSource's may be rejected intermittently. `edge.25-01-04`
+    contains more sane defaults and includes more options for tuning the EventBus to handle different traffic load patterns.
+</MarkdownAlert>
+
+### Breaking Changes
+
+* This release contains a major version upgrade to Linkerd.
+
+  This upgrade removes the need for the privileged `proxy-init` initContainer to be injected into every container as the initialization logic
+  is now completed once per node. This should reduce pod startup times by 5-20 seconds and improves overall security by
+  removing the need to run a privileged container in each pod.
+
+  **To upgrade with no downtime, you MUST update the modules in the following order:**
+
+  * [kube\_kyverno](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_kyverno)
+  * [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+  * [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium)
+  * [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+  * [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+  * [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+  * The remainder of the modules may be updated in any order.
+
+* The NATS backend for [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) has been replaced
+  with our enhanced NATS module, [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats). This provides improved
+  availability, security, observability, and performance.
+
+  To apply this module, you will need to manually delete any existing `EventBus` resources in our cluster, or you will receive an error. You will
+  also need to delete any associated `EventSource` or `Sensor` resources *before* deleting the `EventBus` or the `EventBus`
+  deletion will be blocked.
+
+  **Deleting an existing EventBus will cause any unprocessed events to be deleted.** Make sure that you have no pending events before performing this upgrade.
+
+* The `kube_fledged` and `kube_reflector` modules have been removed (they were deprecated in `edge.24-11-13`).
+
+* The `images` input of [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) has
+  been updated to take a list of image configuration options rather than a list of image strings.
+
+  Additionally, `node_image_cached_enabled` has been removed as a top-level input from Panfactum submodules (e.g., [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment))
+  as image cache settings can now be configured on a per-container basis.
+
+### Changes
+
+* Added support for the [NATS Jetstream message broker](https://docs.nats.io/nats-concepts/jetstream) via a new submodule, [kube\_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats).
+  This release also adds NATS integration with the devShell tooling including adding the `nats` CLI and updating `pf-db-tunnel` to support connecting with NATS clusters.
+
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now launches with `arm64` nodes when `bootstrap_mode_enabled` is `true` as we have resolved the remaining issues
+  that have prevented `arm64` from being used during bootstrapping.
+
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [EKS access entries](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html) enabled.
+
+* [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) now has [ARC Zonal Shift](https://docs.aws.amazon.com/eks/latest/userguide/zone-shift.html) enabled if running nodes in multiple subnets.
+
+* [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) now has [ARC Zonal Shift](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/zonal-shift.html) enabled.
+
+* [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now schedules pods exclusively on `arm64` nodes
+  in order to support the integration of external secret plugins.
+
+### Added
+
+* The [kube\_node\_image\_cache\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller) has
+  been updated with a "prepull" component that automatically pulls cached images in **parallel** as soon as a node launches. Previously,
+  images were pulled serially which resulted in significant delays when many large images were cached.
+
+* The [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler) will now
+  automatically recreate pods that were not run through the Kyverno policy engine. This provides protection
+  in case the Kyverno admission controller is ever offline.
+
+* Images provided to and/or used by Panfactum submodules (e.g.,
+  [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment),
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster), etc.) are now
+  cached by default.
+
+* Additional annotations and labels can now be added to the controllers created via [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment),
+  [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set),
+  [kube\_daemon\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set), and
+  [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job).
+
+* The `kyverno` CLI has been added to the devShell.
+
+* Adds support for dynamically generated labels in [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec)
+  via `labels_from_parameters` and `labels_from`.
+
+* [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) now creates a ServiceAccount and output's its name. This can
+  be used to assign AWS (or other permissions) to the EventSource pods.
+
+* Adds the ability to configure temporary storage space size in [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy).
+
+### Fixed
+
+* The [kube\_node\_image\_cache\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_node_image_cache_controller)
+  will now deduplicate images that are added to the cache by [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodules/kubernetes/kube_node_image_cache).
+
+* We have adjusted the Kyverno settings to improve overall stability of the mutation engine.
+
+* Resolved slow Vault startup times for Vault databases larger than 100MB in [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault).
+
+* BuildKit cache PVCs are now excluded from Velero backups as they consume a lot of storage and are safe to delete.
+
+* Fixed root user access provisioning in [kube\_rbac](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_rbac).
+
+* Addressed issue where the Descheduler was not replacing pods that were older than the max lifetime.
+
+* Addressed issue where resetting a one's own password via Authentik caused an unauthorized error.
+
+* Fixed mount permissions in [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec).
+
+## edge.24-11-13
+
+<MarkdownAlert severity="warning">
+    This release introduces [Kyverno](https://kyverno.io/docs/introduction/). Unfortunately, we discovered several issues
+    with our initial architecture that could cause degenerate cluster behavior eventually resulting in a full cluster shutdown.
+
+    Generally, this takes days to occur, so it is safe to upgrade to this release so long as you immediately continue to upgrade
+    to subsequent releases where the issues are resolved.
+
+    All issues were fully resolved in the `edge.25-01-04` release.
+</MarkdownAlert>
+
+### Breaking Changes
+
+* We have added the [Kyverno](https://kyverno.io/docs/introduction/) policy engine as a core part of the Panfactum Stack. Kyverno allows
+  us to install rules onto the cluster to automatically generate, mutate, or validate resources based on a powerful, Kubernetes-native expression
+  language. This provides several benefits:
+
+  * Provides a unified control plane for adding functionality that previously required managing additional controllers or custom scripts.
+  * Allows us to simplify several parts of our IaC modules by offloading resource management to global Kyverno policies.
+  * Allows us to add Panfactum-compatible, sensible defaults to Kubernetes resources that are not created by Panfactum modules.
+  * Allows users to add management logic to their clusters that was previously only possible by building and deploying custom controllers. See the [example policies.](https://kyverno.io/policies/)
+
+  **You must install Kyverno by following this [new bootstrapping guide section.](/docs/edge/guides/bootstrapping/policy-controller)** Many modules
+  now depend on Kyverno and will not function without it.
+
+* `kube_fledged` has been removed in favor of a new node-local image caching mechanism built by Panfactum on top of Kyverno. The new mechanism has the following
+  benefits over `kube_fledged`:
+
+  * The node's image cache will be created immediately when a node launches, concurrently with other node setup steps.
+  * Cached images will never be removed from the node's image store.
+  * Overall controller performance is significantly improved reducing the overall resource requirements for caching.
+  * The caching mechanism no longer generates pods that prevent Karpenter from disrupting underutilized nodes.
+
+  To install the new mechanism, please follow [this guide.](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches) To start caching images, you may use the new
+  [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) module. Additionally,
+  we provide a new input to our submodules such as [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) called `node_image_cached_enabled` that when enabled
+  will automatically add the submodule's images to the node-local image cache.
+
+  **`kube_fledged` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release. It should
+  not be removed until Kyverno is installed.
+
+* `kube_reflector` has been removed in favor of a new syncing mechanism built by Panfactum on top of Kyverno.
+
+  * To sync ConfigMaps, use [kube\_sync\_config\_map](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_config_map).
+  * To sync Secrets, use [kube\_sync\_secret](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sync_secret).
+
+  **`kube_reflector` must be removed from your clusters before upgrading to the ***next*** version** as it will no longer be available in the next release. It should
+  not be removed until Kyverno is installed.
+
+* Vertical pod autoscaling now works for both the PostgreSQL clusters and Pgbouncer deployments created by the
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) submodule. The following variables
+  have been removed:
+
+  * `pg_memory_mb`
+  * `pg_cpu_millicores`
+
+  and the following variables have been added:
+
+  * `pg_minimum_memory_mb`
+  * `pg_maximum_memory_mb`
+  * `pg_minimum_cpu_millicores`
+  * `pg_maximum_cpu_millicores`
+  * `pgbouncer_minimum_memory_mb`
+  * `pgbouncer_maximum_memory_mb`
+  * `pgbouncer_minimum_cpu_millicores`
+  * `pgbouncer_maximum_cpu_millicores`
+
+  This change also resolves issues where some values for `pg_cpu_millicores` caused a permanent reconciliation conflict.
+
+* All pods in Panfactum clusters will now automatically tolerate `arm64` and `spot` node taints regardless of whether they were created
+  by Panfactum modules (this was already the default for Panfactum modules). To disable these tolerations for a specific pod, you must
+  add the `panfactum.com/arm64-enabled = "false"` or `panfactum.com/spot-enabled = "false"` labels, respectively.
+
+### Changed
+
+* We have upgrade the CNPG operator in [kube\_cloudnative\_pg](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cloudnative_pg) to 1.24 (up from 1.23).
+  This adds additional stability improvements during failover events.
+
+  After performing this upgrade, you MUST use the new [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  submodule as well. Old versions are no longer compatible.
+
+* We have upgraded the default PostgreSQL version in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to 16.4 (up
+  from 16.2). This upgrade should not require any action on your part, but be sure to [pin your PostgreSQL version](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#database-version)
+  if you do not want to be automatically upgraded.
+
+### Added
+
+* Adds a new submodule, [kube\_daemon\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_daemon_set), for creating
+  Kubernetes [DaemonSets](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/).
+
+### Fixed
+
+* Added Kyverno rule that forces linkerd sidecars to terminate prior to the pod's `terminationGracePeriodSeconds` to ensure that pods
+  are not marked as "failed" by controllers such as Argo if the main container has a TCP connection leak.
+
+* Resolved unnecessary log noise that was introduced in the last release when running Terragrunt commands.
+
+* Adjusted Cilium deployment to address edge cases where Cilium would not successfully launch new nodes
+  after a complete zonal or cluster outage.
+
+## edge.24-10-25
+
+<MarkdownAlert severity="warning">
+  A bug has been discovered in this release that can cause a complete cluster crash due to the introduction of the new Kyverno
+  policy engine. Please skip this release and use `edge.24-11-13` instead.
+</MarkdownAlert>
+
+## edge.24-10-23
+
+### Breaking Changes
+
+* The required Nix version to use the Panfactum Stack has been updated to `>= 2.23` (up from `>= 2.18`). The latest Nix versions
+  include performance improvements required to make local development ergonomic on all operating systems. Additionally, we have
+  added a check to the loading script (`.envrc`) to ensure that users have a compatible Nix version installed.
+
+  If you installed Nix using the Determinate Systems installer, see [these upgrade docs.](https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#upgrading-nix)
+
+### Changed
+
+* Panfactum modules are now downloaded as gzipped tarballs from an HTTPS server rather than requiring a full git clone of the Panfactum Stack repository. This should
+  dramatically improve initialization speed of modules and reduces network bandwidth by over 90%. This is an internal refactor that should not have any impact on how you
+  use Panfactum modules.
+
+### Added
+
+* Added a new module, [aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website), to enable users to serve files directly from an S3 bucket via CloudFront.
+* [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) can now handle CORS headers on behalf of the origin servers
+* [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn) now uses 10x more efficient [CloudFront functions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html)
+  for request / response mutations.
+
+### Fixed
+
+* Deploying modules that use Helm charts hosted in ECR (e.g., [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter))
+  will now use the appropriate credentials.
+
+* Upgraded Argo Workflows to fix some issues related to workflow timeouts being ignored.
+
+## edge.24-10-21
+
+### Breaking Changes
+
+* In all Panfactum submodules, `instance_type_spread_required` has been renamed to `instance_type_anti_affinity_required`
+  as we have had to replace TopologySpreadConstraints with AntiAffinity rules to work around [this issue with Karpenter.](https://github.com/kubernetes-sigs/karpenter/issues/1762)
+
+  This change will ensure that Karpenter will not randomly create massive nodes.
+
+* To add further protection against Karpenter provisioning extremely large nodes, we have
+  two variables for [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools), `max_node_memory_mb` and `max_node_cpu`,
+  that limit the maximum size of nodes that can be provisioned.
+
+  The default limits are 64GB of memory and 32 CPUs. If you require nodes larger than these limits, you will need to adjust these new inputs.
+
+### Fixed
+
+* Prevents Karpenter from scheduling instances on bare metal instances which we have observed issues with.
+
+* Removes memory limits on the Cilium node agent in [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) as
+  these limits can cause Cilium to fail to launch on larger node sizes. This is due to the fact that Cilium's memory requirements increase proportionally
+  to the size of the node, but the VPA does not take this into account when assigning limits.
+
+* Upgrades [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_nginx_ingress) so that it can run on nodes with a large number of CPU cores.
+
+* EBS-backed PVs with many large files took a long time to mount due to [this issue](https://github.com/bottlerocket-os/bottlerocket/issues/3151)
+  with Bottlerocket OS (our underlying node OS). We have added the recommended remediation and now PVs should mount
+  nearly instantly. Note that this fix will **not** apply to existing PVs, only new ones.
+
+  To apply the fix to existing PVs, you will need to manually add the following mount option to their manifests:
+
+  ```yaml
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+      name: XXXX
+  spec:
+      mountOptions:
+        - context="system_u:object_r:local_t:s0"
+  ```
+
+## edge.24-10-18
+
+### Breaking Changes
+
+* We have removed [devenv](https://devenv.sh/) from the Panfactum Stack and now use plain [nix flakes](https://nixos.wiki/wiki/Flakes) to manage the local
+  development shell (aka the "devShell"). We did not use the vast majority of the features in devenv, and its removal comes with a couple key improvements:
+
+  * Greatly increased performance on macOS. Initial installation should now take \~ 5 minutes (down from 45+). Additionally,
+    opening the devShell after initial installation should now be instant.
+
+  * More control and flexibility of the Panfactum setup which will allow us to better implement future Panfactum features.
+
+  However, this does come with a few key changes that you must perform manually:
+
+  1. The syntax for your `flake.nix` has changed.
+
+     **Before:**
+
+     ```nix
+     {
+         inputs = {
+             # Change 'nixos-23.11' to whichever cut of the nixpkgs repository
+             # you want to use in your project. This will NOT impact the Panfactum stack at all.
+             # For available versions, see https://github.com/NixOS/nixpkgs
+             # We recommend using the version that is supported here:
+             # https://search.nixos.org/packages (updated every 6 mo)
+             pkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+
+             # Change '__PANFACTUM_VERSION_MAIN__' to be the release version that you desire
+             # Ensure that this matches the version you use for your infrastructure modules
+             panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__";
+         };
+
+         outputs = { self, panfactum, pkgs, ... } @ inputs: {
+             devShells = panfactum.lib.mkDevShells {
+                 inherit pkgs;
+                 modules = [ (import ./devenv.nix )];
+             };
+         };
+     }
+     ```
+
+     **After:**
+
+     ```nix
+     {
+       inputs = {
+         flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
+         panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
+       };
+
+       outputs = { panfactum, flake-utils, ... }@inputs:
+         flake-utils.lib.eachDefaultSystem
+         (system:
+           {
+             devShell = panfactum.lib.${system}.mkDevShell { };
+           }
+         );
+     }
+     ```
+
+  2. We no longer support `devenv` syntax, so your `devenv.nix` file  and the `.devenv` directory can be removed.
+
+  For alternatives to all the functionality included in devenv using our new devShell paradigm, please
+  see [our documentation.](/docs/main/guides/development-shell/customizing)
+
+* `pf-get-version-hash` has been renamed to `pf-get-commit-hash` to better reflect what it does (get a commit hash given an arbitrary repo and [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References)).
+  In addition, it has been updated to take named rather than positional arguments in order to align with other Panfactum scripts.
+  Finally, we have fixed several bugs in the script to make it more resilient to various inputs.
+
+* Removes `pgadmin4` from the devShell as it significantly increased build times and was not useful to all users. Users
+  should have an option to pick their favorite DB clients rather than us be prescriptive.
+
+### Changes
+
+* Upgrades [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) to v1.16.3. This change
+  brings [new Cilium features](https://isovalent.com/blog/post/cilium-1-16), reduces the per-node memory usage by 75MB,
+  and reduces the amount of errors that users can encounter during the bootstrapping guide.
+
+* Upgrades [kube\_aws\_ebs\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) to v1.36 in order
+  to support Karpenter v1 disruption taints and improve node shutdown performance.
+
+* Updates [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) to support 10 concurrent image builds per module
+  rather than just one.
+
+### Added
+
+* Adds `cdn_mode_enabled` boolean to the [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) & [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) module to enable CDN for Vault.
+* Adds `image_tag_prefix` string to the [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+
+### Fixed
+
+* Fixed a handful of scheduling constraint bugs that resulted in less-than-optimal resource utilization. These improvements
+  should result in a significant improvement to resource utilization in tiny clusters and a minor improvement in larger clusters.
+
+* Fixed an issue where `pf_stack_version` could not be a commit hash. It can now be any valid [git ref](https://git-scm.com/book/ms/v2/Git-Internals-Git-References).
+
+* Fixed an issue where `pf-wf-git-checkout` would fail when given a branch name as a git ref. This impact both
+  [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+  and [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+
+## edge.24-10-15
+
+### Breaking Changes
+
+* This release integrates the new [Panfactum provider](https://registry.terraform.io/providers/Panfactum/pf/latest) and
+  removes the need to pass many different variables through the module tree.
+
+  Additionally, we have upgraded [OpenTofu to v1.8](https://opentofu.org/blog/opentofu-1-8-0/) which now supports variables in module `source` fields. To take advantage
+  of this, we now pass two new inputs to every module by default: `pf_module_source` and `pf_module_ref`.
+
+  This greatly simplifies developer experience for first-party modules by removing boilerplate with no loss of functionality.
+
+  **Original:**
+
+  ```hcl
+  module "namespace" {
+    source = "github.com/Panfactum/stack.git//packages/infrastructure/kube_namespace?ref=c817073e165fd67a5f9af5ac2d997962b7c20367" #pf-update
+
+    namespace = "example"
+
+    # pf-generate: pass_vars
+    pf_stack_version = var.pf_stack_version
+    pf_stack_commit  = var.pf_stack_commit
+    environment      = var.environment
+    region           = var.region
+    pf_root_module   = var.pf_root_module
+    is_local         = var.is_local
+    extra_tags       = var.extra_tags
+    # end-generate
+  }
+  ```
+
+  **Simplified:**
+
+  ```hcl
+  module "namespace" {
+    source = "${var.pf_module_source}kube_namespace${var.pf_module_ref}"
+
+    namespace = "example"
+  }
+  ```
+
+  For more information, see the [updated first-party IaC development documentation.](/docs/edge/guides/iac/first-party-modules#writing-modules)
+
+  This does come with a couple breaking changes:
+
+  1. Terragrunt no longer passes the following inputs to modules by default as they can be accessed via the Panfactum provider:
+
+     * `pf_stack_version`
+     * `pf_stack_commit`
+     * `environment`
+     * `region`
+     * `pf_root_module`
+     * `is_local`
+
+  2. The templating system and `pf-update-iac` have been removed as they are no longer necessary.
+
+* [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `rewrite_rules`
+  to be specified on `ingress_configs`. Instead, there is now a top-level `redirect_rules` variables that has enhanced capabilities:
+  * Can pattern match against the entire url (`https://google.com/some/path`) instead of just the path component (`/some/path`).
+  * Can specify whether a permanent or temporary HTTP redirect should be used.
+
+* [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) no longer allows `domains`
+  to be specified on individual `ingress_configs`. Instead, `domains` is now a top-level variable. This provides better
+  compatibility with the new CDN option and prevents confusing behavior in several edge cases. This also better
+  matches the intent of the module: to provide routing rules for a single set of domains, not to provide routing rules
+  for *all* domains in your system.
+
+### Added
+
+* A new module, [kube\_aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_aws_cdn), has been
+  created that enables setting up a CloudFront distribution (CDN) in front of Ingress resources for improved performance and security
+  as well as reduced server costs. [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+  has been updated to support CDN settings.
+
+  Additionally, a non-Kubernetes CDN module, [aws\_cdn](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_cdn),
+  has also been created.
+
+* A new module, [aws\_dns\_zones](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_zones), has been
+  created that allows you to create Route53 zones that have a non-AWS registrar.
+
+* Adds the `acl_aws_logs_delivery_enabled` input to [aws\_s3\_private\_bucket](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_private_bucket)
+  which makes it easier to use the bucket for AWS log delivery purposes.
+
+* Adds support for Cloudflare in [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) and [kube\_cert\_issuers](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_issuers)
+
+### Changed
+
+* `tls_1_2_enabled` now defaults to `true` in [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) in order
+  to support CDNs like CloudFront which do not yet support TLSv1.3.
+
+### Fixed
+
+* The internal logic of [aws\_dns\_records](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) has been
+  updated so that each record is managed independently of the others. This fixes an issue where adding or removing
+  records would cause *all* records to be created. However, this update will cause all records to be recreated
+  one last time.
+
+* `pf-wf-git-checkout` no longer automatically appends a `.git` to the end of given repo URLs as this is incompatible
+  with some git hosting providers (e.g., Azure DevOps). This does mean that the `repo` variable input
+  to [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) and
+  [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) should
+  be updated to include the `.git` suffix if required for cloning over HTTP.
+
+* Pinned helm provider version for `kube_redis_sentinel` submodule.
+
+## edge.24-10-09
+
+### Added
+
+* Adds a new [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables), `pf_stack_local_path`, that can be used to deploy local copies of the Panfactum Stack modules. This
+  can be used by developers when testing changes to Panfactum modules on personal infrastructure before submitting pull requests to the [Stack repository](https://github.com/Panfactum/stack).
+
+### Changed
+
+* Loosened the requirements for the [repo variable](/docs/edge/reference/configuration/repo-variables) `repo_url` so that we
+  can now support users on arbitrary git hosting providers (not just GitHub).
+
+* `pf-env-bootstrap` is now idempotent, allowing it to be re-run if it fails in the middle of its initial execution.
+
+### Fixed
+
+* Fixes the ami instance type mismatch when `bootstrap_mode_enabled` is enabled in the [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.
+* Fixes issues that prevented bootstrapping scripts from running with new `pf-tf-init` logic.
+* Adjusts the defaults for [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) so that installation does not fail in the bootstrapping guide.
+
+## edge.24-09-30
+
+### Added
+
+* Adds a [new addon for self-hosted GitHub Action runners.](/docs/edge/guides/addons/github-actions/installing)
+* Adds the `pf-eks-suspend` and `pf-eks-resume` command to [Suspend and Resume the EKS Cluster](/docs/main/guides/bootstrapping/suspend-kubernetes-cluster).
+
+### Fixed
+
+* Fixes an issue where voluntary disruption windows created by the [kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller)
+  would only work for the `argo` namespace. They will now work in all namespaces.
+
+## edge.24-09-12
+
+### Breaking Changes
+
+* The [kube\_secrets\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_secrets_csi) has been deprecated
+  and should be removed from your clusters. It was primarily used for managing dynamically generated Vault secrets such as
+  database credentials, but we have switched to a new paradigm that uses the [Vault Secrets Operator](https://github.com/hashicorp/vault-secrets-operator).
+
+  This saves approximately 150MB of memory per node in the cluster, improves security by removing pods that needed elevated
+  host-level permissions, and provides better ergonomics for managing dynamically
+  generated secrets in our modules.
+
+* [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)'s and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)'s  `superuser_username`
+  and `superuser_password` outputs have been renamed to `root_username` and `root_password`, respectively. We made this change
+  because "superuser" implies Vault-generated credentials, which these are not.
+
+* `pf-providers-enable` has been renamed to `pf-tf-init` as it now has expanded functionality:
+
+  * Now influences every module in the directory tree where it is run rather than just the module in the CWD.
+  * Now runs `init -upgrade` on every module to update provider versions and download internal submodules when performing Panfactum version upgrades.
+  * The runtime speed has been improved in order to accommodate running against many modules at once.
+
+  We have updated the [upgrade guide](/docs/edge/guides/versioning/upgrading/general) to reflect that `pf-tf-init` should
+  be run every time you upgrade the Panfactum version in an environment.
+
+* You now no longer need to manually enable providers via the `providers` array in each `module.yaml`. Our Terragrunt configuration now automatically
+  detects which providers need to be included at runtime.
+
+  No changes are required to take advantage of this new functionality.
+  However, the `providers` Terragrunt input no longer has any functionality and the `providers` array can be removed
+  from all `module.yaml` files. If this leaves a `module.yaml` empty, the entire `module.yaml` file can be deleted.
+
+### Added
+
+* Adds `common_env_from_config_maps` and `common_env_from_secrets` inputs to all standard workload submodules to provide the
+  capability to source environment variables from existing ConfigMaps and Secrets, respectively.
+
+* [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and
+  [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) now support
+  using Vault-generated credentials to authenticate from other workloads. See the module documentation for more information.
+
+### Fixed
+
+* Adds a controller node preference to pods with `controller_nodes_enabled` set to `true`. This optimizes resource
+  efficiency in the cluster as we should prefer to fill controller (EKS) nodes before Karpenter nodes as controller
+  nodes are not automatically scaled.
+
+## edge.24-09-10
+
+### Breaking Changes
+
+* Karpenter has updated its CRD specification which unfortunately requires manual intervention during the upgrade process.
+  **After** updating the `pf_stack_version` for any deployments of the `kube_karpenter_node_pools` module,
+  run the following commands in the `kube_karpenter_node_pools` folder:
+
+  ```bash
+  pf-providers-enable
+  terragrunt state rm kubernetes_manifest.default_node_class \
+    kubernetes_manifest.spot_node_class \
+    kubernetes_manifest.burstable_node_class \
+    kubernetes_manifest.burstable_node_pool \
+    kubernetes_manifest.burstable_arm_node_pool \
+    kubernetes_manifest.spot_node_pool \
+    kubernetes_manifest.spot_arm_node_pool \
+    kubernetes_manifest.on_demand_arm_node_pool \
+    kubernetes_manifest.on_demand_node_pool
+  terragrunt apply --auto-approve
+  kubectl delete nodepools burstable burstable-arm on-demand on-demand-arm spot spot-arm
+  kubectl delete ec2nc spot burstable on-demand
+  ```
+
+  The `kubectl delete` commands may take a few minutes to complete as this will force all pods to be rescheduled from
+  nodes created using the old CRDs to nodes created using the new CRDs.
+
+* The `ports` input on [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+  and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) has been moved
+  to a container-level field rather than a top-level field to better align with the Kubernetes API.
+
+### Added
+
+* Adds a new submodule, [kube\_service](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_service), for
+  defining Kubernetes [Services](https://kubernetes.io/docs/concepts/services-networking/service/) that are optimized for the Panfactum Stack.
+  Additionally, integrates `kube_service` into [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+  and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) for automatic Service creation.
+
+* Adds `extra_storage_classes` input to the [kube\_aws\_ebs\_csi](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi)
+  module.
+
+### Fixed
+
+* Addressed issue in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  where non-superuser credentials created by Vault would not have access to database schemas other than `public`.
+
+* Addressed issue where our Terragrunt configuration would cause the version pinning for the `goauthentik/authentik` and
+  `alekc/kubectl` infrastructure providers would be removed. This would cause issues to occur when users ran `terragrunt init -upgrade`
+  to update their lockfiles.
+
+## edge.24-09-04
+
+### Breaking Changes
+
+* Before applying this release, the `buildkit-amd64` and `buildkit-arm64` StatefulSets in the `buildkit` namespace
+  must be removed (if [kube\_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) is deployed).
+
+* In preparation for our upcoming release, we cleaned up a handful of naming conventions which impact the inputs and outputs of several modules:
+  * In [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment), [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set), [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job), [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod), [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), and [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
+    * `ready_check_` prefixed fields have been changed to `readiness_probe_` to better align with the actual Kubernetes API.
+    * `liveness_check_` prefixed fields have been changed to `liveness_probe_` to better align with the actual Kubernetes API.
+    * `image` and `image_version` have been replaced with `image_registry`, `image_repository`, and `image_tag` to provide
+      a clearer description of each constituent part and better align with ecosystem conventions.
+    * `secrets` has been renamed to `common_secrets` to better align with its counterpart, `common_env`.
+    * `pod_annotations` has been renamed to `extra_pod_annotations` to better align with its counterpart, `extra_pod_labels`.
+    * `readonly` and has been renamed to `read_only` to better align with our casing conventions.
+    * `read_only_root_fs` has been renamed to `read_only` for better consistency across modules.
+    * `instance_type_anti_affinity_required` has been renamed to `instance_type_spread_required` to better reflect that the underlying mechanism
+      is a pod topology spread constraint.
+    * `topology_spread_enabled` has been renamed to `az_spread_preferred` to better reflect actual behavior.
+    * `topology_spread_required` has been renamed to `az_spread_required` to better reflect actual behavior.
+    * `zone_anti_affinity_required` has been renamed to `az_anti_affinity_required` to better align naming conventions with other settings that control scheduling
+      based on availability zone.
+  * Renamed Panfactum-provided priority classes to improve semantics (see [docs](/docs/edge/guides/deploying-workloads/basics#priority-class)).
+  * In [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel):
+    * `spot_instances_enabled`, `arm_instances_enabled`, and `burstable_instances_enabled` have been changed to
+      `spot_nodes_enabled`, `arm_nodes_enabled`, and `burstable_nodes_enabled` to better align with the inputs of other modules.
+  * In [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants), a few outputs have been updated:
+    * `panfactum_image` has been renamed to `panfactum_image_repository` to better align with naming conventions in other Panfactum modules
+    * `panfactum_image_version` has been renamed to `panfactum_image_tag` to better align with naming conventions in other Panfactum modules
+
+* We have removed a handful of options from [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment), [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set), [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job), [kube\_pod](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod), [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), and [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility) that we
+  would never recommend using:
+  * `prefer_spot_nodes_enabled`, `prefer_burstable_nodes_enabled`, `prefer_arm_nodes_enabled`: These scheduling
+    preferences are unnecessary as Karpenter will already prefer the cheapest nodes.
+  * `az_anti_affinity_preferred`: `az_spread_preferred` should be used instead.
+
+* When we introduced the concept of the `enhanced_ha_enabled` input, it was designed as a cost-saving switch for direct modules
+  where users do not need to have a deep understanding of the internals. However, it has also found its way into
+  some submodules where it has created ambiguity about module behavior, especially since its impact differs module-to-module.
+  As a result, we have replaced the `enhanced_ha_enabled` input in all *submodules* with more granular tuning knobs that have
+  clearer behavior. This impacts the following submodules: [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster),
+  [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel),
+  [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy),
+  [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus),
+  and [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source).
+
+* Nodes managed by EKS Node Groups (vs Karpenter) are now tainted with `controller=true:NoSchedule`. We have added this
+  taint as pods scheduled on these nodes might be disrupted regardless of their PDBs during EKS upgrades. For some workloads
+  this could cause a disruption. Most workload submodules have a new input, `controller_nodes_enabled`, that can be used
+  to allow your workloads to tolerate this taint if desired.
+
+* Previously we were conservative about enabling certain features by default in some of our submodules in order to ensure our modules
+  would be compatible with non-Panfactum Kubernetes clusters. However, this is a very niche use case, and we have observed
+  that this results in extra mental overhead for our normal users to avoid missing out on the core features provided by the Panfactum Stack. As a result:
+
+  * The following flags are now enabled by default in [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment), [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set), [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job), [kube\_pod](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_pod), [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_spec), [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster), [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel), and [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility):
+    * `spot_nodes_enabled`
+    * `arm_nodes_enabled`
+    * `vpa_enabled`
+    * `panfactum_scheduler_enabled`
+  * The following flags are now enabled by default in [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment):
+    * `az_spread_preferred`
+  * The following flags are now enabled by default in [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set):
+    * `az_spread_required`
+    * `instance_type_spread_required`
+  * The following inputs are now enabled by default in all modules:
+    * `pull_through_cache_enabled`
+  * The following inputs are now enabled by default in all direct modules deployed **after** the [autoscaling section](/docs/edge/guides/bootstrapping/autoscaling) in the bootstrapping guide:
+    * `vpa_enabled`
+    * `panfactum_scheduler_enabled`
+
+### Added
+
+* Adds built-in default [downward-api](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/)
+  integrations in all our workload submodules.
+* All mounted ConfigMaps and Secrets in our workload submodules are now mounted as executable to make
+  it easier to mount scripts.
+
+### Fixed
+
+* Updates Karpenter and EBS CSI Controller to prevent any remaining edge cases where nodes were terminated prior to
+  EBS volumes being detached which would result in six-minute delays for rescheduling stateful pods.
+* Remove the `RemoveDuplicates` strategy in [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
+  as users expect to be able to schedule multiple pods of the same controller on the same node when they set
+  `host_anti_affinity_required` to `false`.
+
+## edge.24-08-27
+
+### Breaking Changes
+
+* We removed the ability to disable S3 backups in
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). The backups
+  have an extremely low cost impact and significantly improves the durability of data. Moreover, the continuous
+  WAL archiving provided by the backups improves our system's ability to automatically recover in the case
+  of failover events.
+
+  Ultimately, we found that the risk of misuse (resulting in unexpected data loss or downtime)
+  significantly outweighed any potential benefits gained by providing this functionality.
+
+### Added
+
+* Added native support for restoring from database backups to the [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  submodule.
+
+* Added automatic creation of an immediate base backup to the
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to ensure that
+  new databases can be recovered all the way up to their point of creation.
+
+### Fixed
+
+* Mitigated a rare scenario where disruption in the middle of a database failover would result in
+  the PostgreSQL databases being unable to restart without manual intervention in the
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) submodule.
+
+* Fixed an issue where `pf-get-repo-variables` would provide the wrong directory for the root of the repository
+  when run inside a downloaded `.terragrunt-cache` directory.
+
+## edge.24-08-24
+
+### Fixed
+
+* Addressed a couple of issues with the [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+  module:
+  * [authentik\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources) will no longer
+    fail to apply and end up in an invalid state when first created.
+  * Authentik should no longer experience any downtime during database failover events
+
+## edge.24-08-23
+
+### Fixed
+
+* Correctly sets PgBouncer permissions on new PostgreSQL cluster creation in
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+
+## edge.24-08-22
+
+### Breaking Changes
+
+* The default behavior of [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+  was to use both [Redis AOF and RDB](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/) for persistence.
+  Unfortunately, using AOF concurrently with RDB negates Redis' the ability to do [partial resynchronizations after restarts
+  and failovers](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/#partial-sync-after-restarts-and-failovers).
+  Instead, a full copy of the entire database must be transferred from the current master to replicas on every restart. This greatly increases
+  the time-to-recover as well as incurs a high network cost.
+
+  In fact, there is arguably no benefit to AOF-based persistence with our replicated
+  architecture as new Redis nodes will always pull their data from the running master, not from their local AOF. The
+  only benefit would be if *all* Redis nodes simultaneously failed with a non-graceful shutdown (an incredibly unlikely scenario).
+
+  As a result, we have switched the module to use only use RDB for persistence, and the `redis_appendfsync` input
+  has been removed. The module still provides the ability to provide custom redis configuration, so you can re-enable
+  AOF if you want (though we would not advise it).
+
+* `token_lifetime_seconds` has been changed to `token_lifetime_hours` in [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to avoid a perpetual diff issue
+  present in the Vault provider.
+
+* Removed the daily backups from [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
+  as they were undocumented and had no realistic use case.
+
+### Added
+
+* Adds a new submodule, [kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_disruption_window_controller),
+  which can be used to specify time-based disruption windows for disruption-sensitive workloads (e.g., databases). Disruption
+  window capabilities have also been added to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  and [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
+
+* Adds synchronous replication support to
+  [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  via `pg_sync_replication_enabled`.
+
+### Fixed
+
+* Addressed issue where `pg_smart_shutdown_timeout` cannot be set to 0 in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  without having CNPG reset it to 180.
+
+* Fixed an issue in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero) where stale
+  EBS snapshots were not being deleted.
+
+* Added stricter disruption prevention to the Velero server in [kube\_velero](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_velero)
+  as disrupting the server in the middle of a backup operation would cause it to fail and not be resumed.
+
+## edge.24-08-15
+
+### Breaking Changes
+
+* `pg_shutdown_timeout` has been renamed to `pg_smart_shutdown_timeout` to better indicate its purpose
+  in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster). Additionally,
+  the shutdown and failover logic has been overhauled. The new default will immediately terminate running queries when
+  a database pod is killed, but this serves to reduce the downtime from 60-120 seconds to \< 5 seconds in the failover scenario.
+  Please see the module documentation for more information.
+
+### Added
+
+* Adds the concept of passthrough parameters to [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+
+* Makes `tf_apply_dir` a Workflow parameter in [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+  so that you only need a single instance of this module per cluster.
+
+* Adds the ability to use `templateRef` to [compose Workflows](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/#referencing-other-workflowtemplates)
+  in [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
+
+### Fixed
+
+* Fixed the working directory in
+  [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy)
+  and [wf\_dockerfile\_build](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build)
+  to be inside the cloned repository.
+
+* Addressed OOM errors when using resource templates with [wf\_spec](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_spec).
+
+## edge.24-08-13
+
+### Breaking Changes
+
+* `pg_storage_increase_percent` has been changed to `pg_storage_increase_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+  This allows for more predictable storage autoscaling and optimal resource provisioning regardless of the current storage scale.
+
+* `pg_storage_gb` has been changed to `pg_initial_storage_gb` in [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+  This better indicates that this value is *only used during the initial database provisioning* and has no effect thereafter.
+
+* `node_vpc_id`, `node_subnets`, and `node_security_group_id` have been moved from [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
+  to [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) in order to simplify the logic
+  of assigning nodes to subnets, VPCs, and security groups. Additionally, we have removed Karpenter auto-discovery tags as they are no longer necessary.
+
+### Added
+
+* Adds new enhancements to the [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) module:
+  * Better defaults and options for memory tuning
+  * Provides the ability to set arbitrary [PostgreSQL parameters](https://cloudnative-pg.io/documentation/1.23/postgresql_conf)
+  * Provides the ability to set a custom backup schedule
+  * Adds support for additional schemas via the `extra_schemas` input
+
+* Adds another local retry for Terragrunt when providers produce an inconsistent final plan.
+
+* Adds check for an updated `direnv` version to prevent issues when setting up the local devenv.
+
+### Fixed
+
+* Added deterministic ordering to additional resources in [authentik\_core\_resources](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
+
+* Fixed the following bugs in `pf-env-bootstrap`:
+  * Would use a non-existent AWS profile for the `.sops.yaml` file.
+  * Would not install all the platform checksums in the `.terraform.lock.hcl` files.
+
+* `amd64` nodes are now used when `bootstrapping_enabled` is `true` in [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) in order
+  to allow certain bootstrapping tests (e.g., Cilium) to run successfully.
+
+* Restores the `pf-db-tunnel` command to the devenv.
+
+* `pf-get-version-hash local` now properly returns `local` without an error code.
+
+* Updates the Panfactum image version in [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) to
+  a version that is compatible with the latest pre-built workflows.
+
+## edge.24-08-12
+
+### Breaking Changes
+
+* [Repository variables](/docs/edge/reference/configuration/repo-variables) must now be defined in a `panfactum.yaml`
+  file located at the root of your repository instead of in your `devenv.nix`. Additionally, the variables names are no longer
+  prefixed with `PF_` and are lowercase.
+
+  For example, `env.PF_REPO_NAME` in `devenv.nix` should now be defined at `repo_name` in `panfactum.yaml`.
+
+  This change was made to make it easier to reference these values outside of local development contexts such as within
+  CI pipelines where `devenv.nix` isn't loaded.
+
+### Added
+
+* We have provided two new addons, a [Workflow Engine](/docs/edge/guides/addons/workflow-engine/installing) (Argo Workflows)
+  and an [Event Bus](/docs/edge/guides/addons/event-bus/installing) (Argo Events).
+
+* We have created a [guide and best practices](/docs/edge/guides/cicd/getting-started) for setting up CI / CD in the Panfactum Stack.
+
+* To support the new addons, we are upgrading the following infrastructure modules to Beta status:
+  * [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo): For deploying the Argo controllers
+  * [kube\_argo\_event\_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus): For deploying an Argo EventBus
+  * [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source): For deploying an Argo EventSource
+  * [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor): For deploying an Argo Sensor
+  * [wf\_spec](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/wf_spec): For creating an Argo Workflow specification
+  * [wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/wf_tf_deploy): For creating an Argo WorkflowTemplate that deploys IaC modules
+  * [wf\_dockerfile\_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build): For creating an Argo WorkflowTemplate that builds container images from Dockerfiles
+
+* Adds `pf-get-repo-variables` which prints a JSON payload of all repository configuration variables with the appropriate
+  defaults set.
+
+## edge.24-07-08
+
+### Breaking Changes
+
+* We have made a small, breaking refactor of [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+  to reduce unnecessary options that made onboarding and maintenance more difficult:
+  * Most importantly, users will no longer able to set the instance type and count for nodes in EKS node groups. This
+    flexibility is unnecessary since node provisioning is handled
+    by Karpenter and not EKS. Moving forward, there are just two static configurations that are guaranteed to work
+    in all use cases: one for before autoscaling is installed and one for after. This is controlled via the new input,
+    `bootstrap_mode_enabled` (default: `false`).
+  * `control_plane_version` and `controller_node_kube_version` have been unified into a single variable
+    called `kube_version` that applies to all subsystems.
+  * `controller_node_subnets` has been renamed to `node_subnets` to indicate these subnets are used
+    for all cluster nodes, not just the EKS node groups.
+  * `all_nodes_allowed_security_groups` has been renamed to `node_security_groups` to align naming conventions
+
+* By default, PVCs created by controllers such as StatefulSets can not be updated through their controller as their template (`volumeClaimTemplates`)
+  is immutable (a Kubernetes limitation). This poses a challenge when needing to update PVC metadata such as annotations and labels. We have
+  built a workaround to this ([kube\_pvc\_annotator](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator))
+  and incorporated it in various Panfactum modules. Unfortunately, incorporating this enhancement requires redeploying StatefulSets.
+
+  To complete this upgrade, perform the following steps:
+
+  1. Create a Velero backup of the cluster by running `velero create backup -w <backup_name>` to recover in case of mistakes.
+
+  2. The following StatefulSets need to be deleted **in this order** AND **with `kubectl delete --cascade=orphan`** AND **immediately restored**
+     with a subsequent `terragrunt apply` to their defining module:
+
+     * The Vault StatefulSet created by `kube_vault`
+     * The Redis cluster StatefulSet for Authentik created by `kube_authentik`
+     * The BuildKit StatefulSets created by `kube_buildkit`
+     * Any StatefulSets you have provisioned with [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set)
+     * Any Redis clusters StatefulSets you have provisioned with [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+
+     As long as you use `--cascade=orphan` and take care to minimize the time between the `kubectl delete` and `terragrunt apply`,
+     there will not be any downtime during this operation.
+
+  3. After completing this operation, you need to delete the backing PVCs from each module **one at a time** by deleting
+     the PVC and then deleting its bound pod. The controller will then automatically provision a new PVC with the correct labels and annotations
+     to take advantage of the new functionality.
+
+     After deleting each pod, ensure that a new pod is automatically provisioned and becomes healthy **before** proceeding to the next.
+     As long as you proceed one at a time, this will not cause any downtime or data loss.
+
+  4. Delete the Velero backup you created in step 1 by running `velero delete backup <backup_name>`.
+
+### Added
+
+* Adds [kube\_fledged](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_fledged) to the core stack. The
+  [kube-fledged](https://github.com/senthilrch/kube-fledged/tree/master) controller adds the ability to pre-pull images
+  to every node to improve pod startup times for critical or frequently used containers such as the Linkerd proxy or database
+  images. We provide instructions for installing this module [here](docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches)
+
+* Adds the [kube\_pvc\_annotator](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pvc_annotator) submodule
+  that will provision a CronJob to run `pf-set-pvc-metadata` against PVCs created by immutable templates. See the module
+  documentation for potential use cases.
+
+* Adds `persistence_backups_enabled` (default: `true`) to [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel)
+  to support disabling EBS snapshot backups.
+
+* Adds a new [common variable](docs/edge/reference/infrastructure-modules/overview#common-variables), `node_image_cache_enabled`,
+  to Panfactum modules that can be used to enable pre-pulling images to nodes via the `kube_fledged` operator.
+
+* Adds the `pf-buildkit-clear-cache` command for removing any BuildKit caches not being used by an active image build job.
+
+* Adds the `pf-set-pvc-metadata` utility command for syncing labels and annotations across groups of PVCs.
+
+### Fixed
+
+* Fixes handling of public ECR registries in `docker-credential-panfactum`.
+
+* Fixes handling of ECR token caching in `docker-credential-panfactum`.
+
+* Fixes `pf-get-open-port` to be platform-agnostic.
+
+* Fixes `pf-get-version-hash` to work with commit hash inputs.
+
+* Fixes image paths in the Authentik dashboard for applications provisioned by Panfactum modules.
+
+## edge.24-07-01
+
+### Breaking Changes
+
+* The input format to [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) has been
+  reformatted to support better per-repository configuration. This should **not** require replacing any resources, but
+  it will require updating your Terragrunt inputs.
+
+* The following resources will no longer be tagged with the Panfactum version and commit hash as updates cause unnecessary
+  delays and disruptions during updates for little added value:
+  * EC2 instances in EKS node groups generated by [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+  * EC2 instances serving as NAT hosts in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc)
+  * KMS replica keys in [aws\_kms\_encrypt\_key](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key)
+  * Pods created in [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion)
+
+### Added
+
+* [kube\_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) has graduated to beta
+  and is now ready for general consumption. This is the first [stack addon](/docs/edge/guides/addons/overview) that
+  can be used to extend the behavior of the core stack. Installation and usage instructions can be found
+  [here](/docs/edge/guides/addons/buildkit/installing).
+
+* [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) now supports custom image
+  expirations rules and both pull and push permissions.
+
+* [aws\_ecr\_public\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_public_repos) has been added
+  to support created public ECR repositories.
+
+* Adds ARM support in [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) and
+  [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_resizer). All core cluster
+  components can now be run on both amd64 and arm64 nodes allow for optimal cost savings.
+
+* Changes the default `securityContext.fsGroupChangePolicy` to `OnRootMismatch` for Pods created by Panfactum submodules
+  in order to improve PVC mounting performance.
+
+* `pf-providers-enable` now ensures that `.terraform.lock.hcl` files have all common platform checksums.
+
+* Adds `pf-get-terragrunt-variables` which can be used to derive the
+  [Terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables) that would be used if Terragrunt were
+  run in the given directory.
+
+* Adds `pf-tf-delete-locks` which can be used to bulk-release Tofu state locks.
+
+* Adds `pf-sops-set-profile` which will update all sops-encrypted files in the given directory to use the indicated AWS
+  profile for KMS operations. This can be used in CI pipelines to allow the CI user to access sops-encrypted files.
+
+* (Alpha) Adds [kube\_argo\_sensor](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor) and
+  [kube\_argo\_event\_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source) submodules
+  for deploying these core components of the [Argo Events](https://argoproj.github.io/argo-events/) system.
+
+* (Alpha) Adds the [kube\_workflow\_spec](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workflow_spec)
+  submodule to help in defining production-ready [Argo Workflows.](https://argo-workflows.readthedocs.io/en/latest/)
+
+### Fixed
+
+* [kube\_aws\_ebs\_csi](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) has been adjusted
+  to ensure that PVCs are detached from nodes during node shutdown, preventing unnecessary delays in moving PVCs between
+  nodes.
+
+* [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) no longer accidentally includes the Vault provider.
+
+* [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_ingress_nginx) will no longer
+  unnecessarily set browser security headers on `3xx` responses or responses that do not have `Content-Type` headers.
+
+## edge.24-06-20
+
+### Breaking Changes
+
+* [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) has upgraded the Karpenter
+  version to `v0.37`. During this release cycle, the Karpenter team moved the CRDs required by Karpenter to a dedicated Helm chart
+  to improve the upgrade ergonomics. Unfortunately, this introduces a few one-time manual steps that you must perform
+  to enable the migration. Specifically, the following commands must be run against your cluster **before** applying the
+  latest version of `kube_karpenter`:
+
+  ```bash
+  kubectl label crd ec2nodeclasses.karpenter.k8s.aws nodepools.karpenter.sh nodeclaims.karpenter.sh app.kubernetes.io/managed-by=Helm --overwrite
+  kubectl annotate crd ec2nodeclasses.karpenter.k8s.aws nodepools.karpenter.sh nodeclaims.karpenter.sh meta.helm.sh/release-name=karpenter-crd --overwrite
+  kubectl annotate crd ec2nodeclasses.karpenter.k8s.aws nodepools.karpenter.sh nodeclaims.karpenter.sh meta.helm.sh/release-namespace=karpenter --overwrite
+  ```
+
+* [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+  has a new input `node_labels` which defines what labels will be applied to generated
+  nodes. The standard Panfactum labeling system will no longer apply to Karpenter nodes due to [this upstream issue.](https://github.com/aws/karpenter-provider-aws/issues/6387)
+
+* The `persistence_enabled` option was removed from [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel).
+  Redis is now always deployed with persistence enabled. This decision was made b/c the cross-AZ network costs of re-instantiating
+  Redis nodes without PVC storage dwarf the costs of the PVC storage (by a factor of 100x). As a result, there is no benefit
+  to not periodically saving the redis database to a persistent disk.
+
+  To compensate for potential performance impacts, we have exposed another input, `redis_appendfsync`. Setting this to
+  `"no"` will achieve the same performance as having persistence disabled. However, the default setting of `"everysec"` is
+  likely sufficient for the vast majority of use cases and reduces the risk of data loss.
+
+  Unfortunately, if you were previously running with `persistence_enabled` set to `false`, you will need to delete
+  the Redis StatefulSets in order to apply the new module.
+
+  In particular, this impacts the `kube_authentik` module. Before deleting the Redis StatefulSet for Authentik,
+  ensure your Vault token is not expired as you will not be able to re-authenticate with Authentik
+  while the Redis StatefulSet is removed.
+
+  Since `persistence_enabled` should only have been used in scenarios where data retention was not important,
+  this should be considered a safe operation. However, it will introduce a minor
+  service disruption during the replacement period.
+
+* [aws\_ecr\_pull\_through\_cache\_addresses](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_ecr_pull_through_cache_addresses)
+  has been refactored to improve the ergonomics of using the module. It now requires an input, `pull_through_cache_enabled`,
+  and will output the correct registry names regardless of whether using a pull through cache or not.
+
+### Added
+
+* [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment),
+  [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set),
+  [kube\_cron\_job](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cron_job),
+  and [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod) have graduated to Beta status. They
+  are now safe to use.
+
+* Adds the `pf-providers-enable` command that will automatically inspect the source infrastructure module
+  and enable the required providers in a module's `module.yaml`.
+
+* Adds the `pf-update-iac` command that will update [first-party infrastructure modules](/docs/edge/guides/iac/first-party-modules)
+  in the following ways:
+
+  * Executes the [templating directives](/docs/edge/reference/iac-templating).
+
+  * Updates the `ref` in sourced Panfactum submodules to the commit hash of the devenv if the `# pf-update` annotation
+    is provided. See the [documentation](/docs/edge/guides/iac/first-party-modules#using-panfactum-submodules) for more details.
+
+* Adds phone number validation in [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account).
+
+* Adds `cors_enabled` (default: `false`) input variable to [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+  that can enabled [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) handling.
+
+  This can be useful
+  when building web applications that interact with Vault in client-side JavaScript. By default, this will
+  allow CORS requests from all sibling and child domains.
+
+### Fixed
+
+* Addresses an issue in [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+  that prevented the SSO login pop-up from working.
+
+* Implements custom CORS handling logic in [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+  that resolves [issues in the default behavior provided by the NGINX ingress controller.](https://github.com/kubernetes/ingress-nginx/issues/8469)
+
+* Removes invalid failure cases when using `pf-get-vault-token` in Terragrunt and improve failure messaging.
+
+* Fixes an issue that occurs when the `kubernetes` provider is enabled but the sourced module does not use the `kubectl` provider.
+
+* Fixes failure cases in `pf-env-scaffold` and adds more debug logging.
+
+## edge.24-06-14
+
+### Added
+
+* Adds [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler), an alternative Kubernetes
+  scheduler that can be used to improve bin-packing of pods on nodes in the Kubernetes cluster. This allows for better,
+  smaller node selection and our tests show an estimated 25-33% reduction in node costs when used. We provide
+  instructions for installing it [here](/docs/edge/guides/bootstrapping/autoscaling#deploy-bin-packing-kubernetes-scheduler).
+
+* Adds `panfactum_scheduler_enabled` (default: `false`) input to most infrastructure modules. When enabled, will
+  use the scheduler provided by [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+  instead of the less-efficient EKS scheduler.
+
+* If `panfactum_scheduler_enabled` is `true`, the [kube\_descheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_descheduler)
+  will automatically remove pods from low utilization nodes to allow the [kube\_scheduler](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_scheduler)
+  to bin-pack them on other nodes.
+
+### Fixed
+
+* Addresses a bug in the previous release that left [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter)
+  not deployable.
+
+* Addresses an issue where nodes were limited a hard cap of 29 pods.
+
+* Configures Kubernetes nodes to use a fixed amount of system overhead rather than one that scales unnecessarily with node size.
+
+## edge.24-06-13
+
+### Added
+
+* Updates [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) with many new variables
+  for configuring PgBouncer. New variables are prefixed with `pgbouncer_`.
+
+* Adds support for `path_prefix` to [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy) ([@mschnee](https://github.com/mschnee))
+
+* Adds new `enhanced_ha_enabled` input to many core modules (default `true`). Setting this to `false` will
+  allow for additional cost savings (approximately \$50 / month) in exchange for introducing a small possibility of temporary
+  outages. We estimate that setting this to `false` reduces availability from 99.995% to 99.9%.
+  This can be used to decrease costs in less critical clusters (e.g., `development`).
+
+* Adds a [Spot Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
+  to the [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) module.
+
+* Adds the [kube\_open\_cost](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_open_cost) module
+  for calculating the cost of workloads running on Kubernetes.
+
+### Fixed
+
+* Addressed issue in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) where NAT nodes wouldn't restart
+  if NAT setup failed with an exit code other than `1`.
+
+* Increased the memory floor of the Authentik server in [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)
+  to avoid OOM issues.
+
+* Updates [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) to allow showing
+  [Gravatar](https://gravatar.com/) profile images.
+
+* Updates [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) to provide the necessary Permissions-Policy headers to allow
+  use of WebAuthn devices.
+
+* Correctly applies pod labels in [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller).
+
+* Removes node preferences defaults from [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility)
+  that were preventing efficient node deprovisioning.
+
+* Adjusts the VPA recommendation overhead from 30% to 15% to improve resource utilization.
+
+* Fixes incorrect SCIM property mapping in [authentik\_aws\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso).
+
+* Aligns pod labels, affinities, topologySpreadConstraints, and tolerations in
+  [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd) to conventions used in all
+  other modules.
+
+## edge.24-06-08
+
+### Added
+
+* Updates [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) to support new command `pf-vpc-network-test` that
+  will verify network connectivity properties of the instantiated VPC. This allows us to simplify an
+  otherwise [complex validation step in the bootstrapping guide](/docs/edge/guides/bootstrapping/aws-networking#test-connectivity).
+
+* Adds the `pf-env-bootstrap` command that automatically bootstraps the necessary resources to begin working with
+  IaC in an environment. This replaces the manual steps that used to be a part of the [bootstrapping guide.](/docs/edge/guides/bootstrapping/infrastructure-as-code#set-up-state-management)
+
+* Adds new `extra_inputs` [terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#inputs) that
+  allows you to pass inputs to all modules in the current scope.
+
+* Adds arm64 NodePools and arm64 support for the core components. This reduces the cost of running the base stack by \$25 - 50 / month
+  due to significantly better price / performance ratios for arm64 instances in AWS.
+
+* Sets `unhealthyPodEvictionPolicy` to `AlwaysAllow` for all module [PDBs](https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy).
+  This will allow the system to scale up quicker when running against resource pressure and pods become stuck in a temporary crash loop.
+
+* Sets maximum node lifetime to 24h to force Karpenter to try to consolidate instances at least once per day.
+
+### Fixed
+
+* Addressed issue where the `aws-ebs-csi-driver` DaemonSet pods would not be properly terminated by Karpenter during
+  node shutdown. This resulted in EBS volumes not being detached and introduced an unnecessary 6min delay when moving
+  EBS volumes between nodes.
+
+* Replaces most usages of `kubernetes_manifest` with `kubectl_manifest` to avoid type manifest parsing issues that prevent
+  dynamic values in manifests.
+
+## edge.24-06-06
+
+### Breaking Changes
+
+* [kube\_trust\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_trust_manager) has been deprecated as it's functionality was redundant with
+  [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector). We are keeping the module
+  in the repo to support backwards compatibility, but it will be removed in the future. You should perform the following steps to remove it:
+  * Apply this release.
+  * Remove any dependency blocks to it in your `terragrunt.hcl` files.
+  * Run `terragrunt destroy` on the module to remove it.
+  * Delete the `bundles` CRD.
+
+### Added
+
+* [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains) can now set the contact type
+  for each contact.
+
+* Allow users to reference availability zones by single character (e.g., `a`) in addition to the full name (e.g., `us-east-2a`) in the
+  [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) module.
+
+* The manual steps needed to reset new EKS clusters to a clean slate during the bootstrapping guide have been consolidated
+  into a single new command, `pf-eks-reset`.
+
+### Fixed
+
+* Addressed issue in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) that caused a temporary, harmless error to crash
+  the `terragrunt apply` on initial bootstrapping.
+
+* Fixed issue where Cilium test suites would fail during bootstrapping due to a NetworkPolicy blocking the
+  [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns) module.
+
+## edge.24-06-04
+
+### Breaking Changes
+
+* The reloader deployment must be deleted before the next apply of [kube\_reloader](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reloader). No
+  inputs have changed.
+
+* The alpha module `kube_labels` has been removed in favor of the labels provided by [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility).
+
+* VPC flow logs in [aws\_vpc](/docs/edge/reference/infrastructure-modules/direct/aws/aws_vpc) are now disabled by default as they
+  can be fairly expensive and should only be used if you have a specific use-case in mind. They can be enabled
+  by setting `vpc_flow_logs_enabled` to `true`.
+
+### Added
+
+* Added new `pf-env-scaffold` script that takes care of setting up the `PF_ENVIRONMENTS_DIR` in the
+  [bootstrapping guide section for setting up terragrunt.](/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code)
+
+* Added [kube\_workload\_utility](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_workload_utility) to make it easier to create uniform, production-hardened
+  Pod specs that take advantage of all capabilities included in the Panfactum stack.
+
+* A new standard label `panfactum.com/workload` can be used to group replicated pods for the purpose of aggregating metrics. This is
+  now applied in all core infrastructure modules.
+
+* Added [kube\_constants](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_constants) that export static configuration values that can be useful
+  when creating resources that run on clusters in the Panfactum stack.
+
+* [kube\_cert\_manager](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cert_manager) will now automatically delete Certificate secrets if the Certificate is deleted.
+
+* [aws\_ses\_domain](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain) now takes an optional input `smtp_allowed_cidrs`
+  that restricts what IPs can use the generated SMTP credentials. This allows users to mitigate
+  credential exfiltration attacks. We provide an example of how to use this [here.](https://github.com/Panfactum/stack/blob/main/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl)
+
+* The Vault login UI will now have the OIDC login as the default method.
+
+* Terragrunt will now automatically retry on some errors up to three times before exiting the process with a failure. This should
+  address intermittent issues such as network disruptions or race conditions.
+
+### Fixed
+
+* `.env` files are now properly loaded into the shell environment and changes will trigger fast reloads
+  instead of full devenv re-evaluations.
+
+* Temporarily adds `GIT_CLONE_PROTECTION_ACTIVE=false` to the shell environment in order to address
+  [this issue](https://github.com/git-lfs/git-lfs/issues/5749). Note that this only
+  disables new bleeding edge security features which were accidentally shipped in a broken
+  state.
+
+* Adjusts base resource requests of core infrastructure modules to prevent temporary OOM errors when bootstrapping before VPA
+  take effect.
+
+* [kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik) now respects `log_level` input.
+
+* Sets `max_history` to `5` for all Helm charts to prevent overloading the Kubernetes API server with an every-growing amount
+  of historical Helm deployments.
+
+## edge.24-06-02
+
+### Breaking Changes
+
+* Upgraded to devenv 1.0. As a part of this upgrade, `.env` file values can no longer be referenced directly
+  inside `.nix` files.
+
+### Added
+
+* Updated [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) to automatically
+  limit client buffer size to prevent OOM issues when processing very bursty traffic.
+
+* Added `pf-update` command that runs all the repository scaffolding commands at once.
+
+### Fixed
+
+* Addressed an issue that caused updates to the local devenv to take
+  at least 10 minutes rebuild on macOS. Rebuilds should now be 10-15x faster, but they will still
+  take about 45 seconds at minimum. Note that this *only* impacts rebuilds and *not* normal direnv load times which should
+  still be instant.
+
+  This is a known limitation of upstream nix's derivation evaluation
+  caching when using flakes. We expect this to be addressed when flakes reach stability.
+
+* Added missing defaults for `PF_ENVIRONMENTS_DIR` and `PF_IAC_DIR`.
+
+* Resolves an issues where devenv warnings could not be resolved during the initial bootstrapping guide.
+
+* Added extra validation for the terragrunt variable `extra_tags`. Invalid characters will now be replaced with `.`
+  for *both* keys *and* values for *both* Kubernetes labels and AWS tags.
+
+* Fixed some core components that were using *all* Kubernetes labels for `labelSelector` matching rules which prevented
+  Karpenter from autoscaling when `extra_tags` was provided. This previously
+  manifested as the error `spec.requirements: Too many: #: must have at most 30 items`.
+
+* Added extra constraints to [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
+  to prevent it from attempting to query zones that it isn't managing.
+
+* Prevented [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns) from
+  excluding parent domains of included domains.
+
+## edge.24-05-30
+
+### Breaking Changes
+
+* The default for `vault_storage_size_gb` in [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault)
+  has been changed from `20` to `2` in order to improve resource utilization. If you created Vault with the old default,
+  you will need to manually set `vault_storage_size_gb` to `20` as volume sizes cannot be reduced after creation.
+
+### Added
+
+* (Alpha) Added the [Loki](https://grafana.com/docs/loki/latest/)
+  logging backend via [kube\_logging](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_logging)
+  and the [Alloy](https://grafana.com/docs/alloy/latest/) log collector via [kube\_alloy](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_alloy).
+
+* The [PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer) has been added via the
+  [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pvc_autoresizer) module in order
+  to automatically expand EBS volumes as they fill up. We provide the guide for deploying it
+  [here](/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer).
+
+* Added validation for phone number format in
+  [aws\_registered\_domains](/docs/edge/reference/infrastructure-modules/direct/aws/aws_registered_domains). ([@wesbragagt](https://github.com/wesbragagt))
+
+### Fixed
+
+* Resolved issue where scheduling constraints could not be resolved for components deployed before Karpenter ([#41](https://github.com/Panfactum/stack/issues/41))
+
+## edge.24-05-23
+
+### Breaking Changes
+
+* We have removed the EKS CoreDNS addon and replaced it with the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+  module in order to provide better guarantees about the behavior of DNS in the Panfactum stack. In order to migrate:
+
+  1. Add the `dns_service_ip` input to [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) deployments
+     by following [this guide](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr). Double check that the `dns_service_ip` is the
+     same IP as defined by `kube-system/kube-dns`.
+
+  2. Additionally, set `core_dns_addon_enabled` to `true`.
+
+  3. Apply the updated module `aws_eks` module.
+
+  4. Add the `cluster_dns_service_ip` input to your [kube\_karpenter\_node\_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools)
+     module like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_karpenter_node_pools/terragrunt.hcl),
+     and re-apply the module. Ensure that all of your nodes have been replaced with the new configuration.
+
+  5. Deploy `kube_core_dns` by following [this guide](/docs/main/guides/bootstrapping/internal-cluster-networking#deploy-coredns).
+     Note that this deployment will fail as the original addon service is still running and the IP is already taken.
+
+  6. Delete `kube-system/kube-dns` and re-apply `kube_core_dns`. Note that while the service is deleted, DNS will be
+     temporarily unavailable in your cluster.
+
+  7. Once you've validated that DNS is working in the cluster, remove the `core_dns_addon_enabled` input
+     from the `aws_eks` module and re-apply.
+
+* We have stabilized the label selectors in [kube\_pod](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pod) but
+  this requires one final label update for already-deployed Deployments. This will cause re-applies
+  of [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) to fail (and any first-party modules that rely on [kube\_deployment](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_deployment)).
+  To resolve, you must first manually delete the `bastion/bastion` deployment (and all other deployments created by [kube\_deployment](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_deployment)).
+
+* [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) has two
+  new flags, `pgbouncer_read_only_enabled` (default `false`) and `pgbouncer_read_write_enabled` (default `true`), which will enable
+  the `r` and `rw` poolers, respectively. This will enable users to better control what is deployed so as not
+  to have idle resources. This is a *breaking* change as `pgbouncer_read_only_enabled` is set to `false` by default.
+
+### Added
+
+* (Alpha) We've added a monitoring stack [kube\_monitoring](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_monitoring)
+  which includes HA [Prometheus](https://prometheus.io/docs/introduction/overview/), the
+  [Prometheus Operator](https://prometheus-operator.dev/), [Thanos](https://thanos.io/) metrics storage on
+  S3 (with deduplication, caching, and down-sampling), the [Node Exporter](https://github.com/prometheus/node_exporter),
+  [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics), [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/),
+  and [Grafana](https://grafana.com/) (with SSO enabled and 20+ custom dashboards).
+
+  Additionally, most modules
+  now have an additional `monitoring_enabled` (default `false`) flag that can be turned on to being shipping data
+  to Prometheus for viewing and querying via Grafana.
+
+* (Alpha) [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) now has a new debugging
+  mode, `hubble_enabled` (default `false`), that will capture extensive TCP-level metrics about the cluster
+  as well as expose a debugging UI via HTTPS.
+
+* (Alpha) [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) now deploys [Linkerd Viz](https://linkerd.io/2.15/features/dashboard/)
+  when `monitoring_enabled = true`. This provides a service mesh dashboard and the ability to capture and introspect
+  raw HTTP requests sent in realtime.
+
+* (Alpha) We've added the [Argo Workflow](https://argoproj.github.io/workflows/) engine to the stack
+  via the [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) module. This will
+  serve as the basis for the future, integrated CI / CD systems and can also be used to process
+  arbitrary events from event queues such as AWS SNS/SQS and Kafka. ([@jlevydev](https://github.com/jlevydev))
+
+* A new module, [kube\_vault\_proxy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_vault_proxy), that
+  can be used to add SSO to web assets that do not have integrated SSO. The module SSO is configured out-of-the-box
+  to work with the cluster's Vault instance.
+
+* We've included a new Kubernetes provider, [kubectl](https://registry.terraform.io/providers/alekc/kubectl/latest/docs/resources/kubectl_manifest),
+  to augment the original [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) provider.
+  The `kubectl` provider allows more flexibility in deploying raw Kubernetes manifests which is required by our templating
+  system. This provider will automatically be enabled the `kubernetes` provider is enabled, so no additional changes
+  are required from end users.
+
+* [kube\_redis\_sentinel](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_redis_sentinel) has a new flag,
+  `lfu_cache_enabled`, that will configure the Redis cluster automatically evict records under memory pressure
+  based on an approximated Least Frequently Used algorithm.
+
+* [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) now takes an `extra_configuration_snippet`
+  variable which allows for additional commands in the [NGINX configuration snippet](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#configuration-snippet).
+
+### Changed
+
+* Added the standard [Restricted Reader](/docs/edge/reference/rbac) role to Vault instances (`rbac-restricted-reader`)
+  and updated [vault\_auth\_oidc](/docs/edge/reference/infrastructure-modules/direct/vault/vault_auth_oidc) to take `restricted_reader_groups`. Since cluster resources authenticate with SSO
+  via Vault, this allows restricted readers to access additional cluster resources such as Grafana and Argo Workflows
+  (albeit, in a locked-down read-only mode).
+
+* Disabled evictions of database pods based on max lifetimes. This improves
+  the stability of databases deployed by Panfactum modules.
+
+* After completing the bootstrapping guide, we now recommend that users update their `aws_eks` cluster
+  modules to have `controller_node_count` set to `1` and `controller_node_instance_types` set to `["t3a.medium"]`.
+  This will decrease the costs of the base cluster by about 40% without impacting cluster availability or resiliency.
+  The single remaining node is used primarily as a place for Karpenter to run (Karpenter cannot run on instances that it itself
+  provisions).
+
+* [kube\_karpenter](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter) now only deploys
+  a single instance of Karpenter and enforces that it is run on a controller node. This reduces the overall
+  resource utilization of this fairly heavyweight controller.
+
+* Kubernetes labels applied via the `extra_tags` terragrunt input are now sanitized for valid characters automatically (invalid characters
+  are replaced with `.`). ([@mschnee](https://github.com/mschnee))
+
+* Added scheduling constraints to prevent critical workloads from scheduling all pods on the same
+  instance type in order to minimize the possibility of disruption on events that only affect one
+  instance type (e.g., spot node preemption).
+
+* Changes many other non-critical core controllers to only have a single replica when 100% uptime is not necessary
+  in order to reduce resource utilization in the Stack.
+
+* Updates many controller deployments to use the [Recreate](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment)
+  deployment strategy to improve timing and efficiency of applying Panfactum upgrades.
+
+* [kube\_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) has a new `history_length_hours` (default `24`)
+  that will control how far back it will analyze metrics for computing its recommendations.
+
+### Fixed
+
+* PVCs for postgres instances were inadvertently created with duplicated entries for accessModes. This has no functional impact,
+  but confused monitoring systems. This has been fixed, but the fix will not retroactively adjust existing PVCs as they are immutable.
+
+## edge.24-05-15
+
+### Breaking Changes
+
+* [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) now takes `vault_domain`
+  as an input instead of `environment_domains`. This change was made as having multiple domains for Vault
+  is incompatible with using Vault as an intermediary IdP.
+
+### Added
+
+* New [kube\_reflector](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_reflector) module for deploying
+  the [Reflector](https://github.com/emberstack/kubernetes-reflector) in order to synchronize ConfigMaps and Secrets across
+  namespaces. Created a [new guide section](/docs/edge/guides/bootstrapping/maintenance-controllers#reflector) for deploying
+  the module as a part of the foundational Stack.
+
+* `pg_shutdown_timeout` variable to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  to control how long the postgres instances will wait for active connections to close before shutting down.
+
+### Fixed
+
+* Fixed an issue where simultaneous, graceful shutdown of *all* postgres nodes in a [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+  would cause unnecessary downtime when the primary was running on a spot instance.
+
+## edge.24-05-12
+
+The initial edge release of the Panfactum stack!
+
+{/* lint enable no-duplicate-headings */}
