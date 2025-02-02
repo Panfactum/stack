@@ -624,6 +624,13 @@ resource "kubectl_manifest" "vpa_server" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -653,6 +660,13 @@ resource "kubectl_manifest" "vpa_worker" {
           minAllowed = {
             memory = "700Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {

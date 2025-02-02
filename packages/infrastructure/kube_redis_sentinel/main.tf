@@ -432,6 +432,13 @@ resource "kubectl_manifest" "vpa" {
         kind       = "StatefulSet"
         name       = "${random_id.id.hex}-node"
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       resourcePolicy = {
         containerPolicies = [{
           containerName = "redis"

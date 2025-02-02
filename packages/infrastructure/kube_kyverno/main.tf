@@ -625,6 +625,13 @@ resource "kubectl_manifest" "vpa_admission_controller" {
         kind       = "Deployment"
         name       = "kyverno-admission-controller"
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       resourcePolicy = {
         containerPolicies = [{
           containerName = "kyverno"
@@ -656,6 +663,13 @@ resource "kubectl_manifest" "vpa_background_controller" {
         kind       = "Deployment"
         name       = "kyverno-background-controller"
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       resourcePolicy = {
         containerPolicies = [{
           containerName = "controller"
@@ -683,6 +697,13 @@ resource "kubectl_manifest" "vpa_cleanup_controller" {
       labels    = module.util_cleanup_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

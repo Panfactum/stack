@@ -189,6 +189,13 @@ resource "kubectl_manifest" "vpa" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "argoproj.io/v1alpha1"
         kind       = "Sensor"

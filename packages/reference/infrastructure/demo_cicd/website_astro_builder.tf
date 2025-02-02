@@ -97,9 +97,9 @@ module "astro_builder_workflow" {
     GIT_REF = "{{workflow.parameters.git_ref}}"
     BUILDKIT_BUCKET_NAME = var.buildkit_bucket_name
     BUILDKIT_BUCKET_REGION = var.buildkit_bucket_region
-    PUBLIC_ALGOLIA_APP_ID = var.algolia_app_id
-    PUBLIC_ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
-    PUBLIC_ALGOLIA_INDEX_NAME = var.algolia_index_name_2
+    ALGOLIA_APP_ID = var.algolia_app_id
+    ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
+    ALGOLIA_INDEX_NAME = var.algolia_index_name_2
     SITE_URL = var.site_url
     DISTRIBUTION_ID = "E1BPTEFRQY1PK4"
   }

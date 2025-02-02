@@ -22,11 +22,19 @@ Learn more [here](/docs/edge/guides/versioning/releases).*
 * Enables the [Access Token](https://argo-workflows.readthedocs.io/en/stable/access-token/) auth method for
 the Argo Workflows server to allow direct access to its API programmatically.
 
+* When using a Panfactum module, the vertical pod autoscaler will only evict pods when resources need to be scaled
+*up* not *down*. This should reduce some unnecessary resource thrash and improve overall cluster stability. As pod lifetimes
+are generally capped at four hours, downscaling will still occur (just not as frequently).
+
 ### Added
 
 * Adds ability to pass in extra service annotations through kube_deployment module
 
 ### Fixed
+
+* Added `pg_minimum_cpu_update_millicores` input to [kube\_pg\_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster)
+in order to reduce autoscaling thrash caused by frequent small updates in the VPA's CPU recommendations. Before this was
+introduced, setting `vpa_enabled` to `true` would occasionally cause significant instability.
 
 * Applied fix for [argo-events write hole issue](https://github.com/argoproj/argo-events/pull/3449) in [kube\_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo).
 

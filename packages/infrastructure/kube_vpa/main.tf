@@ -365,6 +365,13 @@ resource "kubectl_manifest" "vpa_controller" {
       labels    = module.util_admission_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -395,6 +402,13 @@ resource "kubectl_manifest" "vpa_recommender" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -417,6 +431,13 @@ resource "kubectl_manifest" "vpa_updater" {
       labels    = module.util_updater.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

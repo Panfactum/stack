@@ -356,6 +356,13 @@ resource "kubectl_manifest" "vpa_controller" {
       labels    = module.util_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -379,6 +386,13 @@ resource "kubectl_manifest" "vpa_cainjector" {
       labels    = module.util_ca_injector.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -402,6 +416,13 @@ resource "kubectl_manifest" "vpa_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

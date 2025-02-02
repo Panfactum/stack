@@ -402,6 +402,13 @@ resource "kubectl_manifest" "vpa_descheduler" {
       labels    = module.util_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

@@ -127,6 +127,13 @@ resource "kubectl_manifest" "vpa" {
       labels    = module.util.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "argoproj.io/v1alpha1"
         kind       = "EventSource"

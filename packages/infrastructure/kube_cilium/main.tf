@@ -403,6 +403,13 @@ resource "kubectl_manifest" "vpa_operator" {
       labels    = module.util_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -434,6 +441,13 @@ resource "kubectl_manifest" "vpa_node" {
             # so we set a floor
             memory = "200Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resource          = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {

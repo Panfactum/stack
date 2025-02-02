@@ -146,7 +146,7 @@ resource "kubectl_manifest" "vpa" {
         name       = var.name
       }
       updatePolicy = {
-        updateMode = "Auto"
+        updateMode = "Initial"
       }
       resourcePolicy = {
         containerPolicies = [for config in var.containers : {
