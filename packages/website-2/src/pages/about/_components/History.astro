@@ -1,0 +1,83 @@
+---
+import {Picture} from "astro:assets";
+
+import JackHeadshot from './jack.webp';
+import Button from "../../../components/ui/Button.astro";
+import {SIGNUP_LINK} from "../../../lib/constants";
+---
+<section class="flex flex-col gap-4 py-12 lg:gap-8">
+
+    <div class="flex flex-col gap-3">
+                <span class="text-display-xs text-secondary font-semibold">
+                History
+            </span>
+
+        <h2 class="text-display-xl font-machina font-semibold">
+            How we started
+        </h2>
+    </div>
+    <div class="text-display-xs  grid grid-cols-1 gap-x-24 gap-y-4 lg:grid-cols-2">
+        <div class="flex flex-col gap-4">
+
+            <p>
+                In 2016, it was no surprise that most organizations were
+                struggling to develop and deploy the{" "}<a
+                    class="cursor-pointer underline underline-offset-4"
+                    href="/">foundational systems that comprise a good software platform</a>.
+                However, after nearly a decade working in the DevSecOps field, it
+                was surprising how little progress had been made on this front.
+            </p>
+
+            <p>
+                To fill this gap, I developed a
+                "starter kit" for companies ranging from pre-seed startups to large enterprises.
+                In 2023, this kit formally became the Panfactum Framework
+                that you see today.
+            </p>
+
+            <p>
+                Shortly thereafter, <a href="https://www.linkedin.com/in/uptown/" class="cursor-pointer underline underline-offset-4">James</a> and I launched Panfactum Group to support the
+                continued development and support of the Framework. In 2024, we created
+                our first stable release and began taking on alpha customers.
+            </p>
+
+            <p>
+                Since then, we have been focused on stable, long-term growth toward
+                our core mission:
+                cutting the total cost of cloud computing by 99%. Thanks to our amazing early adopters, we have
+                been profitable and growing since day one.
+            </p>
+            <p>
+                Our next chapter involves expanding the out-of-the-box capabilities of
+                the framework and growing the team to support our expanding user base!
+
+            </p>
+
+            <p>
+                Let's get to building!
+            </p>
+
+
+            <p class="mb-8">
+                - <a href="https://www.linkedin.com/in/jacklangston/" class="cursor-pointer underline underline-offset-4">Jack Langston</a>
+            </p>
+
+            <div>
+                <a href={SIGNUP_LINK}>
+                    <Button
+                      class="w-full md:w-fit"
+                    >Get in touch</Button>
+                </a>
+            </div>
+        </div>
+
+        <div class="hidden flex-col gap-4 lg:flex">
+            <Picture
+                    src={JackHeadshot}
+                    alt="Jack Langston"
+                    formats={["avif", "webp"]}
+                    width={500}
+            />
+        </div>
+    </div>
+</section>

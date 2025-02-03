@@ -41,9 +41,22 @@ const FAQS: Component = () => {
           Get in touch at jack@panfactum.com with the subject line "Better than You".
         </p>
       </FAQItem>
+      <FAQItem title={"Does my support plan need to cover all workloads deployed on Panfactum?"} id={"coverage"}>
+        <p>
+          Yes. When we proactively apply updates your foundational infrastructure, we also need to update the
+          infrastructure-as-code your workloads use. If those versions are not in-sync that can cause instability,
+          security problems, or even outages. As a result, our support plans must cover all your Panfactum systems for
+          us to achieve our contractual obligations to you.
+        </p>
+        <p>
+          For simple workloads, this can sometimes cause our plan costs to be higher than necessary. Please highlight
+          that when connecting with us, so that we can devise support plan pricing that makes sense for your use case.
+        </p>
+      </FAQItem>
       <FAQItem title={"Are the savings guaranteed?"} id={"guaranteed-savings"}>
         <p>
-          Before signing any contracts, we conduct a free assessment to pinpoint exactly how much we can save you and when
+          Before signing any contracts, we conduct a free assessment to pinpoint exactly how much we can save you and
+          when
           you
           can expect those savings (generally within 45 days).
         </p>
@@ -84,13 +97,29 @@ const FAQS: Component = () => {
           a migration with zero downtime. This process normally takes around 30 days.
         </p>
         <p>
-          That includes containerizing your worklods (if they aren't already), developing the production-ready infrastructure-as-code
+          That includes containerizing your workloads (if they aren't already), developing the production-ready infrastructure-as-code
           for them, deploying them to your Panfactum clusters, and hooking up end-to-end CI/CD pipelines.
+        </p>
+      </FAQItem>
+      <FAQItem title={"How often is my infrastructure upgraded?"} id={"frequency"}>
+        <p>
+          Our support plans pin users to our stable release channels. We create new stable releases at the same cadence
+          as Kubernetes version releases to ensure that your infrastructure never falls behind. Currently, that means
+          a new release every four to six months.
+        </p>
+        <p>
+          We will generally plan upgrades a month in advance so that we can set aside the appropriate time for testing
+          as each new release typically involves material changes to our module APIs.
+        </p>
+        <p>
+          Occasionally, we will find bugs or security issues in our stable releases. We patch those in a backwards
+          compatible manner and deploy those updates immediately to your infrastructure to minimize any negative impact.
         </p>
       </FAQItem>
       <FAQItem title={"Do you provide SLAs for deployed infrastructure?"} id={"slas"}>
         <p>
-          Yes. For each workload, we work with you to decide whether a 99.9%, 99.99%, or 99.999% uptime target is desired (higher targets
+          Yes. For each workload, we work with you to decide whether a 99.9%, 99.99%, or 99.999% uptime target is
+          desired (higher targets
           mean higher compute costs). Whatever the target, if we miss it, we will refund that entire month's support costs.
         </p>
       </FAQItem>
@@ -126,7 +155,7 @@ const FAQS: Component = () => {
           If the workload is deployed on a Panfactum Kubernetes cluster, we provide end-to-end support.
         </p>
         <p>
-          If the workload interacts with worklaods on Panfactum, we will handle the integration on the Panfactum side.
+          If the workload interacts with workloads on Panfactum, we will handle the integration on the Panfactum side.
         </p>
         <p>
           If the workload is deployed outside of a Panfactum cluster, it will be your responsibility to configure it.

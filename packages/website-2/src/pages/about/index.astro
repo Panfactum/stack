@@ -1,184 +1,23 @@
 ---
-
-// const COMPANY_MEMBERS = [
-//   {
-//     image: "/face.png",
-//     name: "Amélie Laurent",
-//     role: "Frontend Engineer",
-//   },
-//   {
-//     image: "/face.png",
-//     name: "Nikolas Gibbons",
-//     role: "Engineering Manager",
-//   },
-//   {
-//     image: "/face.png",
-//     name: "Jack Langston",
-//     role: "Founder / CEO",
-//   },
-//   {
-//     image: "/face.png",
-//     name: "James Lee",
-//     role: "Founder / CTO",
-//   },
-// ];
+import Charter from "./_components/Charter.astro";
+import HeroSection from "./_components/HeroSection.astro";
+import History from "./_components/History.astro";
+import Mission from "./_components/Mission.astro";
+import Layout from "../../layouts/Layout.astro";
 ---
 
-<!--<Layout-->
-<!--  title="About"-->
-<!--  darkBackground={true}-->
-<!--  heroClass="bg-secondary"-->
-<!--  hasBorder={false}-->
-<!--&gt;-->
-<!--  <MainSection-->
-<!--    slot="hero"-->
-<!--    title="About Panfactum"-->
-<!--    kicker="pæn • fak • tm"-->
-<!--    subtitle="The Panfactum Stack is an integrated set of OpenTofu (Terraform) modules and local tooling aimed at providing the best experience for building, deploying, and managing software on AWS and Kubernetes."-->
-<!--  />-->
-
-<!--  <SubSection kicker="pæn • fak • tm" title="Panfactum Missions">-->
-<!--    <div>-->
-<!--      Panfactum was founded with one goal:-->
-<!--      <span class="text-xl font-bold">-->
-<!--        create the best possible platform for building, deploying, and-->
-<!--        maintaining software.-->
-<!--      </span>-->
-<!--    </div>-->
-<!--    <div class="w-full md:flex md:gap-x-8xl pr-8">-->
-<!--      <div class="flex-1 max-w-[576px]">-->
-<!--        <p class="text-tertiary  md:text-lg mb-lg">-->
-<!--          Most existing platform providers fall into one of three buckets:-->
-<!--        </p>-->
-
-<!--        <ul class="list-disc list-outside pl-7">-->
-<!--          <li class=" md:text-lg">-->
-<!--            <b class="font-bold">Hyper-focused:</b> tackles a single problem well-->
-<!--            with no concern for the dozens of other moving parts in an effective-->
-<!--            platform-->
-<!--          </li>-->
-<!--          <li class=" md:text-lg">-->
-<!--            <b class="font-bold">Happy-path:</b> easy to get started for trivial-->
-<!--            use cases, but difficult to extend to meet user's unique needs-->
-<!--          </li>-->
-<!--          <li class=" md:text-lg">-->
-<!--            <b class="font-bold">Quantity-over-quality:</b> throws 100s of options-->
-<!--            at users with little to no overarching guidance-->
-<!--          </li>-->
-<!--        </ul>-->
-<!--      </div>-->
-
-<!--      <div class="flex-1 w-full  md:text-lg">-->
-<!--        <p class="mb-4">Each misses the mark for serious, long-term users.</p>-->
-<!--        <p class="pr-8">-->
-<!--          Instead, we know we must provide a highly-opinionated foundational-->
-<!--          platform that tackles <a-->
-<!--            class="underline underline-offset-4 cursor-pointer"-->
-<!--            >every major platform concern</a-->
-<!--          > while also remaining easy to extended.-->
-<!--        </p>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </SubSection>-->
-
-<!--  <MainSection>-->
-<!--    <div class="flex flex-col gap-y-4xl items-start">-->
-<!--      <div class="">-->
-<!--        <h2 class="text-brand-secondary text-sm md: font-semibold mb-md">-->
-<!--          History-->
-<!--        </h2>-->
-<!--        <h1-->
-<!--          class="font-machina text-primary text-display-sm md:text-display-md font-medium mb-lg"-->
-<!--        >-->
-<!--          A Brief History-->
-<!--        </h1>-->
-<!--      </div>-->
-<!--      <div class="flex flex-col gap-y-xl  md:text-lg">-->
-<!--        <p>-->
-<!--          In 2016, it was no surprise that most software organizations were-->
-<!--          struggling to develop and deploy the <a-->
-<!--            class="underline underline-offset-4"-->
-<!--            href="/">foundational systems that comprise a good platform</a-->
-<!--          >. However, after nearly a decade working in the DevSecOps field, it-->
-<!--          was surprising how little progress had been made on this front.-->
-<!--        </p>-->
-
-<!--        <p>-->
-<!--          To fill this gap, I developed a consulting niche deploying a platform-->
-<!--          "starter kit" for companies ranging from pre-seed startups to &gt;$1B-->
-<!--          organizations. In 2023, this kit formally became the Panfactum Stack-->
-<!--          that you see today.-->
-<!--        </p>-->
-
-<!--        <p>-->
-<!--          Shortly thereafter, I launched Panfactum, LLC, to support the-->
-<!--          continued development and support of the Stack. In 2024, we created-->
-<!--          our first stable release and began taking on non-beta customers.-->
-<!--        </p>-->
-
-<!--        <p>-->
-<!--          Since then, we have been focused on stable, long-term growth toward-->
-<!--          our <a href="/" class="underline underline-offset-4">core mission</a>:-->
-<!--          creating the best possible platform for building, deploying, and-->
-<!--          maintaining software. Thanks to our amazing early adopters, we have-->
-<!--          been profitable and growing since day one.-->
-<!--        </p>-->
-<!--        <p>-->
-<!--          Our next chapter involves expanding the out-of-the-box capabilities of-->
-<!--          the stack and growing the team to support our expanding user base!-->
-<!--          Let's get to building!-->
-<!--        </p>-->
-
-<!--        <p class="mb-8">-->
-<!--          - <a href="/" class="underline underline-offset-4">Jack Langston</a>-->
-<!--        </p>-->
-
-<!--        <div>-->
-<!--          <Button size="lg" className="w-full md:w-auto  h-[48px]"-->
-<!--            >Get in touch</Button-->
-<!--          >-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--    <div class="hidden xl:block">-->
-<!--      <img src="/jack.webp" class="min-w-[576px]" />-->
-<!--    </div>-->
-<!--  </MainSection>-->
-
-<!--  <SubSection-->
-<!--    kicker="Our Values"-->
-<!--    title="Core Platform Values"-->
-<!--    subtitle="Our shared values keep us connected and guide us as one team."-->
-<!--  >-->
-<!--    <div class="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-5xl">-->
-<!--      &lt;!&ndash;{&ndash;&gt;-->
-<!--      &lt;!&ndash;  CORE_PLATFORM_VALUES.map((item) => (&ndash;&gt;-->
-<!--      &lt;!&ndash;    <FeatureListBlock&ndash;&gt;-->
-<!--      &lt;!&ndash;      icon={item.icon}&ndash;&gt;-->
-<!--      &lt;!&ndash;      title={item.title}&ndash;&gt;-->
-<!--      &lt;!&ndash;      content={item.content}&ndash;&gt;-->
-<!--      &lt;!&ndash;    />&ndash;&gt;-->
-<!--      &lt;!&ndash;  ))&ndash;&gt;-->
-<!--      &lt;!&ndash;}&ndash;&gt;-->
-<!--    </div>-->
-<!--  </SubSection>-->
-
-<!--  <SubSection-->
-<!--    kicker="We're Hiring!"-->
-<!--    title="Meet our team "-->
-<!--    subtitle="Our philosophy is simple — hire a team of diverse, passionate people and foster a culture that empowers you to do your best work."-->
-<!--  >-->
-<!--    <div class="flex flex-col justify-center lg:flex-row gap-y-8 w-full">-->
-<!--      {-->
-<!--        COMPANY_MEMBERS.map((item) => (-->
-<!--          <div class="flex flex-col items-center gap-xl text-center sm:min-w-[240px]">-->
-<!--            <img src={item.image} class="w-[80px]" />-->
-
-<!--            <h3 class="text-lg font-semibold">{item.name}</h3>-->
-<!--            <p class="text-tertiary ">{item.role}</p>-->
-<!--          </div>-->
-<!--        ))-->
-<!--      }-->
-<!--    </div>-->
-<!--  </SubSection>-->
-<!--</Layout>-->
+<Layout
+  title="About"
+  heroClass="bg-secondary"
+  description="About Panfactum"
+  hasBorder={false}
+>
+  <HeroSection slot="hero"/>
+    <div class="mx-auto max-w-screen-2xl px-4 sm:px-12">
+        <Mission/>
+        <hr class="h-px border-0 bg-gray-light-mode-400 shadow-gray-dark-mode-300 blur-xs  dark:bg-gray-dark-mode-700"/>
+        <History/>
+        <hr class="h-px border-0 bg-gray-light-mode-400 shadow-gray-dark-mode-300 blur-xs  dark:bg-gray-dark-mode-700"/>
+        <Charter/>
+    </div>
+</Layout>
