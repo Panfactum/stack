@@ -15,7 +15,7 @@ const SupportHoursDescription = () => (
       possible savings.
     </p>
     <p>The available Support Hour options:</p>
-    <table class="border-secondary w-full min-w-full table-fixed border-collapse overflow-y-visible rounded-md border lg:min-w-[990px]">
+    <table class="border-secondary w-full min-w-full table-fixed border-collapse overflow-y-visible rounded-md border">
       <thead>
         <tr>
           <th class="bg-secondary border-secondary text-secondary border-b p-4 text-start text-sm tracking-wide">
@@ -38,7 +38,7 @@ const SupportHoursDescription = () => (
                 {excludeHolidays && <sup class="align-super">*</sup>}
               </td>
               <td class="p-4">
-                {NUMBER_FORMAT.format(multiplier * 100)}%
+                {NUMBER_FORMAT.format(100 + multiplier * 100)}%
               </td>
             </tr>
           )}</For>

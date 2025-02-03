@@ -24,7 +24,7 @@ const PrioritySupportEnabledDescription = () => (
       </li>
     </ul>
     <p>Issues come with the following SLAs:</p>
-    <table class="border-secondary w-full min-w-full table-fixed border-collapse overflow-y-visible rounded-md border lg:min-w-[990px]">
+    <table class="border-secondary w-full min-w-full table-fixed border-collapse overflow-y-auto rounded-md border">
       <thead>
         <tr>
           <th class="bg-secondary border-secondary text-secondary border-b p-3 text-start text-sm tracking-wide">

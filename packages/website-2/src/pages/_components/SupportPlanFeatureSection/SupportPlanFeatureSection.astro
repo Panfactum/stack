@@ -1,22 +1,79 @@
 ---
-import SupportPlanFeature from "./SupportPlanFeature.astro";
+import DollarIcon from "@/components/icons/dollar.svg"
+import EyeIcon from "@/components/icons/eye.svg";
+import FlameIcon from "@/components/icons/flame.svg";
+import MessageIcon from "@/components/icons/message.svg"
+import PackageImportIcon from "@/components/icons/package-import.svg";
+import QRIcon from "@/components/icons/qr-code.svg";
+import SettingsUpIcon from "@/components/icons/settings-up.svg";
+import ToolIcon from "@/components/icons/tool.svg";
+import UserIcon from "@/components/icons/user.svg";
+
+import FeatureListBlock from "../FeatureListBlock.astro";
 ---
 
-<div class="mx-auto flex max-w-[1096px] flex-col gap-6 px-12 py-10 md:px-8">
-  <SupportPlanFeature
-    description="End-to-end setup, management, and maintenance of your Panfactum framework deployment"
-  />
-  <SupportPlanFeature
-    description="Configuration and deployment of your custom, containerized workloads"
-  />
-  <SupportPlanFeature
-    description="Everything defined in infrastructure-as-code, stored in your version control system, and connected to CI/CD pipelines"
-  />
-  <SupportPlanFeature
-    description="Proactive upgrades of all your systems on new Panfactum framework version releases"
-  />
-  <SupportPlanFeature description="Migration of your existing infrastructure" />
-  <SupportPlanFeature
-    description="Dedicated solutions engineer with on-call support and regular trainings"
-  />
+<div class="py-12 flex flex-col gap-10 sm:grid sm:grid-cols-2 md:grid-cols-3">
+    <FeatureListBlock
+            title="Complete Coverage"
+            content={"End-to-end setup, management, and maintenance of your Panfactum framework deployment"}
+            background="light"
+    >
+        <ToolIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Deploy Any Workload"
+            content={"Configuration and deployment of your containerized workloads including zero-downtime migration of your existing infrastructure"}
+            background="light"
+    >
+        <PackageImportIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Full Infrastructure-as-Code"
+            content={"Everything defined in infrastructure-as-code, stored in your version control system, and connected to CI/CD pipelines"}
+            background="light"
+    >
+        <QRIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Managed Upgrades"
+            content={"Automatic upgrades of all your systems every new Panfactum framework version release"}
+            background="light"
+    >
+        <SettingsUpIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Proactive Monitoring"
+            content={"Active monitoring of your infrastructure systems and workloads"}
+            background="light"
+    >
+        <EyeIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Dedicated Support"
+            content={"Dedicated solutions engineer as a single point of contact"}
+            background="light"
+    >
+        <UserIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Guaranteed results"
+            content={"Contractually obligated savings targets and uptime SLAs"}
+            background="light"
+    >
+        <DollarIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Frontline Triaging"
+            content={"On-call support with guaranteed response and resolution times"}
+            background="light"
+    >
+        <FlameIcon />
+    </FeatureListBlock>
+    <FeatureListBlock
+            title="Messaging Integrations"
+            content={"Support integrated with your instant messaging platform"}
+            background="light"
+    >
+        <MessageIcon />
+    </FeatureListBlock>
 </div>

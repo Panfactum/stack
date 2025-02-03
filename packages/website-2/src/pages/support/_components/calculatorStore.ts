@@ -49,7 +49,7 @@ export const [calculatorStore, setCalculatorStore] =
   createStore<CalculatorStore>({
     clusterCount: 3,
     workloadCount: 2,
-    annualSpendCommitmentEnabled: false,
+    annualSpendCommitmentEnabled: true,
     prioritySupportEnabled: false,
     startupDiscountEnabled: false,
     supportHours: "basic",

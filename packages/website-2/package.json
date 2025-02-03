@@ -31,6 +31,7 @@
     "@tailwindcss/typography": "0.5.9",
     "@typescript-eslint/eslint-plugin": "6.5.0",
     "@unpic/astro": "^1.0.0",
+    "accordian": "link:@kobalte/core/accordian",
     "animate-css-grid": "^1.5.1",
     "astro": "^5.1.9",
     "astro-capo": "^0.0.1",

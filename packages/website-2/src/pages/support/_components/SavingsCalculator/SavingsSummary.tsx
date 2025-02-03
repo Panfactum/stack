@@ -38,7 +38,7 @@ const SavingsSummary: Component = () => {
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <Button onClick={shareCalculatorValues} variant="secondary">
           <div class="flex items-center justify-between gap-2">
-            <span>Share Now</span>
+            <span>Share Link</span>
             <FiShare />
           </div>
         </Button>
@@ -53,7 +53,7 @@ const SavingsSummary: Component = () => {
         </Button>
         <a href={SIGNUP_LINK} class="col-span-2 lg:col-span-1">
           <Button variant="primary" class="w-full">
-            Sign-up Now
+            Start Saving
           </Button>
         </a>
         {/*We conditionally add the details modal to the DOM b/c it is very expensive to update its DOM when the user changes calculator values*/}

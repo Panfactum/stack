@@ -12,7 +12,7 @@ const AnnualSpendCommitmentDescription = () => (
       have.
     </p>
     <p>
-      However, if you pay in advance for the following 12 months, we can offer a
+      However, if you commit in advance for the following 12 months, we can offer a
       flat {NUMBER_FORMAT.format(-ANNUAL_SPEND_DISCOUNT_MULTIPLIER * 100)}%
       discount on the committed spend.
     </p>

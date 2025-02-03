@@ -1,6 +1,11 @@
 ---
 import PriceItem from "./PriceItem.astro";
 import SubSection from "../../../layouts/SubSection.astro";
+import {
+  ANNUAL_SPEND_DISCOUNT_MULTIPLIER,
+  CLUSTER_COST,
+  WORKLOAD_DEPLOYMENT_COST
+} from "../../support/_components/priceConstants";
 ---
 
 <SubSection title="Simple, Usage-based Pricing">
@@ -11,22 +16,17 @@ import SubSection from "../../../layouts/SubSection.astro";
       price={0}
     />
     <PriceItem
-      title="Cloud Foundations"
-      description="Boostrap your organization for automated IaC deployments and configure your AWS ecosystem for compatibility with deployments of Panfactum Kubernetes clusters."
-      price={500}
-      period="/ month"
-    />
-    <PriceItem
-      title="Panfactum Kubernetes Cluster"
+      title="Support: Panfactum Kubernetes Cluster"
       description="We perform end-to-end lifecycle management of a production-ready Kubernetes cluster with all Panfactum addons installed."
-      price={750}
+      price={CLUSTER_COST + (CLUSTER_COST * ANNUAL_SPEND_DISCOUNT_MULTIPLIER)}
       period="/ month"
     />
     <PriceItem
-      title="Workload Deployment"
+      title="Support: Workload Deployment"
       description="We configure, harden, and deploy one of your workloads to a Panfactum Kubernetes cluster."
-      price={250}
+      price={WORKLOAD_DEPLOYMENT_COST + (WORKLOAD_DEPLOYMENT_COST * ANNUAL_SPEND_DISCOUNT_MULTIPLIER)}
       period="/ month"
     />
+      <p class="self-center text-xs"><sup>*</sup>Displayed prices include annual plan discounts</p>
   </div>
 </SubSection>

@@ -15,7 +15,7 @@ import PriceDetails from "@/pages/support/_components/PriceCalculator/PriceDetai
 import { calculatePlanPrice } from "@/pages/support/_components/PriceCalculator/calculatePlanPrice.ts";
 import {
   calculatorStore,
-  setCalculatorStore,
+  setCalculatorStore, shareCalculatorValues,
 } from "@/pages/support/_components/calculatorStore.ts";
 
 
@@ -54,11 +54,11 @@ const PriceSummary: Component = () => {
       </div>
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <Button
-          onClick={() => setDetailsOpened(!detailsOpened())}
+          onClick={shareCalculatorValues}
           variant="secondary"
         >
           <div class="flex items-center justify-between gap-2">
-            <span>Share Now</span>
+            <span>Share Link</span>
             <FiShare />
           </div>
         </Button>
@@ -75,7 +75,7 @@ const PriceSummary: Component = () => {
         </Button>
         <a href={SIGNUP_LINK} class="col-span-2 lg:col-span-1">
           <Button variant="primary" class="w-full">
-            Sign-up Now
+            Connect
           </Button>
         </a>
         {/*We conditionally add the details modal to the DOM b/c it is very expensive to update its DOM when the user changes calculator values*/}

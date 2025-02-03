@@ -68,8 +68,8 @@ export const STACK_PRODUCTIVITY_BOOST = 0.11;
 
 // Support plan pricing
 export const CLOUD_COST = 500;
-export const CLUSTER_COST = 750;
-export const WORKLOAD_DEPLOYMENT_COST = 250;
+export const CLUSTER_COST = 999;
+export const WORKLOAD_DEPLOYMENT_COST = 349;
 
 export const PRIORITY_SUPPORT_MULTIPLIER = 0.2;
 

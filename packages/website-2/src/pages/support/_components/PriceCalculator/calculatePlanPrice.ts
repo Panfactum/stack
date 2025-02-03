@@ -1,6 +1,5 @@
 import {
   ANNUAL_SPEND_DISCOUNT_MULTIPLIER,
-  CLOUD_COST,
   CLUSTER_COST,
   PRIORITY_SUPPORT_MULTIPLIER,
   STARTUP_DISCOUNT_MULTIPLIER,
@@ -33,12 +32,6 @@ export const calculatePlanPrice: (inputs: PlanPriceInputs) => {
   // Base Items
   ///////////////////////////////////////////////////
   const lineItems: Array<PlanPriceLineItem> = [
-    {
-      name: "Cloud Foundations",
-      unitPrice: CLOUD_COST,
-      quantity: 1,
-      subTotal: CLOUD_COST,
-    },
     {
       name: "Panfactum Kubernetes Clusters",
       unitPrice: CLUSTER_COST,
