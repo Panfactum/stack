@@ -15,35 +15,38 @@ const SupportHoursDescription = () => (
       possible savings.
     </p>
     <p>The available Support Hour options:</p>
-    <table class="border-secondary w-full min-w-full table-fixed border-collapse overflow-y-visible rounded-md border">
-      <thead>
+    <div class="overflow-auto">
+      <table class="border-primary  w-full min-w-128 table-fixed border-collapse overflow-y-visible rounded-md border">
+        <thead>
         <tr>
-          <th class="bg-secondary border-secondary text-secondary border-b p-4 text-start text-sm tracking-wide">
+          <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
             Tier
           </th>
-          <th class="bg-secondary border-secondary text-secondary border-b p-4 text-start text-sm tracking-wide">
+          <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
             Times
           </th>
-          <th class="bg-secondary border-secondary text-secondary border-b p-4 text-start text-sm tracking-wide">
+          <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
             Multiplier
           </th>
         </tr>
-      </thead>
-      <tbody>
-        <For each={SUPPORT_HOURS_OPTIONS}>{({ name, description, multiplier, excludeHolidays }) => (
-            <tr>
-              <td class="p-4">{name}</td>
-              <td class="p-4">
-                {description}
-                {excludeHolidays && <sup class="align-super">*</sup>}
-              </td>
-              <td class="p-4">
-                {NUMBER_FORMAT.format(100 + multiplier * 100)}%
-              </td>
-            </tr>
-          )}</For>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+        <For each={SUPPORT_HOURS_OPTIONS}>{({name, description, multiplier, excludeHolidays}) => (
+          <tr>
+            <td class="p-4">{name}</td>
+            <td class="p-4">
+              {description}
+              {excludeHolidays && <sup class="align-super">*</sup>}
+            </td>
+            <td class="p-4">
+              {NUMBER_FORMAT.format(100 + multiplier * 100)}%
+            </td>
+          </tr>
+        )}</For>
+        </tbody>
+      </table>
+    </div>
+
     <p>
       The Support Hours cost is a multiplier over the base support plan price.
     </p>

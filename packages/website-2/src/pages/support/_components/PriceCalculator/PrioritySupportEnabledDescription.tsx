@@ -24,44 +24,46 @@ const PrioritySupportEnabledDescription = () => (
       </li>
     </ul>
     <p>Issues come with the following SLAs:</p>
-    <table class="border-secondary w-full min-w-full table-fixed border-collapse overflow-y-auto rounded-md border">
-      <thead>
-        <tr>
-          <th class="bg-secondary border-secondary text-secondary border-b p-3 text-start text-sm tracking-wide">
-            Priority Level
-          </th>
-          <th class="bg-secondary border-secondary text-secondary border-b p-3 text-start text-sm tracking-wide">
-            Response Time SLA<sup class="align-super">*</sup>
-          </th>
-          <th class="bg-secondary border-secondary text-secondary border-b p-3 text-start text-sm tracking-wide">
-            Resolution Time SLA<sup class="align-super">*</sup>
-          </th>
-          <th class="bg-secondary border-secondary text-secondary border-b p-3 text-start text-sm tracking-wide">
-            Requires Priority Support
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="p-3">P1</td>
-          <td class="p-3">15 Minutes</td>
-          <td class="p-3">4 Hours</td>
-          <td class="p-3">Yes</td>
-        </tr>
-        <tr>
-          <td class="p-3">P2</td>
-          <td class="p-3">1 Hour</td>
-          <td class="p-3">8 Hours</td>
-          <td class="p-3">Yes</td>
-        </tr>
-        <tr>
-          <td class="p-3">P3</td>
-          <td class="p-3">8 Hours</td>
-          <td class="p-3">N/A</td>
-          <td class="p-3">No</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="overflow-auto">
+      <table class="border-primary w-full min-w-128 table-fixed border-collapse rounded-md border ">
+        <thead>
+          <tr>
+            <th class="bg-secondary border-primary border-b p-3 text-start text-sm tracking-wide">
+              Priority Level
+            </th>
+            <th class="bg-secondary border-primary border-b p-3 text-start text-sm tracking-wide">
+              Response Time SLA<sup class="align-super">*</sup>
+            </th>
+            <th class="bg-secondary border-primary border-b p-3 text-start text-sm tracking-wide">
+              Resolution Time SLA<sup class="align-super">*</sup>
+            </th>
+            <th class="bg-secondary border-primary border-b p-3 text-start text-sm tracking-wide ">
+              Requires Priority Support
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="p-3">P1</td>
+            <td class="p-3">15 Minutes</td>
+            <td class="p-3">4 Hours</td>
+            <td class="p-3">Yes</td>
+          </tr>
+          <tr>
+            <td class="p-3">P2</td>
+            <td class="p-3">1 Hour</td>
+            <td class="p-3">8 Hours</td>
+            <td class="p-3">Yes</td>
+          </tr>
+          <tr>
+            <td class="p-3">P3</td>
+            <td class="p-3">8 Hours</td>
+            <td class="p-3">N/A</td>
+            <td class="p-3">No</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p>
       If your support plan does <b>not</b> include Priority Support, all issues
       will be treated as P3.
