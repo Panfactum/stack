@@ -46,7 +46,6 @@ const Tooltip: ParentComponent<TooltipProps> = (props) => {
           >
             {props.content}
           </Show>
-          <props.content/>
         </KobalteTooltip.Content>
       </KobalteTooltip.Portal>
     </KobalteTooltip>
