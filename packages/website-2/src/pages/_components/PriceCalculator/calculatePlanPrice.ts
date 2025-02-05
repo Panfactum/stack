@@ -24,6 +24,31 @@ export interface PlanPriceInputs {
   startupDiscountEnabled: boolean;
 }
 
+export const getSupportHoursOption =  (hours: (typeof SUPPORT_HOURS_OPTIONS)[number]["id"]) => {
+return SUPPORT_HOURS_OPTIONS.find(
+  ({ id }) => id === hours,
+);
+}
+
+export const getSupportHoursMultiplier = (hours: (typeof SUPPORT_HOURS_OPTIONS)[number]["id"]) => {
+  return getSupportHoursOption(hours)?.multiplier || 0;
+}
+
+export const getAdjustedPrice = (basePrice: number, input: PlanPriceInputs) => {
+  let total = basePrice;
+  if(input.prioritySupportEnabled){
+    total *= 1 + PRIORITY_SUPPORT_MULTIPLIER
+  }
+  total *= 1 + getSupportHoursMultiplier(input.supportHours)
+  if(input.startupDiscountEnabled){
+    total *= 1 + STARTUP_DISCOUNT_MULTIPLIER
+  }
+  if(input.annualSpendCommitmentEnabled){
+    total *= 1 + ANNUAL_SPEND_DISCOUNT_MULTIPLIER
+  }
+  return total
+}
+
 export const calculatePlanPrice: (inputs: PlanPriceInputs) => {
   total: number;
   lineItems: PlanPriceLineItem[];
@@ -63,13 +88,10 @@ export const calculatePlanPrice: (inputs: PlanPriceInputs) => {
     });
   }
 
-  const supportHoursOption = SUPPORT_HOURS_OPTIONS.find(
-    ({ id }) => id === inputs.supportHours,
-  );
-  const supportHoursMultiplier = supportHoursOption?.multiplier || 0;
+  const supportHoursMultiplier = getSupportHoursMultiplier(inputs.supportHours)
   if (supportHoursMultiplier > 0) {
     lineItems.push({
-      name: `Addon: Support Hours - ${supportHoursOption?.name}`,
+      name: `Addon: Support Hours - ${getSupportHoursOption(inputs.supportHours)?.name}`,
       unitPrice: supportHoursMultiplier,
       quantity: baselineSubtotal,
       subTotal: baselineSubtotal * supportHoursMultiplier,

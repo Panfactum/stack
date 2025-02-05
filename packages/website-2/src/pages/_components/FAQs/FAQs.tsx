@@ -6,7 +6,7 @@ import FAQItem from "@/pages/_components/FAQs/FAQItem.tsx";
 
 const FAQS: Component = () => {
   return (
-    <Accordion class="w-full max-w-screen-lg" multiple={true} defaultValue={["price-changes"]}>
+    <Accordion class="w-full max-w-screen-lg" multiple={true}>
       <FAQItem title={"Is Panfactum right for me?"} id={"right-for-me"}>
         An ideal Panfactum user generally meets the following criteria:
         <ul class="flex list-inside list-disc flex-col gap-4">
@@ -27,9 +27,7 @@ const FAQS: Component = () => {
         <p>
           Our aim is to provide end-to-end support at less than 25% the current hourly market
           rate for
-          infrastructure experts. We make money because our rigorous trainings, internal automations, and economies of scale allow our
-          internal costs
-          to be even cheaper than that. Ultimately, we absolve you of the risk and challenge of meeting that bar.
+          infrastructure experts. We absolve you of the risk and challenge of meeting that bar.
         </p>
         <p>
           These savings allow you and your organization to focus on more interesting problems than optimizing, upgrading, and maintaining your infrastructure.
@@ -108,7 +106,7 @@ const FAQS: Component = () => {
           a new release every four to six months.
         </p>
         <p>
-          We will reach out a month in advance of every upgrade so that we can collaborate on any necessary stability testing
+          We will reach out a month in advance of every upgrade so that we can collaborate on stability testing
           as each new release can contain significant changes, oftentimes driven by the projects we integrate.
         </p>
         <p>
@@ -210,7 +208,7 @@ const FAQS: Component = () => {
           various
           license changes in the open source community. As the Panfactum framework is composed exclusively of open
           source code, we have direct experience
-          handling the fallout of such events (<a href="https://opentofu.org/manifesto/">looking at you Hashicorp</a>).
+          handling the fallout of such events (<a href="https://opentofu.org/manifesto/">looking at you, Hashicorp</a>).
         </p>
         <p>
           We take this risk incredibly seriously and are looking for a long-term home for the OSS Panfactum framework. In the interim, you can

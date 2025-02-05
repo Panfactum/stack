@@ -11,6 +11,8 @@ export interface CalculatorStorePlanPriceComponents {
   annualSpendCommitmentEnabled: boolean;
   clusterCount: number;
   workloadCount: number;
+  dbCount: number;
+  moduleCount: number;
   prioritySupportEnabled: boolean;
   startupDiscountEnabled: boolean;
   supportHours: (typeof SUPPORT_HOURS_OPTIONS)[number]["id"];
@@ -49,6 +51,8 @@ export const [calculatorStore, setCalculatorStore] =
   createStore<CalculatorStore>({
     clusterCount: 3,
     workloadCount: 2,
+    dbCount: 1,
+    moduleCount: 1,
     annualSpendCommitmentEnabled: true,
     prioritySupportEnabled: false,
     startupDiscountEnabled: false,

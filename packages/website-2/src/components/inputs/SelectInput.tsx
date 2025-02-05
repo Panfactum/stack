@@ -8,6 +8,8 @@ import {
 } from "solid-js";
 import { isServer } from "solid-js/web";
 
+import {useBackgroundContext} from "@/components/context/background.ts";
+
 import InputBase from "./InputBase.tsx";
 
 
@@ -67,6 +69,7 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
   };
 
   const [selectEl, setSelectEl] = createSignal<HTMLDivElement>();
+  const background = useBackgroundContext();
 
   return (
     <InputBase
@@ -82,6 +85,7 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
           class={clsx(
             "border-primary flex w-full items-center justify-between rounded-md border px-4 py-2 text-sm",
             "h-12 shadow focus:outline-none focus:ring-2",
+            background === "primary" ? "bg-transparent" : "bg-primary"
           )}
         >
           {selectedOption()}

@@ -1,9 +1,5 @@
 export const NAV_LINKS = [
   {
-    title: "Support",
-    url: "/support",
-  },
-  {
     title: "Docs",
     url: "/docs",
   },

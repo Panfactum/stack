@@ -1,4 +1,5 @@
-import { type Component, createEffect, createSignal, type JSX } from "solid-js";
+import {Slider} from "@kobalte/core/slider";
+import { type Component } from "solid-js";
 import "./IntegerSliderInput.css";
 
 interface IntegerSliderInputProps {
@@ -9,56 +10,43 @@ interface IntegerSliderInputProps {
   minValue: number;
   maxValue: number;
   description?: string | Component;
-  onChange?: (newVal: number) => void;
+  onChange: (newVal: number) => void;
 }
 
 const PercentSliderInput: Component<IntegerSliderInputProps> = (
   props,
 ) => {
-  const [inputEl, setInputEl] = createSignal<HTMLInputElement>();
-
-  const onInput: JSX.EventHandler<HTMLInputElement, InputEvent> = (event) => {
-    const newValue = event.currentTarget.value;
-    const newNum = parseInt(newValue);
-    if (props.onChange) {
-      props.onChange(newNum);
-    }
-  };
-
-  createEffect(() => {
-    const newValue = `${props.value}`;
-    const currentVal = inputEl()?.value;
-    if (currentVal !== newValue) {
-      const inputDOMEl = inputEl();
-      if (inputDOMEl) {
-        inputDOMEl.value = newValue;
-      }
-    }
-  });
-
   return (
-    <div class="col-span-full flex w-full gap-4">
-      <label for={props.id} class="sr-only">
+    <Slider
+      class="col-span-full flex w-full gap-8 py-4"
+      value={[props.value]}
+      onChange={(values) => { props.onChange(values[0]); }}
+      minValue={props.minValue}
+      maxValue={props.maxValue}
+      step={props.step}
+      getValueLabel={({values}) => `${values[0]}%`}
+    >
+      <Slider.Label for={props.id} class="sr-only">
         {props.label}
-      </label>
-      <span class="w-10 font-semibold">{props.value}%</span>
-      <div class={"flex w-full items-center gap-2"}>
-        <span class="text-secondary text-sm">{props.minValue}%</span>
-        <input
-          ref={setInputEl}
-          type="range"
-          class={"integer-slider"}
-          id={props.id}
-          aria-orientation="horizontal"
-          min={props.minValue}
-          max={props.maxValue}
-          step={props.step}
-          on:input={onInput}
+      </Slider.Label>
+      <Slider.ValueLabel class="text-display-xs w-10 font-semibold"/>
+      <div class="flex w-full items-center gap-6">
+        <span>{props.minValue}%</span>
+      <Slider.Track
+        class="relative h-2 w-full rounded-full bg-gray-dark-mode-200"
+      >
+        <Slider.Fill
+          class="bg-accent-light absolute h-full rounded-full"
         />
-        <span class="text-secondary text-sm">{props.maxValue}%</span>
+        <Slider.Thumb class="bg-accent-light -top-2 size-6 cursor-pointer rounded-full">
+          <Slider.Input/>
+        </Slider.Thumb>
+      </Slider.Track>
+      <span>{props.maxValue}%</span>
       </div>
-    </div>
-  );
+    </Slider>
+
+    );
 };
 
 export default PercentSliderInput;

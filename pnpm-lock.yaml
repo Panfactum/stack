@@ -536,6 +536,9 @@ importers:
       sharp:
         specifier: ^0.32.6
         version: 0.32.6
+      slider:
+        specifier: link:@kobalte/core/slider
+        version: link:@kobalte/core/slider
       solid-devtools:
         specifier: ^0.33.0
         version: 0.33.0(solid-js@1.9.4)(vite@6.0.11(@types/node@22.10.5)(jiti@1.21.7)(lightningcss@1.28.2)(terser@5.37.0)(tsx@4.19.1)(yaml@2.7.0))

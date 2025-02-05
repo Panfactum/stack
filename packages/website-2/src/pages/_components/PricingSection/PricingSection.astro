@@ -15,12 +15,7 @@ import {
       description="Our full infrastructure framework is completely free and open source. That includes self-service versions of the below software. No paywalled features and no support plan needed."
       price={0}
     />
-    <PriceItem
-      title="Managed: Panfactum Kubernetes Cluster"
-      description="We perform end-to-end lifecycle management of a production-ready Kubernetes cluster with dozens of Panfactum addons installed. Includes a full observability suite and CI/CD pipelines."
-      price={CLUSTER_COST + (CLUSTER_COST * ANNUAL_SPEND_DISCOUNT_MULTIPLIER)}
-      period="/ month"
-    />
+
     <PriceItem
             title="Managed: Panfactum Module"
             description="We deploy one of our turn-key infrastructure modules for popular OSS tooling to a Kubernetes cluster."
@@ -39,6 +34,12 @@ import {
       price={CUSTOM_WORKLOAD_DEPLOYMENT_COST + (CUSTOM_WORKLOAD_DEPLOYMENT_COST * ANNUAL_SPEND_DISCOUNT_MULTIPLIER)}
       period="/ month"
     />
-      <p class="self-center text-xs"><sup>*</sup>Displayed prices include annual plan discounts</p>
+      <PriceItem
+              title="Managed: Panfactum Kubernetes Cluster"
+              description="We perform end-to-end lifecycle management of a production-ready Kubernetes cluster with dozens of bundled Panfactum addons included such as a full observability suite and CI/CD pipelines."
+              price={CLUSTER_COST + (CLUSTER_COST * ANNUAL_SPEND_DISCOUNT_MULTIPLIER)}
+              period="/ month"
+      />
+      <p class="self-center text-xs"><sup>*</sup>Displayed prices include annual plan discounts and no enhanced support modifiers</p>
   </div>
 </SubSection>

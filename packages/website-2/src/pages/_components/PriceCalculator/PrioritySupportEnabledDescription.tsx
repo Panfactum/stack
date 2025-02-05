@@ -69,8 +69,8 @@ const PrioritySupportEnabledDescription = () => (
       will be treated as P3.
     </p>
     <p>
-      Enabling Priority Support costs{" "}
-      {NUMBER_FORMAT.format(PRIORITY_SUPPORT_MULTIPLIER * 100)}% of your base
+      Enabling Priority Support adds{" "}
+      {NUMBER_FORMAT.format(PRIORITY_SUPPORT_MULTIPLIER * 100)}% to your
       support plan price.
     </p>
     <p class="text-xs">

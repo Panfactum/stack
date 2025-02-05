@@ -12,7 +12,7 @@ const FAQItem: ParentComponent<FAQItemProps> = (props) => {
       <Accordion.Item value={props.id} class="border-b-2 border-gray-light-mode-500 py-4 last:border-0 dark:border-gray-dark-mode-700">
       <Accordion.Header class="[&[data-expanded]_svg]:rotate-45">
         <Accordion.Trigger
-          class="text-display-sm flex w-full items-center justify-between gap-4 py-4 text-left font-semibold"
+          class="text-display-sm flex w-full cursor-pointer items-center justify-between gap-4 py-4 text-left font-semibold"
         >
           {props.title}
           <FiPlusCircle class="self-start transition-all" size={28}/>
