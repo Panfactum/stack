@@ -31,7 +31,7 @@ to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thu
 credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
 
 <MarkdownAlert severity="warning">
-    The module also supplies `root_username` and `root_password` outputs for the root user of the database.
+    The module also supplies `root_name` and `root_password` outputs for the root user of the database.
     These credentials are **unsafe** to use as they are not automatically rotated.
 </MarkdownAlert>
 
