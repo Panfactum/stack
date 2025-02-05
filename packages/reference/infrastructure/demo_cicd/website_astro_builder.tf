@@ -90,6 +90,17 @@ module "astro_builder_workflow" {
         name = "git_ref"
         description = "Which commit to check out and build in the panfactum/stack repository"
         default = "main"
+      },
+
+      {
+        name = "sitemap_url"
+        description = "The URL of the sitemap to scrape"
+        default = "https://panfactum.com/sitemap.xml"
+      },
+
+      {
+        name = "algolia_index_name"
+        description = "The index name in algolia to update"
       }
     ]
   }
@@ -106,11 +117,11 @@ module "astro_builder_workflow" {
   extra_aws_permissions = data.aws_iam_policy_document.astro_builder.json
   default_resources = {
     requests = {
-      memory = "25Mi"
-      cpu = "25m"
+      memory = "512Mi"
+      cpu = "100m"
     }
     limits = {
-      memory = "100Mi"
+      memory = "1024Mi"
     }
   }
   default_container_image = local.ci_image
@@ -133,12 +144,23 @@ module "astro_builder_workflow" {
             name = "build"
             command = ["/scripts/build.sh"]
             dependencies = ["scale-buildkit", "clone"]
+          },
+
+          {
+            image = "891377197483.dkr.ecr.us-east-2.amazonaws.com/scraper:${var.scraper_image_version}"
+            command = ["node"]
+            args = ["index.js", "{{workflow.parameters.sitemap_url}}", "{{workflow.parameters.algolia_index_name}}"]
           }
         ]
       }
     }
   ]
   tmp_directories = {
+    "cache" = {
+      mount_path = "/tmp"
+      size_mb = 100
+    }
+
     code = {
       mount_path = "/code"
       size_mb = 1024
