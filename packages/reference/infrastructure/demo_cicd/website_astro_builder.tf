@@ -83,7 +83,7 @@ module "astro_builder_workflow" {
   panfactum_scheduler_enabled = true
   active_deadline_seconds = 60 * 60
 
-  entrypoint = "build-images"
+  entrypoint = "main-dag"
   arguments = {
     parameters = [
       {
@@ -95,12 +95,13 @@ module "astro_builder_workflow" {
       {
         name = "sitemap_url"
         description = "The URL of the sitemap to scrape"
-        default = "https://panfactum.com/sitemap.xml"
+        default = "https://website2.panfactum.com/sitemap-index.xml"
       },
 
       {
         name = "algolia_index_name"
         description = "The index name in algolia to update"
+        default = "docs-2"
       }
     ]
   }
@@ -117,13 +118,14 @@ module "astro_builder_workflow" {
   extra_aws_permissions = data.aws_iam_policy_document.astro_builder.json
   default_resources = {
     requests = {
-      memory = "512Mi"
-      cpu = "100m"
+      memory = "25Mi"
+      cpu = "25m"
     }
     limits = {
-      memory = "1024Mi"
+      memory = "100Mi"
     }
   }
+
   default_container_image = local.ci_image
   templates = [
     {
@@ -144,12 +146,27 @@ module "astro_builder_workflow" {
             name = "build"
             command = ["/scripts/build.sh"]
             dependencies = ["scale-buildkit", "clone"]
+          }
+        ]
+      }
+    },
+
+    {
+      name = "main-dag"
+      dag = {
+        tasks = [
+          {
+            name = "build-images"
+            template = "build-images"
           },
 
           {
-            image = "891377197483.dkr.ecr.us-east-2.amazonaws.com/scraper:${var.scraper_image_version}"
-            command = ["node"]
-            args = ["index.js", "{{workflow.parameters.sitemap_url}}", "{{workflow.parameters.algolia_index_name}}"]
+            name = "scrape-and-index"
+            templateRef = {
+              name = module.run_scraper_workflow_spec.name
+              template = "entry"
+            }
+            depends = "build-images"
           }
         ]
       }
