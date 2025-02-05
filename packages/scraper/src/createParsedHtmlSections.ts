@@ -72,7 +72,15 @@ export function parseScrapedUrl (scrapedUrl: ScrapedUrl): Section[] {
  */
 function parseUrlContent (content: string): UrlContent[] {
   const root = parse(content)
-  root.querySelectorAll('script').forEach((el) => el.remove())
+
+  const removeElements = [
+    'script',
+    'style'
+  ]
+
+  removeElements.forEach((element) => {
+    root.querySelectorAll(element).forEach((el) => el.remove())
+  })
 
   const breadCrumbs = [root.querySelector('nav [aria-label="secondary tab navigation"] a[aria-selected="true"]'), ...Array.from(root.querySelectorAll('aside .text-black'))].map(el => el?.textContent).filter(content => content !== undefined)
   const article = root.querySelector('article')
