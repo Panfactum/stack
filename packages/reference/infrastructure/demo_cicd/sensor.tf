@@ -170,7 +170,17 @@ module "sensor" {
                 namespace = local.namespace
               }
               spec = {
-                arguments = module.astro_builder_workflow.arguments
+                /*arguments = module.astro_builder_workflow.arguments
+                arguments = {
+                  parameters = [
+                    {
+                      name = "tf_apply_paths"
+                      value = jsonencode([
+                        "environments/${var.deployment_environment}/us-west-2"
+                      ])
+                    }
+                  ]
+                }*/
                 workflowTemplateRef = {
                   name = local.website_astro_builder_name
                 }
