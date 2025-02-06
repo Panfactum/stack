@@ -44,7 +44,8 @@ data "aws_iam_policy_document" "astro_builder" {
       "s3:*"
     ]
     resources = [
-      "arn:aws:s3:::pf-website-astro/*"
+      "arn:aws:s3:::pf-website-astro/*",
+      "arn:aws:s3:::pf-website-astro"
     ]
   }
   statement {
