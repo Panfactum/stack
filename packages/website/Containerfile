@@ -8,9 +8,18 @@ WORKDIR /code
 ## Dependencies Image
 #################################################
 FROM base AS deps
+ARG BUILDARCH
 
 # Install package manager
-RUN npm i -g pnpm@9.14.2
+RUN apt update && \
+  apt install -y curl unzip groff && \
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-$( [ "$BUILDARCH" = "amd64" ] && echo "x86_64" || echo "aarch64").zip" -o "awscliv2.zip" && \
+  unzip awscliv2.zip && \
+  ./aws/install && \
+  apt-get clean autoclean && \
+  apt-get autoremove -y && \
+  rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
+  npm i -g pnpm@9.14.2
 
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
@@ -18,18 +27,6 @@ COPY packages/website/package.json packages/website/
 COPY packages/eslint/ packages/eslint/
 RUN --mount=type=cache,id=pnpm,target=/code/.pnpm pnpm install --frozen-lockfile
 
-#################################################
-## Development Image
-#################################################
-
-FROM deps AS development
-WORKDIR /code/packages/website
-COPY packages/website/ .
-RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
- NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) \
- NODE_OPTIONS=--max-old-space-size=8192 \
- npx next build --no-lint
-RUN npx next-sitemap
 
 #################################################
 ## Builder Image
@@ -39,33 +36,25 @@ FROM deps AS builder
 ARG ALGOLIA_APP_ID
 ARG ALGOLIA_SEARCH_API_KEY
 ARG ALGOLIA_INDEX_NAME
-
-## Validate required build arguments
-RUN test -n "$ALGOLIA_APP_ID" && test -n "$ALGOLIA_SEARCH_API_KEY" && test -n "$ALGOLIA_INDEX_NAME"
+ARG SITE_URL
 
 ENV NODE_ENV=production
 WORKDIR /code/packages/website
-COPY packages/website/ .
+COPY packages/website .
 
-RUN mkdir /code/packages/website/build
-RUN --mount=type=secret,id=MUI_X_LICENSE_KEY,target=/run/secrets/MUI_X_LICENSE_KEY \
-  --mount=type=cache,id=website-build,target=/code/packages/website/build/cache \
-  NEXT_PUBLIC_MUI_X_LICENSE_KEY=$(cat /run/secrets/MUI_X_LICENSE_KEY) \
-  NEXT_PUBLIC_ALGOLIA_APP_ID=${ALGOLIA_APP_ID} \
-  NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${ALGOLIA_SEARCH_API_KEY} \
-  NEXT_PUBLIC_ALGOLIA_INDEX_NAME=${ALGOLIA_INDEX_NAME} \
+RUN mkdir /code/packages/website/dist
+RUN --mount=type=cache,id=website-build,target=/code/packages/website/.cache \
+  ALGOLIA_APP_ID=${ALGOLIA_APP_ID} \
+  ALGOLIA_SEARCH_API_KEY=${ALGOLIA_SEARCH_API_KEY} \
+  ALGOLIA_INDEX_NAME=${ALGOLIA_INDEX_NAME} \
+  SITE_URL=${SITE_URL} \
   NODE_OPTIONS=--max-old-space-size=8192 \
-  npx next build --no-lint
-RUN npx next-sitemap
+  pnpm run build
 
-#################################################
-## Production Image
-#################################################
-
-FROM base AS production
-WORKDIR /code
-ENV NODE_ENV=production
-COPY --from=builder /code/packages/website/build/standalone ./
-WORKDIR /code/packages/website
-COPY --from=builder /code/packages/website/public ./public
-COPY --from=builder /code/packages/website/build/static ./build/static
+RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_ID \
+  --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,target=/run/secrets/AWS_SECRET_ACCESS_KEY \
+  --mount=type=secret,id=AWS_SESSION_TOKEN,target=/run/secrets/AWS_SESSION_TOKEN \
+  AWS_ACCESS_KEY_ID=$(cat /run/secrets/AWS_ACCESS_KEY_ID) \
+  AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/AWS_SECRET_ACCESS_KEY) \
+  AWS_SESSION_TOKEN=$(cat /run/secrets/AWS_SESSION_TOKEN) \
+  aws s3 cp ./dist/ s3://pf-website-astro/ --recursive

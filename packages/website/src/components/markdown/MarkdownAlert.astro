@@ -1,0 +1,25 @@
+---
+interface Props {
+  severity: "info" | "warning";
+}
+const baseClass = "flex gap-lg items-center px-4 border-l-4 my-4";
+
+const classes = {
+  info: "bg-gray-light-mode-300 [&_a]:!text-black [&_a]:dark:!text-white dark:bg-accent dark:bg-brand-docs-info border-brand",
+  warning: "bg-warning-primary [&_a]:!text-black [&_a]:dark:!text-white dark:bg-brand-docs-warning border-warning",
+  error: "bg-error-primary dark:bg-brand-docs-error border-error",
+  success: "bg-success-primary dark:bg-brand-docs-success border-success"
+}
+
+const {severity} = Astro.props;
+const styleClasses = classes[severity];
+---
+
+<div class:list={[
+  baseClass,
+  styleClasses
+]}>
+  <div class="w-full" role="alert">
+    <slot />
+  </div>
+</div>

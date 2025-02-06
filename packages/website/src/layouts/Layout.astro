@@ -1,0 +1,40 @@
+---
+import CommonHead from "./CommonHead.astro";
+import Footer from "./Footer.astro";
+import Header from "./Header.astro";
+import ToastRegion from "../components/ui/ToastRegion";
+
+interface Props {
+  redirect?: string;
+  title: string;
+  description: string;
+  heroClass?: string;
+  hasBorder?: boolean;
+}
+const {
+  redirect,
+  title,
+  description,
+  heroClass = "",
+  hasBorder = false,
+} = Astro.props;
+---
+
+<html lang="en">
+  <CommonHead title={title} description={description} redirect={redirect}>
+    <meta name="generator" content={Astro.generator} />
+  </CommonHead>
+  <body class="bg-primary w-screen max-w-[100vw] overflow-x-hidden overflow-y-scroll font-inter">
+    <div class:list={heroClass}>
+      <Header
+        transition:persist
+        hasBorder={hasBorder}
+        background={"transparent"}
+      />
+      <slot name="hero" />
+    </div>
+    <slot />
+    <Footer />
+    <ToastRegion client:idle/>
+  </body>
+</html>

@@ -37,14 +37,14 @@ buildctl \
   --frontend=dockerfile.v0 \
   --output "type=image,name=astro-builder:latest,push=false" \
   --local context=. \
-  --local dockerfile=./packages/website-2 \
+  --local dockerfile=./packages/website \
   --opt filename=./Containerfile \
   --secret id=AWS_ACCESS_KEY_ID,env=AWS_ACCESS_KEY_ID \
   --secret id=AWS_SECRET_ACCESS_KEY,env=AWS_SECRET_ACCESS_KEY \
   --secret id=AWS_SESSION_TOKEN,env=AWS_SESSION_TOKEN \
-  --opt build-arg:PUBLIC_ALGOLIA_APP_ID="$PUBLIC_ALGOLIA_APP_ID" \
-  --opt build-arg:PUBLIC_ALGOLIA_SEARCH_API_KEY="$PUBLIC_ALGOLIA_SEARCH_API_KEY" \
-  --opt build-arg:PUBLIC_ALGOLIA_INDEX_NAME="$PUBLIC_ALGOLIA_INDEX_NAME" \
+  --opt build-arg:ALGOLIA_APP_ID="$ALGOLIA_APP_ID" \
+  --opt build-arg:ALGOLIA_SEARCH_API_KEY="$ALGOLIA_SEARCH_API_KEY" \
+  --opt build-arg:ALGOLIA_INDEX_NAME="$ALGOLIA_INDEX_NAME" \
   --opt build-arg:SITE_URL="$SITE_URL" \
   --export-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder" \
   --import-cache "type=s3,region=$BUILDKIT_BUCKET_REGION,bucket=$BUILDKIT_BUCKET_NAME,name=astro-builder"

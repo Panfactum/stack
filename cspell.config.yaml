@@ -208,7 +208,10 @@ words: [
   "Prepuller",
   "FLUSHALL",
   "Noco",
-  "nocodb"
+  "nocodb",
+  "astro",
+  "shellsession",
+  "downscaling"
 ]
 languageSettings:
   - languageId: markdown,mdx

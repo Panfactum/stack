@@ -1,0 +1,109 @@
+/* src/styles/content.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.content {
+  @apply prose md:prose-base max-w-full;
+  *, *::marker {
+    @apply text-primary-on-light;
+  }
+  @apply prose-h1:font-medium prose-h1:font-machina prose-h1:break-words prose-h1:mb-5;
+  @apply prose-h2:py-2 prose-h2:my-5 prose-h2:border-b prose-h2:border-primary prose-h2:break-words;
+  @apply prose-h3:break-words;
+  @apply prose-h4:break-words;
+  @apply prose-h5:break-words;
+  @apply prose-h6:break-words;
+
+  @apply prose-td:border prose-th:border prose-td:border-secondary prose-th:border-secondary;
+  @apply prose-td:py-3 prose-td:px-6 prose-th:py-3 prose-th:px-6 prose-th:bg-secondary;
+  @apply prose-a:underline;
+  @apply prose-code:font-montreal prose-code:font-semibold;
+
+  code:not(pre > code)::before, code:not(pre > code)::after {
+      content: "`";
+  }
+
+  #footnote-label {
+    position: relative;
+    width: unset;
+    height: unset;
+  }
+
+  td {
+    @apply border border-gray-light-mode-400 dark:border-gray-dark-mode-800;
+  }
+
+  figure {
+    @apply !shadow-sm;
+  }
+
+  section.footnotes {
+    @apply -mx-6 px-6 py-4 bg-tertiary dark:bg-secondary;
+
+    h2 {
+      @apply m-0;
+    }
+  }
+
+  sup {
+    @apply top-0;
+  }
+
+  sup a {
+    @apply text-sm font-medium border py-0.5 px-1.5 btn-secondary-on-light rounded no-underline;
+  }
+
+  .katex-html {
+    display: none;
+  }
+
+  .icon.icon-link {
+    display: inline-block; /* Ensures the element behaves like an inline icon */
+    width: 1rem; /* Set width for the icon */
+    height: 1rem; /* Set height for the icon */
+    background-color: transparent; /* Ensure the background is transparent */
+    background-image: url("/link.svg"); /* Replace with your desired icon */
+    background-repeat: no-repeat;
+    background-size: contain; /* Ensures the image scales properly */
+    vertical-align: middle; /* Aligns with text, if any */
+    cursor: pointer; /* Changes cursor to pointer for interactivity */
+    margin-left: 6px;
+  }
+
+  a:hover .icon.icon-link {
+    filter: brightness(1.2); /* Lightens the icon on hover */
+  }
+
+  th {
+    white-space: nowrap;
+  }
+
+  img {
+    @apply bg-transparent dark:bg-white;
+  }
+
+  /*h1[id]::before {
+    content: '';
+    display: block;
+    height: 80px;
+    margin-top: -80px;
+  }*/
+
+  h1[id],
+  h2[id],
+  h3[id],
+  h4[id],
+  h5[id],
+  h6[id] {
+    scroll-margin-top: var(--header-height);
+  }
+
+  a {
+    @apply underline-offset-4 cursor-pointer;
+  }
+
+  div[role="alert"] a {
+    @apply text-primary-on-dark;
+  }
+}

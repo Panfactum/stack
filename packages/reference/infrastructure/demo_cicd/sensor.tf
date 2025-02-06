@@ -197,30 +197,6 @@ module "sensor" {
     },
     {
       template = {
-        name = module.build_and_deploy_website_workflow.name
-        conditions = "push-to-main"
-        argoWorkflow = {
-          operation = "submit"
-          source = {
-            resource = {
-              apiVersion = "argoproj.io/v1alpha1"
-              kind = "Workflow"
-              metadata = {
-                generateName = module.build_and_deploy_website_workflow.generate_name
-                namespace = local.namespace
-              }
-              spec = {
-                workflowTemplateRef = {
-                  name = module.build_and_deploy_website_workflow.name
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      template = {
         name = module.resource_update_workflow.name
         conditions = "push-to-main"
         argoWorkflow = {

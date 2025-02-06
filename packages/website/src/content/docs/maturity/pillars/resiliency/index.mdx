@@ -1,0 +1,160 @@
+---
+title: "Resiliency"
+---
+
+# Resiliency
+
+## Overview
+
+Resiliency focuses on preventing unintended system problems and reducing the impact when system problems do occur. A
+_system problem_ might be as small as a UI bug or as large as a complete system outage.
+
+Resilient platforms excel in four distinct areas:
+
+- **High Availability (HA)**: The ability of a system to remain functional despite arbitrary problems in any _failure domain_.
+  Some examples of failure domains include a single replica of a multi-replica service (smallest), a single VM in a cluster (small), a single
+  datacenter in a region (medium), or even an entire cloud provider such as AWS (large).
+
+  Every organization will have to choose what level of HA it needs. Resiliency against outages in larger failure domains results
+  in higher costs, not just in infrastructure resources but also engineering complexity.
+  For attaining 99.9% uptime SLAs in cloud computing environments, organizations will typically
+  design for single datacenter / [availability zone](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html) failures.
+  Beyond this, organizations must carefully weigh the costs and benefits as costs increase dramatically.
+
+- **Automated Testing**: The ability of an organization to tests its systems with the goal of uncovering problems as early
+  in the software development lifecycle as possible. There are generally five categories of automated testing that an organization can develop:
+
+  - **Unit Tests**: Tests written against individual components of codebase in isolation. Typically, these target
+    individual functions / methods. [^1]
+
+  - **Static Analysis**: Tests written that analyze the source code directly without invoking it. Static analysis can
+    be extremely effective as it requires no additional work other than producing the source code itself. This usually includes
+    using a [typed language](https://en.wikipedia.org/wiki/Type_system) and various [linters](<https://en.wikipedia.org/wiki/Lint_(software)>). [^2]
+
+  - **Integration Tests**: Tests written against the public interface of the codebase. For example, an HTTP service
+    might have integration tests that submit HTTP requests and validate various system properties such as database records. As another example,
+    a programming library might have tests written against its public API to validate the expected behavior.
+
+  - **End-to-End (E2E) Tests**: Tests written against the overall system as a whole. Usually these are written with the goal
+    of emulating the end user experience. For example, a SaaS company with a web UI might use a tool like [Playwright](https://playwright.dev/) to
+    create simulated user actions directly in a web browser.
+
+    E2E tests can be used to gate deployments to production, for example by running the test suite in a production-like staging environment. Additionally,
+    the tests can be even be run against production itself in order to create better [downtime visibility](/docs/maturity/measures/downtime-visibility).
+
+  - **Simulated Failure Tests**: Also known as [chaos engineering](https://en.wikipedia.org/wiki/Chaos_engineering),
+    these test simulate real-world failure cases that are often not related to the specific
+    business logic of the code itself. Simulated failures might include dropped network packets / requests, a sudden service shutdown
+    caused by an [OOM error](https://en.wikipedia.org/wiki/Out_of_memory), or even the unexpected loss of an entire datacenter.
+
+[^1]:
+    Unit tests can be incredibly helpful in many circumstances, especially when developing functional logic
+    that does not contain [side effects](<https://en.wikipedia.org/wiki/Side_effect_(computer_science)>) (e.g., network calls). However, when developing networked systems as is common in SaaS products, trying
+    to unit test every line of code as is recommended in some practices such as [TDD](https://en.wikipedia.org/wiki/Test-driven_development)
+    may not be the most efficient use of time. Not only does it become complex to [mock](https://en.wikipedia.org/wiki/Mock_object) side
+    effects, but mocking degrades the relevance of the tests themselves. We believe once you are working with side effects,
+    you are better served to focus on testing system behavior via integration tests.
+
+[^2]:
+    An important result of static analysis is additional rules and limitations on the source code itself. A common
+    complaint is that this can cause perceived productivity loss. However, in our experience aiding organizations developing SaaS products,
+    the vast majority of bugs deployed to production systems
+    could have been prevented with static analysis. Additionally, static analysis helps to enforce
+    uniformity in a codebase being worked on by many individuals. Ultimately, you must come to your own decision for the
+    best tools for your workflows, but we'd always strongly recommend increasing the levels of static analysis whenever possible.
+
+- **Automated Remediation**: The ability of a system to automatically fix itself when issues are detected. Most commonly,
+  this practices involves incorporating automatic rollbacks to an organization's deployment pipelines where new code and / or
+  configuration changes are applied to an environment.
+
+  While conceptually simple, this requires strong foundations in the [observability pillar](/docs/maturity/pillars/observability)
+  in order to quickly detect when issues occurs. Additionally, automatic rollbacks can introduce complexity in organizations
+  using [GitOps](https://about.gitlab.com/topics/gitops/) where it will cause differences between what is deployed and
+  what is running in the system.
+
+- **Disaster Recovery**: The ability to recover from system changes that cannot be easily rolled back. A catastrophic system
+  change could come from both internal or external sources. An internal example would be an accidental database deletion, and
+  an external example would be a long-term outage from a foundational service provider.
+
+  We break this into two focus areas:
+
+  - **Data Durability:** How your organization would recover its data in the event the primary storage location becomes
+    unavailable or corrupted (e.g., service provider locks your accounts, invalid schema migration, ransomware attack, etc.).
+
+  - **System Restoration:** How your organization would redeploy all of its systems in the event the primary system becomes
+    unavailable or compromised (e.g., regional outage, lost system access, etc.). Highly related to the [recovery time objective
+    (RTO)](</docs/maturity/measures/kpis#recovery-time-objective-(rto)>).
+
+## Motivation
+
+This pillar provides organizational value for the following reasons:
+
+- Prevents risks to business continuity:
+
+  - irrecoverable data loss
+  - irrecoverable or extended system outages
+
+- Prevents damage to public reputation and customer trust caused by bugs and outages
+
+- Improves development velocity by
+
+  - reducing the amount of rework
+  - reducing time spent debugging production issues
+  - reducing the amount of manual scrutiny necessary during development by relying on resilient CI / CD pipelines
+
+- Improves development predictability by minimizing unplanned work
+
+## Benchmark
+
+### Metrics
+
+These are common measurements that can help an organization assess their performance in this pillar. These are
+intended to be **assessed within the context of performance on the [key platform metrics](/docs/maturity/measures/kpis),** not used in a standalone manner.
+
+| Indicator                                                                                       | Business Impact                                                                                                             | Ideal Target |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| System Uptime Percentage                                                                        | The business cannot operate when its systems are down                                                                       | >= 99.9%     |
+| [Recovery Time Objective (RTO)](</docs/maturity/measures/kpis#recovery-time-objective-(rto)>) | Ensure that the business can quickly recover from arbitrary catastrophes                                                    | \< 4 hours   |
+| [Change Failure Rate (CFR)](</docs/maturity/measures/kpis#change-failure-rate-(cfr)>)         | Bugs in production impact development velocity and customer experience                                                      | \< 5%        |
+| [Error rates](/docs/maturity/measures/kpis#error-rates)                                       | Unhandled errors degrade customer experience                                                                                | \< 0.1%      |
+| Likelihood of Unrecoverable Data Loss / Year                                                    | Losing system data almost always poses a risk to business continuity                                                        | \< 0.1%      |
+| [Automated Test Coverage](https://en.wikipedia.org/wiki/Code_coverage)                          | Ensures that bugs are detected early in the SDLC, minimizing business impact                                                | >= 90%       |
+| E2E Test Runtime                                                                                | Ensures that E2E tests can easily be incorporated into the SDLC                                                             | \<= 30 min   |
+| Time since last system recovery exercise                                                        | Ensures that system recovery practices can be applied to the current system design; ensures that RTO attainment is feasible | \<= 90 days  |
+
+### Organization Goals
+
+These are common goals to help organizations improve their performance on the key platform metrics. While each goal represents a best practice, **the level
+of impact and optimal approach will depend on your organization's unique context.**
+
+| Category              | Code     | Goal                                                                                                                                     |
+| :-------------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| High Availability     | `R.A.1`  | Services always deployed with at least one online replica.                                                                               |
+|                       | `R.A.2`  | Service replicas never deployed to the same underlying host.                                                                             |
+|                       | `R.A.3`  | Service replicas are balanced evenly across failure domains.                                                                             |
+|                       | `R.A.4`  | Services automatically restart if crashed.                                                                                               |
+|                       | `R.A.5`  | Services stop receiving traffic if unhealthy.                                                                                            |
+|                       | `R.A.6`  | Services gracefully drain active traffic when shutting down.                                                                             |
+|                       | `R.A.7`  | All network calls are automatically retried on failure with an [exponential backoff](https://en.wikipedia.org/wiki/Exponential_backoff). |
+|                       | `R.A.8`  | System load is equally balanced across service replicas.                                                                                 |
+|                       | `R.A.9`  | Services are updated in a [rolling manner.](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)                 |
+|                       | `R.A.10` | Services are automatically migrated away from unhealthy failure domains.                                                                 |
+|                       | `R.A.11` | Essential systems and services contain deletion prevention controls.                                                                     |
+| Automated Testing     | `R.T.1`  | All first-party code contains a unit testing framework.                                                                                  |
+|                       | `R.T.2`  | All first-party code contains an integration testing framework.                                                                          |
+|                       | `R.T.3`  | Total code coverage between unit and integration tests is measured.                                                                      |
+|                       | `R.T.4`  | The organization maintains an E2E test suite.                                                                                            |
+|                       | `R.T.5`  | E2E tests are regularly added as a part of the SDLC.                                                                                     |
+|                       | `R.T.6`  | All first-party code uses at least one static analysis tool.                                                                             |
+|                       | `R.T.7`  | The organization regularly tests production-like deployments with simulated failure tools.                                               |
+| Automated Remediation | `R.R.1`  | Service updates are deployed in a [blue-green fashion.](https://en.wikipedia.org/wiki/Blue%E2%80%93green_deployment)                     |
+|                       | `R.R.2`  | Database schema changes include both upgrade and downgrade logic.                                                                        |
+|                       | `R.R.3`  | System updates include automatic rollback logic.                                                                                         |
+|                       | `R.R.4`  | Atomic system writes are wrapped in transactions that enable rollbacks in case of a partial failure.                                     |
+| Disaster Recovery     | `R.D.1`  | Databases backups can always be restored to any point in the previous hour.                                                              |
+|                       | `R.D.2`  | Databases backups contain deletion prevention controls.                                                                                  |
+|                       | `R.D.3`  | Databases backups are stored on systems with 99.999999999% (11 nines) durability guarantees.                                             |
+|                       | `R.D.4`  | Databases backups are stored in a different site than the primary system.                                                                |
+|                       | `R.D.5`  | Your organization maintains scripts that can automatically restore databases from backups.                                               |
+|                       | `R.D.6`  | Your organization regularly tests database recovery scripts.                                                                             |
+|                       | `R.D.7`  | Your organization regularly practices restoring the complete system from scratch.                                                        |

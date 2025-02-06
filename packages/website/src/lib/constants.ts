@@ -1,52 +1,43 @@
-export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum LLC.`
+import { NODE_ENV, ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME  } from "astro:env/client"
+export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum Group, Inc.`;
 
-export const PANFACTUM_VERSION_MAIN = 'main'
-export const PANFACTUM_VERSION_EDGE = 'edge.25-01-09'
-export const PANFACTUM_VERSION_24_05 = '24-05.0'
+export const PANFACTUM_VERSION_MAIN = "main";
+export const PANFACTUM_VERSION_EDGE = "edge.24-10-25";
 
-export function replaceVersionPlaceholders (str: string) {
+export const SIGNUP_LINK =
+  "https://hs.panfactum.com/meetings/jack-langston/intro";
+
+export function replaceVersionPlaceholders(str: string) {
   return str
-    .replaceAll('__PANFACTUM_VERSION_EDGE__', PANFACTUM_VERSION_EDGE)
-    .replaceAll('__PANFACTUM_VERSION_24_05__', PANFACTUM_VERSION_24_05)
-    .replaceAll('__PANFACTUM_VERSION_MAIN__', PANFACTUM_VERSION_MAIN)
+    .replaceAll("__PANFACTUM_VERSION_EDGE__", PANFACTUM_VERSION_EDGE)
+    .replaceAll("__PANFACTUM_VERSION_MAIN__", PANFACTUM_VERSION_MAIN);
 }
 
-export const discordServerLink = 'https://discord.gg/MJQ3WHktAS'
+export const GITHUB_URL = "https://github.com/Panfactum/stack";
+export const DISCORD_URL = "https://discord.gg/MJQ3WHktAS";
 
-export const DOCS_VERSIONS = process.env.NODE_ENV === 'development'
-  ? [
-    { text: 'Unreleased', slug: 'main' },
-    { text: 'Edge', slug: 'edge' },
-    { text: '24-05', slug: '24-05' }
-  ] as const
-  : [
-    { text: 'Edge', slug: 'edge' },
-    { text: '24-05', slug: '24-05' }
-  ] as const
-
-export const slugs = DOCS_VERSIONS.map(({ slug }) => slug)
-export type VersionSlug = (typeof slugs)[number]
-
-export function isValidVersionSlug (maybeSlug: string | undefined): maybeSlug is (typeof slugs)[number] {
-  return slugs.includes(maybeSlug as (typeof slugs)[number])
+export enum Versions {
+  unreleased = "main",
+  edge = "edge",
 }
 
-export function algoliaEnv () {
-  const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
-  const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
-  const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
+export interface VersionOption {
+  text: string;
+  slug: Versions;
+}
 
-  if (ALGOLIA_APP_ID === undefined) {
-    throw new Error('Missing Algolia environment variable: NEXT_PUBLIC_ALGOLIA_APP_ID')
-  } else if (ALGOLIA_SEARCH_API_KEY === undefined) {
-    throw new Error('Missing Algolia environment variable: NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY')
-  } else if (ALGOLIA_INDEX_NAME === undefined) {
-    throw new Error('Missing Algolia environment variable: NEXT_PUBLIC_ALGOLIA_INDEX_NAME')
-  }
+export const DOCS_VERSIONS: VersionOption[] =
+  (NODE_ENV === "development"
+    ? ([
+        { text: "Unreleased", slug: Versions.unreleased },
+        { text: "Edge", slug: Versions.edge },
+      ])
+    : ([{ text: "Edge", slug: Versions.edge }]))
 
+export function algoliaEnv() {
   return {
     ALGOLIA_APP_ID,
     ALGOLIA_SEARCH_API_KEY,
     ALGOLIA_INDEX_NAME
-  }
+  };
 }

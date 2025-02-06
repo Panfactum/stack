@@ -1,57 +1,21 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "target": "es6",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "skipLibCheck": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
     "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "jsxImportSource": "solid-js",
+    "strictNullChecks": true,
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "react": [ "./node_modules/@types/react" ],
-      "@/*": [
-        "src/*"
-      ]
-    },
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "allowJs": true,
-    "checkJs": true,
-    "isolatedModules": true,
-    "exactOptionalPropertyTypes": false,
-    "resolveJsonModule": true
+      "~/*": ["./"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
-    "next-env.d.ts",
-    "process-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
-    ".next/types/**/*.ts",
-    "build/types/**/*.ts",
-    ".lint/types/**/*.ts"
+    "src/**/*.astro",
+    "src/**/*.mdx",
+    ".astro/types.d.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
 }

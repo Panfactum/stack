@@ -14,5 +14,5 @@ dependency "cert_issuers" {
 
 inputs = {
   # Alpha: Do not use
-  prometheus_enabled        = false
+  prometheus_enabled = false
 }

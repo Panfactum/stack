@@ -1,119 +1,56 @@
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft'
-import ArrowRightIcon from '@mui/icons-material/ArrowRight'
-import LinearProgress from '@mui/material/LinearProgress'
-import Link from 'next/link'
-import { memo } from 'react'
+import {Progress} from "@kobalte/core/progress";
+import type { Component } from "solid-js";
 
-import DefaultTooltipLazy from '@/components/tooltip/DefaultTooltipLazy'
-
-function MarkdownGuideNavButton (props: {href: string | undefined, tooltip: string, text: string, icon: 'left' | 'right'}) {
-  const { href, tooltip, text, icon } = props
-
-  if (href === undefined) {
-    return <div className="w-36"/>
-  }
-
-  const Icon = icon === 'left' ? ArrowLeftIcon : ArrowRightIcon
-
-  return (
-    <DefaultTooltipLazy title={tooltip}>
-      <Link
-        href={href}
-        className="flex items-center justify-around bg-primary text-white w-28 lg:w-36 py-1.5 text-base rounded-md"
-      >
-        {icon === 'right' ? null : <Icon className="p-0 m-[-1rem] lg:w-[2.5rem] lg:h-[2.5rem]"/>}
-        {text}
-        {icon === 'left' ? null : <Icon className="p-0 m-[-1rem] lg:w-[2.5rem] lg:h-[2.5rem]"/>}
-      </Link>
-    </DefaultTooltipLazy>
-  )
-}
+import MarkdownGuideNavButton from "@/components/markdown/MarkdownGuidedNavButton.tsx";
 
 interface MarkdownGuideNavProps {
-  backHref?: string | undefined
-  backText?: string | undefined
-  backTooltip?: string | undefined
-  forwardHref?: string | undefined
-  forwardText?: string | undefined
-  forwardTooltip?: string | undefined
-  stepNumber?: number | undefined
-  totalSteps?: number | undefined
-  progressLabel?: string | undefined
+  backHref?: string;
+  backText?: string;
+  forwardHref?: string;
+  forwardText?: string;
+  stepNumber: number;
+  totalSteps: number;
+  progressLabel?: string;
 }
 
-export default memo(function MarkdownGuideNav (props: MarkdownGuideNavProps) {
-  const {
-    backHref,
-    backText = 'Previous',
-    backTooltip = 'Previous page',
-    forwardHref,
-    forwardText = 'Next',
-    forwardTooltip = 'Next page',
-    stepNumber,
-    totalSteps = 10,
-    progressLabel
-  } = props
-
+const MarkdownGuideNav: Component<MarkdownGuideNavProps> = (props) => {
   return (
-    <div className="w-full flex flex-col gap-2 py-4">
-      <div className=" flex justify-between items-end">
+
+    <Progress
+      minValue={1}
+      maxValue={props.totalSteps}
+      value={props.stepNumber}
+      getValueLabel={({ value, max }) => `Step ${value} of ${max}`}
+      class="flex w-full flex-col gap-4 py-4"
+    >
+      <div class="flex items-end justify-between gap-4">
         <MarkdownGuideNavButton
-          href={backHref}
-          text={backText}
-          tooltip={backTooltip}
-          icon={'left'}
+          href={props.backHref}
+          text={props.backText || "Back"}
+          icon={"left"}
         />
-        {stepNumber === undefined
-          ? <div/>
-          : (
-            <div className="justify-center gap-3 hidden lg:flex">
-              <div className="font-bold">
-                {progressLabel}
-              </div>
-              <div>
-                {' '}
-                Step
-                {' '}
-                {stepNumber}
-                {' '}
-                /
-                {totalSteps}
-              </div>
-            </div>
-          )}
+        <div class="flex justify-center gap-4">
+        <Progress.Label class="text-display-xs font-semibold">
+          {props.progressLabel || "Guide Progress"}
+        </Progress.Label>
+        <Progress.ValueLabel />
+        </div>
         <MarkdownGuideNavButton
-          href={forwardHref}
-          text={forwardText}
-          tooltip={forwardTooltip}
-          icon={'right'}
+          href={props.forwardHref}
+          text={props.forwardText || "Next"}
+          icon={"right"}
         />
       </div>
-      {stepNumber === undefined
-        ? <div/>
-        : (
-          <div className="flex flex-col gap-3">
-            <LinearProgress
-              color="primary"
-              variant="determinate"
-              value={Math.round(stepNumber / totalSteps * 100)}
-            />
-            <div className="justify-center gap-3 flex lg:hidden text-base">
-              <div className="font-bold">
-                {progressLabel}
-              </div>
-              <div>
-                {' '}
-                Step
-                {' '}
-                {stepNumber}
-                {' '}
-                /
-                {totalSteps}
-              </div>
-            </div>
-          </div>
-        )}
-    </div>
 
+      <Progress.Track
+        class="bg-tertiary dark:bg-secondary h-2 rounded"
+      >
+        <Progress.Fill
+          class="bg-accent h-full w-[var(--kb-progress-fill-width)] rounded"
+        />
+      </Progress.Track>
+    </Progress>
   )
-})
+};
+
+export default MarkdownGuideNav;
