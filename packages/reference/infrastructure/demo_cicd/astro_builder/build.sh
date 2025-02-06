@@ -10,13 +10,13 @@ cd /code/stack || exit
 ###########################################################
 ## Step 2: Get BuildKit address
 ###########################################################
-BUILDKIT_HOST=$(pf-buildkit-get-address --arch=arm64)
+BUILDKIT_HOST=$(pf-buildkit-get-address --arch=amd64)
 export BUILDKIT_HOST
 
 ###########################################################
 ## Step 3: Record the build
 ###########################################################
-pf-buildkit-record-build --arch=arm64
+pf-buildkit-record-build --arch=amd64
 
 ###########################################################
 ## Step 4: Get AWS credentials for the s3 upload
