@@ -16,25 +16,25 @@ const InputRow: ParentComponent<InputRowProps> = (props) => {
   return (
     <>
       <div class={clsx(
-        "flex w-full flex-col gap-y-3 px-8 py-6 md:gap-y-2 lg:flex-row",
+        "flex w-full flex-col gap-y-3 overflow-visible px-8 py-6 md:gap-y-2 lg:flex-row",
         props.withPrice ? "items-start" : "items-start xl:items-center"
         )}
       >
         <div
-          class={`text-display-sm min-w-[300px] basis-1/5 py-4 font-semibold underline lg:py-0 lg:text-left lg:no-underline`}
+          class={`text-display-sm min-w-[300px] basis-1/5 overflow-visible py-4 font-semibold underline lg:py-0 lg:text-left lg:no-underline`}
         >
           <Show
             when={props.description}
             fallback={props.title}
           >
             <button
-              class="hover:text-secondary flex cursor-pointer items-center gap-4"
+              class="hover:text-secondary flex cursor-pointer items-center gap-4 overflow-visible"
               onClick={toggleOpen}
             >
               <span>
                 {props.title}
               </span>
-              <div class="w-5">
+              <div class="w-5 overflow-visible">
                 <InfoIcon/>
               </div>
             </button>

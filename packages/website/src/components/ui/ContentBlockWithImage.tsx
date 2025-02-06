@@ -25,13 +25,13 @@ const  ContentBlockWithImage: ParentComponent<{
       <Show when={props.image}>
         <div
           class={clsx(
-            "flex flex-none items-center justify-center text-white",
+            "flex flex-none items-center justify-center",
             props.bgColor,
             props.type === ContentBlockType.HORIZONTAL ? "h-[200px] w-full sm:h-auto sm:w-1/3" : "h-[200px]"
           )}
         >
-          <div class="flex size-[94px] items-center justify-center rounded-full border-4">
-            <div class="flex size-[72px] items-center justify-center rounded-full border-4">
+          <div class="flex size-[94px] items-center justify-center rounded-full border-4 !text-gray-modern-400">
+            <div class="flex size-[72px] items-center justify-center rounded-full border-4 !text-gray-modern-400">
               {props.image && <props.image/>}
             </div>
           </div>

@@ -33,7 +33,7 @@ const PercentSliderInput: Component<IntegerSliderInputProps> = (
       <div class="flex w-full items-center gap-6">
         <span>{props.minValue}%</span>
       <Slider.Track
-        class="relative h-2 w-full rounded-full bg-gray-dark-mode-200"
+        class="relative h-2 w-full rounded-full bg-gray-light-mode-500 dark:bg-gray-dark-mode-200"
       >
         <Slider.Fill
           class="bg-accent-light absolute h-full rounded-full"

@@ -14,7 +14,7 @@ const InputRowPrice: ParentComponent<InputRowPriceProps> = (props) => {
   const [open, setOpen] = createSignal(false)
   const toggleOpen = () => setOpen(open => !open)
   return (
-    <span class="text-secondary font-semibold xl:col-span-2">
+    <span class="text-secondary text-xs sm:text-sm xl:col-span-2">
       <Show when={props.perCluster} fallback={`x ${CURRENCY_FORMAT.format(props.price)}`}>
         <button
           onClick={toggleOpen}

@@ -77,14 +77,14 @@ export default defineConfig({
     }),
     mdx(),
     sitemap(),
-    inline({
-      critters: {
-        preloadFonts: false, // Done by astro-font
-        keyframes: "none", // Animations not critical
-        compress: false, // This messes up styles
-        reduceInlineStyles: false // This messes up styles
-      }
-    }),
+    // inline({
+    //   critters: {
+    //     preloadFonts: false, // Done by astro-font
+    //     keyframes: "none", // Animations not critical
+    //     compress: false, // This messes up styles
+    //     reduceInlineStyles: false // This messes up styles
+    //   }
+    // }),
     compress({
       HTML: {
         "html-minifier-terser": {

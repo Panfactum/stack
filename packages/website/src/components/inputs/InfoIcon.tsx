@@ -7,6 +7,7 @@ export default function InfoIcon() {
       xmlns="http://www.w3.org/2000/svg"
       width="auto"
       viewBox="0 0 416.979 416.979"
+      class="overflow-visible"
     >
       <g>
         <path
