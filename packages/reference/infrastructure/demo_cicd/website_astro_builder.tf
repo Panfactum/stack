@@ -79,7 +79,7 @@ module "astro_builder_workflow" {
   name = local.website_astro_builder_name
   namespace = local.namespace
   burstable_nodes_enabled = true
-  arm_nodes_enabled = false
+  arm_nodes_enabled = true
   panfactum_scheduler_enabled = true
   active_deadline_seconds = 60 * 60
 

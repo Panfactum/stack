@@ -12,7 +12,29 @@ ARG BUILDARCH
 
 # Install package manager
 RUN apt update && \
-  apt install -y curl unzip groff && \
+  apt install -y \
+    curl \
+    unzip \
+    groff \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    libu2f-udev \
+    libxshmfence1 \
+    libglu1-mesa \
+    chromium && \
   curl "https://awscli.amazonaws.com/awscli-exe-linux-$( [ "$BUILDARCH" = "amd64" ] && echo "x86_64" || echo "aarch64").zip" -o "awscliv2.zip" && \
   unzip awscliv2.zip && \
   ./aws/install && \
@@ -20,6 +42,10 @@ RUN apt update && \
   apt-get autoremove -y && \
   rm -rf /var/lib/{apt,dpkg,cache,log}/ && \
   npm i -g pnpm@9.14.2
+
+# Use the debian version of chrome
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Install Dependencies
 COPY package.json pnpm-lock.yaml .npmrc pnpm-workspace.yaml .
