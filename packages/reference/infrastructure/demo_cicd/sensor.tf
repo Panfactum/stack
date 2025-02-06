@@ -161,6 +161,33 @@ module "sensor" {
         }
       }
     },
+
+    {
+      template = {
+        name = "test-astro-buiilder"
+        conditions = "push-to-test"
+        argoWorkflow = {
+          operation = "submit"
+          source = {
+            resource = {
+              apiVersion = "argoproj.io/v1alpha1"
+              kind = "Workflow"
+              metadata = {
+                generateName = "${local.website_astro_builder_name}-"
+                namespace = local.namespace
+              }
+              spec = {
+                arguments = module.astro_builder_workflow.arguments
+                workflowTemplateRef = {
+                  name = local.website_astro_builder_name
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     {
       template = {
         name = local.vault_image_builder_name
