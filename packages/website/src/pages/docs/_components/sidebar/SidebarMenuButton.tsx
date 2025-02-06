@@ -61,7 +61,6 @@ const SidebarMenuButton: Component<SidebarMenuButtonProps> = (props) => {
       <li>
         <Collapsible.Trigger
           class={buttonClasses()}
-          aria-selected={props.isActive}
         >
           {props.isActive && <div class="absolute left-1 min-h-4/5 min-w-1 rounded-full bg-brand-400 dark:bg-brand-500"/>}
           <span class="truncate">{props.text}</span>

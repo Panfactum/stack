@@ -58,6 +58,13 @@ module "bucket" {
   bucket_name   = var.bucket_name
   description   = var.description
   access_policy = data.aws_iam_policy_document.cf_access.json
+
+  versioning_enabled = var.versioning_enabled
+  expire_after_days = var.expire_after_days
+  expire_old_versions = var.expire_old_versions
+  timed_transitions_enabled = var.timed_transitions_enabled
+  intelligent_transitions_enabled = var.intelligent_transitions_enabled
+  force_destroy = var.force_destroy
 }
 
 resource "aws_s3_bucket_cors_configuration" "bucket" {
@@ -90,6 +97,9 @@ module "cf" {
       path_prefix              = "" // This must be set to "" and not "/" in order to implement the regex logic without running into eval errors in the cloudfront function execution environment
       origin_domain            = module.bucket.regional_domain_name
       origin_access_control_id = aws_cloudfront_origin_access_control.cf_oac.id
+
+      default_cache_behavior = var.default_cache_behavior
+      path_match_behaviors = var.path_match_behaviors
 
       rewrite_rules = concat(
         var.default_file != "" ? [

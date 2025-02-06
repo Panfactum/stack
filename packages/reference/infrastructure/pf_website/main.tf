@@ -136,5 +136,12 @@ module "website" {
   bucket_name = "pf-website-astro"
   description = "Hosts the new Astro Panfactum website"
   domain      = "website2.panfactum.com"
+
+  path_match_behaviors = {
+    "_astro*" = {
+
+    }
+
+  }
 }
 

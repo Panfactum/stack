@@ -57,4 +57,5 @@ RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_
   AWS_ACCESS_KEY_ID=$(cat /run/secrets/AWS_ACCESS_KEY_ID) \
   AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/AWS_SECRET_ACCESS_KEY) \
   AWS_SESSION_TOKEN=$(cat /run/secrets/AWS_SESSION_TOKEN) \
-  aws s3 cp ./dist/ s3://pf-website-astro/ --recursive
+  aws s3 sync ./dist/_astro s3://pf-website-astro/_astro --recursive --delete --cache-control "public,max-age=604800,immutable" \
+  aws s3 sync ./dist s3://pf-website-astro --recursive --delete --exclude '_astro/*'

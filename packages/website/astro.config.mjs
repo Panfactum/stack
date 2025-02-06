@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import compress from "@playform/compress"
 import inline from "@playform/inline"
+import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
 
@@ -85,6 +86,8 @@ export default defineConfig({
     //     reduceInlineStyles: false // This messes up styles
     //   }
     // }),
+
+    criticalCSS(),
     compress({
       HTML: {
         "html-minifier-terser": {
