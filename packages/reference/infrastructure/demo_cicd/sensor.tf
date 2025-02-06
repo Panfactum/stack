@@ -47,13 +47,6 @@ module "sensor" {
             value = ["refs/heads/test"]
           }
         ]
-        script = <<-EOT
-        ${file("${path.module}/is_modified.lua")}
-        return is_modified(event.body, {
-          "packages/reference/infrastructure/demo_cicd/.*",
-          "packages/reference/environments/.*"
-        })
-        EOT
       }
     }
   ]
