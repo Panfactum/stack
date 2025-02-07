@@ -39,6 +39,7 @@ const FAQS: Component = () => {
           Get in touch at jack@panfactum.com with the subject line "Better than You".
         </p>
       </FAQItem>
+
       <FAQItem title={"Does my support plan need to cover all workloads deployed on Panfactum?"} id={"coverage"}>
         <p>
           Yes. When we proactively apply updates your foundational infrastructure, we also need to update the
@@ -49,6 +50,36 @@ const FAQS: Component = () => {
         <p>
           For simple workloads, this can sometimes cause our plan costs to be higher than necessary. Please highlight
           that when connecting with us, so that we can devise support plan pricing that makes sense for your use case.
+        </p>
+      </FAQItem>
+      <FAQItem title={"Do you replace DevOps / platform engineers?"} id={"replace-engineers"}>
+        <p>
+          If your organization is just starting out in the cloud, our support plans can replace
+          the need to hire infrastructure experts on day one.
+        </p>
+        <p>
+          That said, our platform is also designed to be extended by your engineers to meet your organization's
+          unique needs. Our support plans are primarily focused on cutting the costs of the undifferentiated toil such as upgrade
+          cycles and ongoing maintenance.
+        </p>
+        <p>
+          This allows your DevOps and platform engineers to work on problems that improve productivity and efficiency
+          even further rather than just worrying about keeping the foundational infrastructure running.
+        </p>
+      </FAQItem>
+      <FAQItem title={"Can we (continue to) customize Panfactum under a support plan?"} id={"customize"}>
+        <p>
+          Absolutely! Panfactum is designed specifically to provide sane out-of-the-box defaults while also ensuring
+          you always have the ability to customize your infrastructure unlike most other managed services
+        </p>
+        <p>
+          Our support plans are primarily focused on cutting the costs of the undifferentiated toil such as upgrade
+          cycles and ongoing maintenance. If anything, this allows you to have more time to customize Panfactum to your
+          organization's unique needs.
+        </p>
+        <p>
+          As you work on bespoke infrastructure components, our engineers will also provide support and guidance
+          to ensure that you meet your goals.
         </p>
       </FAQItem>
       <FAQItem title={"Are the savings guaranteed?"} id={"guaranteed-savings"}>
@@ -89,19 +120,28 @@ const FAQS: Component = () => {
           workloads in the cloud. Our support plans make that a guarantee.
         </p>
       </FAQItem>
-      <FAQItem title={"Will you migrate our existing workloads onto Panfactum?"} id={"migrate"}>
+      <FAQItem title={"Will you migrate our existing workloads and infrastructure-as-code onto Panfactum?"} id={"migrate"}>
         <p>
           Yes! We take complete ownership over the migration process and in the vast majority of cases can even achieve
           a migration with zero downtime. This process normally takes around 30 days.
         </p>
         <p>
-          That includes containerizing your workloads (if they aren't already), developing the production-ready infrastructure-as-code
+          That includes containerizing your workloads (if they aren't already), developing the production-ready
+          infrastructure-as-code
           for them, deploying them to your Panfactum clusters, and hooking up end-to-end CI/CD pipelines.
+        </p>
+        <p>
+          If you already have a paradigm for managing infrastructure via infrastructure-as-code, we do require
+          that you migrate to our open-source paradigm using{" "}<a href={"https://opentofu.org/"}>OpenTofu</a>{" "}and {" "}<a href="https://terragrunt.gruntwork.io/">Terragrunt</a>{" "}
+          so that we can ensure your success. Most of the times, we can migrate your infrastructure-as-code to our patterns
+          even if doesn't manage Panfactum infrastructure. That enables you to have a single way of managing infrastructure
+          across your organization (and often cuts costs as well).
         </p>
       </FAQItem>
       <FAQItem title={"How often is my infrastructure upgraded?"} id={"frequency"}>
         <p>
-          We pin users to our stable release channels (unless you request otherwise). We create new stable releases at the same cadence
+          We pin users to our stable release channels (unless you request otherwise). We create new stable releases at
+          the same cadence
           as Kubernetes version releases to ensure that your infrastructure never falls behind. Currently, that means
           a new release every four to six months.
         </p>
@@ -192,7 +232,7 @@ const FAQS: Component = () => {
           support plan.
         </p>
       </FAQItem>
-      <FAQItem title={"Can I use the Panfactum framework without a support plan?"} id={"support-plan-required"}>
+      <FAQItem title={"Can I use the Panfactum framework without a support plan? What if I need to cancel?"} id={"support-plan-required"}>
         <p>
           Absolutely! The framework is free and open source. It will remain that way forever.
         </p>
