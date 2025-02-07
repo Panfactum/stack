@@ -48,4 +48,4 @@ git commit -m "release: $VERSION_TAG"
 git tag --force "$VERSION_TAG"
 
 # Push the changes
-git push
+git push --atomic origin main "$VERSION_TAG"
