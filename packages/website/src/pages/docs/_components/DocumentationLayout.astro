@@ -55,8 +55,8 @@ const {
       <DocsSidebar fullPath={pathname} metadata={metadata} client:load />
       <article
         class:list={[
-          "content mt-0 md:mt-16 lg:mt-[--header-height] lg:ml-[--sidebar-width] pt-6 px-6 h-full w-full max-w-full",
-          headings.length > 1 ? "xl:w-[calc(100%_-_var(--sidebar-width)_-_var(--toc-width))]" : "xl:w-[calc(100%_-_var(--sidebar-width))]"
+          "content mt-0 md:mt-16 lg:mt-[--header-height] lg:ml-[--sidebar-width] pt-6 px-6 h-full w-full max-w-full lg:w-[calc(100%_-_var(--sidebar-width))]",
+          headings.length > 1 ? "xl:w-[calc(100%_-_var(--sidebar-width)_-_var(--toc-width))]" : ""
         ]}
       >
         <slot />
