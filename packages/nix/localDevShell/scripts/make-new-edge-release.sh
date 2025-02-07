@@ -40,7 +40,7 @@ VERSION_TAG="edge.$(date +'%y-%m-%d')"
 jq --arg tag "$VERSION_TAG" '.panfactum_version_edge = "\($tag)"' "$CONSTANTS_FILE" > "$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
 # Update the changelog (only if it does not already contain the release tag)
-grep -q "^## $VERSION_TAG" filename || sed -i "s/^## Unreleased$/## Unreleased\n\n## $VERSION_TAG/" "$CHANGELOG_FILE"
+grep -q "^## $VERSION_TAG" "$CHANGELOG_FILE" || sed -i "s/^## Unreleased$/## Unreleased\n\n## $VERSION_TAG/" "$CHANGELOG_FILE"
 
 # Commit the changes and create the tag
 git add "$REPO_ROOT"
