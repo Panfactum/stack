@@ -23,7 +23,7 @@ const SidebarSectionList: Component<SidebarSectionListProps> = (props) => {
             activeClass={"bg-tertiary"}
             text={item().text}
             isActive={("/" + props.nonVersionedPath).startsWith(item().path)}
-            href={`${DOCS_BASE_PATH}${item().notVersioned ? "" : `/${version()}`}${item().path}`}
+            href={`${DOCS_BASE_PATH}${item().notVersioned ? "" : `/${version()}`}${item().path}${item().defaultSubPath ?? ''}`}
             IconComponent={item().icon ? ICON_MAPPING[item().icon!] : undefined}
             saveUserLocation={true}
           />

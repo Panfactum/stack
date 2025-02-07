@@ -15,6 +15,7 @@ export enum NavIcons {
 export interface TopLevelDocsSectionMetadata {
   text: string;
   path: string;
+  defaultSubPath?: string;
   icon?: NavIcons;
   notVersioned?: boolean;
   default?: boolean;
