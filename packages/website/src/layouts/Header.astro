@@ -96,6 +96,6 @@ const pathname = new URL(Astro.request.url).pathname;
   </div>
   <div class="flex items-center gap-2 md:hidden">
     {searchButtonEnabled && <SearchIconButton client:idle />}
-    <MobileNav background={background} client:idle />
+    <MobileNav background={background} fullPath={pathname} client:idle />
   </div>
 </div>

@@ -60,7 +60,7 @@ const PriceDetails: Component<PriceDetailsProps> = (props) => {
             <Button variant="primary">Schedule a Call</Button>
           </a>
         </div>
-        <p class="self-start text-xs">
+        <p class="text-xs">
           <em>
             The prices shown here are for estimation purposes only. A final
             quote will be provided before contract signing.

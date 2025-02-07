@@ -10,6 +10,7 @@ import { DISCORD_URL, GITHUB_URL } from "@/lib/constants.ts";
 
 interface MobileNavProps {
   background: "primary" | "secondary" | "transparent";
+  fullPath: string;
 }
 
 const MobileNav: Component<MobileNavProps> = (props) => {
@@ -56,7 +57,7 @@ const MobileNav: Component<MobileNavProps> = (props) => {
               </a>
             )}</For>
             <span class="mt-4 flex flex-col gap-3 sm:col-span-2">
-              <GetStartedButton />
+              <GetStartedButton  fullPath={props.fullPath}/>
               <a href={GITHUB_URL}>
                 <Button variant={"secondary"} class="w-full">
                   Github
