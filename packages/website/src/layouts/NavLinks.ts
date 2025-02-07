@@ -1,7 +1,7 @@
 export const NAV_LINKS = [
   {
     title: "Docs",
-    url: "/docs",
+    url: "/docs/edge/guides",
   },
   {
     title: "About",
