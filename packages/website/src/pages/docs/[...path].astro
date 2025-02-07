@@ -30,6 +30,8 @@ const filteredHeadings = headings.filter(({text}) => {
   return text !== "Added" && text !== "Fixed" && text !== "Breaking Changes" && text !== "Changed"
 })
 
+const headingTitle = headings.find(({depth}) => depth === 1)?.text
+
 export const metadata: DocsMetadata = {
   [Versions.edge]: SIDENAV_SECTIONS_EDGE,
   [Versions.unreleased]: SIDENAV_SECTIONS_MAIN,
@@ -37,7 +39,7 @@ export const metadata: DocsMetadata = {
 ---
 
 <DocumentationLayout
-  title={entry.data.title}
+  title={`Panfactum: ${entry.data.title || headingTitle || "Documentation"}`}
   description={entry.data.description}
   headings={filteredHeadings}
   metadata={metadata}
