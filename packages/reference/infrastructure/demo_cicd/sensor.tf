@@ -142,7 +142,22 @@ module "sensor" {
                 namespace = local.namespace
               }
               spec = {
-                arguments = module.astro_builder_workflow.arguments
+                arguments = {
+                  parameters = [
+                    {
+                      name = "git_ref"
+                      value = "main"
+                    },
+                    {
+                      name = "sitemap_url"
+                      value = "${var.site_url}/sitemap-index.xml"
+                    },
+                    {
+                      name = "algolia_index_name"
+                      value = "${var.algolia_index_name_2}"
+                    }
+                  ]
+                }
                 workflowTemplateRef = {
                   name = local.website_astro_builder_name
                 }
