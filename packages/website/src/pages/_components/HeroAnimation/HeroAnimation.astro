@@ -2,13 +2,29 @@
 import { Image } from "astro:assets";
 
 import RootOrbit from "./RootOrbit.astro";
+import ArgoSquare from "./images/argo-square.jpg"
+import AuthentikSquare from "./images/authentik-square.jpg"
+import CanarySquare from "./images/canary-checker-square.jpg"
+import CertManagerSquare from "./images/cert-manager-square.jpg"
+import CiliumSquare from "./images/cilium-square.jpg"
+import CoreDNSSquare from "./images/core-dns-square.jpg"
+import GrafanaSquare from "./images/grafana-square.jpg"
+import KarpenterSquare from "./images/karpenter-square.jpg"
+import KedaSquare from "./images/keda-square.jpg"
 import KubernetesSquare from "./images/kubernetes-square.jpg";
+import KyvernoSquare from "./images/kyverno-square.jpg"
+import LinkerdSquare from "./images/linkerd-square.jpg"
+import NATSSquare from "./images/nats-square.jpg"
 import NixIcon from "./images/nix.jpg";
 import PanfactumSquare from "./images/panfactum-square.jpg";
+import PostgreSQLSqaure from "./images/postgres-square.jpg"
+import PrometheusSquare from "./images/prometheus-square.jpg"
+import RedisSquare from "./images/redis-square.jpg"
 import TerragruntIcon from "./images/terragrunt.jpg";
 import TiltIcon from "./images/tilt.jpg";
 import TofuIcon from "./images/tofu.jpg";
-
+import VaultSquare from "./images/vault-square.jpg"
+import VeleroSquare from "./images/velero-square.jpg"
 
 interface Props {
   scale?: number;
@@ -25,43 +41,22 @@ const { scale = 1 } = Astro.props;
   }}
 >
   <script>
-    const logos = [
-      {
-        src: "/animation/canary-checker-square.jpg",
-        alt: "Canary Checker logo",
-      },
-      { src: "/animation/authentik-square.jpg", alt: "Authentik logo" },
-      { src: "/animation/cilium-square.jpg", alt: "Cilium logo" },
-      { src: "/animation/argo-square.jpg", alt: "Argo logo" },
-      { src: "/animation/redis-square.jpg", alt: "Redis logo" },
-      { src: "/animation/cert-manager-square.jpg", alt: "cert-manager logo" },
-      { src: "/animation/core-dns-square.jpg", alt: "CoreDNS logo" },
-      { src: "/animation/grafana-square.jpg", alt: "Grafana logo" },
-      { src: "/animation/karpenter-square.jpg", alt: "Karpenter logo" },
-      { src: "/animation/keda-square.jpg", alt: "KEDA logo" },
-      { src: "/animation/kyverno-square.jpg", alt: "Kyverno logo" },
-      { src: "/animation/linkerd-square.jpg", alt: "Linkerd logo" },
-      { src: "/animation/nats-square.jpg", alt: "NATS logo" },
-      { src: "/animation/postgres-square.jpg", alt: "PostgreSQL logo" },
-      { src: "/animation/prometheus-square.jpg", alt: "Prometheus logo" },
-      { src: "/animation/vault-square.jpg", alt: "Vault logo" },
-      { src: "/animation/velero-square.jpg", alt: "Velero logo" },
-    ];
+
+    const stagingArea = document.getElementById("animation-image-staging")!
 
     // Utility fx for swapping logos on the image elements
     const swapLogo = (imgElement: HTMLImageElement) => {
-      const newLogo = logos.shift();
-      if (newLogo) {
-        imgElement.src = newLogo.src;
-        imgElement.alt = newLogo.alt;
-
-        // Return the old logo from the screen to the logo array so it will be cycled
-        // Also, prevents duplicates from being added to the queue
-        const logoToSave = { src: imgElement.src, alt: imgElement.alt };
-        if (logos.findIndex(({ src }) => src === logoToSave.src) === -1) {
-          logos.push(logoToSave);
-        }
-      }
+      const options = stagingArea.children
+      const newLogo = options[Math.floor(Math.random()*options.length)] as HTMLImageElement;
+      const currentSrc = imgElement.src;
+      const currentSrcSet = imgElement.srcset;
+      const currentAlt = imgElement.alt;
+      imgElement.src = newLogo.src;
+      imgElement.srcset = newLogo.srcset;
+      imgElement.alt = newLogo.alt
+      newLogo.src = currentSrc
+      newLogo.srcset = currentSrcSet;
+      newLogo.alt = currentAlt;
     };
 
     document.addEventListener("astro:page-load", () => {
@@ -114,14 +109,20 @@ const { scale = 1 } = Astro.props;
       0% {
         transform: translateY(0);
       }
+      8% {
+          transform: translateY(0);
+      }
       25% {
         transform: translateY(calc(145px * var(--scale)));
       }
       75% {
         transform: translateY(calc(145px * var(--scale)));
       }
-      100% {
+      92% {
         transform: translateY(0);
+      }
+      100% {
+          transform: translateY(0);
       }
     }
 
@@ -154,6 +155,42 @@ const { scale = 1 } = Astro.props;
     }
   </style>
 
+  <div id="animation-image-staging" class="hidden">
+    {[
+      {
+        src: CanarySquare,
+        alt: "Canary Checker logo",
+      },
+      { src: CertManagerSquare, alt: "cert-manager logo" },
+      { src: CoreDNSSquare, alt: "CoreDNS logo" },
+      { src: GrafanaSquare, alt: "Grafana logo" },
+      { src: KarpenterSquare, alt: "Karpenter logo" },
+      { src: KedaSquare, alt: "KEDA logo" },
+      { src: KyvernoSquare, alt: "Kyverno logo" },
+      { src: LinkerdSquare, alt: "Linkerd logo" },
+      { src: NATSSquare, alt: "NATS logo" },
+      { src: PostgreSQLSqaure, alt: "PostgreSQL logo" },
+      { src: PrometheusSquare, alt: "Prometheus logo" },
+      { src: VaultSquare, alt: "Vault logo" },
+      { src: VeleroSquare, alt: "Velero logo" },
+    ].map(({src, alt}) => (
+      <Image
+        src={src}
+        alt={alt}
+        width={105 * scale}
+        height={105 * scale}
+        loading="lazy"
+        fetchpriority="low"
+        decoding="async"
+        format="avif"
+        class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
+        style={{
+          "border-radius": `calc(16px * ${scale})`,
+        }}
+      />
+    ))}
+  </div>
+
   <div
     class="absolute [transform:rotateX(45deg)]"
     style={{
@@ -168,6 +205,11 @@ const { scale = 1 } = Astro.props;
       alt="Stylized Panfactum logo"
       height={256 * scale}
       width={256 * scale}
+      loading="eager"
+      fetchpriority="high"
+      decoding="sync"
+      priority={true}
+      format="avif"
       class="absolute z-30 rotate-45 drop-shadow-2xl"
       style={{
         top: `calc(-128px * ${scale})`,
@@ -180,6 +222,11 @@ const { scale = 1 } = Astro.props;
       alt="Kubernetes logo"
       height={256 * scale}
       width={256 * scale}
+      loading="eager"
+      fetchpriority="high"
+      decoding="sync"
+      priority={true}
+      format="avif"
       class="absolute z-20 rotate-45"
       style={{
         top: `calc(50% - (128px * ${scale}))`,
@@ -195,23 +242,31 @@ const { scale = 1 } = Astro.props;
         "column-gap": `calc(28px * ${scale})`,
       }}
     >
-      <img
-        src="/animation/authentik-square.jpg"
+      <Image
+        src={AuthentikSquare}
         alt="Authentik logo"
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-1"
+        loading="eager"
+        fetchpriority="low"
+        decoding="async"
+        format="avif"
         class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
         }}
       />
-      <img
-        src="/animation/redis-square.jpg"
+      <Image
+        src={RedisSquare}
         alt="Redis logo"
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-2"
+        loading="eager"
+        fetchpriority="low"
+        decoding="async"
+        format="avif"
         class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
@@ -226,23 +281,32 @@ const { scale = 1 } = Astro.props;
         "column-gap": `calc(28px * ${scale})`,
       }}
     >
-      <img
-        src="/animation/argo-square.jpg"
+      <Image
+        src={ArgoSquare}
         alt="Argo logo"
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-3"
+        loading="eager"
+        fetchpriority="low"
+        decoding="async"
+        format="avif"
         class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
+          "width": `calc(120px * ${scale})`,
           "border-radius": `calc(16px * ${scale})`,
         }}
       />
-      <img
-        src="/animation/cilium-square.jpg"
+      <Image
+        src={CiliumSquare}
         alt="Cilium logo"
         width={105 * scale}
         height={105 * scale}
         id="hero-icon-4"
+        loading="eager"
+        fetchpriority="low"
+        decoding="async"
+        format="avif"
         class="hero-icon border-primary border-2 border-solid drop-shadow-2xl"
         style={{
           "border-radius": `calc(16px * ${scale})`,
@@ -256,6 +320,11 @@ const { scale = 1 } = Astro.props;
         width={64 * scale}
         height={64 * scale}
         class="circling-icon absolute rounded-[50%]"
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+        priority={true}
+        format="avif"
         style={{
           top: `calc(-32px * ${scale})`,
           left: `calc(50% - (32px * ${scale}))`,
@@ -267,6 +336,11 @@ const { scale = 1 } = Astro.props;
         width={64 * scale}
         height={64 * scale}
         class="circling-icon absolute rounded-[50%]"
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+        priority={true}
+        format="avif"
         style={{
           left: `calc(-32px * ${scale})`,
           top: `calc(50% - (32px * ${scale}))`,
@@ -278,6 +352,11 @@ const { scale = 1 } = Astro.props;
         width={64 * scale}
         height={64 * scale}
         class="circling-icon absolute rounded-[50%]"
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+        priority={true}
+        format="avif"
         style={{
           right: `calc(-32px * ${scale})`,
           top: `calc(50% - (32px * ${scale}))`,
@@ -289,6 +368,11 @@ const { scale = 1 } = Astro.props;
         width={64 * scale}
         height={64 * scale}
         class="circling-icon absolute rounded-[50%]"
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+        priority={true}
+        format="avif"
         style={{
           bottom: `calc(-32px * ${scale})`,
           left: `calc(50% - (32px * ${scale}))`,

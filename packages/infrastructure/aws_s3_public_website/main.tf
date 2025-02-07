@@ -59,12 +59,12 @@ module "bucket" {
   description   = var.description
   access_policy = data.aws_iam_policy_document.cf_access.json
 
-  versioning_enabled = var.versioning_enabled
-  expire_after_days = var.expire_after_days
-  expire_old_versions = var.expire_old_versions
-  timed_transitions_enabled = var.timed_transitions_enabled
+  versioning_enabled              = var.versioning_enabled
+  expire_after_days               = var.expire_after_days
+  expire_old_versions             = var.expire_old_versions
+  timed_transitions_enabled       = var.timed_transitions_enabled
   intelligent_transitions_enabled = var.intelligent_transitions_enabled
-  force_destroy = var.force_destroy
+  force_destroy                   = var.force_destroy
 }
 
 resource "aws_s3_bucket_cors_configuration" "bucket" {
@@ -99,7 +99,7 @@ module "cf" {
       origin_access_control_id = aws_cloudfront_origin_access_control.cf_oac.id
 
       default_cache_behavior = var.default_cache_behavior
-      path_match_behaviors = var.path_match_behaviors
+      path_match_behaviors   = var.path_match_behaviors
 
       rewrite_rules = concat(
         var.default_file != "" ? [

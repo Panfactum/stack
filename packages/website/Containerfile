@@ -83,7 +83,7 @@ RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_
   AWS_ACCESS_KEY_ID=$(cat /run/secrets/AWS_ACCESS_KEY_ID) \
   AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/AWS_SECRET_ACCESS_KEY) \
   AWS_SESSION_TOKEN=$(cat /run/secrets/AWS_SESSION_TOKEN) \
-  aws s3 sync ./dist/_astro s3://pf-website-astro/_astro --delete --cache-control "public,max-age=604800,immutable"
+  aws s3 sync ./dist/_astro s3://pf-website-astro/_astro --delete --cache-control "public,max-age=31536000,immutable"
 
 RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_ID \
   --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,target=/run/secrets/AWS_SECRET_ACCESS_KEY \
@@ -91,4 +91,12 @@ RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_
   AWS_ACCESS_KEY_ID=$(cat /run/secrets/AWS_ACCESS_KEY_ID) \
   AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/AWS_SECRET_ACCESS_KEY) \
   AWS_SESSION_TOKEN=$(cat /run/secrets/AWS_SESSION_TOKEN) \
-  aws s3 sync ./dist s3://pf-website-astro --delete --exclude '_astro/*'
+  aws s3 sync ./dist/fonts s3://pf-website-astro/fonts --delete --cache-control "public,max-age=31536000,immutable"
+
+RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,target=/run/secrets/AWS_ACCESS_KEY_ID \
+  --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,target=/run/secrets/AWS_SECRET_ACCESS_KEY \
+  --mount=type=secret,id=AWS_SESSION_TOKEN,target=/run/secrets/AWS_SESSION_TOKEN \
+  AWS_ACCESS_KEY_ID=$(cat /run/secrets/AWS_ACCESS_KEY_ID) \
+  AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/AWS_SECRET_ACCESS_KEY) \
+  AWS_SESSION_TOKEN=$(cat /run/secrets/AWS_SESSION_TOKEN) \
+  aws s3 sync ./dist s3://pf-website-astro --delete --exclude '_astro/*' --exclude 'fonts/*'
