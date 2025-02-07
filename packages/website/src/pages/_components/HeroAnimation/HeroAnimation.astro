@@ -31,6 +31,9 @@ interface Props {
 }
 
 const { scale = 1 } = Astro.props;
+const squareLogoSize = Math.floor(105 * scale)
+const circleLogoSize = Math.floor(64 * scale)
+const mainLogoSize = Math.floor(256 * scale)
 ---
 
 <div
@@ -177,8 +180,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={src}
         alt={alt}
-        width={105 * scale}
-        height={105 * scale}
+        width={squareLogoSize}
+        height={squareLogoSize}
         loading="lazy"
         fetchpriority="low"
         decoding="async"
@@ -203,8 +206,8 @@ const { scale = 1 } = Astro.props;
     <Image
       src={PanfactumSquare}
       alt="Stylized Panfactum logo"
-      height={256 * scale}
-      width={256 * scale}
+      height={mainLogoSize}
+      width={mainLogoSize}
       loading="eager"
       fetchpriority="high"
       decoding="sync"
@@ -220,8 +223,8 @@ const { scale = 1 } = Astro.props;
     <Image
       src={KubernetesSquare}
       alt="Kubernetes logo"
-      height={256 * scale}
-      width={256 * scale}
+      height={mainLogoSize}
+      width={mainLogoSize}
       loading="eager"
       fetchpriority="high"
       decoding="sync"
@@ -245,8 +248,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={AuthentikSquare}
         alt="Authentik logo"
-        width={105 * scale}
-        height={105 * scale}
+        width={squareLogoSize}
+        height={squareLogoSize}
         id="hero-icon-1"
         loading="eager"
         fetchpriority="low"
@@ -260,8 +263,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={RedisSquare}
         alt="Redis logo"
-        width={105 * scale}
-        height={105 * scale}
+        width={squareLogoSize}
+        height={squareLogoSize}
         id="hero-icon-2"
         loading="eager"
         fetchpriority="low"
@@ -284,8 +287,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={ArgoSquare}
         alt="Argo logo"
-        width={105 * scale}
-        height={105 * scale}
+        width={squareLogoSize}
+        height={squareLogoSize}
         id="hero-icon-3"
         loading="eager"
         fetchpriority="low"
@@ -300,8 +303,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={CiliumSquare}
         alt="Cilium logo"
-        width={105 * scale}
-        height={105 * scale}
+        width={squareLogoSize}
+        height={squareLogoSize}
         id="hero-icon-4"
         loading="eager"
         fetchpriority="low"
@@ -317,8 +320,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={TerragruntIcon}
         alt="Terragrunt icon"
-        width={64 * scale}
-        height={64 * scale}
+        width={circleLogoSize}
+        height={circleLogoSize}
         class="circling-icon absolute rounded-[50%]"
         loading="eager"
         fetchpriority="high"
@@ -333,8 +336,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={NixIcon}
         alt="Nix icon"
-        width={64 * scale}
-        height={64 * scale}
+        width={circleLogoSize}
+        height={circleLogoSize}
         class="circling-icon absolute rounded-[50%]"
         loading="eager"
         fetchpriority="high"
@@ -349,8 +352,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={TiltIcon}
         alt="Tilt icon"
-        width={64 * scale}
-        height={64 * scale}
+        width={circleLogoSize}
+        height={circleLogoSize}
         class="circling-icon absolute rounded-[50%]"
         loading="eager"
         fetchpriority="high"
@@ -365,8 +368,8 @@ const { scale = 1 } = Astro.props;
       <Image
         src={TofuIcon}
         alt="Tofu icon"
-        width={64 * scale}
-        height={64 * scale}
+        width={circleLogoSize}
+        height={circleLogoSize}
         class="circling-icon absolute rounded-[50%]"
         loading="eager"
         fetchpriority="high"
