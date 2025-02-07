@@ -95,6 +95,7 @@ export default {
           25: "#fcfdfd",
           50: "#f9fafb",
           100: "#f2f5f7",
+          150: "#ebeff1",
           200: "#e4e9ec",
           300: "#d0d8dd",
           400: "#98a8b3",
@@ -197,8 +198,6 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/forms"),
-    require('preline/plugin'),
+    require("@tailwindcss/forms")
   ],
 };

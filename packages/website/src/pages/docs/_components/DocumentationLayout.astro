@@ -50,12 +50,12 @@ const {
     />
 
     <div
-      class="mx-auto flex h-full min-h-[calc(100vh_-_var(--header-height))] max-w-screen-3xl flex-col items-start lg:flex-row"
+      class="mx-auto flex h-full min-h-[calc(100vh_-_var(--header-height))] w-screen flex-col items-start lg:flex-row xl:max-w-screen-3xl"
     >
       <DocsSidebar fullPath={pathname} metadata={metadata} client:load />
       <article
         class:list={[
-          "content lg:mt-[--header-height] lg:ml-[--sidebar-width] pt-6 px-6 h-full",
+          "content mt-0 md:mt-16 lg:mt-[--header-height] lg:ml-[--sidebar-width] pt-6 px-6 h-full w-full max-w-full",
           headings.length > 1 ? "xl:w-[calc(100%_-_var(--sidebar-width)_-_var(--toc-width))]" : "xl:w-[calc(100%_-_var(--sidebar-width))]"
         ]}
       >

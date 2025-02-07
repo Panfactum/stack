@@ -11,7 +11,6 @@ import rehypeWrap from "rehype-wrap-all";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import compress from "@playform/compress"
-import inline from "@playform/inline"
 import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -55,6 +54,9 @@ export default defineConfig({
   prefetch: {
     defaultStrategy: 'hover'
   },
+  build: {
+    inlineStylesheets: 'never' // We use the criticalcss plugin for this
+  },
   image: {
     service: imageService({
       placeholder: "blurhash",
@@ -78,16 +80,16 @@ export default defineConfig({
     }),
     mdx(),
     sitemap(),
-    // inline({
-    //   critters: {
-    //     preloadFonts: false, // Done by astro-font
-    //     keyframes: "none", // Animations not critical
-    //     compress: false, // This messes up styles
-    //     reduceInlineStyles: false // This messes up styles
-    //   }
-    // }),
-
-    criticalCSS(),
+    criticalCSS({
+      dimensions: [
+        {width: 624, height: 900 },
+        {width: 765, height: 900 },
+        {width: 1023, height: 1500 },
+        {width: 1263, height: 2000 },
+        {width: 1500, height: 2000 }
+      ],
+      strict: true
+    }),
     compress({
       HTML: {
         "html-minifier-terser": {
@@ -100,7 +102,7 @@ export default defineConfig({
           sortAttributes: true
         }
       },
-      Image: false
+      Image: false // Image compression is tackled by the image service
     })
   ],
   markdown: {

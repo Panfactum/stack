@@ -49,7 +49,7 @@ the website.
   /* Primaries */
   /* Very light / very dark */
   .bg-primary {
-    @apply bg-gray-light-mode-200 dark:bg-gray-dark-mode-950;
+    @apply bg-gray-light-mode-150 dark:bg-gray-dark-mode-950;
     @apply text-primary-on-light;
   }
 

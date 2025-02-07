@@ -18,7 +18,7 @@ const MobileNav: Component<MobileNavProps> = (props) => {
 
   return (
     <Dialog open={isOpen()} id="mobile-nav" onOpenChange={setIsOpen}>
-      <Dialog.Trigger class="md:hidden">
+      <Dialog.Trigger class="block md:hidden">
         <IoMenu class="size-12" />
       </Dialog.Trigger>
       <Dialog.Portal>
