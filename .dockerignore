@@ -2,7 +2,6 @@
 !packages/website/src
 !packages/website/public
 !packages/website/.eslintrc.js
-!packages/website/jsconifg.json
 !packages/website/tsconfig.json
 !packages/website/tailwind.config.mjs
 !packages/website/panfactum-theme.mjs
@@ -10,6 +9,7 @@
 !packages/website/components.json
 !packages/website/astro.config.mjs
 !packages/website/.prettierrc.mjs
+!packages/website/postcss.config.cjs
 !packages/scraper/package.json
 !packages/scraper/src
 !packages/scraper/.eslintrc.js
