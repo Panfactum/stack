@@ -69,7 +69,7 @@ const fetchSearchResults = async (input: {
     const response = await client.post<SearchResponse>(
       `/1/indexes/${ALGOLIA_INDEX_NAME}/query`,
       {
-        input: input.query,
+        query: input.query,
         hitsPerPage: 5,
         attributesToSnippet: ["hierarchy.lvl1:5", "content:20"],
         filters: `version:${input.version} OR hasVersion:false`,
