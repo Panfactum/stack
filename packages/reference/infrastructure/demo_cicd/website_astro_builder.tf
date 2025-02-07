@@ -137,7 +137,7 @@ module "astro_builder_workflow" {
         containers = [
           {
             name = "scale-buildkit"
-            command = ["/bin/pf-buildkit-scale-up", "--wait", "--only=arm64"]
+            command = ["/bin/pf-buildkit-scale-up", "--wait", "--only=amd64"]
           },
           {
             name = "clone"
