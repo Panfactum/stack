@@ -14,6 +14,7 @@ import compress from "@playform/compress"
 import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
+import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.js";
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
@@ -108,6 +109,7 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkGfm, remarkMath],
     rehypePlugins: [
+      rehypeReplaceStrings,
       rehypeSlug,
       [rehypeAutolinkHeadings, { behavior: "append" }],
       [

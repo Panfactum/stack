@@ -66,8 +66,8 @@ in the hands of a third-party leaves you vulnerable to outages and security inci
 Fortunately, there are also many production-ready self-hosted IdPs that contain all the same functionality. In our analysis,
 the most robust and well-integrated tool is [Authentik](https://goauthentik.io/).
 
-We provide both a module to deploy Authentik ([kube\_authentik](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_authentik)) and
-many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_aws_sso)).
+We provide both a module to deploy Authentik ([kube\_authentik](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_authentik)) and
+many modules to connect Authentik to the various systems in the Panfactum stack (e.g., [authentik\_aws\_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_aws_sso)).
 
 ### Configure AWS SES
 
@@ -78,7 +78,7 @@ AWS provides a service called [Simple Email Service (SES)](https://aws.amazon.co
 (the standard protocol for sending email).
 
 Before using it, you must first configure SES to use the domain you want to use send email from (e.g., `panfactum.com`).
-We provide a module to do this: [aws\_ses\_domain](/docs/main/reference/infrastructure-modules/direct/aws/aws_ses_domain).
+We provide a module to do this: [aws\_ses\_domain](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ses_domain).
 
 Let's deploy the module now:
 
@@ -87,7 +87,7 @@ Let's deploy the module now:
 
 2. Add a new `aws_ses_domain` folder to your `production` environment in the region where you plan to deploy Authentik (requires a Kubernetes cluster).
 
-3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl).
+3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl).
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -103,8 +103,8 @@ Let's deploy the module now:
 
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
-   to set this up. You can use the [aws\_dns\_records](/docs/main/reference/infrastructure-modules/direct/aws/aws_dns_records) module to
-   deploy the record like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
+   to set this up. You can use the [aws\_dns\_records](/docs/edge/reference/infrastructure-modules/direct/aws/aws_dns_records) module to
+   deploy the record like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
 
 ### Deploy Authentik
 
@@ -112,7 +112,7 @@ We are now ready to deploy Authentik:
 
 1. Add a new `kube_authentik` folder adjacent to your `aws_ses_domain` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_authentik/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_authentik/terragrunt.hcl).
 
    1. The `domain` should be a subdomain of one of the domains available in this environment.
 
@@ -154,11 +154,11 @@ We are now ready to deploy Authentik:
 
 Out-of-the box, Authentik provides a nearly blank slate with only enough to facilitate the initial admin login. We
 provide a module that augments this initial setup with more secure authentication flows, recovery flows, and
-branding: [authentik\_core\_resources](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
+branding: [authentik\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_core_resources).
 
 This module also allows you to define user groups. Groups in Authentik will be assigned to roles in
 service providers as the foundational mechanism for implementing RBAC across your ecosystem. See the [Panfactum
-RBAC reference](/docs/main/reference/rbac) for more information.
+RBAC reference](/docs/edge/reference/rbac) for more information.
 
 Of particular note is the `superusers` group which will receive root access to every system deployed by a Panfactum
 module.
@@ -167,7 +167,7 @@ Let's deploy this configuration now:
 
 1. Add a new `authentik_core_resources` folder adjacent to your `kube_authentik` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_core_resources/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/authentik_core_resources/terragrunt.hcl).
 
    1. `organization_name` should be how you want your organization to be referenced on the Authentik web UI.
 
@@ -179,7 +179,7 @@ Let's deploy this configuration now:
    4. Optionally, you can replace the default Panfactum branding with your own `logo_svg_b64` and
       `favicon_ico_b64` files.
 
-   5. `default_groups_enabled` will provision the [default Panfactum RBAC groups](/docs/main/reference/rbac) (`superusers` will always be deployed).
+   5. `default_groups_enabled` will provision the [default Panfactum RBAC groups](/docs/edge/reference/rbac) (`superusers` will always be deployed).
 
    6. `extra_groups` allows you to create arbitrary additional groups.
 
@@ -311,4 +311,4 @@ user account.
 Your IdP is now fully configured and ready to be connected to the other systems set up in this guide such as AWS, Kubernetes,
 and Vault.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/databases"} forwardHref={"/docs/main/guides/bootstrapping/federated-auth"} stepNumber={19} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/databases"} forwardHref={"/docs/edge/guides/bootstrapping/federated-auth"} stepNumber={19} />

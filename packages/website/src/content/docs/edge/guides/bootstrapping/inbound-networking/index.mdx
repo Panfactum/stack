@@ -17,7 +17,7 @@ Deploy the necessary components to allow inbound network traffic to workloads ru
 ## Background
 
 Like internal networking, *inbound* networking has several moving parts. We won't cover them in detail
-within this guide, but we do in our [concept documentation.](/docs/main/concepts/networking/cluster-networking)
+within this guide, but we do in our [concept documentation.](/docs/edge/concepts/networking/cluster-networking)
 
 ## Deploy ExternalDNS
 
@@ -26,15 +26,15 @@ synchronizing DNS records from internal [Service](https://kubernetes.io/docs/con
 and [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources
 to external DNS servers like AWS Route53.
 
-We provide a module to deploy it: [kube\_external\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
+We provide a module to deploy it: [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_external_dns`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_external_dns/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_external_dns/terragrunt.hcl).
 
-3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](/docs/main/guides/bootstrapping/certificate-management#deploy-issuers)
+3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](/docs/edge/guides/bootstrapping/certificate-management#deploy-issuers)
    for more information, but unless you have a specific reason not to, simply copy that input into this module.
 
 4. Run `pf-tf-init` to enable the required providers.
@@ -61,13 +61,13 @@ Kubernetes nodes. AWS load balancers are the perfect gateways:
 
 * Support for [PROXY protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) to preserve IP headers
 
-We provide a module to deploy it: [kube\_aws\_lb\_controller](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
+We provide a module to deploy it: [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
 
 Let's deploy it now:
 
 1. Create a new directory adjacent to your `kube_external_dns` module called `kube_aws_lb_controller`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_aws_lb_controller/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_aws_lb_controller/terragrunt.hcl).
 
 3. Select the **public** subnets that you want AWS load balancers to be able to use. We suggest passing in **all**
    the public subnets created in your `aws_vpc` deployment.
@@ -105,13 +105,13 @@ costs.
 The most popular ingress controller for Kubernetes is the [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/)
 which uses [NGINX](https://www.nginx.com/) as the underlying proxy.
 
-We provide a module to deploy it: [kube\_ingress\_nginx](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress_nginx).
+We provide a module to deploy it: [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress_nginx).
 
 ### Deploy the NGINX-Ingress Controller
 
 1. Create a new directory adjacent to your `kube_external_dns` module called `kube_ingress_nginx`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_ingress_nginx/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_ingress_nginx/terragrunt.hcl).
 
    1. For `ingress_domains` select **all** the domains that the cluster can use to serve traffic. Each domain
       listed here **must** have been configured in the `kube_external_dns` and `kube_cert_issuers` modules.
@@ -163,7 +163,7 @@ Currently, the system has one workload that definitely needs inbound connectivit
 
 Let's set that up now:
 
-1. Return the `kube_vault` module you deployed in the [Vault guide section](/docs/main/guides/bootstrapping/vault).
+1. Return the `kube_vault` module you deployed in the [Vault guide section](/docs/edge/guides/bootstrapping/vault).
 
 2. Change `ingress_enabled` from `false` to `true`.
 
@@ -214,7 +214,7 @@ Let's set that up now:
    can verify this either directly via the command line (`curl -I <your_vault_address>`) or using a site such
    as [https://securityheaders.com](https://securityheaders.com).
 
-   This is accomplished by our [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+   This is accomplished by our [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
    module. `kube_vault` uses it internally, and you can use it directly in your projects.
 
 8. Finally, you no longer need to use the finicky `kubectl port-forward` to connect with Vault. Let's update the address in your
@@ -243,7 +243,7 @@ message format](https://www.postgresql.org/docs/current/protocol.html). [^1]
     is prone to service disruptions as pods restart and move around the cluster. The bastion will use the highly available
     service infrastructure to ensure connections are preserved even if the underlying pod changes.
 
-We provide a bastion deployment module: [kube\_bastion](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
+We provide a bastion deployment module: [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
 
 This host uses certificate authentication with Vault so that you do not need to manually manage static SSH keys
 unlike SSH setups you might have used in the past. We will see that in action in a moment.
@@ -254,7 +254,7 @@ Let's deploy the bastion now:
 
 1. Create a new directory adjacent to your `kube_ingress_nginx` module called `kube_bastion`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_bastion/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_bastion/terragrunt.hcl).
 
    1. For `bastion_domains` select the domain names that you want to be able to access the bastion
       hosts at.
@@ -290,7 +290,7 @@ Now that the bastion is running, let's configure connectivity:
 
 3. Copy the `config.example.yaml` file to `config.yaml`.
 
-4. Update the values to the correct values for your setup. See the [reference docs](/docs/main/reference/configuration/ssh) for
+4. Update the values to the correct values for your setup. See the [reference docs](/docs/edge/reference/configuration/ssh) for
    more information.
 
 5. Run `pf-update-ssh --build` to generate the `known_hosts` and `connection_info` files for your project. Additionally, a
@@ -348,4 +348,4 @@ Now that the core functionality of the cluster is live,
 let's install a handful of maintenance controllers that will ensure things continue
 to operate smoothly.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/autoscaling"} forwardHref={"/docs/main/guides/bootstrapping/maintenance-controllers"} stepNumber={16} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/autoscaling"} forwardHref={"/docs/edge/guides/bootstrapping/maintenance-controllers"} stepNumber={16} />

@@ -14,12 +14,12 @@ Deploy the [Linkerd2 service mesh](https://linkerd.io/).
 ## Background
 
 For more information on why the Panfactum stack includes a service mesh and why we chose Linkerd,
-check out our [concept documentation.](/docs/main/concepts/networking/cluster-networking#service-mesh)
+check out our [concept documentation.](/docs/edge/concepts/networking/cluster-networking#service-mesh)
 
 ## Deploy Linkerd2
 
 [Linkerd](https://linkerd.io/2.15/overview/) is likely the most popular service mesh for Kubernetes,
-and we provide a module for deploying it: [kube\_linkerd](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
+and we provide a module for deploying it: [kube\_linkerd](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_linkerd)
 
 This module not only deploys linkerd but also connects it to the certificate infrastructure that we
 provisioned in the previous section. It also installs linkerd-specific observability tooling that we
@@ -29,7 +29,7 @@ Let's deploy the module now:
 
 1. Create a new directory adjacent to your `kube_cert_manager` module called `kube_linkerd`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_linkerd/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_linkerd/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -221,4 +221,4 @@ At this point, all the necessary components for powering *internal* cluster netw
 we configure *external* networking, we will address autoscaling
 as the cluster is likely already running 75+ containers and will soon become resource constrained.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/certificate-management"} forwardHref={"/docs/main/guides/bootstrapping/autoscaling"} stepNumber={14} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/certificate-management"} forwardHref={"/docs/edge/guides/bootstrapping/autoscaling"} stepNumber={14} />

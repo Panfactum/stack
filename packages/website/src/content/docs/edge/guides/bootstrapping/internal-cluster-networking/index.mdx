@@ -9,8 +9,8 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 ## Objective
 
-Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
-and [kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.
+Install the basic Kubernetes cluster networking primitives via the [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns)
+and [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium) modules.
 
 ## Background
 
@@ -18,14 +18,14 @@ In the Panfactum stack, we use [CoreDNS](https://coredns.io/) to handle
 cluster DNS resolution and [Cilium](https://docs.cilium.io) to handle all the L3/L4 networking in our Kubernetes cluster.
 
 In this guide, we won't go into detail about the underlying design decisions and network concepts, so
-we recommend reviewing the [concept documentation](/docs/main/concepts/networking/cluster-networking) for more
+we recommend reviewing the [concept documentation](/docs/edge/concepts/networking/cluster-networking) for more
 information.
 
 ## Deploy Cilium
 
 Cilium provides workloads in your clusters with network interfaces that allow them to connect with each other and the wider
 internet. Without this controller, your pods would not be able to communicate. We provide a module
-for deploying Cilium: [kube\_cilium](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
+for deploying Cilium: [kube\_cilium](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_cilium).
 
 Let's deploy it now.
 
@@ -33,7 +33,7 @@ Let's deploy it now.
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_cilium`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_cilium/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -51,7 +51,7 @@ Let's deploy it now.
 
 Kubernetes provides human-readable DNS names for pods and services running inside the cluster (e.g., `my-service.namespace.svc.cluster.local`);
 however, it does not come with its own DNS servers. The standard way to provide this functionality is via CoreDNS.
-We provide a module to deploy CoreDNS called [kube\_core\_dns](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
+We provide a module to deploy CoreDNS called [kube\_core\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_core_dns).
 
 Let's deploy it now.
 
@@ -59,9 +59,9 @@ Let's deploy it now.
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_core_dns`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_core_dns/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_core_dns/terragrunt.hcl).
 
-3. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/main/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
+3. If you used our recommendation of `172.20.0.0/16` for the `service_cidr` in the [cluster setup docs](/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-service-cidr),
    you should use a `service_ip` of `172.20.0.10` as this is the well-known DNS IP in Kubernetes.
 
 4. Run `pf-tf-init` to enable the required providers.
@@ -74,7 +74,7 @@ Let's deploy it now.
 
    If you see only 1/2 pods running, that is because we force the CoreDNS pods to run on nodes with different instance types
    for high-availability. However, the cluster won't be able to dynamically provision the new instance types until
-   you complete the [autoscaling section](/docs/main/guides/bootstrapping/autoscaling) of the bootstrapping guide.
+   you complete the [autoscaling section](/docs/edge/guides/bootstrapping/autoscaling) of the bootstrapping guide.
    Once you complete that guide section, you will see that both CoreDNS pods have launched successfully. This should
    not have any impact in the interim.
 
@@ -82,4 +82,4 @@ Let's deploy it now.
 
 Now that basic networking is working, we will configure a policy engine for the cluster.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/kubernetes-cluster"} forwardHref={"/docs/main/guides/bootstrapping/policy-controller"} stepNumber={9} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/kubernetes-cluster"} forwardHref={"/docs/edge/guides/bootstrapping/policy-controller"} stepNumber={9} />

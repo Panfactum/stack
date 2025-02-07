@@ -1,8 +1,10 @@
 import { NODE_ENV, ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME  } from "astro:env/client"
+import constants from "./constants.json"
 export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum Group, Inc.`;
 
-export const PANFACTUM_VERSION_MAIN = "main";
-export const PANFACTUM_VERSION_EDGE = "edge.24-10-25";
+
+export const PANFACTUM_VERSION_MAIN = constants.panfactum_version_main;
+export const PANFACTUM_VERSION_EDGE = constants.panfactum_version_edge;
 
 export const SIGNUP_LINK =
   "https://hs.panfactum.com/meetings/jack-langston/intro";

@@ -4,18 +4,18 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_pod" status="stable" type="submodule" />
+<ModuleHeader name="kube_pod" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pod" status="stable" type="submodule" />
 
 # Kubernetes Pod Template
 
 This module does **not** create a Kubernetes Pod but rather exposes a `pod_template` output
 that is intended to by used by higher-level controllers such as Deployments and StatefulSets. This module
 is used internally by many Panfactum submodules such as
-[kube\_deployment](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube\_stateful\_set](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
+[kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment) and [kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set).
 
 ## Usage
 
-This module follows most of the conventions outlined in [this guide](/docs/main/guides/deploying-workloads/basics).
+This module follows most of the conventions outlined in [this guide](/docs/edge/guides/deploying-workloads/basics).
 
 ## Providers
 

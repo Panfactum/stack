@@ -310,6 +310,9 @@ importers:
       typescript:
         specifier: 5.2.2
         version: 5.2.2
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
     devDependencies:
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^4.3.0

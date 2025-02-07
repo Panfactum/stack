@@ -4,7 +4,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_vault_proxy" status="stable" type="submodule" />
+<ModuleHeader name="kube_vault_proxy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vault_proxy" status="stable" type="submodule" />
 
 # Vault OAuth2 Proxy
 
@@ -15,7 +15,7 @@ that requires authentication with the cluster's Vault instance.
 
 ### Setup
 
-This module is intended to be used in conjunction with the [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+This module is intended to be used in conjunction with the [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
 module. `domain` should be set to a domain used in `kube_ingress` and the `upstream_ingress_annotations` output
 should be passed to the `extra_annotations` input of `kube_ingress`.
 

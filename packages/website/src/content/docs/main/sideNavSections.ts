@@ -536,6 +536,7 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
     path: "/changelog",
     icon: NavIcons.history,
     notVersioned: true,
+    defaultSubPath: "/edge",
     sub: [
       {
         text: "Edge",

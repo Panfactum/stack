@@ -73,12 +73,12 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
     sub: [
       {
         text: "Getting Started",
+        path: "/"
+      },
+      {
+        text: "devShell Setup",
         path: "/getting-started",
         sub: [
-          {
-            text: "Start Here",
-            path: "/start-here",
-          },
           {
             text: "Overview",
             path: "/overview",
@@ -98,7 +98,7 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
         ],
       },
       {
-        text: "Bootstrapping Stack",
+        text: "Bootstrapping Guide",
         path: "/bootstrapping",
         sub: [
           {
@@ -114,7 +114,7 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
             path: "/preparing-aws",
           },
           {
-            text: "Configuring Infrastructure-as-Code (IaC)",
+            text: "Configuring IaC",
             path: "/configuring-infrastructure-as-code",
           },
           {
@@ -534,9 +534,9 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
   {
     text: "Changelog",
     path: "/changelog",
-    defaultSubPath: '/edge',
     icon: NavIcons.history,
     notVersioned: true,
+    defaultSubPath: "/edge",
     sub: [
       {
         text: "Edge",
@@ -550,6 +550,10 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
     icon: NavIcons.dataFlow,
     notVersioned: true,
     sub: [
+      {
+        text: "Overview",
+        path: "/"
+      },
       {
         text: "Measures",
         path: "/measures",

@@ -14,10 +14,10 @@ Set up a CI / CD system that deploys IaC when committing changes to your stack r
 
 ## Prerequisites
 
-* This guide requires that you have installed the [Workflow Engine Stack Addon.](/docs/main/guides/addons/workflow-engine/installing)
+* This guide requires that you have installed the [Workflow Engine Stack Addon.](/docs/edge/guides/addons/workflow-engine/installing)
 
 * Setting up your CI / CD integrations will require writing new IaC modules. Ensure you understand the
-  basic concepts for this by reviewing [our first-party IaC guide](/docs/main/guides/iac/first-party-modules).
+  basic concepts for this by reviewing [our first-party IaC guide](/docs/edge/guides/iac/first-party-modules).
 
 * You will need admin access to your organization's git repositories as you will need to adjust sensitive settings
   (e.g., webhooks).
@@ -26,17 +26,17 @@ Set up a CI / CD system that deploys IaC when committing changes to your stack r
 
 <MarkdownAlert severity="info">
   Our recommended architecture uses Argo Workflows and Events as the basis for the CI / CD system. That said,
-  we do offer alternative modules for [self-hosted GitHub Actions](/docs/main/guides/addons/github-actions/installing).
+  we do offer alternative modules for [self-hosted GitHub Actions](/docs/edge/guides/addons/github-actions/installing).
 </MarkdownAlert>
 
-We will be deploying our [recommended CI / CD architecture](/docs/main/concepts/cicd/recommended-architecture). Please
+We will be deploying our [recommended CI / CD architecture](/docs/edge/concepts/cicd/recommended-architecture). Please
 ensure you have reviewed the architectural diagram in the linked concept documentation so that you have a
 concrete understanding of the end state for this guide.
 
 This guide will focus on setting up CI / CD in a *single* cluster; however, you will likely want to repeat
 these steps for every region / environment.
 
-We provide a complete example the IaC of a fully functional CI / CD system [here](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd).
+We provide a complete example the IaC of a fully functional CI / CD system [here](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/reference/infrastructure/demo_cicd).
 
 ## Deploy an Event Bus
 
@@ -46,9 +46,9 @@ do this now:
 1. Create a new IaC module for your CI/CD configuration in your infrastructure repository.
 
 2. Add a new Kubernetes namespace using our
-   [kube\_namespace](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_namespace) submodule.
+   [kube\_namespace](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_namespace) submodule.
 
-3. Follow our [guide for creating a new Event Bus.](/docs/main/guides/addons/event-bus/installing)
+3. Follow our [guide for creating a new Event Bus.](/docs/edge/guides/addons/event-bus/installing)
 
    1. Set up the relevant source for your specific git hosting provider:
 
@@ -74,7 +74,7 @@ do this now:
       [Log trigger](https://argoproj.github.io/argo-events/sensors/triggers/log/) so that you can examine the webhook payload.
 
 4. Create a public Ingress for your webhook using our
-   [kube\_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) submodule.
+   [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress) submodule.
 
 5. Deploy your new IaC module to your desired Kubernetes cluster.
 
@@ -107,7 +107,7 @@ We provide [several prebuilt Workflows](http://localhost:3000/docs/main/guides/a
 that you can use for common CI / CD tasks.
 
 Right now, let's set up the IaC deployment workflow,
-[wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy),
+[wf\_tf\_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy),
 so that we can automatically deploy your infrastructure changes.
 
 Add an instance of the `wf_tf_deploy` submodule to the CI / CD module you created above and re-apply it:
@@ -274,4 +274,4 @@ You can begin adding additional GitOps automation by creating and connecting you
 
 You can examine some of the additional guides in this section for some common patterns you might want to
 add to your system. Additionally, don't forget to take advantage of our
-[prebuilt workflows](/docs/main/guides/addons/workflow-engine/prebuilt-workflows).
+[prebuilt workflows](/docs/edge/guides/addons/workflow-engine/prebuilt-workflows).

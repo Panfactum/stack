@@ -4,7 +4,7 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This guide takes you through the recommended steps to take when upgrading your Panfactum version.
 
-Before you being, please ensure you have reviewed the guide for [pinning the Panfactum version](/docs/main/guides/versioning/pinning).
+Before you being, please ensure you have reviewed the guide for [pinning the Panfactum version](/docs/edge/guides/versioning/pinning).
 
 <MarkdownAlert severity="warning">
   We only support upgrading to the next major version in sequence. For example, if there exists the versions
@@ -39,7 +39,7 @@ you have reviewed the changes and understand what steps you need to take.
 ## Update your Infrastructure
 
 1. Update the provider versions in your first-party IaC modules to match the
-   [required provider versions in the new release](/docs/main/reference/infrastructure-modules/overview#provider-versions):
+   [required provider versions in the new release](/docs/edge/reference/infrastructure-modules/overview#provider-versions):
 
    ```diff lang="hcl"
    terraform {
@@ -63,7 +63,7 @@ you have reviewed the changes and understand what steps you need to take.
    ```
 
 3. Ensure that the terragrunt `version` for that environment is set to `local` in order
-   to deploy the local changes from step 1 (review [these docs](/docs/main/guides/iac/first-party-modules)). [^2]
+   to deploy the local changes from step 1 (review [these docs](/docs/edge/guides/iac/first-party-modules)). [^2]
 
 4. Run `pf-tf-init` in the environment's Terragrunt directory to automatically upgrade your `module.yaml` and `.terraform.lock.hcl` files
    for every module.

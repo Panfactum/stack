@@ -13,7 +13,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) module.
+using our [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module.
 
 ## A Quick Note
 
@@ -26,7 +26,7 @@ and we recommend planning for at minimum {"$"}150 / month / cluster. [^1]
     required to manage the control plane on your own, this is an incredible deal.
 
 <MarkdownAlert severity="info">
-  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/main/guides/bootstrapping/suspend-kubernetes-cluster)
+  To save costs during the bootstrapping process you can follow the [Kubernetes Cluster Suspension Guide](/docs/edge/guides/bootstrapping/suspend-kubernetes-cluster)
   to suspend resources and resume as you are setting up your cluster.
 </MarkdownAlert>
 
@@ -54,7 +54,7 @@ configured to download the image from the public registry *only if it does not a
 in its cache*. In this way, most images will only ever need to be downloaded from a public source *once* during
 the initial deployment.
 
-We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/main/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
+We provide a module for configuring this behavior: [aws\_ecr\_pull\_through\_cache](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_pull_through_cache).
 
 However, before we deploy it, you must first retrieve authentication credentials for some upstream repositories. [^13]
 
@@ -86,13 +86,13 @@ The following instructions apply for **every** environment-region combination wh
 
 2. Add an `aws_ecr_pull_through_cache` directory to that region.
 
-3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
 
 4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
-6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
+6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
    This ensures all modules deployed in this environment will utilize the cache.
 
 <MarkdownAlert severity="warning">
@@ -108,7 +108,7 @@ The following instructions apply for **every** environment-region combination wh
 
 2. Add an `aws_eks` directory to that region.
 
-3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl).
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl).
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -124,7 +124,7 @@ primary cluster in the production environment.
 ### Choose Kubernetes Version
 
 We *strongly* recommend leaving this as the module default. The version was specifically chosen for compatibility
-with the rest of the Panfactum stack. See the [module documentation](/docs/main/reference/infrastructure-modules/direct/aws/aws_eks) if
+with the rest of the Panfactum stack. See the [module documentation](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) if
 you need to override either the control plane or node group versions.
 
 ### Enable Bootstrapping Mode
@@ -171,7 +171,7 @@ To download this metadata:
 3. Run `pf-update-kube --build` to dynamically generate a `cluster_info` file and download your cluster's CA certs.
 
 As you add additional clusters, you will need to update `config.yaml` and re-run `pf-update-kube --build`. More
-information about this file can be found [here](/docs/main/reference/configuration/kubernetes).
+information about this file can be found [here](/docs/edge/reference/configuration/kubernetes).
 
 ### Set up Kubeconfig
 
@@ -205,11 +205,11 @@ To generate your kubeconfig:
 4. Run `pf-update-kube` to generate your kubeconfig file.
 
 Remember that you will need to update your `config.user.yaml` and re-run `pf-update-kube` as you add additional clusters. More
-information about this file can be found [here](/docs/main/reference/configuration/kubernetes).
+information about this file can be found [here](/docs/edge/reference/configuration/kubernetes).
 
 <MarkdownAlert severity="warning">
   *Every* one of your users will need to set up their own `config.user.yaml` file, and we provide instructions
-  for them [here](/docs/main/guides/getting-started/connect-to-infrastructure).
+  for them [here](/docs/edge/guides/getting-started/connect-to-infrastructure).
 </MarkdownAlert>
 
 ### Verify Connection
@@ -263,7 +263,7 @@ to a single IaC paradigm, we are able to greatly simplify operations for users o
 
 In order to start using our Kubernetes modules, we must first configure the
 [Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) by setting
-some additional [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables).
+some additional [terragrunt variables](/docs/edge/reference/configuration/terragrunt-variables).
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 
@@ -271,7 +271,7 @@ In the `region.yaml` file for the region where you deployed the cluster, add the
   If this was set up using `pf-update-kube`, this is just the name of the cluster.
 * `kube_api_server`: This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
 
-See [this file](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
+See [this file](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
 
 The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
 
@@ -280,4 +280,4 @@ The Kubernetes modules deployed in this region will now appropriately deploy to 
 Congratulations! You have officially deployed Kubernetes using infrastructure-as-code.
 Now that the cluster is running, we will begin working on the internal networking stack.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/aws-networking"} forwardHref={"/docs/main/guides/bootstrapping/internal-cluster-networking"} stepNumber={8} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/aws-networking"} forwardHref={"/docs/edge/guides/bootstrapping/internal-cluster-networking"} stepNumber={8} />

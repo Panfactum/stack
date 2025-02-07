@@ -11,7 +11,7 @@ which automatically installs all the necessary tooling to launch and work with t
 
 ## Install Prerequisite Tooling
 
-Follow this [guide section](/docs/main/guides/getting-started/install-tooling?bootstrapping=true) to install a few prerequisite tools.
+Follow this [guide section](/docs/edge/guides/getting-started/install-tooling?bootstrapping=true) to install a few prerequisite tools.
 
 ## Choosing a Repository
 
@@ -35,7 +35,7 @@ This repository will contain the following pieces of functionality:
 * All of your immediate integration tooling for local development
 
 <MarkdownAlert severity="info">
-  We provide a [reference repository setup](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference) that you can benchmark against as you progress through the setup documentation.
+  We provide a [reference repository setup](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/reference) that you can benchmark against as you progress through the setup documentation.
 </MarkdownAlert>
 
 ## Integrate the Panfactum devShell
@@ -91,16 +91,16 @@ of the Panfactum stack in your repo and organization.
 ### Shared Configuration
 
 We expect you to provide some top-level configuration values in a `panfactum.yaml` file in the root of your repository.
-See an example file [here.](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/panfactum.yaml)
+See an example file [here.](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/panfactum.yaml)
 
-For the full list of available values and their behavior, please refer to [these reference docs](/docs/main/reference/configuration/repo-variables).
+For the full list of available values and their behavior, please refer to [these reference docs](/docs/edge/reference/configuration/repo-variables).
 
 ### Personal Configuration
 
 Each developer has settings that are specific to them. These should be set in a `.env` file using the [dotenv](https://www.dotenv.org/docs/)
 syntax. This file will control what values get set as environment variables when the devShell launches.
 
-For the full list of Panfactum-specific environment variables, please refer to [these reference docs](/docs/main/reference/configuration/dotenv).
+For the full list of Panfactum-specific environment variables, please refer to [these reference docs](/docs/edge/reference/configuration/dotenv).
 
 Even though your `.env` is personal to your, you might want to include an example
 file in the repo called `.env.example` to aid other users in your organization. The `.env` can contain
@@ -160,4 +160,4 @@ your organization.
 
 Now that you have the tooling installed, we will need to prepare AWS for deploying infrastructure.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/overview"} forwardHref={"/docs/main/guides/bootstrapping/preparing-aws"} stepNumber={2} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/overview"} forwardHref={"/docs/edge/guides/bootstrapping/preparing-aws"} stepNumber={2} />

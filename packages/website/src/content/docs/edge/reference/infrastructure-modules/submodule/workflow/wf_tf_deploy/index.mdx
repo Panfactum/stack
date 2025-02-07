@@ -4,7 +4,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="wf_tf_deploy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/wf_tf_deploy" status="beta" type="submodule" />
+<ModuleHeader name="wf_tf_deploy" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/wf_tf_deploy" status="beta" type="submodule" />
 
 # Argo Workflow Template: Tofu Deployment
 
@@ -15,7 +15,7 @@ that will deploy Tofu code from an indicated repository that follows the Panfact
 
 In particular, generated Workflows will perform the following actions:
 
-* Check out the source code indicated by `repo` using our [standard process](/docs/main/guides/cicd/checking-out-code).
+* Check out the source code indicated by `repo` using our [standard process](/docs/edge/guides/cicd/checking-out-code).
 * Automatically configure authentication for the following providers: AWS, Kubernetes, Vault
 * Update SOPS-encrypted files to use the CI's AWS profile
 * Configure the [Terragrunt provider cache](https://terragrunt.gruntwork.io/docs/features/provider-cache/).
@@ -32,7 +32,7 @@ In particular, generated Workflows will perform the following actions:
 
 ## Usage
 
-We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/tf_deploy.tf).
+We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/infrastructure/demo_cicd/tf_deploy.tf).
 
 The critical configuration values are:
 
@@ -54,7 +54,7 @@ The critical configuration values are:
 
 ### Authenticating with Private Repositories
 
-`git_username` and `git_password` can be used for authenticating with a private `repo`. See our [documentation](/docs/main/guides/cicd/checking-out-code)
+`git_username` and `git_password` can be used for authenticating with a private `repo`. See our [documentation](/docs/edge/guides/cicd/checking-out-code)
 for what values to provide. The only permissions needed by this Workflow is read access to the source code.
 
 Note that these credentials will be used for *all* git operations, so if your modules refer to many private repositories,

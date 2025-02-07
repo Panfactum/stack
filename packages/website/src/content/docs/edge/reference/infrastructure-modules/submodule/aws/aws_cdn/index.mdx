@@ -4,7 +4,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_cdn" status="beta" type="submodule" />
+<ModuleHeader name="aws_cdn" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_cdn" status="beta" type="submodule" />
 
 # AWS CloudFront CDN
 
@@ -237,7 +237,7 @@ you must set `cors_additional_allowed_origins`. Adding `"*"` to this input will 
 #### S3 Origins
 
 If you want to use an S3 bucket as the origin for this CloudFront distribution, you should use our
-[aws\_s3\_public\_website](/docs/main/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
+[aws\_s3\_public\_website](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_s3_public_website) module.
 
 ### Number of PoPs
 

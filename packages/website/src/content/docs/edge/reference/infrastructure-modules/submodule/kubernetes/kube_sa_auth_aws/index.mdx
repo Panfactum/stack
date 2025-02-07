@@ -4,7 +4,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 {/* eslint-disable import/order */}
 
-<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
+<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
 
 # AWS Authentication via Kubernetes Service Account
 
@@ -64,7 +64,7 @@ module "aws_permissions" {
 To mitigate credential exfiltration attacks,
 generated credentials may only be used by pods running inside the cluster's subnets. These
 subnets are subnets with the `kubernetes.io/cluster/<cluster_name>` tag set. This is automatically
-configured by the [aws\_eks](/docs/main/reference/infrastructure-modules/submodule/aws/aws_eks) module.
+configured by the [aws\_eks](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_eks) module.
 
 If you need to allow additional entities to use these credentials, you must manually
 add their CIDRs to the `ip_allow_list` input.

@@ -12,12 +12,12 @@ Complete the necessary repository setup to begin utilizing OpenTofu (Terraform) 
 
 <MarkdownAlert severity="warning">
   If you're new to using infrastructure-as-code tooling professionally, you should review the
-  [concepts documentation](/docs/main/concepts/iac) before continuing.
+  [concepts documentation](/docs/edge/concepts/iac) before continuing.
 </MarkdownAlert>
 
 The Panfactum stack uses the open-source Terraform fork, [OpenTofu](https://opentofu.org/), to define the [100+
-infrastructure modules](/docs/main/reference/infrastructure-modules/overview) that comprise the Panfactum stack. [^1] We
-use a [configuration-as-code](/docs/main/concepts/iac#configuration-as-code) manager for Terraform / OpenTofu called [Terragrunt](https://terragrunt.gruntwork.io/)
+infrastructure modules](/docs/edge/reference/infrastructure-modules/overview) that comprise the Panfactum stack. [^1] We
+use a [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) manager for Terraform / OpenTofu called [Terragrunt](https://terragrunt.gruntwork.io/)
 to deploy each module.
 
 [^1]: To learn more about why Terraform was forked, see the [OpenTofu manifesto](https://opentofu.org/manifesto/).
@@ -64,21 +64,21 @@ We extend that pattern with one more rule:
 This is a **critically important** concept. Again, **one** branch will define exactly what is deployed across
 **all** environments.
 
-Pick the branch you want to use and make sure it is set as the `repo_primary_branch` (per the [docs](/docs/main/reference/configuration/repo-variables)).
+Pick the branch you want to use and make sure it is set as the `repo_primary_branch` (per the [docs](/docs/edge/reference/configuration/repo-variables)).
 
 ### Choose Environments Folder
 
 We store all configuration-as-code for all environment in a directory in the repo we canonically call
 the "environments folder" or "environments directory."
 
-Pick the folder you want to use and make sure it is set as the `environments_dir` (per the [docs](/docs/main/reference/configuration/repo-variables)).
+Pick the folder you want to use and make sure it is set as the `environments_dir` (per the [docs](/docs/edge/reference/configuration/repo-variables)).
 
 ## Configure Terragrunt Variables
 
 In order to begin deploying infrastructure modules, we must first configure Terragrunt.
 
 This is done by adding specific directories and files to your `environments_dir`. Specifically,
-`environments_dir` must be set up to follow [these conventions](/docs/main/reference/configuration/terragrunt-variables).
+`environments_dir` must be set up to follow [these conventions](/docs/edge/reference/configuration/terragrunt-variables).
 
 We provide a convenience script to perform this setup: `pf-env-scaffold -e <env1,env2,...>`.
 
@@ -87,10 +87,10 @@ Run it now, specifying each environment (AWS account) you created in the prior s
 Once this completes, take a moment to validate that each `global.yaml`, `environment.yaml`, and `region.yaml` file
 contains the appropriate values. [^2]
 
-[^2]: See the [reference documentation](/docs/main/reference/configuration/terragrunt-variables) for more information on the available values.
+[^2]: See the [reference documentation](/docs/edge/reference/configuration/terragrunt-variables) for more information on the available values.
 
 ## Next Steps
 
 In the next guide section, we will use this configuration to deploy your first infrastructure-as-code modules.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/preparing-aws"} forwardHref={"/docs/main/guides/bootstrapping/infrastructure-as-code"} stepNumber={4} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/preparing-aws"} forwardHref={"/docs/edge/guides/bootstrapping/infrastructure-as-code"} stepNumber={4} />

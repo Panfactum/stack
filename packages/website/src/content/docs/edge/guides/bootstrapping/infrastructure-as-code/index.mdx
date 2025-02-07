@@ -14,8 +14,8 @@ To begin deploying infrastructure, you will first need both a state backend and 
 
 We provide two infrastructure modules that define both those resources:
 
-* [tf\_bootstrap\_resources](/docs/main/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
-* [aws\_kms\_encrypt\_key](/docs/main/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
+* [tf\_bootstrap\_resources](/docs/edge/reference/infrastructure-modules/direct/aws/tf_bootstrap_resources) (the state backend using AWS [S3](https://aws.amazon.com/s3/) and [DynamoDB](https://aws.amazon.com/dynamodb/))
+* [aws\_kms\_encrypt\_key](/docs/edge/reference/infrastructure-modules/submodule/aws/aws_kms_encrypt_key) (the encryption key using AWS [KMS](https://aws.amazon.com/kms/))
 
 Deploying these modules for the first time is a bit cumbersome as they have circular references. [^1]
 
@@ -110,14 +110,14 @@ Let's perform a quick test to ensure sops is working properly.
 ## Deploy the AWS Account Module
 
 Now that you have both the state backends and encryption keys established, we can start deploying infrastructure.
-The first resource will be the [aws\_account](/docs/main/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
+The first resource will be the [aws\_account](/docs/edge/reference/infrastructure-modules/direct/aws/aws_account) module. This module adds some critical metadata
 to your account including setting up its alias and contact information.
 
 Let's deploy it now:
 
 1. In **every** environment's `global` region, create an `aws_account` directory.
 
-2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
 
    Note the addition of this line `secrets = yamldecode(sops_decrypt_file("secrets.yaml"))` which demonstrates how
    terragrunt and sops integrate with one another.
@@ -164,4 +164,4 @@ Let's deploy it now:
 
 Now that you are set up to deploy infrastructure-as-code, we are ready to setup DNS.
 
-<BootstrappingGuideNav backHref={"/docs/main/guides/bootstrapping/configuring-infrastructure-as-code"} forwardHref={"/docs/main/guides/bootstrapping/dns"} stepNumber={5} />
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code"} forwardHref={"/docs/edge/guides/bootstrapping/dns"} stepNumber={5} />
