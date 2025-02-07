@@ -13,12 +13,12 @@ CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 # Do some validation to ensure we don't create the wrong commit
 if [[ "$CURRENT_BRANCH" != "main" ]]; then
-    echo "You are not on the main branch. Cannot create edge release. Current branch: $CURRENT_BRANCH"
-    exit 1
+  echo "You are not on the main branch. Cannot create edge release. Current branch: $CURRENT_BRANCH"
+  exit 1
 fi
 if [[ -n $(git status --porcelain) ]]; then
-    echo "There are unstaged or staged changes. Cannot create an edge release while the working directory is dirty. Please commit or stash them."
-    exit 1
+  echo "There are unstaged or staged changes. Cannot create an edge release while the working directory is dirty. Please commit or stash them."
+  exit 1
 fi
 
 # Remove existing edge release
@@ -37,7 +37,7 @@ find "$DOCS_DIR/edge" -type f -exec sed -i -E "s|__PANFACTUM_VERSION_MAIN__|__PA
 VERSION_TAG="edge.$(date +'%y-%m-%d')"
 
 # Update the version tag in constants
-jq --arg tag "$VERSION_TAG" '.panfactum_version_edge = "\($tag)"' "$CONSTANTS_FILE" > "$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
+jq --arg tag "$VERSION_TAG" '.panfactum_version_edge = "\($tag)"' "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
 # Update the changelog (only if it does not already contain the release tag)
 grep -q "^## $VERSION_TAG" "$CHANGELOG_FILE" || sed -i "s/^## Unreleased$/## Unreleased\n\n## $VERSION_TAG/" "$CHANGELOG_FILE"

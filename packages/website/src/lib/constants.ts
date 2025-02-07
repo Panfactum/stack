@@ -1,4 +1,5 @@
 import { NODE_ENV, ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, ALGOLIA_INDEX_NAME  } from "astro:env/client"
+
 import constants from "./constants.json"
 export const COPYWRITE = `Copyright © ${new Date().getFullYear()} Panfactum Group, Inc.`;
 

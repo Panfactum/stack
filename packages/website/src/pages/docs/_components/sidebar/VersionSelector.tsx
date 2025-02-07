@@ -1,4 +1,5 @@
 import { Select } from "@kobalte/core/select";
+import {clsx} from "clsx";
 import { FiChevronDown , FiCheck } from "solid-icons/fi";
 import {
   type Component,
@@ -45,7 +46,9 @@ const VersionSelector: Component = () => {
     >
       <Select.Trigger
         aria-label="Documentation Version"
-        class="dark:hover:bg-secondary border-primary flex h-10 w-full  items-center justify-between whitespace-nowrap rounded-md border bg-gray-light-mode-100 px-3 py-2 text-sm shadow-sm hover:bg-gray-light-mode-300 focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-dark-mode-800"
+        class={clsx(
+          "border-primary flex h-10 w-full  items-center justify-between whitespace-nowrap rounded-md border bg-gray-light-mode-100 px-3 py-2 text-sm shadow-sm hover:bg-gray-light-mode-300 focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-dark-mode-800 hover:dark:bg-gray-dark-mode-700",
+        )}
       >
         <span>{selectedVersion()?.text}</span>
         <FiChevronDown />

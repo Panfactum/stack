@@ -17,6 +17,9 @@ module.exports = {
     project: ['./tsconfig.json'],
     extraFileExtensions: ['.astro']
   },
+  ignorePatterns: [
+    "*.js"
+  ],
   rules: {
     "no-console": "error",
     "no-unused-vars": "off",
