@@ -4,21 +4,6 @@
 
 .content {
 
-  /*!* Article container sizing *!*/
-  /*@media screen(lg) {*/
-  /*  margin-top: var(--header-height);*/
-  /*  margin-left: var(--sidebar-width);*/
-  /*}*/
-  /*@media screen(xl) {*/
-  /*  width: calc(100% - var(--sidebar-width));*/
-  /*}*/
-  /*&.withTOC {*/
-  /*  @media screen(xl) {*/
-  /*    width: calc(100% - var(--sidebar-width) - var(--toc-width));*/
-  /*  }*/
-  /*}*/
-
-
   /* Default styles for text */
   *, *::marker {
     @apply text-primary-on-light;

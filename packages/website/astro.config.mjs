@@ -15,6 +15,10 @@ import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
 import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.js";
+import tailwindcss from 'tailwindcss'
+import tailwindcssNesting from 'tailwindcss/nesting'
+import autoprefixer from 'autoprefixer'
+import postcssImporter from 'postcss-import';
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
@@ -131,6 +135,16 @@ export default defineConfig({
     plugins: [visualizer({
       emitFile: true,
       filename: "stats.html"
-    })]
+    })],
+    css: {
+      // For some reason, both this AND the postcss.config.cjs file are required. No idea why.
+      // Be sure to keep them in sync.
+      plugins: [
+        postcssImporter(),
+        tailwindcssNesting(),
+        tailwindcss(),
+        autoprefixer(),
+      ]
+    }
   }
 });

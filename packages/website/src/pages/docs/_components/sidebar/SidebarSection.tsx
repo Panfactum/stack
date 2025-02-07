@@ -53,7 +53,7 @@ const SidebarSection: Component<SidebarSectionProps> = (props) => {
           text={props.text}
           expandable={true}
         />
-        <Collapsible.Content as="li" class="!my-0">
+        <Collapsible.Content as="li">
           <ul class="flex flex-col gap-1">
             <For each={props.sub || []}>
               {(el) => (

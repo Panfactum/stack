@@ -32,7 +32,7 @@ const VersionSelector: Component = () => {
           <Select.Item
             item={props.item}
             as="li"
-            class="!my-0 focus:bg-accent relative flex w-full cursor-pointer select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none"
+            class="focus:bg-accent relative flex w-full cursor-pointer select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none"
           >
             <Select.ItemLabel>{props.item.rawValue.text}</Select.ItemLabel>
             <Show when={props.item.rawValue.slug === version()}>
