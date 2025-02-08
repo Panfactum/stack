@@ -93,7 +93,15 @@ export default defineConfig({
         {width: 1263, height: 2000 },
         {width: 1500, height: 2000 }
       ],
-      strict: true
+      strict: true,
+      inline: {
+        // The actual default is "swap" which appears to not work will with astro view transitions
+        // as the stylesheets end up above the inlined styles which breaks styling in some circumstances (the external stylesheets
+        // should have priority and thus must come AFTER the inlined styles). The "default" strategy adds
+        // the external stylesheets to the end of the body which ensures they come after the inlined styles regardless of
+        // the shenanigans that astro does to the <head>
+        strategy: "default"
+      }
     }),
     compress({
       HTML: {
@@ -128,7 +136,7 @@ export default defineConfig({
   },
   experimental: {
     svg: {
-      mode: 'sprite'
+      mode: 'inline'
     }
   },
   vite: {
