@@ -5,10 +5,14 @@ interface Props {
   href: string;
 }
 
-const href = replaceVersionPlaceholders(Astro.props.href).replaceAll(
+const {href, ...rest} = Astro.props;
+
+const fixedHref = replaceVersionPlaceholders(href).replaceAll(
   "__discordServerLink__",
   DISCORD_URL,
 );
+
+
 ---
 
-<a {...Astro.props} href={href}><slot /></a>
+<a {...rest} href={fixedHref}><slot /></a>
