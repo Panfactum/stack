@@ -36,7 +36,7 @@ variable "audience" {
 variable "ui_description" {
   description = "The description to display in the Authentik web dashboard"
   type        = string
-  default     = "Atlas Mongo"
+  default     = "MongoDB Atlas"
 }
 
 variable "allowed_groups" {
