@@ -25,7 +25,7 @@ This guide will help setup the MongoDB Atlas side of the SSO integration.
 ### Download the Signing Certificate from Authentik
 
 Before proceeding, make sure to have downloaded the signing certificate from the Authentik application
-1. Login to your authentik instnace
+1. Login to your Authentik instance
 2. Switch over to the `Admin` section
 3. Go to the section `Applications` -> `Providers` -> `MongoDB Atlas`
 4. Find `Related objects` and click on the `Download` button for the `Download signing certificate`
