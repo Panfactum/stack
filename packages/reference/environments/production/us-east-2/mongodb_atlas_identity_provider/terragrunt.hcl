@@ -24,7 +24,6 @@ locals {
 }
 
 inputs = {
-  name = "authentik test integration"
   mongodbatlas_public_key = local.secrets.public_key
   mongodbatlas_private_key = local.secrets.private_key
   federation_settings_id = "679ac90e37161e292db2780e"

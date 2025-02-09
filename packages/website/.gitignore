@@ -1,5 +1,10 @@
 # build output
 dist/
+build
+
+# lint output
+.lint
+
 # generated types
 .astro/
 # build cache
