@@ -28,7 +28,7 @@ terraform {
 ###########################################################################
 
 resource "random_id" "logo" {
-  prefix      = "atlas-mongodb-"
+  prefix      = "mongodb-atlas-"
   byte_length = 8
 }
 
@@ -73,7 +73,7 @@ resource "tls_self_signed_cert" "signing" {
 }
 
 resource "authentik_certificate_key_pair" "signing" {
-  name             = "atlas-mongodb-signing-certs"
+  name             = "mongodb-atlas-signing-certs"
   certificate_data = tls_self_signed_cert.signing.cert_pem
   key_data         = tls_private_key.signing.private_key_pem
 }
@@ -91,8 +91,8 @@ data "authentik_property_mapping_provider_saml" "email" {
   managed = "goauthentik.io/providers/saml/email"
 }
 
-resource "authentik_provider_saml" "atlas_mongodb" {
-  name               = "atlas-mongodb"
+resource "authentik_provider_saml" "mongodb_atlas" {
+  name               = "mongodb-atlas"
   authorization_flow = data.authentik_flow.default_authorization_flow.id
   acs_url            = var.acs_url
   sp_binding         = "post"
@@ -102,14 +102,10 @@ resource "authentik_provider_saml" "atlas_mongodb" {
   signing_kp         = authentik_certificate_key_pair.signing.id
 }
 
-data "authentik_provider_saml_metadata" "atlas_mongodb" {
-  provider_id = authentik_provider_saml.atlas_mongodb.id
-}
-
-resource "authentik_application" "atlas_mongodb" {
-  name              = "Atlas MongoDB"
-  slug              = "atlas-mongodb"
-  protocol_provider = authentik_provider_saml.atlas_mongodb.id
+resource "authentik_application" "mongodb_atlas" {
+  name              = "MongoDB Atlas"
+  slug              = "mongodb-atlas"
+  protocol_provider = authentik_provider_saml.mongodb_atlas.id
   meta_description  = var.ui_description
   meta_publisher    = "Panfactum"
   meta_icon         = "https://${var.authentik_domain}/media/public/${random_id.logo.hex}.svg"
@@ -121,7 +117,7 @@ data "authentik_group" "superusers" {
 }
 
 resource "authentik_policy_binding" "superuser_access" {
-  target = authentik_application.atlas_mongodb.uuid
+  target = authentik_application.mongodb_atlas.uuid
   group  = data.authentik_group.superusers.id
   order  = 0
 }
@@ -133,7 +129,11 @@ data "authentik_group" "group" {
 
 resource "authentik_policy_binding" "access" {
   for_each = var.allowed_groups
-  target   = authentik_application.atlas_mongodb.uuid
+  target   = authentik_application.mongodb_atlas.uuid
   group    = data.authentik_group.group[each.key].id
   order    = 10
+}
+
+data "authentik_provider_saml_metadata" "mongodb_atlas" {
+  provider_id = authentik_provider_saml.mongodb_atlas.id
 }

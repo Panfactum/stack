@@ -42,5 +42,11 @@ variable "ui_description" {
 variable "allowed_groups" {
   description = "Only members of these groups can access MongoDB"
   type        = set(string)
-  default     = []
+  default     = [
+    "superusers",
+    "privileged_engineers",
+    "engineers",
+    "restricted_engineers",
+    "billing_admins",
+  ]
 }
