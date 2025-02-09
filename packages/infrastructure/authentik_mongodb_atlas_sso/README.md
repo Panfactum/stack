@@ -16,7 +16,7 @@ This guide will walk you through setting up the Authentik side of the MongoDB At
 
 ### Setup MongoDB Atlas Identity Provider
 
-Please follow the steps defined in the [MongoDB Atlas Identity Provider]() and resume here. 
+Please follow the steps defined in the [MongoDB Atlas Identity Provider](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/infrastructure-modules/direct/mongodb_atlas/mongodb_atlas_identity_provider) and resume here. 
 
 1. Copy and set the `ACS URL` from the MongoDB Atlas Identity Provider setup to the `acs_url` input.
 2. Copy and set the `Audience URI` from the MongoDB Atlas Identity Provider setup to the `audience` input.

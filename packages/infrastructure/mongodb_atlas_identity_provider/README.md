@@ -61,7 +61,7 @@ Create Access Keys
 
 From the terminal
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
-2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/authentik_mongodb_atlas_sso/terragrunt.hcl)
+2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
 3. Set the `federation_settings_id` to the value from above 
 4. Set the `idp_id` to the value from above
 5. Set the `associated_domains` to the domain you verified above
