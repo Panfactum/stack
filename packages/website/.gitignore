@@ -1,9 +1,12 @@
 # build output
 dist/
+build
+
 # generated types
 .astro/
 # build cache
 .cache
+
 
 # dependencies
 node_modules/
