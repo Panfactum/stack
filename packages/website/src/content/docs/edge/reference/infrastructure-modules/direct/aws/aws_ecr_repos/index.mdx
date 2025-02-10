@@ -3,8 +3,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="aws_ecr_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ecr_repos" status="stable" type="direct" />
+<ModuleHeader name="aws_ecr_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ecr_repos" status="stable" type="direct"/>
 
 # AWS ECR Repositories
 
@@ -25,7 +24,7 @@ image artifacts across environments rather than rebuilding for each environment.
 
 IAM users and roles in other accounts must still have the
 [appropriate permissions to interact with ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-policy-examples.html).
-We provide this automatically for Kubernetes clusters deployed with the [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks)
+We provide this automatically for Kubernetes clusters deployed with the [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws\_eks)
 module.
 
 ## Image Immutability
@@ -44,20 +43,20 @@ three means to do so:
 1. We automatically remove untagged images as if an image loses its tag, it is assumed it will never be pulled again.
 
 2. If set to `true`, `<repo>.expire_all_images` will automatically remove an image 14 days after it was created. This
-   can be helpful for images generated during local development that will not be used in production and can be easily
-   regenerated.
+can be helpful for images generated during local development that will not be used in production and can be easily
+regenerated.
 
 3. We provide a `<repo>.expiration_rules` field that will allow you to specify custom
-   [lifecycle policies](https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html) for
-   each repository based on the image's tag pattern. See the linked docs for available patterns.
+[lifecycle policies](https://docs.aws.amazon.com/AmazonECR/latest/userguide/lpp_creation.html) for
+each repository based on the image's tag pattern. See the linked docs for available patterns.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 

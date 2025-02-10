@@ -168,10 +168,10 @@ resource "helm_release" "cert_manager" {
   chart           = "cert-manager"
   version         = var.cert_manager_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -359,7 +359,7 @@ resource "kubectl_manifest" "vpa_controller" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -389,7 +389,7 @@ resource "kubectl_manifest" "vpa_cainjector" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -419,7 +419,7 @@ resource "kubectl_manifest" "vpa_webhook" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

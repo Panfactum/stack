@@ -80,6 +80,10 @@
 
   code:not(pre > code)::before, code:not(pre > code)::after {
     content: "`";
+    @apply text-brand-600 dark:text-brand-300;
+  }
+  code:not(pre > code) {
+    @apply text-brand-600 dark:text-brand-300;
   }
 
   figure {
@@ -121,7 +125,7 @@
 
   /* Link Styles */
   a {
-    @apply underline underline-offset-4 cursor-pointer;
+    @apply underline underline-offset-4 cursor-pointer text-brand-600 dark:text-brand-300;
   }
 
   /* Copy Header Link Styles */

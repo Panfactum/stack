@@ -31,3 +31,9 @@ variable "log_level" {
     error_message = "log_level must be one of: debug, info, warn, error"
   }
 }
+
+variable "wait" {
+  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
+}

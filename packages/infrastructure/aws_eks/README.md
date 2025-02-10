@@ -1,6 +1,6 @@
 # Elastic Kubernetes Service (EKS)
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module provides our standard setup for a configurable AWS EKS Cluster.
 It includes:

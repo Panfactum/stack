@@ -37,8 +37,6 @@ locals {
   namespace = module.namespace.namespace
 }
 
-data "aws_region" "current" {}
-
 data "pf_kube_labels" "labels" {
   module = "kube_authentik"
 }
@@ -199,10 +197,10 @@ resource "helm_release" "authentik" {
   chart           = "authentik"
   version         = var.authentik_helm_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -627,7 +625,7 @@ resource "kubectl_manifest" "vpa_server" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -665,7 +663,7 @@ resource "kubectl_manifest" "vpa_worker" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

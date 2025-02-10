@@ -477,9 +477,9 @@ resource "helm_release" "prometheus_stack" {
   chart           = "kube-prometheus-stack"
   version         = var.kube_prometheus_stack_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 
@@ -1339,9 +1339,9 @@ resource "helm_release" "thanos" {
   chart           = "thanos"
   version         = var.thanos_chart_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 
@@ -1981,7 +1981,7 @@ resource "kubectl_manifest" "vpa_prometheus_operator" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2011,7 +2011,7 @@ resource "kubectl_manifest" "vpa_prometheus_operator_webhook" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2041,7 +2041,7 @@ resource "kubectl_manifest" "vpa_grafana" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2071,7 +2071,7 @@ resource "kubectl_manifest" "vpa_node_exporter" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2109,7 +2109,7 @@ resource "kubectl_manifest" "vpa_kube_state_metrics" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2147,7 +2147,7 @@ resource "kubectl_manifest" "vpa_prometheus" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2186,7 +2186,7 @@ resource "kubectl_manifest" "vpa_thanos_compactor" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2216,7 +2216,7 @@ resource "kubectl_manifest" "vpa_thanos_bucket_web" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2254,7 +2254,7 @@ resource "kubectl_manifest" "vpa_thanos_store_gateway" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2292,7 +2292,7 @@ resource "kubectl_manifest" "vpa_thanos_query_frontend" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2330,7 +2330,7 @@ resource "kubectl_manifest" "vpa_thanos_query" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -2397,6 +2397,7 @@ module "authenticating_proxy" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  wait                                 = var.wait
 }
 
 module "bucket_web_ingress" {

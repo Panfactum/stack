@@ -543,9 +543,9 @@ resource "helm_release" "karpenter_crds" {
   chart           = "karpenter-crd"
   version         = var.karpenter_helm_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   force_update    = true # required b/c the CRDs might already be installed
   max_history     = 5
@@ -562,9 +562,9 @@ resource "helm_release" "karpenter" {
   chart           = "karpenter"
   version         = var.karpenter_helm_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   force_update    = true
   skip_crds       = true # managed above
@@ -682,7 +682,7 @@ resource "kubectl_manifest" "vpa" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

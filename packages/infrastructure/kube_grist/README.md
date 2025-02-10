@@ -1,6 +1,6 @@
 # Grist
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module deploys a [Grist](https://support.getgrist.com/) instance to the Kubernetes cluster.
 
