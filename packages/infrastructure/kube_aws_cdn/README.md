@@ -1,6 +1,6 @@
 # AWS CDN for Kubernetes Ingresses
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 This module creates a CDN for a set of Kubernetes Ingresses by aggregating the `cdn_origin_configs`
 output from instances of the [kube_ingress](/docs/main/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
