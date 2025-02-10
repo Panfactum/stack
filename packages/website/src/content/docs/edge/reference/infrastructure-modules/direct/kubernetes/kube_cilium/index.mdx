@@ -3,8 +3,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_cilium" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_cilium" status="stable" type="direct" />
+<ModuleHeader name="kube_cilium" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_cilium" status="stable" type="direct"/>
 
 # Cilium CNI
 
@@ -14,15 +13,15 @@ This module deploys the [Cilium CNI](https://docs.cilium.io/en/stable/installati
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -95,6 +94,14 @@ Description: Whether the VPA resources should be enabled
 Type: `bool`
 
 Default: `false`
+
+### wait
+
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 

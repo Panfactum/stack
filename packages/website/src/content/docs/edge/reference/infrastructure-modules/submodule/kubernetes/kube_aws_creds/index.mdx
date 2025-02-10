@@ -3,27 +3,25 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="kube_aws_creds" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_aws_creds" status="stable" type="submodule" />
+<ModuleHeader name="kube_aws_creds" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_aws_creds" status="stable" type="submodule"/>
 
 # Dynamically Generated AWS Credentials
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module uses the [AWS secrets engine](https://developer.hashicorp.com/vault/docs/secrets/aws) of the Vault instance in the Kubernetes cluster
 to provision an IAM User and associated credentials. The credentials are periodically rotated based on `credential_lifetime_hours`, but
-no other security controls are applied (unlike [kube\_sa\_auth\_aws](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)).
+no other security controls are applied (unlike [kube\_sa\_auth\_aws](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_sa\_auth\_aws)).
 
 <MarkdownAlert severity="warning">
-  This module should *only* be used when [kube\_sa\_auth\_aws](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws)
-  is not suitable. The credentials provisioned by this module offers far less security than [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html),
-  but occasionally you may need credentials that are not session-based.
+   This module should *only* be used when [kube\_sa\_auth\_aws](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_sa\_auth\_aws)
+   is not suitable. The credentials provisioned by this module offers far less security than [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html),
+   but occasionally you may need credentials that are not session-based.
 
-  Some valid use cases for this module:
-
-  * You are using a client that does not support IRSA (unlikely, all modern AWS clients do).
-  * You need SMTP credentials for AWS SES.
-  * You need to provide long-lived credentials to provide some third-party service.
+   Some valid use cases for this module:
+      - You are using a client that does not support IRSA (unlikely, all modern AWS clients do).
+      - You need SMTP credentials for AWS SES.
+      - You need to provide long-lived credentials to provide some third-party service.
 </MarkdownAlert>
 
 ## Usage
@@ -36,8 +34,8 @@ rotated every `credential_lifetime_hours` / 2.
 
 This secret will contain two values:
 
-* `AWS_ACCESS_KEY_ID`
-* `AWS_SECRET_ACCESS_KEY`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 
 As an example:
 
@@ -79,17 +77,17 @@ module "deployment" {
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
