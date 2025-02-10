@@ -1,6 +1,6 @@
 # NATS Jetstream
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module deploys a highly-available [NATS cluster](https://nats.io/) running in [Jetstream mode.](https://docs.nats.io/nats-concepts/jetstream)
 

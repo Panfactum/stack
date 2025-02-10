@@ -307,9 +307,3 @@ variable "linkerd_enabled" {
   type        = bool
   default     = true
 }
-
-variable "default_permissions_enabled" {
-  description = "True iff a set of default permissions should be granted to the Pod's service account (e.g., reading its own manifest)."
-  type        = bool
-  default     = true
-}

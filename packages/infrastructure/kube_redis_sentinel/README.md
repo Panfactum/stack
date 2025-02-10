@@ -1,6 +1,6 @@
 # Redis with Sentinel
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module deploys a highly-available set of [Redis](https://redis.io/docs/) nodes.
 

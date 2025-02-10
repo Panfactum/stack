@@ -79,10 +79,10 @@ resource "helm_release" "alloy" {
   chart           = "alloy"
   version         = var.alloy_chart_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  atomic          = true
   force_update    = true
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -173,7 +173,7 @@ resource "kubectl_manifest" "vpa_alloy" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

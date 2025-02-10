@@ -4,6 +4,21 @@
 
 .content {
 
+  /*!* Article container sizing *!*/
+  /*@media screen(lg) {*/
+  /*  margin-top: var(--header-height);*/
+  /*  margin-left: var(--sidebar-width);*/
+  /*}*/
+  /*@media screen(xl) {*/
+  /*  width: calc(100% - var(--sidebar-width));*/
+  /*}*/
+  /*&.withTOC {*/
+  /*  @media screen(xl) {*/
+  /*    width: calc(100% - var(--sidebar-width) - var(--toc-width));*/
+  /*  }*/
+  /*}*/
+
+
   /* Default styles for text */
   *, *::marker {
     @apply text-primary-on-light;
@@ -80,10 +95,6 @@
 
   code:not(pre > code)::before, code:not(pre > code)::after {
     content: "`";
-    @apply text-brand-600 dark:text-brand-300;
-  }
-  code:not(pre > code) {
-    @apply text-brand-600 dark:text-brand-300;
   }
 
   figure {
@@ -125,7 +136,7 @@
 
   /* Link Styles */
   a {
-    @apply underline underline-offset-4 cursor-pointer text-brand-600 dark:text-brand-300;
+    @apply underline underline-offset-4 cursor-pointer;
   }
 
   /* Copy Header Link Styles */

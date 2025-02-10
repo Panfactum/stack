@@ -219,9 +219,8 @@ resource "helm_release" "vault_secrets_operator" {
   chart           = "vault-secrets-operator"
   version         = var.vault_secrets_operator_helm_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 

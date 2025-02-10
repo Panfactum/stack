@@ -19,7 +19,7 @@ const SidebarSubSectionList: Component<SidebarSubSectionListProps> = (
         <ul class="flex w-full min-w-0 flex-col">
           {<For each={props.section.sub}>{(section) => {
             return (
-              <li>
+              <li class="!my-0">
                 <SidebarSection
                   {...section}
                   fullPath={props.fullPath}

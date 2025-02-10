@@ -1,6 +1,6 @@
 # Dynamically Generated AWS Credentials
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module uses the [AWS secrets engine](https://developer.hashicorp.com/vault/docs/secrets/aws) of the Vault instance in the Kubernetes cluster
 to provision an IAM User and associated credentials. The credentials are periodically rotated based on `credential_lifetime_hours`, but

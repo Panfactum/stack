@@ -2,10 +2,9 @@
 import { getCollection, render } from "astro:content";
 
 
-import MarkdownAnchorTag from "@/components/markdown/MarkdownAnchorTag.astro";
-
 import DocumentationLayout from "./_components/DocumentationLayout.astro";
 import type { DocsMetadata } from "./_components/types";
+import MarkdownAnchorTag from "@/components/markdown/MarkdownAnchorTag.astro";
 import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_EDGE } from "../../content/docs/edge/sideNavSections";
 import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_MAIN } from "../../content/docs/main/sideNavSections";
 import { Versions } from "../../lib/constants";

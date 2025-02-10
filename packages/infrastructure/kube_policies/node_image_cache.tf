@@ -185,10 +185,6 @@ module "prepull_pod" {
   // This pod should never be restarted once completed
   restart_policy = "Never"
 
-  // When bootstrapping, the namespace for this pod won't yet exist and having this set to
-  // true will cause an issue
-  default_permissions_enabled = false
-
   az_spread_required                   = false
   az_spread_preferred                  = false
   instance_type_anti_affinity_required = false

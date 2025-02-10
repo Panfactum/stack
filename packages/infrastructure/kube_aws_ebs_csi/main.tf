@@ -125,10 +125,10 @@ resource "helm_release" "ebs_csi_driver" {
   chart           = "aws-ebs-csi-driver"
   version         = var.aws_ebs_csi_driver_helm_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  atomic          = true
   force_update    = true
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -416,7 +416,7 @@ resource "kubectl_manifest" "vpa_deployment" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -446,7 +446,7 @@ resource "kubectl_manifest" "vpa_daemonset" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

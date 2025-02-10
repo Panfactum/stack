@@ -30,14 +30,14 @@ variable "monitoring_enabled" {
   default     = false
 }
 
-variable "panfactum_scheduler_enabled" {
-  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+variable "enhanced_ha_enabled" {
+  description = "Whether to add extra high-availability scheduling constraints at the trade-off of increased cost"
   type        = bool
   default     = true
 }
 
-variable "wait" {
-  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+variable "panfactum_scheduler_enabled" {
+  description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
   type        = bool
   default     = true
 }

@@ -1,6 +1,6 @@
 # Kubernetes StatefulSet
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 Provides a production-hardened instance of a Kubernetes [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 with the following enhancements:

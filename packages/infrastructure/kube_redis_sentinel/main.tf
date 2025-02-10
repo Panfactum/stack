@@ -116,10 +116,10 @@ resource "helm_release" "redis" {
   repository      = "oci://registry-1.docker.io/bitnamicharts"
   chart           = "redis"
   version         = var.helm_version
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
   recreate_pods   = false
+  atomic          = true
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   timeout         = 60 * 15
   max_history     = 5
@@ -435,7 +435,7 @@ resource "kubectl_manifest" "vpa" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

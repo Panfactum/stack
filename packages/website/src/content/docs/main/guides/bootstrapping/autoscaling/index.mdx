@@ -201,14 +201,9 @@ Let's deploy it now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_karpenter/terragrunt.hcl).
 
-3. Adjust the `wait` input to `false`. This will allow the installation to proceed even though there will
-be temporary errors as Karpenter sets up the required resources.
+3. Run `pf-tf-init` to enable the required providers.
 
-4. Run `pf-tf-init` to enable the required providers.
-
-5. Run `terragrunt apply`.
-
-6. Update `wait` to `true`.
+4. Run `terragrunt apply`.
 
 ### Deploy NodePools
 

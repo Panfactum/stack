@@ -44,9 +44,9 @@ variable "force_destroy" {
   default     = false
 }
 
-variable "domains" {
-  description = "The domain names to serve content from"
-  type        = list(string)
+variable "domain" {
+  description = "The domain name to serve content from"
+  type        = string
 }
 
 variable "geo_restriction_type" {
@@ -201,17 +201,6 @@ variable "rewrite_rules" {
   }))
   default = []
 }
-
-variable "redirect_rules" {
-  description = "A list of redirect rules that the ingress will match against before sending requests to the upstreams"
-  type = list(object({
-    source    = string                # A regex string for matching the entire request url (^https://domain.com(/.*)?$)
-    target    = string                # The redirect target (can use numbered capture groups from the source - https://domain2.com/$1)
-    permanent = optional(bool, false) # If true will issue a 301 redirect; otherwise, will use 302
-  }))
-  default = []
-}
-
 
 variable "not_found_path" {
   description = "The bucket path to return when the HTTP request path isn't found in the S3 bucket"

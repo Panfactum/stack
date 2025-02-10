@@ -74,9 +74,9 @@ resource "helm_release" "gha_controller" {
   chart           = "gha-runner-scale-set-controller"
   version         = var.gha_runner_scale_set_controller_helm_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  atomic          = true
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   force_update    = true
   max_history     = 5
@@ -135,7 +135,7 @@ resource "kubectl_manifest" "vpa" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

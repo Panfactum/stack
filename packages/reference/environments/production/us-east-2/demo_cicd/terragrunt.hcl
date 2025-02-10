@@ -31,7 +31,7 @@ inputs = {
   algolia_search_api_key = "76e7c17dae4d35f581c858ee2784b41a"
   algolia_index_name     = "docs"
   algolia_index_name_2   = "docs-2"
-  site_url               = "https://panfactum.com"
+  site_url               = "https://website2.panfactum.com"
   scraper_image_version  = "9a150442c6fc3bd0ca54dbeb45aad6750378d0fd"
   module_bucket          = dependency.module_bucket.outputs.bucket_name
 }

@@ -10,6 +10,11 @@ variable "dhparam" {
   sensitive   = true
 }
 
+variable "ingress_domains" {
+  description = "The domains that can be used for network ingress to the cluster"
+  type        = set(string)
+}
+
 variable "ingress_timeout_seconds" {
   description = "The maximum number of seconds that request may take."
   type        = number
@@ -60,12 +65,6 @@ variable "sla_target" {
 
 variable "node_image_cached_enabled" {
   description = "Whether to add the container images to the node image cache for faster startup times"
-  type        = bool
-  default     = true
-}
-
-variable "wait" {
-  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
   type        = bool
   default     = true
 }

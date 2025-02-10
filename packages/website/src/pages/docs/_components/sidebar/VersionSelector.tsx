@@ -1,5 +1,4 @@
 import { Select } from "@kobalte/core/select";
-import {clsx} from "clsx";
 import { FiChevronDown , FiCheck } from "solid-icons/fi";
 import {
   type Component,
@@ -33,7 +32,7 @@ const VersionSelector: Component = () => {
           <Select.Item
             item={props.item}
             as="li"
-            class="focus:bg-accent relative flex w-full cursor-pointer select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none"
+            class="!my-0 focus:bg-accent relative flex w-full cursor-pointer select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none"
           >
             <Select.ItemLabel>{props.item.rawValue.text}</Select.ItemLabel>
             <Show when={props.item.rawValue.slug === version()}>
@@ -46,9 +45,7 @@ const VersionSelector: Component = () => {
     >
       <Select.Trigger
         aria-label="Documentation Version"
-        class={clsx(
-          "border-primary flex h-10 w-full  items-center justify-between whitespace-nowrap rounded-md border bg-gray-light-mode-100 px-3 py-2 text-sm shadow-sm hover:bg-gray-light-mode-300 focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-dark-mode-800 hover:dark:bg-gray-dark-mode-700",
-        )}
+        class="dark:hover:bg-secondary border-primary flex h-10 w-full  items-center justify-between whitespace-nowrap rounded-md border bg-gray-light-mode-100 px-3 py-2 text-sm shadow-sm hover:bg-gray-light-mode-300 focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-dark-mode-800"
       >
         <span>{selectedVersion()?.text}</span>
         <FiChevronDown />

@@ -33,7 +33,7 @@ const SidebarMenuButton: Component<SidebarMenuButtonProps> = (props) => {
     <Show
       when={props.expandable}
       fallback={(
-        <li class={clsx(props.isChild && "pl-4")}>
+        <li class={clsx("!my-0", props.isChild && "pl-4")}>
           <SavedLink
             defaultHref={props.href || "#"}
             id={`${props.text.toLowerCase()}`}
@@ -58,7 +58,7 @@ const SidebarMenuButton: Component<SidebarMenuButtonProps> = (props) => {
         </li>
       )}
     >
-      <li>
+      <li class="!my-0">
         <Collapsible.Trigger
           class={buttonClasses()}
         >

@@ -15,10 +15,6 @@ import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
 import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.js";
-import tailwindcss from 'tailwindcss'
-import tailwindcssNesting from 'tailwindcss/nesting'
-import autoprefixer from 'autoprefixer'
-import postcssImporter from 'postcss-import';
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
@@ -93,15 +89,7 @@ export default defineConfig({
         {width: 1263, height: 2000 },
         {width: 1500, height: 2000 }
       ],
-      strict: true,
-      inline: {
-        // The actual default is "swap" which appears to not work will with astro view transitions
-        // as the stylesheets end up above the inlined styles which breaks styling in some circumstances (the external stylesheets
-        // should have priority and thus must come AFTER the inlined styles). The "default" strategy adds
-        // the external stylesheets to the end of the body which ensures they come after the inlined styles regardless of
-        // the shenanigans that astro does to the <head>
-        strategy: "default"
-      }
+      strict: true
     }),
     compress({
       HTML: {
@@ -136,23 +124,13 @@ export default defineConfig({
   },
   experimental: {
     svg: {
-      mode: 'inline'
+      mode: 'sprite'
     }
   },
   vite: {
     plugins: [visualizer({
       emitFile: true,
       filename: "stats.html"
-    })],
-    css: {
-      // For some reason, both this AND the postcss.config.cjs file are required. No idea why.
-      // Be sure to keep them in sync.
-      plugins: [
-        postcssImporter(),
-        tailwindcssNesting(),
-        tailwindcss(),
-        autoprefixer(),
-      ]
-    }
+    })]
   }
 });

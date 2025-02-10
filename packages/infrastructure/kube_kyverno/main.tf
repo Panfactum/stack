@@ -153,10 +153,10 @@ resource "helm_release" "kyverno" {
   chart           = local.name
   version         = var.kyverno_helm_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  atomic          = true
   force_update    = true
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -628,7 +628,7 @@ resource "kubectl_manifest" "vpa_admission_controller" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -666,7 +666,7 @@ resource "kubectl_manifest" "vpa_background_controller" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -700,7 +700,7 @@ resource "kubectl_manifest" "vpa_cleanup_controller" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

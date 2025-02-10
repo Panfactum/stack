@@ -1,6 +1,6 @@
 # Argo Workflow Template: Tofu Deployment
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module creates an Argo [WorkflowTemplate](https://argo-workflows.readthedocs.io/en/latest/workflow-templates/)
 that will deploy Tofu code from an indicated repository that follows the Panfactum Stack IaC conventions.

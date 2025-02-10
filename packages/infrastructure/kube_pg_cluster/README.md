@@ -1,6 +1,6 @@
 # PostgreSQL Cluster on Kubernetes
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 ## Usage
 

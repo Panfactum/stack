@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_vpa" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vpa" status="stable" type="direct"/>
+
+<ModuleHeader name="kube_vpa" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_vpa" status="stable" type="direct" />
 
 # Kubernetes VPA
 
@@ -29,30 +30,30 @@ not set `history_length_hours` to greater than 1 week as this will cause signifi
 The VPA can use Prometheus as the source of its recommendations when setting pod resources.
 To enable this in the Panfactum stack:
 
-- Ensure you have deployed [kube\_monitoring](/docs/edge/reference/infrastructure-modules/kubernetes/kube\_monitoring).
-Note that `kube_monitoring` **must** have been deployed for at least `history_length_hours`
-in order for the VPA to work properly.
+* Ensure you have deployed [kube\_monitoring](/docs/edge/reference/infrastructure-modules/kubernetes/kube_monitoring).
+  Note that `kube_monitoring` **must** have been deployed for at least `history_length_hours`
+  in order for the VPA to work properly.
 
-- Set `prometheus_enabled` to `true`.
+* Set `prometheus_enabled` to `true`.
 
-- Add the `thanos_query_frontend_url` input from the `kube_monitoring` output.
+* Add the `thanos_query_frontend_url` input from the `kube_monitoring` output.
 
-- Apply the module.
+* Apply the module.
 
-- If you had previously deployed the VPA without Prometheus, delete all `Verticalpodautoscalercheckpoints`:
-`kubectl delete -A verticalpodautoscalercheckpoints.autoscaling.k8s.io --all`.
+* If you had previously deployed the VPA without Prometheus, delete all `Verticalpodautoscalercheckpoints`:
+  `kubectl delete -A verticalpodautoscalercheckpoints.autoscaling.k8s.io --all`.
 
 ## Providers
 
 The following providers are needed by this module:
 
-- [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
+* [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 
@@ -149,14 +150,6 @@ Description: Whether the VPA resources should be enabled
 Type: `bool`
 
 Default: `false`
-
-### wait
-
-Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
-
-Type: `bool`
-
-Default: `true`
 
 ## Outputs
 

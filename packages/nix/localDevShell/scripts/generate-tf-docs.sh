@@ -2,7 +2,7 @@
 
 # Purpose: Uses terraform-docs to create the markdown documentation
 # for each terraform module for the public website
-DOCS_VERSION_DIR="$REPO_ROOT/packages/website/src/content/docs/main"
+DOCS_VERSION_DIR="$REPO_ROOT/packages/website/docs/main"
 OUTPUT_DIR="$DOCS_VERSION_DIR/reference/infrastructure-modules"
 
 # Initialize an empty JSON object with a `modules` array
@@ -86,7 +86,7 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
       rename_provider_header |
       add_header "$MODULE" "$STATUS" "$TYPE" |
       skip_injected_variables \
-        >"$DOCS_DIR/index.mdx"
+        >"$DOCS_DIR/page.mdx"
   fi
 done
 

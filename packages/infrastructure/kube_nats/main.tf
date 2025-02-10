@@ -96,9 +96,9 @@ resource "helm_release" "nats" {
   chart           = "nats"
   version         = var.helm_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  atomic          = true
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
 
   values = [
@@ -376,7 +376,7 @@ resource "kubectl_manifest" "vpa" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

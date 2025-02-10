@@ -72,7 +72,7 @@ resource "aws_s3_bucket_cors_configuration" "bucket" {
   cors_rule {
     allowed_headers = var.cors_allowed_headers
     allowed_methods = ["GET"]
-    allowed_origins = concat([for domain in var.domains : "https://${domain}"], var.cors_additional_allowed_origins)
+    allowed_origins = concat(["https://${var.domain}"], var.cors_additional_allowed_origins)
     max_age_seconds = var.cors_max_age_seconds
     expose_headers  = var.cors_expose_headers
   }
@@ -90,7 +90,7 @@ module "cf" {
 
   name = var.bucket_name
 
-  domains = var.domains
+  domains = [var.domain]
 
   origin_configs = [
     {
@@ -116,8 +116,6 @@ module "cf" {
       )
     }
   ]
-
-  redirect_rules = var.redirect_rules
 
   custom_error_responses = [{
     error_code         = "403"

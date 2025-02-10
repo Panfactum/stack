@@ -49,9 +49,3 @@ variable "sla_target" {
     error_message = "sla_target must be one of: 1, 2, 3"
   }
 }
-
-variable "wait" {
-  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
-  type        = bool
-  default     = true
-}

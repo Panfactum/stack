@@ -30,7 +30,6 @@ list here for convenience:
 | `canary_enabled`              | `bool`                      | `false` | (Alpha) Whether to install synthetic healthchecks for the components in the module. Requires [kube\_argo](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_argo) to have been deployed.                                                                             |
 | `aws_iam_ip_allow_list`       | `list(string)`              | `[]`    | All created IAM roles are only allowed to be used by internal IP addresses. This allows you to provide extra CIDR blocks from which IAM roles can be used.                                                                                                                            |
 | `vault_domain`                | `string`                    | N/A     | The public domain name of Vault running in the cluster where the module is deployed. Used to set up federated authz/n.                                                                                                                                                                |
-| `wait`                        | `boolean`                   | `true`  | Set to `false` if you do not wish to wait for the resources to reach a ready state before proceeding with the deployment. This will significantly improve the speed of deploying updates but will disable automatic rollbacks in case something goes wrong. Manual intervention may be required if deployment fails.|
 
 ## Provider Versions
 

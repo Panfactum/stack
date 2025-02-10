@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { visit } from 'unist-util-visit';
 import constants from "../constants.json";
 

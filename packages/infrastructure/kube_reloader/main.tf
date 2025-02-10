@@ -70,10 +70,10 @@ resource "helm_release" "reloader" {
   chart           = "reloader"
   version         = var.reloader_helm_version
   recreate_pods   = false
+  atomic          = true
   force_update    = true
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -144,7 +144,7 @@ resource "kubectl_manifest" "vpa" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

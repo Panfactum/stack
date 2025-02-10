@@ -3,7 +3,8 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule"/>
+
+<ModuleHeader name="kube_sa_auth_aws" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_sa_auth_aws" status="stable" type="submodule" />
 
 # AWS Authentication via Kubernetes Service Account
 
@@ -63,7 +64,7 @@ module "aws_permissions" {
 To mitigate credential exfiltration attacks,
 generated credentials may only be used by pods running inside the cluster's subnets. These
 subnets are subnets with the `kubernetes.io/cluster/<cluster_name>` tag set. This is automatically
-configured by the [aws\_eks](/docs/main/reference/infrastructure-modules/submodule/aws/aws\_eks) module.
+configured by the [aws\_eks](/docs/main/reference/infrastructure-modules/submodule/aws/aws_eks) module.
 
 If you need to allow additional entities to use these credentials, you must manually
 add their CIDRs to the `ip_allow_list` input.
@@ -75,16 +76,17 @@ the following:
 
 1. The pod's service account has the `eks.amazonaws.com/role-arn` annotation set.
 2. Each container have the following environment variables set (should be set automatically):
-    - `AWS_ROLE_ARN`
-    - `AWS_WEB_IDENTITY_TOKEN_FILE`
+   * `AWS_ROLE_ARN`
+   * `AWS_WEB_IDENTITY_TOKEN_FILE`
 
 If both of those statements are true, that means that *authentication* via IRSA (OIDC) is working
 correctly; however, *authorization* might still be broken.
 
 To verify, use the AWS console to check the following:
+
 1. The role identified by `AWS_ROLE_ARN` has the correct permissions.
 2. The role's `*ip-block*` policy allows traffic from both your internal cluster IP address
-ranges (subnet CIDRs) and the public IP addresses assigned to the cluster's VPC's NAT nodes.
+   ranges (subnet CIDRs) and the public IP addresses assigned to the cluster's VPC's NAT nodes.
 
 If you believe all of the above is true, you may finally verify by examining the [AWS CloudTrail
 Event History](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html):
@@ -96,13 +98,13 @@ Event History](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-c
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 

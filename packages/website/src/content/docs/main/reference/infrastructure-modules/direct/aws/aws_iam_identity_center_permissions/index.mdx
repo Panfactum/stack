@@ -3,18 +3,19 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="aws_iam_identity_center_permissions" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_iam_identity_center_permissions" status="stable" type="direct"/>
+
+<ModuleHeader name="aws_iam_identity_center_permissions" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_iam_identity_center_permissions" status="stable" type="direct" />
 
 # AWS IAM Identity Center Permissions
 
 Creates the three core permission tiers for each AWS account:
 
-   1. `superusers`: Maps to the `arn:aws:iam::aws:policy/AdministratorAccess` managed policy.
-   2. `admins`: Maps to a role that has admin access to most items,
+1. `superusers`: Maps to the `arn:aws:iam::aws:policy/AdministratorAccess` managed policy.
+2. `admins`: Maps to a role that has admin access to most items,
    but attempts to block permissions that could create obvious security problems or delete key infrastructure.
-   3. `readers`: Read-only access to the specific subset of AWS resources used in the Panfactum stack.
-   4. `restricted_readers`: Same as `readers` but prevents reading sensitive values.
-   5. `billing_admins`: Allows a user to control payment and billing settings but not live infrastructure.
+3. `readers`: Read-only access to the specific subset of AWS resources used in the Panfactum stack.
+4. `restricted_readers`: Same as `readers` but prevents reading sensitive values.
+5. `billing_admins`: Allows a user to control payment and billing settings but not live infrastructure.
 
 ## Usage
 
@@ -22,8 +23,8 @@ Creates the three core permission tiers for each AWS account:
 
 There are two different expiration times to keep in mind when using AWS IAM Identity Center:
 
-- The AWS session expiration time: How often you need to get a new AWS session token
-- The SAML authentication expiration time: How often you need to re-authenticate with your upstream IdP
+* The AWS session expiration time: How often you need to get a new AWS session token
+* The SAML authentication expiration time: How often you need to re-authenticate with your upstream IdP
 
 When using tools like the AWS CLI, AWS sessions will automatically be renewed *so long as your SAML
 authentication is not expired*.
@@ -39,9 +40,9 @@ can adjust the value via the `session_duration_hours` input.
 
 The following providers are needed by this module:
 
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 

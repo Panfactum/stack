@@ -32,8 +32,14 @@ terraform {
 }
 
 locals {
+
   name      = "bastion"
   namespace = module.namespace.namespace
+
+  // Number of seconds it takes to de-register targets from the NLB
+  // (even though you can set this to < 5 minutes, there appears to be a consistent floor of about 5 minutes)
+  // https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/2366#issuecomment-1118312709
+  deregistration_delay = 60
 }
 
 module "constants" {
@@ -133,7 +139,7 @@ module "bastion" {
   namespace = module.namespace.namespace
   name      = local.name
 
-  replicas                             = 2 // Should always use two replicas so that the tunnel can immediately reconnect when one goes down
+  replicas                             = var.sla_target >= 2 ? 2 : 1
   burstable_nodes_enabled              = true
   controller_nodes_enabled             = true
   instance_type_anti_affinity_required = var.sla_target == 3

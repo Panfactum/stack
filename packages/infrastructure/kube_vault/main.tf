@@ -142,10 +142,10 @@ resource "helm_release" "vault" {
   repository      = "https://helm.releases.hashicorp.com"
   chart           = "vault"
   version         = var.vault_helm_version
+  atomic          = true
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  cleanup_on_fail = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -367,7 +367,7 @@ resource "kubectl_manifest" "vpa_server" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

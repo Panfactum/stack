@@ -148,9 +148,9 @@ resource "helm_release" "cilium" {
   chart           = "cilium"
   version         = var.cilium_helm_version
   recreate_pods   = false
-  atomic          = var.wait
-  cleanup_on_fail = var.wait
-  wait            = var.wait
+  cleanup_on_fail = true
+  atomic          = true
+  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -406,7 +406,7 @@ resource "kubectl_manifest" "vpa_operator" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -446,7 +446,7 @@ resource "kubectl_manifest" "vpa_node" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resources         = ["cpu", "memory"]
+          resource          = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

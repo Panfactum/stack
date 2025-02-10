@@ -1,6 +1,6 @@
 # AWS Virtual Private Cloud (VPC)
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
 
 This module configures the following infrastructure resources for a Virtual Private Cloud:
 
