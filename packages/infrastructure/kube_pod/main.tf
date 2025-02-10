@@ -47,7 +47,7 @@ locals {
     name = k
     valueFrom = {
       secretKeyRef = {
-        name     = kubernetes_secret.secrets.metadata[0].name
+        name     = kubernetes_secret.secrets[0].metadata[0].name
         key      = k
         optional = false
       }
@@ -436,6 +436,8 @@ module "constants" {
 ************************************************/
 
 resource "kubernetes_secret" "secrets" {
+  count = length(keys(var.common_secrets)) > 0 ? 1 : 0
+
   metadata {
     namespace     = var.namespace
     generate_name = "${var.workload_name}-"
@@ -449,6 +451,8 @@ resource "kubernetes_secret" "secrets" {
 ************************************************/
 
 resource "kubernetes_role" "pod_reader" {
+  count = var.default_permissions_enabled ? 1 : 0
+
   metadata {
     namespace     = var.namespace
     generate_name = "${var.workload_name}-"
@@ -462,6 +466,8 @@ resource "kubernetes_role" "pod_reader" {
 }
 
 resource "kubernetes_role_binding" "pod_reader" {
+  count = var.default_permissions_enabled ? 1 : 0
+
   metadata {
     namespace     = var.namespace
     generate_name = "${var.workload_name}-"
@@ -475,7 +481,7 @@ resource "kubernetes_role_binding" "pod_reader" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "Role"
-    name      = kubernetes_role.pod_reader.metadata[0].name
+    name      = kubernetes_role.pod_reader[0].metadata[0].name
   }
 }
 
