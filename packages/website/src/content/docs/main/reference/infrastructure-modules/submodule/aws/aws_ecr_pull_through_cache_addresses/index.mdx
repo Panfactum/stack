@@ -1,0 +1,64 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="aws_ecr_pull_through_cache_addresses" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_pull_through_cache_addresses" status="stable" type="submodule"/>
+
+# AWS ECR Pull Through Cache Address
+
+Used to find the pull through cache address for the AWS account
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### docker\_hub\_registry
+
+Description: For use as the image\_registry when sourcing public images hosted at docker.io
+
+### ecr\_public\_registry
+
+Description: For use as the image\_registry when sourcing public images hosted at public.ecr.aws
+
+### github\_registry
+
+Description: For use as the image\_registry when sourcing public images hosted at ghcr.io
+
+### kubernetes\_registry
+
+Description: For use as the image\_registry when sourcing public images hosted at registry.k8s.io
+
+### quay\_registry
+
+Description: For use as the image\_registry when sourcing public images hosted at quay.io
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

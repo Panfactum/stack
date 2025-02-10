@@ -1,0 +1,1163 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pg_cluster" status="stable" type="submodule"/>
+
+# PostgreSQL Cluster on Kubernetes
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+
+## Usage
+
+### Database Version
+
+The PostgreSQL version can be controlled via the `pg_version` string. The version MUST be one a valid tag of an image
+from the [CNPG container repository.](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql)
+
+The default value for `pg_version` is the one that we test in our clusters, so we recommend starting there.
+
+<MarkdownAlert severity="warning">
+    At this time, major version upgrades are not supported for existing clusters (coming soon). Minor version upgrades will be applied
+    automatically when `pg_version` is changed.
+</MarkdownAlert>
+
+### Credentials
+
+For in-cluster applications, credentials can be sourced from the following Kubernetes Secrets named in the module's outputs:
+
+- `superuser_creds_secret`: Complete access to the database
+- `admin_creds_secret`: Read and write access to the database (does not include the ability to preform sensitive operations like schema or permission manipulation)
+- `reader_creds_secret`: Read-only access to the database
+
+Each of the above named Secrets contains the following values:
+
+- `username`: The username to use for authentication
+- `password`: The password to use for authentication
+
+The credentials in each Secret are managed by Vault and rotated automatically before they expire. In the Panfactum
+Stack, credential rotation will automatically trigger a pod restart for pods that reference the credentials.
+
+The credential lifetime is configured by the `vault_credential_lifetime_hours` input (defaults
+to 16 hours). Credentials are rotated 50% of the way through their lifetime. Thus, in the worst-case,
+credentials that a pod receives are valid for `vault_credential_lifetime_hours` / 2.
+
+<MarkdownAlert severity="warning">
+    The module also supplies `root_username` and `root_password` outputs for the root user of the database.
+    These credentials are **unsafe** to use as they are not automatically rotated without re-applying
+    this module.
+</MarkdownAlert>
+
+### Connecting
+
+The below example show how to connect to the PostgreSQL cluster through
+the read-write PgBouncer using dynamically rotated admin credentials by setting various
+environment variables in our [kube\_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_deployment) module.
+
+```hcl
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+  ...
+}
+
+module "deployment" {
+  source = "${var.pf_module_source}kube_deployment${var.pf_module_ref}"
+  ...
+  common_env_from_secrets = {
+    POSTGRES_USERNAME = {
+      secret_name = module.database.admin_creds_secret
+      key = "username"
+    }
+    POSTGRES_PASSWORD = {
+      secret_name = module.database.admin_creds_secret
+      key = "password"
+    }
+  }
+  common_env = {
+    POSTGRES_HOST = module.database.pooler_rw_service_name
+    POSTGRES_PORT = module.database.pooler_rw_service_port
+  }
+}
+```
+
+### Storage
+
+You must provide an initial storage amount for the database with `pg_initial_storage_gb`. This configures the size
+of the underlying EBS volumes.
+
+Once the database is running, the PVC autoresizer
+(provided by [kube\_pvc\_autoresizer](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube\_pvc\_autoresizer))
+will automatically expand the EBS volumes once the free space
+drops below `pg_storage_increase_threshold_percent` of the current EBS volume size.
+The size of the EBS volume will grow by `pg_storage_increase_gb` on every scaling event until a maximum of `pg_storage_limit_gb`.
+
+<MarkdownAlert severity="warning">
+    Note that a scaling event can trigger **at most once every 6 hours** due to an AWS limitation. As a result,
+    ensure that `pg_storage_increase_gb` is large enough to satisfy your data growth rate.
+</MarkdownAlert>
+
+### Resource Allocation
+
+The resources (CPU and memory) given to each PostgreSQL node is automatically scaled by the Vertical Pod Autoscaler when `vpa_enabled` is `true` (the default). You
+can control the ranges of the resources allocated to the pods via the following inputs:
+
+* `pg_minimum_memory_mb`
+* `pg_maximum_memory_mb`
+* `pg_minimum_cpu_millicores`
+* `pg_maximum_cpu_millicores`
+
+Similarly, resources given to the PgBouncer instances are controlled via:
+
+* `pgbouncer_minimum_memory_mb`
+* `pgbouncer_maximum_memory_mb`
+* `pgbouncer_minimum_cpu_millicores`
+* `pgbouncer_maximum_cpu_millicores`
+
+If `vpa_enabled` is `false`, the actual resource requests and limits will be set to the minimums.
+
+<MarkdownAlert severity="warning">
+    You should take care to tune the memory minimums appropriately, especially for bursty workloads. If you are regularly
+    issuing queries that take more than twice the 95th percentile memory utilization, you must manually set `pg_minimum_memory_mb` to
+    a sensible value for your workloads as the VPA will under-provision resources.
+
+    Additionally, you should review our section on memory tuning below.
+</MarkdownAlert>
+
+### Memory Tuning
+
+By default, we tune the PostgreSQL memory settings in accordance with
+[the EDB recommendations](https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory) since EDB
+is the original creator of CNPG.
+
+However, PostgreSQL databases can be used to run such a wide array of workloads that you may want to tune
+the settings further for your particular use case.
+
+These three settings are the most important:
+
+- `pg_work_mem_percent`: How much memory is set aside for intermediate calculations in a query (i.e., sorts, joins, etc.).
+- `pg_max_connections`: How many simultaneous connections / queries you can run in the database.
+- `pg_shared_buffers_percent`: How much of the memory given to the cluster is set aside for caching data so that
+it does not need to be read from disk.
+
+`pg_work_mem_percent` is the most important and most likely to slow down your complex queries. This parameter
+represents the total memory set aside for all connections for their query calculations.
+
+`pg_max_connections` is important as memory is allocated and limited on a *per-operation* basis.
+As a result, the actual memory available to each query is roughly `pg_memory_mb * pg_work_mem_percent / pg_max_connections`.
+This is true regardless of whether you are
+actually using the maximum number of connections. Therefore, if you are using the database
+to run large analytical queries, you may want to lower the `pg_max_connections` value in order to allow each query to use more
+of the working memory pool.
+
+`pg_shared_buffers_percent` will not typically be a source of issues as the linux page cache will step in if
+this value is not large enough. However, the internal PostgreSQL cache controlled by this value
+will always be more performant than the generic page cache, so tuning this can help in some circumstances.
+
+### Shutdowns and Failovers
+
+Postgres has [three shutdown modes](https://www.postgresql.org/docs/current/server-shutdown.html):
+
+- Smart Shutdown: Prevents new connections, but allows existing sessions to finish their work before
+shutting down.
+- Fast Shutdown: Prevents new connections and forces all existing sessions to abort safely before
+shutting down.
+- Immediate Shutdown: Immediately exits without doing normal database shutdown processing (including
+forcibly killing sessions w/ doing graceful aborts). Forces a database recovery operation on the next
+startup.
+
+The default behavior of this module is to do a fast shutdown with a 30-second timeout (`pg_switchover_delay`)
+until an immediate shutdown is issued.
+
+When running with a replica, this results in at most 30 seconds of downtime if the primary
+instance is terminated (the replicas are still readable); however, it will normally be around
+5 seconds.
+
+This is quite quick, but the downside is that any running queries on the primary will be immediately
+terminated and not allowed to complete. You can increase the amount of time that running queries
+are allowed to complete by increasing `pg_smart_shutdown_timeout`. However, this will increase the
+time that *new* sessions cannot be made with database proportionally (i.e., setting `pg_smart_shutdown_timeout`
+to `30` will allow 30 seconds for existing queries to complete but increase the amount of time that new
+queries cannot be made to about 35 seconds).
+
+We generally recommend keeping
+`pg_smart_shutdown_timeout` set to the default `1` (minimum allowed by CNPG) in order to minimize downtime.
+Instead of trying to ensure queries
+will always complete, we recommend that you implement retry logic in your database client code. This will
+not only add resilience to this particular scenario, but will also be beneficial in other failure modes.
+
+For more information about shutdowns, please see the [CNPG documentation.](https://cloudnative-pg.io/documentation/1.23/instance_manager/)
+
+### Synchronous Replication
+
+By default, this module *asynchronously* replicates data written to the primary instance to each replica. This ensures
+that writes can be completed relatively quickly and that writes can continue even if the replicas are unavailable.
+
+Generally, this is safe. On a shutdown or failover of the primary, writes
+are paused and replicas are given a chance to catch up with the primary before one of them is promoted.
+
+However, there are a few drawbacks:
+
+- In the case of a catastrophic instance failure on the primary (e.g., power outage), there is a possibility
+of data loss (up to roughly 5 seconds).
+
+- If you are reading from the replicas, you may be reading stale data (up to roughly 5 seconds old).
+
+- About 5 seconds of additional downtime must be accounted for on failovers in order to allow the replicas to catch-up.
+
+To avoid these drawbacks, you can set `pg_sync_replication_enabled`. However, this comes with its own tradeoffs:
+
+- Database mutations will take significantly longer because writes must be distributed across every replica before returning successfully.
+
+- Database mutations will not complete unless *all* replicas are available. This will increase the chance of downtime for write operations.
+
+We advise you to stick with the default asynchronous replication unless you have a specific, demonstrated need for synchronous replication.
+
+### Recovery
+
+In the case of an emergency, you can recover the database from the backups and WAL archives stored in S3.
+
+Complete the following steps:
+
+1. Run `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. Verify that there exists a "First Point of
+Recoverability".
+
+    If this is not available, that means that your logical PostgreSQL backups were not configured correctly and
+    are not available. You will need to restore from the hourly EBS snapshots
+    created by Velero instead.
+
+2. Retrieve the `recovery_directory` output from this module by running `terragrunt output`.
+
+3. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
+
+4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `recovery_directory`
+output you retrieved in step 2.
+
+    Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
+    timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
+    must be **after** the "First Point of Recoverability" that was reported in step 1.
+
+    If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
+    should be within 5 seconds of the last database write.
+
+5. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
+come back online.
+
+Note that the "First Point of Recoverability" is determined by the `backups_retention_days`
+input; backups older than `backups_retention_days` (default `3`) will be deleted, and you
+will no longer be able to recover to that point in time.
+
+For more information on recovery procedures, see the CNPG
+[recovery documentation](https://cloudnative-pg.io/documentation/1.23/recovery/).
+
+### Disruptions
+
+By default, failovers of PostgreSQL pods in this module can be initiated at any time. This enables the cluster to automatically
+perform maintenance operations such as instance resizing, AZ re-balancing, version upgrades, etc. However, every time a PostgreSQL pod
+is disrupted, running queries will be terminated prematurely and a short period of downtime might occur if the disrupted
+pod is the primary instance (see the Shutdowns and Failovers section).
+
+You may want to provide more control over when these failovers can occur, so we provide the following options:
+
+#### Disruption Windows
+
+Disruption windows provide the ability to confine disruptions to specific time intervals (e.g., periods of low load) if this is needed
+to meet your stability goals. You can enable this feature by setting `voluntary_disruption_window_enabled` to `true`.
+
+The disruption windows are scheduled via `voluntary_disruption_window_cron_schedule` and the length of time of each
+window via `voluntary_disruption_window_seconds`.
+
+If you use this feature, we *strongly* recommend that you allow disruptions at least once per day, and ideally more frequently.
+
+For more information on how this works, see the
+[kube\_disruption\_window\_controller](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_disruption\_window\_controller)
+submodule.
+
+#### Custom PDBs
+
+Rather than time-based disruption windows, you may want more granular control of when disruptions are allowed and disallowed.
+
+You can do this by managing your own [PodDisruptionBudgets](https://kubernetes.io/docs/tasks/run-application/configure-pdb/).
+This module provides outputs that will allow you to match certain subsets of pods for both PostgreSQL and PgBouncer.
+
+For example:
+
+```hcl
+module "database" {
+  source = "${var.pf_module_source}kube_pg_cluster${var.pf_module_ref}"
+  ...
+}
+
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "custom-pdb"
+      namespace = module.database.namespace
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.database.cluster_match_labels # Selects all PostgreSQL pods
+      }
+      maxUnavailable = 0 # Prevents any disruptions
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+}
+```
+
+While this example is constructed via IaC, you can also create / destroy these PDBs directly in your application
+logic via YAML manifests and the Kubernetes API. This would allow you to create a PDB prior to initiating a long-running
+query that you do not want disrupted and then delete it upon completion.
+
+#### Completely Disabling Voluntary Disruptions
+
+Allowing the cluster to periodically initiate failovers of PostgreSQL is critical to maintaining system health. However,
+there are rare cases where you want to override the safe behavior and disable voluntary disruptions altogether. Setting
+the `voluntary_disruptions_enabled` to `false` will set up PDBs that disallow any voluntary disruption of either PostgreSQL
+or PgBouncer pods.
+
+This is *strongly* discouraged. If limiting any and all potential disruptions is of primary importance you should instead:
+
+- Create a one-hour weekly disruption window to allow *some* opportunity for automatic maintenance operations
+- Ensure that `spot_instances_enabled` and `burstable_instances_enabled` are both set to `false`
+- Connect through PgBouncer with `pgbouncer_pool_mode` set to `transaction`
+
+Note that the above configuration will significantly increase the costs of running PostgreSQL (2.5-5x) versus more
+flexible settings. In the vast majority of cases, this is entirely unnecessary, so this should only be used as a last resort.
+
+<MarkdownAlert severity="warning">
+    Enabling PDBs either manually or via disruption windows will not prevent all forms of disruption, only *voluntary* ones. A voluntary
+    disruption is one that is done through the [Eviction API](https://kubernetes.io/docs/concepts/scheduling-eviction/api-eviction/)
+    and limited by the use of PDBs.
+
+    An example of a non-voluntary disruption would be via spot node termination or resource constraints. As a result,
+    you should still implement defensive coding practices in your client code to account for potential disruptions.
+</MarkdownAlert>
+
+### PostgreSQL Parameters
+
+PostgreSQL comes with hundreds of parameters that can be used to customize its behavior. You
+can see the full set of available values [here](https://cloudnative-pg.io/documentation/1.23/postgresql_conf), and you
+can provide them to this module via `pg_parameters`.
+
+This can be used overwrite any default settings this module provides.
+
+### Extra Schemas
+
+When initially created, the CNPG cluster has just one [schema](https://www.postgresql.org/docs/current/ddl-schemas.html)
+(`public`) in the `app` database. However, you may choose to add more in the future.
+
+If you do, you will need to add those schemas to the `extra_schemas` input. This will ensure that users and roles
+created by the Vault auth system will have access to the objects in those schemas.
+
+Note that this will NOT create the extra schemas; you should do that in your database migration scripts.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### aws\_iam\_ip\_allow\_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+### pg\_cluster\_namespace
+
+Description: The namespace to deploy to the cluster into
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### arm\_nodes\_enabled
+
+Description: Whether the database pods can be scheduled on arm64 nodes
+
+Type: `bool`
+
+Default: `true`
+
+### backups\_cron\_schedule
+
+Description: The cron schedule on which to create CNPG Backup resources
+
+Type: `string`
+
+Default: `"0 0 0 * * *"`
+
+### backups\_force\_delete
+
+Description: Whether to delete backups on destroy
+
+Type: `bool`
+
+Default: `false`
+
+### backups\_retention\_days
+
+Description: The number of days that backups will be retained
+
+Type: `number`
+
+Default: `3`
+
+### burstable\_nodes\_enabled
+
+Description: Whether the database pods can be scheduled on burstable nodes
+
+Type: `bool`
+
+Default: `false`
+
+### controller\_nodes\_enabled
+
+Description: Whether the database pods can be scheduled on controller nodes
+
+Type: `bool`
+
+Default: `false`
+
+### create\_timeout\_minutes
+
+Description: The number of minutes to wait for a new database to be created
+
+Type: `number`
+
+Default: `60`
+
+### extra\_schemas
+
+Description: Extra schemas that were created in the app database
+
+Type: `list(string)`
+
+Default: `[]`
+
+### instance\_type\_anti\_affinity\_required
+
+Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
+
+Type: `bool`
+
+Default: `true`
+
+### monitoring\_enabled
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### node\_image\_cached\_enabled
+
+Description: Whether to add the container images to the node image cache for faster startup times
+
+Type: `bool`
+
+Default: `true`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### pg\_initial\_storage\_gb
+
+Description: The initial number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+Default: `10`
+
+### pg\_instances
+
+Description: The number of instances to deploy in the postgres cluster
+
+Type: `number`
+
+Default: `2`
+
+### pg\_maintenance\_work\_mem\_percent
+
+Description: The percent of the overall memory allocation available for database maintenance operations
+
+Type: `number`
+
+Default: `5`
+
+### pg\_max\_connections
+
+Description: The maximum number of connections to each postgres database
+
+Type: `number`
+
+Default: `100`
+
+### pg\_maximum\_cpu\_millicores
+
+Description: The maximum amount of cpu to allocate to the postgres pods (in millicores)
+
+Type: `number`
+
+Default: `10000`
+
+### pg\_maximum\_memory\_mb
+
+Description: The maximum amount of memory to allocate to the postgres pods (in Mi)
+
+Type: `number`
+
+Default: `128000`
+
+### pg\_minimum\_cpu\_millicores
+
+Description: The minimum amount of cpu to allocate to the postgres pods (in millicores)
+
+Type: `number`
+
+Default: `50`
+
+### pg\_minimum\_cpu\_update\_millicores
+
+Description: The CPU settings for the Postgres won't be updated until the recommendations from the VPA (if enabled) differ from the current settings by at least this many millicores. This prevents autoscaling thrash.
+
+Type: `number`
+
+Default: `250`
+
+### pg\_minimum\_memory\_mb
+
+Description: The minimum amount of memory to allocate to the postgres pods (in Mi)
+
+Type: `number`
+
+Default: `400`
+
+### pg\_parameters
+
+Description: A map of postgres parameters. See https://cloudnative-pg.io/documentation/1.23/postgresql_conf.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### pg\_recovery\_directory
+
+Description: The name of the directory in the backup bucket containing the recovery files.
+
+Type: `string`
+
+Default: `null`
+
+### pg\_recovery\_mode\_enabled
+
+Description: If true, will attempt to recover the cluster
+
+Type: `bool`
+
+Default: `false`
+
+### pg\_recovery\_target\_time
+
+Description: If provided, will recover the database to the indicated target time in RFC 3339 format rather than to the latest data.
+
+Type: `string`
+
+Default: `null`
+
+### pg\_shared\_buffers\_percent
+
+Description: The percent of the overall memory allocation dedicated for caching data (avoiding reads to disk)
+
+Type: `number`
+
+Default: `25`
+
+### pg\_smart\_shutdown\_timeout
+
+Description: The number of seconds to wait for open connections to close before shutting down postgres nodes
+
+Type: `number`
+
+Default: `1`
+
+### pg\_storage\_increase\_gb
+
+Description: The number of GB to increase storage by if free space drops below the threshold
+
+Type: `number`
+
+Default: `10`
+
+### pg\_storage\_increase\_threshold\_percent
+
+Description: Dropping below this percent of free storage will trigger an automatic increase in storage size
+
+Type: `number`
+
+Default: `20`
+
+### pg\_storage\_limit\_gb
+
+Description: The maximum number of gigabytes of storage to provision for the postgres cluster
+
+Type: `number`
+
+Default: `null`
+
+### pg\_switchover\_delay
+
+Description: Controls max amount of time that CNPG will wait for data to be synced from primary to replica before forcing the switchover
+
+Type: `number`
+
+Default: `30`
+
+### pg\_sync\_replication\_enabled
+
+Description: Whether to use synchronous replication for the streaming replicas (vs async)
+
+Type: `bool`
+
+Default: `false`
+
+### pg\_version
+
+Description: The version of postgres to deploy
+
+Type: `string`
+
+Default: `"16.6-13"`
+
+### pg\_work\_mem\_percent
+
+Description: The percent of the overall memory allocation available to queries for sort and hash operations (intermediate calculations during queries)
+
+Type: `number`
+
+Default: `25`
+
+### pgbouncer\_application\_name\_add\_host
+
+Description: Add the client host address and port to the application name setting set on connection start.
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_autodb\_idle\_timeout
+
+Description: If the automatically created (via “*”) database pools have been unused this many seconds, they are freed.
+
+Type: `number`
+
+Default: `3600`
+
+### pgbouncer\_client\_idle\_timeout
+
+Description: Client connections idling longer than this many seconds are closed. This should be larger than the client-side connection lifetime settings, and only used for network problems.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_client\_login\_timeout
+
+Description: If a client connects but does not manage to log in in this amount of time, it will be disconnected. Mainly needed to avoid dead connections stalling SUSPEND and thus online restart.
+
+Type: `number`
+
+Default: `60`
+
+### pgbouncer\_default\_pool\_size
+
+Description: How many server connections to allow per user/database pair.
+
+Type: `number`
+
+Default: `20`
+
+### pgbouncer\_disable\_pqexec
+
+Description: Disable the Simple Query protocol (PQexec). Unlike the Extended Query protocol, Simple Query allows multiple queries in one packet, which allows some classes of SQL-injection attacks.
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_log\_connections
+
+Description: Whether to log each connection.
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_log\_disconnections
+
+Description: Whether to log each disconnection.
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_log\_pooler\_errors
+
+Description: Whether to log errors the pooler sends to clients.
+
+Type: `bool`
+
+Default: `true`
+
+### pgbouncer\_max\_client\_conn
+
+Description: The maximum client connections allowed by pgbouncer
+
+Type: `number`
+
+Default: `10000`
+
+### pgbouncer\_max\_db\_connections
+
+Description: Do not allow more than this many server connections per database (regardless of user). This considers the PgBouncer database that the client has connected to, not the PostgreSQL database of the outgoing connection.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_max\_prepared\_statements
+
+Description: When this is set to a non-zero value PgBouncer tracks protocol-level named prepared statements related commands sent by the client in transaction and statement pooling mode. PgBouncer makes sure that any statement prepared by a client is available on the backing server connection. Even when the statement was originally prepared on another server connection.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_max\_user\_connections
+
+Description: Do not allow more than this many server connections per user (regardless of database).
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_maximum\_cpu\_millicores
+
+Description: The maximum amount of cpu to allocate to the pgbouncer pods (in millicores)
+
+Type: `number`
+
+Default: `10000`
+
+### pgbouncer\_maximum\_memory\_mb
+
+Description: The maximum amount of memory to allocate to the pgbouncer pods (in Mi)
+
+Type: `number`
+
+Default: `32000`
+
+### pgbouncer\_min\_pool\_size
+
+Description: Add more server connections to pool if below this number. Improves behavior when the normal load suddenly comes back after a period of total inactivity. The value is effectively capped at the pool size.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_minimum\_cpu\_millicores
+
+Description: The minimum amount of cpu to allocate to the pgbouncer pods (in millicores)
+
+Type: `number`
+
+Default: `15`
+
+### pgbouncer\_minimum\_memory\_mb
+
+Description: The minimum amount of memory to allocate to the pgbouncer pods (in Mi)
+
+Type: `number`
+
+Default: `25`
+
+### pgbouncer\_pool\_mode
+
+Description: What pool\_mode to run pgbouncer in
+
+Type: `string`
+
+Default: `"session"`
+
+### pgbouncer\_query\_timeout
+
+Description: Queries running longer than this amount of seconds are canceled. This should be used only with a slightly smaller server-side statement\_timeout, to apply only for network problems.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_query\_wait\_timeout
+
+Description: Maximum time queries are allowed to spend waiting for execution. If the query is not assigned to a server during that time, the client is disconnected. 0 disables. If this is disabled, clients will be queued indefinitely.
+
+Type: `number`
+
+Default: `120`
+
+### pgbouncer\_read\_only\_enabled
+
+Description: Whether to enable a pgbouncer deployment in read-only mode
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_read\_write\_enabled
+
+Description: Whether to enable a pgbouncer deployment in read-write mode
+
+Type: `bool`
+
+Default: `true`
+
+### pgbouncer\_reserve\_pool\_size
+
+Description: How many additional connections to allow to a pool (see reserve\_pool\_timeout). 0 disables.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_reserve\_pool\_timeout
+
+Description: If a client has not been serviced in this amount of seconds, use additional connections from the reserve pool. 0 disables.
+
+Type: `number`
+
+Default: `5`
+
+### pgbouncer\_server\_check\_delay
+
+Description: How long to keep released connections available for immediate re-use.
+
+Type: `number`
+
+Default: `30`
+
+### pgbouncer\_server\_connect\_timeout
+
+Description: If connection and login don’t finish in this amount of seconds, the connection will be closed.
+
+Type: `number`
+
+Default: `15`
+
+### pgbouncer\_server\_fast\_close
+
+Description: Disconnect a server in session pooling mode immediately or after the end of the current transaction if it is in “close\_needed” mode (set by RECONNECT, RELOAD that changes connection settings, or DNS change), rather than waiting for the session end. In statement or transaction pooling mode, this has no effect since that is the default behavior there.
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_server\_idle\_timeout
+
+Description: If a server connection has been idle more than this many seconds it will be closed. If 0 then this timeout is disabled.
+
+Type: `number`
+
+Default: `600`
+
+### pgbouncer\_server\_lifetime
+
+Description: The pooler will close an unused (not currently linked to any client connection) server connection that has been connected longer than this. Setting it to 0 means the connection is to be used only once, then closed.
+
+Type: `number`
+
+Default: `3600`
+
+### pgbouncer\_server\_login\_retry
+
+Description: If login to the server failed, because of failure to connect or from authentication, the pooler waits this many seconds before retrying to connect. During the waiting interval, new clients trying to connect to the failing server will get an error immediately without another connection attempt.
+
+Type: `number`
+
+Default: `15`
+
+### pgbouncer\_stats\_period
+
+Description: Sets how often the averages shown in various SHOW commands are updated and how often aggregated statistics are written to the log.
+
+Type: `number`
+
+Default: `60`
+
+### pgbouncer\_tcp\_keepalive
+
+Description: Turns on basic keepalive with OS defaults.
+
+Type: `bool`
+
+Default: `true`
+
+### pgbouncer\_tcp\_keepcnt
+
+Description: Sets tcp\_keepcnt
+
+Type: `number`
+
+Default: `null`
+
+### pgbouncer\_tcp\_keepidle
+
+Description: Sets tcp\_keepidle
+
+Type: `number`
+
+Default: `null`
+
+### pgbouncer\_tcp\_keepintvl
+
+Description: Sets tcp\_keepintvl
+
+Type: `number`
+
+Default: `null`
+
+### pgbouncer\_tcp\_user\_timeout
+
+Description: Sets the TCP\_USER\_TIMEOUT socket option. This specifies the maximum amount of time in milliseconds that transmitted data may remain unacknowledged before the TCP connection is forcibly closed. If set to 0, then operating system’s default is used.
+
+Type: `bool`
+
+Default: `false`
+
+### pgbouncer\_verbose
+
+Description: Increase verbosity. Mirrors the “-v” switch on the command line. For example, using “-v -v” on the command line is the same as verbose=2.
+
+Type: `number`
+
+Default: `0`
+
+### pgbouncer\_version
+
+Description: The version of the cloudnative-pg/pgbouncer image to use
+
+Type: `string`
+
+Default: `"1.22.1"`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### spot\_nodes\_enabled
+
+Description: Whether the database pods can be scheduled on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
+### vault\_credential\_lifetime\_hours
+
+Description: The lifetime of database credentials generated by Vault
+
+Type: `number`
+
+Default: `16`
+
+### voluntary\_disruption\_window\_cron\_schedule
+
+Description: The times when disruption windows should start
+
+Type: `string`
+
+Default: `"0 4 * * *"`
+
+### voluntary\_disruption\_window\_enabled
+
+Description: Whether to confine voluntary disruptions of pods in this module to specific time windows
+
+Type: `bool`
+
+Default: `false`
+
+### voluntary\_disruption\_window\_seconds
+
+Description: The length of the disruption window in seconds
+
+Type: `number`
+
+Default: `3600`
+
+### voluntary\_disruptions\_enabled
+
+Description: Whether to enable voluntary disruptions of pods in this module.
+
+Type: `bool`
+
+Default: `true`
+
+### vpa\_enabled
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### admin\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding credentials for the admin role in the PostgreSQL database
+
+### cluster\_match\_labels
+
+Description: Label selector that matches all PostgreSQL pods
+
+### cluster\_ro\_match\_labels
+
+Description: Label selector that matches all read-only replica PostgreSQL pods
+
+### cluster\_rw\_match\_labels
+
+Description: Label selector that matches the primary PostgreSQL pod (the read-write node)
+
+### database
+
+Description: The database to use for application data
+
+### db\_admin\_role
+
+Description: The Vault role used to get admin credentials for the created PostgreSQL cluster
+
+### db\_reader\_role
+
+Description: The Vault role used to get read-only credentials for the created PostgreSQL cluster
+
+### db\_superuser\_role
+
+Description: The Vault role used to get superuser credentials for the created PostgreSQL cluster
+
+### namespace
+
+Description: The Kubernetes namespace for the created resources
+
+### pooler\_r\_match\_labels
+
+Description: Label selector that matches all PgBouncer pods that allows read-only access to the PostgreSQL cluster
+
+### pooler\_r\_service\_name
+
+Description: The service name of the PgBouncer connection pooler that allows read-only access
+
+### pooler\_r\_service\_port
+
+Description: The PostgreSQL port for this service
+
+### pooler\_rw\_match\_labels
+
+Description: Label selector that matches all PgBouncer pods that allows read-write access to the PostgreSQL cluster
+
+### pooler\_rw\_service\_name
+
+Description: The service name of the PgBouncer connection pooler that allows read-write access
+
+### pooler\_rw\_service\_port
+
+Description: The PostgreSQL port for this service
+
+### r\_service\_name
+
+Description: The service name for all db instances that allows read access (includes read-write instances as well)
+
+### r\_service\_port
+
+Description: The PostgreSQL port for this service
+
+### reader\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding credentials for the reader role in the PostgreSQL database
+
+### recovery\_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
+### ro\_service\_name
+
+Description: The service name for the db instances that allows read-only access
+
+### ro\_service\_port
+
+Description: The PostgreSQL port for this service
+
+### root\_password
+
+Description: The password for root user of the database
+
+### root\_username
+
+Description: The root user of the database
+
+### rw\_service\_name
+
+Description: The service name of the db node that allows read-write access
+
+### rw\_service\_port
+
+Description: The PostgreSQL port for this service
+
+### server\_certs\_secret
+
+Description: The secret containing the server certificates for the database
+
+### superuser\_creds\_secret
+
+Description: The name of the Kubernetes Secret holding credentials for the superuser role in the PostgreSQL database
+
+## Maintenance Notes
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

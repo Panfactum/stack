@@ -1,0 +1,90 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="kube_core_dns" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_core_dns" status="stable" type="direct"/>
+
+# CoreDNS
+
+This launches a deployment of [CoreDNS](https://coredns.io/) instances that will serve as the cluster's DNS servers.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### core\_dns\_image\_version
+
+Description: The version of the image to use for the deployment
+
+Type: `string`
+
+Default: `"1.12.0"`
+
+### monitoring\_enabled
+
+Description: Whether to add active monitoring to the deployed systems
+
+Type: `bool`
+
+Default: `false`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `false`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### service\_ip
+
+Description: The IP address that the DNS service will be exposed on
+
+Type: `string`
+
+Default: `"172.20.0.10"`
+
+### vpa\_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `false`
+
+## Outputs
+
+No outputs.
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -16,7 +16,17 @@ if (!indexName) {
 }
 
 const urls = await extractUrlsFromSitemap(url)
-const scraped = await scrapeUrls(urls, true)
+
+// removing urls that are not scraping or indexing friendly
+const urlBlacklist = [
+  '/changelog'
+]
+
+const filtered_urls = urls.filter(url => {
+  return !urlBlacklist.some(blacklist => url.includes(blacklist))
+})
+
+const scraped = await scrapeUrls(filtered_urls, true)
 const sections = createParsedHtmlSections(scraped)
 
 await updateAlgoliaIndex(sections, indexName)

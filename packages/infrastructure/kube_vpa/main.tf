@@ -114,6 +114,16 @@ module "webhook_cert" {
   namespace     = local.namespace
 }
 
+// The CRDs must be installed as such b/c the VPA often releases bugs in their CRDs
+// and helm does not update CRD versions once they have been deployed
+resource "kubectl_manifest" "crds" {
+  for_each  = toset(fileset(path.module, "crds/*.yaml"))
+  yaml_body = file(each.key)
+
+  force_conflicts   = true
+  server_side_apply = true
+}
+
 resource "helm_release" "vpa" {
   namespace       = local.namespace
   name            = local.name
@@ -121,10 +131,10 @@ resource "helm_release" "vpa" {
   chart           = "vpa"
   version         = var.vertical_autoscaler_helm_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -365,6 +375,13 @@ resource "kubectl_manifest" "vpa_controller" {
       labels    = module.util_admission_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -395,6 +412,13 @@ resource "kubectl_manifest" "vpa_recommender" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -417,6 +441,13 @@ resource "kubectl_manifest" "vpa_updater" {
       labels    = module.util_updater.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

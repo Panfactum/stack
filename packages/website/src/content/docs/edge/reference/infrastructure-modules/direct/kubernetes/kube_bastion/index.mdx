@@ -1,0 +1,124 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="kube_bastion" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_bastion" status="stable" type="direct"/>
+
+# Kubernetes Ingress Bastion
+
+This launches an SSH bastion that utilizes Vault for authenticating the present SSH certificates.
+Shell sessions cannot be started directly in the bastion, but the bastion can be used as a proxy
+to private network resources.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### bastion\_domains
+
+Description: The domain names of the bastion
+
+Type: `list(string)`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### bastion\_image\_version
+
+Description: The version of the image to use for the deployment
+
+Type: `string`
+
+Default: `"17b5034568b63f0a777bc1f5b7ef907c0e00fa2a"`
+
+### bastion\_port
+
+Description: The port the bastion should use for the ssh server
+
+Type: `number`
+
+Default: `45459`
+
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### sla\_target
+
+Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
+
+Type: `number`
+
+Default: `3`
+
+### ssh\_cert\_lifetime\_seconds
+
+Description: The lifetime of SSH certs provisioned by Vault
+
+Type: `number`
+
+Default: `28800`
+
+### vpa\_enabled
+
+Description: Whether the VPA resources should be enabled
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### bastion\_domains
+
+Description: The domains the SSH server is available on
+
+### bastion\_host\_public\_key
+
+Description: The bastion host's public key for mutual verification
+
+### bastion\_port
+
+Description: The port the SSH server is available on in each domain
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

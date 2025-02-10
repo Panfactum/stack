@@ -1,6 +1,6 @@
 # Argo Workflow Template: Dockerfile Build Deployment
 
-import MarkdownAlert from "@/components/markdown/MarkdownAlert";
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 <MarkdownAlert severity="warning">
     This module will only run inside of clusters that have the [kube_buildkit](/docs/main/guides/addons/buildkit/installing) addon deployed.

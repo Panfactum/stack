@@ -1,0 +1,98 @@
+---
+title: "Security Backlog"
+---
+
+# Security Backlog
+
+Keeping your systems secure is a critical facet of platform engineering. While you hope to prevent issues
+through good platform design, you will never achieve perfect security.
+
+As a result, it is important
+to keep your organization aligned on the set of known vulnerabilities. Typically, this is done
+through a central backlog of security issues that are assessed and prioritized via a standard process. This
+is not only best practice, but also a requirement of many compliance programs such as SOC 2.
+
+## Defining Security Vulnerabilities
+
+Before building processes, you must first align your organization on what represents a _security vulnerability_.
+
+While most have an intuitive image of "being hacked," security has a broader scope that your entire organization
+should remain mindful of.
+
+- Unauthorized access to systems, software, or data (e.g., SQL injection attacks)
+
+- Unauthorized mutation or deletion of data (e.g., ransomware attacks)
+
+- Unintended leakage of private data (e.g., exposing customer info on a public endpoint)
+
+- Unintended bugs in access control (e.g., granting elevated privileges to user accounts)
+
+- Prevention of your organization's ability to deliver system services (e.g., denial-of-service attacks)
+
+Additionally, it is important to consider both internal _and_ external threat vectors.
+
+## Building a Security Backlog
+
+The exact technology used for your security backlog is unimportant. You could use your standard ticketing
+system or even a spreadsheet. [^1]
+
+[^1]:
+    However, you may want to consider limiting access to only a subset
+    of your overall organization.
+
+What is important is that you have a way of assessing each issue's severity and a standard SLA for different
+severity levels.
+
+We recommend the following simple framework:
+
+1. For each issue, assign both a risk and impact score between 1 and 5: [^2]
+
+   - Risk: The estimated probability of the vulnerability being exploited within the next 12 months.
+
+   - Impact: The estimated financial liability caused if the vulnerability were exploited.
+
+2. Multiply those numbers together to reach a severity score between 1 and 25.
+
+3. Establish SLAs for various ranges of severity. For example:
+
+   - 1 - 5: Will resolve within the next 12 months
+
+   - 5 - 15: Will resolve within the next 3 months
+
+   - 16 - 25: Will begin work to resolve immediately
+
+4. Provide some mechanism to track SLA attainment as this is an important component of
+   many compliance programs such as SOC 2.
+
+[^2]:
+    As a platform engineer, you may be tempted to proactively assert your own estimations for risks, impact, and priority as you may
+    be the most technically informed stakeholder. However, you will achieve better alignment if you instead
+    position yourself as an objective facilitator in this process. Ask probing questions and ensure you understand how
+    other's view the security issues. As security operates in the realm of hypotheticals,
+    you must allow each stakeholder to draw their own conclusions if you want to build the necessary organizational
+    resolve to tackle tough security issues.
+
+We recommend meeting regularly (1-2 times per month) with your leadership team to review new and outstanding
+items on the security backlog. This can be incorporated into other planning and prioritization ceremonies
+that your organization already has in place.
+
+## Providing a Reporting Process
+
+The backlog itself serves limited purpose if your stakeholders do not know it exists or how to submit
+discovered issues to it. As a result, considering how issues should be reported is an important part
+of the process, and another requirement of most compliance programs.
+
+You should provide a _public_ webpage that describes how both internal and external stakeholders should
+go about disclosing issues. The gold standard would be an intake form that directly drops reported
+issues into your backlog for triaging.
+
+## Preventing Security Issues
+
+Similar to [preventing downtime](/docs/maturity/measures/downtime-visibility#preventing-downtime), each security
+issue should generate a [postmortem process](https://en.wikipedia.org/wiki/Postmortem_documentation) that
+identifies not just the proximate cause but what gaps in the platform allowed the security issue to manifest.
+
+As a platform engineer, this is your opportunity to provide guidance to your organization on what improvement
+ought to be made as well as provide a concrete return-on-investment justification. The severity score is an
+[expected value](https://en.wikipedia.org/wiki/Expected_value) calculation in disguise, and you
+can confidently assert each security issue has a specific negative financial impact as a result.

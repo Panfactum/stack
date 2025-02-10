@@ -1,0 +1,95 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="aws_ses_domain" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/aws_ses_domain" status="stable" type="direct"/>
+
+# AWS SES Domain
+
+Sets up a domain with [AWS SES](https://aws.amazon.com/ses/) for email sending
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### domain
+
+Description: Domain name that will send emails
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### send\_from\_subdomain
+
+Description: The default subdomain to send emails from
+
+Type: `string`
+
+Default: `"mail"`
+
+### smtp\_allowed\_cidrs
+
+Description: CIDR blocks that can use the SMTP credentials
+
+Type: `list(string)`
+
+Default: `[]`
+
+## Outputs
+
+The following outputs are exported:
+
+### smtp\_host
+
+Description: The SMTP server for sending email
+
+### smtp\_password
+
+Description: The secret access key converted into an SES SMTP password by applying AWS's Sigv4 conversion algorithm
+
+### smtp\_user
+
+Description: The user to use for sending emails via SMTP
+
+## Usage
+
+### Create / Delete
+
+This module does **not** register domains but rather adopts domains
+that you have already registered and updates their information.
+Additionally, destroying this module does un-register the domains;
+it only removes them from the terraform state.
+
+### Contact Information
+
+There are three different domain contacts:
+
+- Registrant: The owner of the domain
+- Admin: The person responsible for administrative decisions about the domain
+- Tech: The person responsible for executing changes for the domain
+
+It is possible for the same person to serve multiple roles.
+
+These people will be contacted in the case of billing issues, abuse, or required
+changes. Their information is **not** publicly available, but will be made
+available to the registrar (AWS).
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

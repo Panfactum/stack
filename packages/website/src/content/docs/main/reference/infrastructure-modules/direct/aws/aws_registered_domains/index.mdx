@@ -1,0 +1,341 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="aws_registered_domains" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_registered_domains" status="stable" type="direct"/>
+
+# AWS Registered Domains
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### admin\_address\_line\_1
+
+Description: The street address (1) of the domain admin contact
+
+Type: `string`
+
+### admin\_city
+
+Description: The city of the domain admin contact
+
+Type: `string`
+
+### admin\_country\_code
+
+Description: The country code of the domain admin contact
+
+Type: `string`
+
+### admin\_email\_address
+
+Description: The email address of the domain contact
+
+Type: `string`
+
+### admin\_first\_name
+
+Description: The first name of the domain admin contact
+
+Type: `string`
+
+### admin\_last\_name
+
+Description: The last name of the domain admin contact
+
+Type: `string`
+
+### admin\_phone\_number
+
+Description: The phone number of the domain contact
+
+Type: `string`
+
+### admin\_state
+
+Description: The state or province of the domain admin contact
+
+Type: `string`
+
+### admin\_zip\_code
+
+Description: The ZIP code of the domain admin contact
+
+Type: `string`
+
+### domain\_names
+
+Description: Domain names that will be managed by this module
+
+Type: `set(string)`
+
+### registrant\_address\_line\_1
+
+Description: The street address (1) of the domain registrant contact
+
+Type: `string`
+
+### registrant\_city
+
+Description: The city of the domain registrant contact
+
+Type: `string`
+
+### registrant\_country\_code
+
+Description: The country code of the domain registrant contact
+
+Type: `string`
+
+### registrant\_email\_address
+
+Description: The email address of the domain contact
+
+Type: `string`
+
+### registrant\_first\_name
+
+Description: The first name of the domain registrant contact
+
+Type: `string`
+
+### registrant\_last\_name
+
+Description: The last name of the domain registrant contact
+
+Type: `string`
+
+### registrant\_phone\_number
+
+Description: The phone number of the domain contact
+
+Type: `string`
+
+### registrant\_state
+
+Description: The state or province of the domain registrant contact
+
+Type: `string`
+
+### registrant\_zip\_code
+
+Description: The ZIP code of the domain registrant contact
+
+Type: `string`
+
+### tech\_address\_line\_1
+
+Description: The street address (1) of the domain tech contact
+
+Type: `string`
+
+### tech\_city
+
+Description: The city of the domain tech contact
+
+Type: `string`
+
+### tech\_country\_code
+
+Description: The country code of the domain tech contact
+
+Type: `string`
+
+### tech\_email\_address
+
+Description: The email address of the domain contact
+
+Type: `string`
+
+### tech\_first\_name
+
+Description: The first name of the domain tech contact
+
+Type: `string`
+
+### tech\_last\_name
+
+Description: The last name of the domain tech contact
+
+Type: `string`
+
+### tech\_phone\_number
+
+Description: The phone number of the domain contact
+
+Type: `string`
+
+### tech\_state
+
+Description: The state or province of the domain tech contact
+
+Type: `string`
+
+### tech\_zip\_code
+
+Description: The ZIP code of the domain tech contact
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### additional\_account\_ids\_with\_record\_access
+
+Description: Additional AWS account IDs for accounts that can assume with record manager role
+
+Type: `list(string)`
+
+Default: `[]`
+
+### admin\_address\_line\_2
+
+Description: The street address (2) of the domain admin contact
+
+Type: `string`
+
+Default: `null`
+
+### admin\_contact\_type
+
+Description: The type of the contact. Defaults to PERSON if admin\_organization\_name is not provided. Otherwise, defaults to COMPANY.
+
+Type: `string`
+
+Default: `"DEFAULT"`
+
+### admin\_organization\_name
+
+Description: The name of the organization that the admin contact works for
+
+Type: `string`
+
+Default: `null`
+
+### enable\_auto\_renew
+
+Description: Whether to enable automatic domain renewal
+
+Type: `bool`
+
+Default: `true`
+
+### enable\_privacy\_protection
+
+Description: Whether to enable Whois privacy protection
+
+Type: `bool`
+
+Default: `true`
+
+### enable\_transfer\_lock
+
+Description: Whether to enable domain transfer lock
+
+Type: `bool`
+
+Default: `true`
+
+### registrant\_address\_line\_2
+
+Description: The street address (2) of the domain registrant contact
+
+Type: `string`
+
+Default: `null`
+
+### registrant\_contact\_type
+
+Description: The type of the contact. Defaults to PERSON if registrant\_organization\_name is not provided. Otherwise, defaults to COMPANY.
+
+Type: `string`
+
+Default: `"DEFAULT"`
+
+### registrant\_organization\_name
+
+Description: The name of the organization that the registrant contact works for
+
+Type: `string`
+
+Default: `null`
+
+### tech\_address\_line\_2
+
+Description: The street address (2) of the domain tech contact
+
+Type: `string`
+
+Default: `null`
+
+### tech\_contact\_type
+
+Description: The type of the contact. Defaults to PERSON if tech\_organization\_name is not provided. Otherwise, defaults to COMPANY.
+
+Type: `string`
+
+Default: `"DEFAULT"`
+
+### tech\_organization\_name
+
+Description: The name of the organization that the tech contact works for
+
+Type: `string`
+
+Default: `null`
+
+## Outputs
+
+The following outputs are exported:
+
+### domains
+
+Description: n/a
+
+### record\_manager\_role\_arn
+
+Description: The ARN of the IAM role used to manage DNS records.
+
+### zones
+
+Description: Zone information
+
+## Usage
+
+### Create / Delete
+
+This module does **not** register domains but rather adopts domains
+that you have already registered and updates their information.
+Additionally, destroying this module does un-register the domains;
+it only removes them from the terraform state.
+
+### Contact Information
+
+There are three different domain contacts:
+
+- Registrant: The owner of the domain
+- Admin: The person responsible for administrative decisions about the domain
+- Tech: The person responsible for executing changes for the domain
+
+It is possible for the same person to serve multiple roles.
+
+These people will be contacted in the case of billing issues, abuse, or required
+changes. Their information is **not** publicly available, but will be made
+available to the registrar (AWS).
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

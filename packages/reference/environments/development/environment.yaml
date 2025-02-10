@@ -13,3 +13,6 @@ tf_state_region: "us-east-2" # Region for the S3 bucket holding the state file
 tf_state_bucket: "pf-tf-state-development" # S3 bucket holding the state file
 tf_state_lock_table: "pf-tf-locks-development" # Dynamodb table holding state locks"
 tf_state_profile: "development-superuser" # AWS profile to assume for working with the state files
+
+# SLA
+sla_target: 1

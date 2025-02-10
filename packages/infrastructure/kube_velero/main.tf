@@ -179,10 +179,10 @@ resource "helm_release" "velero" {
   chart           = "velero"
   version         = var.velero_helm_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -339,6 +339,13 @@ resource "kubectl_manifest" "vpa" {
           minAllowed = {
             memory = "256Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {

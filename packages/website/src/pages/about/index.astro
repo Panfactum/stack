@@ -1,0 +1,23 @@
+---
+import Charter from "./_components/Charter.astro";
+import HeroSection from "./_components/HeroSection.astro";
+import History from "./_components/History.astro";
+import Mission from "./_components/Mission.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="About"
+  heroClass="bg-secondary"
+  description="About Panfactum"
+  hasBorder={false}
+>
+  <HeroSection slot="hero"/>
+    <div class="mx-auto max-w-screen-2xl px-4 sm:px-12">
+        <Mission/>
+        <hr class="h-px border-0 bg-gray-light-mode-400 shadow-gray-dark-mode-300 blur-xs  dark:bg-gray-dark-mode-700"/>
+        <History/>
+        <hr class="h-px border-0 bg-gray-light-mode-400 shadow-gray-dark-mode-300 blur-xs  dark:bg-gray-dark-mode-700"/>
+        <Charter/>
+    </div>
+</Layout>

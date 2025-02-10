@@ -1,0 +1,60 @@
+---
+export interface ArticleHeadingMetadata {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: ArticleHeadingMetadata[];
+}
+
+const { headings } = Astro.props;
+
+const depthPadding = (depth: number) => {
+  if (depth === 1) {
+    return "pl-0";
+  } else if (depth === 2) {
+    return "pl-4";
+  } else if (depth === 3) {
+    return "pl-8";
+  } else if (depth === 4) {
+    return "pl-12";
+  } else if (depth === 5) {
+    return "pl-16";
+  } else {
+    return "pl-20";
+  }
+};
+---
+
+<div class="float-right hidden min-w-[--toc-width] xl:block">
+  {
+    headings.length ? (
+      <nav
+        aria-label="Table of Contents"
+        class="fixed top-[--header-height] flex h-[calc(100vh_-_var(--header-height))] w-[--toc-width] flex-col gap-y-4 overflow-y-auto px-4 pt-4"
+      >
+        <span class="text-display-xs font-semibold">On this page</span>
+
+        <ul class="text-tertiary flex flex-col gap-y-4">
+          {headings.filter((heading) => heading.depth > 1)
+            .map((heading) => (
+              /* eslint-disable jsx-a11y/anchor-has-content */
+              /* We use set:html to add line-breaking whitespace in front of _ characters to allow for better wrapping */
+                    <li class="text-secondary flex items-center text-sm">
+                <a
+                  href={`#${heading.slug}`}
+                  class:list={[
+                    depthPadding(heading.depth - 1),
+                    "cursor-pointer"
+                  ]}
+                  set:html={heading.text.replace("_", "&#8203;_")}
+                />
+              </li>
+            ))}
+        </ul>
+      </nav>
+    ) : null
+  }
+</div>

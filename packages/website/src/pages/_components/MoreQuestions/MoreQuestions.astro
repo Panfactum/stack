@@ -1,0 +1,50 @@
+---
+import {Picture} from "astro:assets";
+
+import SalesExpert from "./SalesExpert.jpg"
+import Button from "../../../components/ui/Button.astro";
+import SubSection from "../../../layouts/SubSection.astro";
+import {SIGNUP_LINK} from "../../../lib/constants";
+---
+<SubSection>
+    <div
+            class="bg-accent relative flex w-full items-center justify-center rounded-lg p-10 text-center text-white lg:gap-24"
+    >
+        <div class="flex flex-col items-center justify-center gap-8">
+            <p class="text-display-lg font-machina font-semibold">
+                Still have questions?
+            </p>
+
+            <p class="text-display-sm">
+                Our friendly Panfactum experts would love to hear from you.
+            </p>
+
+            <div class="w-64">
+                <Picture
+                        src={SalesExpert}
+                        alt="Panfactum expert"
+                        sizes="16rem"
+                        formats={["avif", "webp"]}
+                        breakpoints={[256]}
+                        class={"rounded-full lg:hidden"}
+                />
+            </div>
+
+            <a href={SIGNUP_LINK} class="z-10">
+                <Button variant="secondary" size="lg" class="text-lg">Connect</Button>
+            </a>
+        </div>
+        <div>
+            <Picture
+                    src={SalesExpert}
+                    alt="Panfactum expert"
+                    sizes="16rem"
+                    formats={["avif", "webp"]}
+                    breakpoints={[256]}
+                    class={"hidden rounded-lg lg:block"}
+            />
+        </div>
+
+
+    </div>
+</SubSection>

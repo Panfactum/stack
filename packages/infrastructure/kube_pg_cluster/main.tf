@@ -658,7 +658,7 @@ resource "kubectl_manifest" "pdb" {
   )
 }
 
-resource "kubectl_manifest" "vpa_resource_adjustments" {
+resource "kubectl_manifest" "vpa_adjustments" {
   count = var.vpa_enabled ? 1 : 0
   yaml_body = yamlencode({
     apiVersion = "kyverno.io/v1"
@@ -674,7 +674,7 @@ resource "kubectl_manifest" "vpa_resource_adjustments" {
       useServerSideApply           = true
       rules = [
         {
-          name = "adjust-cluster-based-on-vpa"
+          name = "adjust-memory"
           match = {
             resources = {
               kinds = ["autoscaling.k8s.io/v1/VerticalPodAutoscaler"]
@@ -685,13 +685,7 @@ resource "kubectl_manifest" "vpa_resource_adjustments" {
             {
               name = "memory"
               variable = {
-                value = "{{ divide('{{ request.object.status.recommendation.containerRecommendations[?containerName == 'postgres'] | [0].target.memory || '${var.pg_minimum_memory_mb}Mi' }}', '1') || `${var.pg_minimum_memory_mb * 1000 * 1000}` }}"
-              }
-            },
-            {
-              name = "cpu"
-              variable = {
-                value = "{{ divide('{{ request.object.status.recommendation.containerRecommendations[?containerName == 'postgres'] | [0].target.cpu || '${var.pg_minimum_cpu_millicores}m' }}', '1') || `${var.pg_minimum_cpu_millicores / 1000}` }}"
+                value = "{{ divide('{{ request.object.status.recommendation.containerRecommendations[?containerName == 'postgres'] | [0].target.memory || '${var.pg_minimum_memory_mb}Mi' }}', '1') || `${var.pg_minimum_memory_mb * 1024 * 1024}` }}"
               }
             }
           ]
@@ -733,14 +727,70 @@ resource "kubectl_manifest" "vpa_resource_adjustments" {
               },
               {
                 op    = "add"
-                path  = "/spec/resources/requests/cpu"
-                value = "{{ round(multiply(`{{ cpu }}`, `1000`), `0`) }}m"
-              },
-              {
-                op    = "add"
                 path  = "/spec/resources/limits/memory"
                 value = "{{ round(divide(`{{ memory }}`, `900`), `0`) }}k"
               }
+            ])
+          }
+        },
+        {
+          name = "adjust-cpu"
+          match = {
+            resources = {
+              kinds = ["autoscaling.k8s.io/v1/VerticalPodAutoscaler"]
+              names = [local.cluster_name]
+            }
+          }
+          context = [
+            {
+              name = "cpuRecommendation"
+              variable = {
+                jmesPath = "request.object.status.recommendation.containerRecommendations[?containerName == 'postgres'] | [0].target.cpu || '${var.pg_minimum_cpu_millicores}m'"
+              }
+            },
+            {
+              name = "cpuCurrent"
+              apiCall = {
+                urlPath  = "/apis/postgresql.cnpg.io/v1/namespaces/${var.pg_cluster_namespace}/clusters/${local.cluster_name}"
+                jmesPath = "spec.resources.requests.cpu || '0m'"
+              }
+            }
+          ]
+
+          // This is required to prevent thrash at lower CPU levels
+          preconditions = {
+            any = [
+              {
+                key      = "{{ subtract(cpuRecommendation, cpuCurrent) }}"
+                operator = "GreaterThan"
+                value    = "${var.pg_minimum_cpu_update_millicores}m"
+                message  = "CPU recommendation is not ${var.pg_minimum_cpu_update_millicores}m greater than current setting."
+              },
+              {
+                key      = "{{ subtract(cpuCurrent, cpuRecommendation) }}"
+                operator = "GreaterThan"
+                value    = "${var.pg_minimum_cpu_update_millicores}m"
+                message  = "CPU recommendation is not ${var.pg_minimum_cpu_update_millicores}m less than current setting."
+              }
+            ]
+          }
+
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "postgresql.cnpg.io/v1"
+                kind       = "Cluster"
+                name       = local.cluster_name
+                namespace  = var.pg_cluster_namespace
+              }
+            ]
+            patchesJson6902 = yamlencode([
+              {
+                op    = "add"
+                path  = "/spec/resources/requests/cpu"
+                value = "{{ cpuRecommendation }}"
+              },
             ])
           }
         }
@@ -754,6 +804,8 @@ resource "kubectl_manifest" "vpa_resource_adjustments" {
   ]
 }
 
+// This is required b/c we ignore the resources set on the manifest
+// in order to accommodate the case where the VPA IS enabled.
 resource "kubectl_manifest" "non_vpa_resource_adjustments" {
   count = var.vpa_enabled ? 0 : 1
   yaml_body = yamlencode({

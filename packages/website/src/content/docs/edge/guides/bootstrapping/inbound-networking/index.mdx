@@ -1,0 +1,351 @@
+import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
+
+import ingressK9sImg from './ingress-k9s.jpg'
+import ingressLBImg from './ingress-load-balancer.jpg'
+import ingressServiceImg from './ingress-service.jpg'
+import ingressTargetsAWSImg from './ingress-targets-aws.jpg'
+import ingressTargetsK9sImg from './ingress-targets-k9s.jpg'
+import vaultImg from './vault.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Inbound Networking
+
+## Objective
+
+Deploy the necessary components to allow inbound network traffic to workloads running in the cluster.
+
+## Background
+
+Like internal networking, *inbound* networking has several moving parts. We won't cover them in detail
+within this guide, but we do in our [concept documentation.](/docs/edge/concepts/networking/cluster-networking)
+
+## Deploy ExternalDNS
+
+[ExternalDNS](https://github.com/kubernetes-sigs/external-dns) is the most popular Kubernetes controller for
+synchronizing DNS records from internal [Service](https://kubernetes.io/docs/concepts/services-networking/service/)
+and [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources
+to external DNS servers like AWS Route53.
+
+We provide a module to deploy it: [kube\_external\_dns](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_external_dns)
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_external_dns`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_external_dns/terragrunt.hcl).
+
+3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](/docs/edge/guides/bootstrapping/certificate-management#deploy-issuers)
+   for more information, but unless you have a specific reason not to, simply copy that input into this module.
+
+4. Run `pf-tf-init` to enable the required providers.
+
+5. Run `terragrunt apply`.
+
+We will test that this works once we set up our first inbound networking resource.
+
+## Deploy the AWS Load Balancer Controller
+
+Otherwise known as the ALB controller, the [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller)
+provisions [AWS load balancers](https://aws.amazon.com/elasticloadbalancing/) for our Kubernetes
+[Services of type LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer).
+
+As the cluster nodes are running in *private* subnet, the first step to providing inbound networking is deploying
+a *public* gateway in your VPC for inbound traffic to connect with before it is forwarded onto your
+Kubernetes nodes. AWS load balancers are the perfect gateways:
+
+* Highly available, distributed across all your public AZs
+
+* Highly scalable, able to handle any amount of traffic
+
+* Built-in protection against DOS attacks
+
+* Support for [PROXY protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt) to preserve IP headers
+
+We provide a module to deploy it: [kube\_aws\_lb\_controller](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_aws_lb_controller)
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `kube_external_dns` module called `kube_aws_lb_controller`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_aws_lb_controller/terragrunt.hcl).
+
+3. Select the **public** subnets that you want AWS load balancers to be able to use. We suggest passing in **all**
+   the public subnets created in your `aws_vpc` deployment.
+
+4. Run `pf-tf-init` to enable the required providers.
+
+5. Run `terragrunt apply`.
+
+We will see it in action in the following section.
+
+## Deploy the Ingress System
+
+The AWS load balancer will not route requests directly to our workloads. Instead, they will be mediated by
+a [Kubernetes Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resource.
+
+Operating at OSI layer 7 (e.g., HTTP), the ingress system adds several key capabilities:
+
+* Logging for *all* inbound traffic in a standard format
+
+* Public TLS termination
+
+* Request routing based on domain, pathname, and HTTP headers
+
+* Compression of large responses
+
+* Rate-limiting
+
+* Standard security headers
+
+* [Web application firewall](https://www.cloudflare.com/learning/ddos/glossary/web-application-firewall-waf/) engine
+
+Additionally, it allows you to only use one AWS load balancer instead of one for each service, saving significant
+costs.
+
+The most popular ingress controller for Kubernetes is the [Ingress-Nginx Controller](https://kubernetes.github.io/ingress-nginx/)
+which uses [NGINX](https://www.nginx.com/) as the underlying proxy.
+
+We provide a module to deploy it: [kube\_ingress\_nginx](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress_nginx).
+
+### Deploy the NGINX-Ingress Controller
+
+1. Create a new directory adjacent to your `kube_external_dns` module called `kube_ingress_nginx`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_ingress_nginx/terragrunt.hcl).
+
+   1. For `ingress_domains` select **all** the domains that the cluster can use to serve traffic. Each domain
+      listed here **must** have been configured in the `kube_external_dns` and `kube_cert_issuers` modules.
+
+   2. The `dhparam` is the Diffie-Hellman key used to power [perfect forward secrecy](https://en.wikipedia.org/wiki/Forward_secrecy)
+      in your tls connections. You can generate it by running `openssl dhparam 4096 2> /dev/null`. This
+      can take several minutes as it depends on the entropy generated by your computer.
+
+      This is a **secret** so ensure that you use sops to save it.
+
+   3. The `ingress_timeout_seconds` is the maximum number of seconds that NGINX will wait on upstream
+      servers to return a response before a server error is returned.
+      In general, long-lived requests create reliability and resiliency problems, so we recommend keeping
+      this to 60 seconds or less.
+
+   4. If you need to support legacy TLSv1.2 clients, set `tls_1_2_enabled` to `true`. We recommend using
+      only TLSv1.3 if possible.
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+5. In k9s, notice that a service (`:svc`) of type `LoadBalancer` was created:
+
+   <MarkdownImage src={ingressServiceImg} alt="A service of type LoadBalancer was created." />
+
+   This shows the ALB controller in action. It automatically provisioned a
+   new [AWS Network Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html)
+   and configured it to route traffic across the NGINX pods.
+
+6. Log into the AWS web console. Notice that the load balancer resource does indeed exist:
+
+   <MarkdownImage src={ingressLBImg} alt="The Network Load Balancer" />
+
+7. Select the target group bound to port 443. Notice that this automatically routes traffic to the IP addresses
+   of the NGINX pods running in the cluster:
+
+   <MarkdownImage src={ingressTargetsAWSImg} alt="The load balancer targets from the AWS perspective." />
+
+   <MarkdownImage src={ingressTargetsK9sImg} alt="The load balancer targets from the k9s perspective." />
+
+### Deploy the Vault Ingress
+
+While the NGINX-ingress controllers *are* successfully running, they will not process any traffic until you create
+an [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resource. An Ingress instructs
+NGINX how to respond to incoming traffic and what workloads to forward requests to.
+
+Currently, the system has one workload that definitely needs inbound connectivity: the Vault cluster.
+
+Let's set that up now:
+
+1. Return the `kube_vault` module you deployed in the [Vault guide section](/docs/edge/guides/bootstrapping/vault).
+
+2. Change `ingress_enabled` from `false` to `true`.
+
+3. Run `terragrunt apply`.
+
+4. In k9s, notice that you have your first Ingress resource:
+
+   <MarkdownImage src={ingressK9sImg} alt="The first Ingress resource" />
+
+5. ExternalDNS should recognize the new Ingress resource and set up your public DNS records appropriately. Verify
+   that by running `delv @1.1.1.1 vault.prod.panfactum.com` replacing `prod.panfactum.com` with your domain. You should receive
+   a response like this:
+
+   ```shellsession
+   ; fully validated
+   vault.prod.panfactum.com. 60	IN	A	18.223.233.91
+   vault.prod.panfactum.com. 60	IN	A	52.14.249.23
+   vault.prod.panfactum.com. 60	IN	RRSIG	A 13 4 60 20240326215221 20240326195121 42332 prod.panfactum.com. FDoA4LYqJw7KdTTzgcQb1JG74amZE3mf0HafZ06Z7GmWlLw3qWUSll9x KOl8XcMMr+XOLO7Zi4JjbdGn0CUjVg==
+   ```
+
+   Note that the IP addresses listed are the IPs assigned to the AWS load balancer in front of NGINX.
+   The load balancer will forward TCP traffic onto NGINX which will in turn forward HTTP traffic onto the active Vault instance.
+
+6. Let's see that in action. Run `stern . -n ingress-nginx` to start capturing logs from all the NGINX servers. Now visit
+   your Vault cluster in your web browser (use the domain you queried in the previous section). You should now see the Vault
+   login page:
+
+   <MarkdownImage src={vaultImg} alt="The Vault login page" />
+
+   Additionally, you should have seen many logs for each resource needed to load the UI:
+
+   {/* spellchecker: disable */}
+
+   ```shellsession
+   ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/seal-status", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:58:54+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 667, "duration": 0.003, "request_id": "b2718b569ed881072fbe7682a2cc635d", "request_length": 29, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
+   ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/health?standbycode=200&sealedcode=200&uninitcode=200&drsecondarycode=200&performancestandbycode=200", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:58:54+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 638, "duration": 0.004, "request_id": "dca72e8c51d359bcfcd4c702c53d85a8", "request_length": 90, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
+   ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/seal-status", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:59:04+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 667, "duration": 0.020, "request_id": "7296f3e527c7dab1e2868b81e6252c32", "request_length": 29, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
+   ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/health?standbycode=200&sealedcode=200&uninitcode=200&drsecondarycode=200&performancestandbycode=200", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:59:04+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 638, "duration": 0.020, "request_id": "29e496dbb0d04aecf00e1bf6e7bf7b5c", "request_length": 90, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
+   ingress-nginx-controller-c87487976-gd9cn controller {"tls.version": "TLSv1.3", "tls.cipher": "TLS_AES_256_GCM_SHA384", "http.url": "/v1/sys/health?standbycode=200&sealedcode=200&uninitcode=200&drsecondarycode=200&performancestandbycode=200", "http.version": "HTTP/2.0", "http.status_code": "200", "http.method": "GET", "http.referer": "", "http.origin": "", "http.host": "vault.prod.panfactum.com", "http.useragent":"Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0", "time":"2024-03-26T20:59:05+00:00", "remote_addr": "X.X.X.X", "remote_user": "", "response_length": 638, "duration": 0.003, "request_id": "c7eefe2a1d3d155136618ff6bc3f1d9f", "request_length": 90, "response_content_type": "application/json", "x_forwarded_for": "X.X.X.X"}
+   ```
+
+   {/* spellchecker: enable */}
+
+   Notice that cert-manager has successfully provisioned a *public* TLS certificate and NGINX has picked it up
+   to allow communication over HTTPS (using TLSv1.3).
+
+7. Moreover, notice that NGINX properly secures the site in a standard way by setting security headers for the browser. You
+   can verify this either directly via the command line (`curl -I <your_vault_address>`) or using a site such
+   as [https://securityheaders.com](https://securityheaders.com).
+
+   This is accomplished by our [kube\_ingress](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_ingress)
+   module. `kube_vault` uses it internally, and you can use it directly in your projects.
+
+8. Finally, you no longer need to use the finicky `kubectl port-forward` to connect with Vault. Let's update the address in your
+   configuration files:
+
+   1. Update `VAULT_ADDR` in your `.env`.
+
+   2. In your region's `region.yaml` file, add or update the `vault_addr` key to the public address.
+
+   3. To verify this works as expected, re-apply the `vault_core_resources` module.
+
+## Deploy the Bastion
+
+While the Ingress system will allow you to publicly expose HTTP endpoints, you still need a way to communicate
+with other internal systems using other protocols. For example, you might want to connect over TCP with databases
+running in the cluster.
+
+For that reason, we will deploy an [SSH bastion host](https://en.wikipedia.org/wiki/Bastion_host) to proxy connections
+to your backend resources over raw TCP. This will allow you to use any protocol over the wire such as the [PostgreSQL
+message format](https://www.postgresql.org/docs/current/protocol.html). [^1]
+
+[^1]: We do not want to use `kubectl port-forward` for this purpose; that was just a stop-gap measure
+    during the bootstrapping process. For one, you may choose to make the Kubernetes
+    API server private in a subsequent guide. Additionally, you do not want to burden the API server with heavy traffic spikes
+    as this could disrupt the entire cluster. Finally, `kubectl port-forward` connects directly to a single *pod* which
+    is prone to service disruptions as pods restart and move around the cluster. The bastion will use the highly available
+    service infrastructure to ensure connections are preserved even if the underlying pod changes.
+
+We provide a bastion deployment module: [kube\_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion).
+
+This host uses certificate authentication with Vault so that you do not need to manually manage static SSH keys
+unlike SSH setups you might have used in the past. We will see that in action in a moment.
+
+### Deploy the Bastion Module
+
+Let's deploy the bastion now:
+
+1. Create a new directory adjacent to your `kube_ingress_nginx` module called `kube_bastion`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_bastion/terragrunt.hcl).
+
+   1. For `bastion_domains` select the domain names that you want to be able to access the bastion
+      hosts at.
+
+   2. Vault will issue ssh certificates that allow users in your organization to connect to private network resources.
+      Those certificates are valid for `ssh_cert_lifetime_seconds`. We recommend setting this to a fairly low value
+      ($\leq$ 8 hours) as long-lived certificates would allow de-provisioned users to continue to access the private network. [^2]
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+[^2]: Access to the private network is not the only security gate for accessing private systems in the Panfactum stack,
+    but short-lived credentials are an important part of defense-in-depth.
+
+Note that this will deploy a second AWS NLB. We keep the bastion NLB separate to ensure you have a secondary ingress
+mechanism should the primary NLB fail.
+
+### Configure Bastion Connectivity
+
+We provide two CLI utilities for working with the bastion:
+
+* `pf-update-ssh`: Sets up the bastion connectivity settings that you will commit to your repo for your team
+  to share
+
+* `pf-tunnel`: Establishes a tunnel through one of the bastions using dynamically generated, individual credentials
+
+Now that the bastion is running, let's configure connectivity:
+
+1. Run `pf-update-ssh` to scaffold your `ssh_dir` directory (default: `.ssh`).
+
+2. Switch to that directory.
+
+3. Copy the `config.example.yaml` file to `config.yaml`.
+
+4. Update the values to the correct values for your setup. See the [reference docs](/docs/edge/reference/configuration/ssh) for
+   more information.
+
+5. Run `pf-update-ssh --build` to generate the `known_hosts` and `connection_info` files for your project. Additionally, a
+   `state.lock` file is used to help determine when you need to rebuild. These
+   files should be committed to version control as they do not contain any sensitive information and can be shared
+   with everyone in your organization.
+
+### Test Bastion Connectivity
+
+Everything should now be in place to use the bastion to proxy connections. Let's verify that it is working
+as intended.
+
+1. We expose an internal service called `nginx-status` that prints some realtime metrics about the NGINX instance. This service
+   is available at the address `nginx-status.ingress-nginx:18080`. We
+   cannot access it via the public internet, so we must use the bastion to connect.
+
+2. We will open a tunnel to the service bound to your `localhost:3030` that will route connections *through the bastion.*
+   Run `pf-tunnel -b <bastion_name> -r nginx-status.ingress-nginx:18080 -l 3030`. Replace
+   `<bastion_name>` with the name you used in your `config.yaml`.
+
+   * `-b / --bastion`: Selects the name.
+
+   * `-r / --remote-address`: Selects the remote address. You must specify the port.
+
+   * `-l / --local-port`: Selects the local port to bind to.
+
+3. In a separate terminal session, run `curl localhost:3030/nginx_status`. NGINX should return a result like this:
+
+   ```shellsession
+   Active connections: 1
+   server accepts handled requests
+    28680 28680 13962
+   Reading: 0 Writing: 1 Waiting: 0
+   ```
+
+4. Notice that the SSH keys were automatically generated in the configuration directory. The `_signed.pub` is the
+   certificate that was signed by Vault that allows you temporary access to the bastion host. It will
+   expire after the `ssh_cert_lifetime_seconds` you configured for the `kube_bastion` module. These files are secret
+   and automatically ignored from version control.
+
+   This time it used the root vault token you set in your `.env` file, but in the future it will use your organization's
+   SSO which we will configure in a later section.
+
+5. For fun, run `kubectl rollout restart deployment -n bastion` to restart the bastion instances. Notice that the tunnel
+   recovers gracefully even during disruption to the underlying nodes.
+
+6. Close the tunnel with `^C`.
+
+While this was a particularly trivial test, this functionality will become important when needing to access
+private network resources such as databases without needing to manually maintain certificates or IP whitelists.
+
+## Next Steps
+
+Now that the core functionality of the cluster is live,
+let's install a handful of maintenance controllers that will ensure things continue
+to operate smoothly.
+
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/autoscaling"} forwardHref={"/docs/edge/guides/bootstrapping/maintenance-controllers"} stepNumber={16} />

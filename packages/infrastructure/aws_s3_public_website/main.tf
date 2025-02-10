@@ -58,6 +58,13 @@ module "bucket" {
   bucket_name   = var.bucket_name
   description   = var.description
   access_policy = data.aws_iam_policy_document.cf_access.json
+
+  versioning_enabled              = var.versioning_enabled
+  expire_after_days               = var.expire_after_days
+  expire_old_versions             = var.expire_old_versions
+  timed_transitions_enabled       = var.timed_transitions_enabled
+  intelligent_transitions_enabled = var.intelligent_transitions_enabled
+  force_destroy                   = var.force_destroy
 }
 
 resource "aws_s3_bucket_cors_configuration" "bucket" {
@@ -65,7 +72,7 @@ resource "aws_s3_bucket_cors_configuration" "bucket" {
   cors_rule {
     allowed_headers = var.cors_allowed_headers
     allowed_methods = ["GET"]
-    allowed_origins = concat(["https://${var.domain}"], var.cors_additional_allowed_origins)
+    allowed_origins = concat([for domain in var.domains : "https://${domain}"], var.cors_additional_allowed_origins)
     max_age_seconds = var.cors_max_age_seconds
     expose_headers  = var.cors_expose_headers
   }
@@ -83,13 +90,16 @@ module "cf" {
 
   name = var.bucket_name
 
-  domains = [var.domain]
+  domains = var.domains
 
   origin_configs = [
     {
       path_prefix              = "" // This must be set to "" and not "/" in order to implement the regex logic without running into eval errors in the cloudfront function execution environment
       origin_domain            = module.bucket.regional_domain_name
       origin_access_control_id = aws_cloudfront_origin_access_control.cf_oac.id
+
+      default_cache_behavior = var.default_cache_behavior
+      path_match_behaviors   = var.path_match_behaviors
 
       rewrite_rules = concat(
         var.default_file != "" ? [
@@ -106,6 +116,8 @@ module "cf" {
       )
     }
   ]
+
+  redirect_rules = var.redirect_rules
 
   custom_error_responses = [{
     error_code         = "403"

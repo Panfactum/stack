@@ -1,0 +1,129 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="kube_cert_issuers" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_cert_issuers" status="stable" type="direct"/>
+
+# Kubernetes Certificate Issuers
+
+This module provides our standard cluster issuers for [cert-manager](https://cert-manager.io/). It includes:
+
+- Cluster issuer for public domain names
+
+- Cluster issuer for self-signed certs
+
+- Cluster issuer for intermediate CAs
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+## Required Inputs
+
+The following input variables are required:
+
+### alert\_email
+
+Description: An email that will receive certificate alerts.
+
+Type: `string`
+
+### vault\_internal\_url
+
+Description: The url to the vault instance for internal cert issuance
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### aws\_iam\_ip\_allow\_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### cloudflare\_api\_token
+
+Description: Cloudflare API Token
+
+Type: `string`
+
+Default: `null`
+
+### cloudflare\_zones
+
+Description: A list of public DNS domains managed by Cloudflare; cert-manager uses this to issue public-facing certificates.
+
+Type: `list(string)`
+
+Default: `[]`
+
+### namespace
+
+Description: The name of the cert-manager namespace.
+
+Type: `string`
+
+Default: `"cert-manager"`
+
+### route53\_zones
+
+Description: A mapping of public DNS domains managed by AWS to their configuration; cert-manager uses this to issue public-facing certificates.
+
+Type:
+
+```hcl
+map(object({
+    record_manager_role_arn = string
+    zone_id                 = string
+  }))
+```
+
+Default: `{}`
+
+### service\_account
+
+Description: The name of the cert-manager service account.
+
+Type: `string`
+
+Default: `"cert-manager"`
+
+## Outputs
+
+The following outputs are exported:
+
+### cloudflare\_zones
+
+Description: The cloudflare DNS names provided as an input
+
+### route53\_zones
+
+Description: The route53 zone configuration provided as an input
+
+### vault\_ca\_crt
+
+Description: The public certificate of the root vault certificate authority
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

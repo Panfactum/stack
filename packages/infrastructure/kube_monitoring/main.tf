@@ -477,9 +477,9 @@ resource "helm_release" "prometheus_stack" {
   chart           = "kube-prometheus-stack"
   version         = var.kube_prometheus_stack_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 
@@ -1339,9 +1339,9 @@ resource "helm_release" "thanos" {
   chart           = "thanos"
   version         = var.thanos_chart_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 
@@ -1978,6 +1978,13 @@ resource "kubectl_manifest" "vpa_prometheus_operator" {
       labels    = module.util_operator.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2001,6 +2008,13 @@ resource "kubectl_manifest" "vpa_prometheus_operator_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2024,6 +2038,13 @@ resource "kubectl_manifest" "vpa_grafana" {
       labels    = module.util_grafana.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2047,6 +2068,13 @@ resource "kubectl_manifest" "vpa_node_exporter" {
       labels    = module.util_node_exporter.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "DaemonSet"
@@ -2078,6 +2106,13 @@ resource "kubectl_manifest" "vpa_kube_state_metrics" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2107,6 +2142,13 @@ resource "kubectl_manifest" "vpa_prometheus" {
           minAllowed = {
             memory = "150Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {
@@ -2141,6 +2183,13 @@ resource "kubectl_manifest" "vpa_thanos_compactor" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "batch/v1"
         kind       = "CronJob"
@@ -2164,6 +2213,13 @@ resource "kubectl_manifest" "vpa_thanos_bucket_web" {
       labels    = module.util_thanos_bucket_web.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2193,6 +2249,13 @@ resource "kubectl_manifest" "vpa_thanos_store_gateway" {
           minAllowed = {
             memory = "1000Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {
@@ -2226,6 +2289,13 @@ resource "kubectl_manifest" "vpa_thanos_query_frontend" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2257,7 +2327,13 @@ resource "kubectl_manifest" "vpa_thanos_query" {
           }
         }]
       }
-
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -2321,6 +2397,7 @@ module "authenticating_proxy" {
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
   az_spread_preferred                  = var.enhanced_ha_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  wait                                 = var.wait
 }
 
 module "bucket_web_ingress" {

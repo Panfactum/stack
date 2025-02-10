@@ -1,0 +1,45 @@
+---
+export type Status = "stable" | "beta" | "alpha" | "deprecated";
+
+interface Props {
+  status: Status;
+}
+
+const { status } = Astro.props;
+
+const color =
+  status === "stable"
+    ? "bg-brand-500 !text-white"
+    : status === "beta"
+      ? "bg-warning-500 !text-white"
+      : "bg-error-500 !text-white";
+
+const text =
+  status === "stable"
+    ? "Stable"
+    : status === "deprecated"
+      ? "Deprecated"
+      : status === "alpha"
+        ? "Alpha"
+        : "Beta";
+
+// const explainer =
+//   status === "stable"
+//     ? "Ready for production use!"
+//     : status === "deprecated"
+//       ? "No longer supported. You should remove this from your stack."
+//       : status === "beta"
+//         ? "Safe for production use but API may change significantly in next major release"
+//         : "Do not use unless you are working directly with Panfactum maintainers on testing";
+
+// TODO: Add tooltip
+---
+
+<div
+  class:list={[
+    "font-medium tracking-wide py-1 px-4 rounded-lg w-fit whitespace-nowrap h-fit text-sm sm:text-base",
+    color,
+  ]}
+>
+  {text}
+</div>

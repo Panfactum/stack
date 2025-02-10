@@ -264,10 +264,20 @@ module "database" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
 
+  pg_minimum_cpu_millicores        = var.pg_minimum_cpu_millicores
+  pg_maximum_cpu_millicores        = var.pg_maximum_cpu_millicores
+  pg_minimum_cpu_update_millicores = var.pg_minimum_cpu_update_millicores
+  pg_minimum_memory_mb             = var.pg_minimum_memory_mb
+  pg_maximum_memory_mb             = var.pg_maximum_memory_mb
+  pgbouncer_minimum_cpu_millicores = var.pgbouncer_minimum_cpu_millicores
+  pgbouncer_maximum_cpu_millicores = var.pgbouncer_maximum_cpu_millicores
+  pgbouncer_minimum_memory_mb      = var.pgbouncer_minimum_memory_mb
+  pgbouncer_maximum_memory_mb      = var.pgbouncer_maximum_memory_mb
+
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time
-  vpa_enabled = var.vpa_enabled
+  vpa_enabled              = var.vpa_enabled
 }
 
 /***************************************
@@ -309,10 +319,10 @@ resource "helm_release" "argo" {
   chart           = "argo-workflows"
   version         = var.argo_workflows_helm_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
 
   values = [
@@ -519,6 +529,13 @@ resource "kubectl_manifest" "vpa_controller" {
           }
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -570,6 +587,13 @@ resource "kubectl_manifest" "vpa_server" {
           minAllowed = {
             memory = "50Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {
@@ -722,6 +746,13 @@ resource "kubectl_manifest" "vpa_events_controller" {
       labels    = module.util_events_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -767,6 +798,13 @@ resource "kubectl_manifest" "vpa_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

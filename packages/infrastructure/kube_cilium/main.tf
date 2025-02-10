@@ -148,9 +148,9 @@ resource "helm_release" "cilium" {
   chart           = "cilium"
   version         = var.cilium_helm_version
   recreate_pods   = false
-  cleanup_on_fail = true
-  atomic          = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 
@@ -403,6 +403,13 @@ resource "kubectl_manifest" "vpa_operator" {
       labels    = module.util_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -434,6 +441,13 @@ resource "kubectl_manifest" "vpa_node" {
             # so we set a floor
             memory = "200Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {

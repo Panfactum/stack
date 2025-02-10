@@ -38,12 +38,6 @@ variable "pull_through_cache_enabled" {
   default     = true
 }
 
-variable "node_image_cache_enabled" {
-  description = "Whether to cache images locally for better startup performance"
-  type        = bool
-  default     = true
-}
-
 variable "log_level" {
   description = "The log level for the argo pods"
   type        = string
@@ -114,4 +108,84 @@ variable "db_recovery_target_time" {
   description = "If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data."
   type        = string
   default     = null
+}
+
+variable "pg_minimum_memory_mb" {
+  description = "The minimum amount of memory to allocate to the postgres pods (in Mi)"
+  type        = number
+  default     = 400
+
+  validation {
+    condition     = var.pg_minimum_memory_mb >= 400
+    error_message = "Must provide at least 400MB of memory"
+  }
+}
+
+variable "pg_maximum_memory_mb" {
+  description = "The maximum amount of memory to allocate to the postgres pods (in Mi)"
+  type        = number
+  default     = 128000
+}
+
+variable "pg_minimum_cpu_millicores" {
+  description = "The minimum amount of cpu to allocate to the postgres pods (in millicores)"
+  type        = number
+  default     = 50
+
+  validation {
+    condition     = var.pg_minimum_cpu_millicores >= 50
+    error_message = "Must provide at least 50m of CPU"
+  }
+}
+
+variable "pg_maximum_cpu_millicores" {
+  description = "The maximum amount of cpu to allocate to the postgres pods (in millicores)"
+  type        = number
+  default     = 10000
+}
+
+variable "pg_minimum_cpu_update_millicores" {
+  description = "The CPU settings for the Postgres won't be updated until the recommendations from the VPA (if enabled) differ from the current settings by at least this many millicores. This prevents autoscaling thrash."
+  type        = number
+  default     = 250
+}
+
+variable "pgbouncer_minimum_memory_mb" {
+  description = "The minimum amount of memory to allocate to the pgbouncer pods (in Mi)"
+  type        = number
+  default     = 25
+
+  validation {
+    condition     = var.pgbouncer_minimum_memory_mb >= 25
+    error_message = "Must provide at least 25MB of memory"
+  }
+}
+
+variable "pgbouncer_maximum_memory_mb" {
+  description = "The maximum amount of memory to allocate to the pgbouncer pods (in Mi)"
+  type        = number
+  default     = 32000
+}
+
+variable "pgbouncer_minimum_cpu_millicores" {
+  description = "The minimum amount of cpu to allocate to the pgbouncer pods (in millicores)"
+  type        = number
+  default     = 15
+
+  validation {
+    condition     = var.pgbouncer_minimum_cpu_millicores >= 10
+    error_message = "Must provide at least 10m of CPU"
+  }
+}
+
+variable "pgbouncer_maximum_cpu_millicores" {
+  description = "The maximum amount of cpu to allocate to the pgbouncer pods (in millicores)"
+  type        = number
+  default     = 10000
+}
+
+variable "wait" {
+  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
 }

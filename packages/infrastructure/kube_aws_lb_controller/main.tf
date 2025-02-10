@@ -406,10 +406,10 @@ resource "helm_release" "alb_controller" {
   chart           = "aws-load-balancer-controller"
   version         = var.alb_controller_helm_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 3
 
@@ -541,6 +541,13 @@ resource "kubectl_manifest" "vpa" {
           minAllowed = {
             memory = "${floor(85 / 1.3)}Mi"
           }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
         }]
       }
       targetRef = {

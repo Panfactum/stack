@@ -44,7 +44,8 @@ data "aws_iam_policy_document" "astro_builder" {
       "s3:*"
     ]
     resources = [
-      "arn:aws:s3:::pf-website-astro/*"
+      "arn:aws:s3:::pf-website-astro/*",
+      "arn:aws:s3:::pf-website-astro"
     ]
   }
   statement {
@@ -83,13 +84,25 @@ module "astro_builder_workflow" {
   panfactum_scheduler_enabled = true
   active_deadline_seconds = 60 * 60
 
-  entrypoint = "build-images"
+  entrypoint = "main-dag"
   arguments = {
     parameters = [
       {
         name = "git_ref"
         description = "Which commit to check out and build in the panfactum/stack repository"
         default = "main"
+      },
+
+      {
+        name = "sitemap_url"
+        description = "The URL of the sitemap to scrape"
+        default = "https://website2.panfactum.com/sitemap-index.xml"
+      },
+
+      {
+        name = "algolia_index_name"
+        description = "The index name in algolia to update"
+        default = "docs-2"
       }
     ]
   }
@@ -97,9 +110,9 @@ module "astro_builder_workflow" {
     GIT_REF = "{{workflow.parameters.git_ref}}"
     BUILDKIT_BUCKET_NAME = var.buildkit_bucket_name
     BUILDKIT_BUCKET_REGION = var.buildkit_bucket_region
-    PUBLIC_ALGOLIA_APP_ID = var.algolia_app_id
-    PUBLIC_ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
-    PUBLIC_ALGOLIA_INDEX_NAME = var.algolia_index_name_2
+    ALGOLIA_APP_ID = var.algolia_app_id
+    ALGOLIA_SEARCH_API_KEY = var.algolia_search_api_key
+    ALGOLIA_INDEX_NAME = var.algolia_index_name_2
     SITE_URL = var.site_url
     DISTRIBUTION_ID = "E1BPTEFRQY1PK4"
   }
@@ -113,6 +126,7 @@ module "astro_builder_workflow" {
       memory = "100Mi"
     }
   }
+
   default_container_image = local.ci_image
   templates = [
     {
@@ -123,7 +137,7 @@ module "astro_builder_workflow" {
         containers = [
           {
             name = "scale-buildkit"
-            command = ["/bin/pf-buildkit-scale-up", "--wait", "--only=arm64"]
+            command = ["/bin/pf-buildkit-scale-up", "--wait", "--only=amd64"]
           },
           {
             name = "clone"
@@ -136,9 +150,35 @@ module "astro_builder_workflow" {
           }
         ]
       }
+    },
+
+    {
+      name = "main-dag"
+      dag = {
+        tasks = [
+          {
+            name = "build-images"
+            template = "build-images"
+          },
+
+          {
+            name = "scrape-and-index"
+            templateRef = {
+              name = module.run_scraper_workflow_spec.name
+              template = "entry"
+            }
+            depends = "build-images"
+          }
+        ]
+      }
     }
   ]
   tmp_directories = {
+    "cache" = {
+      mount_path = "/tmp"
+      size_mb = 100
+    }
+
     code = {
       mount_path = "/code"
       size_mb = 1024

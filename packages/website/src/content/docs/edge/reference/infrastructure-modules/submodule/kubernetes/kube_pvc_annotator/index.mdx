@@ -1,0 +1,81 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="kube_pvc_annotator" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_EDGE__/packages/infrastructure/kube_pvc_annotator" status="stable" type="submodule"/>
+
+# PVC Annotator
+
+The PVC Annotator is a Panfactum-created addon that periodically applies a set of labels
+and annotations to PVCs in the same PVC group.
+
+A "PVC group" is a set of PVCs in the same namespace with the same value for the
+`panfactum.com/pvc-group` label.
+
+This module exists to solve the issue of `volumeClaimTemplate` immutability in common
+controllers such as [StatefulSets](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#statefulset-v1-apps). In other words, once a controller such as a StatefulSet
+has been created, the labels and annotations for its PVCs can never be updated. This
+makes it difficult to adjust PVC settings that depend on PVC labels and annotations
+such as those for [Velero](https://velero.io/) or the
+[PVC Autoresizer](https://github.com/topolvm/pvc-autoresizer).
+
+## Architecture
+
+This addon is very simple. It simply implements a Kyverno policy that adds the indicated labels and annotations
+to the PVCs.
+
+## Usage Notes
+
+We make extensive use of this submodule in our core Panfactum modules such as in
+[kube\_stateful\_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube\_stateful\_set).
+
+Most of the time you will not need to use this directly. However, we expose it in case you
+are using a controller that creates PVCs that is not included in the stack.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+## Required Inputs
+
+The following input variables are required:
+
+### config
+
+Description: The top-level keys are the panfactum.com/pvc-group label values and the values are the corresponding labels and annotations to apply to all PVCs in the group.
+
+Type:
+
+```hcl
+map(object({
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+  }))
+```
+
+### namespace
+
+Description: The namespace the cluster is in
+
+Type: `string`
+
+## Optional Inputs
+
+No optional inputs.
+
+## Outputs
+
+No outputs.
+
+
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

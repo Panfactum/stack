@@ -426,9 +426,9 @@ resource "helm_release" "linkerd" {
   chart           = "linkerd-control-plane"
   version         = var.linkerd_helm_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 
@@ -965,6 +965,13 @@ resource "kubectl_manifest" "vpa_cni" {
           mode          = "Off"
         }]
       }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "DaemonSet"
@@ -1010,6 +1017,13 @@ resource "kubectl_manifest" "vpa_identity" {
       labels    = module.util_identity.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -1055,6 +1069,13 @@ resource "kubectl_manifest" "vpa_destination" {
       labels    = module.util_destination.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -1101,6 +1122,13 @@ resource "kubectl_manifest" "vpa_proxy_injectory" {
       labels    = module.util_proxy_injector.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -1146,6 +1174,13 @@ resource "kubectl_manifest" "vpa_metrics_api" {
       labels    = module.util_viz.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -1195,6 +1230,13 @@ resource "kubectl_manifest" "vpa_tap_injector" {
       labels    = module.util_viz.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -1244,6 +1286,13 @@ resource "kubectl_manifest" "vpa_web" {
       labels    = module.util_viz.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -1295,6 +1344,13 @@ resource "kubectl_manifest" "vpa_tap" {
       labels    = module.util_viz.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

@@ -218,6 +218,10 @@ resource "kubectl_manifest" "vpa" {
       }
       updatePolicy = {
         updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
       }
       resourcePolicy = {
         containerPolicies = [for config in var.containers : {

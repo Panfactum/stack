@@ -1,0 +1,192 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
+
+import createAccountImg from './aws-create-account.jpg'
+import securityCredentialImg from './aws-security-credentials.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Preparing AWS
+
+## Objective
+
+Establish your AWS account, organization, and admin access credentials
+
+## Create your First AWS Account
+
+<MarkdownAlert severity="info">
+  If you already have an AWS account, you may skip this step.
+</MarkdownAlert>
+
+An "AWS account" is the basic unit of encapsulation for AWS infrastructure. All AWS infrastructure exists in exactly
+one account.
+
+Follow [this guide](https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-creating.html) to create your first AWS account.
+
+From here on, we will refer to this account as the **management account.**
+
+The email and password you used to create this account are referred to as **root credentials.** Keep these handy.
+
+## Create an AWS Organization
+
+<MarkdownAlert severity="info">
+  If you already have an AWS organization, you may skip this step. However, make sure that you have [AdministratorAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AdministratorAccess.html) to your
+  organization's management account.
+</MarkdownAlert>
+
+An *AWS organization* allows you to centrally manage a set of AWS accounts from a central *management account.* This
+provides an easier mechanism to manage billing, security, and compliance needs. For more information, review
+the [AWS documentation](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html) on organizations. [^1]
+
+[^1]: One would think that you would *first* create an AWS organization before individual accounts. However,
+    the concept of an "Organization" was created many years after accounts, and this feature is very much "bolted-on." That said,
+    it is incredibly useful and a significant step up from the days of managing each account completely independently.
+
+Follow [Step 1 from this guide](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_tutorials_basic.html).
+
+You do **not** need to create organizational units (OUs) or governance policies at this phase.
+
+## Create Additional AWS Accounts
+
+You will want to create **one account for each environment** your organization intends to use.
+
+An *environment* is a set of infrastructure components that is isolated from the infrastructure
+components of other environments. In other words, what happens to one environment should not impact what happens
+to another. [^2]
+
+[^2]: There are exceptions to this rule such as the *management environment* which is used to set governance policies
+    for other environments.
+
+Here are some guidelines to think about as you are choosing your set of environments:
+
+* You can always add more as needed in the future.
+
+* You will always have the `management` environment which contains root configurations for many utilities such as AWS. This includes the
+  initial AWS account that you created above.
+
+* If you are a solo developer or early stage team, you might need just one additional environment: `production`. This environment would
+  receive new changes immediately and make them live to all users.
+
+* As your organization scales, you will likely want to adopt the practice of *promoting changes* across a set of environments.
+  We recommend the following setup:
+
+  * `development`: The *integration* environment. New changes are immediately deployed to this environment and made available
+    to internal stakeholders. If you follow [GitHub flow](https://githubflow.github.io/) [^3], code merged to your
+    `main` branch gets deployed here.
+
+  * `staging`: (Optional) If you have end-to-end test suites, code from `development` will be periodically promoted here
+    to test for production-readiness.
+    It is important to keep a dedicated environment for end-to-end tests as you will frequently reset the environment to a clean starting state which may cause collaboration
+    problems if done directly in `development`.
+
+  * `production`: Once testing in `development` (or `staging`) has been completed, changes are promoted to `production` to make
+    new code live to all users.
+
+* If you have a *really* large organization, you might create separate sets of `development`, `staging`, and `production` environments for each
+  organization unit. Typically, this would be done only when each organization unit is managed completely independently of one another.
+
+[^3]: We assume you do.
+
+Once you have decided on the set of environments, use the following steps to create the associated AWS accounts:
+
+1. Login to your management account using your root credentials.
+
+2. Navigate to the *AWS Organizations* pane.
+
+3. Navigate to the *AWS accounts* tab in the sidebar. You should see something that look like the below image. Notice
+   that you should also see "management account" label in your account list.
+
+   <MarkdownImage src={createAccountImg} alt={"Create accounts in AWS Organizations"} placeholder={"blur"} />
+
+4. Select "Add an AWS account" to create one account for each additional environment. Choose semantic names like
+   `<your_organization>-development`. Ensure that you have access to the email addresses you enter for each account's
+   root user / owner. [^4] [^5]
+
+5. When you create an account, AWS Organizations initially assigns a long (64 characters), complex, randomly generated password to the root user.
+   You can't retrieve this initial password. To access the account as the root user for the first time, you must go through the process for password recovery.
+   Complete the password reset and save the password in a secure location.
+
+6. Save the AWS account ID for quick reference as we will need it in the later guides.
+
+[^4]: Tip: Use group inboxes for managing these accounts to reduce your [bus factor risk](https://en.wikipedia.org/wiki/Bus_factor).
+
+[^5]: Tip: While AWS forces you to use a unique email address for each account, you can sometimes use the `+` trick
+    to create multiple email addresses for the same inbox ([example](https://gmail.googleblog.com/2008/03/2-hidden-ways-to-get-more-from-your.html)).
+
+## Create Access Keys for Each Account
+
+Eventually, we will hook up single sign-on (SSO) for each account, and you will no longer need to manage static
+credentials. However, we do need to begin provisioning infrastructure before we reach that step.
+
+To do this, we need access keys that will allow your CLI tooling such as OpenTofu (Terraform) to work.
+
+Repeat the following steps for **every account**:
+
+1. Login to the account as the root user
+
+2. Use the dropdown in the top right to access the "Security credentials" pane
+
+   <MarkdownImage src={securityCredentialImg} alt={"Access security credentials"} placeholder={"blur"} />
+
+3. Now is the perfect time to set up MFA for the root user. This is incredibly important as this user will (a) always
+   exist and (b) have complete access to all of your AWS systems. Select "Assign MFA device" from the Multi-factor
+   authentication section and complete the setup for your desired second factor.
+
+4. Next you will create an Access key via "Create access key."
+
+   1. You will receive a dialog warning that "Root user access
+      keys are not recommended." Don't worry. Once we have SSO established, we will remove these access keys permanently and
+      prevent anyone in your organization from needing static AWS credentials.
+
+   2. Save **both** the access key id and secret access key in a safe place. We will need them in the next steps.
+
+5. Open your [stack repo](/docs/edge/guides/bootstrapping/installing-devshell) locally. We will be setting up your [AWS configuration and
+   credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) files in your `aws_dir` directory ([reference](/docs/edge/reference/configuration/repo-variables))
+   which by default is the `.aws` folder in your repo. We keep this configuration in the repo so that it does not interact with other
+   settings already present on your computer.
+
+   1. In this directory, create a file called `config`. For each account you created, add a block that matches the pattern below. Replace
+      `<profile_name>` with a profile name matching the format `<environment_name>-superuser` (e.g., `development-superuser`). Replace `<aws_region>` with the main [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
+      you will be interacting with (e.g., `us-east-2`).
+
+      ```ini
+      [profile <profile_name>]
+      region = <aws_region>
+      output = text
+      ```
+
+   2. In this directory, also create a file called `credentials`. For each profile you created add a block that matches
+      the below pattern. Replace `<profile_name>` with the profile name chosen in the previous step (note there is no preceding
+      `profile` string). Replace `<access_key_id>` and `<secret_access_key>` with the keys you created for this account.
+
+      ```ini
+      [<profile_name>]
+      aws_access_key_id=<access_key_id>
+      aws_secret_access_key=<secret_access_key>
+      ```
+
+   3. The `aws` CLI is already installed by the Panfactum developer environment.
+
+      To instruct the CLI to use a certain
+      set of credentials, set the active profile by setting the `AWS_PROFILE` environment variable:
+      `export AWS_PROFILE=<profile_name>`. Alternatively, you can pass the `--profile` CLI flag.
+
+      For each profile, verify that the credentials work by running
+      `aws --profile=<profile> sts get-caller-identity`. You should receive a result that looks as follows (with values specific to your
+      organization:
+
+      ```text
+      143003111016    arn:aws:iam::143003111016:root  143003111016
+      ```
+
+<MarkdownAlert severity="warning">
+  We require naming your AWS profiles with the form `<environment_name>-superuser` as this will match the format that your
+  SSO profiles will take once enabled later in the guide. Failing to name your AWS profiles using this format will
+  cause errors later.
+</MarkdownAlert>
+
+## Next Steps
+
+Once you are able to successfully utilize the `aws` CLI to interact with each account, you are ready
+to configure terragrunt to begin deploying infrastructure.
+
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/installing-devshell"} forwardHref={"/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code"} stepNumber={3} />

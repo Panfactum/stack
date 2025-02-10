@@ -142,7 +142,22 @@ module "sensor" {
                 namespace = local.namespace
               }
               spec = {
-                arguments = module.astro_builder_workflow.arguments
+                arguments = {
+                  parameters = [
+                    {
+                      name = "git_ref"
+                      value = "main"
+                    },
+                    {
+                      name = "sitemap_url"
+                      value = "${var.site_url}/sitemap-index.xml"
+                    },
+                    {
+                      name = "algolia_index_name"
+                      value = "${var.algolia_index_name_2}"
+                    }
+                  ]
+                }
                 workflowTemplateRef = {
                   name = local.website_astro_builder_name
                 }
@@ -192,30 +207,6 @@ module "sensor" {
               }
             }
           ]
-        }
-      }
-    },
-    {
-      template = {
-        name = module.build_and_deploy_website_workflow.name
-        conditions = "push-to-main"
-        argoWorkflow = {
-          operation = "submit"
-          source = {
-            resource = {
-              apiVersion = "argoproj.io/v1alpha1"
-              kind = "Workflow"
-              metadata = {
-                generateName = module.build_and_deploy_website_workflow.generate_name
-                namespace = local.namespace
-              }
-              spec = {
-                workflowTemplateRef = {
-                  name = module.build_and_deploy_website_workflow.name
-                }
-              }
-            }
-          }
         }
       }
     },

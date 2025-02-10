@@ -1,0 +1,67 @@
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav";
+
+# Boot Developer Environment
+
+## Objective
+
+Launch the developer environment to automatically install and configure all the remaining tools.
+
+## Repository Setup
+
+Now that you have the tooling installed:
+
+1. Download your organization's `git` repository that contains your infrastructure code.
+   Refer to your organization's instructions for additional detail if necessary. [^2]
+
+   [^2]: If you are trying to connect to the [demo environment](/stack/demo/live), download the [stack repository](https://github.com/Panfactum/stack)
+       and pretend that the `packages/reference` directory is the root of your organization's repo.
+
+2. `cd` into the cloned directory.
+
+3. You should now see an error message that looks like the following:
+
+   ```shellsession
+   direnv: error /home/user/repos/your-repo/.envrc is blocked. Run `direnv allow` to approve its content
+   ```
+
+   Run `direnv allow` to whitelist this directory.
+
+   If you do not see this message, ensure that you installed the `direnv` [shell hook](https://direnv.net/docs/hook.html) and retry. If the issue persists, restart your terminal session.
+
+4. Once allowed, `direnv` will install the panfactum devShell. The devShell defines all additional tooling that needs to be installed, and the installer should immediately run. It will look similar to the below:
+
+   ```shellsession
+   direnv: loading ~/repos/your-repo/.envrc
+   Building shell ...
+   ```
+
+   This may take several minutes to complete as the remaining local development dependencies are installed. Fortunately, these steps are
+   cached and subsequent shell launches should be nearly instant. [^1]
+
+   [^1]: The initial installation can take around 5-10 minutes as most utilities are recompiled from source.
+
+5. If everything completes successfully, you should have the following environment variables set (check via `printenv | grep PF_DEVSHELL`):
+
+   ```dotenv
+    PF_DEVSHELL=1
+   ```
+
+## Setting up User Variables
+
+The repository has two sets of top-level configuration variables that will control the devShell's behavior:
+
+* shared: Set up in the repo's `panfactum.yaml` by your organization's administrators ([docs](/docs/edge/reference/configuration/repo-variables))
+* personal: Unique to you and set up in a top-level `.env` file ([docs](/docs/edge/reference/configuration/dotenv))
+
+As the shared variables should have already been set up, we will now configure your personal variables.
+
+In the root of the repo, create a `.env` file that follows the [dotenv](https://www.dotenv.org/) format.
+
+For the complete list of values, see the Panfactum [reference docs](/docs/edge/reference/configuration/dotenv).
+
+## Next Steps
+
+Now that you have your organization's tooling installed, we can begin to set up connections to the live
+infrastructure.
+
+<MarkdownGuideNav backHref={"/docs/edge/guides/getting-started/install-tooling"} forwardHref={"/docs/edge/guides/getting-started/connect-to-infrastructure"} stepNumber={3} totalSteps={4} progressLabel={"Getting Started Guide:"} />

@@ -1,0 +1,319 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
+
+import readyVaultImg from './ready-vault.jpg'
+import unreadyVaultImg from './unready-vault.jpg'
+import vaultEBSVolumesImg from './vault-ebs-volumes.jpg'
+import vaultPVCsImg from './vault-pvcs.jpg'
+import vaultServicesImg from './vault-services.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Hashicorp Vault
+
+## Objective
+
+Deploy and configure a highly available [Hashicorp Vault](https://www.vaultproject.io/) cluster.
+
+## Background
+
+Vault serves several important purposes in the Panfactum stack:
+
+* acts as the root [certificate authority](https://en.wikipedia.org/wiki/Certificate_authority) for each environment's
+  [X.509 certificate infrastructure](https://en.wikipedia.org/wiki/X.509)
+* authorizes SSH authentication to our [bastion hosts](https://en.wikipedia.org/wiki/Bastion_host)
+* provisions (and de-provisions) dynamic credentials for stack's supported databases
+
+## Deploy Vault
+
+We will use the [kube\_vault](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vault) infrastructure module to deploy
+Vault in a highly available manner using
+[it's integrated Raft storage backend](https://developer.hashicorp.com/vault/docs/configuration/storage/raft).
+
+Let's do this now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_vault`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_vault/terragrunt.hcl).
+
+3. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
+
+4. Run `pf-tf-init` to enable the required providers.
+
+5. Run `terragrunt apply`.
+
+6. Note that this deployment **may not succeed,** but you should see three vault instances which are in the unready state:
+
+   <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
+
+   Checking the logs of one of the Vault pods will show error messages that look like this (the exact order and information may appear different):
+
+   ```shellsession
+   │ 2024-03-19T13:06:57.989Z [WARN]  failed to unseal core: error="stored unseal keys are supported, but none were found"                   │
+   │ 2024-03-19T13:06:58.600Z [INFO]  core: security barrier not initialized                                                                 │
+   │ 2024-03-19T13:06:58.600Z [INFO]  core.autoseal: recovery seal configuration missing, but cannot check old path as core is sealed        │
+   │ 2024-03-19T13:06:59.710Z [INFO]  core: security barrier not initialized                                                                 │
+   │ 2024-03-19T13:06:59.712Z [INFO]  core: attempting to join possible raft leader node: leader_addr=https://vault-1.vault-internal:8200    │
+   │ 2024-03-19T13:06:59.712Z [INFO]  core: attempting to join possible raft leader node: leader_addr=https://vault-2.vault-internal:8200    │
+   │ 2024-03-19T13:06:59.712Z [INFO]  core: attempting to join possible raft leader node: leader_addr=https://vault-0.vault-internal:8200    │
+   │ 2024-03-19T13:06:59.717Z [ERROR] core: failed to get raft challenge: leader_addr=https://vault-2.vault-internal:8200 error="error durin │
+   │ 2024-03-19T13:06:59.719Z [ERROR] core: failed to get raft challenge: leader_addr=https://vault-0.vault-internal:8200 error="error durin │
+   │ 2024-03-19T13:06:59.719Z [ERROR] core: failed to get raft challenge: leader_addr=https://vault-1.vault-internal:8200 error="error durin │
+   │ 2024-03-19T13:06:59.719Z [ERROR] core: failed to retry join raft cluster: retry=2s err="failed to get raft challenge"
+   ```
+
+   **This is because Vault must be manually initialized on first use.**
+
+## Initialize Vault
+
+Vault must be initialized which ultimately requires setting the root encryption key used to store data on disk. Once each
+Vault pod in the Vault cluster is initialized, the Vault cluster will become available for use. [^1]
+
+[^1]: Vault only keeps unencrypted data in memory and this includes the encryption key. As a result, when pods restart, the encryption
+    key must provided again in a process called [unsealing](https://developer.hashicorp.com/vault/docs/concepts/seal). Normally,
+    this is a manual process, but Panfactum's module utilizes AWS KMS to automate the unsealing operation. This significantly
+    reduces the burden of running a Vault cluster on Kubernetes.
+
+### Root Access
+
+The root token is constructed via [Shamir's secret sharing algorithm](https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing).
+This means that you will construct $x$ subkeys and require $y$ subkeys (where $y \leq x$) to recreate a root token. This
+will enable you to restore root access to the Vault cluster. These subkeys are called the **Recovery Keys**
+in the [Vault documentation](https://developer.hashicorp.com/vault/docs/concepts/seal). [^6]
+
+[^6]: The recovery keys are not the *unseal keys*. We do not utilize static unseal keys in the Panfactum setup
+    as we rely on AWS KMS to perform the unsealing for us. While this prevents breaches that rely only on getting access to the Vault database, it does mean that you will
+    not be able to access Vault if you delete the KMS key. For that reason, we replicate the key to a secondary region **and**
+    add a 30-day countdown timer to any key deletion operation.
+
+As Vault (a) controls many forms of authentication and (b) needs to be accessible on a public endpoint to authenticate users,
+these keys are incredibly sensitive as collectively they allow root access to a substantial portion of your ecosystem.
+
+We recommend you consider the following before proceeding:
+
+* How many people do you want to be superusers?  (`recovery-shares`) [^2]
+* How many superusers must work together to gain root access to Vault? (`recovery-threshold`) [^3]
+* How will your organization recommend superusers store these keys? [^4]
+* How will your organization codify the process and timings of key rotations? [^5]
+
+[^2]: This is highly dependent on organization size, but we recommend the following: `1` if you are a solo
+    operator, `2` if you have at least one other person working on infrastructure (to reduce your [bus factor](https://en.wikipedia.org/wiki/Bus_factor)),
+    and no more than `5` at the largest organization size (to minimize the burden of regular key rotation).
+
+[^3]: It can be tempting to make this a high number, but you will need these keys fairly regularly
+    (expect about once per quarter). We recommend in sensitive environments you use
+    `2` so there is at least one check on root access. In less sensitive environments, you can make this `1` for convenience.
+
+[^4]: This should **not** be in a location that is accessible by all superusers (e.g., a company password vault).
+
+[^5]: Make sure you consider **both** offboarding and time-based rotations (once per quarter or year).
+
+Note that you **can** change the shares and threshold later.
+
+Once you have answers to the above, you are ready to proceed.
+
+### Initializing Each Vault Pod
+
+Right now, the Vault pods are only accessible from inside the Kubernetes cluster. We will leverage k9s to establish
+a remote terminal session to perform the initialization:
+
+1. Find the Vault pods in the `vault` namespace in k9s (`vault-0`, `vault-1`, `vault-2`).
+
+2. Establish a shell in `vault-0` by pressing `s` once the pod is highlighted.
+
+3. Run `vault operator init -recovery-shares=<...> -recovery-threshold=<...>`. Set `recovery-shares` and
+   `recovery-threshold` to the values you decided above. You should see a message like the following:
+
+   ```shellsession
+   Recovery Key 1: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
+
+   Initial Root Token: hvs.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+   Success! Vault is initialized
+
+   Recovery key initialized with 1 key shares and a key threshold of 1. Please
+   securely distribute the key shares printed above.
+   ```
+
+4. Save **both** the recovery keys and the root token in a safe location. The root token allows root access
+   to the vault instance. The recovery keys allow creating new root tokens.
+
+5. Now run `vault operator unseal` to unseal vault. Provide the recovery keys from the previous
+   step when prompted. After each unseal operation you should see the below message. **Continue running unseal operations until you
+   you see `Sealed` as `false` in the output** (using a different recovery key each time).
+
+   ```shellsession
+   Key                      Value
+   ---                      -----
+   Recovery Seal Type       shamir
+   Initialized              true
+   Sealed                   false
+   Total Recovery Shares    1
+   Threshold                1
+   Version                  1.15.2
+   Build Date               2023-11-06T11:33:28Z
+   Storage Type             raft
+   Cluster Name             vault-cluster-0d4df53a
+   Cluster ID               ecc7f4ba-0c8e-3eca-2ad6-515ff027202e
+   HA Enabled               true
+   HA Cluster               https://vault-0.vault-internal:8201
+   HA Mode                  active
+   Active Since             2024-03-19T14:36:28.434643111Z
+   Raft Committed Index     58
+   Raft Applied Index       58
+   ```
+
+6. When this node is unsealed, the other nodes will automatically join the cluster. Verify this by:
+
+   1. Set the `VAULT_TOKEN` to the root token from the prior steps via `export VAULT_TOKEN=<your_token>`.
+
+   2. Run `vault operator members`.
+
+   3. You should see an output with all three members:
+
+      ```shellsession
+      Host Name    API Address                 Cluster Address                        Active Node    Version    Upgrade Version    Redundancy Zone    Last Echo
+      ---------    -----------                 ---------------                        -----------    -------    ---------------    ---------------    ---------
+      vault-2      http://10.0.114.250:8200    https://vault-2.vault-internal:8201    false          1.15.2     1.15.2             n/a                2024-03-19T15:04:52Z
+      vault-0      http://10.0.178.10:8200     https://vault-0.vault-internal:8201    true           1.15.2     1.15.2             n/a                n/a
+      vault-1      http://10.0.212.45:8200     https://vault-1.vault-internal:8201    false          1.15.2     1.15.2             n/a                2024-03-19T15:04:52Z
+      ```
+
+7. Exit the shell by running `exit`. You should see the pod is now ready:
+
+   <MarkdownImage src={readyVaultImg} alt="The Vault cluster is now ready." />
+
+8. Notice that you should also see multiple Vault services:
+
+   <MarkdownImage src={vaultServicesImg} alt="The Vault services." />
+
+   These have the following uses:
+
+   * `vault`: All Vault pods
+   * `vault-active`: Will always be the active Vault pod which is the one that you should connect with when performing Vault operations. [^7]
+   * `vault-internal`: The [headless service for the StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+     that can be used for addressing the pods individually
+   * `vault-standby`: Non-active Vault pods
+   * `vault-ui`: The service that exposes the web UI (different port than the Vault API)
+
+[^7]: The other nodes cannot accept vault commands and are only on standby in case the active pod terminates.
+
+## Configure Vault
+
+One of the major benefits of Vault is that it can be [configured directly with OpenTofu (Terraform)](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
+alongside our other infrastructure components. The Panfactum stack includes several
+modules for working with Vault. In this section we will deploy some foundational configuration
+via the [vault\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources) module.
+
+### Connect to Vault
+
+As Vault is required to set up our ingress system, we will need to set up connectivity to Vault without
+it having a publicly available endpoint.
+
+Here is how we will work around this issue:
+
+1. Establish a proxy to the active Vault node from your local machine by running the following command in a free terminal:
+
+   ```bash
+   kubectl -n vault port-forward svc/vault-active 8200:8200
+   ```
+
+2. Set the `VAULT_ADDR` in your `.env` file as follows:
+
+   ```dotenv
+   VAULT_ADDR=http://127.0.0.1:8200
+   ```
+
+3. Use the root token you received in the previous section to set the `VAULT_TOKEN` in your `.env` file as follows:
+
+   ```dotenv
+   VAULT_TOKEN=hvs.xxxxxxxxxxxxxxxxxxxxxxx
+   ```
+
+4. Run `vault status` to verify you are able to connect to the cluster. You should receive an output that looks
+   similar to below:
+
+   ```shellsession
+   Key                      Value
+   ---                      -----
+   Seal Type                shamir
+   Recovery Seal Type       n/a
+   Initialized              true
+   Sealed                   false
+   Total Recovery Shares    1
+   Threshold                1
+   Version                  1.15.2
+   Build Date               2023-11-06T11:33:28Z
+   Storage Type             raft
+   Cluster Name             vault-cluster-59bb7d60
+   Cluster ID               9a5488b6-9966-5bd9-271d-51373057c52e
+   HA Enabled               true
+   HA Cluster               https://vault-0.vault-internal:8201
+   HA Mode                  active
+   Active Since             2024-03-19T15:01:49.867966233Z
+   Raft Committed Index     110
+   Raft Applied Index       110
+   ```
+
+<MarkdownAlert severity="warning">
+  Note that in order for your connection to Vault to work, the proxy from Step 1 must be running. It can
+  occasionally terminate such as when pods restart, so if you encounter issues with Vault in the following
+  guide sections, verify the proxy is running.
+</MarkdownAlert>
+
+### Deploy Configuration Module
+
+Let's now deploy [vault\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources):
+
+1. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/vault_core_resources/terragrunt.hcl).
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+## Testing
+
+Before we move on, let's verify a few parts of the Vault infrastructure are working as intended.
+
+### Pod Restart
+
+Let's ensure that Vault pods can restart without manual intervention. This entails two pieces of functionality:
+automatic unsealing and automatic updating of the active service address.
+
+1. Using k9s, delete the `vault-0` pod (`<ctrl-d>`).
+
+2. When it restarts, the container should contain the following log messages (press enter on the pod):
+
+   ```shellsession
+   │ 2024-03-19T16:07:55.131Z [INFO]  core: vault is unsealed                                             │
+   │ 2024-03-19T16:07:55.131Z [INFO]  core: entering standby mode                                         │
+   │ 2024-03-19T16:07:55.195Z [INFO]  core: unsealed with stored key
+   ```
+
+3. Locally, run `vault status` and verify the connection still works. Likely, you will need to restart the `kubectl port-forward`
+   command from the previous section to re-establish the proxy since the pod terminated.
+
+### Verify Storage
+
+Each Vault node stores its data on EBS volumes provisioned by the AWS EBS CSI driver. Recall setting that up
+in the [prior section](/docs/edge/guides/bootstrapping/storage-interfaces).
+
+Let's verify the volumes were provisioned:
+
+1. In k9s, you should see three [PersistentVolumeClaims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/),
+   one for each Vault node:
+
+   <MarkdownImage src={vaultPVCsImg} alt="Vault persistent volume claims" />
+
+2. Log into the AWS web console. Navigate to EC2 > Elastic Block Store > Volumes. You should see
+   the three underlying EBS volumes:
+
+   <MarkdownImage src={vaultEBSVolumesImg} alt="Vault EBS volumes" />
+
+## Next Steps
+
+Now that Vault is set up, we will use it to set up the cluster's X.509 infrastructure in the
+next section.
+
+<BootstrappingGuideNav backHref={"/docs/edge/guides/bootstrapping/storage-interfaces"} forwardHref={"/docs/edge/guides/bootstrapping/certificate-management"} stepNumber={12} />

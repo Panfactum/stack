@@ -1,0 +1,64 @@
+import MarkdownSVGImage from "@/components/markdown/MarkdownImgSvg";
+
+import ArchitectureImg from './architecture.svg?raw'
+
+# BuildKit
+
+## Architecture
+
+While we detail how to manage the BuildKit installation in the [kube\_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_buildkit)
+documentation, we also want to provide a holistic picture of the overall image-building architecture recommended by
+Panfactum.
+
+<MarkdownSVGImage src={ArchitectureImg} alt={"BuildKit network architecture"} />
+
+A few critical notes:
+
+1. Clients such as developers or CI/CD jobs use the [buildctl](https://github.com/moby/buildkit/blob/master/docs/reference/buildctl.md)
+   CLI to send [build contexts](https://docs.docker.com/build/building/context/) to `buildkitd`, the BuildKit server. Remote
+   clients access the server over the SSH bastion.
+
+2. BuildKit is deployed in two horizontally autoscaling groups, one for amd64 architectures and one for arm64. Clients
+   will typically submit *two* jobs, one to each builder.
+
+3. The timestamp of the last submitted job is recorded on the autoscaling group. If a job has not been submitted for some
+   configured period of time, the autoscaling group will be scaled to zero to prevent idle resources.
+
+4. Which specific instance to use is done via *client-side* load-balancing, in particular the `pf-buildkit-get-address`
+   command. This is done by selecting the instance with the most available CPU to spread the overall workload
+   across the autoscaling group.
+
+5. Every BuildKit instances has a local layer cache attached as a PVC. When builds are finished, new layers are pushed
+   to a global cache in S3. When new builds are started, BuildKit will check for new layers in the global cache. This
+   allows the cache to be shared across all BuildKit instances, even if not every BuildKit instance has built every image.
+
+   Note that this *only* applies to the layer cache. Other caches such as cache mounts are not shared.
+
+6. When BuildKit builds an image, it will push the image to ECR in the same region where it is deployed. It uses
+   the *client's* credentials for ECR authentication.
+
+7. It is the *client's* responsibility to merge built images into a [multi-platform image.](https://docs.docker.com/build/building/multi-platform/)
+   We recommend the [manifest-tool](https://github.com/estesp/manifest-tool) CLI.
+
+8. Images are pulled from ECR by kubelets to run workloads on Kubernetes nodes. A *single* ECR is used to source
+   images for *all* Kubernetes clusters, even across accounts. For details on setting up cross-account permissions, see
+   the [aws\_ecr\_repos](/docs/edge/reference/infrastructure-modules/direct/aws/aws_ecr_repos) module.
+
+## Alternatives
+
+While BuildKit is the most popular and efficient image building software currently, there are other ways to build images that are
+worth knowing about:
+
+* nix: nix provides a [system](https://ryantm.github.io/nixpkgs/builders/images/dockertools/) for creating images out
+  of your nix environments. We actually use this to provide images of the Panfactum devShell. However, while this can
+  generate incredibly small and reproducible images, the tooling ecosystem is not quite there for us to recommend this
+  as a general practice.
+
+* kaniko: [kaniko](https://github.com/GoogleContainerTools/kaniko) is probably the closest BuildKit competitor for building
+  images using your Kubernetes clusters. It requires
+  less setup than BuildKit but this comes at the cost of some decreased utility such as the ability to run as a server that can be used
+  by developers and CI/CD jobs alike.
+
+* buildah: [buildah](https://buildah.io/) is a tool that can be used to build images imperatively by running normal
+  scripting commands. This can be helpful if you need more control over the resulting image than a declarative tool
+  like a Dockerfile allows. However, in practice, we have not seen this be useful for the vast majority of applications.

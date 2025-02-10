@@ -168,10 +168,10 @@ resource "helm_release" "cert_manager" {
   chart           = "cert-manager"
   version         = var.cert_manager_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -281,10 +281,10 @@ resource "helm_release" "cert_manager" {
           }
         }]
         // this must be inject-ca-from-secret to override the chart default
-        mutatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? {} : {
+        mutatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? null : {
           "cert-manager.io/inject-ca-from-secret" = "${local.namespace}/${local.webhook_secret}"
         }
-        validatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? {} : {
+        validatingWebhookConfigurationAnnotations = var.self_generated_certs_enabled ? null : {
           "cert-manager.io/inject-ca-from-secret" = "${local.namespace}/${local.webhook_secret}"
         }
 
@@ -356,6 +356,13 @@ resource "kubectl_manifest" "vpa_controller" {
       labels    = module.util_controller.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -379,6 +386,13 @@ resource "kubectl_manifest" "vpa_cainjector" {
       labels    = module.util_ca_injector.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
@@ -402,6 +416,13 @@ resource "kubectl_manifest" "vpa_webhook" {
       labels    = module.util_webhook.labels
     }
     spec = {
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"

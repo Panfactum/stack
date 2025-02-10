@@ -1,0 +1,103 @@
+---
+import {Head} from "astro-capo"
+import { AstroFont } from "astro-font";
+import { SEO } from "astro-seo";
+import { ClientRouter } from "astro:transitions";
+
+import { join } from "node:path";
+
+
+interface Props {
+  title: string;
+  description: string;
+  redirect?: string;
+}
+
+const { title, description, redirect } = Astro.props;
+---
+
+<Head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <SEO title={title} description={description} />
+  {redirect && <meta http-equiv="refresh" content={`0; url=${redirect}`} />}
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <AstroFont
+          config={[
+            {
+              name: "Inter",
+              src: [],
+              googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap',
+              preload: true,
+              display: "swap",
+              selector: "body",
+              fallback: "sans-serif",
+            },
+            {
+              name: "neue-machina",
+              src: [
+                {
+                  weight: '400',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-machina", 'PPNeueMachina-PlainLight.woff2'),
+                  preload: false
+                },
+                {
+                  weight: '500',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-machina", 'PPNeueMachina-PlainMedium.woff2'),
+                  preload: true,
+                },
+                {
+                  weight: '600',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-machina", 'PPNeueMachina-PlainRegular.woff2'),
+                  preload: false
+                },
+                {
+                  weight: '700',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-machina", 'PPNeueMachina-PlainUltrabold.woff2'),
+                  preload: false
+                }
+              ],
+              display: "swap",
+              selector: ".font-machina",
+              fallback: "sans-serif",
+            },
+            {
+              name: "neue-montreal-mono",
+              src: [
+                {
+                  weight: '400',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-montreal-mono",'PPNeueMontrealMono-Light.woff2')
+                },
+                {
+                  weight: '500',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-montreal-mono", 'PPNeueMontrealMono-Regular.woff2')
+                },
+                {
+                  weight: '600',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts',"neue-montreal-mono", 'PPNeueMontrealMono-Medium.woff2')
+                },
+                {
+                  weight: '700',
+                  style: 'normal',
+                  path: join(process.cwd(), 'public', 'fonts', "neue-montreal-mono", 'PPNeueMontrealMono-Bold.woff2')
+                }
+              ],
+              preload: false,
+              display: "swap",
+              selector: ".font-machina",
+              fallback: "sans-serif",
+            },
+          ]}
+  />
+    <slot/>
+  <ClientRouter />
+</Head>

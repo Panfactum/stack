@@ -96,9 +96,9 @@ resource "helm_release" "nats" {
   chart           = "nats"
   version         = var.helm_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
 
   values = [
@@ -372,6 +372,13 @@ resource "kubectl_manifest" "vpa" {
         apiVersion = "apps/v1"
         kind       = "StatefulSet"
         name       = random_id.id.hex
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
       }
       resourcePolicy = {
         containerPolicies = [{

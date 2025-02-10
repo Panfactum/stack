@@ -192,6 +192,12 @@ variable "pg_maximum_cpu_millicores" {
   default     = 10000
 }
 
+variable "pg_minimum_cpu_update_millicores" {
+  description = "The CPU settings for the Postgres won't be updated until the recommendations from the VPA (if enabled) differ from the current settings by at least this many millicores. This prevents autoscaling thrash."
+  type        = number
+  default     = 250
+}
+
 variable "pgbouncer_minimum_memory_mb" {
   description = "The minimum amount of memory to allocate to the pgbouncer pods (in Mi)"
   type        = number

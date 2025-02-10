@@ -1,0 +1,58 @@
+---
+import "../styles/global.css";
+
+import ComparisonSection from "./_components/ComparisonSection.astro";
+import FAQS from "./_components/FAQs/FAQs";
+import FrameworkFeaturesSection from "./_components/FrameworkFeaturesSection/FrameworkFeaturesSection.astro";
+import FrameworkSummarySection from "./_components/FrameworkSummarySection.astro";
+import HeroSection from "./_components/HeroSection.astro";
+import MoreQuestions from "./_components/MoreQuestions/MoreQuestions.astro";
+import PriceCalculator from "./_components/PriceCalculator/PriceCalculator";
+import PricingSection from "./_components/PricingSection/PricingSection.astro";
+import ReplacedServicesSection from "./_components/ReplacedServicesSection/ReplacedServicesSection.astro";
+import SavingsCalculator from "./_components/SavingsCalculator/SavingsCalculator";
+import SupportGuaranteeSection from "./_components/SupportGuaranteeSection/SupportGuaranteeSection.astro";
+import SupportPlanFeatureSection from "./_components/SupportPlanFeatureSection/SupportPlanFeatureSection.astro";
+import Layout from "../layouts/Layout.astro";
+import MainSection from "../layouts/MainSection.astro";
+import SubSection from "../layouts/SubSection.astro";
+---
+
+<Layout
+  heroClass="bg-secondary bg-hero-pattern bg-[center_top] bg-cover bg-no-repeat"
+  hasBorder={false}
+  title="Panfactum"
+  description="The open-source framework for managing cloud infrastructure."
+>
+  <HeroSection slot="hero"/>
+  <MainSection title="The OSS Panfactum Framework">
+    <FrameworkSummarySection />
+    <FrameworkFeaturesSection />
+      <div class="hidden sm:block">
+          <ReplacedServicesSection />
+      </div>
+
+  </MainSection>
+
+  <MainSection
+    background="secondary"
+    title="Hire the Panfactum Experts"
+    subtitle="You focus on shipping software. We handle your cloud infrastructure."
+  >
+    <SupportPlanFeatureSection />
+
+    <ComparisonSection />
+    <PricingSection />
+      <SubSection title="Customize your Plan" kicker="Optimized for your needs" id="plan-calculator">
+        <PriceCalculator background="secondary" client:idle />
+      </SubSection>
+      <SubSection title="Calculate your Savings" kicker="Slash your cloud costs" id="savings-calculator">
+          <SavingsCalculator background="secondary" client:idle />
+      </SubSection>
+      <SupportGuaranteeSection />
+      <SubSection title="Frequently Asked Questions">
+          <FAQS client:idle/>
+          <MoreQuestions/>
+      </SubSection>
+  </MainSection>
+</Layout>
