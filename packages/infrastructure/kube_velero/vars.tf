@@ -10,12 +10,6 @@ variable "aws_plugin_version" {
   default     = "v1.11.0"
 }
 
-variable "csi_plugin_version" {
-  description = "The image version of the velero/velero-plugin-for-csi image"
-  type        = string
-  default     = "v0.7.0"
-}
-
 variable "aws_iam_ip_allow_list" {
   description = "A list of IPs that can use the service account token to authenticate with AWS API"
   type        = list(string)
@@ -52,6 +46,12 @@ variable "monitoring_enabled" {
 
 variable "panfactum_scheduler_enabled" {
   description = "Whether to use the Panfactum pod scheduler with enhanced bin-packing"
+  type        = bool
+  default     = true
+}
+
+variable "wait" {
+  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
   type        = bool
   default     = true
 }

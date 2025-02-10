@@ -96,9 +96,9 @@ resource "helm_release" "nats" {
   chart           = "nats"
   version         = var.helm_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
 
   values = [

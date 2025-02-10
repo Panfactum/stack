@@ -148,9 +148,9 @@ resource "helm_release" "cilium" {
   chart           = "cilium"
   version         = var.cilium_helm_version
   recreate_pods   = false
-  cleanup_on_fail = true
-  atomic          = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 

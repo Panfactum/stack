@@ -426,9 +426,9 @@ resource "helm_release" "linkerd" {
   chart           = "linkerd-control-plane"
   version         = var.linkerd_helm_version
   recreate_pods   = false
-  atomic          = true
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
   max_history     = 5
 

@@ -38,12 +38,6 @@ variable "pull_through_cache_enabled" {
   default     = true
 }
 
-variable "node_image_cache_enabled" {
-  description = "Whether to cache images locally for better startup performance"
-  type        = bool
-  default     = true
-}
-
 variable "log_level" {
   description = "The log level for the argo pods"
   type        = string
@@ -188,4 +182,10 @@ variable "pgbouncer_maximum_cpu_millicores" {
   description = "The maximum amount of cpu to allocate to the pgbouncer pods (in millicores)"
   type        = number
   default     = 10000
+}
+
+variable "wait" {
+  description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
 }

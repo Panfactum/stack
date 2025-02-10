@@ -319,10 +319,10 @@ resource "helm_release" "argo" {
   chart           = "argo-workflows"
   version         = var.argo_workflows_helm_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
 
   values = [

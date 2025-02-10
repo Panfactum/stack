@@ -25,6 +25,13 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 any other module. If you run into any issues, set `vpa_enabled` to `false` before you apply the module and re-enable once the
 module is deployed.
 
+### Added
+
+* Most Kubernetes modules now have a `wait` input that can be set to `false` if you do not wish to wait for the resources
+to reach a ready state before proceeding with the deployment. This will significantly improve the speed of deploying
+updates but will disable automatic rollback in case something goes wrong. Manual intervention may be required if
+deployment fails.
+
 ### Fixed
 
 * [kube_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) now always uses two replicas

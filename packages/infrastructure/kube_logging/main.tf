@@ -237,10 +237,10 @@ resource "helm_release" "loki" {
   chart           = "loki"
   version         = var.loki_chart_version
   recreate_pods   = false
-  atomic          = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   force_update    = true
-  cleanup_on_fail = true
-  wait            = true
   wait_for_jobs   = true
   max_history     = 5
   timeout         = 60 * 10

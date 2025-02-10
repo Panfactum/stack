@@ -66,10 +66,10 @@ resource "helm_release" "external_snapshotter" {
   chart           = "snapshot-controller"
   version         = var.external_snapshotter_helm_version
   recreate_pods   = false
-  cleanup_on_fail = true
-  wait            = true
+  atomic          = var.wait
+  cleanup_on_fail = var.wait
+  wait            = var.wait
   wait_for_jobs   = true
-  atomic          = true
   force_update    = true
   max_history     = 5
 
