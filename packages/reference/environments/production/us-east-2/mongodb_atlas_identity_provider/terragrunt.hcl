@@ -32,5 +32,5 @@ inputs = {
   sso_url = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
 
   associated_domains = ["panfactum.com"]
-  status = "ACTIVE"
+  active = true
 }

@@ -25,9 +25,10 @@ variable "sso_debug_enabled" {
   default = true
 }
 
-variable "status" {
+variable "active" {
+  type = bool
   description = "The status of the identity provider"
-  default = "INACTIVE"
+  default = false
 }
 
 variable "sso_url" {

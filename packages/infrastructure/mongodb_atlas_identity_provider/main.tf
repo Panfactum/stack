@@ -12,7 +12,7 @@ resource "mongodbatlas_federated_settings_identity_provider" "identity_provider"
   name                         = var.name
   associated_domains           = var.associated_domains
   sso_debug_enabled            = var.sso_debug_enabled
-  status                       = var.status
+  status                       = var.active ? "ACTIVE" : "INACTIVE"
   sso_url                      = var.sso_url
   issuer_uri                   = var.issuer_url
   request_binding              = "HTTP-POST"
@@ -20,7 +20,6 @@ resource "mongodbatlas_federated_settings_identity_provider" "identity_provider"
 }
 
 data "mongodbatlas_federated_settings_identity_provider" "identity_provider_ds" {
-  #federation_settings_id = mongodbatlas_federated_settings_identity_provider.identity_provider.id
   federation_settings_id = var.federation_settings_id
   identity_provider_id   = var.idp_id
 }
