@@ -3,18 +3,17 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="aws_ecr_public_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_public_repos" status="stable" type="direct" />
+<ModuleHeader name="aws_ecr_public_repos" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/aws_ecr_public_repos" status="stable" type="direct"/>
 
 # Public AWS ECR Repositories
 
 ## Differences from Private ECR Repositories
 
-* All public ECR repositories are created in `us-east-1`.
+- All public ECR repositories are created in `us-east-1`.
 
-* Once published, image tags are immutable.
+- Once published, image tags are immutable.
 
-* There is no automatic lifecycle management for images published to public repositories.
+- There is no automatic lifecycle management for images published to public repositories.
 
 ## Custom Registry Alias
 
@@ -24,15 +23,15 @@ This may take a few days to be approved.
 
 ## Deployment Notes
 
-* This module should be deployed in the `global` region.
+- This module should be deployed in the `global` region.
 
 ## Providers
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
 ## Required Inputs
 

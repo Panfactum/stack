@@ -3,8 +3,7 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-
-<ModuleHeader name="vault_core_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/vault_core_resources" status="stable" type="direct" />
+<ModuleHeader name="vault_core_resources" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/vault_core_resources" status="stable" type="direct"/>
 
 # Vault Core Resources
 
@@ -12,17 +11,17 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 
 The following providers are needed by this module:
 
-* [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
-* [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
 
-* [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
 
-* [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
 
-* [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
 
-* [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
 
 ## Required Inputs
 
@@ -75,6 +74,14 @@ Description: Whether the VPA resources should be enabled
 Type: `bool`
 
 Default: `false`
+
+### wait
+
+Description: Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 
