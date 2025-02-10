@@ -23,6 +23,15 @@ terraform {
   }
 }
 
+locals {
+  combined_allowed_groups = toset([
+    "superusers",
+    "privileged_engineers",
+    "engineers",
+    "restricted_engineers",
+    "billing_admins"], var.allowed_groups...)
+}
+
 ###########################################################################
 ## Upload the logo
 ###########################################################################
@@ -123,12 +132,12 @@ resource "authentik_policy_binding" "superuser_access" {
 }
 
 data "authentik_group" "group" {
-  for_each = var.allowed_groups
+  for_each = local.combined_allowed_groups
   name     = each.key
 }
 
 resource "authentik_policy_binding" "access" {
-  for_each = var.allowed_groups
+  for_each = local.combined_allowed_groups
   target   = authentik_application.mongodb_atlas.uuid
   group    = data.authentik_group.group[each.key].id
   order    = 10
