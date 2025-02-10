@@ -33,6 +33,8 @@ to ensure tunnels can immediately reconnect if one bastion gets restarted.
 * Due to a bug in how Helm manages CRDs, CRDs included in [kube_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa)
 were not appropriately updated in the previous release. This release resolves the issue.
 
+* Adjusted the bootstrapping steps for Karpenter to include instructions for managing the `wait` input.
+
 ## edge.25-02-07
 
 <MarkdownAlert severity="warning">

@@ -53,3 +53,9 @@ variable "sla_target" {
     error_message = "sla_target must be one of: 1, 2, 3"
   }
 }
+
+variable "wait" {
+  description = "Wait for resources to be in a ready state before proceeding."
+  type        = bool
+  default     = false
+}
