@@ -172,7 +172,8 @@
       "original": {
         "path": "../..",
         "type": "path"
-      }
+      },
+      "parent": []
     },
     "postgresPkgsSrc": {
       "locked": {
