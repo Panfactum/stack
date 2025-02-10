@@ -19,6 +19,11 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Fixed
+
+* [kube_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) now always uses two replicas
+to ensure tunnels can immediately reconnect if one bastion gets restarted.
+
 ## edge.25-02-07
 
 ### Changed
