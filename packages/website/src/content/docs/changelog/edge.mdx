@@ -19,12 +19,26 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Breaking Changes
+
+* This update requires that you apply the [kube_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa) before
+any other module. If you run into any issues, set `vpa_enabled` to `false` before you apply the module and re-enable once the
+module is deployed.
+
 ### Fixed
 
 * [kube_bastion](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_bastion) now always uses two replicas
 to ensure tunnels can immediately reconnect if one bastion gets restarted.
 
+* Due to a bug in how Helm manages CRDs, CRDs included in [kube_vpa](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_vpa)
+were not appropriately updated in the previous release. This release resolves the issue.
+
 ## edge.25-02-07
+
+<MarkdownAlert severity="warning">
+    This release contains a VPA CRD bug that will make it difficult to upgrade to the following release without
+    manual intervention. Please skip this release and proceed directly to the next.
+</MarkdownAlert>
 
 ### Changed
 

@@ -231,7 +231,7 @@ resource "kubectl_manifest" "vpa" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }

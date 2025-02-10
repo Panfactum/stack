@@ -10,6 +10,6 @@ terraform {
 inputs = {
   bucket_name  = "pf-modules-website"
   description  = "Hosts the IaC modules and submodules for the Panfactum Stack"
-  domain       = "modules.panfactum.com"
+  domains      = ["modules.panfactum.com"]
   default_file = ""
 }

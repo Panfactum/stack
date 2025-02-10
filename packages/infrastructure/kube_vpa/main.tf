@@ -114,6 +114,16 @@ module "webhook_cert" {
   namespace     = local.namespace
 }
 
+// The CRDs must be installed as such b/c the VPA often releases bugs in their CRDs
+// and helm does not update CRD versions once they have been deployed
+resource "kubectl_manifest" "crds" {
+  for_each  = toset(fileset(path.module, "crds/*.yaml"))
+  yaml_body = file(each.key)
+
+  force_conflicts   = true
+  server_side_apply = true
+}
+
 resource "helm_release" "vpa" {
   namespace       = local.namespace
   name            = local.name
@@ -368,7 +378,7 @@ resource "kubectl_manifest" "vpa_controller" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -405,7 +415,7 @@ resource "kubectl_manifest" "vpa_recommender" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
@@ -434,7 +444,7 @@ resource "kubectl_manifest" "vpa_updater" {
       updatePolicy = {
         updateMode = "Auto"
         evictionRequirements = [{
-          resource          = ["cpu", "memory"]
+          resources         = ["cpu", "memory"]
           changeRequirement = "TargetHigherThanRequests"
         }]
       }
