@@ -1,11 +1,3 @@
-variable "mongodbatlas_public_key" {
-  description = "The public key for the MongoDB Atlas API"
-}
-
-variable "mongodbatlas_private_key" {
-  description = "The private key for the MongoDB Atlas API"
-}
-
 variable "organization_id" {
   description = "ID of the MongoDB Atlas organization"
 }
