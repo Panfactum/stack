@@ -8,11 +8,13 @@ terraform {
 }
 
 dependency "cluster" {
-  config_path = "../aws_eks"
+  config_path  = "../aws_eks"
+  skip_outputs = true
 }
 
-inputs = {
-  cluster_name  = dependency.cluster.outputs.cluster_name
-  node_role_arn = dependency.cluster.outputs.node_role_arn
-  wait = true
+dependency "kyverno" {
+  config_path  = "../kube_kyverno"
+  skip_outputs = true
 }
+
+inputs = {}

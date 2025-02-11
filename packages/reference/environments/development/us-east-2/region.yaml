@@ -16,7 +16,7 @@ kube_api_server: "https://C2ACE84A0D1F454A44F84AA663EC6B1D.gr7.us-east-2.eks.ama
 extra_inputs:
   enhanced_ha_enabled: false
   vpa_enabled: true
-  panfactum_scheduler_enabled: false
+  panfactum_scheduler_enabled: true
   monitoring_enabled: false # ALPHA do not enable
   pull_through_cache_enabled: true
 

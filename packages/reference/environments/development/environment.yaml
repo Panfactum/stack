@@ -16,3 +16,5 @@ tf_state_profile: "development-superuser" # AWS profile to assume for working wi
 
 # SLA
 sla_target: 1
+
+pf_stack_version: "edge.25-02-10"
