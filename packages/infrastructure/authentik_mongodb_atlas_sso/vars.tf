@@ -6,6 +6,7 @@ variable "media_configmap" {
 variable "authentik_namespace" {
   description = "The kubernetes namespace where Authentik is deployed"
   type        = string
+  default     = "authentik"
 }
 
 variable "authentik_domain" {
