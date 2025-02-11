@@ -91,6 +91,11 @@ resource "authentik_certificate_key_pair" "signing" {
 ## IdP Config
 ###########################################################################
 
+resource "authentik_property_mapping_provider_saml" "member_of" {
+  name       = "SAML MongoDB Atlas memberOf"
+  saml_name  = "memberOf"
+  expression = "return request.user.ak_groups.all()"
+}
 
 data "authentik_flow" "default_authorization_flow" {
   slug = "default-provider-authorization-implicit-consent"
@@ -103,6 +108,9 @@ data "authentik_property_mapping_provider_saml" "email" {
 resource "authentik_provider_saml" "mongodb_atlas" {
   name               = "mongodb-atlas"
   authorization_flow = data.authentik_flow.default_authorization_flow.id
+  property_mappings = [
+    authentik_property_mapping_provider_saml.member_of.id,
+  ]
   acs_url            = var.acs_url
   sp_binding         = "post"
   issuer             = var.issuer

@@ -6,6 +6,10 @@ variable "mongodbatlas_private_key" {
   description = "The private key for the MongoDB Atlas API"
 }
 
+variable "organization_id" {
+  description = "ID of the MongoDB Atlas organization"
+}
+
 variable "federation_settings_id" {
   description = "The IDP ID from MongoDB Atlas"
 }
@@ -42,4 +46,11 @@ variable "issuer_url" {
 variable "name" {
   description = "The name of the identity provider"
   default = "Authentik Integration"
+}
+
+variable "member_groups" {
+  description = "The group mappings for the identity provider"
+
+  type        = list(string)
+  default     = []
 }
