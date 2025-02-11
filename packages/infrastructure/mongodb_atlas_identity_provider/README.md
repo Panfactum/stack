@@ -68,6 +68,4 @@ From the terminal
 6. Add a new `secrets.yaml` and add the public and private key from above
 7. Encrypt with `sops -e -i secrets.yaml`
 8. Run `pf-tf-init`
-9. Run `terragrunt import mongodbatlas_federated_settings_identity_provider.identity_provider {federation-settings-id}-{idp-id}`. 
-   Example: `terragrunt import mongodbatlas_federated_settings_identity_provider.identity_provider 67a80b37499ddf3676fa8f2b-67a80b37499ddf3676fa8f2b`
-10. Run `terragrunt apply`
+9. Run `terragrunt apply`
