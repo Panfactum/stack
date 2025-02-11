@@ -10,9 +10,8 @@ This guide will walk you through setting up the Authentik side of the MongoDB At
 
 1. Add a new a `authentik_atlas_mongodb_sso` folder adjacent to your `authentik_core_resources` folder.
 2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_mongodb_atlas_sso/terragrunt.hcl).
-3. Replace the input `issuer` with your authentik domain url.
-4. run `pf-tf-init`
-5. run `terragrunt apply`
+3. run `pf-tf-init`
+4. run `terragrunt apply`
 
 ### Setup MongoDB Atlas Identity Provider
 

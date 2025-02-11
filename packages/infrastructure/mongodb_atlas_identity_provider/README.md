@@ -36,20 +36,22 @@ Unfortunately, the terraform provider for MongoDB Atlas does not support the cre
 We will first create the resource through the UI and then import it to configure further.
 
 From MongoDB Atlas UI
-1. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Identity Providers`
-2. Click on `Configure Identity Provider`
-3. Select `Workforce Identity Federation`
-4. Select `SAML for Atlas UI Access`
-5. Set a Name: `Authentik Integration`
-6. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
-7. Upload the `Signing Certificate` that we downloaded above
-8. Set the `Request Binding` to `HTTP-POST`
-9. Set the `Response Signature Algorithm` to `SHA-256`
-10. Continue to the next step 
-11. Note the `ACS URL`
-12. Note the `Audience URI`
-13. Note the `IdP ID`
-14. Note the `Federation Settings ID` Found in the url `https://cloud.mongodb.com/v2#/federation/{this-is-your-federation-settings-id}/overview`
+1. Go to `Organization Settings`
+2. Note the `Organization ID`
+3. Go to `Federated Authentication Settings` -> `Identity Providers`
+4. Click on `Configure Identity Provider`
+5. Select `Workforce Identity Federation`
+6. Select `SAML for Atlas UI Access`
+7. Set a Name: `Authentik Integration`
+8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
+9. Upload the `Signing Certificate` that we downloaded above
+10. Set the `Request Binding` to `HTTP-POST`
+11. Set the `Response Signature Algorithm` to `SHA-256`
+12. Continue to the next step 
+13. Note the `ACS URL`
+14. Note the `Audience URI`
+15. Note the `IdP ID`
+16. Note the `Federation Settings ID` Found in the url `https://cloud.mongodb.com/v2#/federation/{this-is-your-federation-settings-id}/overview`
 
 Create Access Keys
 1. Go to `Organization Settings` -> `Access Manager`
@@ -57,15 +59,17 @@ Create Access Keys
 3. Click on `Add new`
 4. Set the description to `terraform`
 5. Set the Organization Permission to `Organization Owner`
-6. Save the public and private key
+6. Save the public and private key to your `.env` file
+   1. set `MONGODB_ATLAS_PUBLIC_KEY`
+   2. set `MONGODB_ATLAS_PRIVATE_KEY`
 
 From the terminal
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
 2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
 3. Set the `federation_settings_id` to the value from above 
-4. Set the `idp_id` to the value from above
-5. Set the `associated_domains` to the domain you verified above
-6. Add a new `secrets.yaml` and add the public and private key from above
-7. Encrypt with `sops -e -i secrets.yaml`
+4. Set the `organization_id` to the value from above
+5. Set the `idp_id` to the value from above
+6. Set the `associated_domains` to the domain you verified above
+7. Add a new `secrets.yaml` and add the public and private key from above
 8. Run `pf-tf-init`
 9. Run `terragrunt apply`
