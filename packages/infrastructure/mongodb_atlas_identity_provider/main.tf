@@ -23,3 +23,8 @@ data "mongodbatlas_federated_settings_identity_provider" "identity_provider_ds" 
   federation_settings_id = var.federation_settings_id
   identity_provider_id   = var.idp_id
 }
+
+import {
+  to = mongodbatlas_federated_settings_identity_provider.identity_provider
+  id = "${var.federation_settings_id}-${var.idp_id}"
+}
