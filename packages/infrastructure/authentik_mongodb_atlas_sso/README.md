@@ -17,6 +17,8 @@ Please follow the steps defined in the [MongoDB Atlas Identity Provider](https:/
 
 ### Sync Authentik with the Atlas Settings
 
+![img.png](img.png)
+
 1. Copy and set the `ACS URL` from the MongoDB Atlas Identity Provider setup to the `acs_url` input.
 2. Copy and set the `Audience URI` from the MongoDB Atlas Identity Provider setup to the `audience` input.
 3. run `terragrunt apply`

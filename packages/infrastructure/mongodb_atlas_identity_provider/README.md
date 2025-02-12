@@ -36,10 +36,13 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 
 1. Go to your MongoDB Atlas account
 2. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Domains`
-3. Click on `Add Domain`
+3. Click on `Add Domain` 
+    ![img.png](img.png)
 4. Add the root domain that you are using for Authentik (ie: panfactum.com)
-5. Select `DNS Record` as the verification method
-6. Note the `TXT Record` that is generated. You will need this value in future steps.
+5. Select `DNS Record` as the verification method 
+    ![img_2.png](img_2.png)
+6. Note the `TXT Record` that is generated. You will need this value in future steps. 
+    ![img_1.png](img_1.png)
 
 ### Deploy a new DNS TXT Record & Verify
 
@@ -53,8 +56,10 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 Before proceeding, make sure to have downloaded the signing certificate from the Authentik application
 1. Login to your Authentik instance
 2. Switch over to the `Admin` section
+    ![img_3.png](img_3.png)
 3. Go to the section `Applications` -> `Providers` -> `MongoDB Atlas`
 4. Find `Related objects` and click on the `Download` button for the `Download signing certificate`
+    ![img_4.png](img_4.png)
 
 ### Deploy the MongoDB Identity Provider module
 
@@ -66,10 +71,12 @@ We will first create the resource through the UI and then import it to configure
 2. Note the `Organization ID`. You will need this value in future steps.
 3. Go to `Federated Authentication Settings` -> `Identity Providers`
 4. Click on `Configure Identity Provider`
+    ![img_5.png](img_5.png)
 5. Select `Workforce Identity Federation`
 6. Select `SAML for Atlas UI Access`
 7. Set a Name: `Authentik Integration`
 8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
+    ![img_7.png](img_7.png)
 9. Upload the `Signing Certificate` that we downloaded above
 10. Set the `Request Binding` to `HTTP-POST`
 11. Set the `Response Signature Algorithm` to `SHA-256`
@@ -123,3 +130,4 @@ After you have confirmed and validated that SSO is working through Authentik, di
 1. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Identity Providers`
 2. Click on the `Authentik Integration` identity provider
 3. Toggle `Bypass SAML Mode` to `off`
+    ![img_8.png](img_8.png)
