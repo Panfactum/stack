@@ -94,7 +94,7 @@ resource "authentik_certificate_key_pair" "signing" {
 resource "authentik_property_mapping_provider_saml" "member_of" {
   name       = "SAML MongoDB Atlas memberOf"
   saml_name  = "memberOf"
-  expression = "return request.user.ak_groups.all()"
+  expression = file("${path.module}/mapping.py")
 }
 
 data "authentik_flow" "default_authorization_flow" {

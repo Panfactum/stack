@@ -11,7 +11,7 @@ This module sets up the identity provider configuration in MongoDB Atlas.
 
   - If "Bypass SAML Mode" is enabled, users will be able to bypass Authentik and login directly to Atlas using their static usernames and passwords. As a result, we strongly recommend keeping this flag disabled.
   - Any active session tokens that the user has with the Atlas web UI will not be automatically revoked. Until these tokens expire, the user may still have the ability to interact with the web UI unless you manually remove them from the Atlas organization.
-  - Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if removing a user in the superusers group (and any other group configured with access to application keys).
+  - Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if removing a user in the `superusers` group (and any other group configured with access to application keys).
 </MarkdownAlert>
 
 ## Guide
@@ -23,7 +23,7 @@ This module sets up the identity provider configuration in MongoDB Atlas.
 3. Click on `Add Domain`
 4. Add the root domain that you are using for Authentik (ie: panfactum.com)
 5. Select `DNS Record` as the verification method
-6. Note the `TXT Record` that is generated
+6. Note the `TXT Record` that is generated. You will need this value in future steps.
 
 ### Deploy a new DNS TXT Record & Verify
 
@@ -45,9 +45,9 @@ Before proceeding, make sure to have downloaded the signing certificate from the
 Unfortunately, the terraform provider for MongoDB Atlas does not support the creation of the Identity Provider but allows for modifications. 
 We will first create the resource through the UI and then import it to configure further.
 
-From MongoDB Atlas UI
+#### From MongoDB Atlas UI
 1. Go to `Organization Settings`
-2. Note the `Organization ID`
+2. Note the `Organization ID`. You will need this value in future steps.
 3. Go to `Federated Authentication Settings` -> `Identity Providers`
 4. Click on `Configure Identity Provider`
 5. Select `Workforce Identity Federation`
@@ -57,13 +57,13 @@ From MongoDB Atlas UI
 9. Upload the `Signing Certificate` that we downloaded above
 10. Set the `Request Binding` to `HTTP-POST`
 11. Set the `Response Signature Algorithm` to `SHA-256`
-12. Continue to the next step 
-13. Note the `ACS URL`
-14. Note the `Audience URI`
-15. Note the `IdP ID`
-16. Note the `Federation Settings ID` Found in the url `https://cloud.mongodb.com/v2#/federation/{this-is-your-federation-settings-id}/overview`
+12. Continue to the next step and note these values as you will need them in future steps.
+    * `ACS URL`
+    * `Audience URI`
+    * `IdP ID`
+    * `Federation Settings ID` Found in the url `https://cloud.mongodb.com/v2#/federation/<this-is-your-federation-settings-id>/overview`
 
-Create Access Keys
+#### Create Access Keys
 1. Go to `Organization Settings` -> `Access Manager`
 2. Click on `Applications` tab
 3. Click on `Add new`
@@ -73,23 +73,35 @@ Create Access Keys
    1. set `MONGODB_ATLAS_PUBLIC_KEY`
    2. set `MONGODB_ATLAS_PRIVATE_KEY`
 
-From the terminal
+#### Optional: CICD
+If you have CICD setup and deploying infrastructure using the [wf_tf_deploy] module, you will also need to pass in the keys. 
+
+1. Update your CICD module var to accept the keys as inputs like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo-cicd/vars.tf)
+2. Update the `wf_tf_deploy` module and pass in the secrets inputs like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo-cicd/tf_deploy.tf)
+3. Add them to the `secrets.yaml` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/demo-cicd/secrets.yaml)
+4. Utilize and pass them in as inputs like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/demo-cicd/terragrunt.hcl)
+
+
+#### From the terminal
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
 2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
 3. Set the `federation_settings_id` to the value from above 
 4. Set the `organization_id` to the value from above
 5. Set the `idp_id` to the value from above
 6. Set the `associated_domains` to the domain you verified above
-7. Add a new `secrets.yaml` and add the public and private key from above
-8. Run `pf-tf-init`
-9. Run `terragrunt apply`
+7. Run `pf-tf-init`
+8. Run `terragrunt apply`
+
+If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume the [Sync Authentik with the Atlas Settings](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)` section. 
 
 ### Disable SSO Bypass
 
 After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle.
 
 <MarkdownAlert severity="warning">
+  You MUST verify that SSO works prior to disabling the bypass. 
   Disabling this toggle will lock you out of your MongoDB Atlas account if you have not configured SSO correctly.
+  If you do lock yourself out, rest assured you can still recover by contacting their support, but it can take 1-2 days.
 </MarkdownAlert>
 
 1. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Identity Providers`
