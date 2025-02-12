@@ -5,15 +5,16 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 This module sets up the identity provider configuration in MongoDB Atlas.
 
 <MarkdownAlert severity="warning">
-  Due to limitations with MongoDB Atlas, this module does not handle automatic de-provisioning of users. 
-  - Once Bypass SAML Mode is disabled, users who are no longer in the identity provider will be unable to log in.
-  - However, any application keys that the user has previously generated will still be active and continue to have access.
-  - Proper key rotation and revocation steps should be taken to ensure security.
+  Due to limitations with MongoDB Atlas, users will not be automatically removed from MongoDB Atlas when they are removed from Authentik.
+
+  They will lose the ability to login, but you should be aware of the following caveats:
+
+  - If "Bypass SAML Mode" is enabled, users will be able to bypass Authentik and login directly to Atlas using their static usernames and passwords. As a result, we strongly recommend keeping this flag disabled.
+  - Any active session tokens that the user has with the Atlas web UI will not be automatically revoked. Until these tokens expire, the user may still have the ability to interact with the web UI unless you manually remove them from the Atlas organization.
+  - Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if removing a user in the superusers group (and any other group configured with access to application keys).
 </MarkdownAlert>
 
 ## Guide
-
-This guide will help setup the MongoDB Atlas side of the SSO integration.
 
 ### Pre-req: Setup MongoDB Atlas Identity Provider Domain Verification
 
@@ -26,7 +27,7 @@ This guide will help setup the MongoDB Atlas side of the SSO integration.
 
 ### Deploy a new DNS TXT Record & Verify
 
-1. Add a text record to your `global/aws_dns/terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl#118).
+1. Add a text record to your `global/aws_dns/terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
 2. Run `terragrunt apply`
 3. Go back to MongoDB Atlas and click on `Verify` next to the domain you added
 4. Confirm verification

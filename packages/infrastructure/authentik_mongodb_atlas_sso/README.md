@@ -1,14 +1,12 @@
 # Authentik MongoDB Atlas SSO
 
-This module sets up the Authentik Application and Provider for MongoDB Atlas.
+This module configures Authentik for integration with MongoDB Atlas.
 
 ## Guide
 
-This guide will walk you through setting up the Authentik side of the MongoDB Atlas SSO integration. 
-
 ### Deploy MongoDB Atlas Provider & Application in Authentik
 
-1. Add a new a `authentik_atlas_mongodb_sso` folder adjacent to your `authentik_core_resources` folder.
+1. Add a new a `authentik_mongodb_atlas_sso` folder adjacent to your `authentik_core_resources` folder.
 2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_mongodb_atlas_sso/terragrunt.hcl).
 3. run `pf-tf-init`
 4. run `terragrunt apply`
@@ -16,6 +14,8 @@ This guide will walk you through setting up the Authentik side of the MongoDB At
 ### Setup MongoDB Atlas Identity Provider
 
 Please follow the steps defined in the [MongoDB Atlas Identity Provider](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure-modules/direct/mongodb/mongodb_atlas_identity_provider) and resume here. 
+
+### Sync Authentik with the Atlas Settings
 
 1. Copy and set the `ACS URL` from the MongoDB Atlas Identity Provider setup to the `acs_url` input.
 2. Copy and set the `Audience URI` from the MongoDB Atlas Identity Provider setup to the `audience` input.
