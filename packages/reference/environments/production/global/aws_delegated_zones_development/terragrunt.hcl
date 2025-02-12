@@ -13,5 +13,5 @@ dependency "root_domains" {
 
 inputs = {
   root_domain_names     = keys(dependency.root_domains.outputs.domains)
-  subdomain_identifiers = ["dev", "development"]
+  subdomain_identifiers = ["dev", "development", "seth"]
 }
