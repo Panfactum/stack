@@ -7,6 +7,27 @@ terraform {
   }
 }
 
+locals {
+  default_role_mappings = {
+    "superusers"            = ["ORG_OWNER"]
+    "billing_admins"        = ["ORG_BILLING_ADMIN"]
+    "privileged_engineers"  = ["ORG_GROUP_CREATOR", "ORG_READ_ONLY"]
+    "engineers"             = ["ORG_READ_ONLY"]
+    "restricted_engineers"  = ["ORG_MEMBER"]
+  }
+
+  # Filter out keys that attempt to override default mappings
+  allowed_custom_mappings = {
+    for key, roles in var.custom_role_mappings :
+    key => roles if !contains(keys(local.default_role_mappings), key)
+  }
+
+  # Final role mappings (default + only new custom mappings)
+  role_mappings = merge(local.default_role_mappings, local.allowed_custom_mappings)
+}
+
+
+
 resource "mongodbatlas_federated_settings_identity_provider" "identity_provider" {
   federation_settings_id       = var.federation_settings_id
   name                         = var.name
@@ -29,92 +50,15 @@ data "mongodbatlas_federated_settings_identity_provider" "identity_provider_ds" 
   identity_provider_id   = var.idp_id
 }
 
-resource "mongodbatlas_federated_settings_org_role_mapping" "owner" {
-  for_each = toset(concat(var.member_groups, ["superusers"]))
-  external_group_name    = each.key
+resource "mongodbatlas_federated_settings_org_role_mapping" "role_mapping" {
+  for_each = local.role_mappings
 
+  external_group_name    = each.key
   federation_settings_id = var.federation_settings_id
   org_id                 = var.organization_id
 
   role_assignments {
     org_id = var.organization_id
-
-    # "ORG_MEMBER","ORG_GROUP_CREATOR","ORG_BILLING_ADMIN", "ORG_OWNER
-    # https://www.mongodb.com/docs/atlas/reference/user-roles/
-    roles     = ["ORG_OWNER"]
-  }
-}
-
-resource "mongodbatlas_federated_settings_org_role_mapping" "project_creator" {
-  for_each = toset(concat(var.member_groups, []))
-  external_group_name    = each.key
-
-  federation_settings_id = var.federation_settings_id
-  org_id                 = var.organization_id
-
-  role_assignments {
-    org_id = var.organization_id
-
-    # "ORG_MEMBER","ORG_GROUP_CREATOR","ORG_BILLING_ADMIN", "ORG_OWNER
-    # https://www.mongodb.com/docs/atlas/reference/user-roles/
-    roles     = ["ORG_GROUP_CREATOR"]
-  }
-}
-
-resource "mongodbatlas_federated_settings_org_role_mapping" "billing_admin" {
-  for_each = toset(concat(var.member_groups, ["billing_admins"]))
-  external_group_name    = each.key
-
-  federation_settings_id = var.federation_settings_id
-  org_id                 = var.organization_id
-
-  role_assignments {
-    org_id = var.organization_id
-
-    # "ORG_MEMBER","ORG_GROUP_CREATOR","ORG_BILLING_ADMIN", "ORG_OWNER
-    # https://www.mongodb.com/docs/atlas/reference/user-roles/
-    roles     = ["ORG_BILLING_ADMIN"]
-  }
-}
-
-resource "mongodbatlas_federated_settings_org_role_mapping" "billing_viewer" {
-  for_each = toset(concat(var.member_groups, []))
-  external_group_name    = each.key
-
-  federation_settings_id = var.federation_settings_id
-  org_id                 = var.organization_id
-
-  role_assignments {
-    org_id = var.organization_id
-
-    # "ORG_MEMBER","ORG_GROUP_CREATOR","ORG_BILLING_ADMIN", "ORG_OWNER
-    # https://www.mongodb.com/docs/atlas/reference/user-roles/
-    roles     = ["ORG_BILLING_READ_ONLY"]
-  }
-}
-
-resource "mongodbatlas_federated_settings_org_role_mapping" "read_only" {
-  for_each = toset(concat(var.member_groups, ["privileged_engineers"]))
-  external_group_name    = each.key
-
-  federation_settings_id = var.federation_settings_id
-  org_id                 = var.organization_id
-
-  role_assignments {
-    org_id = var.organization_id
-    roles     = ["ORG_READ_ONLY"]
-  }
-}
-
-resource "mongodbatlas_federated_settings_org_role_mapping" "member" {
-  for_each = toset(concat(var.member_groups, ["restricted_engineers", "engineers"]))
-  external_group_name    = each.key
-
-  federation_settings_id = var.federation_settings_id
-  org_id                 = var.organization_id
-
-  role_assignments {
-    org_id = var.organization_id
-    roles     = ["ORG_MEMBER"]
+    roles  = each.value
   }
 }

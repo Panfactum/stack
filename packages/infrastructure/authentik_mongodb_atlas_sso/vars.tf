@@ -1,6 +1,7 @@
 variable "media_configmap" {
   description = "The configmap holding the static media that Authentik will use"
   type        = string
+  default     = "media"
 }
 
 variable "authentik_namespace" {
@@ -24,11 +25,6 @@ variable "acs_url" {
   type        = string
 }
 
-variable "issuer" {
-  description = "The authentik url of the idp"
-  type        = string
-}
-
 variable "audience" {
   description = "The Entity URL provided by the Service Provider"
   type        = string
@@ -42,6 +38,6 @@ variable "ui_description" {
 
 variable "allowed_groups" {
   description = "Only members of these groups can access MongoDB"
-  type        = set(string)
-  default     = []
+  type = set(string)
+  default = []
 }

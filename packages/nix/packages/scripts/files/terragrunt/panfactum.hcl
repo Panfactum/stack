@@ -55,7 +55,7 @@ locals {
   enable_aws           = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/aws")
   enable_kubernetes    = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/kubernetes") || strcontains(local.lockfile_contents, "registry.opentofu.org/alekc/kubectl")
   enable_vault         = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/vault")
-  enable_mongodb_atlas = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/vault")
+  enable_mongodb_atlas = strcontains(local.lockfile_contents, "registry.opentofu.org/mongodb/mongodbatlas")
   enable_helm          = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/helm")
   enable_authentik     = strcontains(local.lockfile_contents, "registry.opentofu.org/goauthentik/authentik")
   enable_time          = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/time")

@@ -30,6 +30,8 @@ locals {
     "engineers",
     "restricted_engineers",
     "billing_admins"], var.allowed_groups...)
+
+  issuer = "https://${var.authentik_domain}"
 }
 
 ###########################################################################
@@ -113,7 +115,7 @@ resource "authentik_provider_saml" "mongodb_atlas" {
   ]
   acs_url            = var.acs_url
   sp_binding         = "post"
-  issuer             = var.issuer
+  issuer             = local.issuer
   audience           = var.audience
   name_id_mapping    = data.authentik_property_mapping_provider_saml.email.id
   signing_kp         = authentik_certificate_key_pair.signing.id
