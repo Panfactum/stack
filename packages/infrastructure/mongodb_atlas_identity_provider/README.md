@@ -1,6 +1,15 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
 # Mongodb Atlas MongoDB Identity Provider
 
 This module sets up the identity provider configuration in MongoDB Atlas.
+
+<MarkdownAlert severity="warning">
+  Due to limitations with MongoDB Atlas, this module does not handle automatic de-provisioning of users. 
+  - Once Bypass SAML Mode is disabled, users who are no longer in the identity provider will be unable to log in.
+  - However, any application keys that the user has previously generated will still be active and continue to have access.
+  - Proper key rotation and revocation steps should be taken to ensure security.
+</MarkdownAlert>
 
 ## Guide
 
@@ -73,3 +82,15 @@ From the terminal
 7. Add a new `secrets.yaml` and add the public and private key from above
 8. Run `pf-tf-init`
 9. Run `terragrunt apply`
+
+### Disable SSO Bypass
+
+After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle.
+
+<MarkdownAlert severity="warning">
+  Disabling this toggle will lock you out of your MongoDB Atlas account if you have not configured SSO correctly.
+</MarkdownAlert>
+
+1. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Identity Providers`
+2. Click on the `Authentik Integration` identity provider
+3. Toggle `Bypass SAML Mode` to `off`
