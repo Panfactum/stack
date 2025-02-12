@@ -10,13 +10,13 @@ kube_config_context: "development-seth"
 kube_api_server: "https://A22CD77150C602866DD723DDBB7E1BAA.gr7.us-east-1.eks.amazonaws.com"
 
 # Vault
-# vault_addr: "https://vault.prod.panfactum.com"
+vault_addr: "https://vault.seth.panfactum.com"
 
 # Extra inputs
 extra_inputs:
   enhanced_ha_enabled: false
   vpa_enabled: true
-  panfactum_scheduler_enabled: false
+  panfactum_scheduler_enabled: true
   monitoring_enabled: false # ALPHA do not enable
   pull_through_cache_enabled: true
 

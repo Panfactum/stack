@@ -1,6 +1,0 @@
-# Copy this file to `config.yaml`
-# `config.yaml` file should be committed to version control (automatically setup via .gitignore)
-# More information can be found here: https://panfactum.com/docs/edge/reference/configuration/buildkit
-
-bastion: production-primary
-module: production/us-east-2/kube_buildkit

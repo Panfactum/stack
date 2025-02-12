@@ -164,8 +164,6 @@
         "vaultPkgsSrc": "vaultPkgsSrc"
       },
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-54RnLOs02/yG73/2yGLdYQYOjfGzTi4vf5GEUvIU+gI=",
         "path": "../..",
         "type": "path"
       },
