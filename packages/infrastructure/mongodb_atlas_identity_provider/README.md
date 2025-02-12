@@ -14,6 +14,22 @@ This module sets up the identity provider configuration in MongoDB Atlas.
   - Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if removing a user in the `superusers` group (and any other group configured with access to application keys).
 </MarkdownAlert>
 
+## Panfactum Role to MongoDB Atlas Role Mapping
+
+This document outlines the default role mappings between **Panfactum Roles** and **MongoDB Atlas Roles**. The mappings ensure that users in Panfactum have appropriate permissions in MongoDB Atlas, maintaining security and role-based access control.
+
+For more details on MongoDB Atlas roles, refer to the official documentation:  
+[MongoDB Atlas User Roles](https://www.mongodb.com/docs/atlas/reference/user-roles/)
+
+| **Panfactum Role**          | **MongoDB Atlas Role(s)**              | **Reason for Mapping** |
+|-----------------------------|----------------------------------------|------------------------|
+| **superusers**              | `ORG_OWNER`                            | Superusers require full administrative access to the MongoDB Atlas organization, including user management, billing, and resource creation. |
+| **billing_admins**          | `ORG_BILLING_ADMIN`                    | Billing admins manage payment details and invoices but do not need full administrative control over the organization. |
+| **privileged_engineers**    | `ORG_GROUP_CREATOR`, `ORG_READ_ONLY`   | Privileged engineers can create groups (projects) in Atlas and need read-only access for visibility into organization-wide settings. |
+| **engineers**               | `ORG_READ_ONLY`                        | Engineers require read-only access to view Atlas organization settings but cannot modify any configurations. |
+| **restricted_engineers**    | `ORG_MEMBER`                           | Restricted engineers have basic membership access, allowing them to work within assigned projects but without organization-wide privileges. |
+
+
 ## Guide
 
 ### Pre-req: Setup MongoDB Atlas Identity Provider Domain Verification
