@@ -67,6 +67,18 @@ variable "algolia_index_name_2" {
   type        = string
 }
 
+variable "mongodb_atlas_public_key" {
+  description = "The public key for MongoDB Atlas"
+  type        = string
+  sensitive   = true
+}
+
+variable "mongodb_atlas_private_key" {
+  description = "The private key for MongoDB Atlas"
+  type        = string
+  sensitive   = true
+}
+
 variable "site_url" {
   description = "The URL of the site to use for the search index"
   type        = string

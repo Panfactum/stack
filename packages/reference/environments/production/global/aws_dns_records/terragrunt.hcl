@@ -114,7 +114,8 @@ inputs = {
             "MS=ms89071327",                                                                                                         // AAD Domain Ownership
             "v=spf1 include:one.zoho.com include:zohomail.com include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all", // SPF record authorizing email senders
             "zoho-verification=zb69684923.zmverify.zoho.com",                                                                        // Zoho Domain Ownership
-            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ"                                                   // Panfactum.com Google Search Console
+            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                                                  // Panfactum.com Google Search Console
+            "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                                                            // Panfactum.com MongoDB Atlas SSO
           ]
         }
       ]
