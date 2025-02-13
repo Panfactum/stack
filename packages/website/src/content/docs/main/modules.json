@@ -438,7 +438,7 @@
     {
       "module": "mongodb_atlas_identity_provider",
       "type": "direct",
-      "group": "mongodb"
+      "group": "mongodb-atlas"
     },
     {
       "module": "test_kube_pg_cluster",
