@@ -87,6 +87,9 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
       add_header "$MODULE" "$STATUS" "$TYPE" |
       skip_injected_variables \
         >"$DOCS_DIR/index.mdx"
+
+    # Copy only image files from the module directory
+    find "$d" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.webp" \) -exec cp {} "$DOCS_DIR/" \;
   fi
 done
 
