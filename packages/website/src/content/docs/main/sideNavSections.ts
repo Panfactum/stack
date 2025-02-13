@@ -492,6 +492,11 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
                 sub: makeModuleDir(modules.modules, "kubernetes", "direct"),
               },
               {
+                text: "MongoDB Atlas",
+                path: "/mongodb",
+                sub: makeModuleDir(modules.modules, "mongodb", "direct"),
+              },
+              {
                 text: "Vault",
                 path: "/vault",
                 sub: makeModuleDir(modules.modules, "vault", "direct"),
