@@ -1,3 +1,44 @@
+# This file is maintained automatically by "tofu init".
+# Manual edits may be lost in future updates.
+
+provider "registry.opentofu.org/goauthentik/authentik" {
+  version     = "2024.8.4"
+  constraints = "2024.8.4"
+  hashes = [
+    "h1:bZS9RwjEc1FlLFMidiCzyUrFTC7VONufHBDgGjAtSWs=",
+    "zh:13040879209e226ba73dd3492849301f5d6233098decf4789dde4e75a7db00a3",
+    "zh:21e5b1403749e4577c85efe1e1ffbc7f70f910c9b025a66ee36d6d9e7a26834d",
+    "zh:3290e95ff74aa269031df2d9604526c977826d76c4c1c03b61c61d4767775f44",
+    "zh:5648de4e32e83f1162844dfae55c2c2ff23eb1b0ae0c6a251a38917d6c7407f0",
+    "zh:5a12f804038d3d84819954fe7666b84aa24bc2284682e5732302c0811401faa3",
+    "zh:6b61eaad598256beb677f170fcb63c2f56c8a9e2a8f6516c98802fab0009807d",
+    "zh:8071892662952c013bdee898a4f5dc4116c18e7e2fbcb0fa96afdf56e78a582f",
+    "zh:94aead29a3fb563c84eca7275a88f7b49e14f6bc7344cc06c766fdf638098d6d",
+    "zh:96ad4fddd7c4ff84f6c18e7106a7565c545e545ac8b8419f2c76216760e1a35a",
+    "zh:c5105037a5d9f0be8fd6a3ecbf08928e26acd3af587dbeb099a328c994cef6f6",
+    "zh:c69b47759a0b831270ba074002078ebf375da712f8c306053b880946cb80ae14",
+    "zh:cb76e7fcdffa73055670f2ecf88286353a3d70a9cc3528e77217ea00465a32c2",
+    "zh:d95b39d122b61c833e234b3fdf423495685cb20456efd761fdcbafc3817248e1",
+    "zh:fc1a55ce2f8f7872f6911afd68d5f76472ba247a2ad2d739010d15add2c7e268",
+  ]
+}
+
+provider "registry.opentofu.org/hashicorp/null" {
+  version = "3.2.3"
+  hashes = [
+    "h1:LF8arSzHfhbyQSFtTMTYEqCM34klzrbAQBJMHYCs9d8=",
+    "zh:1d57d25084effd3fdfd902eca00020b34b1fb020253b84d7dd471301606015ac",
+    "zh:65b7f9799b88464d9c2ec529713b7f52ea744275b61a8dc86cdedab1b2dcb933",
+    "zh:80d3e9c95b7b4ae7c54005cd127cae82e5c53d2b7023ef24c147337bac9dadd9",
+    "zh:841b60c07683e4bf456799ccd718896fdafdcc2c49252ae09967f2e74d8c8a03",
+    "zh:8fa1c592a9c78222e35713c6edb3f1f818a4c6f3524a30a209f0a7e919827b68",
+    "zh:bb795cc1429e09466840c09d39a28edf1db5070b1ec76822fc1173906a264572",
+    "zh:da1784818a89bea29dfe660632f0060a7a843e4e564d74435fbeca002b0f7d2a",
+    "zh:f409bf21b1cdaa6dac47cd79806f3d93f67e9507fe4dbf33b0165335f53bc2e1",
+    "zh:fbea7a1ff84b430ba9594698e93196d81d03e4036de3d1cafccb2a96d5b38581",
+    "zh:fbf0c84663a7e85881388d7d71ac862184f05fbf2d17ecf76bc5d3d7503ea260",
+  ]
+}
 
 provider "registry.opentofu.org/mongodb/mongodbatlas" {
   version     = "1.26.1"
