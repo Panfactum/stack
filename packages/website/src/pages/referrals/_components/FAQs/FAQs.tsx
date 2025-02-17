@@ -6,7 +6,7 @@ import FAQItem from ".//FAQItem.tsx";
 
 const FAQS: Component = () => {
   return (
-    <Accordion class="w-full max-w-screen-md" multiple={true}>
+    <Accordion class="w-full max-w-screen-md xl:max-w-screen-lg" multiple={true}>
       <FAQItem title={"How many times can I receive the $10,000 bonus?"} id={"times"}>
         There is no limit to the amount of times that you can receive the bonus.
       </FAQItem>
