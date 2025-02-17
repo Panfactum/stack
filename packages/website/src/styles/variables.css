@@ -14,4 +14,8 @@
     --colors-brand-doc-success: rgba(23, 37, 31, 1);
     --colors-brand-doc-error: rgba(38, 23, 22, 1);
   }
+
+  [data-banner] {
+    --header-height: 8rem;
+  }
 }

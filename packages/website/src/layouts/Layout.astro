@@ -21,7 +21,10 @@ const {
 } = Astro.props;
 ---
 
-<html lang="en">
+<html
+        lang="en"
+        data-banner="true"
+>
   <CommonHead title={title} description={description} redirect={redirect}>
     <meta name="generator" content={Astro.generator} />
   </CommonHead>
