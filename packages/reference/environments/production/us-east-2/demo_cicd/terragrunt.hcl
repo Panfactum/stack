@@ -32,7 +32,7 @@ inputs = {
   algolia_index_name     = "docs"
   algolia_index_name_2   = "docs-2"
   site_url               = "https://panfactum.com"
-  scraper_image_version  = "9a150442c6fc3bd0ca54dbeb45aad6750378d0fd"
+  scraper_image_version  = "586d06cee96633a26ffe0ce318d85f26c3f7c27d"
   module_bucket          = dependency.module_bucket.outputs.bucket_name
 }
 
