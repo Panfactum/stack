@@ -101,6 +101,13 @@ resource "kubernetes_service_account" "service_account" {
   }
 }
 
+data "kubernetes_resources" "deployment" {
+  api_version    = "apps/v1"
+  kind           = "Deployment"
+  namespace      = var.namespace
+  label_selector = "id=${module.pod_template.match_labels.id}"
+}
+
 resource "kubectl_manifest" "deployment" {
   yaml_body = yamlencode({
     apiVersion = "apps/v1"
@@ -120,7 +127,7 @@ resource "kubectl_manifest" "deployment" {
       )
     }
     spec = {
-      replicas = var.replicas
+      replicas = var.ignore_replica_count && length(data.kubernetes_resources.deployment.objects) > 0 ? data.kubernetes_resources.deployment.objects[0].spec.replicas : var.replicas
       strategy = { for k, v in {
         type = var.update_type
         rollingUpdate = var.update_type == "RollingUpdate" ? {

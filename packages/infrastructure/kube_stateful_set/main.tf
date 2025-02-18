@@ -118,6 +118,13 @@ module "service_headless" {
   headless_enabled = true
 }
 
+data "kubernetes_resources" "stateful_set" {
+  api_version    = "apps/v1"
+  kind           = "StatefulSet"
+  namespace      = var.namespace
+  label_selector = "id=${module.pod_template.match_labels.id}"
+}
+
 resource "kubectl_manifest" "stateful_set" {
   yaml_body = yamlencode({
     apiVersion = "apps/v1"
@@ -139,7 +146,7 @@ resource "kubectl_manifest" "stateful_set" {
     spec = {
       serviceName         = "${var.name}-headless"
       podManagementPolicy = var.pod_management_policy
-      replicas            = var.replicas
+      replicas            = var.ignore_replica_count && length(data.kubernetes_resources.stateful_set.objects) > 0 ? data.kubernetes_resources.stateful_set.objects[0].spec.replicas : var.replicas
       updateStrategy = {
         type = var.update_type
       }

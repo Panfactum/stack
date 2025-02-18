@@ -21,7 +21,11 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ### Fixed
 
-* Fixed to use `{}` from using `null` for `webhookConfigurations` in `kube_cert_manager`
+* `ignore_replica_count` in [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) will
+now properly *not* reset `spec.replicas` to the `replicas` input if `spec.replicas` has been mutated by an external process.
+
+* Fixed to use `{}` from using `null` for `webhookConfigurations` in `kube_cert_manager`.
 
 ## edge.25-02-10
 
