@@ -1,11 +1,12 @@
 ---
 import DiscordIcon from "@/components/icons/discord.svg";
 import PanfactumLogo from "@/components/icons/panfactum-logo.svg";
+import PanfactumMark from "@/components/icons/panfactum-mark.svg";
 
 import HeroAnimation from "./HeroAnimation/HeroAnimation.astro";
 import Button from "../../components/ui/Button.astro";
 import GetStartedButton from "../../components/ui/GetStartedButton.tsx";
-import { DISCORD_URL } from "../../lib/constants";
+import {DISCORD_URL, SIGNUP_LINK} from "../../lib/constants";
 
 const pathname = new URL(Astro.request.url).pathname;
 ---
@@ -29,14 +30,20 @@ const pathname = new URL(Astro.request.url).pathname;
         </p>
       </div>
 
-      <div class="flex gap-x-3">
-        <a href={DISCORD_URL}>
-          <Button variant="secondary" class="flex items-center gap-2">
+      <div class="flex flex-wrap justify-center gap-3">
+          <a href={SIGNUP_LINK} class="flex w-full justify-center sm:w-fit">
+              <Button variant="secondary" class="flex w-3/4 items-center justify-center gap-2 sm:w-fit">
+                  <PanfactumMark size="24" class="h-5" />
+                  Live Demo
+              </Button>
+          </a>
+        <a href={DISCORD_URL} class="flex w-full justify-center sm:w-fit">
+          <Button variant="secondary" class="flex w-3/4 items-center justify-center gap-2 sm:w-fit">
             <DiscordIcon size="24" class="h-5" />
-            Connect
+            Discord
           </Button>
         </a>
-        <GetStartedButton fullPath={pathname}/>
+        <GetStartedButton fullPath={pathname} class="w-3/4 sm:w-fit"/>
       </div>
     </div>
   </div>

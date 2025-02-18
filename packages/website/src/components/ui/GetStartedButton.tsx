@@ -5,12 +5,13 @@ import {DocsVersionProvider, useDocsVersion} from "@/state/docsVersion.tsx";
 
 interface GetStartedProps {
   size?: "sm" | "md" | "lg" | "xl";
+  class?: string;
 }
 
 const _GetStartedButton: Component<GetStartedProps> = (props) => {
   const [version] = useDocsVersion()
   return (
-    <a href={`/docs/${version()}/guides`}>
+    <a href={`/docs/${version()}/guides`} class={props.class}>
       <Button size={props.size} variant="primary" class="w-full">
         Get Started
       </Button>
@@ -21,7 +22,7 @@ const _GetStartedButton: Component<GetStartedProps> = (props) => {
 const GetStartedButton: Component<GetStartedProps & {fullPath: string}> = (props) => {
   return (
     <DocsVersionProvider fullPath={props.fullPath}>
-      <_GetStartedButton size={props.size}/>
+      <_GetStartedButton size={props.size} class={props.class}/>
     </DocsVersionProvider>
   )
 }

@@ -275,7 +275,7 @@ the website.
   }
 
   .btn-secondary-on-dark {
-    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-dark-mode-300 dark:bg-gray-dark-mode-900 hover:dark:bg-gray-dark-mode-800 ring-2 dark:ring-1 ring-gray-dark-mode-300 dark:ring-gray-warm-800;
+    @apply btn-common text-primary-on-light bg-gray-light-mode-200 hover:bg-gray-dark-mode-300 dark:bg-gray-dark-mode-700 hover:dark:bg-gray-dark-mode-800 ring-2 dark:ring-1 ring-gray-dark-mode-300 dark:ring-gray-warm-800;
   }
 
   /****************************************************
