@@ -19,7 +19,21 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Added
+
+* Adds support for using a private git repository for first-party IaC modules by
+providing `GIT_USERNAME` and `GIT_PASSWORD` environment variables. See the [updated documentation.](/docs/main/guides/iac/first-party-modules#using-a-private-git-repository)
+
+### Fixed
+
+* Resolves a bug that caused [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) workflows
+to fail.
+
 ## edge.25-02-18
+
+<MarkdownAlert severity="warning">
+    This release causes issues in the CI/CD pipelines for IaC deployments. This is resolved in the subsequent release.
+</MarkdownAlert>
 
 ### Fixed
 

@@ -26,7 +26,11 @@ let
             exit "$?"
         fi
     done
-    ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@"
+    {
+      stdbuf -oL ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@" 2> >(stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g" >&2)
+    } | stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g"
+
+    exit ''${PIPESTATUS[0]}
   '';
   cilium = pkgs.symlinkJoin {
     name = "cilium-cli";
