@@ -9,6 +9,7 @@ provider "pf" {
   stack_version = "${stack_version}"
   stack_commit = "${stack_commit}"
   kube_config_context = "${kube_config_context}"
+  kube_cluster_name = "${kube_config_context}"
   kube_api_server = "${kube_api_server}"
   sla_target = ${sla_target}
   is_local = ${is_local}

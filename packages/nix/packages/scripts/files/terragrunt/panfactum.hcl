@@ -173,8 +173,8 @@ locals {
   ############################################################################################
   # Kubernetes Connection
   ############################################################################################
-  kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
-  kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
+  kube_api_server     = try(local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server, "@@KUBE_API_SERVER_INVALID@@")
+  kube_config_context = try(local.is_ci ? "ci" : local.vars.kube_config_context, "@@KUBE_CONFIG_CONTEXT_INVALID@@")
 
   ############################################################################################
   # Miscellaneous
@@ -232,13 +232,13 @@ generate "pf_provider" {
   path      = "pf.tf"
   if_exists = "overwrite_terragrunt"
   contents = local.enable_pf ? templatefile("${local.provider_folder}/pf.tftpl", {
-    is_local            = local.enable_pf ? local.is_local : false
-    environment         = local.enable_pf ? local.vars.environment : ""
-    region              = local.enable_pf ? local.vars.region : ""
-    stack_version       = local.enable_pf ? local.pf_stack_version : ""
-    stack_commit        = local.enable_pf ? local.pf_stack_version_commit_hash : ""
-    root_module         = local.enable_pf ? local.module : ""
-    extra_tags          = local.enable_pf ? local.extra_tags : {}
+    is_local            = local.is_local
+    environment         = local.vars.environment
+    region              = local.vars.region
+    stack_version       = local.pf_stack_version
+    stack_commit        = local.pf_stack_version_commit_hash
+    root_module         = local.module
+    extra_tags          = local.extra_tags
     kube_api_server     = local.kube_api_server
     kube_config_context = local.kube_config_context
     sla_target          = local.sla_target

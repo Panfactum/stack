@@ -21,6 +21,9 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ### Fixed
 
+* The `pf` provider will now receive Kubernetes metadata regardless of whether the Kubernetes provides are enabled
+in the module tree.
+
 * Pinning the `version` of first-party IaC modules should now work without error regardless of what version of
 the Panfactum modules are used (including if using a local copy).
 
