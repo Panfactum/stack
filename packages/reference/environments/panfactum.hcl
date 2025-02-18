@@ -3,9 +3,15 @@
 #################################################################
 
 locals {
+
+  ############################################################################################
+  # Variable Resolution
+  #
   # Load all the terragrunt variables
   # For more information about the configuration architecture and available options,
   # see https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables
+  ############################################################################################
+
   global_raw_vars     = try(yamldecode(file(find_in_parent_folders("global.yaml"))), {})
   global_user_vars    = try(yamldecode(file(find_in_parent_folders("global.user.yaml"))), {})
   global_vars         = merge({}, local.global_raw_vars, local.global_user_vars)
@@ -50,6 +56,10 @@ locals {
     local.module_extra_inputs
   )
 
+  ############################################################################################
+  # Provider Activation
+  ############################################################################################
+
   # Activated providers
   lockfile_contents = try(file(find_in_parent_folders("${get_terragrunt_dir()}/.terraform.lock.hcl")), "")
   enable_aws        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/aws")
@@ -63,26 +73,70 @@ locals {
   enable_tls        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/tls")
   enable_pf         = strcontains(local.lockfile_contents, "registry.opentofu.org/panfactum/pf")
 
-  # The module to deploy
+
+  ############################################################################################
+  # Shared module logic
+  ############################################################################################
+
+  # The module to deploy - This logic is used BOTH for Panfacutm modules and first-party IaC
   module = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
 
-  # The version of the panfactum stack to deploy
-  pf_stack_version                       = lookup(local.vars, "pf_stack_version", "main")
-  pf_stack_repo                          = "github.com/panfactum/stack"
-  pf_stack_version_commit_hash           = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
-  pf_stack_local_path                    = lookup(local.vars, "pf_stack_local_path", "../../../../../..")
-  pf_stack_local_ref                     = local.pf_stack_version == "local" ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", local.pf_stack_version == "local" ? "${local.pf_stack_local_path}/packages/infrastructure" : "") : ""
-  pf_stack_local_use_relative            = lookup(local.vars, "pf_stack_local_use_relative", true)
-  pf_stack_local_path_relative_to_module = local.pf_stack_version == "local" && local.pf_stack_local_use_relative ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "realpath", "--relative-to=${local.repo_root}", local.pf_stack_version == "local" ? local.pf_stack_local_path : local.repo_root) : ""
-  pf_stack_source                        = local.pf_stack_version == "local" ? ("${local.pf_stack_local_path}/packages/infrastructure//${local.module}") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//${local.module}"
 
+  ############################################################################################
+  # How to source the Panfactum modules
+  ############################################################################################
+
+  # Constant for the git repository where Panfactum modules live
+  pf_stack_repo = "github.com/panfactum/stack"
+
+  # The version of the Panfactum modules to use ("local" means use the local copy)
+  pf_stack_version = lookup(local.vars, "pf_stack_version", "main")
+
+  # Whether to use the local copy of the Panfactum modules -- useful for debugging and local
+  # development of module updates.
+  use_local_pf_modules = local.pf_stack_version == "local"
+
+  # Long commit sha for the specific branch / tag / commit specified
+  pf_stack_version_commit_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.pf_stack_version}", "--repo=https://${local.pf_stack_repo}")
+
+  # The absolute path on the machine to the local copy of the Panfactum modules
+  # If pf_stack_local_path isn't set, we assume that the we are in the reference repository (note that we use get_repo_root() vs local.repo_root to get the actual git repo root)
+  pf_stack_local_absolute_path = lookup(local.vars, "pf_stack_local_path", get_repo_root())
+
+  # This is used for cache invalidation since we cannot use git refs for the local copy
+  pf_stack_local_ref = local.use_local_pf_modules ? run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-local-module-hash", local.use_local_pf_modules ? "${local.pf_stack_local_absolute_path}/packages/infrastructure" : "") : ""
+
+  # We can either choose to use relative or absolute file paths for sourcing local module versions
+  # We default to using relative b/c this adds enhanced cache invalidation logic
+  pf_stack_local_use_relative = lookup(local.vars, "pf_stack_local_use_relative", true)
+
+  # The relative path from the local.repo_root to the local copy of the Panfactum modules
+  pf_stack_local_relative_path_from_root = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "realpath", "--relative-to=${local.repo_root}", local.pf_stack_local_absolute_path)
+
+  # The relative path from the module's terragrunt.hcl directory to the local copy of the Panfactum modules
+  pf_stack_local_relative_path_from_tg_dir = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "realpath", "--relative-to=${get_original_terragrunt_dir()}", local.pf_stack_local_absolute_path)
+
+  # The relative path from the directory where tf is actually run (in .terragrunt-cache) to the local copy of the Panfactum modules
+  # Note that this will change depending on whether the first-party IaC modules are themselves using local code or if they are pulling from the remote git repo
+  # TODO: update when https://github.com/gruntwork-io/terragrunt/issues/3896 is resolved
+  pf_stack_local_relative_path_from_working_dir = "${local.use_local_iac ? "../../../.." : "../../../../${join("/", [for segment in split("/", local.repo_vars.iac_dir_from_git_root) : ".."])}"}/${local.pf_stack_local_relative_path_from_root}"
+
+  # The terraform.source to use if deploying a "direct" Panfactum module (i.e., not a submodule)
+  # TODO: It is unclear to me why we don't support relative paths here, so let's investigate in the future.
+  pf_stack_source = local.use_local_pf_modules ? ("${local.pf_stack_local_absolute_path}/packages/infrastructure//${local.module}") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//${local.module}"
+
+  ############################################################################################
   # Repo metadata
+  ############################################################################################
   repo_vars      = jsondecode(run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-repo-variables"))
   repo_url       = local.repo_vars.repo_url
   repo_name      = local.repo_vars.repo_name
   repo_root      = local.repo_vars.repo_root
-  iac_dir        = local.repo_vars.iac_dir_from_root
   primary_branch = local.repo_vars.repo_primary_branch
+
+  ############################################################################################
+  # How to source first-party IaC modules
+  ############################################################################################
 
   # Determine the module "version" (git ref to checkout)
   # Use the following priority ordering:
@@ -90,22 +144,24 @@ locals {
   # 2. Fallback to the repo's primary branch
   version = lookup(local.vars, "version", local.primary_branch)
 
-  # The version_tag needs to be a commit sha
+  # Long commit sha for the specific branch / tag / commit specified
   version_hash = run_cmd("--terragrunt-global-cache", "--terragrunt-quiet", "pf-get-commit-hash", "--ref=${local.version}")
 
+  # Whether to use the local copy of the first-party IaC rather than download from the remote git repo
   # Always use the local copy if trying to deploy to mainline branches to resolve performance and caching issues
   use_local_iac = contains(["local", local.primary_branch], local.version)
-  iac_path      = "/${local.iac_dir}//${local.module}"
-  source        = local.use_local_iac ? "${local.repo_root}${local.iac_path}" : "${local.repo_url}?ref=${local.version}${local.iac_path}"
 
-  # Folder of shared snippets to generate
-  provider_folder = "providers"
+  # The terraform.source for the first-party IaC
+  # Note that the location of the // is intentional and changes depending on whether local or not.
+  # Additionally note the difference b/w iac_dir_from_root and iac_dir_from_git_root -- This is also intentional as hack to workaround the fact that the reference repo isn't at the git root.
+  source = local.use_local_iac ? "${local.repo_root}/${local.repo_vars.iac_dir_from_root}//${local.module}" : "${local.repo_url}//${local.repo_vars.iac_dir_from_git_root}/${local.module}"
 
-  # local dev namespace
-  local_dev_namespace = get_env("LOCAL_DEV_NAMESPACE", "")
-  is_local            = local.vars.environment == "local"
+  ############################################################################################
+  # Vault Token Sourcing
+  ############################################################################################
 
-  # Get vault_token (only if the vault provider is enabled)
+  # We have customized the retrieval of the Vault token in order to handle all the various scenarios for how modules
+  # can be applied
   vault_address = local.is_ci ? get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@") : lookup(local.vars, "vault_addr", get_env("VAULT_ADDR", "@@TERRAGRUNT_INVALID@@"))
   vault_token = run_cmd(
     "--terragrunt-global-cache", "--terragrunt-quiet",
@@ -114,11 +170,26 @@ locals {
     local.enable_vault ? "" : "--noop"
   )
 
-  # With Panfactum CI (and most other CI providers), the CI env variable is set to indicate the execution context is a CI runner
-  is_ci = get_env("CI", "false") == "true" || get_env("CI", "false") == "1"
-
+  ############################################################################################
+  # Kubernetes Connection
+  ############################################################################################
   kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
   kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
+
+  ############################################################################################
+  # Miscellaneous
+  ############################################################################################
+  # Folder of shared snippets to generate
+  provider_folder = "providers"
+
+  # local dev namespace
+  # TODO: This is deprecated and will be removed / changed in a future release
+  local_dev_namespace = get_env("LOCAL_DEV_NAMESPACE", "")
+  is_local            = local.vars.environment == "local"
+
+
+  # With Panfactum CI (and most other CI providers), the CI env variable is set to indicate the execution context is a CI runner
+  is_ci = get_env("CI", "false") == "true" || get_env("CI", "false") == "1"
 
   # sla_target is both a provider config option and a common module input. To keep everything aligned,
   # this ensures that the provider config option will equal the module input iff the module input
@@ -132,7 +203,7 @@ locals {
 ################################################################
 
 terraform {
-  source = local.source
+  source = local.source # We default to the first-party IaC module but this should be overridden in each terragrunt.hcl
 
   # Force Terraform to keep trying to acquire a lock for
   # up to 30 minutes if someone else already has the lock
@@ -340,11 +411,12 @@ retry_sleep_interval_sec = 30
 ################################################################
 ### Default Module Inputs
 ################################################################
+
 inputs = merge(
   local.extra_inputs,
   {
-    pf_module_source = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "../../../../${local.pf_stack_local_path_relative_to_module}/packages/infrastructure//" : "${local.pf_stack_local_path}/packages/infrastructure//") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//"
-    pf_module_ref    = local.pf_stack_version == "local" ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : ""
+    pf_module_source = local.use_local_pf_modules ? (local.pf_stack_local_use_relative ? "${local.pf_stack_local_relative_path_from_working_dir}/packages/infrastructure//" : "${local.pf_stack_local_absolute_path}/packages/infrastructure//") : "https://modules.panfactum.com/${local.pf_stack_version_commit_hash}/modules.tar.gz//"
+    pf_module_ref    = local.use_local_pf_modules ? (local.pf_stack_local_use_relative ? "" : "?ref=${local.pf_stack_local_ref}") : ""
     sla_target       = local.sla_target
   }
 )
