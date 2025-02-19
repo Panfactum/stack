@@ -428,6 +428,10 @@ resource "kubectl_manifest" "network_cost" {
     spec = {
       updateStrategy = {
         type = "RollingUpdate"
+        rollingUpdate = {
+          maxUnavailable = "34%"
+          maxSurge       = 0
+        }
       }
       selector = {
         matchLabels = module.util_network_cost.match_labels

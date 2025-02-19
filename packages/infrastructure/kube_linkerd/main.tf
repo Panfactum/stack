@@ -339,10 +339,11 @@ data "kubectl_server_version" "version" {}
 resource "kubectl_manifest" "linkerd_cni_policy" {
   yaml_body = yamlencode({
     apiVersion = "kyverno.io/v1"
-    kind       = "ClusterPolicy"
+    kind       = "Policy"
     metadata = {
-      name   = "linkerd-cni"
-      labels = data.pf_kube_labels.labels.labels
+      name      = "linkerd-cni"
+      namespace = local.namespace
+      labels    = data.pf_kube_labels.labels.labels
     }
     spec = {
       rules = [
@@ -416,6 +417,59 @@ resource "kubectl_manifest" "linkerd_cni_policy" {
   server_side_apply = true
 
   depends_on = [helm_release.linkerd_cni]
+}
+
+
+resource "kubectl_manifest" "linkerd_cni_ds_policy" {
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "Policy"
+    metadata = {
+      name      = "linkerd-cni-ds"
+      namespace = local.namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      rules = [
+        {
+          name = "update-ds"
+          match = {
+            any = [
+              {
+                resources = {
+                  kinds = ["DaemonSet"]
+                  names = ["linkerd-cni"]
+                }
+              }
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [{
+              apiVersion = "apps/v1"
+              kind       = "DaemonSet"
+              name       = "linkerd-cni"
+            }]
+            patchStrategicMerge = {
+              spec = {
+                updateStrategy = {
+                  rollingUpdate = {
+                    maxUnavailable = "34%"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+      webhookConfiguration = {
+        failurePolicy = "Ignore"
+      }
+    }
+  })
+
+  force_conflicts   = true
+  server_side_apply = true
 }
 
 

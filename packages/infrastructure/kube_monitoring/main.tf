@@ -597,6 +597,14 @@ resource "helm_release" "prometheus_stack" {
           }
         }
 
+        updateStrategy = {
+          type = "RollingUpdate"
+          rollingUpdate = {
+            maxSurge       = 0
+            maxUnavailable = "34%"
+          }
+        }
+
         tolerations = concat(
           [
             {

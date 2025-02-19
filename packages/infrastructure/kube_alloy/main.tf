@@ -121,7 +121,7 @@ resource "helm_release" "alloy" {
         podLabels         = module.util.labels
         updateStrategy = {
           rollingUpdate = {
-            maxUnavailable = "50%"
+            maxUnavailable = "34%"
             maxSurge       = 0
           }
         }

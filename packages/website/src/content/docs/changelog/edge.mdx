@@ -26,6 +26,9 @@ providing `GIT_USERNAME` and `GIT_PASSWORD` environment variables. See the [upda
 
 ### Fixed
 
+* DaemonSets in the cluster will update in a constant time. Previously the update time scaled with the number
+of nodes in the cluster which led to timeouts.
+
 * Resolves a bug that caused [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) workflows
 to fail.
 
