@@ -22,15 +22,18 @@ let
         if [[ "$arg" == "run-all" ]]; then
             export TERRAGRUNT_PROVIDER_CACHE=1
             export TERRAGRUNT_PROVIDER_CACHE_DIR="$TF_PLUGIN_CACHE_DIR"
-            ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@"
-            exit "$?"
         fi
     done
-    {
-      stdbuf -oL ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@" 2> >(stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g" >&2)
-    } | stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g"
 
-    exit ''${PIPESTATUS[0]}
+    if [[ "$CI" == "true" || "$CI" == "1" ]]; then
+        {
+          stdbuf -oL ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@" 2> >(stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g" >&2)
+        } | stdbuf -oL sed "s/$GIT_PASSWORD/redacted/g"
+        exit ''${PIPESTATUS[0]}
+    else
+        ${tfUtilsPkgs.terragrunt}/bin/terragrunt "$@"
+        exit "$?"
+    fi
   '';
   cilium = pkgs.symlinkJoin {
     name = "cilium-cli";

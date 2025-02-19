@@ -61,9 +61,10 @@ locals {
   ############################################################################################
 
   # Activated providers
-  lockfile_contents = try(file(find_in_parent_folders("${get_terragrunt_dir()}/.terraform.lock.hcl")), "")
+  lockfile_contents = try(file(find_in_parent_folders("${get_original_terragrunt_dir()}/.terraform.lock.hcl")), "")
   enable_aws        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/aws")
-  enable_kubernetes = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/kubernetes") || strcontains(local.lockfile_contents, "registry.opentofu.org/alekc/kubectl")
+  enable_kubernetes = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/kubernetes")
+  enable_kubectl    = strcontains(local.lockfile_contents, "registry.opentofu.org/alekc/kubectl")
   enable_vault      = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/vault")
   enable_helm       = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/helm")
   enable_authentik  = strcontains(local.lockfile_contents, "registry.opentofu.org/goauthentik/authentik")
@@ -78,9 +79,12 @@ locals {
   # Shared module logic
   ############################################################################################
 
-  # The module to deploy - This logic is used BOTH for Panfacutm modules and first-party IaC
+  # The module to deploy - This logic is used BOTH for Panfactum modules and first-party IaC
   module = lookup(local.vars, "module", basename(get_original_terragrunt_dir()))
 
+  # Inspect the terragrunt.hcl that includes this shared file. If it uses the 'pf_stack_source'
+  # local, that means it is almost certainly deploying a Panfactum module directly (vs a first-party IaC module)
+  is_pf_stack_module = strcontains(file("${get_original_terragrunt_dir()}/terragrunt.hcl"), "pf_stack_source")
 
   ############################################################################################
   # How to source the Panfactum modules
@@ -175,8 +179,8 @@ locals {
   ############################################################################################
   # Kubernetes Connection
   ############################################################################################
-  kube_api_server     = try(local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server, "@@KUBE_API_SERVER_INVALID@@")
-  kube_config_context = try(local.is_ci ? "ci" : local.vars.kube_config_context, "@@KUBE_CONFIG_CONTEXT_INVALID@@")
+  kube_api_server     = try(local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server, "")
+  kube_config_context = try(local.is_ci ? "ci" : local.vars.kube_config_context, "")
 
   ############################################################################################
   # Miscellaneous
@@ -231,9 +235,11 @@ terraform {
 ################################################################
 
 generate "pf_provider" {
-  path      = "pf.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_pf ? templatefile("${local.provider_folder}/pf.tftpl", {
+  path        = "pf.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_pf
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/pf.tftpl", {
     is_local            = local.is_local
     environment         = local.vars.environment
     region              = local.vars.region
@@ -244,124 +250,167 @@ generate "pf_provider" {
     kube_api_server     = local.kube_api_server
     kube_config_context = local.kube_config_context
     sla_target          = local.sla_target
-  }) : ""
+  })
 }
 
 generate "aws_provider" {
-  path      = "aws.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_aws ? templatefile("${local.provider_folder}/aws.tftpl", {
-    aws_region     = local.enable_aws ? local.vars.aws_region : ""
-    aws_account_id = local.enable_aws ? local.vars.aws_account_id : ""
-    aws_profile    = local.enable_aws ? (local.is_ci ? "ci" : local.vars.aws_profile) : ""
-  }) : ""
+  path        = "aws.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_aws
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/aws.tftpl", {
+    aws_region     = local.vars.aws_region
+    aws_account_id = local.vars.aws_account_id
+    aws_profile    = local.is_ci ? "ci" : local.vars.aws_profile
+  })
 }
 
+# Note: If the aws provider is enabled, always enable the secondary as it removes a footgun at no extra cost
 generate "aws_secondary_provider" {
-  path      = "aws_secondary.tf"
-  if_exists = "overwrite_terragrunt"
-  # Note: If the aws provider is enabled, always enable the secondary as it removes a footgun at no extra cost
-  contents = local.enable_aws ? templatefile("${local.provider_folder}/aws_secondary.tftpl", {
-    aws_region     = local.enable_aws ? local.vars.aws_secondary_region : ""
-    aws_account_id = local.enable_aws ? local.vars.aws_secondary_account_id : ""
-    aws_profile    = local.enable_aws ? (local.is_ci ? "ci" : local.vars.aws_secondary_profile) : ""
-  }) : ""
+  path        = "aws_secondary.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_aws
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/aws_secondary.tftpl", {
+    aws_region     = local.vars.aws_secondary_region
+    aws_account_id = local.vars.aws_secondary_account_id
+    aws_profile    = local.is_ci ? "ci" : local.vars.aws_secondary_profile
+  })
 }
 
+# Note: If the aws provider is enabled, always enable the global as it removes a footgun at no extra cost
 generate "aws_global_provider" {
-  path      = "aws_global.tf"
-  if_exists = "overwrite_terragrunt"
-  # Note: If the aws provider is enabled, always enable the global as it removes a footgun at no extra cost
-  contents = local.enable_aws ? templatefile("${local.provider_folder}/aws_global.tftpl", {
-    aws_account_id = local.enable_aws ? local.vars.aws_account_id : ""
-    aws_profile    = local.enable_aws ? (local.is_ci ? "ci" : local.vars.aws_profile) : ""
-  }) : ""
+  path        = "aws_global.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_aws
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/aws_global.tftpl", {
+    aws_account_id = local.vars.aws_account_id
+    aws_profile    = local.is_ci ? "ci" : local.vars.aws_profile
+  })
 }
 
 generate "kubernetes_provider" {
-  path      = "kubernetes.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubernetes.tftpl", {
-    kube_api_server     = local.enable_kubernetes ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
-    kube_config_context = local.enable_kubernetes ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
-  }) : ""
+  path        = "kubernetes.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_kubernetes
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/kubernetes.tftpl", {
+    kube_api_server     = local.kube_api_server
+    kube_config_context = local.kube_config_context
+  })
 }
 
 generate "kubectl_provider" {
-  path      = "kubectl.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl.tftpl", {
+  path        = "kubectl.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_kubectl
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/kubectl.tftpl", {
     kube_api_server     = local.kube_api_server
     kube_config_context = local.kube_config_context
-  }) : ""
-}
-
-generate "kubectl_override_provider" {
-  path      = "kubectl_override.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_kubernetes ? templatefile("${local.provider_folder}/kubectl_override.tf", {
-    kubectl_version = local.enable_kubernetes ? lookup(local.vars, "kubectl_version", "2.1.3") : ""
-  }) : ""
+  })
 }
 
 generate "helm_provider" {
-  path      = "helm.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_helm ? templatefile("${local.provider_folder}/helm.tftpl", {
-    kube_api_server     = local.enable_helm ? (local.is_ci ? try("https://${get_env("KUBERNETES_SERVICE_HOST")}", local.vars.kube_api_server) : local.vars.kube_api_server) : ""
-    kube_config_context = local.enable_helm ? (local.is_ci ? "ci" : local.vars.kube_config_context) : ""
-  }) : ""
+  path        = "helm.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_helm
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/helm.tftpl", {
+    kube_api_server     = local.kube_api_server
+    kube_config_context = local.kube_config_context
+  })
 }
 
 generate "authentik_provider" {
-  path      = "authentik.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik.tftpl", {
-    authentik_url = local.enable_authentik ? local.vars.authentik_url : ""
-  }) : ""
-}
-
-generate "authentik_override_provider" {
-  path      = "authentik_override.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_authentik ? templatefile("${local.provider_folder}/authentik_override.tf", {
-    authentik_version = local.enable_authentik ? lookup(local.vars, "authentik_version", "2024.8.4") : ""
-  }) : ""
+  path        = "authentik.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_authentik
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/authentik.tftpl", {
+    authentik_url = local.vars.authentik_url
+  })
 }
 
 generate "time_provider" {
-  path      = "time.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = local.enable_time ? file("${local.provider_folder}/time.tf") : ""
+  path        = "time.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_time
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/time.tf")
 }
 
 generate "random_provider" {
-  path      = "random.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = local.enable_random ? file("${local.provider_folder}/random.tf") : ""
+  path        = "random.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_random
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/random.tf")
 }
 
 generate "local_provider" {
-  path      = "local.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = local.enable_local ? file("${local.provider_folder}/local.tf") : ""
+  path        = "local.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_local
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/local.tf")
 }
 
 generate "tls_provider" {
-  path      = "tls.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = local.enable_tls ? file("${local.provider_folder}/tls.tf") : ""
+  path        = "tls.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_tls
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/tls.tf")
 }
 
 generate "vault_provider" {
-  path      = "vault.tf"
-  if_exists = "overwrite_terragrunt"
-  contents = local.enable_vault ? templatefile("${local.provider_folder}/vault.tftpl", {
+  path        = "vault.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_vault
+  if_disabled = "remove"
+  contents = templatefile("${local.provider_folder}/vault.tftpl", {
     vault_address = local.vault_address
     vault_token   = local.vault_token
-  }) : ""
+  })
 }
 
+################################################################
+### Provider Overrides
+###
+### Required b/c tf will default providers to the hashicorp namespace
+### if the provider is used in a submodule but the source is not configured in the root module...
+### even if the source IS specified in the submodule. I know... wtf were they thinking.
+###
+### As a result, we need these overrides for every provider not in the hashicorp namespace.
+###
+### See https://github.com/hashicorp/terraform/issues/27663
+################################################################
+
+generate "authentik_override_provider" {
+  path        = "authentik_override.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_authentik || local.is_pf_stack_module # If we are deploying a Panfactum module directly, do not override as it will clear the version
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/authentik_override.tf")
+}
+
+generate "kubectl_override_provider" {
+  path        = "kubectl_override.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_kubectl || local.is_pf_stack_module # If we are deploying a Panfactum module directly, do not override as it will clear the version
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/kubectl_override.tf")
+}
+
+generate "pf_override_provider" {
+  path        = "pf_override.tf"
+  if_exists   = "overwrite_terragrunt"
+  disable     = !local.enable_pf || local.is_pf_stack_module # If we are deploying a Panfactum module directly, do not override as it will clear the version
+  if_disabled = "remove"
+  contents    = file("${local.provider_folder}/pf_override.tf")
+}
 
 ################################################################
 ### Remote State Configuration

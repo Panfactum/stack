@@ -236,17 +236,18 @@ Our Terragrunt configuration automatically takes care of passing in the appropri
 and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/docs/main/reference/configuration/terragrunt-variables#module-source), these variables will
 automatically update.
 
-Finally, if you are using Panfactum submodules, your IaC provider version constraints must be set to a specific value
-for each provider. For the full list of provider version values, see the [reference docs](/docs/main/reference/infrastructure-modules/overview#provider-versions).
+Finally, if you are using Panfactum submodules, you should **not** set version constraints for IaC providers used by the submodule (check
+the module's documentation for what providers are used). Instead, your first-party IaC will automatically inherit the constraints from the submodule's configuration.
+This ensures that no first-party IaC updates are required when changing Panfactum versions.
 
-Unfortunately, these must be set manually. For example:
+For example, you should **remove** static version constraints:
 
-```hcl
+```diff lang="hcl"
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.34.0"
+-      version = "2.34.0"
     }
   }
 }

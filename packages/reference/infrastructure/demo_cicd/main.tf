@@ -2,32 +2,24 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.34.0"
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = "2.1.3"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "5.80.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.3"
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "4.5.0"
     }
     pf = {
       source = "panfactum/pf"
-      version = "0.0.7"
     }
   }
 }
-
-data "aws_region" "current" {}
 
 locals {
   namespace = module.namespace.namespace
