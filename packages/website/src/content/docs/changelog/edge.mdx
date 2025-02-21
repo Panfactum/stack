@@ -29,6 +29,8 @@ a standard set of labels and/or annotations to all pods in the cluster.
 
 ### Fixed
 
+* Addressed issue where the `.kube/.gitignore` file was not being created.
+
 * DaemonSets in the cluster will update in a constant time. Previously the update time scaled with the number
 of nodes in the cluster which led to timeouts.
 
