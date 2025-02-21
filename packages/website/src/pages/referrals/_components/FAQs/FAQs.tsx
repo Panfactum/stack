@@ -50,7 +50,7 @@ const FAQS: Component = () => {
         No.
       </FAQItem>
       <FAQItem title={"Have a more complex situation?"} id={"complex"}>
-        <p>Reach out to CEO Jack Langston at <a href="mailto:jack@panfactum.com">jack@panfactum.com</a>.</p>
+        <p>Reach out to CEO Jack Langston at <a href="mailto:jack@panfactum.com">jack@panfactum.com</a>{" "} or{" "}<a href="https://cal.com/jack-langston/chat?user=jack-langston&duration=15">set up a time to chat live.</a></p>
       </FAQItem>
     </Accordion>
   )
