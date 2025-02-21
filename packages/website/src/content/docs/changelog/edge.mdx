@@ -24,6 +24,9 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 * Adds support for using a private git repository for first-party IaC modules by
 providing `GIT_USERNAME` and `GIT_PASSWORD` environment variables. See the [updated documentation.](/docs/main/guides/iac/first-party-modules#using-a-private-git-repository)
 
+* [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies) now takes `common_pod_labels` and `common_pod_annotations` inputs which can be used to apply
+a standard set of labels and/or annotations to all pods in the cluster.
+
 ### Fixed
 
 * DaemonSets in the cluster will update in a constant time. Previously the update time scaled with the number

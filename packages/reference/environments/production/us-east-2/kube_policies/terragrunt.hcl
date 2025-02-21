@@ -19,6 +19,9 @@ inputs = {
   common_secrets = {
     jack = "langston"
   }
+  common_pod_annotations = {
+    panfactum = "rocks"
+  }
 }
 
 
