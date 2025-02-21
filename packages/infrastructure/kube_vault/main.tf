@@ -360,7 +360,7 @@ resource "kubectl_manifest" "vpa_server" {
         containerPolicies = [{
           containerName = "vault"
           minAllowed = {
-            memory = "200Mi"
+            memory = "275Mi"
           }
         }]
       }

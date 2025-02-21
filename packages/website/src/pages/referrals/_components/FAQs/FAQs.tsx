@@ -23,7 +23,14 @@ const FAQS: Component = () => {
             Is headquartered in North America.
           </li>
         </ul>
-        We work successfully with both early-stage startups and large organizations with lots of preexisting infrastructure.
+        <p>
+          We work successfully with both early-stage startups and large organizations with lots of preexisting
+          infrastructure.
+        </p>
+        <p>
+          The benefits are not tied to a particular sector or industry. We work with users across all fields
+          including but not limited to finance, healthcare, HR, software-as-a-service (SaaS), construction, logistics, manufacturing, retail, AI, etc.
+        </p>
       </FAQItem>
       <FAQItem title={"Can I refer my own organization?"} id={"own-referral"}>
         <p>

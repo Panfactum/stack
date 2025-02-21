@@ -5,6 +5,7 @@ import HeroSection from "./_components/HeroSection.astro"
 import Pitch from "./_components/Pitch.astro";
 import Layout from "../../layouts/Layout.astro";
 import MainSection from "../../layouts/MainSection.astro";
+import WhoWouldBenefit from "./_components/WhoWouldBenefit.astro";
 ---
 <Layout
         heroClass="bg-secondary"
@@ -14,6 +15,7 @@ import MainSection from "../../layouts/MainSection.astro";
 >
     <HeroSection slot="hero"/>
     <Details/>
+    <WhoWouldBenefit/>
     <Pitch/>
     <MainSection title="FAQs">
         <FAQS client:idle/>

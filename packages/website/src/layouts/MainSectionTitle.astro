@@ -8,6 +8,7 @@ const { title } = Astro.props;
 
 <h2
   class:list={["font-machina font-semibold text-display-xl mb-2 text-center"]}
+  id={title.replace(" ", "-").toLowerCase()}
 >
   {title}
 </h2>
