@@ -17,7 +17,7 @@ This module sets up the identity provider configuration in MongoDB Atlas.
 They will lose the ability to login, but you should be aware of the following caveats:
 
 - If "Bypass SAML Mode" is enabled, users will be able to bypass Authentik and login directly to Atlas using their
-  static usernames and passwords. As a result, we strongly recommend keeping this flag disabled.
+  static usernames and passwords. As a result, we strongly recommend keeping the [SSO Debug Mode](#sso\_debug\_enabled) input as `false` after initial setup.
 - Any active session tokens that the user has with the Atlas web UI will not be automatically revoked. Until these
   tokens expire, the user may still have the ability to interact with the web UI unless you manually remove them from
   the Atlas organization.
