@@ -38,21 +38,22 @@ import SubSection from "../layouts/SubSection.astro";
     background="secondary"
     title="Hire the Panfactum Experts"
     subtitle="You focus on shipping software. We handle your cloud infrastructure."
+    id="support"
   >
     <SupportPlanFeatureSection />
 
     <ComparisonSection />
     <PricingSection />
-      <SubSection title="Customize your Plan" kicker="Optimized for your needs" id="plan-calculator">
-        <PriceCalculator background="secondary" client:idle />
-      </SubSection>
-      <SubSection title="Calculate your Savings" kicker="Slash your cloud costs" id="savings-calculator">
-          <SavingsCalculator background="secondary" client:idle />
-      </SubSection>
-      <SupportGuaranteeSection />
-      <SubSection title="Frequently Asked Questions">
-          <FAQS client:idle/>
-          <MoreQuestions/>
-      </SubSection>
+    <SubSection title="Customize your Plan" kicker="Optimized for your needs" id="plan-calculator">
+      <PriceCalculator background="secondary" client:idle />
+    </SubSection>
+    <SubSection title="Calculate your Savings" kicker="Slash your cloud costs" id="savings-calculator">
+        <SavingsCalculator background="secondary" client:idle />
+    </SubSection>
+    <SupportGuaranteeSection />
+    <SubSection title="Frequently Asked Questions">
+        <FAQS client:idle/>
+        <MoreQuestions/>
+    </SubSection>
   </MainSection>
 </Layout>

@@ -19,7 +19,7 @@ const { background = "primary", title, subtitle, id } = Astro.props;
 >
   <div
     class="container mx-auto flex max-w-screen-xl flex-col items-center px-4 py-16 md:px-8"
-    id={id ?? title}
+    id={id ?? title?.replaceAll(" ", "-").toLowerCase()}
   >
     <div class="mb-8">
       {title && <MainSectionTitle title={title} background={background} />}
