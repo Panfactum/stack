@@ -24,6 +24,7 @@ const InputLabel: Component<InputLabelProps> = (props) => {
 
   return (
     <>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
       <label
         class={clsx(
           "hover:text-secondary flex cursor-pointer items-center gap-3 whitespace-nowrap text-sm font-semibold",

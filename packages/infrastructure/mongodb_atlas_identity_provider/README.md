@@ -86,7 +86,7 @@ We will first create the resource through the UI and then import it to configure
 6. Select `SAML for Atlas UI Access`
 7. Set a Name such as `Authentik Integration`
 8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
-   ![Fill with placeholder vlaues](doc_images/mongodb-atlas-saml-fill-placeholder.png)
+   ![Fill with placeholder values](doc_images/mongodb-atlas-saml-fill-placeholder.png)
 9. Upload the `Signing Certificate` that we downloaded above
 10. Set the `Request Binding` to `HTTP-POST`
 11. Set the `Response Signature Algorithm` to `SHA-256`

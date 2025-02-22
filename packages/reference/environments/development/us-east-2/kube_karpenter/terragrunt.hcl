@@ -14,5 +14,5 @@ dependency "cluster" {
 inputs = {
   cluster_name  = dependency.cluster.outputs.cluster_name
   node_role_arn = dependency.cluster.outputs.node_role_arn
-  wait = true
+  wait          = true
 }
