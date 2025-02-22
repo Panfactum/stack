@@ -44,7 +44,7 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 2. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Domains`
 3. Click on `Add Domain`
    ![img.png](doc_images/img.png)
-4. Add the root domain that you are using for Authentik (ie: panfactum.com)
+4. Add the root domain that you are using for Authentik (i.e., panfactum.com)
 5. Select `DNS Record` as the verification method
    ![img_2.png](doc_images/img_2.png)
 6. Note the `TXT Record` that is generated. You will need this value in future steps.
@@ -84,7 +84,7 @@ We will first create the resource through the UI and then import it to configure
    ![img_5.png](doc_images/img_5.png)
 5. Select `Workforce Identity Federation`
 6. Select `SAML for Atlas UI Access`
-7. Set a Name: `Authentik Integration`
+7. Set a Name such as `Authentik Integration`
 8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
    ![img_7.png](doc_images/img_7.png)
 9. Upload the `Signing Certificate` that we downloaded above
@@ -94,8 +94,8 @@ We will first create the resource through the UI and then import it to configure
     * `ACS URL`
     * `Audience URI`
     * `IdP ID`
-    * `Federation Settings ID` Found in the url
-      `https://cloud.mongodb.com/v2#/federation/<this-is-your-federation-settings-id>/overview`
+    * `Federation Settings ID` (Found in the url
+      `https://cloud.mongodb.com/v2#/federation/<this-is-your-federation-settings-id>/overview`)
 
 #### Create Access Keys
 
@@ -105,8 +105,8 @@ We will first create the resource through the UI and then import it to configure
 4. Set the description to `terraform`
 5. Set the Organization Permission to `Organization Owner`
 6. Save the public and private key to your `.env` file
-    1. set `MONGODB_ATLAS_PUBLIC_KEY`
-    2. set `MONGODB_ATLAS_PRIVATE_KEY`
+    1. Set `MONGODB_ATLAS_PUBLIC_KEY`
+    2. Set `MONGODB_ATLAS_PRIVATE_KEY`
 
 #### Optional: CICD
 
