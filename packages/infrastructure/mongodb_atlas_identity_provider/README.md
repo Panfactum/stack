@@ -130,7 +130,7 @@ keys.
 3. Set the `federation_settings_id` to the value from above
 4. Set the `organization_id` to the value from above
 5. Set the `idp_id` to the value from above
-6. Set the `associated_domains` to the domain you verified above
+6. Set the `associated_domains` by adding the domain you verified above to the list
 7. Set the `sso_debug_enabled` to `true`
 8. Run `pf-tf-init`
 9. Run `terragrunt apply`
