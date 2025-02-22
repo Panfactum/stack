@@ -16,7 +16,7 @@ They will lose the ability to login, but you should be aware of the following ca
   the Atlas organization.
 - Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be
   able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if
-  removing a user in the `superusers` group (and any other group configured with access to application keys).
+  removing a user in the `superusers` or `privileged_engineers` group (and any other group configured with access to application keys).
   </MarkdownAlert>
 
 ## Panfactum Role to MongoDB Atlas Role Mapping
