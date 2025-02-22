@@ -123,7 +123,7 @@ We will first create the resource through the UI and then import it to configure
 
 #### 4. CICD (Optional)
 
-If you have CICD setup and deploying infrastructure using the [wf_tf_deploy] module, you will also need to pass in the
+If you have CICD setup and deploying infrastructure using the [wf_tf_deploy]() module, you will also need to pass in the
 keys.
 
 1. Update your CICD module var to accept the keys as inputs
@@ -136,7 +136,7 @@ keys.
    like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/demo-cicd/terragrunt.hcl)
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
-the [Sync Authentik with the Atlas Settings](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
+the [Sync Authentik with the Atlas Settings](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
 section.
 
 ### Disable SSO Bypass
