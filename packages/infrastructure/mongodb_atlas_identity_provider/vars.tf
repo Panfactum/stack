@@ -60,7 +60,21 @@ variable "name" {
 }
 
 variable "extra_role_mappings" {
-  description = "Additional role mappings to extend the default local mappings"
+  description = "Extra authentik roles to map to MongoDB Atlas roles. {<panfactum_role> => [<mongodb_role>, ...]"
   type        = map(list(string))
   default     = {}
+
+  validation {
+    condition = alltrue([
+      for roles in values(var.extra_role_mappings) :
+      alltrue([for role in roles : contains([
+        "ORG_OWNER",
+        "ORG_BILLING_ADMIN",
+        "ORG_GROUP_CREATOR",
+        "ORG_MEMBER",
+        "ORG_READ_ONLY"
+      ], role)])
+    ])
+    error_message = "Invalid MongoDB Atlas role found in extra_role_mappings. Allowed roles: ORG_OWNER, ORG_BILLING_ADMIN, ORG_GROUP_CREATOR, ORG_MEMBER, ORG_READ_ONLY."
+  }
 }
