@@ -15,8 +15,8 @@ terraform {
 locals {
   default_role_mappings = {
     "superusers"            = ["ORG_OWNER"]
+    "privileged_engineers"  = ["ORG_OWNER"]
     "billing_admins"        = ["ORG_BILLING_ADMIN"]
-    "privileged_engineers"  = ["ORG_GROUP_CREATOR", "ORG_READ_ONLY"]
     "engineers"             = ["ORG_READ_ONLY"]
     "restricted_engineers"  = ["ORG_MEMBER"]
   }
