@@ -60,7 +60,7 @@ variable "name" {
 }
 
 variable "extra_role_mappings" {
-  description = "Extra authentik roles to map to MongoDB Atlas roles. {<panfactum_role> => [<mongodb_role>, ...]"
+  description = "Extra authentik roles to map to MongoDB Atlas roles. `{<panfactum role> => [<mongodb role>, ...]}`"
   type        = map(list(string))
   default     = {}
 
