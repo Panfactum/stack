@@ -43,12 +43,12 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 1. Go to your MongoDB Atlas account
 2. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Domains`
 3. Click on `Add Domain`
-   ![img.png](doc_images/img.png)
+   ![Add Domain](doc_images/mongodb-atlas-add-domains.png)
 4. Add the root domain that you are using for Authentik (i.e., panfactum.com)
 5. Select `DNS Record` as the verification method
-   ![img_2.png](doc_images/img_2.png)
+   ![DNS Verification](doc_images/mongodb-atlas-dns-verification.png)
 6. Note the `TXT Record` that is generated. You will need this value in future steps.
-   ![img_1.png](doc_images/img_1.png)
+   ![DNS TXT Verification Record](doc_images/mongodb-atlas-dns-txt-verification.png)
 
 ### Deploy a new DNS TXT Record & Verify
 
@@ -64,10 +64,10 @@ Before proceeding, make sure to have downloaded the signing certificate from the
 
 1. Login to your Authentik instance
 2. Switch over to the `Admin` section
-   ![img_3.png](doc_images/img_3.png)
+   ![Authentik Admin](doc_images/mongodb-atlas-authentik-admin-link.png)
 3. Go to the section `Applications` -> `Providers` -> `MongoDB Atlas`
 4. Find `Related objects` and click on the `Download` button for the `Download signing certificate`
-   ![img_4.png](doc_images/img_4.png)
+   ![Authentik Identity Provider Signature](doc_images/mongodb-atlas-providers-certificate.png)
 
 ### Deploy the MongoDB Identity Provider module
 
@@ -81,12 +81,12 @@ We will first create the resource through the UI and then import it to configure
 2. Note the `Organization ID`. You will need this value in future steps.
 3. Go to `Federated Authentication Settings` -> `Identity Providers`
 4. Click on `Configure Identity Provider`
-   ![img_5.png](doc_images/img_5.png)
+   ![Configure Identity Provider](doc_images/mongodb-atlas-configure-identity-provider.png)
 5. Select `Workforce Identity Federation`
 6. Select `SAML for Atlas UI Access`
 7. Set a Name such as `Authentik Integration`
 8. Click on `Fill with placeholder values` for the Issuer URI and Single Sign-On URL
-   ![img_7.png](doc_images/img_7.png)
+   ![Fill with placeholder vlaues](doc_images/mongodb-atlas-saml-fill-placeholder.png)
 9. Upload the `Signing Certificate` that we downloaded above
 10. Set the `Request Binding` to `HTTP-POST`
 11. Set the `Response Signature Algorithm` to `SHA-256`
