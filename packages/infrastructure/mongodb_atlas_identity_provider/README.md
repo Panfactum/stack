@@ -131,8 +131,9 @@ keys.
 4. Set the `organization_id` to the value from above
 5. Set the `idp_id` to the value from above
 6. Set the `associated_domains` to the domain you verified above
-7. Run `pf-tf-init`
-8. Run `terragrunt apply`
+7. Set the `sso_debug_enabled` to `true`
+8. Run `pf-tf-init`
+9. Run `terragrunt apply`
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
 the [Sync Authentik with the Atlas Settings](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)`
@@ -140,15 +141,10 @@ section.
 
 ### Disable SSO Bypass
 
-After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle.
+After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle by updating the `sso_debug_enabled` to `false` in the `mongodb_atlas_identity_provider` module.
 
 <MarkdownAlert severity="warning">
   You MUST verify that SSO works prior to disabling the bypass. 
   Disabling this toggle will lock you out of your MongoDB Atlas account if you have not configured SSO correctly.
   If you do lock yourself out, rest assured you can still recover by contacting their support, but it can take 1-2 days.
 </MarkdownAlert>
-
-1. Go to `Organization Settings` -> `Federated Authentication Settings` -> `Identity Providers`
-2. Click on the `Authentik Integration` identity provider
-3. Toggle `Bypass SAML Mode` to `off`
-   ![img_8.png](doc_images/img_8.png)
