@@ -17,7 +17,7 @@ They will lose the ability to login, but you should be aware of the following ca
 - Atlas application keys are not scoped to a user's account. If the user had access to these keys, they may still be
   able to access Atlas even after their account is removed. As a result, ensure that you rotate application keys if
   removing a user in the `superusers` or `privileged_engineers` group (and any other group configured with access to application keys).
-  </MarkdownAlert>
+</MarkdownAlert>
 
 ## Panfactum Role to MongoDB Atlas Role Mapping
 
@@ -75,7 +75,7 @@ Unfortunately, the terraform provider for MongoDB Atlas does not support the cre
 allows for modifications.
 We will first create the resource through the UI and then import it to configure further.
 
-#### From MongoDB Atlas UI
+#### 1. From MongoDB Atlas UI
 
 1. Go to `Organization Settings`
 2. Note the `Organization ID`. You will need this value in future steps.
@@ -97,7 +97,7 @@ We will first create the resource through the UI and then import it to configure
     * `Federation Settings ID` (Found in the url
       `https://cloud.mongodb.com/v2#/federation/<this-is-your-federation-settings-id>/overview`)
 
-#### Create Access Keys
+#### 2. Create Access Keys
 
 1. Go to `Organization Settings` -> `Access Manager`
 2. Click on `Applications` tab
@@ -108,7 +108,20 @@ We will first create the resource through the UI and then import it to configure
     1. Set `MONGODB_ATLAS_PUBLIC_KEY`
     2. Set `MONGODB_ATLAS_PRIVATE_KEY`
 
-#### Optional: CICD
+#### 3. From the terminal
+
+1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
+2. Add a new a `terragrunt.hcl` file that looks
+   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
+3. Set the `federation_settings_id` to the value from above
+4. Set the `organization_id` to the value from above
+5. Set the `idp_id` to the value from above
+6. Set the `associated_domains` by adding the domain you verified above to the list
+7. Set the `sso_debug_enabled` to `true`
+8. Run `pf-tf-init`
+9. Run `terragrunt apply`
+
+#### 4. CICD (Optional)
 
 If you have CICD setup and deploying infrastructure using the [wf_tf_deploy] module, you will also need to pass in the
 keys.
@@ -122,29 +135,18 @@ keys.
 4. Utilize and pass them in as inputs
    like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/demo-cicd/terragrunt.hcl)
 
-#### From the terminal
-
-1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
-2. Add a new a `terragrunt.hcl` file that looks
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
-3. Set the `federation_settings_id` to the value from above
-4. Set the `organization_id` to the value from above
-5. Set the `idp_id` to the value from above
-6. Set the `associated_domains` by adding the domain you verified above to the list
-7. Set the `sso_debug_enabled` to `true`
-8. Run `pf-tf-init`
-9. Run `terragrunt apply`
-
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
-the [Sync Authentik with the Atlas Settings](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)`
+the [Sync Authentik with the Atlas Settings](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso)
 section.
 
 ### Disable SSO Bypass
-
-After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle by updating the `sso_debug_enabled` to `false` in the `mongodb_atlas_identity_provider` module.
-
 <MarkdownAlert severity="warning">
   You MUST verify that SSO works prior to disabling the bypass. 
   Disabling this toggle will lock you out of your MongoDB Atlas account if you have not configured SSO correctly.
   If you do lock yourself out, rest assured you can still recover by contacting their support, but it can take 1-2 days.
 </MarkdownAlert>
+
+After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle by updating the `sso_debug_enabled` to `false` in the `mongodb_atlas_identity_provider` module.
+
+
+
