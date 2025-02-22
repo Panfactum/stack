@@ -4,7 +4,6 @@ module "tf_deploy" {
 
   name                       = "tf-deploy-prod"
   namespace                  = local.namespace
-  pull_through_cache_enabled = var.pull_through_cache_enabled
 
   repo         = "github.com/panfactum/stack.git"
   tf_apply_dir = "packages/reference/environments/production"

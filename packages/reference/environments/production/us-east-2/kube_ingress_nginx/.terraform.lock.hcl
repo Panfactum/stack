@@ -111,24 +111,24 @@ provider "registry.opentofu.org/hashicorp/random" {
 }
 
 provider "registry.opentofu.org/hashicorp/vault" {
-  version = "4.5.0"
+  version = "4.6.0"
   hashes = [
-    "h1:+wKs9hDeViWLWokhYBrGSs5vf6KwYIcXlgADm0Wbp04=",
-    "h1:2zN1LdTCiEpE8QWTbIcA+SDIGBXI52mwFMmwupWjfhE=",
-    "h1:6RjXUlhC6fzx48z01DNU15GaX5HlO/vuJ4hDOyQop4w=",
-    "h1:KWtz/9RwY80JLQ18SFh6AesSKwgzm8LDGfwMz0kLbAY=",
-    "zh:006189f781957a6128cfc71ea6e78015117dd8d618ca440a526feabf8168c708",
-    "zh:01ea4b69af85ab3efaf07c94e716cfbea45c2c052fdfddbcf0194d28a8590d3f",
-    "zh:21824df7ed7e5b2f596bf513c919a87663faf62bd4796c3d64df3de864af1397",
-    "zh:48ec5a529e74b538f597a18dad1a0476e04649f2e2b856e8aa7e52ec5fbde705",
-    "zh:5b422544b25e1796aeac86bf6abfe984d8ccc02ac95a13eb1159934e28eb6138",
-    "zh:759f732465af5071d481376db40455334f9a3247eecd27da89e0a0b090f00b6d",
-    "zh:89bb58831407f4b2d97b56ee84bcdd7ed196945b6e1209bd0f170d025b076ec4",
-    "zh:a2a17ab874beea583a0cf644b00370374533ce4c25bd33c7fac9ee8f757c1589",
-    "zh:cfe5b6355740a6591000df76abfae4e961de3f493b82ef7d5a4e9d3258bccd69",
-    "zh:eeff88ccf1a7f796ad06e0d762db746f78e5daf51572dfec413ad42e6122459f",
+    "h1:297s9DWT0KlQi4jbcUHBqR3JIJMOLaiClqtTrIuw1qQ=",
+    "h1:9wGZsCWun1czjelMYJIqx5h6xOZrehtICjXVWoTMsVA=",
+    "h1:TXh46Yi4lURS0yUa0p0Oqsa+QKALn8t5MX88y6siJ0w=",
+    "h1:byggLpJkjOJKzwojB0YR8ZjSO+kq3fIKCNC2QdlIkqw=",
+    "zh:05c3ba3b2e658d6b6d43e2e14291ca8d3b6423540c16828f7f16c27497410967",
+    "zh:3aec8d860bfa31fcf6bb8ec65d51f62ee6b478b747bc25caba9015e10f32d849",
+    "zh:4b7651f5759efe42aa95be447e6ab12c50ead01ce5a96a9be930d278bb6878be",
+    "zh:4bc2ceff195f173641e2611629d362848d73cfc14d4fff5a43b11ba19ef51583",
+    "zh:4f68f9ca133732d46dd8da66ad8910171f238d1e9a7c8a8680c44f5b2a550387",
+    "zh:53a0a43c352784474367c10d3836cab690aaff719af2aa4445cc7311cd9cb7db",
+    "zh:5b2727d7f023fd8f68e183bb944ab1bed9cf99e1f210c111263957a558283536",
+    "zh:7a991319f3a409f6eda7f2b433fb6e8cbc4cad24a9206ab486ad1f0b4f8f1635",
+    "zh:d42d9c27bc8c61ccf765d752c1eaad274b0cc3a9b8f08253657bd2cc1df08b3d",
+    "zh:ddcab8f69724e7513d2f089a8dd9052e3e3b5320cec37ae2a5fef93950cda0ca",
   ]
-  constraints = "4.5.0"
+  constraints = "4.6.0"
 }
 
 provider "registry.opentofu.org/panfactum/pf" {

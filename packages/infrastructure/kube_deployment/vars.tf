@@ -321,7 +321,7 @@ variable "extra_service_labels" {
 }
 
 variable "ignore_replica_count" {
-  description = "Whether to ignore changes to the replica count. Useful when implementing horizontal autoscaling."
+  description = "Whether to ignore changes to the replica count. When this is true, 'replicas' will ONLY be used at initial Deployment creation. Useful when implementing horizontal autoscaling."
   type        = bool
   default     = false
 }

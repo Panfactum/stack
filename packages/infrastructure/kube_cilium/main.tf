@@ -214,6 +214,14 @@ resource "helm_release" "cilium" {
         hostNamespaceOnly = true
       }
 
+      updateStrategy = {
+        type = "RollingUpdate"
+        rollingUpdate = {
+          maxUnavailable = "34%"
+          maxSurge       = 0
+        }
+      }
+
       resources = {
         requests = {
           memory = "400Mi" // Needs to be a bit higher before the VPA is enabled

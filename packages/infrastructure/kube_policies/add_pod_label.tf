@@ -7,9 +7,15 @@ locals {
       mutate = {
         patchStrategicMerge = {
           metadata = {
-            labels = {
-              "+(panfactum.com/kyverno-mutated)" = "true"
-            }
+            labels = merge(
+              {
+                "+(panfactum.com/kyverno-mutated)" = "true"
+              },
+              {
+                for k, v in var.common_pod_labels : "+(${k})" => v
+              }
+            )
+            annotations = { for k, v in var.common_pod_annotations : "+(${k})" => v }
           }
         }
       }

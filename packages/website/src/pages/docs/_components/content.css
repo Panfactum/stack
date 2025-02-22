@@ -42,7 +42,11 @@
   }
 
   h3 {
-    @apply text-display-sm font-semibold mt-8 tracking-wide
+    @apply text-display-sm font-semibold mt-5 tracking-wide
+  }
+
+  h4 {
+    @apply text-display-xs mt-5 tracking-wide
   }
 
   h1,
@@ -64,6 +68,9 @@
   }
 
   /* Tables Styles */
+  table {
+    @apply mt-5;
+  }
   th, td {
     @apply border border-gray-light-mode-400 dark:border-gray-dark-mode-800 py-3 px-6
   }

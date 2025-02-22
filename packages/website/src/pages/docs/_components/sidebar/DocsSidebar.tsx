@@ -1,5 +1,6 @@
 import { Dialog } from "@kobalte/core/dialog";
 import { createResizeObserver } from "@solid-primitives/resize-observer";
+import {clsx} from "clsx";
 import { IoChevronForwardOutline } from "solid-icons/io";
 import { TbMenu } from "solid-icons/tb";
 import {
@@ -97,7 +98,8 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
   return (
     <>
       {/* DESKTOP VIEW */}
-      <div class="border-primary fixed top-[--header-height] hidden h-[calc(100vh_-_var(--header-height))] w-[--sidebar-width] overflow-y-auto border-r-2 pt-3 text-sm lg:block">
+      <div class="border-primary fixed top-[--header-height] hidden h-[calc(100vh_-_var(--header-height))] w-[--sidebar-width] overflow-y-auto border-r-2 pt-3 text-sm lg:block"
+      >
         <SidebarContent
           setMobileNavOpen={setMobileNavOpen}
           fullPath={props.fullPath}
@@ -110,8 +112,9 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
 
       {/* Mobile VIEW */}
       <div
-        class="bg-primary border-primary text-tertiary sticky top-0 z-20 flex h-12 w-screen max-w-[100vw] items-center justify-between gap-2 border-b-2  px-4 text-xs md:top-[--header-height] lg:hidden"
-        ref={crumbsRef}
+        class={clsx(
+          "bg-primary border-primary text-tertiary sticky top-0 z-20 flex h-12 w-screen max-w-[100vw] items-center justify-between gap-2 border-b-2  px-4 text-xs md:top-[--header-height] lg:hidden"
+        )}
       >
         <Dialog open={mobileNavOpen()} onOpenChange={setMobileNavOpen}>
           <Dialog.Trigger class="flex cursor-pointer items-center gap-1 overflow-x-hidden text-nowrap md:gap-2 dark:hover:text-white">

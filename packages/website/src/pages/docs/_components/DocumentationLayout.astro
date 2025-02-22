@@ -5,6 +5,7 @@ import CommonHead from "@/layouts/CommonHead.astro";
 import ArticleTableOfContents, {
   type ArticleHeadingMetadata,
 } from "./ArticleTableOfContents.astro";
+import DocumentationArticle from "./DocumentationArticle";
 import DocsSidebar from "./sidebar/DocsSidebar";
 import { type DocsMetadata } from "./types";
 import ToastRegion from "../../../components/ui/ToastRegion";
@@ -31,16 +32,19 @@ const {
   headings = [],
   metadata,
 } = Astro.props;
-
 ---
 
-<html lang="en">
+<html
+        lang="en"
+        data-banner="true"
+>
   <CommonHead title={title} description={description} redirect={redirect} >
     <meta name="generator" content={Astro.generator} />
   </CommonHead>
 
   <body
     class="bg-primary text-primary w-screen overflow-y-scroll font-inter"
+    id="body"
   >
     <Header
       hasBorder={hasBorder}
@@ -50,17 +54,18 @@ const {
     />
 
     <div
-      class="mx-auto flex h-full min-h-[calc(100vh_-_var(--header-height))] w-screen flex-col items-start lg:flex-row xl:max-w-screen-3xl"
+      class:list={[
+        "mx-auto flex h-full w-screen flex-col items-start lg:flex-row xl:max-w-screen-3xl",
+        "min-h-[calc(100vh_-_var(--header-height))]"
+      ]}
     >
       <DocsSidebar fullPath={pathname} metadata={metadata} client:load />
-      <article
-        class:list={[
-          "content mt-0 md:mt-16 lg:mt-[--header-height] lg:ml-[--sidebar-width] pt-6 px-6 h-full w-full max-w-full lg:w-[calc(100%_-_var(--sidebar-width))]",
-          headings.length > 1 ? "xl:w-[calc(100%_-_var(--sidebar-width)_-_var(--toc-width))]" : ""
-        ]}
-      >
-        <slot />
-      </article>
+        <DocumentationArticle
+                showTOC={headings.length > 1}
+                client:load
+        >
+            <slot/>
+        </DocumentationArticle>
       {headings.length > 1   && (<ArticleTableOfContents headings={headings} />)}
     </div>
     <SearchDialog fullPath={pathname} client:idle />

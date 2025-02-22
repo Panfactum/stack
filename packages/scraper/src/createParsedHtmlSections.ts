@@ -83,7 +83,7 @@ function parseUrlContent (content: string): UrlContent[] {
   })
 
   const breadCrumbs = [root.querySelector('nav [aria-label="secondary tab navigation"] a[aria-selected="true"]'), ...Array.from(root.querySelectorAll('aside .text-black'))].map(el => el?.textContent).filter(content => content !== undefined)
-  const article = root.querySelector('article')
+  const article = root.querySelector('article astro-slot')
 
   const pageElement = article ?? root
 

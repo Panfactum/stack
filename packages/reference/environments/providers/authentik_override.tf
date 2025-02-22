@@ -9,7 +9,6 @@ terraform {
   required_providers {
     authentik = {
       source  = "goauthentik/authentik"
-      version = "${authentik_version}"
     }
   }
 }

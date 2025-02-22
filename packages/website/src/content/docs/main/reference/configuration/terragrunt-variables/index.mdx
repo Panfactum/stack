@@ -146,17 +146,17 @@ The secondary is used in some Panfactum modules to configure things like backups
 | :-------------------- | :----- | :-------------------------------------------------------------------------------------- | :----------------- |
 | `kube_api_server`     | string | The `https` URL of the Kubernetes API server the provider should connect to             | `region.yaml`      |
 | `kube_config_context` | string | The name of the context the provider should use in your repo's `kubeconfig` file        | `region.yaml`      |
-| `kubectl_version`     | string | (Optional) The version of the `alekc/kubectl` IaC Provider to use. Defaults to `2.0.4`. | `environment.yaml` |
 
 #### `vault` Provider
 
 | Variable     | Type   | Description                                                        | Recommended File |
 | :----------- | :----- | :----------------------------------------------------------------- | :--------------- |
-| `vault_addr` | string | The `https` URL of the Vault server the provider should connect to | `region.yaml`    |
+| `vault_addr` | string | The `https` URL of the Vault server the provider should connect to. Will fallback to the `VAULD_ADDR` if not provided. | `region.yaml`    |
 
 #### `authentik` Provider
 
 | Variable            | Type   | Description                                                                                        | Recommended File   |
 | :------------------ | :----- | :------------------------------------------------------------------------------------------------- | :----------------- |
 | `authentik_url`     | string | The `https` URL of the Authenik server the provider should connect to                              | `global.yaml`      |
-| `authentik_version` | string | (Optional) The version of the `goauthentik/authentik` IaC Provider to use. Defaults to `2024.2.0`. | `environment.yaml` |
+
+*To apply modules that use the Authentik provider, you will also need to have `AUTHENTIK_TOKEN` set in [your .env file.](/docs/main/reference/configuration/dotenv)*
