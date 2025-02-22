@@ -59,7 +59,7 @@ variable "name" {
   default = "Panfactum Authentik Integration"
 }
 
-variable "custom_role_mappings" {
+variable "extra_role_mappings" {
   description = "Additional role mappings to extend the default local mappings"
   type        = map(list(string))
   default     = {}

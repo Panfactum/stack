@@ -23,7 +23,7 @@ locals {
 
   # Filter out keys that attempt to override default mappings
   allowed_custom_mappings = {
-    for key, roles in var.custom_role_mappings :
+    for key, roles in var.extra_role_mappings :
     key => roles if !contains(keys(local.default_role_mappings), key)
   }
 

@@ -5,6 +5,9 @@ provider "registry.opentofu.org/goauthentik/authentik" {
   version     = "2024.8.4"
   constraints = "2024.8.4"
   hashes = [
+    "h1:D7ubAOqNdetqacJgTRjLbbrcOxooXCO0Lyp62OvI8yo=",
+    "h1:U3sDctMTEHA2HFpzYhfFyDycKoB4Rk7n9RQZ1RdS+UU=",
+    "h1:Wj3W1TDkn/FcDFQiT5g+GbOUSjUSmGdXfGrJNdWfen8=",
     "h1:bZS9RwjEc1FlLFMidiCzyUrFTC7VONufHBDgGjAtSWs=",
     "zh:13040879209e226ba73dd3492849301f5d6233098decf4789dde4e75a7db00a3",
     "zh:21e5b1403749e4577c85efe1e1ffbc7f70f910c9b025a66ee36d6d9e7a26834d",

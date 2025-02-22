@@ -20,4 +20,5 @@ inputs = {
   sso_url = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
 
   associated_domains = ["panfactum.com"]
+  sso_debug_enabled = false # set this to true while setting up the integration for the first time
 }
