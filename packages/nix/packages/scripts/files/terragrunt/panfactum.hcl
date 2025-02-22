@@ -61,18 +61,19 @@ locals {
   ############################################################################################
 
   # Activated providers
-  lockfile_contents = try(file(find_in_parent_folders("${get_original_terragrunt_dir()}/.terraform.lock.hcl")), "")
-  enable_aws        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/aws")
-  enable_kubernetes = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/kubernetes")
-  enable_kubectl    = strcontains(local.lockfile_contents, "registry.opentofu.org/alekc/kubectl")
-  enable_vault      = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/vault")
-  enable_helm       = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/helm")
-  enable_authentik  = strcontains(local.lockfile_contents, "registry.opentofu.org/goauthentik/authentik")
-  enable_time       = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/time")
-  enable_local      = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/local")
-  enable_random     = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/random")
-  enable_tls        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/tls")
-  enable_pf         = strcontains(local.lockfile_contents, "registry.opentofu.org/panfactum/pf")
+  lockfile_contents    = try(file(find_in_parent_folders("${get_original_terragrunt_dir()}/.terraform.lock.hcl")), "")
+  enable_aws           = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/aws")
+  enable_kubernetes    = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/kubernetes")
+  enable_kubectl       = strcontains(local.lockfile_contents, "registry.opentofu.org/alekc/kubectl")
+  enable_mongodb_atlas = strcontains(local.lockfile_contents, "registry.opentofu.org/mongodb/mongodbatlas")
+  enable_vault         = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/vault")
+  enable_helm          = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/helm")
+  enable_authentik     = strcontains(local.lockfile_contents, "registry.opentofu.org/goauthentik/authentik")
+  enable_time          = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/time")
+  enable_local         = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/local")
+  enable_random        = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/random")
+  enable_tls           = strcontains(local.lockfile_contents, "registry.opentofu.org/hashicorp/tls")
+  enable_pf            = strcontains(local.lockfile_contents, "registry.opentofu.org/panfactum/pf")
 
 
   ############################################################################################
@@ -374,6 +375,12 @@ generate "vault_provider" {
     vault_address = local.vault_address
     vault_token   = local.vault_token
   })
+}
+
+generate "mongodb_atlas_provider" {
+  path      = "mongodb_atlas.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = local.enable_mongodb_atlas ? file("${local.provider_folder}/mongodb_atlas.tf") : ""
 }
 
 ################################################################
