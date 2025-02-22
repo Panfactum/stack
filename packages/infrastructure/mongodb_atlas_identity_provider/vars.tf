@@ -40,7 +40,7 @@ variable "sso_debug_enabled" {
 variable "active" {
   type = bool
   description = "The status of the identity provider in MongoDB Atlas. Setting to false will disable the identity provider and SSO will not function."
-  default = false
+  default = true
 }
 
 variable "sso_url" {
