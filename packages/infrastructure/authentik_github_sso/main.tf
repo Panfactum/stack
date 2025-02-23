@@ -62,7 +62,7 @@ resource "kubernetes_config_map_v1_data" "media" {
 // These certs are only used for their random cryptographic
 // material to sign the SAML assertions. There is no
 // need to use cert-manager to manage them,
-// especially since they need to be manually uploaded to atlas mongo
+// especially since they need to be manually uploaded to github
 // every time they rotate
 resource "tls_private_key" "signing" {
   algorithm = "RSA"
@@ -145,6 +145,6 @@ resource "authentik_policy_binding" "access" {
   order    = 10
 }
 
-data "authentik_provider_saml_metadata" "mongodb_atlas" {
+data "authentik_provider_saml_metadata" "github" {
   provider_id = authentik_provider_saml.github.id
 }
