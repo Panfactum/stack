@@ -104,13 +104,13 @@ data "authentik_property_mapping_provider_saml" "email" {
 resource "authentik_provider_saml" "github" {
   name               = "github"
   authorization_flow = data.authentik_flow.default_authorization_flow.id
-  property_mappings = []
-  acs_url         = var.acs_url
-  sp_binding      = "post"
-  issuer          = local.issuer
-  audience        = var.audience
-  name_id_mapping = data.authentik_property_mapping_provider_saml.email.id
-  signing_kp      = authentik_certificate_key_pair.signing.id
+  property_mappings  = []
+  acs_url            = var.acs_url
+  sp_binding         = "post"
+  issuer             = local.issuer
+  audience           = var.audience
+  name_id_mapping    = data.authentik_property_mapping_provider_saml.email.id
+  signing_kp         = authentik_certificate_key_pair.signing.id
 }
 
 resource "authentik_application" "github" {

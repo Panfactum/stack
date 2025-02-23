@@ -1,3 +1,5 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
 # Authentik Github SSO
 
 This module configures Authentik for integration with Github SAML single sign-on.
