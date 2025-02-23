@@ -20,8 +20,8 @@ This module configures Authentik for integration with Github SAML single sign-on
 
 ### Deploy Github Provider & Application in Authentik
 
-1. Add a new a `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
-2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_github_sso/terragrunt.hcl).
+1. Add a new `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_github_sso/terragrunt.hcl).
 3. Run `pf-tf-init`.
 4. Run `terragrunt apply`.
 5. Note the output as you'll use it in the following steps.
