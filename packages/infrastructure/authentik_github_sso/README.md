@@ -20,7 +20,7 @@ This module configures Authentik for integration with Github SAML single sign-on
 
 ### Deploy Github Provider & Application in Authentik
 
-1. Add a new a `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
+1. Add a new a `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder
 2. Add a new a `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_github_sso/terragrunt.hcl).
 3. Run `pf-tf-init`
 4. Run `terragrunt apply`
@@ -42,9 +42,9 @@ This module configures Authentik for integration with Github SAML single sign-on
    -----END CERTIFICATE-----
    ```
    ![SAML Form](doc_images/github-saml-form.png)
-7. Keep `Require SAML SSO authentication for all members ...` unchecked.
+7. Keep `Require SAML SSO authentication for all members ...` unchecked
 8. Save
-9. Note the `assertion consumer service URL` and `organziation single sign-on URL`. We will need it next.
+9. Note the `assertion consumer service URL` and `organziation single sign-on URL`. We will need it next
 
 
 ### Sync Authentik with the Github Settings
