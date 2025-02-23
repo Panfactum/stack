@@ -44,7 +44,7 @@ This module configures Authentik for integration with Github SAML single sign-on
    ![SAML Form](doc_images/github-saml-form.png)
 7. Keep `Require SAML SSO authentication for all members ...` unchecked.
 8. Click on Save.
-9. Note the `assertion consumer service URL` and `organziation single sign-on URL`. We will need it next.
+9. Note the `assertion consumer service URL` and `organization single sign-on URL`. We will need it next.
 
 
 ### Sync Authentik with the Github Settings
@@ -52,7 +52,7 @@ This module configures Authentik for integration with Github SAML single sign-on
 ![Audience and ACS URL](doc_images/github-audience-acs-url.png)
 
 1. Copy and set the `assertion consumer service URL` from Github to the `acs_url` input.
-2. Copy and set the `organziation single sign-on URL` but without `/sso` from Github to the `audience` input.
+2. Copy and set the `organization single sign-on URL` but without `/sso` from Github to the `audience` input.
 3. Run `terragrunt apply`.
 
 ### Test and Turn on Require SAML SSO
