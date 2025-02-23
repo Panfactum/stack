@@ -5,16 +5,15 @@ This module configures Authentik for integration with Github SAML single sign-on
 ***Note:*** The GitHub Enterprise plan is required for SSO.   
 
 <MarkdownAlert severity="warning">
-  This module only handles authentication and does not provision or de-provisioning users at this time.
-  Due to this limitations, users will not be automatically created or removed from Github when they are removed from Authentik.
+  This module only handles authentication and does not support user provisioning or de-provisioning at this time.
+  As a result, users will not be automatically created or removed from GitHub when they are added or removed from Authentik.
 
-  When they are removed from Authentik, they will lose the ability to access the organization, but you should be aware of the following caveats:
+  When a user is removed from Authentik, they will lose access to the organization. However, be aware of the following caveats:
 
-  - If "Require SAML SSO authentication for all members" is not enabled, users will be able to access the organization until they are manually removed. 
-    As a result, we strongly recommend keeping the [Require SAML SSO](#test-and-turn-on-require-saml-sso) enabled after initial setup.
-  - Any active session tokens that the user has with the Github web UI will not be automatically revoked. Until these
-    tokens expire, the user may still have the ability to interact with the web UI unless you manually remove them from
-    the Github organization.
+  - If Require SAML SSO authentication for all members is not enabled, users may still access the organization until they are manually removed. 
+    Therefore, we strongly recommend enabling the [Require SAML SSO Authentication](#test-and-turn-on-require-saml-sso) after initial setup.
+  - Any active session tokens that the user has with the GitHub web UI will not be automatically revoked. 
+    Until these tokens expire, the user may still interact with the web UI unless they are manually removed from the GitHub organization.
 </MarkdownAlert>
 
 ## Guide
@@ -62,5 +61,6 @@ This module configures Authentik for integration with Github SAML single sign-on
 2. Find the Github application
 3. Click and confirm that you are able to login
 
-Once confirmed that the SSO integration is working, it is optional but recommended to turn on the `Require SAML SSO authentication`. 
-![Require SAML SSO Authentication](doc_images/github-require-saml-sso.png). Not turning this on will prevent you from controlling access from a single source, authentik.  
+Once SSO integration is confirmed to be working, it is recommended to enable `Require SAML SSO authentication`. 
+![Require SAML SSO Authentication](doc_images/github-require-saml-sso.png) 
+Not enabling this setting will prevent centralized access control through Authentik.  
