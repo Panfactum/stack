@@ -22,7 +22,7 @@ dependency "vault" {
 }
 
 inputs = {
-  alert_email        = "etsohwid@mailnesia.com"
+  alert_email        = "it@panfactum.com"
   vault_internal_url = dependency.vault.outputs.vault_internal_url
 
   route53_zones = {
