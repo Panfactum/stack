@@ -164,14 +164,15 @@
         "vaultPkgsSrc": "vaultPkgsSrc"
       },
       "locked": {
+        "lastModified": 0,
+        "narHash": "sha256-WOk3SbpSQKTTEGffVSv4RY5004Ea5mv3380naRUkBW0=",
         "path": "../..",
         "type": "path"
       },
       "original": {
         "path": "../..",
         "type": "path"
-      },
-      "parent": []
+      }
     },
     "postgresPkgsSrc": {
       "locked": {

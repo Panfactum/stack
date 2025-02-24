@@ -12,9 +12,13 @@ dependency "vault" {
   skip_outputs = true
 }
 
+locals {
+  secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+}
+
 inputs = {
   client_id          = "06fca533eaee0113"
-  client_secret      = "EOTSVoeLEzGHmP3HmRu91mcoYlHGTw8IYucy0VZ4mLQqL3KxpNsxRB2xOkELc8TwFf9YOI7JKKt8RHoHroG6FzcGS3Zv4jmvGr357qlYbzC6YJahbeWYXWdSCuj2g5sn"
+  client_secret      = local.secrets.vault_sso_client_secret
   oidc_discovery_url = "https://authentik.panfactum.com/application/o/vault-seth/"
   oidc_redirect_uris = [
       "https://vault.seth.panfactum.com/ui/vault/auth/oidc/oidc/callback",
