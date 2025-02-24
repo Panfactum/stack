@@ -19,9 +19,56 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Added
+
+* Adds [authentik_atlas_mongodb_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso) & [mongodb_atlas_identity_provider](/docs/main/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) module for setting up the Authentik Application and Provider for Atlas MongoDB.
+
+### Changed
+
+* Node-local image caching is now enabled by default in Panfactum submodules.
+
+## edge.25-02-21
+
+### Added
+
+* Adds support for using a private git repository for first-party IaC modules by
+providing `GIT_USERNAME` and `GIT_PASSWORD` environment variables. See the [updated documentation.](/docs/main/guides/iac/first-party-modules#using-a-private-git-repository)
+
+* [kube\_policies](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_policies) now takes `common_pod_labels` and `common_pod_annotations` inputs which can be used to apply
+a standard set of labels and/or annotations to all pods in the cluster.
+
 ### Fixed
 
-* Fixed to use `{}` from using `null` for `webhookConfigurations` in `kube_cert_manager`
+* Addressed issue where the `.kube/.gitignore` file was not being created.
+
+* DaemonSets in the cluster will update in a constant time. Previously the update time scaled with the number
+of nodes in the cluster which led to timeouts.
+
+* Resolves a bug that caused [wf_tf_deploy](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy) workflows
+to fail.
+
+* Resolves a bug that caused module deployment to fail if Kubernetes settings weren't set for the region even if
+Kubernetes wasn't used.
+
+## edge.25-02-18
+
+<MarkdownAlert severity="warning">
+    This release causes issues in the CI/CD pipelines for IaC deployments. This is resolved in the subsequent release.
+</MarkdownAlert>
+
+### Fixed
+
+* The `pf` provider will now receive Kubernetes metadata regardless of whether the Kubernetes provides are enabled
+in the module tree.
+
+* Pinning the `version` of first-party IaC modules should now work without error regardless of what version of
+the Panfactum modules are used (including if using a local copy).
+
+* `ignore_replica_count` in [kube_deployment](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_deployment)
+and [kube_stateful_set](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) will
+now properly *not* reset `spec.replicas` to the `replicas` input if `spec.replicas` has been mutated by an external process.
+
+* Fixed to use `{}` from using `null` for `webhookConfigurations` in `kube_cert_manager`.
 
 ## edge.25-02-10
 

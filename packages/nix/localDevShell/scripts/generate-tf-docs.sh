@@ -40,7 +40,8 @@ function add_provider_links() {
   sed -E 's@- (helm|kubernetes|aws|time|local|vault|time|random|tls|archive) \((.*)\)@- [\1](https://registry.terraform.io/providers/hashicorp/\1/\2/docs) (\2)@g' |
     sed -E 's@- kubectl \((.*)\)@- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/\1/docs) (\1)@g' |
     sed -E 's@- authentik \((.*)\)@- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/\1/docs) (\1)@g' |
-    sed -E 's@- pf \((.*)\)@- [pf](https://registry.terraform.io/providers/panfactum/pf/\1/docs) (\1)@g'
+    sed -E 's@- pf \((.*)\)@- [pf](https://registry.terraform.io/providers/panfactum/pf/\1/docs) (\1)@g' |
+    sed -E 's@- mongodbatlas \((.*)\)@- [mongodbatlas](https://registry.terraform.io/providers/panfactum/mongodbatlas/\1/docs) (\1)@g'
 }
 
 function rename_provider_header() {
@@ -87,6 +88,13 @@ for d in "$TERRAFORM_MODULES_DIR"/*; do
       add_header "$MODULE" "$STATUS" "$TYPE" |
       skip_injected_variables \
         >"$DOCS_DIR/index.mdx"
+
+    # Copy only image files from the doc_images directory if it exists
+    echo "$d/doc_images"
+    if [ -d "$d/doc_images" ]; then
+      mkdir -p "$DOCS_DIR/doc_images"
+      find "$d/doc_images" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.gif" -o -iname "*.svg" -o -iname "*.webp" \) -exec cp {} "$DOCS_DIR/doc_images/" \;
+    fi
   fi
 done
 

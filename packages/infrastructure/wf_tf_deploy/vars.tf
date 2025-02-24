@@ -8,12 +8,6 @@ variable "namespace" {
   type        = string
 }
 
-variable "pull_through_cache_enabled" {
-  description = "Whether to use the ECR pull through cache for the deployed images"
-  type        = bool
-  default     = true
-}
-
 variable "repo" {
   description = "The url of the git repository containing the configuration-as-code that should be applied. Must NOT contain a protocol prefix."
   type        = string
@@ -61,13 +55,13 @@ variable "cpu_millicores" {
 }
 
 variable "git_username" {
-  description = "The username to use when checking out the code to deploy"
+  description = "The git username to use when checking out the code to deploy"
   type        = string
   default     = ""
 }
 
 variable "git_password" {
-  description = "The password to use when checking out the code to deploy"
+  description = "The git password to use when checking out the code to deploy"
   type        = string
   default     = ""
   sensitive   = true

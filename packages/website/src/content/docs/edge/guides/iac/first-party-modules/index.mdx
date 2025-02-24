@@ -82,23 +82,54 @@ module: module2
 
 Now the sourced module will be `infrastructure/module2`.
 
+### Using a Private Git Repository
+
+If your first-party IaC is stored in a private git repository, you will need to do some additional setup:
+
+* Set the `repo_url` [repository variable](/docs/edge/reference/configuration/repo-variables). This will likely have already been set up when your system was first deployed.
+
+* Set `GIT_USERNAME` and `GIT_PASSWORD` in your [personal `.env` file](/docs/edge/reference/configuration/dotenv). The values will be combined with `repo_url` to clone your IaC over HTTPS as follows:
+
+    `git clone https://<GIT_USERNAME>:<GIT_PASSWORD>@<repo_url>` [^99]
+
+    While this is supported by all major git hosting providers, the exact values may differ
+    for `GIT_USERNAME` and `GIT_PASSWORD`. Below we outline some common scenarios:
+
+    * Using a GitHub classic [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic):
+        * `GIT_USERNAME`: the account's username
+        * `GIT_PASSWORD`: the PAT
+    * Using a GitHub fine-grained [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token):
+        * `GIT_USERNAME`: set to `oauth2`
+        * `GIT_PASSWORD`: the PAT
+    * Using a GitLab [Personal Access Token (PAT)](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html):
+        * `GIT_USERNAME`: the account's username
+        * `GIT_PASSWORD`: the PAT
+    * Using a Bitbucket [Repository Access Token (RAT)](https://support.atlassian.com/bitbucket-cloud/docs/using-access-tokens/):
+        * `GIT_USERNAME`: set to `x-token-auth`
+        * `GIT_PASSWORD`: the RAT
+
+[^99]: This is just a conceptual example. The exact interpolation will depend on the `repo_url` you provide. For example, if you provide `git::https://example.com/vpc.git` as the `repo_url`,
+then the framework will automatically insert the `GIT_USERNAME` and `GIT_PASSWORD` in the appropriate location.
+
+<MarkdownAlert severity="info">
+    If you are also deploying IaC using our CI/CD module, ensure you also provide git credentials to the CI/CD system
+    by following [these instructions.](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_tf_deploy#authenticating-with-private-repositories)
+</MarkdownAlert>
+
 ### Versioning
 
-By default, the local version of the module will be sourced. This can be ideal
-for local testing and/or an integration environment where you always want the latest module code to be
-deployed. However, this is not ideal for higher environments where you want a more controlled release process.
+By default, the local code for the module will be sourced. This can be ideal
+for local testing and/or an integration environment where you always want your local changes to be
+deployed. However, this is not ideal for higher environments where you want a more controlled, stable release process.
 
-You likely already have some strategy for creating versioned releases in your repositories. Perhaps you use
-[semantic versioning](https://semver.org/) via git tags.
-
-You can pin a module to a particular version by setting the `version` key to your desired
+You can pin a module (or set of modules) to a particular version by setting the `version` key to a
 [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in one of the `environment.yaml`, `region.yaml`, or `module.yaml` files.
-A git ref can be a tag, a branch name, or even a specific commit hash.
+A git ref can be a tag, a branch name, or even a specific commit hash of your stack repository (the repository specified by `repo_url`).
 
 For example, consider a stack repo that has the git tags `v1.0.0`, `v1.1.0`, and `v2.0.0` representing versioned
-releases of code.
+releases of your IaC code.
 
-Your repo has the following layout:
+This stack repo has the following layout:
 
 ```txt
 environments/
@@ -126,7 +157,7 @@ infrastructure/
    - module2/
 ```
 
-Each `environment.yaml` as the following `version` keys:
+The `environment.yaml` files have the following `version` keys:
 
 * `development/environment.yaml`: `main`
 * `staging/environment.yaml`: `v2.0.0`
@@ -134,10 +165,9 @@ Each `environment.yaml` as the following `version` keys:
 
 Additionally, the `production/us-west-2/region.yaml` file has the `version` key set to `v1.0.0`.
 
-In this scenario, even though all three environments will use both the `module1` and `module2` modules:
+In this scenario, even though all three environments will use both the `module1` and `module2` modules, different versions of these modules will be
+deployed:
 
-* The [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) (e.g., module versions, module inputs, etc.) will for **all** module deployments will **always** be defined
-  by the values in the primary integration branch. This is set by the `repo_primary_branch` [repo variable.](/docs/edge/reference/configuration/repo-variables)
 * **All** modules in `development` will use the latest `infrastructure/*` code on the `main` branch (useful for ensuring the latest
   code is always deployed). This is because `development/environment.yaml` has `version` set to `main`.
 * Similarly, **all** modules in `staging` will use the `infrastructure/*` code at the `v2.0.0` git tag.
@@ -145,6 +175,14 @@ In this scenario, even though all three environments will use both the `module1`
   in `us-west-2` which will use `v1.0.0`.
 
 <MarkdownSVGImage src={VersioningImg} alt="Terragrunt module versioning diagram" />
+
+<MarkdownAlert severity="info">
+    Even thought the infrastructure-as-code versions will differ based on the `version` value, the [configuration-as-code](/docs/edge/concepts/iac#configuration-as-code) (i.e., module versions, module inputs, etc.) for **all** module deployments will **always** be defined
+    by the values in the primary integration branch. This is set by the `repo_primary_branch` [repo variable.](/docs/edge/reference/configuration/repo-variables)
+
+    This ensures that you have a single view containing the settings for all your systems across all environments and regions. This is critical
+    as your infrastructure footprint expands over time.
+</MarkdownAlert>
 
 ## Writing Modules
 
@@ -198,17 +236,18 @@ Our Terragrunt configuration automatically takes care of passing in the appropri
 and `pf_module_ref`. Whenever you change the `pf_stack_version` [Terragrunt variable](/docs/edge/reference/configuration/terragrunt-variables#module-source), these variables will
 automatically update.
 
-Finally, if you are using Panfactum submodules, your IaC provider version constraints must be set to a specific value
-for each provider. For the full list of provider version values, see the [reference docs](/docs/edge/reference/infrastructure-modules/overview#provider-versions).
+Finally, if you are using Panfactum submodules, you should **not** set version constraints for IaC providers used by the submodule (check
+the module's documentation for what providers are used). Instead, your first-party IaC will automatically inherit the constraints from the submodule's configuration.
+This ensures that no first-party IaC updates are required when changing Panfactum versions.
 
-Unfortunately, these must be set manually. For example:
+For example, you should **remove** static version constraints:
 
-```hcl
+```diff lang="hcl"
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.34.0"
+-      version = "2.34.0"
     }
   }
 }

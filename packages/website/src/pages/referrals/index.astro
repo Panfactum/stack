@@ -1,0 +1,23 @@
+---
+import Details from "./_components/Details.astro";
+import FAQS from "./_components/FAQs/FAQs";
+import HeroSection from "./_components/HeroSection.astro"
+import Pitch from "./_components/Pitch.astro";
+import WhoWouldBenefit from "./_components/WhoWouldBenefit.astro";
+import Layout from "../../layouts/Layout.astro";
+import MainSection from "../../layouts/MainSection.astro";
+---
+<Layout
+        heroClass="bg-secondary"
+        hasBorder={false}
+        title="Panfactum Referral Program"
+        description="Connect us with users who would benefit from Panfactum and earn $10,000 for every organization that purchases a support plan."
+>
+    <HeroSection slot="hero"/>
+    <Details/>
+    <WhoWouldBenefit/>
+    <Pitch/>
+    <MainSection title="FAQs">
+        <FAQS client:idle/>
+    </MainSection>
+</Layout>

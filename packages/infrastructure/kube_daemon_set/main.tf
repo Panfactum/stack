@@ -118,9 +118,13 @@ resource "kubectl_manifest" "daemon_set" {
     }
     spec = {
       minReadySeconds = var.min_ready_seconds
-      updateStrategy = {
+      updateStrategy = { for k, v in {
         type = var.update_type
-      }
+        rollingUpdate = var.update_type == "RollingUpdate" ? {
+          maxUnavailable = "34%"
+          maxSurge       = 0
+        } : null
+      } : k => v if v != null }
       selector = {
         matchLabels = module.pod_template.match_labels
       }

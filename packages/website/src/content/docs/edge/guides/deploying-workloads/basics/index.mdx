@@ -481,7 +481,12 @@ limited disk space.
 ### Labels and Annotations
 
 Pod created by Panfactum submodules will automatically be labeled with our [standard resource tags](/docs/edge/reference/resource-tags).
-You can add additional labels and annotations via the `extra_pod_labels` and `extra_pod_annotations` inputs, respectively.
+
+For a specific workload, you can add additional labels and annotations via the `extra_pod_labels` and `extra_pod_annotations` inputs, respectively.
+
+If you need to add a set of labels and/or annotations globally to all pods in a given Kubernetes cluster, you
+can utilize the `common_pod_labels` and `common_pod_annotations` inputs of the [kube\_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies)
+module which was set up during cluster bootstrapping.
 
 ### Priority Class
 

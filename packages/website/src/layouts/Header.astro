@@ -1,5 +1,5 @@
 ---
-
+import HeaderBanner from "./HeaderBanner";
 import MobileNav from "./MobileNav.tsx";
 import { NAV_LINKS } from "./NavLinks";
 import DiscordIcon from "../components/icons/discord.svg";
@@ -29,11 +29,12 @@ const {
 } = Astro.props;
 
 const pathname = new URL(Astro.request.url).pathname;
+
 ---
 
 <div
   class:list={[
-    "flex items-center justify-between border-b w-screen px-4 h-[--header-height] max-w-screen-3xl mx-auto overflow-hidden",
+    "flex flex-col border-b w-screen overflow-hidden h-[--header-height]",
     hasBorder ? "border-primary" : "border-transparent",
     background === "primary"
       ? "bg-primary"
@@ -43,59 +44,63 @@ const pathname = new URL(Astro.request.url).pathname;
     isFixed ? "md:fixed top-0 z-10" : "", // It's only fixed when not on mobile (TODO: refactor to make clearer)
   ]}
 >
-  <div class="flex h-full items-center gap-16">
-    <a
-      href="/"
-      class="flex h-full max-w-[75%] items-center md:w-[230px]"
-      aria-label="Homepage"
-      data-astro-prefetch="viewport"
-    >
-      {
-        collapseLogoOnMobile ? (
-          <>
+    <HeaderBanner client:load transition:persist />
+    <div class="mx-auto flex size-full max-w-screen-3xl grow basis-1 items-center justify-between px-4">
+        <div class="flex h-full items-center gap-16">
+            <a
+                    href="/"
+                    class="flex h-full max-w-[75%] items-center md:w-[230px]"
+                    aria-label="Homepage"
+                    data-astro-prefetch="viewport"
+            >
+              {
+                collapseLogoOnMobile ? (
+                        <>
             <span class="hidden h-full w-[230px] items-center justify-center md:flex [&>svg]:h-2/3">
               <PanfactumLogo />
             </span>
-            <span class="flex h-full w-[--header-height] items-center justify-center text-brand-500 md:hidden dark:text-white [&>svg]:h-3/4">
+                            <span class="flex h-full w-[--header-height] items-center justify-center text-brand-500 md:hidden dark:text-white [&>svg]:h-3/4">
               <PanfactumMark />
             </span>
-          </>
-        ) : (
-          <PanfactumLogo />
-        )
-      }
-    </a>
-    <nav class="hidden gap-x-10 md:flex" aria-label="Primary">
-      {NAV_LINKS.map((link) => (
-          <SavedLink
-            defaultHref={link.url}
-            id={link.title}
-            data-astro-prefetch="viewport"
-            class:list={[
-              "bg-transparent font-bold cursor-pointer text-display-xs mt-2",
-              background === "transparent"
-                ? "hover:text-gray-light-mode-400"
-                : "hover:text-brand-600 dark:hover:text-secondary",
-            ]}
-            saveEnabled={true}
-            client:idle
-          >
-            {link.title}
-          </SavedLink>
-        ))}
-    </nav>
-  </div>
-  <div class="hidden items-center gap-x-8 md:flex">
-    <a aria-label="Github Repository" href={GITHUB_URL} class="hidden lg:inline-flex">
-      <GithubIcon size="24" />
-    </a>
-    <a aria-label="Discord Server" href={DISCORD_URL} class="hidden lg:inline-flex">
-      <DiscordIcon size="30" />
-    </a>
-    <GetStartedButton size="sm" fullPath={pathname} />
-  </div>
-  <div class="flex items-center gap-2 md:hidden">
-    {searchButtonEnabled && <SearchIconButton client:idle />}
-    <MobileNav background={background} fullPath={pathname} client:idle />
-  </div>
+                        </>
+                ) : (
+                        <PanfactumLogo />
+                )
+              }
+            </a>
+            <nav class="hidden gap-x-10 md:flex" aria-label="Primary">
+              {NAV_LINKS.map((link) => (
+                      <SavedLink
+                              defaultHref={link.url}
+                              id={link.title}
+                              data-astro-prefetch="viewport"
+                              class:list={[
+                                "bg-transparent font-bold cursor-pointer text-display-xs mt-2",
+                                background === "transparent"
+                                  ? "hover:text-gray-light-mode-400"
+                                  : "hover:text-brand-600 dark:hover:text-secondary",
+                              ]}
+                              saveEnabled={true}
+                              client:idle
+                      >
+                        {link.title}
+                      </SavedLink>
+              ))}
+            </nav>
+        </div>
+        <div class="hidden items-center gap-x-8 md:flex">
+            <a aria-label="Github Repository" href={GITHUB_URL} class="hidden lg:inline-flex">
+                <GithubIcon size="24" />
+            </a>
+            <a aria-label="Discord Server" href={DISCORD_URL} class="hidden lg:inline-flex">
+                <DiscordIcon size="30" />
+            </a>
+            <GetStartedButton size="sm" fullPath={pathname} />
+        </div>
+        <div class="flex items-center gap-2 md:hidden">
+          {searchButtonEnabled && <SearchIconButton client:idle />}
+            <MobileNav background={background} fullPath={pathname} client:idle />
+        </div>
+    </div>
+
 </div>

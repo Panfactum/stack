@@ -200,6 +200,13 @@ resource "helm_release" "ebs_csi_driver" {
           name                         = kubernetes_service_account.ebs_csi.metadata[0].name
           autoMountServiceAccountToken = true
         }
+        updateStrategy = {
+          type = "RollingUpdate"
+          rollingUpdate = {
+            maxUnavailable = "34%"
+            maxSurge       = 0
+          }
+        }
         resources         = local.default_resources
         tolerateAllTaints = false // This prevents nodes from being shutdown in a timely manner
         tolerations = concat(

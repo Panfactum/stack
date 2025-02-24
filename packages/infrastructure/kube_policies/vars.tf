@@ -63,3 +63,15 @@ variable "common_secrets" {
   type        = map(string)
   default     = {}
 }
+
+variable "common_pod_labels" {
+  description = "Key-value pairs that will be injected as labels into all pods in the cluster"
+  type        = map(string)
+  default     = {}
+}
+
+variable "common_pod_annotations" {
+  description = "Key-value pairs that will be injected as annotations into all pods in the cluster"
+  type        = map(string)
+  default     = {}
+}

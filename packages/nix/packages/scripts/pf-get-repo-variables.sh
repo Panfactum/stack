@@ -12,13 +12,19 @@
 set -eo pipefail
 
 ####################################################################
-# Step 1: Get to the repository root (or root of devenv if using nested devenv)
+# Step 1: Get to the repository root (or root of panfactum.yaml if using reference env)
 ####################################################################
 
 ROOT="${1:-$(pwd)}"
 ROOT=$(realpath "$ROOT")
 while [[ ! -d "${ROOT}/.git" ]] && [[ ! -f "$ROOT/panfactum.yaml" ]]; do
   ROOT=$(dirname "$ROOT")
+done
+
+GIT_ROOT="${1:-$(pwd)}"
+GIT_ROOT=$(realpath "$GIT_ROOT")
+while [[ ! -d "${GIT_ROOT}/.git" ]]; do
+  GIT_ROOT=$(dirname "$GIT_ROOT")
 done
 
 ####################################################################
@@ -85,7 +91,17 @@ for DIR in "${DIRS[@]}"; do
 done
 
 ####################################################################
-# Step 6: Print values
+# Step 6: Set iac_dir_from_git_root
+#
+# This is a bit of a hack to account for the case where the repo_root
+# is different from the git root dir which can occur in cases
+# like the reference system which is a subdirectory of a git repository
+####################################################################
+IAC_DIR_FROM_GIT_ROOT="$(echo "$(echo "$VALUES" | jq -r ".repo_root" | sed -e "s|^$GIT_ROOT||")/$(echo "$VALUES" | jq -r ".iac_dir_from_root")" | sed -e "s|^/||")"
+VALUES=$(echo "$VALUES" | jq ".iac_dir_from_git_root = \"$IAC_DIR_FROM_GIT_ROOT\"")
+
+####################################################################
+# Step 7: Print values
 ####################################################################
 
 echo "$VALUES"

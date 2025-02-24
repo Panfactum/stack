@@ -48,7 +48,8 @@ The critical configuration values are:
 ### Authenticating with Private Repositories
 
 `git_username` and `git_password` can be used for authenticating with a private `repo`. See our [documentation](/docs/main/guides/cicd/checking-out-code)
-for what values to provide. The only permissions needed by this Workflow is read access to the source code.
+for what values to provide. These correspond to the `username` and `password` arguments to the `pf-wf-git-checkout` command
+which is used internally to this module. The only permissions needed by this Workflow is read access to the source code.
 
 Note that these credentials will be used for _all_ git operations, so if your modules refer to many private repositories,
 please ensure that the credentials have access to all systems.
