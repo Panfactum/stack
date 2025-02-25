@@ -45,14 +45,7 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 3. Toggle on `Enable SAML authentication`.
 4. Set `Sign on URL` with the `sso_post_url` output value from above.
 5. Set `Issuer` with the `issuer_url` output value from above.
-6. Set `Public certificate` from the `saml_metadata` output value from above.
-    - Copy the contents from within the `<ds:X509Certificate>` section of the xml
-    - Paste within `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`
-   ```text
-   -----BEGIN CERTIFICATE-----
-   <your-pasted-value>
-   -----END CERTIFICATE-----
-   ```
+6. Set `Public certificate` from the `certificate` output value from above.
    ![SAML Form](doc_images/github-saml-form.png)
 7. Keep `Require SAML SSO authentication for all members ...` unchecked.
 8. Click on `Save`.

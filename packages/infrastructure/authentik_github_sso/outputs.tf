@@ -12,3 +12,8 @@ output "issuer_url" {
   description = "The Authentik issuer URL for the GitHub provider"
   value       = local.issuer
 }
+
+output "certificate" {
+  description = "The certificate used to sign SAML responses"
+  value = authentik_certificate_key_pair.signing.certificate_data
+}
