@@ -25,15 +25,6 @@ variable "acs_url" {
   type        = string
 }
 
-variable "audience" {
-  description = "The Entity URL provided by the Service Provider"
-  type        = string
-  validation {
-    condition     = can(regex("^((?!/sso).)*$", var.audience))
-    error_message = "The audience must not contain '/sso'."
-  }
-}
-
 variable "ui_description" {
   description = "The description to display in the Authentik web dashboard"
   type        = string

@@ -20,17 +20,27 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 
 ## Guide
 
+### Start the Github SAML SSO Setup
+
+1. Log in to GitHub and navigate to your organizations Settings.
+2. Go to Security -> Authentication security.
+3. Toggle on `Enable SAML authentication`.
+4. Note the `assertion consumer service URL`. We will use this in the following step.
+   ![GitHub ACS URL](doc_images/github-acs-url.png)
+   
+
 ### Deploy GitHub Provider & Application in Authentik
 
 1. Add a new `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
 2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_github_sso/terragrunt.hcl).
-3. Run `pf-tf-init`.
-4. Run `terragrunt apply`.
-5. Note the output as you'll use it in the following steps.
+3. Set the `acs_url` input using the the `assertion consumer service URL` from above.
+4. Run `pf-tf-init`.
+5. Run `terragrunt apply`.
+6. Note the output as you'll use it in the following steps.
 
-### Setup GitHub SAML single sign-on
+### Complete GitHub SAML single sign-on
 
-1. Log in to GitHub and navigate to your organizations Settings.
+1. Resume the Authentication security page
 2. Go to Security -> Authentication security.
 3. Toggle on `Enable SAML authentication`.
 4. Set `Sign on URL` with the `sso_post_url` output value from above.
@@ -46,17 +56,6 @@ This module configures Authentik for integration with GitHub SAML single sign-on
    ![SAML Form](doc_images/github-saml-form.png)
 7. Keep `Require SAML SSO authentication for all members ...` unchecked.
 8. Click on `Save`.
-9. Note the `assertion consumer service URL` and `organization single sign-on URL`. We will these later.
-
-
-### Sync Authentik with the GitHub Settings
-
-![Audience and ACS URL](doc_images/github-audience-acs-url.png)
-
-1. Copy and set the `assertion consumer service URL` from GitHub to the `acs_url` input.
-2. Copy and set the `organization single sign-on URL` but without `/sso` from GitHub to the `audience` input. For example
-   if the URL is `https://github.com/orgs/my-org-name/sso` then set the audience to `https://github.com/orgs/my-org-name` 
-3. Run `terragrunt apply`.
 
 ### Test and Turn on Require SAML SSO
 

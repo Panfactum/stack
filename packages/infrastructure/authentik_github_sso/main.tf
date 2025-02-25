@@ -104,13 +104,21 @@ data "authentik_property_mapping_provider_saml" "email" {
 resource "authentik_provider_saml" "github" {
   name               = "github"
   authorization_flow = data.authentik_flow.default_authorization_flow.id
-  property_mappings  = []
+  property_mappings  = [data.authentik_property_mapping_provider_saml.email.id]
   acs_url            = var.acs_url
   sp_binding         = "post"
   issuer             = local.issuer
-  audience           = var.audience
+  audience           = replace(var.acs_url, "/saml/consume", "")
   name_id_mapping    = data.authentik_property_mapping_provider_saml.email.id
   signing_kp         = authentik_certificate_key_pair.signing.id
+}
+
+resource "null_resource" "wait_for_saml_provider" {
+  depends_on = [authentik_provider_saml.github]
+
+  provisioner "local-exec" {
+    command = "sleep 10"  # Give the API time to fully create the resource
+  }
 }
 
 resource "authentik_application" "github" {
