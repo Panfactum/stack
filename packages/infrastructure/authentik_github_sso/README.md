@@ -20,7 +20,7 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 
 ## Guide
 
-### Start the Github SAML SSO Setup
+### Start the GitHub SAML SSO Setup
 
 1. Log in to GitHub and navigate to your organizations Settings.
 2. Go to Security -> Authentication security.
