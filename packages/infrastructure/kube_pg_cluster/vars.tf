@@ -554,3 +554,15 @@ variable "create_timeout_minutes" {
   type        = number
   default     = 60
 }
+
+variable "s3_bucket_access_policy" {
+  description = "Additional AWS access policy for the S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference"
+  type        = string
+  default     = null
+}
+
+variable "pg_wal_keep_size_gb" {
+  description = "The number of gigabytes of WAL files to keep for the cluster"
+  type        = number
+  default     = 2
+}

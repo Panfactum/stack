@@ -146,6 +146,8 @@ module "s3_bucket" {
   audit_log_enabled               = false
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
+
+  access_policy = var.s3_bucket_access_policy
 }
 
 moved {
@@ -367,12 +369,12 @@ resource "kubernetes_manifest" "postgres_cluster" {
             shared_preload_libraries   = ""
             ssl_max_protocol_version   = "TLSv1.3"
             ssl_min_protocol_version   = "TLSv1.3"
-            wal_keep_size              = "2GB"
+            wal_keep_size              = var.pg_wal_keep_size_gb
             wal_level                  = "logical"
             wal_log_hints              = "on"
             wal_receiver_timeout       = "5s"
             wal_sender_timeout         = "5s"
-            max_slot_wal_keep_size     = "10GB"
+            max_slot_wal_keep_size     = "${var.pg_wal_keep_size_gb * 3}GB"
 
             # Memory tuning - Based on guide created by EDB (creators of CNPG)
             # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory
