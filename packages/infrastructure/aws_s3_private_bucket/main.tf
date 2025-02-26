@@ -162,13 +162,8 @@ resource "aws_s3_bucket_intelligent_tiering_configuration" "bucket" {
   }
 }
 
-data "aws_iam_policy_document" "access_policy_doc" {
-  source_policy_documents = var.access_policy == null ? [] : [var.access_policy]
-}
-
 data "aws_iam_policy_document" "default_policy" {
-  override_policy_documents = var.access_policy == null ? [] : [data.aws_iam_policy_document.access_policy_doc.json]
-
+  override_policy_documents = var.access_policy == null ? [] : [var.access_policy]
   statement {
     sid     = "RootAccess"
     effect  = "Allow"
