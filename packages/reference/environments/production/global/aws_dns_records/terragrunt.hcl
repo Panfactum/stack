@@ -64,6 +64,36 @@ inputs = {
         {
           subdomain = "pm-bounces."
           record    = "pm.mtasv.net."
+        },
+        // DKIM (Stripe)
+        {
+          subdomain = "swe5yoosjaxfr7lj4k3dxhg4ekdjjcue._domainkey."
+          record    = "swe5yoosjaxfr7lj4k3dxhg4ekdjjcue.dkim.custom-email-domain.stripe.com."
+        },
+        {
+          subdomain = "vssehpdavbhx5yt753kftjhktxco3ruk._domainkey."
+          record    = "vssehpdavbhx5yt753kftjhktxco3ruk.dkim.custom-email-domain.stripe.com."
+        },
+        {
+          subdomain = "jtchiwpet4rczncf5vnxo6noevlkoey5._domainkey."
+          record    = "jtchiwpet4rczncf5vnxo6noevlkoey5.dkim.custom-email-domain.stripe.com."
+        },
+        {
+          subdomain = "xuqjbph5aztrdrkflm7o6n2rntmn2rmd._domainkey."
+          record    = "xuqjbph5aztrdrkflm7o6n2rntmn2rmd.dkim.custom-email-domain.stripe.com."
+        },
+        {
+          subdomain = "rb6ll6tuxzcdaoefrsqcokogssts54rm._domainkey."
+          record    = "rb6ll6tuxzcdaoefrsqcokogssts54rm.dkim.custom-email-domain.stripe.com."
+        },
+        {
+          subdomain = "zxewgpehkjpnthawp5hchrsolg45ybh7._domainkey."
+          record    = "zxewgpehkjpnthawp5hchrsolg45ybh7.dkim.custom-email-domain.stripe.com."
+        },
+        // Return Path (Stripe)
+        {
+          subdomain = "bounce."
+          record    = "custom-email-domain.stripe.com."
         }
       ]
       txt_records = [
@@ -116,6 +146,7 @@ inputs = {
             "zoho-verification=zb69684923.zmverify.zoho.com",                                                                        // Zoho Domain Ownership
             "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                                                  // Panfactum.com Google Search Console
             "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                                                            // Panfactum.com MongoDB Atlas SSO
+            "stripe-verification=e974df024c29569f82cceeacf4f0bbe7f6abace14bc538961a2076d26513afa9",                                  // Stripe domain verification (email sending)
           ]
         }
       ]
