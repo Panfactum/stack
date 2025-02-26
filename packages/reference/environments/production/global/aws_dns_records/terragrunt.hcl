@@ -147,7 +147,13 @@ inputs = {
             "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                                                  // Panfactum.com Google Search Console
             "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                                                            // Panfactum.com MongoDB Atlas SSO
             "stripe-verification=e974df024c29569f82cceeacf4f0bbe7f6abace14bc538961a2076d26513afa9",                                  // Stripe domain verification (email sending)
+            "asv=8aac24d1b02697630a27d2337948e5e8"                                                                                   // Asana domain verification
           ]
+        },
+        // GitHub Verification
+        {
+          subdomain = "_gh-Panfactum-e"
+          records   = ["66a27fe1ec"]
         }
       ]
     }

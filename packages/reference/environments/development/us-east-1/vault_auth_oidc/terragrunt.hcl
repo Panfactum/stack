@@ -21,11 +21,11 @@ inputs = {
   client_secret      = local.secrets.vault_sso_client_secret
   oidc_discovery_url = "https://authentik.panfactum.com/application/o/vault-seth/"
   oidc_redirect_uris = [
-      "https://vault.seth.panfactum.com/ui/vault/auth/oidc/oidc/callback",
-      "https://vault.seth.panfactum.com/oidc/callback",
-      "http://localhost:8250/oidc/callback"
-    ]
-  oidc_issuer        = "https://authentik.panfactum.com/application/o/vault-seth/"
+    "https://vault.seth.panfactum.com/ui/vault/auth/oidc/oidc/callback",
+    "https://vault.seth.panfactum.com/oidc/callback",
+    "http://localhost:8250/oidc/callback"
+  ]
+  oidc_issuer = "https://authentik.panfactum.com/application/o/vault-seth/"
 
   superuser_groups         = ["superusers"]
   admin_groups             = ["privileged_engineers"]
