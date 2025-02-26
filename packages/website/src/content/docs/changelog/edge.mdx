@@ -22,6 +22,8 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 ### Added
 
 * Adds [authentik_atlas_mongodb_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso) & [mongodb_atlas_identity_provider](/docs/main/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) module for setting up the Authentik Application and Provider for Atlas MongoDB.
+* Adds new inputs to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) for configuring the
+  [PostgreSQL WAL Size](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#pg_wal_keep_size_gb) settings and adding additional [AWS S3 access policies](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#s3_bucket_access_policy) for the s3 bucket
 
 ### Changed
 

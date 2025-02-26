@@ -556,7 +556,7 @@ variable "create_timeout_minutes" {
 }
 
 variable "s3_bucket_access_policy" {
-  description = "Additional AWS access policy for the S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference"
+  description = "Additional AWS access policy for the backup S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference"
   type        = string
   default     = null
 }
