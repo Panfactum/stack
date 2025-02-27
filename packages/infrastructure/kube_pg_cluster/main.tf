@@ -369,7 +369,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
             shared_preload_libraries   = ""
             ssl_max_protocol_version   = "TLSv1.3"
             ssl_min_protocol_version   = "TLSv1.3"
-            wal_keep_size              = var.pg_wal_keep_size_gb
+            wal_keep_size              = "${var.pg_wal_keep_size_gb}GB"
             wal_level                  = "logical"
             wal_log_hints              = "on"
             wal_receiver_timeout       = "5s"
