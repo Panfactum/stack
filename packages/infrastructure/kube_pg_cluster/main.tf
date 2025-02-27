@@ -374,7 +374,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
             wal_log_hints              = "on"
             wal_receiver_timeout       = "5s"
             wal_sender_timeout         = "5s"
-            max_slot_wal_keep_size     = "${var.pg_wal_keep_size_gb * 3}GB"
+            max_slot_wal_keep_size     = "${var.pg_max_slot_wal_keep_size_gb}GB"
 
             # Memory tuning - Based on guide created by EDB (creators of CNPG)
             # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory

@@ -566,3 +566,9 @@ variable "pg_wal_keep_size_gb" {
   type        = number
   default     = 2
 }
+
+variable "pg_max_slot_wal_keep_size_gb" {
+  description = "Maximum size in megabytes of WAL files that replication slots can retain before old segments are removed."
+  type        = number
+  default     = 10
+}
