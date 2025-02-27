@@ -87,6 +87,8 @@ resource "kubectl_manifest" "event_source" {
         metadata = {
           labels = module.util.labels
         }
+
+        serviceAccountName = kubernetes_service_account.service_account.metadata[0].name
         tolerations   = module.util.tolerations
         affinity      = module.util.affinity
         schedulerName = module.util.scheduler_name
