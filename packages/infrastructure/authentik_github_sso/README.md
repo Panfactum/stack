@@ -7,24 +7,19 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 ***Note:*** The [GitHub Enterprise plan](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/using-saml-for-enterprise-iam/configuring-saml-single-sign-on-for-your-enterprise) is required for SSO.   
 
 <MarkdownAlert severity="warning">
-  Due to limitations with GitHub, this module only handles authentication and does not support user provisioning or de-provisioning at this time.
-  As a result, users will not be automatically created or removed from GitHub when they are added or removed from Authentik.
+  Due to limitations with GitHub, this module only handles authentication and does not support user provisioning or de-provisioning at this time. As a result, users will not be automatically created or removed from GitHub when they are added or removed from Authentik.
 
   When a user is removed from Authentik, they will lose access to the organization. However, be aware of the following caveats:
-
-  - If "Require SAML SSO authentication for all members" is not enabled, users may still access the organization until they are manually removed. 
-    Therefore, we strongly recommend enabling the [Require SAML SSO Authentication](#test-and-turn-on-require-saml-sso) after initial setup.
-  - Any active session tokens that the user has with the GitHub web UI and PATs the user may have generated will not be automatically revoked. 
-    Until these tokens expire, the user may still interact with the web UI / API unless they are manually removed from the GitHub organization.
+  - Any active session tokens that the user has with the GitHub web UI and PATs the user may have generated will not be automatically revoked. Until these tokens expire, the user may still interact with the web UI / API unless they are manually removed from the GitHub organization.
 </MarkdownAlert>
 
 ## Guide
 
 ### Start the GitHub SAML SSO Setup
 
-1. Log in to GitHub and navigate to your organizations Settings.
-2. Go to Security -> Authentication security.
-3. Toggle on `Enable SAML authentication`.
+1. Log in to GitHub and navigate to your enterprise's dashboard. For example, Panfactum's enterprise url is https://github.com/enterprises/Panfactum.
+2. Go to Settings -> Authentication security.
+3. Toggle on `Require SAML authentication`.
 4. Note the `assertion consumer service URL`. We will use this in the following step.
    ![GitHub ACS URL](doc_images/github-acs-url.png)
    
@@ -42,12 +37,12 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 
 1. Resume the Authentication security page
 2. Go to Security -> Authentication security.
-3. Toggle on `Enable SAML authentication`.
-4. Set `Sign on URL` with the `sso_post_url` output value from above.
-5. Set `Issuer` with the `issuer_url` output value from above.
-6. Set `Public certificate` from the `certificate` output value from above.
+3. Set `Sign on URL` with the `sso_post_url` output value from above.
+4. Set `Issuer` with the `issuer_url` output value from above.
+5. Set `Public certificate` from the `certificate` output value from above.
    ![SAML Form](doc_images/github-saml-form.png)
-7. Keep `Require SAML SSO authentication for all members ...` unchecked.
+6. Click on `Test SAML configuration`.
+7. Save the `recovery codes` that you are prompted with.
 8. Click on `Save`.
 
 ### Test and Turn on Require SAML SSO
@@ -56,7 +51,3 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 2. Find the GitHub application. Ensure you are in the user dashboard, not the admin dashboard.
    ![Github Application](doc_images/github-application.png)
 3. Click and confirm that you are able to login.
-
-Once the SSO integration is confirmed to be working, enable `Require SAML SSO authentication`. 
-![Require SAML SSO Authentication](doc_images/github-require-saml-sso.png)
-Leaving this disabled will negate benefits of the SSO integration with Authentik.  
