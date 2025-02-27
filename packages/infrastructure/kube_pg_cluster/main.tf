@@ -53,11 +53,17 @@ locals {
     "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
     "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
   }
+}
 
-  validate_pg_wal_sizes = (
-  var.pg_max_slot_wal_keep_size_gb == -1 ||
-  var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
-  ) ? true : tobool("pg_max_slot_wal_keep_size_gb must be greater than pg_wal_keep_size_gb")
+resource "terraform_data" "validate_pg_wal_sizes" {
+  input = "valid"
+
+  lifecycle {
+    precondition {
+      condition     = var.pg_max_slot_wal_keep_size_gb == -1 || var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
+      error_message = "pg_max_slot_wal_keep_size_gb must be -1 (unlimited) or greater than pg_wal_keep_size_gb"
+    }
+  }
 }
 
 data "pf_kube_labels" "labels" {
@@ -325,7 +331,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         annotations = {
           "linkerd.io/inject"                    = "enabled"
           "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
-          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : max(100, 10 * var.pg_initial_storage_gb + var.pg_max_slot_wal_keep_size_gb)}Gi"
+          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : max(100, 10 * var.pg_initial_storage_gb)}Gi"
           "resize.topolvm.io/increase"           = "${var.pg_storage_increase_gb}Gi"
           "resize.topolvm.io/threshold"          = "${var.pg_storage_increase_threshold_percent}%"
         }
