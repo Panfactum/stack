@@ -99,7 +99,7 @@ resource "kubectl_manifest" "event_source" {
             runAsGroup             = 1000
             runAsNonRoot           = true
             readOnlyRootFilesystem = true
-            drop = ["ALL"]
+            drop                   = ["ALL"]
           }
         }
       }
@@ -109,7 +109,7 @@ resource "kubectl_manifest" "event_source" {
 
   wait_for {
     field {
-      key = "status.conditions.[0].status" # The Deployed condition
+      key   = "status.conditions.[0].status" # The Deployed condition
       value = "True"
     }
   }
@@ -133,7 +133,7 @@ resource "kubectl_manifest" "vpa" {
         updateMode = "Auto"
         evictionRequirements = [
           {
-            resources = ["cpu", "memory"]
+            resources         = ["cpu", "memory"]
             changeRequirement = "TargetHigherThanRequests"
           }
         ]
@@ -147,7 +147,7 @@ resource "kubectl_manifest" "vpa" {
   })
   force_conflicts   = true
   server_side_apply = true
-  depends_on = [kubectl_manifest.event_source]
+  depends_on        = [kubectl_manifest.event_source]
 }
 
 resource "kubectl_manifest" "pdb" {
