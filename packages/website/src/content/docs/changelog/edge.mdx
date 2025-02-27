@@ -25,6 +25,9 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 * Adds new inputs to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) for configuring the
   [PostgreSQL WAL Size](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#pg_wal_keep_size_gb) settings and adding additional [AWS S3 access policies](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#s3_bucket_access_policy) for the s3 bucket
 
+### Fixed
+* Fixes where the service account name is not set for the event source pod in [kube_argo_event_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
+
 ### Changed
 
 * Node-local image caching is now enabled by default in Panfactum submodules.
