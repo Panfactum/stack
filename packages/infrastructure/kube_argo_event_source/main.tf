@@ -89,9 +89,9 @@ resource "kubectl_manifest" "event_source" {
         }
 
         serviceAccountName = kubernetes_service_account.service_account.metadata[0].name
-        tolerations   = module.util.tolerations
-        affinity      = module.util.affinity
-        schedulerName = module.util.scheduler_name
+        tolerations        = module.util.tolerations
+        affinity           = module.util.affinity
+        schedulerName      = module.util.scheduler_name
         container = {
           resources = local.default_resources
           securityContext = {
@@ -99,7 +99,7 @@ resource "kubectl_manifest" "event_source" {
             runAsGroup             = 1000
             runAsNonRoot           = true
             readOnlyRootFilesystem = true
-            drop                   = ["ALL"]
+            drop = ["ALL"]
           }
         }
       }
@@ -109,7 +109,7 @@ resource "kubectl_manifest" "event_source" {
 
   wait_for {
     field {
-      key   = "status.conditions.[0].status" # The Deployed condition
+      key = "status.conditions.[0].status" # The Deployed condition
       value = "True"
     }
   }
@@ -131,10 +131,12 @@ resource "kubectl_manifest" "vpa" {
     spec = {
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "argoproj.io/v1alpha1"
@@ -145,7 +147,7 @@ resource "kubectl_manifest" "vpa" {
   })
   force_conflicts   = true
   server_side_apply = true
-  depends_on        = [kubectl_manifest.event_source]
+  depends_on = [kubectl_manifest.event_source]
 }
 
 resource "kubectl_manifest" "pdb" {
