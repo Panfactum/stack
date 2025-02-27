@@ -53,6 +53,11 @@ locals {
     "panfactum.com/voluntary-disruption-window-max-unavailable" = "1"
     "panfactum.com/voluntary-disruption-window-seconds"         = tostring(var.voluntary_disruption_window_seconds)
   }
+
+  validate_pg_wal_sizes = (
+  var.pg_max_slot_wal_keep_size_gb == -1 ||
+  var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
+  ) ? true : tobool("pg_max_slot_wal_keep_size_gb must be greater than pg_wal_keep_size_gb")
 }
 
 data "pf_kube_labels" "labels" {
