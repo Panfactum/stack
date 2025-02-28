@@ -11,6 +11,16 @@
       "group": "authentik"
     },
     {
+      "module": "authentik_github_sso",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_mongodb_atlas_sso",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
       "module": "authentik_vault_sso",
       "type": "direct",
       "group": "authentik"
@@ -429,6 +439,11 @@
       "module": "kube_workload_utility",
       "type": "submodule",
       "group": "kubernetes"
+    },
+    {
+      "module": "mongodb_atlas_identity_provider",
+      "type": "direct",
+      "group": "authentik"
     },
     {
       "module": "test_kube_pg_cluster",
