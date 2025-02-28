@@ -21,7 +21,12 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ### Added
 
-* Adds [authentik_atlas_mongodb_sso](/docs/main/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso) & [mongodb_atlas_identity_provider](/docs/main/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) module for setting up the Authentik Application and Provider for Atlas MongoDB.
+* Adds [authentik_atlas_mongodb_sso](/docs/edge/reference/infrastructure-modules/direct/authentik/authentik_mongodb_atlas_sso) & [mongodb_atlas_identity_provider](/docs/edge/reference/infrastructure-modules/direct/authentik/mongodb_atlas_identity_provider) module for setting up the Authentik Application and Provider for Atlas MongoDB.
+* Adds new inputs to [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) for configuring the
+  [pg_wal_keep_size_gb](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#pg_wal_keep_size_gb) settings and adding additional [s3_bucket_access_policy](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#s3_bucket_access_policy) for the s3 bucket
+
+### Fixed
+* Fixes where the service account name is not set for the event source pod in [kube_argo_event_source](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_source)
 
 ### Changed
 

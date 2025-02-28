@@ -144,5 +144,3 @@ output "recovery_directory" {
   value       = random_id.recovery_directory.hex
 }
 
-
-

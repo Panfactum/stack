@@ -658,6 +658,14 @@ Type: `string`
 
 Default: `"16.6-13"`
 
+### pg\_wal\_keep\_size\_gb
+
+Description: The number of gigabytes of WAL files to keep for the cluster
+
+Type: `number`
+
+Default: `2`
+
 ### pg\_work\_mem\_percent
 
 Description: The percent of the overall memory allocation available to queries for sort and hash operations (intermediate calculations during queries)
@@ -985,6 +993,14 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
+
+### s3\_bucket\_access\_policy
+
+Description: Additional AWS access policy for the S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
+
+Type: `string`
+
+Default: `null`
 
 ### spot\_nodes\_enabled
 

@@ -146,6 +146,8 @@ module "s3_bucket" {
   audit_log_enabled               = false
   intelligent_transitions_enabled = false // db operator takes care of garbage collection
   force_destroy                   = var.backups_force_delete
+
+  access_policy = var.s3_bucket_access_policy
 }
 
 moved {
@@ -307,7 +309,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         clientCASecret       = module.client_certs.secret_name
         replicationTLSSecret = module.client_certs.secret_name
       }
-
+        
       inheritedMetadata = {
         labels = merge(
           module.util_cluster.labels,
@@ -318,7 +320,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         annotations = {
           "linkerd.io/inject"                    = "enabled"
           "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
-          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : max(100, 10 * var.pg_initial_storage_gb)}Gi"
+          "resize.topolvm.io/storage_limit"      = "${(var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : max(100, 10 * var.pg_initial_storage_gb)) + var.pg_max_slot_wal_keep_size_gb}Gi"
           "resize.topolvm.io/increase"           = "${var.pg_storage_increase_gb}Gi"
           "resize.topolvm.io/threshold"          = "${var.pg_storage_increase_threshold_percent}%"
         }
@@ -367,12 +369,12 @@ resource "kubernetes_manifest" "postgres_cluster" {
             shared_preload_libraries   = ""
             ssl_max_protocol_version   = "TLSv1.3"
             ssl_min_protocol_version   = "TLSv1.3"
-            wal_keep_size              = "2GB"
+            wal_keep_size              = "${var.pg_wal_keep_size_gb}GB"
             wal_level                  = "logical"
             wal_log_hints              = "on"
             wal_receiver_timeout       = "5s"
             wal_sender_timeout         = "5s"
-            max_slot_wal_keep_size     = "10GB"
+            max_slot_wal_keep_size     = "${var.pg_max_slot_wal_keep_size_gb}GB"
 
             # Memory tuning - Based on guide created by EDB (creators of CNPG)
             # https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory
@@ -476,7 +478,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         pvcTemplate = {
           resources = {
             requests = {
-              storage = "${var.pg_initial_storage_gb}Gi"
+              storage = "${var.pg_initial_storage_gb + var.pg_max_slot_wal_keep_size_gb}Gi"
             }
           }
           storageClassName = "ebs-standard"
@@ -553,6 +555,13 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
   timeouts {
     create = "${var.create_timeout_minutes}m"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
+      error_message = "pg_max_slot_wal_keep_size_gb must be greater than or equal to pg_wal_keep_size_gb"
+    }
   }
 }
 
