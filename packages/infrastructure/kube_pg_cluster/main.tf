@@ -309,24 +309,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         clientCASecret       = module.client_certs.secret_name
         replicationTLSSecret = module.client_certs.secret_name
       }
-        pooler = {
-            enable = var.pgbouncer_read_only_enabled || var.pgbouncer_read_write_enabled
-            replicas = {
-            r  = var.pgbouncer_read_only_enabled ? 1 : 0
-            rw = var.pgbouncer_read_write_enabled ? 1 : 0
-            }
-            resources = {
-            requests = {
-                cpu    = "${var.pg_pooler_cpu_millicores}m"
-                memory = "${var.pg_pooler_memory_mb}Mi"
-            }
-            }
-            imageName = "${module.pull_through.github_registry}/cloudnative-pg/pgbouncer:${var.pg_version}"
-            labels    = merge(
-            module.util_pooler[each.key].labels,
-            { "pg-cluster" = local.cluster-label }
-            )
-        }
+        
       inheritedMetadata = {
         labels = merge(
           module.util_cluster.labels,
