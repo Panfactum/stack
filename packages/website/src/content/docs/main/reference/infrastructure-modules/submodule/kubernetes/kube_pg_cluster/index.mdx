@@ -522,6 +522,14 @@ Type: `number`
 
 Default: `100`
 
+### pg\_max\_slot\_wal\_keep\_size\_gb
+
+Description: Maximum size in gigabytes of WAL files that replication slots can retain before old segments are removed.
+
+Type: `number`
+
+Default: `10`
+
 ### pg\_maximum\_cpu\_millicores
 
 Description: The maximum amount of cpu to allocate to the postgres pods (in millicores)
@@ -996,7 +1004,7 @@ Default: `false`
 
 ### s3\_bucket\_access\_policy
 
-Description: Additional AWS access policy for the S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
+Description: Additional AWS access policy for the backup S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
 
 Type: `string`
 

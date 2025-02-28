@@ -19,13 +19,25 @@ This module configures Authentik for integration with GitHub SAML single sign-on
   When a user is removed from Authentik, they will lose access to the organization. However, be aware of the following caveats:
   - Any active session tokens that the user has with the GitHub web UI and PATs the user may have generated will not be automatically revoked. Until these tokens expire, the user may still interact with the web UI / API unless they are manually removed from the GitHub organization.
 </MarkdownAlert>
-
+    
 ## Guide
+
+<MarkdownAlert severity="warning">
+  This guide sets up SAML SSO at the enterprise level, not the organization level. This is important because:
+  - An enterprise-level integration provides SSO coverage for all organizations within your GitHub Enterprise
+  - This eliminates the need to configure separate SSO integrations for each organization
+  - All authentication will be managed through a single integration point
+
+  While this guide focuses on enterprise-level setup, the same steps can be followed for organization-level SSO by selecting the organization settings instead of enterprise settings in GitHub.
+</MarkdownAlert>
 
 ### Start the GitHub SAML SSO Setup
 
 1. Log in to GitHub and navigate to your enterprise's dashboard. For example, Panfactum's enterprise url is https://github.com/enterprises/Panfactum.
-2. Go to Settings -> Authentication security.
+  1. Click on your profile picture in the top right corner.
+  2. Select `Your enterprises`.
+  3. Click on `settings` for your enterprise name.
+2. Go to Authentication security.
 3. Toggle on `Require SAML authentication`.
 4. Note the `assertion consumer service URL`. We will use this in the following step.
    ![GitHub ACS URL](doc\_images/github-acs-url.png)
@@ -56,7 +68,7 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 
 1. Go to your Authentik instance.
 2. Find the GitHub application. Ensure you are in the user dashboard, not the admin dashboard.
-   ![Github Application](doc\_images/github-application.png)
+   ![GitHub Application](doc\_images/github-application.png)
 3. Click and confirm that you are able to login.
 
 ## Providers

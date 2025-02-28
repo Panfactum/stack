@@ -122,7 +122,7 @@ resource "null_resource" "wait_for_saml_provider" {
 }
 
 resource "authentik_application" "github" {
-  name              = "Github"
+  name              = "GitHub"
   slug              = "github"
   protocol_provider = authentik_provider_saml.github.id
   meta_description  = var.ui_description
