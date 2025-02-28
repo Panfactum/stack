@@ -15,9 +15,9 @@ import PriceDetails from "@/pages/_components/PriceCalculator/PriceDetails.tsx";
 import { calculatePlanPrice } from "@/pages/_components/PriceCalculator/calculatePlanPrice.ts";
 import {
   calculatorStore,
-  setCalculatorStore, shareCalculatorValues,
+  setCalculatorStore,
+  shareCalculatorValues,
 } from "@/pages/_components/calculatorStore.tsx";
-
 
 const PriceSummary: Component = () => {
   const [detailsOpened, setDetailsOpened] = createSignal<boolean>(false);
@@ -56,15 +56,17 @@ const PriceSummary: Component = () => {
       </div>
       <div class="grid grid-cols-2 gap-4 md:max-w-2/5 lg:max-w-full lg:grid-cols-3">
         <Button
-          onClick={() => { shareCalculatorValues('plan-calculator'); }}
+          onClick={() => {
+            shareCalculatorValues("plan-calculator");
+          }}
           variant="secondary"
           class="lg:mx-auto lg:w-fit"
         >
           <div class="flex items-center justify-center gap-2 lg:justify-between">
             <span class="text-balance">Copy Shareable Link</span>
             <span class="block md:hidden lg:block">
-            <FiShare/>
-                          </span>
+              <FiShare />
+            </span>
           </div>
         </Button>
         <Button
@@ -77,7 +79,7 @@ const PriceSummary: Component = () => {
           <div class="flex items-center justify-center gap-2 lg:justify-between">
             <span class="text-balance">Show Details</span>
             <span class="block md:hidden lg:block">
-            <HiSolidMagnifyingGlassPlus/>
+              <HiSolidMagnifyingGlassPlus />
             </span>
           </div>
         </Button>

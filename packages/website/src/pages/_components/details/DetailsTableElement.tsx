@@ -19,11 +19,9 @@ const DetailsTableElement: ParentComponent<DetailsTableElementProps> = (
       ) : (
         <>
           <Tooltip content={props.description}>
-          <span
-            class="underline decoration-dotted decoration-2 underline-offset-4"
-          >
-            {props.children}
-          </span>
+            <span class="underline decoration-dotted decoration-2 underline-offset-4">
+              {props.children}
+            </span>
           </Tooltip>
         </>
       )}

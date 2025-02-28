@@ -6,7 +6,8 @@ import { debounce } from "@solid-primitives/scheduled";
 import { HiSolidMagnifyingGlass } from "solid-icons/hi";
 import { IoCloseOutline } from "solid-icons/io";
 import {
-  type Component, createEffect,
+  type Component,
+  createEffect,
   createSignal,
   For,
   Show,
@@ -101,7 +102,7 @@ const _SearchDialog: Component = () => {
 
   // Provide a debouncing effect on input -> search results
   const updateSearchResults = debounce((query: string) => {
-    void fetchSearchResults({ query, version: version() }).then(setHits)
+    void fetchSearchResults({ query, version: version() }).then(setHits);
   }, 250);
 
   // Update search results when the user input changes
@@ -119,7 +120,9 @@ const _SearchDialog: Component = () => {
   return (
     <Dialog
       open={$isOpen()}
-      onOpenChange={(open) => {isSearchModalOpen.set(open)}}
+      onOpenChange={(open) => {
+        isSearchModalOpen.set(open);
+      }}
       id={SEARCH_MODAL_ID}
       modal={true}
     >
@@ -169,7 +172,9 @@ const _SearchDialog: Component = () => {
                 {(hit) => (
                   <a
                     href={hit.url}
-                    on:click={() => {isSearchModalOpen.set(false)}}
+                    on:click={() => {
+                      isSearchModalOpen.set(false);
+                    }}
                     class="cursor-pointer py-4"
                   >
                     <h4 class=" font-bold">

@@ -13,7 +13,6 @@ import { calculateObservabilitySavings } from "./calculateObservabilitySavings.t
 import { calculateRelationalDBSavings } from "./calculateRelationalDBSavings.tsx";
 import { calculateWorkloadSavings } from "./calculateWorkloadSavings.tsx";
 
-
 export interface SavingsLineItem {
   name: string;
   stackCost: number;
@@ -25,7 +24,7 @@ export interface SavingsLineItem {
 }
 
 export const calculateSavings: (
-  inputs: CalculatorStoreSavingsComponents
+  inputs: CalculatorStoreSavingsComponents,
 ) => SavingsLineItem[] = (inputs) => {
   const {
     cicdMinutes,
@@ -53,7 +52,7 @@ export const calculateSavings: (
     clusterCount,
     workloadCount,
     dbCount,
-    moduleCount
+    moduleCount,
   } = inputs;
 
   const savingsItems: SavingsLineItem[] = [
@@ -77,15 +76,17 @@ export const calculateSavings: (
       (acc, cur) => acc + cur.baseCost,
       0,
     );
-    savingsItems.push(calculateLaborSavings(
-      baseInfraCosts,
-      supportPlanPrice,
-      laborHourlyCost,
-      clusterCount,
-      workloadCount,
-      dbCount,
-      moduleCount
-    ));
+    savingsItems.push(
+      calculateLaborSavings(
+        baseInfraCosts,
+        supportPlanPrice,
+        laborHourlyCost,
+        clusterCount,
+        workloadCount,
+        dbCount,
+        moduleCount,
+      ),
+    );
   }
 
   if (productivityBoostEnabled) {

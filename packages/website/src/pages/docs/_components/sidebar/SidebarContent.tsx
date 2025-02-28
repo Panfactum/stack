@@ -22,7 +22,11 @@ const SidebarContent: Component<SidebarContentProps> = (props) => {
         class={`bg-primary sticky top-0 z-top-navigation flex flex-col gap-2`}
       >
         <VersionSelector />
-        <SearchInputButton onSearchOpen={() => { props.setMobileNavOpen(false); }} />
+        <SearchInputButton
+          onSearchOpen={() => {
+            props.setMobileNavOpen(false);
+          }}
+        />
       </div>
 
       <SidebarSectionList

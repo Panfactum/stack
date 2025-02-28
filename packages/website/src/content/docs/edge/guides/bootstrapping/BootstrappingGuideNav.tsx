@@ -1,16 +1,18 @@
-import MarkdownGuideNav from '@/components/markdown/MarkdownGuideNav.tsx'
+import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav.tsx";
 
 interface BootstrappingGuideNavProps {
   backHref?: string;
   forwardHref?: string;
-  stepNumber: number
+  stepNumber: number;
 }
-export default function BootstrappingGuideNav (props: BootstrappingGuideNavProps) {
+export default function BootstrappingGuideNav(
+  props: BootstrappingGuideNavProps,
+) {
   return (
     <MarkdownGuideNav
       {...props}
       totalSteps={21}
-      progressLabel={'Panfactum Bootstrapping Guide:'}
+      progressLabel={"Panfactum Bootstrapping Guide:"}
     />
-  )
+  );
 }

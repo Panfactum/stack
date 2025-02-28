@@ -1,11 +1,10 @@
 import { toaster } from "@kobalte/core/toast";
 import { createEffect, createRoot, createSignal } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
-import {isServer} from "solid-js/web";
+import { isServer } from "solid-js/web";
 
 import Toast from "@/components/ui/Toast.tsx";
 import { SUPPORT_HOURS_OPTIONS } from "@/pages/_components/priceConstants.ts";
-
 
 /****************************************************
  Store Configuration
@@ -93,7 +92,9 @@ export const [calculatorStore, setCalculatorStore] =
  Store Sharing - Copy share link to clipboard
  ***************************************************/
 
-export const shareCalculatorValues = (calcId: "plan-calculator" | "savings-calculator") => {
+export const shareCalculatorValues = (
+  calcId: "plan-calculator" | "savings-calculator",
+) => {
   const stringifiedStore = Object.fromEntries(
     Object.entries(unwrap(calculatorStore)).map(([key, val]) => [
       key,
@@ -101,7 +102,7 @@ export const shareCalculatorValues = (calcId: "plan-calculator" | "savings-calcu
     ]),
   );
 
-  stringifiedStore["id"] = calcId
+  stringifiedStore["id"] = calcId;
   const params = new URLSearchParams(stringifiedStore);
 
   // Combine the current page URL with the href
@@ -111,14 +112,11 @@ export const shareCalculatorValues = (calcId: "plan-calculator" | "savings-calcu
   void navigator.clipboard.writeText(fullUrl);
 
   // Show a toast
-  const toastID = toaster.show(props => (
-    <Toast
-      id={props.toastId}
-      title={"Link copied to clipboard"}
-    />
-  ))
+  const toastID = toaster.show((props) => (
+    <Toast id={props.toastId} title={"Link copied to clipboard"} />
+  ));
 
-  setTimeout(() => toaster.dismiss(toastID), 2000)
+  setTimeout(() => toaster.dismiss(toastID), 2000);
 };
 
 /****************************************************
@@ -137,7 +135,9 @@ export const seedCalculator = () => {
     PRICE_CALCULATOR_LOCAL_STORAGE_KEY,
   );
   if (localStorageSettings) {
-    rehydratedSettings = JSON.parse(localStorageSettings) as Partial<CalculatorStore>;
+    rehydratedSettings = JSON.parse(
+      localStorageSettings,
+    ) as Partial<CalculatorStore>;
   }
 
   // Step 2: Override anything in local storage with the query string values
@@ -171,7 +171,9 @@ export const seedCalculator = () => {
             rehydratedSettings[key] = parseInt(value);
           } catch (e) {
             // eslint-disable-next-line no-console
-            console.warn(`Calculator Store: Could not parse value for ${key}. Given ${value}.`)
+            console.warn(
+              `Calculator Store: Could not parse value for ${key}. Given ${value}.`,
+            );
           }
         }
         break;
@@ -195,9 +197,9 @@ export const seedCalculator = () => {
         break;
 
       case "id":
-        if(!isServer){
+        if (!isServer) {
           // This is necessary b/c hash scrolling doesn't work when combined with query params
-          window.document.getElementById(value)?.scrollIntoView()
+          window.document.getElementById(value)?.scrollIntoView();
         }
         break;
     }

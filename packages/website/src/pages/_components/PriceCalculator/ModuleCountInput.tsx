@@ -2,13 +2,13 @@ import type { Component } from "solid-js";
 
 import { IntegerInput } from "@/components/inputs/IntegerInput.tsx";
 import ModuleCountDescription from "@/pages/_components/PriceCalculator/ModuleCountDescription.tsx";
-import {getAdjustedPrice} from "@/pages/_components/PriceCalculator/calculatePlanPrice.ts";
+import { getAdjustedPrice } from "@/pages/_components/PriceCalculator/calculatePlanPrice.ts";
 import {
   calculatorStore,
   setCalculatorStore,
 } from "@/pages/_components/calculatorStore.tsx";
 import InputRowPrice from "@/pages/_components/inputs/InputRowPrice.tsx";
-import {MODULE_DEPLOYMENT_COST} from "@/pages/_components/priceConstants.ts";
+import { MODULE_DEPLOYMENT_COST } from "@/pages/_components/priceConstants.ts";
 
 const ModuleCountInput: Component = () => {
   return (
@@ -29,7 +29,7 @@ const ModuleCountInput: Component = () => {
         clusterCount={calculatorStore.clusterCount}
       />
     </>
-);
+  );
 };
 
 export default ModuleCountInput;

@@ -1,4 +1,4 @@
-import {type Component, Show} from "solid-js";
+import { type Component, Show } from "solid-js";
 import { isServer } from "solid-js/web";
 
 import MarkdownGuideNav from "@/components/markdown/MarkdownGuideNav.tsx";
@@ -13,7 +13,7 @@ const NextSteps: Component = () => {
   return (
     <Show
       when={isBootstrapping()}
-      fallback={(
+      fallback={
         <div class="mt-2 flex flex-col gap-2">
           We are now ready to launch your organization&apos;s developer
           environment.
@@ -27,7 +27,7 @@ const NextSteps: Component = () => {
             progressLabel={"Getting Started Guide:"}
           />
         </div>
-      )}
+      }
     >
       <div class="mt-2 flex flex-col gap-2">
         <p>
@@ -41,7 +41,7 @@ const NextSteps: Component = () => {
         </p>
       </div>
     </Show>
-  )
+  );
 };
 
 export default NextSteps;

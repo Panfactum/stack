@@ -1,8 +1,6 @@
 import { NUMBER_FORMAT } from "@/lib/utils.ts";
 import CalculatorDescriptionContainer from "@/pages/_components/details/CalculatorDescriptionContainer.tsx";
-import {
-  PRIORITY_SUPPORT_MULTIPLIER,
-} from "@/pages/_components/priceConstants.ts";
+import { PRIORITY_SUPPORT_MULTIPLIER } from "@/pages/_components/priceConstants.ts";
 
 const PrioritySupportEnabledDescription = () => (
   <CalculatorDescriptionContainer>
@@ -70,8 +68,8 @@ const PrioritySupportEnabledDescription = () => (
     </p>
     <p>
       Enabling Priority Support adds{" "}
-      {NUMBER_FORMAT.format(PRIORITY_SUPPORT_MULTIPLIER * 100)}% to your
-      support plan price.
+      {NUMBER_FORMAT.format(PRIORITY_SUPPORT_MULTIPLIER * 100)}% to your support
+      plan price.
     </p>
     <p class="text-xs">
       <sup class="align-super">*</sup>For the purposes of SLA attainment, time

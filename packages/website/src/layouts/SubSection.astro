@@ -11,7 +11,7 @@ const { kicker, title, class: className, id } = Astro.props;
 ---
 
 <section
-        id={id ?? title?.replaceAll(" ", "-").toLowerCase()}
+  id={id ?? title?.replaceAll(" ", "-").toLowerCase()}
   class:list={[
     "flex flex-col items-center justify-center py-16 w-full",
     className,

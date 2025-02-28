@@ -4,14 +4,14 @@ import {
   createSignal,
   type JSX,
   onCleanup,
-  onMount, For,
+  onMount,
+  For,
 } from "solid-js";
 import { isServer } from "solid-js/web";
 
-import {useBackgroundContext} from "@/components/context/background.ts";
+import { useBackgroundContext } from "@/components/context/background.ts";
 
 import InputBase from "./InputBase.tsx";
-
 
 type SelectInputOptions = Array<{ id: string; name: string }>;
 
@@ -25,15 +25,18 @@ interface SelectInputProps {
 }
 
 export const SelectInput: Component<SelectInputProps> = (props) => {
-
   const [isOpen, setIsOpen] = createSignal<boolean>(false);
   const toggleIsOpen = () => setIsOpen((prev) => !prev);
 
   // Handles closing the dropdown when clicking outside the dropdown
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target;
-    const selectElNode = selectEl()
-    if (target instanceof Node && selectElNode && !selectElNode.contains(target)) {
+    const selectElNode = selectEl();
+    if (
+      target instanceof Node &&
+      selectElNode &&
+      !selectElNode.contains(target)
+    ) {
       setIsOpen(false);
     }
   };
@@ -85,7 +88,7 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
           class={clsx(
             "border-primary flex w-full items-center justify-between rounded-md border px-4 py-2 text-sm",
             "h-12 shadow focus:outline-none focus:ring-2",
-            background === "primary" ? "bg-transparent" : "bg-primary"
+            background === "primary" ? "bg-transparent" : "bg-primary",
           )}
         >
           {selectedOption()}
@@ -113,14 +116,16 @@ export const SelectInput: Component<SelectInputProps> = (props) => {
             )}
           >
             <div class="py-1">
-              <For each={props.options}>{({ id, name }) => (
-                <div
-                  on:click={createOnSelect(id)}
-                  class="block px-4 py-2 text-sm hover:font-semibold"
-                >
-                  {name}
-                </div>
-              )}</For>
+              <For each={props.options}>
+                {({ id, name }) => (
+                  <div
+                    on:click={createOnSelect(id)}
+                    class="block px-4 py-2 text-sm hover:font-semibold"
+                  >
+                    {name}
+                  </div>
+                )}
+              </For>
             </div>
           </div>
         )}

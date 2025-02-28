@@ -2,9 +2,7 @@ import { For } from "solid-js";
 
 import { NUMBER_FORMAT } from "@/lib/utils.ts";
 import CalculatorDescriptionContainer from "@/pages/_components/details/CalculatorDescriptionContainer.tsx";
-import {
-  SUPPORT_HOURS_OPTIONS,
-} from "@/pages/_components/priceConstants.ts";
+import { SUPPORT_HOURS_OPTIONS } from "@/pages/_components/priceConstants.ts";
 
 const SupportHoursDescription = () => (
   <CalculatorDescriptionContainer>
@@ -18,31 +16,33 @@ const SupportHoursDescription = () => (
     <div class="overflow-auto">
       <table class="border-primary  w-full min-w-128 table-fixed border-collapse overflow-y-visible rounded-md border">
         <thead>
-        <tr>
-          <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
-            Tier
-          </th>
-          <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
-            Times
-          </th>
-          <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
-            Multiplier
-          </th>
-        </tr>
+          <tr>
+            <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
+              Tier
+            </th>
+            <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
+              Times
+            </th>
+            <th class="bg-secondary border-primary border-b p-4 text-start text-sm tracking-wide">
+              Multiplier
+            </th>
+          </tr>
         </thead>
         <tbody>
-        <For each={SUPPORT_HOURS_OPTIONS}>{({name, description, multiplier, excludeHolidays}) => (
-          <tr>
-            <td class="p-4">{name}</td>
-            <td class="p-4">
-              {description}
-              {excludeHolidays && <sup class="align-super">*</sup>}
-            </td>
-            <td class="p-4">
-              {NUMBER_FORMAT.format(100 + multiplier * 100)}%
-            </td>
-          </tr>
-        )}</For>
+          <For each={SUPPORT_HOURS_OPTIONS}>
+            {({ name, description, multiplier, excludeHolidays }) => (
+              <tr>
+                <td class="p-4">{name}</td>
+                <td class="p-4">
+                  {description}
+                  {excludeHolidays && <sup class="align-super">*</sup>}
+                </td>
+                <td class="p-4">
+                  {NUMBER_FORMAT.format(100 + multiplier * 100)}%
+                </td>
+              </tr>
+            )}
+          </For>
         </tbody>
       </table>
     </div>

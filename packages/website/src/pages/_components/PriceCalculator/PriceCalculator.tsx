@@ -19,7 +19,6 @@ import { seedCalculator } from "@/pages/_components/calculatorStore.tsx";
 
 import InputRow from "../inputs/InputRow.tsx";
 
-
 interface PriceCalculatorProps {
   background: Background;
 }
@@ -46,20 +45,19 @@ const PriceCalculator: Component<PriceCalculatorProps> = (props) => {
           description={WorkloadDescription}
           withPrice={true}
         >
-          <ModuleCountInput/>
-          <DBCountInput/>
-          <CustomWorkloadCountInput/>
+          <ModuleCountInput />
+          <DBCountInput />
+          <CustomWorkloadCountInput />
         </InputRow>
         <InputRow title={"Support Modifiers"}>
-          <PrioritySupportEnabledInput/>
-          <SupportHoursInput/>
+          <PrioritySupportEnabledInput />
+          <SupportHoursInput />
         </InputRow>
         <InputRow title={"Discounts"}>
           <StartupDiscountInput />
           <AnnualSpendCommitmentInput />
         </InputRow>
       </div>
-
     </BackgroundContext.Provider>
   );
 };
