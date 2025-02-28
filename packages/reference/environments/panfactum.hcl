@@ -380,6 +380,8 @@ generate "vault_provider" {
 generate "mongodb_atlas_provider" {
   path      = "mongodb_atlas.tf"
   if_exists = "overwrite_terragrunt"
+  disable     = !local.enable_mongodb_atlas
+  if_disabled = "remove"
   contents  = local.enable_mongodb_atlas ? file("${local.provider_folder}/mongodb_atlas.tf") : ""
 }
 
