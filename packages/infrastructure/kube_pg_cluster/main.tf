@@ -61,7 +61,7 @@ resource "terraform_data" "validate_pg_wal_sizes" {
   lifecycle {
     precondition {
       condition     = var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
-      error_message = "pg_max_slot_wal_keep_size_gb must be greater than pg_wal_keep_size_gb"
+      error_message = "pg_max_slot_wal_keep_size_gb must be greater than or equal to pg_wal_keep_size_gb"
     }
   }
 }
@@ -331,7 +331,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         annotations = {
           "linkerd.io/inject"                    = "enabled"
           "config.linkerd.io/skip-inbound-ports" = "5432" # Postgres communication is already tls-secured by CNPG
-          "resize.topolvm.io/storage_limit"      = "${var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : (max(100, 10 * var.pg_initial_storage_gb) + var.pg_max_slot_wal_keep_size_gb)}Gi"
+          "resize.topolvm.io/storage_limit"      = "${(var.pg_storage_limit_gb != null ? var.pg_storage_limit_gb : max(100, 10 * var.pg_initial_storage_gb)) + var.pg_max_slot_wal_keep_size_gb}Gi"
           "resize.topolvm.io/increase"           = "${var.pg_storage_increase_gb}Gi"
           "resize.topolvm.io/threshold"          = "${var.pg_storage_increase_threshold_percent}%"
         }
