@@ -57,7 +57,7 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 7. Save the `recovery codes` that you are prompted with.
 8. Click on `Save`.
 
-### Test and Turn on Require SAML SSO
+### Test and Validate the Integration
 
 1. Go to your Authentik instance.
 2. Find the GitHub application. Ensure you are in the user dashboard, not the admin dashboard.
