@@ -123,16 +123,6 @@ resource "authentik_application" "github" {
   open_in_new_tab   = true
 }
 
-data "authentik_group" "superusers" {
-  name = "superusers"
-}
-
-resource "authentik_policy_binding" "superuser_access" {
-  target = authentik_application.github.uuid
-  group  = data.authentik_group.superusers.id
-  order  = 0
-}
-
 data "authentik_group" "group" {
   for_each = local.combined_allowed_groups
   name     = each.key
