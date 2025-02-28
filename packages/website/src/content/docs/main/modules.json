@@ -11,6 +11,11 @@
       "group": "authentik"
     },
     {
+      "module": "authentik_github_sso",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
       "module": "authentik_mongodb_atlas_sso",
       "type": "direct",
       "group": "authentik"
