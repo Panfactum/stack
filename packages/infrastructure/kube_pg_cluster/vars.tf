@@ -571,9 +571,4 @@ variable "pg_max_slot_wal_keep_size_gb" {
   description = "Maximum size in gigabytes of WAL files that replication slots can retain before old segments are removed."
   type        = number
   default     = 10
-
-  validation {
-    condition     = var.pg_max_slot_wal_keep_size_gb >= 10 && var.pg_max_slot_wal_keep_size_gb <= 100
-    error_message = "pg_max_slot_wal_keep_size_gb must be between 10 and 100."
-  }
 }

@@ -55,17 +55,6 @@ locals {
   }
 }
 
-resource "terraform_data" "validate_pg_wal_sizes" {
-  input = "valid"
-
-  lifecycle {
-    precondition {
-      condition     = var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
-      error_message = "pg_max_slot_wal_keep_size_gb must be greater than or equal to pg_wal_keep_size_gb"
-    }
-  }
-}
-
 data "pf_kube_labels" "labels" {
   module = "kube_pg_cluster"
 }
@@ -320,7 +309,24 @@ resource "kubernetes_manifest" "postgres_cluster" {
         clientCASecret       = module.client_certs.secret_name
         replicationTLSSecret = module.client_certs.secret_name
       }
-
+        pooler = {
+            enable = var.pgbouncer_read_only_enabled || var.pgbouncer_read_write_enabled
+            replicas = {
+            r  = var.pgbouncer_read_only_enabled ? 1 : 0
+            rw = var.pgbouncer_read_write_enabled ? 1 : 0
+            }
+            resources = {
+            requests = {
+                cpu    = "${var.pg_pooler_cpu_millicores}m"
+                memory = "${var.pg_pooler_memory_mb}Mi"
+            }
+            }
+            imageName = "${module.pull_through.github_registry}/cloudnative-pg/pgbouncer:${var.pg_version}"
+            labels    = merge(
+            module.util_pooler[each.key].labels,
+            { "pg-cluster" = local.cluster-label }
+            )
+        }
       inheritedMetadata = {
         labels = merge(
           module.util_cluster.labels,
@@ -566,6 +572,13 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
   timeouts {
     create = "${var.create_timeout_minutes}m"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.pg_max_slot_wal_keep_size_gb >= var.pg_wal_keep_size_gb
+      error_message = "pg_max_slot_wal_keep_size_gb must be greater than or equal to pg_wal_keep_size_gb"
+    }
   }
 }
 
