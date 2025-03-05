@@ -19,6 +19,11 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Fixed
+
+* Mongodb provider is no longer generated when not utilized
+* [kube_cert_issuer](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) module now correctly uses [cloudflare_zones](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_cert_issuers#cloudflare_zones) input when generating certs
+
 ## edge.25-02-28
 
 ### Added
