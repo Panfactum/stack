@@ -1,9 +1,8 @@
 #!/usr/bin/env bun
-import process from "node:process";
-
 import { Cli, Command } from "clipanion";
 
 // @ts-ignore Bun needs the explicit dot accessor to overwrite at build time with the --define flag
+// eslint-disable-next-line no-undef
 const VERSION = process.env.VERSION ?? "unknown";
 
 class HelpCommand extends Command {
@@ -43,6 +42,7 @@ cli.register(HelpCommand);
 cli.register(VersionCommand);
 
 // Parse and run
+// eslint-disable-next-line no-undef
 cli.runExit(process.argv.slice(2), {
   ...Cli.defaultContext,
 });
