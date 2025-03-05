@@ -1,5 +1,7 @@
 import Button from "@/components/ui/Button.tsx";
-import ContentBlockWithImage, {ContentBlockType} from "@/components/ui/ContentBlockWithImage.tsx";
+import ContentBlockWithImage, {
+  ContentBlockType,
+} from "@/components/ui/ContentBlockWithImage.tsx";
 import Check from "@/content/docs/main/guides/check.tsx";
 import Todo from "@/content/docs/main/guides/todo.tsx";
 
@@ -8,11 +10,13 @@ export function RootDocumentLandingPage() {
     <div>
       <h1 class="text-display-lg">Getting Started</h1>
       <p>
-        The Panfactum framework is a unified architecture combining two sets of tools:
+        The Panfactum framework is a unified architecture combining two sets of
+        tools:
       </p>
       <ul>
         <li>
-          <b>Panfactum Kubernetes Clusters</b>: Tools that run in your organization's cloud computing environment
+          <b>Panfactum Kubernetes Clusters</b>: Tools that run in your
+          organization's cloud computing environment
         </li>
         <li>
           <b>Panfactum devShell</b>: Tools that run locally on your machine
@@ -20,8 +24,9 @@ export function RootDocumentLandingPage() {
       </ul>
 
       <p>
-        With these two sets of utilities, you can begin deploying cloud workloads in the most cost-effective, secure,
-        and production-ready way possible on modern cloud hyperscalers like AWS.
+        With these two sets of utilities, you can begin deploying cloud
+        workloads in the most cost-effective, secure, and production-ready way
+        possible on modern cloud hyperscalers like AWS.
       </p>
 
       <p class="text-primary text-display-md mb-2 font-machina font-semibold tracking-tight">
@@ -57,7 +62,5 @@ export function RootDocumentLandingPage() {
         </ContentBlockWithImage>
       </div>
     </div>
-);
+  );
 }
-
-

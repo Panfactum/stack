@@ -65,7 +65,7 @@ locals {
 
   all_domains = tolist(toset(concat(
     [for domain, _ in var.route53_zones : domain],
-    [for domain, _ in var.cloudflare_zones : domain]
+    [for _, domain in var.cloudflare_zones : domain]
   )))
 
   all_domains_with_subdomains = flatten([for domain in local.all_domains : (alltrue([for possible_parent in local.all_domains : (domain == possible_parent || !endswith(domain, possible_parent))]) ? [domain, "*.${domain}"] : ["*.${domain}"])])

@@ -87,9 +87,11 @@ resource "kubectl_manifest" "event_source" {
         metadata = {
           labels = module.util.labels
         }
-        tolerations   = module.util.tolerations
-        affinity      = module.util.affinity
-        schedulerName = module.util.scheduler_name
+
+        serviceAccountName = kubernetes_service_account.service_account.metadata[0].name
+        tolerations        = module.util.tolerations
+        affinity           = module.util.affinity
+        schedulerName      = module.util.scheduler_name
         container = {
           resources = local.default_resources
           securityContext = {
@@ -129,10 +131,12 @@ resource "kubectl_manifest" "vpa" {
     spec = {
       updatePolicy = {
         updateMode = "Auto"
-        evictionRequirements = [{
-          resources         = ["cpu", "memory"]
-          changeRequirement = "TargetHigherThanRequests"
-        }]
+        evictionRequirements = [
+          {
+            resources         = ["cpu", "memory"]
+            changeRequirement = "TargetHigherThanRequests"
+          }
+        ]
       }
       targetRef = {
         apiVersion = "argoproj.io/v1alpha1"

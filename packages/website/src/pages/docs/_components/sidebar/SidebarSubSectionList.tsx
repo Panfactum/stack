@@ -17,17 +17,21 @@ const SidebarSubSectionList: Component<SidebarSubSectionListProps> = (
     <>
       {props.section && (
         <ul class="flex w-full min-w-0 flex-col">
-          {<For each={props.section.sub}>{(section) => {
-            return (
-              <li>
-                <SidebarSection
-                  {...section}
-                  fullPath={props.fullPath}
-                  parentSectionPath={props.basePath}
-                />
-              </li>
-            );
-          }}</For>}
+          {
+            <For each={props.section.sub}>
+              {(section) => {
+                return (
+                  <li>
+                    <SidebarSection
+                      {...section}
+                      fullPath={props.fullPath}
+                      parentSectionPath={props.basePath}
+                    />
+                  </li>
+                );
+              }}
+            </For>
+          }
         </ul>
       )}
     </>

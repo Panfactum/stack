@@ -1,5 +1,5 @@
-import {clsx} from "clsx";
-import {type Component, createSignal} from "solid-js";
+import { clsx } from "clsx";
+import { type Component, createSignal } from "solid-js";
 
 import Modal from "@/components/ui/Modal.tsx";
 
@@ -48,7 +48,7 @@ const InputLabel: Component<InputLabelProps> = (props) => {
             aria-controls={`${props.id}-modal`}
             data-hs-overlay={`#${props.id}-modal`}
           >
-            <InfoIcon/>
+            <InfoIcon />
           </div>
         )}
       </button>
@@ -63,7 +63,7 @@ const InputLabel: Component<InputLabelProps> = (props) => {
         typeof props.description === "string" ? (
           props.description
         ) : (
-          <props.description/>
+          <props.description />
         )}
       </Modal>
     </>

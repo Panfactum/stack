@@ -13,7 +13,6 @@ import {
 
 import SavingsDetails from "./SavingsDetails.tsx";
 
-
 const SavingsSummary: Component = () => {
   const [detailsOpened, setDetailsOpened] = createSignal<boolean>(false);
   const savingsLineItems = createMemo(() => {
@@ -36,16 +35,18 @@ const SavingsSummary: Component = () => {
         </div>
       </div>
       <div class="grid grid-cols-2 gap-4 md:max-w-2/5 lg:max-w-full lg:grid-cols-3">
-        <Button onClick={() => { shareCalculatorValues('savings-calculator'); }}
-                variant="secondary"
-                class="lg:mx-auto lg:w-fit"
+        <Button
+          onClick={() => {
+            shareCalculatorValues("savings-calculator");
+          }}
+          variant="secondary"
+          class="lg:mx-auto lg:w-fit"
         >
           <div class="flex items-center justify-center gap-2 lg:justify-between">
             <span class="text-balance">Copy Shareable Link</span>
             <span class="block md:hidden lg:block">
-                  <FiShare/>
+              <FiShare />
             </span>
-
           </div>
         </Button>
         <Button
@@ -56,7 +57,7 @@ const SavingsSummary: Component = () => {
           <div class="flex items-center justify-center gap-2 lg:justify-between">
             <span class="text-balance">Show Details</span>
             <span class="block md:hidden lg:block">
-              <HiSolidMagnifyingGlassPlus/>
+              <HiSolidMagnifyingGlassPlus />
             </span>
           </div>
         </Button>

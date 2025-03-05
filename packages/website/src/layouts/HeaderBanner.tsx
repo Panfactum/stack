@@ -1,5 +1,5 @@
-import { IoCloseCircleSharp } from 'solid-icons/io'
-import {type Component, onMount} from "solid-js";
+import { IoCloseCircleSharp } from "solid-icons/io";
+import { type Component, onMount } from "solid-js";
 
 /**************************************************
  * The banner implementation is a little complicated b/c it impacts the overall height
@@ -17,22 +17,22 @@ import {type Component, onMount} from "solid-js";
  * be statically pre-rendered.
  * ***********************************************/
 
-
 // Change this key if you want to force re-enable the banner for users
-const KEY="banner-open-126"
+const KEY = "banner-open-126";
 
 const HeaderBanner: Component = () => {
-
   const closeBanner = () => {
-    window.document.getElementsByTagName('html')[0].toggleAttribute("data-banner", false)
-    window.localStorage.setItem(KEY, "false")
-  }
+    window.document
+      .getElementsByTagName("html")[0]
+      .toggleAttribute("data-banner", false);
+    window.localStorage.setItem(KEY, "false");
+  };
 
   onMount(() => {
-    if(window.localStorage.getItem(KEY) === "false"){
-      closeBanner()
+    if (window.localStorage.getItem(KEY) === "false") {
+      closeBanner();
     }
-  })
+  });
 
   return (
     <div class="banner bg-accent grow basis-1 items-center justify-between gap-6 px-6 lg:justify-center">
@@ -40,18 +40,25 @@ const HeaderBanner: Component = () => {
         <span class="hidden md:inline">
           Know someone who would benefit from Panfactum?{" "}
         </span>
-        Earn{" "}<b>$10,000</b>{" "}per referral<span class="inline md:hidden">{" "}to our support plans</span>.{" "}<a href="/referrals" class="cursor-pointer underline underline-offset-4">Learn more.</a>
+        Earn <b>$10,000</b> per referral
+        <span class="inline md:hidden"> to our support plans</span>.{" "}
+        <a
+          href="/referrals"
+          class="cursor-pointer underline underline-offset-4"
+        >
+          Learn more.
+        </a>
       </span>
       <button
         onClick={() => {
-         closeBanner()
+          closeBanner();
         }}
         class="flex justify-center lg:absolute lg:right-12"
       >
-        <IoCloseCircleSharp size={30}/>
+        <IoCloseCircleSharp size={30} />
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default HeaderBanner
+export default HeaderBanner;

@@ -522,6 +522,14 @@ Type: `number`
 
 Default: `100`
 
+### pg\_max\_slot\_wal\_keep\_size\_gb
+
+Description: Maximum size in gigabytes of WAL files that replication slots can retain before old segments are removed.
+
+Type: `number`
+
+Default: `10`
+
 ### pg\_maximum\_cpu\_millicores
 
 Description: The maximum amount of cpu to allocate to the postgres pods (in millicores)
@@ -657,6 +665,14 @@ Description: The version of postgres to deploy
 Type: `string`
 
 Default: `"16.6-13"`
+
+### pg\_wal\_keep\_size\_gb
+
+Description: The number of gigabytes of WAL files to keep for the cluster
+
+Type: `number`
+
+Default: `2`
 
 ### pg\_work\_mem\_percent
 
@@ -985,6 +1001,14 @@ Description: Whether to use the ECR pull through cache for the deployed images
 Type: `bool`
 
 Default: `false`
+
+### s3\_bucket\_access\_policy
+
+Description: Additional AWS access policy for the backup S3 bucket. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
+
+Type: `string`
+
+Default: `null`
 
 ### spot\_nodes\_enabled
 

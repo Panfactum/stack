@@ -39,9 +39,9 @@ const PriceDetails: Component<PriceDetailsProps> = (props) => {
               </tr>
             </thead>
             <tbody>
-              <For each={props.lineItems}>{(lineItem) => (
-                <PriceDetailsTableRow lineItem={lineItem} />
-              )}</For>
+              <For each={props.lineItems}>
+                {(lineItem) => <PriceDetailsTableRow lineItem={lineItem} />}
+              </For>
               <PriceDetailsTableRow
                 accent={true}
                 lineItem={{

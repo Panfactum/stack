@@ -53,9 +53,9 @@ const SavingsDetails: Component<PriceDetailsProps> = (props) => {
               </tr>
             </thead>
             <tbody>
-              <For each={props.lineItems}>{(lineItem) => (
-                <SavingsDetailsTableRow lineItem={lineItem} />
-              )}</For>
+              <For each={props.lineItems}>
+                {(lineItem) => <SavingsDetailsTableRow lineItem={lineItem} />}
+              </For>
               <SavingsDetailsTableRow
                 lineItem={{
                   name: "Total Savings",

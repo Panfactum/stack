@@ -18,7 +18,7 @@ module.exports = {
     extraFileExtensions: ['.astro']
   },
   ignorePatterns: [
-    "*.js"
+    "*.js", "*.cjs"
   ],
   rules: {
     "no-console": "error",
@@ -79,7 +79,8 @@ module.exports = {
       files: ["*.tsx"],
       plugins: [
           "@typescript-eslint",
-          "solid"
+          "solid",
+          "prettier"
       ],
       parser: "@typescript-eslint/parser",
       parserOptions: {
@@ -89,6 +90,8 @@ module.exports = {
         },
       },
       rules: {
+        // Prettier
+        "prettier/prettier": "error",
 
         // identifier usage is important
         "solid/jsx-no-duplicate-props": 2,

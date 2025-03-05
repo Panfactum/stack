@@ -1,5 +1,5 @@
-import {Toast as KobalteToast} from "@kobalte/core/toast";
-import {type ParentComponent, Show} from "solid-js";
+import { Toast as KobalteToast } from "@kobalte/core/toast";
+import { type ParentComponent, Show } from "solid-js";
 
 interface ToastProps {
   id: number;
@@ -9,10 +9,7 @@ interface ToastProps {
 
 const Toast: ParentComponent<ToastProps> = (props) => {
   return (
-    <KobalteToast
-      toastId={props.id}
-      class="toast [data-opened]"
-    >
+    <KobalteToast toastId={props.id} class="toast [data-opened]">
       <div class="bg-primary rounded-xl border-2 border-gray-light-mode-500 p-6">
         <div>
           <KobalteToast.Title>{props.title}</KobalteToast.Title>
@@ -24,7 +21,7 @@ const Toast: ParentComponent<ToastProps> = (props) => {
         </div>
       </div>
     </KobalteToast>
-  )
-}
+  );
+};
 
 export default Toast;

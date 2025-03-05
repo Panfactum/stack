@@ -1,14 +1,10 @@
 import { Select } from "@kobalte/core/select";
-import {clsx} from "clsx";
-import { FiChevronDown , FiCheck } from "solid-icons/fi";
-import {
-  type Component,
-  Show,
-} from "solid-js";
+import { clsx } from "clsx";
+import { FiChevronDown, FiCheck } from "solid-icons/fi";
+import { type Component, Show } from "solid-js";
 
 import { DOCS_VERSIONS, type VersionOption } from "@/lib/constants.ts";
 import { useDocsVersion } from "@/state/docsVersion.tsx";
-
 
 const VersionSelector: Component = () => {
   const [version, setDocsVersion] = useDocsVersion();

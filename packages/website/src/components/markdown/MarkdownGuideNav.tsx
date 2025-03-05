@@ -1,4 +1,4 @@
-import {Progress} from "@kobalte/core/progress";
+import { Progress } from "@kobalte/core/progress";
 import type { Component } from "solid-js";
 
 import MarkdownGuideNavButton from "@/components/markdown/MarkdownGuidedNavButton.tsx";
@@ -15,7 +15,6 @@ interface MarkdownGuideNavProps {
 
 const MarkdownGuideNav: Component<MarkdownGuideNavProps> = (props) => {
   return (
-
     <Progress
       minValue={1}
       maxValue={props.totalSteps}
@@ -30,10 +29,10 @@ const MarkdownGuideNav: Component<MarkdownGuideNavProps> = (props) => {
           icon={"left"}
         />
         <div class="flex justify-center gap-4">
-        <Progress.Label class="text-display-xs font-semibold">
-          {props.progressLabel || "Guide Progress"}
-        </Progress.Label>
-        <Progress.ValueLabel />
+          <Progress.Label class="text-display-xs font-semibold">
+            {props.progressLabel || "Guide Progress"}
+          </Progress.Label>
+          <Progress.ValueLabel />
         </div>
         <MarkdownGuideNavButton
           href={props.forwardHref}
@@ -42,15 +41,11 @@ const MarkdownGuideNav: Component<MarkdownGuideNavProps> = (props) => {
         />
       </div>
 
-      <Progress.Track
-        class="bg-tertiary dark:bg-secondary h-2 rounded"
-      >
-        <Progress.Fill
-          class="bg-accent h-full w-[var(--kb-progress-fill-width)] rounded"
-        />
+      <Progress.Track class="bg-tertiary dark:bg-secondary h-2 rounded">
+        <Progress.Fill class="bg-accent h-full w-[var(--kb-progress-fill-width)] rounded" />
       </Progress.Track>
     </Progress>
-  )
+  );
 };
 
 export default MarkdownGuideNav;

@@ -11,13 +11,15 @@ interface SavingsDescriptionProps {
 const SavingsDescription: Component<SavingsDescriptionProps> = (props) => {
   return (
     <div class="flex w-fit flex-col">
-      <For each={props.lineItems}>{(item) => {
-        if (item) {
-          return <SavingsDescriptionLineItem {...item} />;
-        } else {
-          return <SavingsDescriptionTotalLine />;
-        }
-      }}</For>
+      <For each={props.lineItems}>
+        {(item) => {
+          if (item) {
+            return <SavingsDescriptionLineItem {...item} />;
+          } else {
+            return <SavingsDescriptionTotalLine />;
+          }
+        }}
+      </For>
     </div>
   );
 };

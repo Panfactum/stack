@@ -1,8 +1,6 @@
 import { NUMBER_FORMAT } from "@/lib/utils.ts";
 import CalculatorDescriptionContainer from "@/pages/_components/details/CalculatorDescriptionContainer.tsx";
-import {
-  STARTUP_DISCOUNT_MULTIPLIER,
-} from "@/pages/_components/priceConstants.ts";
+import { STARTUP_DISCOUNT_MULTIPLIER } from "@/pages/_components/priceConstants.ts";
 
 const StartupDiscountDescription = () => (
   <CalculatorDescriptionContainer>

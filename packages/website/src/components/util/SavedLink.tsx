@@ -3,7 +3,9 @@ import {
   onMount,
   type ParentComponent,
   type JSX,
-  splitProps, createEffect, createMemo,
+  splitProps,
+  createEffect,
+  createMemo,
 } from "solid-js";
 
 import { simpleHash } from "@/lib/simpleHash.ts";
@@ -29,8 +31,10 @@ const SavedLink: ParentComponent<SavedLinkProps> = (props) => {
 
   const [href, _setHref] = createSignal<string>(linkProps.defaultHref);
 
-  const stateKey = createMemo(() =>
-    `pf-saved-href-${linkProps.id.replace(/[^a-zA-Z0-9]/g, "-")}-${simpleHash(linkProps.defaultHref)}`);
+  const stateKey = createMemo(
+    () =>
+      `pf-saved-href-${linkProps.id.replace(/[^a-zA-Z0-9]/g, "-")}-${simpleHash(linkProps.defaultHref)}`,
+  );
 
   // Ensures that we update the in-memory signal AND the
   // browser session storage
@@ -76,14 +80,10 @@ const SavedLink: ParentComponent<SavedLinkProps> = (props) => {
         updateState();
       }
     }
-  })
+  });
 
   return (
-    <a
-      {...rest}
-      href={href()}
-      data-astro-prefetch={"hover"}
-    >
+    <a {...rest} href={href()} data-astro-prefetch={"hover"}>
       {props.children}
     </a>
   );

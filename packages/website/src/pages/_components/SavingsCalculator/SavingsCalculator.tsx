@@ -79,7 +79,6 @@ const SavingsCalculator: Component<SavingsCalculatorProps> = (props) => {
           <SupportCostsIncludedInput />
         </InputRow>
       </div>
-
     </BackgroundContext.Provider>
   );
 };

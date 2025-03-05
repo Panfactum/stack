@@ -15,8 +15,7 @@ const variants = {
   tertiary: "btn-tertiary",
 };
 
-export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement>
-{
+export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "md" | "lg" | "xl";
   variant?: "primary" | "secondary";
 }

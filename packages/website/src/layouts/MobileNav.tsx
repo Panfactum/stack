@@ -1,5 +1,5 @@
 import { Dialog } from "@kobalte/core/dialog";
-import { IoMenu , IoClose } from "solid-icons/io";
+import { IoMenu, IoClose } from "solid-icons/io";
 import { type Component, createSignal, For } from "solid-js";
 
 import PanfactumLogo from "@/components/icons/panfactum-logo.svg?raw";
@@ -23,9 +23,7 @@ const MobileNav: Component<MobileNavProps> = (props) => {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay
-          class={
-            "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
-          }
+          class={"fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"}
         />
         <Dialog.Content
           class={`fixed top-0 z-[100] flex max-h-[80vh] w-screen flex-col overflow-y-scroll ${props.background === "primary" ? "bg-secondary" : "bg-primary"}`}
@@ -35,7 +33,7 @@ const MobileNav: Component<MobileNavProps> = (props) => {
             <a
               innerHTML={PanfactumLogo}
               href="/"
-              class="flex h-full max-w-[75%]  items-center [&>svg]:h-3/5"
+              class="flex h-full max-w-[75%] items-center [&>svg]:h-3/5"
             />
             {/* eslint-enable solid/no-innerhtml,jsx-a11y/anchor-has-content */}
 
@@ -47,17 +45,19 @@ const MobileNav: Component<MobileNavProps> = (props) => {
             aria-label="Primary"
             class="grid grid-cols-1 gap-4 p-4 text-xl sm:grid-cols-2"
           >
-            <For each={NAV_LINKS}>{(link) => (
-              <a href={link.url} data-astro-prefetch="viewport">
-                <button
-                  class={`hover:text-secondary cursor-pointer bg-transparent font-bold`}
-                >
-                  {link.title}
-                </button>
-              </a>
-            )}</For>
+            <For each={NAV_LINKS}>
+              {(link) => (
+                <a href={link.url} data-astro-prefetch="viewport">
+                  <button
+                    class={`hover:text-secondary cursor-pointer bg-transparent font-bold`}
+                  >
+                    {link.title}
+                  </button>
+                </a>
+              )}
+            </For>
             <span class="mt-4 flex flex-col gap-3 sm:col-span-2">
-              <GetStartedButton  fullPath={props.fullPath}/>
+              <GetStartedButton fullPath={props.fullPath} />
               <a href={GITHUB_URL}>
                 <Button variant={"secondary"} class="w-full">
                   Github

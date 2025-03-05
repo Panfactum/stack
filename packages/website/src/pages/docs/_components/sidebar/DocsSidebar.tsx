@@ -1,6 +1,6 @@
 import { Dialog } from "@kobalte/core/dialog";
 import { createResizeObserver } from "@solid-primitives/resize-observer";
-import {clsx} from "clsx";
+import { clsx } from "clsx";
 import { IoChevronForwardOutline } from "solid-icons/io";
 import { TbMenu } from "solid-icons/tb";
 import {
@@ -34,9 +34,11 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
 
   // Each version has a different set of sidebar sections, so this shows the current version's sections
   const activeSidebarSections = createMemo(() => {
-    const sections = props.metadata[version()]
-    if(sections === undefined){
-      throw new Error('Invalid version selected. Could not find documentation sections for the provided version.')
+    const sections = props.metadata[version()];
+    if (sections === undefined) {
+      throw new Error(
+        "Invalid version selected. Could not find documentation sections for the provided version.",
+      );
     }
     return sections;
   });
@@ -45,9 +47,11 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
   const activeSection = createMemo(() => {
     const section = activeSidebarSections().find((item) =>
       ("/" + pathComponents().nonVersionedPath).startsWith(item.path),
-    )
+    );
     if (section === undefined) {
-      throw new Error('Invalid section selected. Could not find the schema for the section for the path.')
+      throw new Error(
+        "Invalid section selected. Could not find the schema for the section for the path.",
+      );
     }
     return section;
   });
@@ -98,8 +102,7 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
   return (
     <>
       {/* DESKTOP VIEW */}
-      <div class="border-primary fixed top-[--header-height] hidden h-[calc(100vh_-_var(--header-height))] w-[--sidebar-width] overflow-y-auto border-r-2 pt-3 text-sm lg:block"
-      >
+      <div class="border-primary fixed top-[--header-height] hidden h-[calc(100vh_-_var(--header-height))] w-[--sidebar-width] overflow-y-auto border-r-2 pt-3 text-sm lg:block">
         <SidebarContent
           setMobileNavOpen={setMobileNavOpen}
           fullPath={props.fullPath}
@@ -113,7 +116,7 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
       {/* Mobile VIEW */}
       <div
         class={clsx(
-          "bg-primary border-primary text-tertiary sticky top-0 z-20 flex h-12 w-screen max-w-[100vw] items-center justify-between gap-2 border-b-2  px-4 text-xs md:top-[--header-height] lg:hidden"
+          "bg-primary border-primary text-tertiary sticky top-0 z-20 flex h-12 w-screen max-w-[100vw] items-center justify-between gap-2 border-b-2  px-4 text-xs md:top-[--header-height] lg:hidden",
         )}
       >
         <Dialog open={mobileNavOpen()} onOpenChange={setMobileNavOpen}>
@@ -130,9 +133,7 @@ const InternalDocsSidebar: Component<DocSidebarProps> = (props) => {
           </Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay
-              class={
-                "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
-              }
+              class={"fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"}
             />
             <Dialog.Content class="bg-primary fixed left-0 top-0 z-[200] flex h-screen w-[--sidebar-width] flex-col overflow-y-scroll pt-8">
               <SidebarContent

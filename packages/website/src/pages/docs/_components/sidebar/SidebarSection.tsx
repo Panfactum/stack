@@ -1,11 +1,10 @@
 import { Collapsible } from "@kobalte/core/collapsible";
 import { clsx } from "clsx";
-import {type Component, createMemo, For, Show} from "solid-js";
+import { type Component, createMemo, For, Show } from "solid-js";
 
 import type { DocsSubsectionMetadata } from "@/pages/docs/_components/types.ts";
 
 import SidebarMenuButton from "./SidebarMenuButton.tsx";
-
 
 interface SidebarSectionProps extends DocsSubsectionMetadata {
   parentSectionPath: string;
@@ -15,22 +14,20 @@ interface SidebarSectionProps extends DocsSubsectionMetadata {
 
 const SidebarSection: Component<SidebarSectionProps> = (props) => {
   const sectionPath = createMemo(() => props.parentSectionPath + props.path);
-  const isActive = createMemo(
-    () => {
-      // This case handles the landing page for each documentation section ("/")
-      if(props.path === "/"){
-        return props.fullPath === sectionPath()
-      }
-      // This is for all other paths
-      return !!(props.path && props.fullPath.startsWith(sectionPath()))
-    },
-  );
+  const isActive = createMemo(() => {
+    // This case handles the landing page for each documentation section ("/")
+    if (props.path === "/") {
+      return props.fullPath === sectionPath();
+    }
+    // This is for all other paths
+    return !!(props.path && props.fullPath.startsWith(sectionPath()));
+  });
   const hasChildren = () => !!props.sub;
 
   return (
     <Show
       when={hasChildren()}
-      fallback={(
+      fallback={
         <SidebarMenuButton
           isActive={isActive()}
           text={props.text}
@@ -38,7 +35,7 @@ const SidebarSection: Component<SidebarSectionProps> = (props) => {
           href={sectionPath()}
           isChild={props.isChild}
         />
-      )}
+      }
     >
       <Collapsible
         as="ul"
@@ -69,7 +66,7 @@ const SidebarSection: Component<SidebarSectionProps> = (props) => {
         </Collapsible.Content>
       </Collapsible>
     </Show>
-  )
+  );
 };
 
 export default SidebarSection;

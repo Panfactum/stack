@@ -75,12 +75,9 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
     }
   });
 
-  const docsVersion = createMemo(() => versionFromPath() ?? _docsVersion())
+  const docsVersion = createMemo(() => versionFromPath() ?? _docsVersion());
 
-  const value: DocsVersionContext = [
-    docsVersion,
-    setDocsVersion,
-  ];
+  const value: DocsVersionContext = [docsVersion, setDocsVersion];
 
   // Always default to the version from the path and only fallback to the internal state
   // if absolutely necessary

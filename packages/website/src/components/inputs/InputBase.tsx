@@ -1,8 +1,4 @@
-import {
-  type Component,
-  type ParentComponent,
-  splitProps,
-} from "solid-js";
+import { type Component, type ParentComponent, splitProps } from "solid-js";
 
 import InputLabel from "./InputLabel.tsx";
 
