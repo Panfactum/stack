@@ -25,7 +25,7 @@ export default [
       ecmaVersion: 2021,
       sourceType: "module",
       parserOptions: {
-        tsconfigRootDir: "/home/seth/panfactum/stack/packages/cli",
+        tsconfigRootDir: __dirname,
         project: ["./tsconfig.json"],
       },
       globals: {
