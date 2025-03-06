@@ -31,7 +31,7 @@ class VersionCommand extends Command {
 
 // Create a CLI instance
 const cli = new Cli({
-  binaryName: "panfactum-cli",
+  binaryName: "pf",
   binaryLabel: "Panfactum CLI",
   binaryVersion: VERSION,
 });
