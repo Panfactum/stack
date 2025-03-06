@@ -1,15 +1,42 @@
-# panfactum-cli
+# Panfactum CLI
 
-To install dependencies:
+A command-line interface for Panfactum.
+
+## Prerequisites
+
+This CLI requires the following dependencies to develop:
+
+- [Bun](https://bun.sh) - Fast all-in-one JavaScript runtime
+- [jq](https://jqlang.github.io/jq/) - Lightweight and flexible command-line JSON processor
+
+## Installation
 
 ```bash
 bun install
 ```
 
-To run:
+## Development
 
 ```bash
-bun run index.ts
+bun run src/index.ts
 ```
 
-This project was created using `bun init` in bun v1.1.31. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## Build
+
+```bash
+bun build src/index.ts
+```
+
+This will create an executable at `./bin/pf`.
+
+## Linting
+
+```bash
+bun run lint
+```
+
+## Fixing linting errors
+
+```bash
+bun run lint:fix
+```
