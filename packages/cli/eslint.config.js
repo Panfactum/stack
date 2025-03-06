@@ -28,6 +28,9 @@ export default [
         tsconfigRootDir: "/home/seth/panfactum/stack/packages/cli",
         project: ["./tsconfig.json"],
       },
+      globals: {
+        process: "readonly"
+      }
     },
     settings: {
       "import/resolver": {
