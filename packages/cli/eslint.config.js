@@ -20,6 +20,9 @@ export default [
       unicorn: fixupPluginRules(unicorn),
       promise: fixupPluginRules(promise),
     },
+    globals: {
+      process: "readonly"
+    },
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2021,
@@ -28,9 +31,6 @@ export default [
         tsconfigRootDir: __dirname,
         project: ["./tsconfig.json"],
       },
-      globals: {
-        process: "readonly"
-      }
     },
     settings: {
       "import/resolver": {
