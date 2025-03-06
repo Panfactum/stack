@@ -8,6 +8,9 @@ import promise from "eslint-plugin-promise";
 import tsParser from "@typescript-eslint/parser";
 import js from "@eslint/js";
 import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default [
   js.configs.recommended,
@@ -26,7 +29,7 @@ export default [
       ecmaVersion: 2021,
       sourceType: "module",
       parserOptions: {
-        tsconfigRootDir: dirname,
+        tsconfigRootDir: __dirname,
         project: ["./tsconfig.json"],
       },
       globals: {
