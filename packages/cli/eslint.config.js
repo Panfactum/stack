@@ -7,6 +7,7 @@ import unicorn from "eslint-plugin-unicorn";
 import promise from "eslint-plugin-promise";
 import tsParser from "@typescript-eslint/parser";
 import js from "@eslint/js";
+import { dirname } from 'path';
 
 export default [
   js.configs.recommended,
@@ -20,16 +21,16 @@ export default [
       unicorn: fixupPluginRules(unicorn),
       promise: fixupPluginRules(promise),
     },
-    globals: {
-      process: "readonly"
-    },
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2021,
       sourceType: "module",
       parserOptions: {
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: dirname,
         project: ["./tsconfig.json"],
+      },
+      globals: {
+        process: "readonly"
       },
     },
     settings: {
