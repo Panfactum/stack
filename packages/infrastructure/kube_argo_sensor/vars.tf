@@ -26,6 +26,7 @@ variable "dependencies" {
     name                   = string
     eventSourceName        = string
     eventName              = optional(string, "default")
+    transform              = optional(any)
     filtersLogicalOperator = optional(string, "and")
     filters = optional(object({
       dataLogicalOperator = optional(string, "and")
