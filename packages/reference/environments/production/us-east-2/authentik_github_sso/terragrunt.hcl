@@ -16,7 +16,7 @@ dependency "kube_authentik" {
 }
 
 inputs = {
-  acs_url  = "https://github.com/enterprises/Panfactum/saml/consume"
+  acs_url = "https://github.com/enterprises/Panfactum/saml/consume"
 
   organization_name = dependency.authentik_core.outputs.organization_name
   authentik_domain  = dependency.kube_authentik.outputs.domain
