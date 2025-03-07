@@ -29,7 +29,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.3.2",
     "clipanion": "^4.0.0-rc.4",
+    "picocolors": "^1.1.1",
     "typanion": "^3.14.0"
   }
 }
