@@ -117,7 +117,7 @@ resource "null_resource" "wait_for_saml_provider" {
   depends_on = [authentik_provider_saml.github]
 
   provisioner "local-exec" {
-    command = "sleep 10"  # Give the API time to fully create the resource
+    command = "sleep 10" # Give the API time to fully create the resource
   }
 }
 

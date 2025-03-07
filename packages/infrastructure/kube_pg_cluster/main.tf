@@ -309,7 +309,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
         clientCASecret       = module.client_certs.secret_name
         replicationTLSSecret = module.client_certs.secret_name
       }
-        
+
       inheritedMetadata = {
         labels = merge(
           module.util_cluster.labels,

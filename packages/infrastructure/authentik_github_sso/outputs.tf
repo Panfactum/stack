@@ -15,5 +15,5 @@ output "issuer_url" {
 
 output "certificate" {
   description = "The certificate used to sign SAML responses"
-  value = authentik_certificate_key_pair.signing.certificate_data
+  value       = authentik_certificate_key_pair.signing.certificate_data
 }
