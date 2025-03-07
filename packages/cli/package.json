@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "clipanion": "^4.0.0-rc.4",
+    "kleur": "^4.1.5",
+    "prompts": "^2.4.2",
     "typanion": "^3.14.0"
   }
 }
