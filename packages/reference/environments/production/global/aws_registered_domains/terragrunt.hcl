@@ -12,7 +12,11 @@ locals {
 }
 
 inputs = {
-  domain_names = ["panfactum.com"]
+  domain_names = [
+    "panfactum.com",
+    "getpanfactum.com",
+    "trypanfactum.com"
+  ]
 
   admin_organization_name = "Panfactum"
   admin_first_name        = "Jack"
