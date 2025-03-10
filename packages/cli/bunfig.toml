@@ -1,0 +1,5 @@
+telemetry = false
+
+# https://bun.sh/docs/runtime/bunfig#run-bun-auto-alias-node-to-bun
+[run]
+bun = true
