@@ -9,6 +9,77 @@ terraform {
 
 inputs = {
   zones = {
+    "trypanfactum.com" = {
+      txt_records = [
+        {
+          subdomain = ""
+          records = [
+            "google-site-verification=FeQQV4StQNkbiNostgR4n_puseQdhrk1tAwOjpmV91E", // Google Site Verification
+            "v=spf1 include:_spf.google.com ~all",                                  // SPF record authorizing email senders
+          ]
+        },
+
+        // DKIM (email - google)
+        {
+          subdomain = "google._domainkey."
+          records = [
+            "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs2DiViVSWtU/jloGJ10bD7usBBcdBw9tVeVD1a8H5t9onb4vM7VvsbI3P+FF2p2+nIGjOfnTs0HbxNe2cZ+YPw7gNxsuDkFRnNxiwNaImeKS0SBQYQ4R5+q1tY2Xgm49xqdkWiPgPPMMtIQxrUSc3gZcpgfBaQHwX/Ca33FMLSOFnm7yGs6wvDhsbUsZvCd300//glJseGYyoYCj3bcVK7bpHdF91CcKEsUK/bd1GJc6FjfsZNGVgr1cRUpHO+It914c41XPCQRMuCZbb0jTy9Su4ahEQot3lyyoqKtrQB+XsytP7CDbgGuFnR7azbuivLvkDwtVPo3dia4vO/QT6QIDAQAB"
+          ]
+        },
+
+        // DMARC (email)
+        {
+          subdomain = "_dmarc."
+          records = [
+            "v=DMARC1; p=reject; rua=mailto:ipm6uhv@ar.glockapps.com; ruf=mailto:ipm6uhv@fr.glockapps.com; fo=1;"
+          ]
+        }
+      ]
+      mx_records = [
+        {
+          subdomain = ""
+          records = [
+            "1 smtp.google.com"
+          ]
+        }
+      ]
+    }
+    "getpanfactum.com" = {
+      txt_records = [
+        {
+          subdomain = ""
+          records = [
+            "google-site-verification=T7P6g2fvaBUZ2Xby1GcdHGbOYwTOr0CGWniC_MH_qIg", // Google Site Verification
+            "v=spf1 include:_spf.google.com ~all",                                  // SPF record authorizing email senders
+          ]
+        },
+
+        // DKIM (email - google)
+        {
+          subdomain = "google._domainkey."
+          records = [
+            "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0H64obBtmcSiIMZ0YTNa/leOWqOJ+doK2d+jdsJ/VryNIM6r0JjcZv1XyAqefkRLkrmA6V6Co1XIUt74e1AIJAnyifcRzux/fLC4I74HqDkA5rEjGIIYaentSxYGnThlC83APfAMOPzQmIHcaPyFmgaLr4ZEEWPFzg0mhio9EgXlbwv1xAj2xJil1PTa+OWNNn8T4Z3eFoBDzeD1lGmno7jj0Hb9Dq9aMbnRPe0hv6zzev7QawSsfbRKz2AIzHcDdVCNts7+tV3ybuSM2aBJ0TGlGRorIzlS4PUaWnN/Cvi9GzVSB+qH78Ix7/F0gB6TTNmq5FLg5PiJxcvVdc/z1QIDAQAB"
+          ]
+        },
+
+
+        // DMARC (email)
+        {
+          subdomain = "_dmarc."
+          records = [
+            "v=DMARC1; p=reject; rua=mailto:ipm6uhv@ar.glockapps.com; ruf=mailto:ipm6uhv@fr.glockapps.com; fo=1;"
+          ]
+        }
+      ]
+      mx_records = [
+        {
+          subdomain = ""
+          records = [
+            "1 smtp.google.com"
+          ]
+        }
+      ]
+    }
     "panfactum.com" = {
       a_records = [
         // Softr client portal
@@ -100,7 +171,7 @@ inputs = {
         // DMARC (email)
         {
           subdomain = "_dmarc."
-          records   = ["v=DMARC1; p=quarantine; rua=mailto:security@panfactum.com; ruf=mailto:security@panfactum.com;"]
+          records   = ["v=DMARC1; p=quarantine; rua=mailto:ipm6uhv@ar.glockapps.com; ruf=mailto:ipm6uhv@fr.glockapps.com; fo=1;"]
         },
         // DKIM (email - zoho)
         {
@@ -141,13 +212,13 @@ inputs = {
         {
           subdomain = ""
           records = [
-            "MS=ms89071327",                                                                                                         // AAD Domain Ownership
-            "v=spf1 include:one.zoho.com include:zohomail.com include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all", // SPF record authorizing email senders
-            "zoho-verification=zb69684923.zmverify.zoho.com",                                                                        // Zoho Domain Ownership
-            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                                                  // Panfactum.com Google Search Console
-            "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                                                            // Panfactum.com MongoDB Atlas SSO
-            "stripe-verification=e974df024c29569f82cceeacf4f0bbe7f6abace14bc538961a2076d26513afa9",                                  // Stripe domain verification (email sending)
-            "asv=8aac24d1b02697630a27d2337948e5e8"                                                                                   // Asana domain verification
+            "MS=ms89071327",                                                                        // AAD Domain Ownership
+            "v=spf1 include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all",          // SPF record authorizing email senders
+            "zoho-verification=zb69684923.zmverify.zoho.com",                                       // Zoho Domain Ownership
+            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                 // Panfactum.com Google Search Console
+            "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                           // Panfactum.com MongoDB Atlas SSO
+            "stripe-verification=e974df024c29569f82cceeacf4f0bbe7f6abace14bc538961a2076d26513afa9", // Stripe domain verification (email sending)
+            "asv=8aac24d1b02697630a27d2337948e5e8"                                                  // Asana domain verification
           ]
         },
         // GitHub Verification
