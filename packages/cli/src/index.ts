@@ -1,33 +1,10 @@
 #!/usr/bin/env bun
-import { Cli, Command } from "clipanion";
+import { Builtins, Cli } from "clipanion";
+
+import { TerraformInitCommand } from "./commands/terraform/tf-init-command";
 
 // @ts-ignore Bun needs the explicit non-index syntax to overwrite this at build time with the --define flag
 const VERSION = process.env.VERSION ?? "unknown";
-
-class HelpCommand extends Command {
-  static override paths = [["--help"], ["-h"]];
-
-  async execute() {
-    this.context.stdout.write("===================================\n");
-    this.context.stdout.write("            PANFACTUM             \n");
-    this.context.stdout.write("===================================\n");
-    // this.context.stdout.write("Commands:\n\n");
-    // this.context.stdout.write("Coming soon...\n\n");
-    this.context.stdout.write("Options:\n");
-    this.context.stdout.write("  -h, --help        Show this help message\n");
-    this.context.stdout.write("  -v, --version     Show version number");
-    return 0;
-  }
-}
-
-class VersionCommand extends Command {
-  static override paths = [["--version"], ["-v"]];
-
-  async execute() {
-    this.context.stdout.write(VERSION);
-    return 0;
-  }
-}
 
 // Create a CLI instance
 const cli = new Cli({
@@ -37,8 +14,9 @@ const cli = new Cli({
 });
 
 // Register commands
-cli.register(HelpCommand);
-cli.register(VersionCommand);
+cli.register(Builtins.HelpCommand);
+cli.register(Builtins.VersionCommand);
+cli.register(TerraformInitCommand);
 
 // Parse and run
 cli.runExit(process.argv.slice(2), {

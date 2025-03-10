@@ -12,7 +12,7 @@
     "@eslint/compat": "^1.2.7",
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.21.0",
-    "@types/bun": "latest",
+    "@types/bun": "^1.2.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "eslint": "^9.21.0",
@@ -26,11 +26,12 @@
     "prettier": "^3.5.3"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.3.2",
     "clipanion": "^4.0.0-rc.4",
+    "ora": "^8.2.0",
     "picocolors": "^1.1.1",
     "typanion": "^3.14.0"
   }
