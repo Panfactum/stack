@@ -2,6 +2,7 @@ import { select, confirm as confirmPrompt } from "@inquirer/prompts";
 import { Command } from "clipanion";
 import pc from "picocolors";
 import YAML from "yaml";
+import { findPanfactumYaml } from "../util/find-panfactum-yaml";
 import { isPanfactumConfig } from "../util/is-panfactum-config";
 
 // must check the region & run script to do that (NOT in global region)
@@ -24,22 +25,6 @@ export class InstallClusterCommand extends Command {
 
     // Check if we're in the correct directory structure for cluster installation
     const currentDirectory = process.cwd();
-
-    // Function to find panfactum.yaml by recursively looking up the directory tree
-    const findPanfactumYaml = async (dir: string): Promise<string | null> => {
-      const panfactumPath = `${dir}/panfactum.yaml`;
-      if (await Bun.file(panfactumPath).exists()) {
-        return panfactumPath;
-      }
-
-      const parentDir = dir.split("/").slice(0, -1).join("/");
-      // Stop if we've reached the root directory
-      if (parentDir === "" || parentDir === dir) {
-        return null;
-      }
-
-      return findPanfactumYaml(parentDir);
-    };
 
     const panfactumYamlPath = await findPanfactumYaml(currentDirectory);
 
