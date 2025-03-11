@@ -33,7 +33,7 @@ export function initTerraformModules(context: BaseContext): boolean {
 
   // Check if the init process failed
   if (initProcess.exitCode !== 0) {
-    context.stdout.write(initProcess.stderr.toString());
+    context.stderr.write(initProcess.stderr.toString());
     context.stdout.write(
       pc.black(pc.red("Failed to initialize Terraform modules.\n"))
     );
