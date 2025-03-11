@@ -24,8 +24,8 @@ export function initTerraformModules(context: BaseContext): boolean {
       "--terragrunt-ignore-external-dependencies",
     ],
     {
-      stdout: "ignore",
-      stderr: "ignore",
+      stdout: "inherit",
+      stderr: "inherit",
     }
   );
 
@@ -51,8 +51,8 @@ export function initTerraformModules(context: BaseContext): boolean {
       "--terragrunt-ignore-external-dependencies",
     ],
     {
-      stdout: "ignore",
-      stderr: "ignore",
+      stdout: "inherit",
+      stderr: "inherit",
     }
   );
 
