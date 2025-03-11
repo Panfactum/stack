@@ -23,7 +23,6 @@ export function initTerraformModules(context: BaseContext): boolean {
       "run-all",
       "init",
       "-upgrade",
-      "--invalid-flag-to-force-error",
       "--terragrunt-ignore-external-dependencies",
     ],
     {
