@@ -7,6 +7,7 @@ export async function downloadFile(url: string, destination: string) {
     );
   }
 
-  const fileData = await response.arrayBuffer();
-  await Bun.write(destination, fileData);
+  // Will automatically write the response body to the destination file
+  // See https://bun.sh/docs/api/file-io#writing-files-bun-write
+  await Bun.write(destination, response);
 }

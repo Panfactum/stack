@@ -6,16 +6,16 @@ import { initTerraformModules } from "./init-terraform-modules";
  * with provider locks for all major platforms
  */
 export class TerraformInitCommand extends Command {
-  static override paths = [["tf", "init"]];
+  static override paths = [["tf-init"]];
 
   static override usage = Command.Usage({
     description:
       "Initialize and upgrade all Terraform modules, and update platform locks",
     details:
-      "This command performs two operations:\n" +
-      "1. Runs terraform init -upgrade on every module\n" +
+      "This command performs two operations:\n\n" +
+      "1. Runs terraform init -upgrade on every module\n\n" +
       "2. Adds provider hashes to the .terraform.lock.hcl for all major platforms",
-    examples: [["Initialize all Terraform modules", "pf tf init"]],
+    examples: [["Initialize all Terraform modules", "pf tf-init"]],
   });
 
   async execute(): Promise<number> {
