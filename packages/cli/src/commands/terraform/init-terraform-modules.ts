@@ -73,7 +73,7 @@ export function initTerraformModules(context: BaseContext): boolean {
 
   // Check if the lock process failed
   if (lockProcess.exitCode !== 0) {
-    context.stdout.write(lockProcess.stderr.toString());
+    context.stderr.write(lockProcess.stderr.toString());
     context.stdout.write(
       pc.black(pc.red("Failed to update platform locks.\n"))
     );
