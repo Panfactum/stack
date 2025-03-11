@@ -1,5 +1,5 @@
 import pc from "picocolors";
-
+import { printHelpInformation } from "../../util/print-help-information";
 import type { BaseContext } from "clipanion";
 
 /**
@@ -12,7 +12,9 @@ import type { BaseContext } from "clipanion";
  * @returns {boolean} Success status
  */
 export function initTerraformModules(context: BaseContext): boolean {
-  context.stdout.write(pc.black(pc.blue("Initializing and upgrading all Terraform modules...\n")));
+  context.stdout.write(
+    pc.black(pc.blue("Initializing and upgrading all Terraform modules...\n"))
+  );
 
   // Step 1: Run init -upgrade on all modules
   const initProcess = Bun.spawnSync(
@@ -21,21 +23,35 @@ export function initTerraformModules(context: BaseContext): boolean {
       "run-all",
       "init",
       "-upgrade",
+      "--invalid-flag-to-force-error",
       "--terragrunt-ignore-external-dependencies",
     ],
     {
       stdout: "ignore",
-      stderr: "inherit",
+      stderr: "pipe",
     }
   );
 
   // Check if the init process failed
   if (initProcess.exitCode !== 0) {
-    context.stdout.write(pc.black(pc.red("Failed to initialize Terraform modules.\n")));
+    context.stdout.write(initProcess.stderr.toString());
+    context.stdout.write(
+      pc.black(pc.red("Failed to initialize Terraform modules.\n"))
+    );
+    context.stdout.write(
+      pc.black(
+        pc.red(
+          "Please check the logs above for more information and try again.\n"
+        )
+      )
+    );
+    printHelpInformation(context);
     return false;
   }
 
-  context.stdout.write(pc.black(pc.blue("Updating platform locks for all platforms...\n")));
+  context.stdout.write(
+    pc.black(pc.blue("Updating platform locks for all platforms...\n"))
+  );
 
   // Step 2: Update the platform locks to include all platforms
   const lockProcess = Bun.spawnSync(
@@ -52,16 +68,29 @@ export function initTerraformModules(context: BaseContext): boolean {
     ],
     {
       stdout: "ignore",
-      stderr: "inherit",
+      stderr: "pipe",
     }
   );
 
   // Check if the lock process failed
   if (lockProcess.exitCode !== 0) {
-    context.stdout.write(pc.black(pc.red("Failed to update platform locks.\n")));
+    context.stdout.write(lockProcess.stderr.toString());
+    context.stdout.write(
+      pc.black(pc.red("Failed to update platform locks.\n"))
+    );
+    context.stdout.write(
+      pc.black(
+        pc.red(
+          "Please check the logs above for more information and try again.\n"
+        )
+      )
+    );
+    printHelpInformation(context);
     return false;
   }
 
-  context.stdout.write(pc.black(pc.green("Successfully initialized all Terraform modules!\n")));
+  context.stdout.write(
+    pc.black(pc.green("Successfully initialized all Terraform modules!\n"))
+  );
   return true;
 }

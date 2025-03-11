@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
 import { Builtins, Cli } from "clipanion";
-
 import { TerraformInitCommand } from "./commands/terraform/tf-init-command";
 
 // @ts-ignore Bun needs the explicit non-index syntax to overwrite this at build time with the --define flag
