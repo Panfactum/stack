@@ -48,7 +48,7 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    // If the environment_var is not set in the panfactum.yaml file they need to complete the initial setup steps
+    // If the environments_dir is not set in the panfactum.yaml file they need to complete the initial setup steps
     const panfactumYamlContent = await Bun.file(panfactumYamlPath).text();
     const panfactumConfig: unknown = YAML.parse(panfactumYamlContent);
     let environmentsDir: string | undefined;
