@@ -2,6 +2,7 @@
 import {Head} from "astro-capo"
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
+import { NODE_ENV } from "astro:env/client"
 import { ClientRouter } from "astro:transitions";
 
 import { join } from "node:path";
@@ -24,6 +25,7 @@ const { title, description, redirect } = Astro.props;
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  {NODE_ENV === "production" && <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-EX534J6X8H"></script>}
   <AstroFont
           config={[
             {
@@ -101,3 +103,13 @@ const { title, description, redirect } = Astro.props;
     <slot/>
   <ClientRouter />
 </Head>
+{NODE_ENV === "production" && (
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-EX534J6X8H');
+</script>
+)}
+
