@@ -1,15 +1,25 @@
-import { select, confirm as confirmPrompt } from "@inquirer/prompts";
-import { Command } from "clipanion";
+import { appendFileSync } from "node:fs";
+import { dirname } from "path";
+import { select, confirm, input } from "@inquirer/prompts";
+import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import YAML from "yaml";
+import { awsRegions } from "../util/aws-regions";
 import { findPanfactumYaml } from "../util/find-panfactum-yaml";
+import { isEnvironmentConfig } from "../util/is-environment-config";
 import { isPanfactumConfig } from "../util/is-panfactum-config";
+import { printHelpInformation } from "../util/print-help-information";
+import { setupVpc } from "./aws/vpc";
 
-// must check the region & run script to do that (NOT in global region)
-// must ask for all the variables needed for the install and write them to a temp config file to read from throughout the install
+const BOOTSTRAP_GUIDE_URL =
+  "https://panfactum.com/docs/edge/guides/bootstrapping/overview\n";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
+
+  verbose = Option.Boolean("-v,-verbose", {
+    description: "Enable verbose output",
+  });
 
   static override usage = Command.Usage({
     description: "Install a Panfactum cluster",
@@ -23,111 +33,58 @@ export class InstallClusterCommand extends Command {
       "Starting Panfactum cluster installation process...\n"
     );
 
-    // Check if we're in the correct directory structure for cluster installation
+    // If there's no panfactum.yaml they need to complete the initial setup steps
     const currentDirectory = process.cwd();
-
     const panfactumYamlPath = await findPanfactumYaml(currentDirectory);
-
     if (panfactumYamlPath === null) {
       this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            "ERROR: Could not find panfactum.yaml in the current directory or any parent directory.\n"
-          )
+        pc.red(
+          "ERROR: Could not find panfactum.yaml in the current directory or any parent directory.\n" +
+            "Please ensure you've completed the initial setup steps in the guide here:\n" +
+            BOOTSTRAP_GUIDE_URL
         )
       );
+      printHelpInformation(this.context);
       return 1;
     }
 
-    // Read and parse the panfactum.yaml file
+    // If the environment_var is not set in the panfactum.yaml file they need to complete the initial setup steps
     const panfactumYamlContent = await Bun.file(panfactumYamlPath).text();
     const panfactumConfig: unknown = YAML.parse(panfactumYamlContent);
     let environmentsDir: string | undefined;
-
     if (isPanfactumConfig(panfactumConfig)) {
       environmentsDir = panfactumConfig.environments_dir;
     }
 
     if (typeof environmentsDir !== "string") {
       this.context.stderr.write(
-        pc.bgBlack(
-          pc.red("ERROR: environments_dir not defined in panfactum.yaml.\n")
+        pc.red(
+          "ERROR: environments_dir not defined in panfactum.yaml.\n" +
+            "Please ensure you've completed the initial setup steps in the guide here:\n" +
+            BOOTSTRAP_GUIDE_URL
         )
       );
+      printHelpInformation(this.context);
       return 1;
     }
 
-    // Get the repo root directory (where panfactum.yaml is located)
-    const repoRoot = panfactumYamlPath.substring(
-      0,
-      panfactumYamlPath.length - "panfactum.yaml".length - 1
+    const validRegionsPattern = awsRegions.join("|");
+    const pathRegex = new RegExp(
+      `/${environmentsDir}/([^/]+)/(${validRegionsPattern})(?:/.*)?$`
     );
-    const fullEnvironmentsPath = `${repoRoot}/${environmentsDir}`;
+    const match = currentDirectory.match(pathRegex);
 
-    // Check if we're in the correct directory structure
-    if (!currentDirectory.startsWith(fullEnvironmentsPath)) {
+    if (!match) {
       this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            `ERROR: Cluster installation must be run from within a region-specific directory.\n`
-          )
+        pc.red(
+          "ERROR: Cluster installation must be run from within a valid region-specific directory.\n" +
+            `Please change to a directory like ${environmentsDir}/<environment>/<valid-aws-region> before continuing.\n` +
+            `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
+            "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
+            BOOTSTRAP_GUIDE_URL
         )
       );
-      this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            `Please change to a directory like ${environmentsDir}/<environment>/<region> before continuing.\n`
-          )
-        )
-      );
-      return 1;
-    }
-
-    // Get the relative path from environments directory
-    const relativePath = currentDirectory.substring(
-      fullEnvironmentsPath.length + 1
-    );
-    const pathParts = relativePath.split("/");
-
-    // Ensure we're at least two levels deep in the environments directory
-    if (
-      pathParts.length < 2 ||
-      pathParts[0] === null ||
-      pathParts[1] === null
-    ) {
-      this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            `ERROR: Cluster installation must be run from at least two levels deep in the environments directory.\n`
-          )
-        )
-      );
-      this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            `Please change to a directory like ${environmentsDir}/<environment>/<region> before continuing.\n`
-          )
-        )
-      );
-      return 1;
-    }
-
-    // Check if we're in a global directory
-    if (pathParts[0].toLowerCase() === "global") {
-      this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            "ERROR: Cluster installation cannot be performed in a global directory.\n"
-          )
-        )
-      );
-      this.context.stderr.write(
-        pc.bgBlack(
-          pc.red(
-            `Please change to a region-specific directory like ${environmentsDir}/<environment>/<region> before continuing.\n`
-          )
-        )
-      );
+      printHelpInformation(this.context);
       return 1;
     }
 
@@ -152,7 +109,44 @@ export class InstallClusterCommand extends Command {
       default: 3,
     });
 
-    const answers = { slaTarget };
+    // Extract environment from the path
+    const environment = match[1];
+    // Construct the path to the environment.yaml file
+    const environmentYamlPath = `${dirname(panfactumYamlPath)}/${environmentsDir}/${environment}/environment.yaml`;
+    // Check if the environment.yaml file exists
+    if (!(await Bun.file(environmentYamlPath).exists())) {
+      this.context.stderr.write(
+        pc.red(
+          `ERROR: Could not find environment.yaml file at ${environmentYamlPath}.\n` +
+            "Please ensure your environment is properly configured.\n" +
+            "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
+            BOOTSTRAP_GUIDE_URL
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
+    // Read and parse the environment.yaml file using YAML package
+    const environmentYamlContent = await Bun.file(environmentYamlPath).text();
+    const environmentConfig: unknown = YAML.parse(environmentYamlContent);
+
+    let pfStackVersion: string | undefined;
+    if (isEnvironmentConfig(environmentConfig)) {
+      pfStackVersion = environmentConfig.pf_stack_version;
+    }
+
+    if (typeof pfStackVersion !== "string") {
+      this.context.stderr.write(
+        pc.red(
+          "ERROR: pf_stack_version not defined in environment.yaml.\n" +
+            "Please ensure you've completed the initial setup steps in the guide here:\n" +
+            BOOTSTRAP_GUIDE_URL
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
 
     // Warn about SLA target being difficult to change
     this.context.stdout.write(
@@ -162,7 +156,7 @@ export class InstallClusterCommand extends Command {
       "This determines how many availability zones your infrastructure will span.\n"
     );
 
-    const proceed = await confirmPrompt({
+    const proceed = await confirm({
       message: "Do you want to proceed with the installation?",
       default: true,
     });
@@ -172,39 +166,79 @@ export class InstallClusterCommand extends Command {
       return 0;
     }
 
+    // Prompt for VPC name
+    const vpcName = await input({
+      message: "Enter a name for your VPC:",
+      default: `panfactum-${environment}`,
+    });
+
+    // Prompt for VPC description
+    const vpcDescription = await input({
+      message: "Enter a description for your VPC:",
+      default: `Main Panfactum VPC for the ${environment} environment`,
+    });
+
+    const answers = { pfStackVersion, slaTarget, vpcName, vpcDescription };
+
     // Write configuration to temp file
     const configPath = currentDirectory + "/.tmp-panfactum-install-config.json";
     await Bun.write(configPath, JSON.stringify(answers, null, 2));
 
-    this.context.stdout.write(`Configuration saved to ${configPath}\n`);
     this.context.stdout.write("Starting AWS networking installation...\n");
 
-    // Here we would call the actual installation process
-    // This would include:
-    // 1. Creating aws_vpc directory in the primary region
-    // 2. Generating terragrunt.hcl with proper subnet configuration
-    // 3. Running pf-tf-init and terragrunt apply
-    // 4. Running pf-vpc-network-test to verify connectivity
+    // Check if sla_target exists in the environment.yaml file and handle accordingly
+    try {
+      const parsedEnvironmentConfig: Record<string, unknown> = YAML.parse(
+        environmentYamlContent
+      );
 
-    this.context.stdout.write(
-      "To complete the installation, follow these steps:\n"
-    );
-    this.context.stdout.write(
-      "1. Create a new `aws_vpc` directory in your primary region (not global)\n"
-    );
-    this.context.stdout.write(
-      "2. Add a terragrunt.hcl with your subnet configuration\n"
-    );
-    this.context.stdout.write(
-      "3. Run `pf-tf-init` to enable required providers\n"
-    );
-    this.context.stdout.write("4. Run `terragrunt apply`\n");
-    this.context.stdout.write(
-      "5. Verify your VPC configuration in the AWS console\n"
-    );
-    this.context.stdout.write(
-      "6. Run `pf-vpc-network-test <path-to-aws_vpc-module>` to test connectivity\n"
-    );
+      if ("sla_target" in parsedEnvironmentConfig) {
+        // If sla_target exists but is different from the chosen value
+        if (parsedEnvironmentConfig["sla_target"] !== slaTarget) {
+          this.context.stderr.write(
+            pc.red(
+              `ERROR: The environment.yaml file already has an SLA target of ${String(parsedEnvironmentConfig["sla_target"])}, ` +
+                `which is different from the chosen value of ${slaTarget}.\n` +
+                `Changing the SLA target requires network architecture changes and is not supported through this command.`
+            )
+          );
+          printHelpInformation(this.context);
+          return 1;
+        }
+        // If sla_target exists and matches the chosen value, do nothing
+      } else {
+        // If sla_target doesn't exist, append it to the file
+        appendFileSync(
+          environmentYamlPath,
+          `\n\n# SLA\nsla_target: ${slaTarget}`
+        );
+      }
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(
+          `Error handling sla_target in environment.yaml: ${String(error)}`
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
+    this.context.stdout.write("Setting up the AWS VPC\n");
+
+    try {
+      await setupVpc({
+        context: this.context,
+        vpcName: answers.vpcName,
+        vpcDescription: answers.vpcDescription,
+        verbose: this.verbose,
+      });
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(`Error setting up the AWS VPC: ${String(error)}`)
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
 
     return 0;
   }
