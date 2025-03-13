@@ -30,4 +30,4 @@ export const awsRegions = [
   "sa-east-1",
   "us-gov-east-1",
   "us-gov-west-1"
-];
+] as const;
