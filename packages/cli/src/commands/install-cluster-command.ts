@@ -41,7 +41,7 @@ export class InstallClusterCommand extends Command {
         pc.red(
           "ERROR: Could not find panfactum.yaml in the current directory or any parent directory.\n" +
             "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            BOOTSTRAP_GUIDE_URL
+            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables"
         )
       );
       printHelpInformation(this.context);
@@ -51,26 +51,28 @@ export class InstallClusterCommand extends Command {
     // If the environments_dir is not set in the panfactum.yaml file they need to complete the initial setup steps
     const panfactumYamlContent = await Bun.file(panfactumYamlPath).text();
     const panfactumConfig: unknown = YAML.parse(panfactumYamlContent);
-    let environmentsDir: string | undefined;
+    let environmentsDir: string | number | undefined;
     if (isPanfactumConfig(panfactumConfig)) {
       environmentsDir = panfactumConfig.environments_dir;
     }
 
-    if (typeof environmentsDir !== "string") {
+    if (typeof environmentsDir !== "string" || typeof environmentsDir !== "number") {
       this.context.stderr.write(
         pc.red(
           "ERROR: environments_dir not defined in panfactum.yaml.\n" +
-            "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            BOOTSTRAP_GUIDE_URL
+            "Please ensure you've set the required variables in the panfactum.yaml file:\n" +
+            "https://panfactum.com/docs/edge/reference/configuration/repo-variables"
         )
       );
       printHelpInformation(this.context);
       return 1;
     }
 
+    const environmentsDirString = String(environmentsDir);
+
     const validRegionsPattern = awsRegions.join("|");
     const pathRegex = new RegExp(
-      `/${environmentsDir}/([^/]+)/(${validRegionsPattern})(?:/.*)?$`
+      `/${environmentsDirString}/([^/]+)/(${validRegionsPattern})(?:/.*)?$`
     );
     const match = currentDirectory.match(pathRegex);
 
@@ -78,7 +80,7 @@ export class InstallClusterCommand extends Command {
       this.context.stderr.write(
         pc.red(
           "ERROR: Cluster installation must be run from within a valid region-specific directory.\n" +
-            `Please change to a directory like ${environmentsDir}/<environment>/<valid-aws-region> before continuing.\n` +
+            `Please change to a directory like ${environmentsDirString}/<environment>/<valid-aws-region> before continuing.\n` +
             `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
             "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
             BOOTSTRAP_GUIDE_URL
@@ -112,7 +114,7 @@ export class InstallClusterCommand extends Command {
     // Extract environment from the path
     const environment = match[1];
     // Construct the path to the environment.yaml file
-    const environmentYamlPath = `${dirname(panfactumYamlPath)}/${environmentsDir}/${environment}/environment.yaml`;
+    const environmentYamlPath = `${dirname(panfactumYamlPath)}/${environmentsDirString}/${environment}/environment.yaml`;
     // Check if the environment.yaml file exists
     if (!(await Bun.file(environmentYamlPath).exists())) {
       this.context.stderr.write(
