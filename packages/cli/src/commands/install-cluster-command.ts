@@ -177,7 +177,7 @@ export class InstallClusterCommand extends Command {
     // Prompt for VPC description
     const vpcDescription = await input({
       message: "Enter a description for your VPC:",
-      default: `Main Panfactum VPC for the ${environment} environment`,
+      default: `Panfactum VPC for the ${environment} environment`,
     });
 
     const answers = { pfStackVersion, slaTarget, vpcName, vpcDescription };
