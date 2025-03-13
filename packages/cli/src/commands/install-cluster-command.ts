@@ -147,7 +147,10 @@ export class InstallClusterCommand extends Command {
     }
 
     // Write configuration to temp file
-    const configPath = currentDirectory + "/.tmp-panfactum-install-config.json";
+    const configPath = path.join(
+      currentDirectory,
+      ".tmp-panfactum-install-config.json"
+    );
     await Bun.write(configPath, JSON.stringify(answers, null, 2));
 
     this.context.stdout.write("Starting AWS networking installation...\n");
