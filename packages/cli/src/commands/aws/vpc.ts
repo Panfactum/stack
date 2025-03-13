@@ -6,6 +6,7 @@ import type { BaseContext } from "clipanion";
 
 export interface VpcSetupInput {
   context: BaseContext;
+  pfStackVersion: string;
   vpcName: string;
   vpcDescription: string;
   verbose?: boolean;
@@ -14,7 +15,7 @@ export interface VpcSetupInput {
 export async function setupVpc(input: VpcSetupInput) {
   await ensureFileExists({
     context: input.context,
-    downloadUrl: `https://raw.githubusercontent.com/Panfactum/stack/refs/tags/edge.25-03-04/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl`,
+    downloadUrl: `https://raw.githubusercontent.com/Panfactum/stack/refs/tags/${input.pfStackVersion}/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl`,
     filePath: "./aws_vpc/terragrunt.hcl",
   });
 

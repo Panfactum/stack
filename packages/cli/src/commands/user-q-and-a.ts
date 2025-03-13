@@ -10,7 +10,7 @@ export async function userQAndA({
   environment: string;
   needSlaTarget: boolean;
 }) {
-  let slaTarget: number | undefined;
+  let slaTarget: 1 | 2 | 3 | undefined;
   if (needSlaTarget) {
     slaTarget = await select({
       message:

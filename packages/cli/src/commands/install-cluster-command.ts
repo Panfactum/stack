@@ -60,7 +60,7 @@ export class InstallClusterCommand extends Command {
     const environmentsDir = terragruntVariables["environments_dir"];
     // If the environments_dir set incorrectly in the panfactum.yaml file they need to complete the initial setup step
     if (
-      typeof environmentsDir !== "string" ||
+      typeof environmentsDir !== "string" &&
       typeof environmentsDir !== "number"
     ) {
       this.context.stderr.write(
@@ -98,7 +98,7 @@ export class InstallClusterCommand extends Command {
 
     const environment = terragruntVariables["environment"];
     // Check if the environment.yaml file exists
-    if (typeof environment !== "string" || typeof environment !== "number") {
+    if (typeof environment !== "string" && typeof environment !== "number") {
       this.context.stderr.write(
         pc.red(
           `ERROR: The environment.yaml appears to be malformed.\n` +
@@ -138,7 +138,7 @@ export class InstallClusterCommand extends Command {
 
     const answers = await userQAndA({
       context: this.context,
-      environment,
+      environment: String(environment),
       needSlaTarget: !slaTarget,
     });
 
@@ -157,7 +157,7 @@ export class InstallClusterCommand extends Command {
         // If sla_target doesn't exist, append it to the environment.yaml file
         appendFileSync(
           path.join(currentDirectory, "..", "environment.yaml"),
-          `\n\n# SLA\nsla_target: ${slaTarget}`
+          `\n\n# SLA\nsla_target: ${answers.slaTarget || slaTarget}`
         );
       }
     } catch (error) {
@@ -173,6 +173,7 @@ export class InstallClusterCommand extends Command {
     try {
       await setupVpc({
         context: this.context,
+        pfStackVersion,
         vpcName: answers.vpcName,
         vpcDescription: answers.vpcDescription,
         verbose: this.verbose,
