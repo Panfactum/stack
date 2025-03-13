@@ -1,6 +1,0 @@
-{
-  "pfStackVersion": "edge.25-02-10",
-  "slaTarget": 1,
-  "vpcName": "DEVELOPMENT_SETH",
-  "vpcDescription": "VPC for the development environment."
-}

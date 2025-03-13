@@ -33,6 +33,20 @@ export class InstallClusterCommand extends Command {
       "Starting Panfactum cluster installation process...\n"
     );
 
+    // Check if they're using the devShell
+    const devShell = process.env["PF_DEVSHELL"] === "1";
+    if (!devShell) {
+      this.context.stderr.write(
+        pc.red(
+          "ERROR: It appears you're not running this installer in the Panfactum devShell.\n" +
+            "Please ensure you've completed the initial setup steps in the guide here:\n" +
+            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#integrate-the-panfactum-devshell"
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
     // If there's no panfactum.yaml they need to complete the initial setup steps
     const currentDirectory = process.cwd();
     const panfactumYamlPath = await findPanfactumYaml(currentDirectory);
@@ -56,7 +70,10 @@ export class InstallClusterCommand extends Command {
       environmentsDir = panfactumConfig.environments_dir;
     }
 
-    if (typeof environmentsDir !== "string" || typeof environmentsDir !== "number") {
+    if (
+      typeof environmentsDir !== "string" ||
+      typeof environmentsDir !== "number"
+    ) {
       this.context.stderr.write(
         pc.red(
           "ERROR: environments_dir not defined in panfactum.yaml.\n" +
