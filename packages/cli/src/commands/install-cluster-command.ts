@@ -1,18 +1,13 @@
 import { appendFileSync } from "node:fs";
-import { dirname } from "path";
-import { select, confirm, input } from "@inquirer/prompts";
+import path from "node:path";
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
-import YAML from "yaml";
 import { awsRegions } from "../util/aws-regions";
 import { findPanfactumYaml } from "../util/find-panfactum-yaml";
-import { isEnvironmentConfig } from "../util/is-environment-config";
-import { isPanfactumConfig } from "../util/is-panfactum-config";
 import { printHelpInformation } from "../util/print-help-information";
 import { setupVpc } from "./aws/vpc";
-
-const BOOTSTRAP_GUIDE_URL =
-  "https://panfactum.com/docs/edge/guides/bootstrapping/overview\n";
+import { getTerragruntVariables } from "./terragrunt/get-terragrunt-variables";
+import { userQAndA } from "./user-q-and-a";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -34,13 +29,12 @@ export class InstallClusterCommand extends Command {
     );
 
     // Check if they're using the devShell
-    const devShell = process.env["PF_DEVSHELL"] === "1";
-    if (!devShell) {
+    if (this.context.env["PF_DEVSHELL"] !== "1") {
       this.context.stderr.write(
         pc.red(
           "ERROR: It appears you're not running this installer in the Panfactum devShell.\n" +
             "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#integrate-the-panfactum-devshell"
+            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#integrate-the-panfactum-devshell\n"
         )
       );
       printHelpInformation(this.context);
@@ -55,21 +49,16 @@ export class InstallClusterCommand extends Command {
         pc.red(
           "ERROR: Could not find panfactum.yaml in the current directory or any parent directory.\n" +
             "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables"
+            "https://panfactum.com/docs/edge/guides/bootstrapping/installing-devshell#setting-repository-configuration-variables\n"
         )
       );
       printHelpInformation(this.context);
       return 1;
     }
 
-    // If the environments_dir is not set in the panfactum.yaml file they need to complete the initial setup steps
-    const panfactumYamlContent = await Bun.file(panfactumYamlPath).text();
-    const panfactumConfig: unknown = YAML.parse(panfactumYamlContent);
-    let environmentsDir: string | number | undefined;
-    if (isPanfactumConfig(panfactumConfig)) {
-      environmentsDir = panfactumConfig.environments_dir;
-    }
-
+    const terragruntVariables = await getTerragruntVariables(this.context);
+    const environmentsDir = terragruntVariables["environments_dir"];
+    // If the environments_dir set incorrectly in the panfactum.yaml file they need to complete the initial setup step
     if (
       typeof environmentsDir !== "string" ||
       typeof environmentsDir !== "number"
@@ -78,7 +67,7 @@ export class InstallClusterCommand extends Command {
         pc.red(
           "ERROR: environments_dir not defined in panfactum.yaml.\n" +
             "Please ensure you've set the required variables in the panfactum.yaml file:\n" +
-            "https://panfactum.com/docs/edge/reference/configuration/repo-variables"
+            "https://panfactum.com/docs/edge/reference/configuration/repo-variables\n"
         )
       );
       printHelpInformation(this.context);
@@ -100,104 +89,62 @@ export class InstallClusterCommand extends Command {
             `Please change to a directory like ${environmentsDirString}/<environment>/<valid-aws-region> before continuing.\n` +
             `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
             "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
-            BOOTSTRAP_GUIDE_URL
+            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo\n"
         )
       );
       printHelpInformation(this.context);
       return 1;
     }
 
-    // Collect required information
-    const slaTarget = await select({
-      message:
-        "Select your SLA target (affects high availability configuration). We recommend level 1 for test / development environments and level 2 or above for environments running live workloads.",
-      choices: [
-        {
-          name: "Level 1: 99.9% uptime (< 45 minutes of downtime / month) — Lowest cost",
-          value: 1,
-        },
-        {
-          name: "Level 2: 99.99% uptime (< 5 minutes of downtime / month) — Roughly 2x the cost of level 1",
-          value: 2,
-        },
-        {
-          name: "Level 3: 99.999% uptime (< 30 seconds of downtime / month) — Roughly 1.5x the cost of level 2",
-          value: 3,
-        },
-      ],
-      default: 3,
-    });
-
-    // Extract environment from the path
-    const environment = match[1];
-    // Construct the path to the environment.yaml file
-    const environmentYamlPath = `${dirname(panfactumYamlPath)}/${environmentsDirString}/${environment}/environment.yaml`;
+    const environment = terragruntVariables["environment"];
     // Check if the environment.yaml file exists
-    if (!(await Bun.file(environmentYamlPath).exists())) {
+    if (typeof environment !== "string" || typeof environment !== "number") {
       this.context.stderr.write(
         pc.red(
-          `ERROR: Could not find environment.yaml file at ${environmentYamlPath}.\n` +
-            "Please ensure your environment is properly configured.\n" +
-            "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
-            BOOTSTRAP_GUIDE_URL
+          `ERROR: The environment.yaml appears to be malformed.\n` +
+            "Please ensure your environment is properly configured by following the steps here:\n" +
+            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#configure-terragrunt-variables\n"
         )
       );
       printHelpInformation(this.context);
       return 1;
     }
 
-    // Read and parse the environment.yaml file using YAML package
-    const environmentYamlContent = await Bun.file(environmentYamlPath).text();
-    const environmentConfig: unknown = YAML.parse(environmentYamlContent);
-
-    let pfStackVersion: string | undefined;
-    if (isEnvironmentConfig(environmentConfig)) {
-      pfStackVersion = environmentConfig.pf_stack_version;
-    }
-
+    const pfStackVersion = terragruntVariables["pf_stack_version"];
     if (typeof pfStackVersion !== "string") {
       this.context.stderr.write(
         pc.red(
-          "ERROR: pf_stack_version not defined in environment.yaml.\n" +
+          "ERROR: pf_stack_version not defined.\n" +
             "Please ensure you've completed the initial setup steps in the guide here:\n" +
-            BOOTSTRAP_GUIDE_URL
+            "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#configure-terragrunt-variables\n"
         )
       );
       printHelpInformation(this.context);
       return 1;
     }
 
-    // Warn about SLA target being difficult to change
-    this.context.stdout.write(
-      "\n\u26A0\uFE0F WARNING: SLA target affects your network architecture and is not easily changed later.\n"
-    );
-    this.context.stdout.write(
-      "This determines how many availability zones your infrastructure will span.\n"
-    );
-
-    const proceed = await confirm({
-      message: "Do you want to proceed with the installation?",
-      default: true,
-    });
-
-    if (proceed === false) {
-      this.context.stdout.write("Installation cancelled.\n");
-      return 0;
+    const slaTarget = terragruntVariables["sla_target"];
+    if (typeof slaTarget !== "number" || ![1, 2, 3].includes(slaTarget)) {
+      this.context.stderr.write(
+        pc.red(
+          "ERROR: sla_target is not defined correctly in the environment.yaml.\n" +
+            "Please ensure you've completed the initial setup steps in the guide here:\n" +
+            "https://panfactum.com/docs/edge/guides/bootstrapping/aws-networking#choose-your-sla-target\n"
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
     }
 
-    // Prompt for VPC name
-    const vpcName = await input({
-      message: "Enter a name for your VPC:",
-      default: `panfactum-${environment}`,
+    const answers = await userQAndA({
+      context: this.context,
+      environment,
+      needSlaTarget: !slaTarget,
     });
 
-    // Prompt for VPC description
-    const vpcDescription = await input({
-      message: "Enter a description for your VPC:",
-      default: `Panfactum VPC for the ${environment} environment`,
-    });
-
-    const answers = { pfStackVersion, slaTarget, vpcName, vpcDescription };
+    if (answers === 0) {
+      return 0;
+    }
 
     // Write configuration to temp file
     const configPath = currentDirectory + "/.tmp-panfactum-install-config.json";
@@ -205,38 +152,17 @@ export class InstallClusterCommand extends Command {
 
     this.context.stdout.write("Starting AWS networking installation...\n");
 
-    // Check if sla_target exists in the environment.yaml file and handle accordingly
     try {
-      const parsedEnvironmentConfig: Record<string, unknown> = YAML.parse(
-        environmentYamlContent
-      );
-
-      if ("sla_target" in parsedEnvironmentConfig) {
-        // If sla_target exists but is different from the chosen value
-        if (parsedEnvironmentConfig["sla_target"] !== slaTarget) {
-          this.context.stderr.write(
-            pc.red(
-              `ERROR: The environment.yaml file already has an SLA target of ${String(parsedEnvironmentConfig["sla_target"])}, ` +
-                `which is different from the chosen value of ${slaTarget}.\n` +
-                `Changing the SLA target requires network architecture changes and is not supported through this command.`
-            )
-          );
-          printHelpInformation(this.context);
-          return 1;
-        }
-        // If sla_target exists and matches the chosen value, do nothing
-      } else {
-        // If sla_target doesn't exist, append it to the file
+      if (!slaTarget) {
+        // If sla_target doesn't exist, append it to the environment.yaml file
         appendFileSync(
-          environmentYamlPath,
+          path.join(currentDirectory, "..", "environment.yaml"),
           `\n\n# SLA\nsla_target: ${slaTarget}`
         );
       }
     } catch (error) {
       this.context.stderr.write(
-        pc.red(
-          `Error handling sla_target in environment.yaml: ${String(error)}`
-        )
+        pc.red(`Error writing sla_target to environment.yaml: ${String(error)}`)
       );
       printHelpInformation(this.context);
       return 1;
