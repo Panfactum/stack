@@ -1,4 +1,4 @@
-import { confirm, input, select } from "@inquirer/prompts";
+import { confirm, input, password, select } from "@inquirer/prompts";
 import type { BaseContext } from "clipanion";
 
 export async function userQAndA({
@@ -10,6 +10,7 @@ export async function userQAndA({
   environment: string;
   needSlaTarget: boolean;
 }) {
+  // https://panfactum.com/docs/edge/guides/bootstrapping/aws-networking#choose-your-sla-target
   let slaTarget: 1 | 2 | 3 | undefined;
   if (needSlaTarget) {
     slaTarget = await select({
@@ -51,6 +52,7 @@ export async function userQAndA({
     }
   }
 
+  // VPC information https://panfactum.com/docs/edge/guides/bootstrapping/aws-networking#deploy-the-aws-vpc-module
   // Prompt for VPC name
   const vpcName = await input({
     message: "Enter a name for your VPC:",
@@ -63,5 +65,53 @@ export async function userQAndA({
     default: `Panfactum VPC for the ${environment} environment`,
   });
 
-  return { slaTarget, vpcName, vpcDescription };
+  // Prompt for GitHub PAT for Kubernetes Cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials
+  const githubUsername = await input({
+    message: "Enter your GitHub username:",
+    required: true,
+  });
+
+  const githubPat = await password({
+    message:
+      "Enter your classic GitHub Personal Access Token with 'read:packages' scope (this will be encrypted with SOPS and stored securely):",
+    mask: true,
+  });
+
+  // Prompt for Docker Hub PAT for Kubernetes Cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials
+  const dockerHubUsername = await input({
+    message: "Enter your Docker Hub username:",
+    required: true,
+  });
+
+  const dockerHubPat = await password({
+    message:
+      "Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions (this will be encrypted with SOPS and stored securely):",
+    mask: true,
+  });
+
+  // Prompt for cluster info
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-cluster-name
+  const clusterName = await input({
+    message: "Enter a name for your Kubernetes cluster:",
+    default: `panfactum-${environment}`,
+  });
+
+  const clusterDescription = await input({
+    message: "Enter a description for your Kubernetes cluster:",
+    default: `Panfactum Kubernetes cluster for the ${environment} environment`,
+  });
+
+  return {
+    clusterDescription,
+    clusterName,
+    dockerHubPat,
+    dockerHubUsername,
+    githubPat,
+    githubUsername,
+    slaTarget,
+    vpcName,
+    vpcDescription,
+  };
 }
