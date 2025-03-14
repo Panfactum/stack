@@ -5,9 +5,12 @@ import pc from "picocolors";
 import { awsRegions } from "../util/aws-regions";
 import { findPanfactumYaml } from "../util/find-panfactum-yaml";
 import { printHelpInformation } from "../util/print-help-information";
+import { setupEcrPullThroughCache } from "./aws/ecr-pull-through-cache";
 import { setupVpc } from "./aws/vpc";
 import { getTerragruntVariables } from "./terragrunt/get-terragrunt-variables";
 import { userQAndA } from "./user-q-and-a";
+import { replaceYamlValue } from "../util/replace-yaml-value";
+import { setupEks } from "./aws/eks";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -57,7 +60,12 @@ export class InstallClusterCommand extends Command {
     }
 
     const terragruntVariables = await getTerragruntVariables(this.context);
-    const environmentsDir = terragruntVariables["environments_dir"];
+
+    this.context.stdout.write(
+      `Terragrunt variables: ${JSON.stringify(terragruntVariables, null, 2)}\n`
+    );
+
+    const environmentsDir = terragruntVariables["environment"];
     // If the environments_dir set incorrectly in the panfactum.yaml file they need to complete the initial setup step
     if (
       typeof environmentsDir !== "string" &&
@@ -78,7 +86,7 @@ export class InstallClusterCommand extends Command {
 
     const validRegionsPattern = awsRegions.join("|");
     const pathRegex = new RegExp(
-      `/${environmentsDirString}/([^/]+)/(${validRegionsPattern})(?:/.*)?$`
+      `/${environmentsDirString}/(${validRegionsPattern})(?:/.*)?$`
     );
     const match = currentDirectory.match(pathRegex);
 
@@ -86,7 +94,7 @@ export class InstallClusterCommand extends Command {
       this.context.stderr.write(
         pc.red(
           "ERROR: Cluster installation must be run from within a valid region-specific directory.\n" +
-            `Please change to a directory like ${environmentsDirString}/<environment>/<valid-aws-region> before continuing.\n` +
+            `Please change to a directory like ${environmentsDirString}/<valid-aws-region> before continuing.\n` +
             `Valid AWS regions include: ${awsRegions.slice(0, 3).join(", ")}, and others.\n` +
             "If you do not have this file structure please ensure you've completed the initial setup steps here:\n" +
             "https://panfactum.com/docs/edge/guides/bootstrapping/configuring-infrastructure-as-code#setting-up-your-repo\n"
@@ -165,7 +173,9 @@ export class InstallClusterCommand extends Command {
       }
     } catch (error) {
       this.context.stderr.write(
-        pc.red(`Error writing sla_target to environment.yaml: ${String(error)}`)
+        pc.red(
+          `Error writing sla_target to environment.yaml: ${String(error)}\n`
+        )
       );
       printHelpInformation(this.context);
       return 1;
@@ -183,7 +193,63 @@ export class InstallClusterCommand extends Command {
       });
     } catch (error) {
       this.context.stderr.write(
-        pc.red(`Error setting up the AWS VPC: ${String(error)}`)
+        pc.red(`Error setting up the AWS VPC: ${String(error)}\n`)
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
+    this.context.stdout.write("Setting up the AWS ECR pull through cache...\n");
+
+    try {
+      await setupEcrPullThroughCache({
+        context: this.context,
+        dockerHubUsername: answers.dockerHubUsername,
+        githubUsername: answers.githubUsername,
+        verbose: this.verbose,
+      });
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(
+          `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
+    try {
+      await replaceYamlValue(
+        "./region.yaml",
+        "extra_inputs.pull_through_cache_enabled",
+        true
+      );
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(
+          `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
+    this.context.stdout.write("Setting up the AWS EKS cluster...\n");
+    this.context.stdout.write(
+      pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
+    );
+
+    try {
+      await setupEks({
+        context: this.context,
+        clusterName: answers.clusterName,
+        clusterDescription: answers.clusterDescription,
+        slaLevel: answers.slaTarget || (slaTarget as 1 | 2 | 3), // This is validated in the code earlier
+        verbose: this.verbose,
+      });
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
       );
       printHelpInformation(this.context);
       return 1;

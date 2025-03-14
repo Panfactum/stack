@@ -15,8 +15,10 @@ export interface VpcSetupInput {
 export async function setupVpc(input: VpcSetupInput) {
   await ensureFileExists({
     context: input.context,
-    downloadUrl: `https://raw.githubusercontent.com/Panfactum/stack/refs/tags/${input.pfStackVersion}/packages/reference/environments/production/us-east-2/aws_vpc/terragrunt.hcl`,
-    filePath: "./aws_vpc/terragrunt.hcl",
+    destinationFile: "./aws_vpc/terragrunt.hcl",
+    sourceFile: await Bun.file(
+      import.meta.dir + "/templates/aws_vpc_terragrunt.hcl"
+    ).text(),
   });
 
   await replaceHclValue("./aws_vpc/terragrunt.hcl", "vpc_name", input.vpcName);

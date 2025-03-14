@@ -1,4 +1,5 @@
 import { confirm, input, password, select } from "@inquirer/prompts";
+import { ensureFileExists } from "../util/ensure-file-exists";
 import type { BaseContext } from "clipanion";
 
 export async function userQAndA({
@@ -91,6 +92,32 @@ export async function userQAndA({
     mask: true,
   });
 
+  context.stdout.write("Encrypting secrets with SOPS...\n");
+
+  await Bun.write(
+    "./.tmp-ecr-pull-through-cache-secrets.yaml",
+    `github_access_token: ${githubPat}\ndocker_hub_access_token: ${dockerHubPat}`
+  );
+
+  const result = Bun.spawnSync([
+    "sops",
+    "encrypt",
+    "-i",
+    "./.tmp-ecr-pull-through-cache-secrets.yaml",
+  ]);
+  if (!result.success) {
+    context.stderr.write(result.stderr.toString());
+    const secretsFile = Bun.file("./.tmp-ecr-pull-through-cache-secrets.yaml");
+    await secretsFile.delete();
+    throw new Error("Failed to encrypt ECR pull through cache secrets");
+  }
+
+  await ensureFileExists({
+    context,
+    destinationFile: "./aws_ecr_pull_through_cache/secrets.yaml",
+    sourceFile: "./.tmp-ecr-pull-through-cache-secrets.yaml",
+  });
+
   // Prompt for cluster info
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-cluster-name
   const clusterName = await input({
@@ -106,9 +133,7 @@ export async function userQAndA({
   return {
     clusterDescription,
     clusterName,
-    dockerHubPat,
     dockerHubUsername,
-    githubPat,
     githubUsername,
     slaTarget,
     vpcName,

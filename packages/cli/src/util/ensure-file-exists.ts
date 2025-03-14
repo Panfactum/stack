@@ -1,29 +1,28 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-import { downloadFile } from "./download-file";
 import type { BaseContext } from "clipanion";
 
 export async function ensureFileExists({
   context,
-  downloadUrl,
-  filePath,
+  destinationFile,
+  sourceFile,
   verbose = false,
 }: {
   context: BaseContext;
-  downloadUrl: string;
-  filePath: string;
+  destinationFile: string;
+  sourceFile: string;
   verbose?: boolean;
 }): Promise<void> {
   // Only take action if the file doesn't already exist.
-  if (!(await Bun.file(filePath).exists())) {
+  if (!(await Bun.file(destinationFile).exists())) {
     // File doesn't exist, download it
-    verbose &&
-      context.stdout.write(`Downloading ${filePath} from ${downloadUrl}`);
+    verbose && context.stdout.write(`Writing ${destinationFile}`);
 
     // Make sure the directory exists
-    await mkdir(dirname(filePath), { recursive: true });
+    await mkdir(dirname(destinationFile), { recursive: true });
 
-    await downloadFile(downloadUrl, filePath);
-    verbose && context.stdout.write(`Downloaded ${filePath} successfully`);
+    await Bun.write(destinationFile, Bun.file(sourceFile));
+    verbose &&
+      context.stdout.write(`Downloaded ${destinationFile} successfully`);
   }
 }
