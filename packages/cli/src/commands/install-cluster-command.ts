@@ -6,11 +6,11 @@ import { awsRegions } from "../util/aws-regions";
 import { findPanfactumYaml } from "../util/find-panfactum-yaml";
 import { printHelpInformation } from "../util/print-help-information";
 import { setupEcrPullThroughCache } from "./aws/ecr-pull-through-cache";
+import { setupEks } from "./aws/eks";
 import { setupVpc } from "./aws/vpc";
-import { getTerragruntVariables } from "./terragrunt/get-terragrunt-variables";
 import { userQAndA } from "./user-q-and-a";
 import { replaceYamlValue } from "../util/replace-yaml-value";
-import { setupEks } from "./aws/eks";
+import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];

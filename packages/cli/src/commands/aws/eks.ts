@@ -1,10 +1,14 @@
+import path from "node:path";
+import yaml from "yaml";
 import { ensureFileExists } from "../../util/ensure-file-exists";
+import { getRepoVariables } from "../../util/scripts/helpers/get-root";
 import { replaceHclValue } from "../../util/replace-hcl-value";
+import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
 import { apply } from "../terragrunt/apply";
 import { initModules } from "../terragrunt/init-modules";
 import type { BaseContext } from "clipanion";
 
-export interface EksSetupInput {
+interface EksSetupInput {
   context: BaseContext;
   verbose?: boolean;
   clusterName: string;
@@ -49,4 +53,65 @@ export async function setupEks(input: EksSetupInput) {
     verbose: input.verbose,
     workingDirectory: "./aws_eks",
   });
+
+  // Setup cluster_info metadata and CA certs
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-cluster_info-metadata-and-ca-certs
+  const terragruntVariables = await getTerragruntVariables(input.context);
+  if (typeof terragruntVariables["environment"] !== "string") {
+    throw new Error("Environment not correctly set for Terragrunt");
+  }
+  if (typeof terragruntVariables["region"] !== "string") {
+    throw new Error("Region not correctly set for Terragrunt");
+  }
+  const { root } = await getRepoVariables();
+  const kubeConfigPath = path.join(root, ".kube", "config.yaml");
+  const configExists = await Bun.file(kubeConfigPath).exists();
+  if (!configExists) {
+    const config = await Bun.file(kubeConfigPath).text();
+    if (
+      !config.includes(
+        `"${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"`
+      )
+    ) {
+      await Bun.write(
+        kubeConfigPath,
+        `# A list of all clusters deployed via aws_eks\nclusters:\n  - module: "${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"`
+      );
+    }
+  } else {
+    // If the config.yaml file already exists, we need to verify if it contains the cluster and if not, add it
+    const config = await Bun.file(kubeConfigPath).text();
+    const jsonConfig: Record<string, unknown> = yaml.parse(config);
+    // If the clusters key is not defined, initialize it as an empty array
+    if (jsonConfig["clusters"] === undefined) {
+      jsonConfig["clusters"] = [];
+    }
+    if (!Array.isArray(jsonConfig["clusters"])) {
+      throw new Error("Clusters key is not an array");
+    }
+    if (
+      !jsonConfig["clusters"].includes(
+        `{module: "${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"}`
+      )
+    ) {
+      jsonConfig["clusters"].push(
+        `{module: "${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"}`
+      );
+      await Bun.write(kubeConfigPath, yaml.stringify(jsonConfig));
+    }
+  }
+
+  // Run update-kube.ts once it's created
+
+  // Setup kubeconfig
+  //https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig
+
+  // verify connection to the cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+
+  // Reset EKS cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#reset-eks-cluster
+
+  // Prepare to deploy kubernetes modules
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#prepare-to-deploy-kubernetes-modules
 }

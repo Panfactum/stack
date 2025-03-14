@@ -94,29 +94,28 @@ export async function userQAndA({
 
   context.stdout.write("Encrypting secrets with SOPS...\n");
 
+  const tempSecretsFilePath = "./.tmp-ecr-pull-through-cache-secrets.yaml";
   await Bun.write(
-    "./.tmp-ecr-pull-through-cache-secrets.yaml",
+    tempSecretsFilePath,
     `github_access_token: ${githubPat}\ndocker_hub_access_token: ${dockerHubPat}`
   );
 
-  const result = Bun.spawnSync([
-    "sops",
-    "encrypt",
-    "-i",
-    "./.tmp-ecr-pull-through-cache-secrets.yaml",
-  ]);
+  const result = Bun.spawnSync(["sops", "encrypt", "-i", tempSecretsFilePath]);
   if (!result.success) {
     context.stderr.write(result.stderr.toString());
-    const secretsFile = Bun.file("./.tmp-ecr-pull-through-cache-secrets.yaml");
-    await secretsFile.delete();
+    await Bun.file(tempSecretsFilePath).delete();
     throw new Error("Failed to encrypt ECR pull through cache secrets");
   }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./aws_ecr_pull_through_cache/secrets.yaml",
-    sourceFile: "./.tmp-ecr-pull-through-cache-secrets.yaml",
-  });
+  try {
+    await ensureFileExists({
+      context,
+      destinationFile: "./aws_ecr_pull_through_cache/secrets.yaml",
+      sourceFile: tempSecretsFilePath,
+    });
+  } finally {
+    await Bun.file(tempSecretsFilePath).delete();
+  }
 
   // Prompt for cluster info
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-cluster-name
