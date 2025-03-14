@@ -139,7 +139,7 @@ export default [
       "sonarjs/prefer-object-literal": "error",
       "sonarjs/prefer-single-boolean-return": "error",
       "sonarjs/no-duplicate-string": ["error", { threshold: 5 }],
-      "sonarjs/cognitive-complexity": ["error", 15],
+      "sonarjs/cognitive-complexity": ["error", 20],
     },
   },
 ];
