@@ -1,9 +1,9 @@
 import path from "node:path";
 import yaml from "yaml";
 import { ensureFileExists } from "../../util/ensure-file-exists";
-import { getRepoVariables } from "../../util/scripts/helpers/get-root";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
+import { getRepoVariables } from "../../util/scripts/helpers/get-root";
 import { apply } from "../terragrunt/apply";
 import { initModules } from "../terragrunt/init-modules";
 import type { BaseContext } from "clipanion";
