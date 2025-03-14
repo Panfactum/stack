@@ -114,6 +114,22 @@ Type: `bool`
 
 Default: `true`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### instance\_type\_anti\_affinity\_required
 
 Description: Whether to enable anti-affinity to prevent pods from being scheduled on the same instance type
@@ -149,6 +165,14 @@ Default: `"/"`
 ### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 

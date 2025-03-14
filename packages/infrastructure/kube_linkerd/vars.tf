@@ -71,3 +71,21 @@ variable "wait" {
   type        = bool
   default     = true
 }
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow controller pods to schedule on spot nodes. Does not affect DaemonSet pods."
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow controller pods to schedule on burstable nodes. Does not affect DaemonSet pods."
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect DaemonSet pods."
+  type        = bool
+  default     = true
+}

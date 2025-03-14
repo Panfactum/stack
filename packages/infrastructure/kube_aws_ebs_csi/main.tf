@@ -51,8 +51,9 @@ module "util_controller" {
   source = "../kube_workload_utility"
 
   workload_name                        = "ebs-csi-controller"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   instance_type_anti_affinity_required = false // Will prevent bootstrapping and simply unnecessary
   az_spread_preferred                  = var.sla_target == 3
   host_anti_affinity_required          = var.sla_target == 3
@@ -243,9 +244,28 @@ resource "helm_release" "ebs_csi_driver" {
               key      = "node.kubernetes.io/pid-pressure"
               operator = "Exists"
               effect   = "NoSchedule"
+            },
+            {
+              key      = "burstable"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "arm64"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "spot"
+              operator = "Exists"
+              effect   = "NoSchedule"
+            },
+            {
+              key      = "controller"
+              operator = "Exists"
+              effect   = "NoSchedule"
             }
-          ],
-          module.util_controller.tolerations
+          ]
         )
         volumes = [
           {

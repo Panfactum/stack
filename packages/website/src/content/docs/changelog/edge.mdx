@@ -19,9 +19,18 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Breaking Changes
+
+* Across all Panfactum modules, `burstabled_nodes_enabled` no longer automatically adds a spot instance toleration. This enables users to run on-demand, [burstable](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
+  instances when appropriate. This means that `spot_nodes_enabled` must now be set to `true` explicitly if [spot instances](https://aws.amazon.com/ec2/spot/) are desired.
+
 ### Added
 
 * Adds support for accepting the `transform` parameter in [kube_argo_sensor dependencies](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor#dependencies) input to allow for custom transformations of incoming events.
+
+* Adds support for `spot_nodes_enabled`, `burstable_nodes_enabled`, and `controller_nodes_enabled` inputs to all direct Kubernetes modules.
+
+* Adds a `spot_nodes_enabled` (default `true`) input to [aws_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module to disable spot instances for controller nodes.
 
 ## edge.25-03-04
 

@@ -76,3 +76,9 @@ variable "cache_clear_cron" {
   default     = "0 0 * * 0" # Sunday at midnight
 }
 
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+

@@ -149,7 +149,7 @@ variable "arm_nodes_enabled" {
 variable "burstable_nodes_enabled" {
   description = "Whether the database pods can be scheduled on burstable nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "pull_through_cache_enabled" {

@@ -61,6 +61,22 @@ Type: `bool`
 
 Default: `true`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### event\_bus\_name
 
 Description: The EventBus to read from. Should almost always be 'default'.
@@ -95,7 +111,7 @@ Default: `1`
 
 ### spot\_nodes\_enabled
 
-Description: Whether EventSource pods can be run on spot nodes
+Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 

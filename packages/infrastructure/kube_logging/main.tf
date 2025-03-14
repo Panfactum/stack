@@ -66,8 +66,9 @@ module "util_read" {
   source = "../kube_workload_utility"
 
   workload_name                        = "loki-read"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -79,8 +80,9 @@ module "util_write" {
   source = "../kube_workload_utility"
 
   workload_name                        = "loki-write"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -92,8 +94,9 @@ module "util_backend" {
   source = "../kube_workload_utility"
 
   workload_name                        = "loki-backend"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -107,8 +110,9 @@ module "util_canary" {
   workload_name                        = "loki-canary"
   panfactum_scheduler_enabled          = false
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   extra_labels                         = data.pf_kube_labels.labels.labels
@@ -138,8 +142,9 @@ module "redis_cache" {
   namespace                            = local.namespace
   replica_count                        = 3
   lfu_cache_enabled                    = true
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   vpa_enabled                          = var.vpa_enabled
   minimum_memory_mb                    = 1000

@@ -118,6 +118,12 @@ variable "node_ami_name" {
   default     = "bottlerocket-aws-k8s-1.30-aarch64-v1.28.0-0ab4fab4"
 }
 
+variable "spot_nodes_enabled" {
+  description = "Whether to create spot instances instead of on-demand instances"
+  type        = bool
+  default     = true
+}
+
 ################################################################################
 ## Access Control
 ################################################################################

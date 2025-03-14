@@ -45,8 +45,8 @@ module "util" {
   instance_type_anti_affinity_required = var.replicas > 1 && var.instance_type_anti_affinity_required
   az_spread_preferred                  = var.replicas > 1 && var.az_spread_preferred
 
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   spot_nodes_enabled          = var.spot_nodes_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels

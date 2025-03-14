@@ -31,7 +31,7 @@ variable "panfactum_scheduler_enabled" {
 variable "log_level" {
   description = "The log verbosity (0-9) for the Kyverno pods"
   type        = number
-  default     = 0
+  default     = 5
 
   validation {
     condition     = var.log_level >= 0 && var.log_level <= 9
@@ -52,6 +52,24 @@ variable "sla_target" {
 
 variable "wait" {
   description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
+}
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
   default     = true
 }

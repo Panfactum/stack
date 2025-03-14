@@ -132,6 +132,7 @@ module "buildkit" {
   az_spread_required                   = false
   az_spread_preferred                  = false
   host_anti_affinity_required          = false
+  spot_nodes_enabled                   = var.spot_nodes_enabled
 
   # Ensure that we are using the appropriate CPU architectures
   arm_nodes_enabled = each.key == "arm64"
@@ -345,9 +346,10 @@ module "scale_to_zero" {
   name                        = "scale-to-zero"
   namespace                   = local.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  spot_nodes_enabled          = true
+  spot_nodes_enabled          = var.spot_nodes_enabled
   arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = "*/15 * * * *"
@@ -422,9 +424,10 @@ module "cache_clear" {
   namespace                   = local.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
-  spot_nodes_enabled          = true
+  spot_nodes_enabled          = var.spot_nodes_enabled
   arm_nodes_enabled           = true
   burstable_nodes_enabled     = true
+  controller_nodes_enabled    = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = var.cache_clear_cron

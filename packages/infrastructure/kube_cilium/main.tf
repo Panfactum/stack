@@ -49,8 +49,9 @@ module "util_controller" {
   az_spread_preferred                  = var.sla_target >= 2
   host_anti_affinity_required          = var.sla_target >= 2
   pull_through_cache_enabled           = true
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
 
   // In cases where a cluster is recovering, it is possible the Panfactum scheduler might not have a node to run on
   // and this operator is required to launch a new node. As a result, this shouldn't use the Panfactum scheduler or
@@ -64,8 +65,9 @@ module "util_agent" {
   source = "../kube_workload_utility"
 
   workload_name               = "cilium-agent"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = true  // must be capable of running on all nodes
+  controller_nodes_enabled    = true  // must be capable of running on all nodes
+  spot_nodes_enabled          = true  // must be capable of running on all nodes
   panfactum_scheduler_enabled = false // daemon-set
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   extra_labels                = data.pf_kube_labels.labels.labels

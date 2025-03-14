@@ -96,46 +96,4 @@ locals {
       }
     }
   ]
-
-  // If the burstable nodes are tolerated,
-  // other tolerations need to be added (spot) if they haven't already
-  rule_add_extra_tolerations_if_burstable_toleration = [for toleration in ["spot"] :
-    {
-      name  = "add-${toleration}-toleration-if-burstable-toleration"
-      match = local.match_any_pod_create
-      preconditions = {
-        all = [
-          {
-            key      = "burstable"
-            operator = "AnyIn"
-            value    = "{{ request.object.spec.tolerations[].key || `[]` }}"
-          },
-          {
-            key      = toleration
-            operator = "AnyNotIn"
-            value    = "{{ request.object.spec.tolerations[].key || `[]` }}"
-          }
-        ]
-      }
-      mutate = {
-        patchesJson6902 = yamlencode([
-          {
-            op   = "add"
-            path = "/spec/tolerations/-"
-            value = {
-              key      = toleration
-              operator = "Equal"
-              value    = "true"
-              effect   = "NoSchedule"
-            }
-          },
-          {
-            op    = "add",
-            path  = "/metadata/labels/panfactum.com~1${toleration}-enabled"
-            value = "true"
-          }
-        ])
-      }
-    }
-  ]
 }

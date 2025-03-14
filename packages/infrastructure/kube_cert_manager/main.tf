@@ -43,8 +43,9 @@ module "util_controller" {
   instance_type_anti_affinity_required = false // single instance
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -57,8 +58,9 @@ module "util_webhook" {
   host_anti_affinity_required          = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -71,8 +73,9 @@ module "util_ca_injector" {
   instance_type_anti_affinity_required = false // single instance
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  controller_nodes_enabled             = true
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 

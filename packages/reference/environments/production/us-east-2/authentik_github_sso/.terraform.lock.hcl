@@ -87,6 +87,7 @@ provider "registry.opentofu.org/hashicorp/null" {
     "zh:fbea7a1ff84b430ba9594698e93196d81d03e4036de3d1cafccb2a96d5b38581",
     "zh:fbf0c84663a7e85881388d7d71ac862184f05fbf2d17ecf76bc5d3d7503ea260",
   ]
+  constraints = "3.2.3"
 }
 
 provider "registry.opentofu.org/hashicorp/random" {

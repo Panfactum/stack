@@ -31,6 +31,22 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### kyverno\_helm\_version
 
 Description: The version of kyverno helm chart to deploy
@@ -45,7 +61,7 @@ Description: The log verbosity (0-9) for the Kyverno pods
 
 Type: `number`
 
-Default: `0`
+Default: `5`
 
 ### monitoring\_enabled
 
@@ -78,6 +94,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 

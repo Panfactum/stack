@@ -256,11 +256,6 @@ We provide the ability to run on cheaper node classes by enabling the following:
   is routinely above \~30%, these instances will actually cost more money as they are run in [unlimited mode](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode.html)
   to prevent unexpected disruptions.
 
-  Note that in the Panfactum stack, Burstable instances are also Spot instances, so setting `burstable_nodes_enabled` to
-  `true` will implicitly set `spot_nodes_enabled` to `true`. This is because we assume workloads scheduled
-  on Burstable instances will not require 100% guaranteed, persistent resource allocations and which almost always
-  means they are safe for Spot instances as well.
-
 * `arm_nodes_enabled`: If `true`, pods will be allowed to run on [ARM64](https://en.wikipedia.org/wiki/AArch64) instances
   which tend to be 20-30% cheaper than AMD64 instances. As most container images today are
   [multi-platform](https://docs.docker.com/build/building/multi-platform/), **this is enabled by default.** If your workload
@@ -272,16 +267,20 @@ We provide the ability to run on cheaper node classes by enabling the following:
 [^91]: ARM64 tolerations are added to *all* pods by default, even those not created by Panfactum submodules. You can add the label `"panfactum.com/arm-enabled" = "false"` to
     the pod to prevent spot tolerations from being injected.
 
+<MarkdownAlert severity="info">
+  Node classes are **not** mutually exclusive. You can have multiple enabled at once to combine their benefits.
+</MarkdownAlert>
+
 We also provide one additional node class: controller nodes. These nodes are special in that they are managed by
 [AWS EKS Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) rather than by Karpenter.
 These are required because some of the core cluster utilities cannot run on nodes provisioned by Karpenter (such
 as Karpenter itself). By default, your workloads will not be allowed to run on them because they have special
 lifecycle rules that might be disruptive to your workloads.
 However, if you have the need, you can allow your workloads to run on these
-nodes by setting `controller_nodes_enabled` to `true`.
+nodes by setting `controller_nodes_enabled` to `true`. Note that this will also add spot and burstable tolerations to generated pods since the controller nodes are burstable, spot instances.
 
-<MarkdownAlert severity="info">
-  Node classes are **not** mutually exclusive. You can have multiple enabled at once to combine their benefits.
+<MarkdownAlert severity="warning">
+  Do not run critical workloads on controller nodes unless they can tolerate arbitrary, non-graceful disruptions.
 </MarkdownAlert>
 
 #### Node Requirements

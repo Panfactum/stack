@@ -134,8 +134,9 @@ module "bastion" {
   name      = local.name
 
   replicas                             = 2 // Should always use two replicas so that the tunnel can immediately reconnect when one goes down
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2
   priority_class_name                  = module.constants.cluster_important_priority_class_name

@@ -54,8 +54,9 @@ module "util_server" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -68,8 +69,9 @@ module "util_worker" {
   host_anti_affinity_required          = var.sla_target >= 2
   instance_type_anti_affinity_required = var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -94,7 +96,9 @@ module "database" {
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   pgbouncer_pool_mode                  = "transaction" // See https://github.com/goauthentik/authentik/issues/9152
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = false // should not run on controller nodes which can cause disruptions
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
@@ -115,8 +119,9 @@ module "redis" {
 
   namespace                            = local.namespace
   replica_count                        = 3
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   vpa_enabled                          = var.vpa_enabled
   monitoring_enabled                   = var.monitoring_enabled
