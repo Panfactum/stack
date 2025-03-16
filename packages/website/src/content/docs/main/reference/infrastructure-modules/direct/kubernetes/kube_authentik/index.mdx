@@ -106,6 +106,14 @@ Type: `bool`
 
 Default: `true`
 
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket containing the backups files.
+
+Type: `string`
+
+Default: `"initial"`
+
 ### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
@@ -258,13 +266,17 @@ Description: n/a
 
 Description: n/a
 
+### db\_backup\_bucket
+
+Description: The name of the S3 bucket that contains the PostgreSQL backups and WAL archives
+
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
 ### db\_reader\_role
 
 Description: n/a
-
-### db\_recovery\_directory
-
-Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
 ### db\_superuser\_role
 

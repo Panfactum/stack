@@ -135,6 +135,14 @@ Type: `bool`
 
 Default: `true`
 
+### grafana\_db\_backup\_directory
+
+Description: The name of the directory in the backup bucket containing the backups files for the Grafana PostgreSQL database.
+
+Type: `string`
+
+Default: `"initial"`
+
 ### grafana\_db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives
@@ -415,13 +423,17 @@ The following outputs are exported:
 
 Description: n/a
 
+### db\_backup\_bucket
+
+Description: The name of the S3 bucket that contains the PostgreSQL backups and WAL archives for Grafana
+
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives for Grafana
+
 ### grafana\_admin\_password
 
 Description: n/a
-
-### grafana\_db\_recovery\_directory
-
-Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives
 
 ### namespace
 

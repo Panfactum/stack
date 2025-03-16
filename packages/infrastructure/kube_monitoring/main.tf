@@ -364,6 +364,7 @@ module "grafana_db" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
+  pg_backup_directory      = var.grafana_db_backup_directory
   pg_recovery_mode_enabled = var.grafana_db_recovery_mode_enabled
   pg_recovery_directory    = var.grafana_db_recovery_directory
   pg_recovery_target_time  = var.grafana_db_recovery_target_time

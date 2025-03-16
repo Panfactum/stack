@@ -220,11 +220,11 @@ Recoverability".
     are not available. You will need to restore from the hourly EBS snapshots 
     created by Velero instead.
 
-2. Retrieve the `recovery_directory` output from this module by running `terragrunt output`.
+2. Retrieve the `backup_directory` output from this module by running `terragrunt output`.
 
 3. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
 
-4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `recovery_directory`
+4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `backup_directory`
 output you retrieved in step 2.
 
     Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
@@ -234,15 +234,30 @@ output you retrieved in step 2.
     If `pg_recovery_target_time` is not provided, the database will be recovered to the latest data stored in S3 which
     should be within 5 seconds of the last database write.
 
-5. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
+5. Set the `pg_backup_directory` module input to anything **other than** the `backup_directory` output you retrieved in step 2. This ensures
+that the new cluster will not use overwrite the existing backup directory and instead create a new one.
+
+6. Re-apply the module that contains this submodule and wait for the recovery to complete. The database should successfully
 come back online.
 
-Note that the "First Point of Recoverability" is determined by the `backups_retention_days`
-input; backups older than `backups_retention_days` (default `3`) will be deleted, and you
-will no longer be able to recover to that point in time.
+7. When the recovered database is back online, an initial backup of the new database will be performed. You can monitor it's progress
+from the `:backups.postgresql.cnpg.io` in k9s. When this complete, you should see a "First Point of
+Recoverability" when running `kubectl cnpg status -n <cluster_namespace> <cluster_name>`. If an initial backup cannot be created,
+something has gone wrong, and you should restart the recovery process.
 
-For more information on recovery procedures, see the CNPG 
-[recovery documentation](https://cloudnative-pg.io/documentation/1.23/recovery/).
+8. After the initial backup for the recovered database is created, you can optionally delete the `pg_recovery_directory` directory from the S3 bucket
+provided by the `backup_bucket_name` output. This can save space as that old backup is no longer needed.
+
+<MarkdownAlert severity="info">
+  Note that the "First Point of Recoverability" is determined by the `backups_retention_days`
+  input; backups older than `backups_retention_days` (default `3`) will be deleted, and you
+  will no longer be able to recover to that point in time.
+
+  For more information on recovery procedures, see the CNPG 
+  [recovery documentation](https://cloudnative-pg.io/documentation/1.25/recovery/).
+</MarkdownAlert>
+
+
 
 ### Disruptions
 

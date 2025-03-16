@@ -497,7 +497,7 @@ resource "kubernetes_cluster_role" "extra_permissions" {
   rule {
     api_groups = [""]
     verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
-    resources  = ["configmaps", "secrets", "nodes", "pods", "persistentvolumeclaims", "namespaces"]
+    resources  = ["configmaps", "secrets", "nodes", "pods", "persistentvolumeclaims", "namespaces", "persistentvolumes"]
   }
   rule {
     api_groups = ["apiextensions.k8s.io"]
@@ -523,6 +523,11 @@ resource "kubernetes_cluster_role" "extra_permissions" {
     api_groups = ["admissionregistration.k8s.io"]
     verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
     resources  = ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
+  }
+  rule {
+    api_groups = ["kyverno.io"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
+    resources  = ["updaterequests"]
   }
 }
 

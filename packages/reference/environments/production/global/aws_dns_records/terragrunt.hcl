@@ -15,7 +15,7 @@ inputs = {
           subdomain = ""
           records = [
             "google-site-verification=FeQQV4StQNkbiNostgR4n_puseQdhrk1tAwOjpmV91E", // Google Site Verification
-            "v=spf1 mx include:_spf.google.com ~all",                                  // SPF record authorizing email senders
+            "v=spf1 mx include:_spf.google.com ~all",                               // SPF record authorizing email senders
           ]
         },
 
@@ -50,7 +50,7 @@ inputs = {
           subdomain = ""
           records = [
             "google-site-verification=T7P6g2fvaBUZ2Xby1GcdHGbOYwTOr0CGWniC_MH_qIg", // Google Site Verification
-            "v=spf1 mx include:_spf.google.com ~all",                                  // SPF record authorizing email senders
+            "v=spf1 mx include:_spf.google.com ~all",                               // SPF record authorizing email senders
           ]
         },
 
@@ -213,7 +213,7 @@ inputs = {
           subdomain = ""
           records = [
             "MS=ms89071327",                                                                        // AAD Domain Ownership
-            "v=spf1 mx include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all",          // SPF record authorizing email senders
+            "v=spf1 mx include:_spf.google.com include:47029925.spf06.hubspotemail.net ~all",       // SPF record authorizing email senders
             "zoho-verification=zb69684923.zmverify.zoho.com",                                       // Zoho Domain Ownership
             "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                 // Panfactum.com Google Search Console
             "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                           // Panfactum.com MongoDB Atlas SSO

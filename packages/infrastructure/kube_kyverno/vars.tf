@@ -31,7 +31,7 @@ variable "panfactum_scheduler_enabled" {
 variable "log_level" {
   description = "The log verbosity (0-9) for the Kyverno pods"
   type        = number
-  default     = 5
+  default     = 0
 
   validation {
     condition     = var.log_level >= 0 && var.log_level <= 9

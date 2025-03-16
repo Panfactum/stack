@@ -263,6 +263,12 @@ variable "grafana_db_recovery_target_time" {
   default     = null
 }
 
+variable "grafana_db_backup_directory" {
+  description = "The name of the directory in the backup bucket containing the backups files for the Grafana PostgreSQL database."
+  type        = string
+  default     = "initial"
+}
+
 variable "node_image_cached_enabled" {
   description = "Whether to add the container images to the node image cache for faster startup times"
   type        = bool

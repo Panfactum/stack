@@ -85,6 +85,14 @@ Type: `bool`
 
 Default: `true`
 
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket containing the backups files for the database.
+
+Type: `string`
+
+Default: `"initial"`
+
 ### db\_recovery\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
@@ -179,7 +187,7 @@ Description: The minimum amount of memory to allocate to the postgres pods (in M
 
 Type: `number`
 
-Default: `400`
+Default: `500`
 
 ### pgbouncer\_maximum\_cpu\_millicores
 
@@ -281,7 +289,11 @@ Description: ARN of the S3 bucket holding workflow artifacts
 
 Description: Name of the S3 bucket holding workflow artifacts
 
-### db\_recovery\_directory
+### db\_backup\_bucket
+
+Description: The name of the S3 bucket that contains the PostgreSQL backups and WAL archives
+
+### db\_backup\_directory
 
 Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 

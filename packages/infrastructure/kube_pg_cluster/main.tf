@@ -119,14 +119,6 @@ module "constants" {
 * S3 Backup
 ***************************************/
 
-resource "random_id" "recovery_directory" {
-  byte_length = 8
-  keepers = {
-    pg_recovery_mode_enabled = var.pg_recovery_mode_enabled
-    pg_recovery_target_time  = var.pg_recovery_target_time
-  }
-}
-
 resource "random_id" "bucket_name" {
   byte_length = 8
   prefix      = "${var.pg_cluster_namespace}-${local.cluster_name}-backup-"
@@ -391,7 +383,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
 
       bootstrap = { for k, v in {
         recovery = var.pg_recovery_mode_enabled ? { for k, v in {
-          source = local.cluster_name
+          source = var.pg_recovery_directory
           recoveryTarget = var.pg_recovery_target_time != null ? {
             targetTime = var.pg_recovery_target_time
           } : null
@@ -444,7 +436,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       } : k => v if v != null }
 
       externalClusters = var.pg_recovery_mode_enabled ? [{
-        name = local.cluster_name
+        name = var.pg_recovery_directory
         barmanObjectStore = {
           destinationPath = "s3://${module.s3_bucket.bucket_name}/"
           serverName      = var.pg_recovery_directory
@@ -504,17 +496,17 @@ resource "kubernetes_manifest" "postgres_cluster" {
         }
         barmanObjectStore = {
           destinationPath = "s3://${module.s3_bucket.bucket_name}/"
-          serverName      = random_id.recovery_directory.hex
+          serverName      = var.pg_backup_directory
           s3Credentials = {
             inheritFromIAMRole = true
           }
 
           data = {
-            compression = "bzip2"
+            compression = "gzip"
             jobs        = 8
           }
           wal = {
-            compression = "bzip2"
+            compression = "gzip"
             maxParallel = 8
           }
         }
@@ -565,12 +557,16 @@ resource "kubernetes_manifest" "postgres_cluster" {
   }
 }
 
+/***************************************
+* Backup Configuration
+***************************************/
+
 resource "kubectl_manifest" "scheduled_backup" {
   yaml_body = yamlencode({
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "ScheduledBackup"
     metadata = {
-      name      = "${local.cluster_name}-default-${random_id.recovery_directory.hex}"
+      name      = "${local.cluster_name}-default-${var.pg_backup_directory}"
       namespace = var.pg_cluster_namespace
     }
     spec = {
@@ -579,13 +575,62 @@ resource "kubectl_manifest" "scheduled_backup" {
       cluster = {
         name = local.cluster_name
       }
-      immediate = true
+      immediate = true // create first backup immediately after scheduled backup is created
+      target    = "prefer-standby"
+      method    = "barmanObjectStore"
     }
   })
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [kubernetes_manifest.postgres_cluster]
 }
+
+resource "kubectl_manifest" "failed_backup_gc" {
+  count = var.gc_failed_backups ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v2"
+    kind       = "CleanupPolicy"
+    metadata = {
+      name      = "failed-backup-gc-${local.cluster_name}"
+      namespace = var.pg_cluster_namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      match = {
+        any = [{
+          resources = {
+            kinds = ["postgresql.cnpg.io/v1/Backup"]
+            names = ["${local.cluster_name}-*"]
+          }
+        }]
+      }
+      conditions = {
+        all = [
+          {
+            key      = "{{ target.status.phase }}"
+            operator = "Equals"
+            value    = "failed"
+          },
+          {
+            key      = "{{ time_since('', '{{ target.metadata.creationTimestamp }}', '') }}"
+            operator = "GreaterThan"
+            value    = "${var.backups_retention_days * 24}h0m0s"
+          }
+        ]
+      }
+      schedule = "0 * * * *"
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on = [
+    kubectl_manifest.vpa_cluster
+  ]
+}
+
+/***************************************
+* Vertical Autoscaling
+***************************************/
 
 resource "kubectl_manifest" "vpa_cluster" {
   count = var.vpa_enabled ? 1 : 0
@@ -626,45 +671,6 @@ resource "kubectl_manifest" "vpa_cluster" {
   force_conflicts   = true
   server_side_apply = true
   depends_on        = [kubernetes_manifest.postgres_cluster]
-}
-
-resource "kubectl_manifest" "pdb" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      // Using the PDB name local.cluster-name will result in the operator deleting it
-      // as we have disabled the operator pdb functionality
-      name      = "${local.cluster_name}-pf-pdb"
-      namespace = var.pg_cluster_namespace
-      labels = merge(
-        module.util_cluster.labels,
-        local.disruption_window_labels
-      )
-      annotations = local.disruption_window_annotations
-    }
-    spec = {
-      # If we haven't met the healthy budget, then disrupting nodes that attempting to recovery
-      # might corrupt the datastore and force a need for manual intervention; as a result, do NOT
-      # use AlwaysAllow here
-      unhealthyPodEvictionPolicy = "IfHealthyBudget"
-      selector = {
-        matchLabels = module.util_cluster.match_labels
-      }
-      maxUnavailable = var.voluntary_disruptions_enabled && !var.voluntary_disruption_window_enabled ? 1 : 0
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [kubernetes_manifest.postgres_cluster]
-  ignore_fields = concat(
-    [
-      "metadata.annotations.panfactum.com/voluntary-disruption-window-start"
-    ],
-    var.voluntary_disruption_window_enabled ? [
-      "spec.maxUnavailable"
-    ] : []
-  )
 }
 
 resource "kubectl_manifest" "vpa_adjustments" {
@@ -1325,7 +1331,7 @@ resource "kubectl_manifest" "pdb_pooler" {
 }
 
 /***************************************
-* Disruption Windows
+* Disruption Management
 ***************************************/
 
 module "disruption_window_controller" {
@@ -1338,6 +1344,155 @@ module "disruption_window_controller" {
   pull_through_cache_enabled  = var.pull_through_cache_enabled
 
   cron_schedule = var.voluntary_disruption_window_cron_schedule
+}
+
+// This policy updates the PDB to prevent cluster disruptions when a backup is running
+resource "kubectl_manifest" "backup_pdb" {
+  count = var.voluntary_disruptions_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "kyverno.io/v1"
+    kind       = "Policy"
+    metadata = {
+      name      = "backup-pdb-${local.cluster_name}"
+      namespace = var.pg_cluster_namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      useServerSideApply = true
+      rules = [
+        // This rule re-enables disruptions if no backups are running
+        {
+          name = "allow-disruptions"
+          match = {
+            any = [{
+              resources = {
+                kinds = ["postgresql.cnpg.io/v1/Backup"]
+              }
+            }]
+          }
+          preconditions = {
+            all = [
+              {
+                key      = "{{ request.object.status.phase || 'running' }}"
+                operator = "NotEquals"
+                value    = "running"
+              },
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "policy/v1"
+                kind       = "PodDisruptionBudget"
+                name       = "${local.cluster_name}-pf-pdb"
+                namespace  = var.pg_cluster_namespace
+
+                // Don't update the PDB if the voluntary disruption window is active
+                preconditions = {
+                  all = [
+                    {
+                      key      = "{{ target.metadata.annotations.\"panfactum.com/voluntary-disruption-window-start\" || '' }}"
+                      operator = "Equals"
+                      value    = ""
+                    }
+                  ]
+                }
+              }
+            ]
+
+            patchStrategicMerge = {
+              metadata = {
+                labels = local.disruption_window_labels
+              }
+              spec = {
+                maxUnavailable = var.voluntary_disruption_window_enabled ? 0 : 1
+              }
+            }
+          }
+        },
+        // This rule disables disruptions if backups are running and takes precedence over the above rules
+        {
+          name = "block-disruptions"
+          match = {
+            any = [{
+              resources = {
+                kinds = ["postgresql.cnpg.io/v1/Backup"]
+              }
+            }]
+          }
+          preconditions = {
+            all = [
+              {
+                key      = "{{ request.object.status.phase || 'running' }}"
+                operator = "Equals"
+                value    = "running"
+              }
+            ]
+          }
+          mutate = {
+            mutateExistingOnPolicyUpdate = true
+            targets = [
+              {
+                apiVersion = "policy/v1"
+                kind       = "PodDisruptionBudget"
+                name       = "${local.cluster_name}-pf-pdb"
+                namespace  = var.pg_cluster_namespace
+              }
+            ]
+            patchStrategicMerge = {
+              metadata = {
+                labels = {
+                  "panfactum.com/voluntary-disruption-window-id" = "false"
+                }
+              }
+              spec = {
+                maxUnavailable = 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  force_new         = true
+  force_conflicts   = true
+  server_side_apply = true
+}
+
+resource "kubectl_manifest" "pdb" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      // Using the PDB name local.cluster-name will result in the operator deleting it
+      // as we have disabled the operator pdb functionality
+      name      = "${local.cluster_name}-pf-pdb"
+      namespace = var.pg_cluster_namespace
+      labels = merge(
+        module.util_cluster.labels,
+        local.disruption_window_labels
+      )
+      annotations = local.disruption_window_annotations
+    }
+    spec = {
+      # If we haven't met the healthy budget, then disrupting nodes that attempting to recovery
+      # might corrupt the datastore and force a need for manual intervention; as a result, do NOT
+      # use AlwaysAllow here
+      unhealthyPodEvictionPolicy = "IfHealthyBudget"
+      selector = {
+        matchLabels = module.util_cluster.match_labels
+      }
+      maxUnavailable = var.voluntary_disruptions_enabled && !var.voluntary_disruption_window_enabled ? 1 : 0
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [kubernetes_manifest.postgres_cluster]
+  ignore_fields = [
+    "metadata.annotations.panfactum.com/voluntary-disruption-window-start",
+    "spec.maxUnavailable"
+  ]
 }
 
 

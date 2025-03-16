@@ -246,43 +246,30 @@ resource "kubectl_manifest" "snapshot_class" {
 }
 
 /***************************************
+* Permissions for Kyverno
+***************************************/
+
+resource "kubernetes_cluster_role" "kyverno_roles" {
+  for_each = toset(["background-controller", "admission-controller", "cleanup-controller"])
+  metadata {
+    name = "kyverno:${each.key}:cnpg"
+    labels = merge(data.pf_kube_labels.labels.labels, {
+      "app.kubernetes.io/part-of"   = "kyverno"
+      "app.kubernetes.io/instance"  = "kyverno"
+      "app.kubernetes.io/component" = each.key
+    })
+  }
+  rule {
+    api_groups = ["postgresql.cnpg.io"]
+    verbs      = ["get", "list", "create", "update", "watch", "delete"]
+    resources  = ["clusters", "backups", "clusterimagecatalogs", "imagecatalogs", "poolers", "scheduledbackups"]
+  }
+}
+
+/***************************************
 * Fix for adding the VPA
 * See: https://github.com/cloudnative-pg/cloudnative-pg/issues/2574
 ***************************************/
-
-
-resource "kubernetes_cluster_role" "kyverno_background_controller" {
-  metadata {
-    name = "kyverno:background-controller:cnpg"
-    labels = merge(data.pf_kube_labels.labels.labels, {
-      "app.kubernetes.io/part-of"   = "kyverno"
-      "app.kubernetes.io/instance"  = "kyverno"
-      "app.kubernetes.io/component" = "background-controller"
-    })
-  }
-  rule {
-    api_groups = ["postgresql.cnpg.io"]
-    verbs      = ["get", "list", "create", "update", "watch", "delete"]
-    resources  = ["clusters", "backups", "clusterimagecatalogs", "imagecatalogs", "poolers", "scheduledbackups"]
-  }
-}
-
-resource "kubernetes_cluster_role" "kyverno_admission_controller" {
-  metadata {
-    name = "kyverno:admission-controller:cnpg"
-    labels = merge(data.pf_kube_labels.labels.labels, {
-      "app.kubernetes.io/part-of"   = "kyverno"
-      "app.kubernetes.io/instance"  = "kyverno"
-      "app.kubernetes.io/component" = "admission-controller"
-    })
-  }
-  rule {
-    api_groups = ["postgresql.cnpg.io"]
-    verbs      = ["get", "list", "create", "update", "watch", "delete"]
-    resources  = ["clusters", "backups", "clusterimagecatalogs", "imagecatalogs", "poolers", "scheduledbackups"]
-  }
-}
-
 
 resource "kubectl_manifest" "cnpg_scale_selector" {
   yaml_body = yamlencode({
@@ -447,7 +434,6 @@ resource "kubectl_manifest" "cnpg_scale_selector" {
   server_side_apply = true
   depends_on = [
     helm_release.cnpg,
-    kubernetes_cluster_role.kyverno_admission_controller,
-    kubernetes_cluster_role.kyverno_background_controller
+    kubernetes_cluster_role.kyverno_roles
   ]
 }

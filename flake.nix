@@ -9,7 +9,7 @@
     tfUtilsPkgsSrc.url = "github:NixOS/nixpkgs/93dc9803a1ee435e590b02cde9589038d5cc3a4e";
     buildkitPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     redisPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
-    postgresPkgsSrc.url = "github:NixOS/nixpkgs/daf7bb95821b789db24fc1ac21f613db0c1bf2cb";
+    postgresPkgsSrc.url = "github:NixOS/nixpkgs/16e046229f3b4f53257973a5532bcbb72457d2f2";
     vaultPkgsSrc.url = "github:NixOS/nixpkgs/325eb628b89b9a8183256f62d017bfb499b19bd9";
     linkerdPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";

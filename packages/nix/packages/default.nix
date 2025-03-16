@@ -61,7 +61,6 @@ with pkgs;
   kubeUtilsPkgs.kustomize # tool for editing manifests programatically
   kubeUtilsPkgs.kubernetes-helm # for working with Helm charts
   kubeUtilsPkgs.kube-capacity # for visualizing resource utilization in the cluster
-  kubeUtilsPkgs.kubectl-cnpg # for managing the cnpg postgres databases
   kubeUtilsPkgs.kubectl-evict-pod # for initiating pod evictions
   linkerdPkgs.linkerd_edge # utility for working with the service mesh
   cilium # for managing the cilium CNI
@@ -161,5 +160,6 @@ with pkgs;
   natsPkgs.natscli # cli for NATS
   natsPkgs.nsc # cli for configuring NATS accounts
   natsPkgs.nats-top # cli for configuring NATS accounts
+  postgresPkgs.kubectl-cnpg # for managing the cnpg postgres databases
   # postgresPkgs.barman # barman cli for backups and restore with postgres (Broken on MacOS b/c of https://github.com/NixOS/nixpkgs/issues/346003)
 ]

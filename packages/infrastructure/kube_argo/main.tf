@@ -280,6 +280,7 @@ module "database" {
   pgbouncer_minimum_memory_mb      = var.pgbouncer_minimum_memory_mb
   pgbouncer_maximum_memory_mb      = var.pgbouncer_maximum_memory_mb
 
+  pg_backup_directory      = var.db_backup_directory
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time

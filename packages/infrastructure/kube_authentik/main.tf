@@ -103,6 +103,7 @@ module "database" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
 
+  pg_backup_directory      = var.db_backup_directory
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time

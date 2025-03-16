@@ -75,3 +75,10 @@ variable "common_pod_annotations" {
   type        = map(string)
   default     = {}
 }
+
+variable "gc_released_volumes_after_days" {
+  description = "The number of days to wait before deleting released PersistentVolumes (PVs). These are volumes that are no longer used but may contain recovery data. Set to -1 to disable."
+  type        = number
+  default     = 30
+}
+
