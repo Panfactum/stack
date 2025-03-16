@@ -443,6 +443,9 @@ resource "kubernetes_manifest" "postgres_cluster" {
           s3Credentials = {
             inheritFromIAMRole = true
           }
+          data = {
+            maxParallel = 16
+          }
           wal = {
             maxParallel = 8
           }
@@ -502,11 +505,15 @@ resource "kubernetes_manifest" "postgres_cluster" {
           }
 
           data = {
-            compression = "gzip"
-            jobs        = 8
+            compression = "snappy"
+            jobs        = 16
+            additionalCommandArgs = [
+              "--min-chunk-size=100MB",
+              "--max-archive-size=5GB"
+            ]
           }
           wal = {
-            compression = "gzip"
+            compression = "snappy"
             maxParallel = 8
           }
         }
