@@ -3,7 +3,7 @@ import yaml from "yaml";
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
-import { getRepoVariables } from "../../util/scripts/helpers/get-root";
+import { getRoot } from "../../util/scripts/helpers/get-root";
 import { apply } from "../terragrunt/apply";
 import { initModules } from "../terragrunt/init-modules";
 import type { BaseContext } from "clipanion";
@@ -56,14 +56,14 @@ export async function setupEks(input: EksSetupInput) {
 
   // Setup cluster_info metadata and CA certs
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-cluster_info-metadata-and-ca-certs
-  const terragruntVariables = await getTerragruntVariables(input.context);
+  const terragruntVariables = await getTerragruntVariables({ context: input.context });
   if (typeof terragruntVariables["environment"] !== "string") {
     throw new Error("Environment not correctly set for Terragrunt");
   }
   if (typeof terragruntVariables["region"] !== "string") {
     throw new Error("Region not correctly set for Terragrunt");
   }
-  const { root } = await getRepoVariables();
+  const { root } = await getRoot();
   const kubeConfigPath = path.join(root, ".kube", "config.yaml");
   const configExists = await Bun.file(kubeConfigPath).exists();
   if (!configExists) {

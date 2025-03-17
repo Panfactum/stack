@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 /**
@@ -5,7 +6,7 @@ import path from "node:path";
  * @param startDir Optional starting directory, defaults to current working directory
  * @returns Object containing root and gitRoot paths
  */
-export async function getRepoVariables(startDir?: string): Promise<{
+export async function getRoot(startDir?: string): Promise<{
   root: string;
   gitRoot: string;
 }> {
@@ -14,8 +15,8 @@ export async function getRepoVariables(startDir?: string): Promise<{
 
   // Find the root directory (containing .git or panfactum.yaml)
   while (
-    !(await Bun.file(path.join(root, ".git")).exists()) &&
-    !(await Bun.file(path.join(root, "panfactum.yaml")).exists())
+    !existsSync(path.join(root, ".git")) &&
+    !existsSync(path.join(root, "panfactum.yaml"))
   ) {
     const parentDir = path.dirname(root);
     if (parentDir === root) {
@@ -27,7 +28,7 @@ export async function getRepoVariables(startDir?: string): Promise<{
   // Find the git root directory
   let gitRoot = path.resolve(startDir ?? process.cwd());
 
-  while (!(await Bun.file(path.join(gitRoot, ".git")).exists())) {
+  while (!existsSync(path.join(gitRoot, ".git"))) {
     const parentDir = path.dirname(gitRoot);
     if (parentDir === gitRoot) {
       throw new Error("Could not find git repository root");

@@ -39,4 +39,7 @@ export async function setupVpc(input: VpcSetupInput) {
     verbose: input.verbose,
     workingDirectory: "./aws_vpc",
   });
+
+  // Run network connectivity tests
+  
 }

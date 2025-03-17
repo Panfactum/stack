@@ -2,6 +2,8 @@
 import { Builtins, Cli } from "clipanion";
 import { InstallClusterCommand } from "./commands/install-cluster-command";
 import { TerragruntInitCommand } from "./commands/terragrunt/tf-init-command";
+import { GetRepoVariablesCommand } from "./util/scripts/get-repo-variables-command";
+import { GetTerragruntVariablesCommand } from "./util/scripts/get-terragrunt-variables-command";
 
 // @ts-ignore Bun needs the explicit non-index syntax to overwrite this at build time with the --define flag
 const VERSION = process.env.VERSION ?? "unknown";
@@ -18,6 +20,8 @@ cli.register(Builtins.HelpCommand);
 cli.register(Builtins.VersionCommand);
 cli.register(TerragruntInitCommand);
 cli.register(InstallClusterCommand);
+cli.register(GetRepoVariablesCommand);
+cli.register(GetTerragruntVariablesCommand);
 
 // Parse and run
 cli.runExit(process.argv.slice(2), {

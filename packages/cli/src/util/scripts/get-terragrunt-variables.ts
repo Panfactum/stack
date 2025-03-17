@@ -9,9 +9,11 @@ import type { BaseContext } from "clipanion";
  * Terragrunt variables are the Panfactum-specific configuration settings defined here:
  * https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables.
  */
-export const getTerragruntVariables = async (
-  context: BaseContext
-): Promise<Record<string, unknown>> => {
+export const getTerragruntVariables = async ({
+  context,
+}: {
+  context: BaseContext;
+}): Promise<Record<string, unknown>> => {
   const files = await getFiles(process.cwd());
 
   // If YAML files are found, merge and convert to JSON
