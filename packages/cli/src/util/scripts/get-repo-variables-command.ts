@@ -4,7 +4,7 @@ import { getRepoVariables } from "./get-repo-variables";
 export class GetRepoVariablesCommand extends Command {
   static override paths = [["get-repo-variables"]];
 
-  verbose = Option.Boolean("-v,-verbose", {
+  verbose = Option.Boolean("-v,--verbose", {
     description: "Enable verbose output",
   });
 

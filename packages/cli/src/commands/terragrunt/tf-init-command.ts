@@ -4,7 +4,7 @@ import { initModules } from "./init-modules";
 export class TerragruntInitCommand extends Command {
   static override paths = [["tf-init"]];
 
-  verbose = Option.Boolean("-v,-verbose", {
+  verbose = Option.Boolean("-v,--verbose", {
     description: "Enable verbose output",
   });
 

@@ -4,7 +4,7 @@ import { getTerragruntVariables } from "./get-terragrunt-variables";
 export class GetTerragruntVariablesCommand extends Command {
   static override paths = [["get-terragrunt-variables"]];
 
-  verbose = Option.Boolean("-v,-verbose", {
+  verbose = Option.Boolean("-v,--verbose", {
     description: "Enable verbose output",
   });
 

@@ -66,76 +66,76 @@ export async function userQAndA({
     default: `Panfactum VPC for the ${environment} environment`,
   });
 
-  // // Prompt for GitHub PAT for Kubernetes Cluster
-  // // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials
-  // const githubUsername = await input({
-  //   message: "Enter your GitHub username:",
-  //   required: true,
-  // });
+  // Prompt for GitHub PAT for Kubernetes Cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials
+  const githubUsername = await input({
+    message: "Enter your GitHub username:",
+    required: true,
+  });
 
-  // const githubPat = await password({
-  //   message:
-  //     "Enter your classic GitHub Personal Access Token with 'read:packages' scope (this will be encrypted with SOPS and stored securely):",
-  //   mask: true,
-  // });
+  const githubPat = await password({
+    message:
+      "Enter your classic GitHub Personal Access Token with 'read:packages' scope (this will be encrypted with SOPS and stored securely):",
+    mask: true,
+  });
 
-  // // Prompt for Docker Hub PAT for Kubernetes Cluster
-  // // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials
-  // const dockerHubUsername = await input({
-  //   message: "Enter your Docker Hub username:",
-  //   required: true,
-  // });
+  // Prompt for Docker Hub PAT for Kubernetes Cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials
+  const dockerHubUsername = await input({
+    message: "Enter your Docker Hub username:",
+    required: true,
+  });
 
-  // const dockerHubPat = await password({
-  //   message:
-  //     "Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions (this will be encrypted with SOPS and stored securely):",
-  //   mask: true,
-  // });
+  const dockerHubPat = await password({
+    message:
+      "Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions (this will be encrypted with SOPS and stored securely):",
+    mask: true,
+  });
 
-  // context.stdout.write("Encrypting secrets with SOPS...\n");
+  context.stdout.write("Encrypting secrets with SOPS...\n");
 
-  // const tempSecretsFilePath = "./.tmp-ecr-pull-through-cache-secrets.yaml";
-  // await Bun.write(
-  //   tempSecretsFilePath,
-  //   `github_access_token: ${githubPat}\ndocker_hub_access_token: ${dockerHubPat}`
-  // );
+  const tempSecretsFilePath = "./.tmp-ecr-pull-through-cache-secrets.yaml";
+  await Bun.write(
+    tempSecretsFilePath,
+    `github_access_token: ${githubPat}\ndocker_hub_access_token: ${dockerHubPat}`
+  );
 
-  // const result = Bun.spawnSync(["sops", "encrypt", "-i", tempSecretsFilePath]);
-  // if (!result.success) {
-  //   context.stderr.write(result.stderr.toString());
-  //   const file = Bun.file(tempSecretsFilePath);
-  //   await file.delete();
-  //   throw new Error("Failed to encrypt ECR pull through cache secrets");
-  // }
+  const result = Bun.spawnSync(["sops", "encrypt", "-i", tempSecretsFilePath]);
+  if (!result.success) {
+    context.stderr.write(result.stderr.toString());
+    const file = Bun.file(tempSecretsFilePath);
+    await file.delete();
+    throw new Error("Failed to encrypt ECR pull through cache secrets");
+  }
 
-  // try {
-  //   await ensureFileExists({
-  //     context,
-  //     destinationFile: "./aws_ecr_pull_through_cache/secrets.yaml",
-  //     sourceFile: tempSecretsFilePath,
-  //   });
-  // } finally {
-  //   const file = Bun.file(tempSecretsFilePath);
-  //   await file.delete();
-  // }
+  try {
+    await ensureFileExists({
+      context,
+      destinationFile: "./aws_ecr_pull_through_cache/secrets.yaml",
+      sourceFile: tempSecretsFilePath,
+    });
+  } finally {
+    const file = Bun.file(tempSecretsFilePath);
+    await file.delete();
+  }
 
-  // // Prompt for cluster info
-  // // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-cluster-name
-  // const clusterName = await input({
-  //   message: "Enter a name for your Kubernetes cluster:",
-  //   default: `panfactum-${environment}`,
-  // });
+  // Prompt for cluster info
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#choose-a-cluster-name
+  const clusterName = await input({
+    message: "Enter a name for your Kubernetes cluster:",
+    default: `panfactum-${environment}`,
+  });
 
-  // const clusterDescription = await input({
-  //   message: "Enter a description for your Kubernetes cluster:",
-  //   default: `Panfactum Kubernetes cluster for the ${environment} environment`,
-  // });
+  const clusterDescription = await input({
+    message: "Enter a description for your Kubernetes cluster:",
+    default: `Panfactum Kubernetes cluster for the ${environment} environment`,
+  });
 
   return {
-    // clusterDescription,
-    // clusterName,
-    // dockerHubUsername,
-    // githubUsername,
+    clusterDescription,
+    clusterName,
+    dockerHubUsername,
+    githubUsername,
     slaTarget,
     vpcName,
     vpcDescription,

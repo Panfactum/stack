@@ -15,7 +15,7 @@ import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
 
-  verbose = Option.Boolean("-v,-verbose", {
+  verbose = Option.Boolean("-v,--verbose", {
     description: "Enable verbose output",
   });
 
@@ -201,61 +201,61 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    // this.context.stdout.write("Setting up the AWS ECR pull through cache...\n");
+    this.context.stdout.write("Setting up the AWS ECR pull through cache...\n");
 
-    // try {
-    //   await setupEcrPullThroughCache({
-    //     context: this.context,
-    //     dockerHubUsername: answers.dockerHubUsername,
-    //     githubUsername: answers.githubUsername,
-    //     verbose: this.verbose,
-    //   });
-    // } catch (error) {
-    //   this.context.stderr.write(
-    //     pc.red(
-    //       `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
-    //     )
-    //   );
-    //   printHelpInformation(this.context);
-    //   return 1;
-    // }
+    try {
+      await setupEcrPullThroughCache({
+        context: this.context,
+        dockerHubUsername: answers.dockerHubUsername,
+        githubUsername: answers.githubUsername,
+        verbose: this.verbose,
+      });
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(
+          `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
 
-    // try {
-    //   await replaceYamlValue(
-    //     "./region.yaml",
-    //     "extra_inputs.pull_through_cache_enabled",
-    //     true
-    //   );
-    // } catch (error) {
-    //   this.context.stderr.write(
-    //     pc.red(
-    //       `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
-    //     )
-    //   );
-    //   printHelpInformation(this.context);
-    //   return 1;
-    // }
+    try {
+      await replaceYamlValue(
+        "./region.yaml",
+        "extra_inputs.pull_through_cache_enabled",
+        true
+      );
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(
+          `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
+        )
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
 
-    // this.context.stdout.write("Setting up the AWS EKS cluster...\n");
-    // this.context.stdout.write(
-    //   pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
-    // );
+    this.context.stdout.write("Setting up the AWS EKS cluster...\n");
+    this.context.stdout.write(
+      pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
+    );
 
-    // try {
-    //   await setupEks({
-    //     context: this.context,
-    //     clusterName: answers.clusterName,
-    //     clusterDescription: answers.clusterDescription,
-    //     slaLevel: answers.slaTarget || (slaTarget as 1 | 2 | 3), // This is validated in the code earlier
-    //     verbose: this.verbose,
-    //   });
-    // } catch (error) {
-    //   this.context.stderr.write(
-    //     pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
-    //   );
-    //   printHelpInformation(this.context);
-    //   return 1;
-    // }
+    try {
+      await setupEks({
+        context: this.context,
+        clusterName: answers.clusterName,
+        clusterDescription: answers.clusterDescription,
+        slaLevel: answers.slaTarget || (slaTarget as 1 | 2 | 3), // This is validated in the code earlier
+        verbose: this.verbose,
+      });
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
 
     return 0;
   }
