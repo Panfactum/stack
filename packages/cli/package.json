@@ -4,7 +4,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "build:binary": "bun build --compile ./src/index.ts --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf --minify",
+    "build:binary": "bun build --compile --minify --sourcemap ./src/index.ts --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
@@ -33,6 +33,7 @@
     "clipanion": "^4.0.0-rc.4",
     "picocolors": "^1.1.1",
     "typanion": "^3.14.0",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.0",
+    "zod": "^3.24.2"
   }
 }

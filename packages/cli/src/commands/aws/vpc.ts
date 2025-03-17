@@ -1,3 +1,4 @@
+import awsVpcTerragruntHcl from "../../templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { apply } from "../terragrunt/apply";
@@ -16,9 +17,7 @@ export async function setupVpc(input: VpcSetupInput) {
   await ensureFileExists({
     context: input.context,
     destinationFile: "./aws_vpc/terragrunt.hcl",
-    sourceFile: await Bun.file(
-      import.meta.dir + "/templates/aws_vpc_terragrunt.hcl"
-    ).text(),
+    sourceFile: await Bun.file(awsVpcTerragruntHcl).text(),
   });
 
   await replaceHclValue("./aws_vpc/terragrunt.hcl", "vpc_name", input.vpcName);

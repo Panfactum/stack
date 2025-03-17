@@ -103,7 +103,8 @@ export async function userQAndA({
   const result = Bun.spawnSync(["sops", "encrypt", "-i", tempSecretsFilePath]);
   if (!result.success) {
     context.stderr.write(result.stderr.toString());
-    await Bun.file(tempSecretsFilePath).delete();
+    const file = Bun.file(tempSecretsFilePath);
+    await file.delete();
     throw new Error("Failed to encrypt ECR pull through cache secrets");
   }
 
@@ -114,7 +115,8 @@ export async function userQAndA({
       sourceFile: tempSecretsFilePath,
     });
   } finally {
-    await Bun.file(tempSecretsFilePath).delete();
+    const file = Bun.file(tempSecretsFilePath);
+    await file.delete();
   }
 
   // Prompt for cluster info

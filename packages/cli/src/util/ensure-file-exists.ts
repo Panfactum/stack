@@ -15,7 +15,7 @@ export async function ensureFileExists({
 }): Promise<void> {
   // Only take action if the file doesn't already exist.
   if (!(await Bun.file(destinationFile).exists())) {
-    // File doesn't exist, download it
+    // File doesn't exist, write it
     verbose && context.stdout.write(`Writing ${destinationFile}`);
 
     // Make sure the directory exists
