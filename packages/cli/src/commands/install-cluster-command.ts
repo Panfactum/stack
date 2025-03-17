@@ -59,7 +59,9 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    const terragruntVariables = await getTerragruntVariables(this.context);
+    const terragruntVariables = await getTerragruntVariables({
+      context: this.context,
+    });
 
     this.context.stdout.write(
       `Terragrunt variables: ${JSON.stringify(terragruntVariables, null, 2)}\n`
