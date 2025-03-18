@@ -54,6 +54,24 @@ variable "auth_enabled" {
   default     = false
 }
 
+variable "admin_email" {
+  description = "Email for the admin user when auth is enabled"
+  type        = string
+  default     = "admin@example.com"
+}
+
+variable "admin_first_name" {
+  description = "First name for the admin user when auth is enabled"
+  type        = string
+  default     = "Admin"
+}
+
+variable "admin_last_name" {
+  description = "Last name for the admin user when auth is enabled"
+  type        = string
+  default     = "User"
+}
+
 variable "ingress_enabled" {
   description = "Whether to enable the ingress for Airbyte"
   type        = bool

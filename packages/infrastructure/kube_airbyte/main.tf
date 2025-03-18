@@ -17,10 +17,6 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.3"
     }
-    vault = {
-      source  = "hashicorp/vault"
-      version = "4.5.0"
-    }
     kubectl = {
       source  = "alekc/kubectl"
       version = "2.1.3"
@@ -36,16 +32,6 @@ locals {
   name      = "airbyte"
   namespace = module.namespace.namespace
 }
-
-resource "kubernetes_service_account" "airbyte_sa" {
-  metadata {
-    name      = "airbyte-sa"
-    namespace = local.namespace
-    labels    = data.pf_kube_labels.labels.labels
-  }
-}
-
-data "aws_region" "current" {}
 
 data "pf_kube_labels" "labels" {
   module = "kube_airbyte"
@@ -129,6 +115,7 @@ module "namespace" {
 module "database" {
   source = "../kube_pg_cluster"
 
+  pg_version = "14.17" # based on minimum supported version https://docs.temporal.io/clusters#dependency-versions
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = var.pg_initial_storage_gb
   pg_instances                         = var.sla_target >= 2 ? 2 : 1
@@ -136,7 +123,7 @@ module "database" {
   pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  pgbouncer_pool_mode                  = "session"
+  pgbouncer_pool_mode                  = "transaction"  # This is critical for Airbyte to work properly
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   controller_nodes_enabled             = false
@@ -149,6 +136,18 @@ module "database" {
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time
+}
+
+/***************************************
+* Service Account with S3 Permissions
+***************************************/
+
+resource "kubernetes_service_account" "airbyte_sa" {
+  metadata {
+    name      = "airbyte-admin"
+    namespace = local.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
 }
 
 /***************************************
@@ -204,10 +203,10 @@ module "aws_permissions" {
 }
 
 /***************************************
-* Airbyte Helm Chart
+* Secret Configuration
 ***************************************/
 
-resource "random_password" "bootstrap_password" {
+resource "random_password" "admin_password" {
   length  = 32
   special = false
 }
@@ -220,9 +219,17 @@ resource "kubernetes_secret" "airbyte_secrets" {
   }
 
   data = {
-    "license-key"       = var.license_key # For enterprise edition
+    "license-key"             = var.license_key # For enterprise edition
+    "instance-admin-email"    = var.admin_email
+    "instance-admin-password" = random_password.admin_password.result
   }
 }
+
+/***************************************
+* Airbyte Helm Chart
+***************************************/
+
+data "aws_region" "current" {}
 
 resource "helm_release" "airbyte" {
   namespace       = local.namespace
@@ -243,25 +250,31 @@ resource "helm_release" "airbyte" {
       fullnameOverride = "airbyte"
 
       global = {
+        serviceAccountName = kubernetes_service_account.airbyte_sa.metadata[0].name
         edition = var.airbyte_edition
-        serviceAccountName = "airbyte-admin"
         airbyteUrl = var.domain != "" ? "https://${var.domain}" : ""
-        env_vars = {}
 
         auth = {
           enabled = var.auth_enabled
           instanceAdmin = {
-            secretName = "airbyte-config-secrets"
+            secretName = kubernetes_secret.airbyte_secrets.metadata[0].name
             emailSecretKey = "instance-admin-email"
             passwordSecretKey = "instance-admin-password"
+            firstName = var.admin_first_name
+            lastName = var.admin_last_name
           }
+        }
+
+        enterprise = {
+          secretName = kubernetes_secret.airbyte_secrets.metadata[0].name
+          licenseKeySecretKey = "license-key"
         }
 
         database = {
           type = "external"
           secretName = module.database.superuser_creds_secret
-          host = module.database.pooler_rw_service_name
-          port = module.database.pooler_rw_service_port
+          host = module.database.rw_service_name
+          port = module.database.rw_service_port
           database = module.database.database
           userSecretKey = "username"
           passwordSecretKey = "password"
@@ -288,7 +301,6 @@ resource "helm_release" "airbyte" {
             }
             limits = {
               memory = "1Gi"
-              cpu = "1"
             }
           }
           kube = {
@@ -298,9 +310,17 @@ resource "helm_release" "airbyte" {
             tolerations = var.tolerations
           }
         }
+
+        extraEnv = []
+        env_vars = {}
       }
 
-      # Webapp config
+      # Disable the default PostgreSQL since we're using our own
+      postgresql = {
+        enabled = false
+      }
+
+      # Webapp configuration
       webapp = {
         enabled = true
         replicaCount = var.webapp_replicas
@@ -329,11 +349,11 @@ resource "helm_release" "airbyte" {
         }
 
         ingress = {
-          enabled = false # We'll use our own ingress module
+          enabled = false # We'll use our own ingress controller
         }
       }
 
-      # Server config
+      # Server configuration
       server = {
         enabled = true
         replicaCount = var.server_replicas
@@ -355,12 +375,11 @@ resource "helm_release" "airbyte" {
           }
           limits = {
             memory = var.server_memory_limit
-            cpu = var.server_cpu_limit
           }
         }
       }
 
-      # Worker config
+      # Worker configuration
       worker = {
         enabled = true
         replicaCount = var.worker_replicas
@@ -382,12 +401,12 @@ resource "helm_release" "airbyte" {
           }
           limits = {
             memory = var.worker_memory_limit
-            cpu = var.worker_cpu_limit
           }
         }
       }
 
-      # Temporal config
+      # Temporal configuration
+      # Temporal is used for workflow management
       temporal = {
         enabled = true
         replicaCount = var.temporal_replicas
@@ -405,7 +424,6 @@ resource "helm_release" "airbyte" {
           }
           limits = {
             memory = var.temporal_memory_limit
-            cpu = var.temporal_cpu_limit
           }
         }
 
@@ -415,35 +433,44 @@ resource "helm_release" "airbyte" {
         }
       }
 
-      # Pod sweeper configuration to clean up completed jobs
+      # Pod sweeper to clean up completed jobs
       "pod-sweeper" = {
         enabled = true
         podLabels = data.pf_kube_labels.labels.labels
         podAnnotations = var.pod_annotations
       }
 
-      # Enable other components as needed
+      # Connector builder server for custom connectors
       "connector-builder-server" = {
         enabled = var.connector_builder_enabled
       }
 
-      # Disable internal PostgreSQL since we're using our own
-      postgresql = {
-        enabled = false
-      }
-
-      # Disable minio since we're using S3
+      # Disable MinIO since we're using S3
       minio = {
         enabled = false
       }
 
+      # Workload API server
+      "workload-api-server" = {
+        enabled = true
+      }
 
+      # Workload launcher
+      "workload-launcher" = {
+        enabled = true
+      }
+
+      # Bootloader configuration
+      "airbyte-bootloader" = {
+        env_vars = {}
+      }
     })
   ]
 
   depends_on = [
     module.database,
-    kubernetes_secret.airbyte_secrets
+    kubernetes_secret.airbyte_secrets,
+    module.aws_permissions
   ]
 }
 
@@ -458,7 +485,7 @@ module "ingress" {
   name      = "airbyte"
   domains   = [var.domain]
   ingress_configs = [{
-    service      = "airbyte-webapp"
+    service      = "airbyte-airbyte-webapp-svc"
     service_port = 80
 
     cdn = {
@@ -505,7 +532,7 @@ module "cdn" {
 }
 
 /***************************************
-* Pod Disruption Budgets and VPAs
+* Pod Disruption Budgets
 ***************************************/
 
 resource "kubectl_manifest" "pdb_webapp" {
@@ -573,6 +600,10 @@ resource "kubectl_manifest" "pdb_worker" {
   server_side_apply = true
   depends_on        = [helm_release.airbyte]
 }
+
+/***************************************
+* Vertical Pod Autoscalers (Optional)
+***************************************/
 
 resource "kubectl_manifest" "vpa_webapp" {
   count = var.vpa_enabled ? 1 : 0
