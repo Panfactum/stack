@@ -8,7 +8,10 @@ import { printHelpInformation } from "../util/print-help-information";
 import { setupEcrPullThroughCache } from "./aws/ecr-pull-through-cache";
 import { setupEks } from "./aws/eks";
 import { setupVpc } from "./aws/vpc";
-import { userQAndA } from "./user-q-and-a";
+import { ecrPullThroughCachePrompts } from "../user-prompts/ecr-pull-through-cache";
+import { kubernetesClusterPrompts } from "../user-prompts/kubernetes-cluster";
+import { slaPrompts } from "../user-prompts/sla";
+import { vpcPrompts } from "../user-prompts/vpc";
 import { replaceYamlValue } from "../util/replace-yaml-value";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { vpcNetworkTest } from "../util/scripts/vpc-network-test";
@@ -134,8 +137,11 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    const slaTarget = terragruntVariables["sla_target"];
-    if (typeof slaTarget !== "number" || ![1, 2, 3].includes(slaTarget)) {
+    const terragruntSlaTarget = terragruntVariables["sla_target"];
+    if (
+      typeof terragruntSlaTarget !== "number" ||
+      ![1, 2, 3].includes(terragruntSlaTarget)
+    ) {
       this.context.stderr.write(
         pc.red(
           "ERROR: sla_target is not defined correctly in the environment.yaml.\n" +
@@ -147,14 +153,16 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    const answers = await userQAndA({
-      context: this.context,
-      environment: String(environment),
-      needSlaTarget: !slaTarget,
-    });
+    let slaTarget: 0 | 1 | 2 | 3 | undefined;
+    if (!terragruntSlaTarget) {
+      slaTarget = await slaPrompts({
+        context: this.context,
+        needSlaTarget: true,
+      });
 
-    if (answers === 0) {
-      return 0;
+      if (slaTarget === 0) {
+        return 0;
+      }
     }
 
     // Write configuration to temp file
@@ -162,16 +170,25 @@ export class InstallClusterCommand extends Command {
       currentDirectory,
       ".tmp-panfactum-install-config.json"
     );
-    await Bun.write(configPath, JSON.stringify(answers, null, 2));
+    await Bun.write(
+      configPath,
+      JSON.stringify(
+        {
+          slaTarget,
+        },
+        null,
+        2
+      )
+    );
 
     this.context.stdout.write("Starting AWS networking installation...\n");
 
     try {
-      if (!slaTarget) {
+      if (!terragruntSlaTarget) {
         // If sla_target doesn't exist, append it to the environment.yaml file
         appendFileSync(
           path.join(currentDirectory, "..", "environment.yaml"),
-          `\n\n# SLA\nsla_target: ${answers.slaTarget || slaTarget}`
+          `\n\n# SLA\nsla_target: ${slaTarget || terragruntSlaTarget}`
         );
       }
     } catch (error) {
@@ -186,12 +203,16 @@ export class InstallClusterCommand extends Command {
 
     this.context.stdout.write("Setting up the AWS VPC\n");
 
+    const { vpcName, vpcDescription } = await vpcPrompts({
+      environment: String(environment),
+    });
+
     try {
       await setupVpc({
         context: this.context,
         pfStackVersion,
-        vpcName: answers.vpcName,
-        vpcDescription: answers.vpcDescription,
+        vpcName,
+        vpcDescription,
         verbose: this.verbose,
       });
     } catch (error) {
@@ -220,11 +241,16 @@ export class InstallClusterCommand extends Command {
 
     this.context.stdout.write("Setting up the AWS ECR pull through cache...\n");
 
+    const { dockerHubUsername, githubUsername } =
+      await ecrPullThroughCachePrompts({
+        context: this.context,
+      });
+
     try {
       await setupEcrPullThroughCache({
         context: this.context,
-        dockerHubUsername: answers.dockerHubUsername,
-        githubUsername: answers.githubUsername,
+        dockerHubUsername,
+        githubUsername,
         verbose: this.verbose,
       });
     } catch (error) {
@@ -258,12 +284,16 @@ export class InstallClusterCommand extends Command {
       pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
     );
 
+    const { clusterName, clusterDescription } = await kubernetesClusterPrompts({
+      environment: String(environment),
+    });
+
     try {
       await setupEks({
         context: this.context,
-        clusterName: answers.clusterName,
-        clusterDescription: answers.clusterDescription,
-        slaLevel: answers.slaTarget || (slaTarget as 1 | 2 | 3), // This is validated in the code earlier
+        clusterName,
+        clusterDescription,
+        slaLevel: slaTarget || (terragruntSlaTarget as 1 | 2 | 3), // This is validated in the code earlier
         verbose: this.verbose,
       });
     } catch (error) {
