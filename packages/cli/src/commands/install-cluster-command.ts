@@ -12,6 +12,7 @@ import { ecrPullThroughCachePrompts } from "../user-prompts/ecr-pull-through-cac
 import { kubernetesClusterPrompts } from "../user-prompts/kubernetes-cluster";
 import { slaPrompts } from "../user-prompts/sla";
 import { vpcPrompts } from "../user-prompts/vpc";
+import { getConfigFileKey } from "../util/get-config-file-key";
 import { replaceYamlValue } from "../util/replace-yaml-value";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { vpcNetworkTest } from "../util/scripts/vpc-network-test";
@@ -31,6 +32,7 @@ export class InstallClusterCommand extends Command {
     examples: [["Start cluster installation", "pf install-cluster"]],
   });
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   async execute(): Promise<number> {
     this.context.stdout.write(
       "Starting Panfactum cluster installation process...\n"
@@ -202,134 +204,217 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write("Setting up the AWS VPC\n");
-
-    const { vpcName, vpcDescription } = await vpcPrompts({
-      environment: String(environment),
-    });
-
-    await updateConfigFile({
-      updates: {
-        vpcName,
-        vpcDescription,
-      },
+    const vpcSetupComplete = await getConfigFileKey({
+      key: "setupVpc",
       configPath,
       context: this.context,
     });
 
-    try {
-      await setupVpc({
-        context: this.context,
-        pfStackVersion,
-        vpcName,
-        vpcDescription,
-        verbose: this.verbose,
-      });
-    } catch (error) {
-      this.context.stderr.write(
-        pc.red(`Error setting up the AWS VPC: ${String(error)}\n`)
+    if (vpcSetupComplete !== true) {
+      this.context.stdout.write(
+        "Skipping VPC setup as it's already complete.\n"
       );
-      printHelpInformation(this.context);
-      return 1;
+    } else {
+      this.context.stdout.write("Setting up the AWS VPC\n");
+
+      const { vpcName, vpcDescription } = await vpcPrompts({
+        environment: String(environment),
+      });
+
+      await updateConfigFile({
+        updates: {
+          vpcName,
+          vpcDescription,
+        },
+        configPath,
+        context: this.context,
+      });
+
+      try {
+        await setupVpc({
+          context: this.context,
+          pfStackVersion,
+          vpcName,
+          vpcDescription,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(`Error setting up the AWS VPC: ${String(error)}\n`)
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          setupVpc: true,
+        },
+        configPath,
+        context: this.context,
+      });
     }
 
-    this.context.stdout.write("Running VPC network test...\n");
-
-    try {
-      await vpcNetworkTest({
-        context: this.context,
-        modulePath: path.join(currentDirectory, "..", "aws_vpc"),
-        verbose: this.verbose,
-      });
-    } catch (error) {
-      this.context.stderr.write(
-        pc.red(`Error running VPC network test: ${String(error)}\n`)
-      );
-      printHelpInformation(this.context);
-      return 1;
-    }
-
-    this.context.stdout.write("Setting up the AWS ECR pull through cache...\n");
-
-    const { dockerHubUsername, githubUsername } =
-      await ecrPullThroughCachePrompts({
-        context: this.context,
-      });
-
-    await updateConfigFile({
-      updates: {
-        dockerHubUsername,
-        githubUsername,
-      },
+    const vpcNetworkTestComplete = await getConfigFileKey({
+      key: "vpcNetworkTest",
       configPath,
       context: this.context,
     });
 
-    try {
-      await setupEcrPullThroughCache({
+    if (vpcNetworkTestComplete !== true) {
+      this.context.stdout.write(
+        "Skipping VPC network test as it's already complete.\n"
+      );
+    } else {
+      this.context.stdout.write("Running VPC network test...\n");
+
+      try {
+        await vpcNetworkTest({
+          context: this.context,
+          modulePath: path.join(currentDirectory, "..", "aws_vpc"),
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(`Error running VPC network test: ${String(error)}\n`)
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          vpcNetworkTest: true,
+        },
+        configPath,
         context: this.context,
-        dockerHubUsername,
-        githubUsername,
-        verbose: this.verbose,
       });
-    } catch (error) {
-      this.context.stderr.write(
-        pc.red(
-          `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
-        )
-      );
-      printHelpInformation(this.context);
-      return 1;
     }
 
-    try {
-      await replaceYamlValue(
-        "./region.yaml",
-        "extra_inputs.pull_through_cache_enabled",
-        true
-      );
-    } catch (error) {
-      this.context.stderr.write(
-        pc.red(
-          `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
-        )
-      );
-      printHelpInformation(this.context);
-      return 1;
-    }
-
-    this.context.stdout.write("Setting up the AWS EKS cluster...\n");
-    this.context.stdout.write(
-      pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
-    );
-
-    const { clusterName, clusterDescription } = await kubernetesClusterPrompts({
-      environment: String(environment),
-    });
-
-    await updateConfigFile({
-      updates: {
-        clusterName,
-        clusterDescription,
-      },
+    const ecrPullThroughCacheSetupComplete = await getConfigFileKey({
+      key: "setupEcrPullThroughCache",
       configPath,
       context: this.context,
     });
 
-    try {
-      await setupEks({
-        context: this.context,
-        clusterName,
-        clusterDescription,
-        slaLevel: slaTarget || (terragruntSlaTarget as 1 | 2 | 3), // This is validated in the code earlier
-        verbose: this.verbose,
-      });
-    } catch (error) {
-      this.context.stderr.write(
-        pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
+    if (ecrPullThroughCacheSetupComplete !== true) {
+      this.context.stdout.write(
+        "Skipping ECR pull through cache setup as it's already complete.\n"
       );
-      printHelpInformation(this.context);
-      return 1;
+    } else {
+      this.context.stdout.write(
+        "Setting up the AWS ECR pull through cache...\n"
+      );
+
+      const { dockerHubUsername, githubUsername } =
+        await ecrPullThroughCachePrompts({
+          context: this.context,
+        });
+
+      await updateConfigFile({
+        updates: {
+          dockerHubUsername,
+          githubUsername,
+        },
+        configPath,
+        context: this.context,
+      });
+
+      try {
+        await setupEcrPullThroughCache({
+          context: this.context,
+          dockerHubUsername,
+          githubUsername,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      try {
+        await replaceYamlValue(
+          "./region.yaml",
+          "extra_inputs.pull_through_cache_enabled",
+          true
+        );
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          setupEcrPullThroughCache: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const kubernetesClusterSetupComplete = await getConfigFileKey({
+      key: "setupEks",
+      configPath,
+      context: this.context,
+    });
+
+    if (kubernetesClusterSetupComplete !== true) {
+      this.context.stdout.write(
+        "Skipping EKS cluster setup as it's already complete.\n"
+      );
+    } else {
+      this.context.stdout.write("Setting up the AWS EKS cluster...\n");
+      this.context.stdout.write(
+        pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
+      );
+
+      const { clusterName, clusterDescription } =
+        await kubernetesClusterPrompts({
+          environment: String(environment),
+        });
+
+      await updateConfigFile({
+        updates: {
+          clusterName,
+          clusterDescription,
+        },
+        configPath,
+        context: this.context,
+      });
+
+      try {
+        await setupEks({
+          context: this.context,
+          clusterName,
+          clusterDescription,
+          slaLevel: slaTarget || (terragruntSlaTarget as 1 | 2 | 3), // This is validated in the code earlier
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          setupEks: true,
+        },
+        configPath,
+        context: this.context,
+      });
     }
 
     return 0;
