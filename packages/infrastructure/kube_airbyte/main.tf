@@ -233,7 +233,7 @@ data "aws_region" "current" {}
 
 resource "helm_release" "airbyte" {
   namespace       = local.namespace
-  name            = "airbyte"
+  name            = local.name
   repository      = "https://airbytehq.github.io/helm-charts"
   chart           = "airbyte"
   version         = var.airbyte_helm_version
@@ -485,7 +485,7 @@ module "ingress" {
   name      = "airbyte"
   domains   = [var.domain]
   ingress_configs = [{
-    service      = "airbyte-airbyte-webapp-svc"
+    service      = "${local.name}-airbyte-webapp-svc"
     service_port = 80
 
     cdn = {
