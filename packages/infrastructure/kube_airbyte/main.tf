@@ -163,7 +163,7 @@ resource "random_id" "airbyte_bucket_name" {
 module "airbyte_bucket" {
   source      = "../aws_s3_private_bucket"
   bucket_name = random_id.airbyte_bucket_name.hex
-  description = "Airbyte storage for logs, state, and workload output"
+  description = "Airbyte storage for logs state and workload output"
 
   intelligent_transitions_enabled = true
 }
@@ -259,11 +259,12 @@ resource "helm_release" "airbyte" {
 
         database = {
           type = "external"
+          secretName = module.database.superuser_creds_secret
           host = module.database.pooler_rw_service_name
           port = module.database.pooler_rw_service_port
           database = module.database.database
-          user = module.database.superuser_username
-          password = module.database.superuser_password
+          userSecretKey = "username"
+          passwordSecretKey = "password"
         }
 
         storage = {

@@ -18,4 +18,5 @@ dependency "kyverno" {
 
 inputs = {
   domain  = "airbyte.seth.panfactum.com"
+  wait = false
 }
