@@ -136,7 +136,7 @@ module "database" {
   pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  pgbouncer_pool_mode                  = "transaction"
+  pgbouncer_pool_mode                  = "session"
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   controller_nodes_enabled             = false
