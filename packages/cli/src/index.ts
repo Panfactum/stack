@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 import { Builtins, Cli } from "clipanion";
 import { InstallClusterCommand } from "./commands/install-cluster-command";
-import { TerragruntInitCommand } from "./commands/terragrunt/tf-init-command";
 import { GetRepoVariablesCommand } from "./util/scripts/get-repo-variables-command";
 import { GetTerragruntVariablesCommand } from "./util/scripts/get-terragrunt-variables-command";
+import { TerragruntInitCommand } from "./util/scripts/tf-init-command";
 
 // @ts-ignore Bun needs the explicit non-index syntax to overwrite this at build time with the --define flag
 const VERSION = process.env.VERSION ?? "unknown";
