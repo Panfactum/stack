@@ -1,8 +1,8 @@
 import awsVpcTerragruntHcl from "../../templates/aws_vpc_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
+import { tfInit } from "../../util/scripts/tf-init";
 import { apply } from "../terragrunt/apply";
-import { initModules } from "../terragrunt/init-modules";
 import type { BaseContext } from "clipanion";
 
 export interface VpcSetupInput {
@@ -28,7 +28,7 @@ export async function setupVpc(input: VpcSetupInput) {
     input.vpcDescription
   );
 
-  initModules({
+  tfInit({
     context: input.context,
     verbose: input.verbose,
     workingDirectory: "./aws_vpc",
@@ -41,5 +41,4 @@ export async function setupVpc(input: VpcSetupInput) {
   });
 
   // Run network connectivity tests
-  
 }

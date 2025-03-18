@@ -1,7 +1,7 @@
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
+import { tfInit } from "../../util/scripts/tf-init";
 import { apply } from "../terragrunt/apply";
-import { initModules } from "../terragrunt/init-modules";
 import type { BaseContext } from "clipanion";
 
 export interface EcrPullThroughCacheSetupInput {
@@ -34,7 +34,7 @@ export async function setupEcrPullThroughCache(
     input.githubUsername
   );
 
-  initModules({
+  tfInit({
     context: input.context,
     verbose: input.verbose,
     workingDirectory: "./aws_ecr_pull_through_cache",
