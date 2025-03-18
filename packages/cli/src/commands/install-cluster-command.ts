@@ -15,6 +15,7 @@ import { vpcPrompts } from "../user-prompts/vpc";
 import { replaceYamlValue } from "../util/replace-yaml-value";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { vpcNetworkTest } from "../util/scripts/vpc-network-test";
+import { updateConfigFile } from "../util/update-config-file";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -207,6 +208,15 @@ export class InstallClusterCommand extends Command {
       environment: String(environment),
     });
 
+    await updateConfigFile({
+      updates: {
+        vpcName,
+        vpcDescription,
+      },
+      configPath,
+      context: this.context,
+    });
+
     try {
       await setupVpc({
         context: this.context,
@@ -245,6 +255,15 @@ export class InstallClusterCommand extends Command {
       await ecrPullThroughCachePrompts({
         context: this.context,
       });
+
+    await updateConfigFile({
+      updates: {
+        dockerHubUsername,
+        githubUsername,
+      },
+      configPath,
+      context: this.context,
+    });
 
     try {
       await setupEcrPullThroughCache({
@@ -286,6 +305,15 @@ export class InstallClusterCommand extends Command {
 
     const { clusterName, clusterDescription } = await kubernetesClusterPrompts({
       environment: String(environment),
+    });
+
+    await updateConfigFile({
+      updates: {
+        clusterName,
+        clusterDescription,
+      },
+      configPath,
+      context: this.context,
     });
 
     try {
