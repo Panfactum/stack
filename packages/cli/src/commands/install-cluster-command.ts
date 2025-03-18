@@ -11,6 +11,7 @@ import { setupVpc } from "./aws/vpc";
 import { userQAndA } from "./user-q-and-a";
 import { replaceYamlValue } from "../util/replace-yaml-value";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
+import { vpcNetworkTest } from "../util/scripts/vpc-network-test";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -196,6 +197,22 @@ export class InstallClusterCommand extends Command {
     } catch (error) {
       this.context.stderr.write(
         pc.red(`Error setting up the AWS VPC: ${String(error)}\n`)
+      );
+      printHelpInformation(this.context);
+      return 1;
+    }
+
+    this.context.stdout.write("Running VPC network test...\n");
+
+    try {
+      await vpcNetworkTest({
+        context: this.context,
+        modulePath: path.join(currentDirectory, "..", "aws_vpc"),
+        verbose: this.verbose,
+      });
+    } catch (error) {
+      this.context.stderr.write(
+        pc.red(`Error running VPC network test: ${String(error)}\n`)
       );
       printHelpInformation(this.context);
       return 1;

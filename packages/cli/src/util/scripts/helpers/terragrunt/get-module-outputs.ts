@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { parseData } from "../../util/parse-data";
-import { progressMessage } from "../../util/progress-message";
+import { parseData } from "../../../parse-data";
+import { progressMessage } from "../../../progress-message";
 import type { BaseContext } from "clipanion";
 
 export const getModuleOutputs = <T extends z.ZodTypeAny>({
