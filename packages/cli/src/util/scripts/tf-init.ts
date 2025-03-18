@@ -1,9 +1,9 @@
 import pc from "picocolors";
-import { printHelpInformation } from "../../util/print-help-information";
-import { progressMessage } from "../../util/progress-message";
+import { printHelpInformation } from "../print-help-information";
+import { progressMessage } from "../progress-message";
 import type { BaseContext } from "clipanion";
 
-export function initModules({
+export function tfInit({
   context,
   verbose = false,
   workingDirectory = ".",
