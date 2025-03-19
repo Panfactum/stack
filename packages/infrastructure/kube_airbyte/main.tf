@@ -115,7 +115,7 @@ module "namespace" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  pg_version = "14.17" # based on minimum supported version https://docs.temporal.io/clusters#dependency-versions
+  pg_version                           = "14.17" # based on minimum supported version https://docs.temporal.io/clusters#dependency-versions
   pg_cluster_namespace                 = local.namespace
   pg_initial_storage_gb                = var.pg_initial_storage_gb
   pg_instances                         = var.sla_target >= 2 ? 2 : 1
@@ -251,40 +251,40 @@ resource "helm_release" "airbyte" {
 
       global = {
         serviceAccountName = kubernetes_service_account.airbyte_sa.metadata[0].name
-        edition = var.airbyte_edition
-        airbyteUrl = var.domain != "" ? "https://${var.domain}" : ""
+        edition            = var.airbyte_edition
+        airbyteUrl         = var.domain != "" ? "https://${var.domain}" : ""
 
         auth = {
           enabled = var.auth_enabled
           instanceAdmin = {
-            secretName = kubernetes_secret.airbyte_secrets.metadata[0].name
-            emailSecretKey = "instance-admin-email"
+            secretName        = kubernetes_secret.airbyte_secrets.metadata[0].name
+            emailSecretKey    = "instance-admin-email"
             passwordSecretKey = "instance-admin-password"
-            firstName = var.admin_first_name
-            lastName = var.admin_last_name
+            firstName         = var.admin_first_name
+            lastName          = var.admin_last_name
           }
         }
 
         enterprise = {
-          secretName = kubernetes_secret.airbyte_secrets.metadata[0].name
+          secretName          = kubernetes_secret.airbyte_secrets.metadata[0].name
           licenseKeySecretKey = "license-key"
         }
 
         database = {
-          type = "external"
-          secretName = module.database.superuser_creds_secret
-          host = module.database.pooler_rw_service_name
-          port = module.database.pooler_rw_service_port
-          database = module.database.database
-          userSecretKey = "username"
+          type              = "external"
+          secretName        = module.database.superuser_creds_secret
+          host              = module.database.pooler_rw_service_name
+          port              = module.database.pooler_rw_service_port
+          database          = module.database.database
+          userSecretKey     = "username"
           passwordSecretKey = "password"
         }
 
         storage = {
           type = "s3"
           bucket = {
-            log = module.airbyte_bucket.bucket_name
-            state = module.airbyte_bucket.bucket_name
+            log            = module.airbyte_bucket.bucket_name
+            state          = module.airbyte_bucket.bucket_name
             workloadOutput = module.airbyte_bucket.bucket_name
           }
           s3 = {
@@ -297,17 +297,17 @@ resource "helm_release" "airbyte" {
           resources = {
             requests = {
               memory = "256Mi"
-              cpu = "250m"
+              cpu    = "250m"
             }
             limits = {
               memory = "1Gi"
             }
           }
           kube = {
-            annotations = {}
-            labels = {}
+            annotations  = {}
+            labels       = {}
             nodeSelector = var.node_selector
-            tolerations = var.tolerations
+            tolerations  = var.tolerations
           }
         }
 
@@ -322,29 +322,29 @@ resource "helm_release" "airbyte" {
 
       # Webapp configuration
       webapp = {
-        enabled = true
-        replicaCount = var.webapp_replicas
-        podLabels = module.util_webapp.labels
+        enabled        = true
+        replicaCount   = var.webapp_replicas
+        podLabels      = module.util_webapp.labels
         podAnnotations = var.pod_annotations
 
-        affinity = module.util_webapp.affinity
-        tolerations = module.util_webapp.tolerations
+        affinity     = module.util_webapp.affinity
+        tolerations  = module.util_webapp.tolerations
         nodeSelector = var.node_selector
 
         resources = {
           requests = {
             memory = var.webapp_memory_request
-            cpu = var.webapp_cpu_request
+            cpu    = var.webapp_cpu_request
           }
           limits = {
             memory = var.webapp_memory_limit
-            cpu = var.webapp_cpu_limit
+            cpu    = var.webapp_cpu_limit
           }
         }
 
         service = {
-          type = "ClusterIP"
-          port = 80
+          type        = "ClusterIP"
+          port        = 80
           annotations = {}
         }
 
@@ -355,13 +355,13 @@ resource "helm_release" "airbyte" {
 
       # Server configuration
       server = {
-        enabled = true
-        replicaCount = var.server_replicas
-        podLabels = module.util_server.labels
+        enabled        = true
+        replicaCount   = var.server_replicas
+        podLabels      = module.util_server.labels
         podAnnotations = var.pod_annotations
 
-        affinity = module.util_server.affinity
-        tolerations = module.util_server.tolerations
+        affinity     = module.util_server.affinity
+        tolerations  = module.util_server.tolerations
         nodeSelector = var.node_selector
 
         log = {
@@ -371,7 +371,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = var.server_memory_request
-            cpu = var.server_cpu_request
+            cpu    = var.server_cpu_request
           }
           limits = {
             memory = var.server_memory_limit
@@ -381,13 +381,13 @@ resource "helm_release" "airbyte" {
 
       # Worker configuration
       worker = {
-        enabled = true
-        replicaCount = var.worker_replicas
-        podLabels = module.util_worker.labels
+        enabled        = true
+        replicaCount   = var.worker_replicas
+        podLabels      = module.util_worker.labels
         podAnnotations = var.pod_annotations
 
-        affinity = module.util_worker.affinity
-        tolerations = module.util_worker.tolerations
+        affinity     = module.util_worker.affinity
+        tolerations  = module.util_worker.tolerations
         nodeSelector = var.node_selector
 
         log = {
@@ -397,7 +397,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = var.worker_memory_request
-            cpu = var.worker_cpu_request
+            cpu    = var.worker_cpu_request
           }
           limits = {
             memory = var.worker_memory_limit
@@ -408,19 +408,19 @@ resource "helm_release" "airbyte" {
       # Temporal configuration
       # Temporal is used for workflow management
       temporal = {
-        enabled = true
-        replicaCount = var.temporal_replicas
-        podLabels = module.util_temporal.labels
+        enabled        = true
+        replicaCount   = var.temporal_replicas
+        podLabels      = module.util_temporal.labels
         podAnnotations = var.pod_annotations
 
-        affinity = module.util_temporal.affinity
-        tolerations = module.util_temporal.tolerations
+        affinity     = module.util_temporal.affinity
+        tolerations  = module.util_temporal.tolerations
         nodeSelector = var.node_selector
 
         resources = {
           requests = {
             memory = var.temporal_memory_request
-            cpu = var.temporal_cpu_request
+            cpu    = var.temporal_cpu_request
           }
           limits = {
             memory = var.temporal_memory_limit
@@ -435,19 +435,19 @@ resource "helm_release" "airbyte" {
         # Add temporal-specific env vars
         extraEnv = [
           {
-            name = "TEMPORAL_DB_HOST"
-            value = module.database.rw_service_name  # Direct connection for Temporal
+            name  = "TEMPORAL_DB_HOST"
+            value = module.database.rw_service_name # Direct connection for Temporal
           },
           {
-            name = "TEMPORAL_DB_PORT"
+            name  = "TEMPORAL_DB_PORT"
             value = tostring(module.database.rw_service_port)
           },
           {
-            name = "POSTGRES_SEEDS"
-            value = module.database.rw_service_name  # Direct connection
+            name  = "POSTGRES_SEEDS"
+            value = module.database.rw_service_name # Direct connection
           },
           {
-            name = "DB_PORT"
+            name  = "DB_PORT"
             value = tostring(module.database.rw_service_port)
           },
         ]
@@ -455,8 +455,8 @@ resource "helm_release" "airbyte" {
 
       # Pod sweeper to clean up completed jobs
       "pod-sweeper" = {
-        enabled = true
-        podLabels = data.pf_kube_labels.labels.labels
+        enabled        = true
+        podLabels      = data.pf_kube_labels.labels.labels
         podAnnotations = var.pod_annotations
       }
 

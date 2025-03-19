@@ -355,12 +355,12 @@ variable "node_selector" {
 
 variable "tolerations" {
   description = "Tolerations for Airbyte pods"
-  type        = list(object({
-    key                = string
-    operator           = string
-    value              = optional(string)
-    effect             = string
-    tolerationSeconds  = optional(number)
+  type = list(object({
+    key               = string
+    operator          = string
+    value             = optional(string)
+    effect            = string
+    tolerationSeconds = optional(number)
   }))
-  default     = []
+  default = []
 }
