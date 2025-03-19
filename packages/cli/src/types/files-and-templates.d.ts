@@ -17,3 +17,8 @@ declare module "*.yaml" {
   const content: string;
   export default content;
 }
+
+declare module "*envrc" {
+  const content: string;
+  export default content;
+}

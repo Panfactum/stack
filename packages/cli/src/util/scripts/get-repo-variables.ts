@@ -12,7 +12,6 @@ import type { BaseContext } from "clipanion";
 // - resolves _dir variables to their absolute path on the local system
 // - adds the repo_root variable
 // - adds the iac_dir_from_root variable which is the original value of iac_dir before being resolved to an absolute path
-
 export const getRepoVariables = async ({
   context,
 }: {
