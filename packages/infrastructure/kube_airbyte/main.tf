@@ -123,7 +123,7 @@ module "database" {
   pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  pgbouncer_pool_mode                  = "transaction"  # This is critical for Airbyte to work properly
+  pgbouncer_pool_mode                  = "session"
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   controller_nodes_enabled             = false
@@ -273,8 +273,8 @@ resource "helm_release" "airbyte" {
         database = {
           type = "external"
           secretName = module.database.superuser_creds_secret
-          host = module.database.rw_service_name
-          port = module.database.rw_service_port
+          host = module.database.pooler_rw_service_name
+          port = module.database.pooler_rw_service_port
           database = module.database.database
           userSecretKey = "username"
           passwordSecretKey = "password"
@@ -431,6 +431,26 @@ resource "helm_release" "airbyte" {
           type = "ClusterIP"
           port = 7233
         }
+
+        # Add temporal-specific env vars
+        extraEnv = [
+          {
+            name = "TEMPORAL_DB_HOST"
+            value = module.database.rw_service_name  # Direct connection for Temporal
+          },
+          {
+            name = "TEMPORAL_DB_PORT"
+            value = tostring(module.database.rw_service_port)
+          },
+          {
+            name = "POSTGRES_SEEDS"
+            value = module.database.rw_service_name  # Direct connection
+          },
+          {
+            name = "DB_PORT"
+            value = tostring(module.database.rw_service_port)
+          },
+        ]
       }
 
       # Pod sweeper to clean up completed jobs
