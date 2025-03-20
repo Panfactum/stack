@@ -5,6 +5,7 @@ import { replaceHclValue } from "../../util/replace-hcl-value";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
 import { getRoot } from "../../util/scripts/helpers/get-root";
 import { tfInit } from "../../util/scripts/tf-init";
+import { updateKube } from "../../util/scripts/update-kube";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -103,7 +104,10 @@ export async function setupEks(input: EksSetupInput) {
     }
   }
 
-  // Run update-kube.ts once it's created
+  await updateKube({
+    context: input.context,
+    buildConfig: true,
+  });
 
   // Setup kubeconfig
   //https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig

@@ -7,6 +7,8 @@ import kubeConfigExample from "../../files/kube/config.example.yaml" with { type
 import kubeUserConfigExample from "../../files/kube/config.user.example.yaml" with { type: "file" };
 import { safeFileExists } from "../safe-file-exists";
 import { getKubeUserStateHash } from "./get-kube-user-state-hash";
+import { safeDirectoryExists } from "../safe-directory-exists";
+import { checkRepoSetup } from "./check-repo-setup";
 import type { BaseContext } from "clipanion";
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -14,7 +16,7 @@ export async function updateKube({
   buildConfig,
   context,
 }: {
-  buildConfig: boolean;
+  buildConfig?: boolean;
   context: BaseContext;
 }) {
   // ############################################################
@@ -87,11 +89,11 @@ export async function updateKube({
         }
         const modulePath = `${environmentsDir}/${cluster.module}`;
         context.stdout.write(`Adding cluster at ${modulePath}... `);
-        if (!(await Bun.file(modulePath).exists())) {
+        if (!(await safeDirectoryExists(modulePath))) {
           context.stderr.write(`Error: No module at ${modulePath}!\n`);
           throw new Error(`No module at ${modulePath}!`);
         }
-        const moduleOutput = await getModuleOutputs({
+        const moduleOutput = getModuleOutputs({
           context,
           modulePath,
           validationSchema: z.object({
@@ -140,7 +142,9 @@ export async function updateKube({
   if (userConfigFileExists && clusterInfoFileExists) {
     context.stdout.write(`Building kubeconfig file at ${kubeDir}/config...\n`);
 
-    const userConfigFileJson = yaml.parse(userConfigFilePath);
+    const userConfigFileJson = yaml.parse(
+      await Bun.file(userConfigFilePath).text()
+    );
     const userConfigFileSchema = z.object({
       clusters: z.array(
         z.object({
@@ -299,12 +303,6 @@ export async function updateKube({
   context.stdout.write(`Kubernetes config files in ${kubeDir} were updated.\n`);
 
   if (process.env["PF_SKIP_CHECK_REPO_SETUP"] !== "1") {
-    Bun.spawnSync(["pf-check-repo-setup"], {
-      stdout: "inherit",
-      stderr: "inherit",
-    });
+    await checkRepoSetup({ context });
   }
 }
-
-const hasher = new Bun.CryptoHasher("md5");
-export const updateKubeHash = hasher.update(String(updateKube)).digest("hex");

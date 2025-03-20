@@ -1,5 +1,5 @@
 import { getRepoVariables } from "./get-repo-variables";
-import { updateKubeHash } from "./update-kube";
+import { updateKubeHash } from "./shared-constants";
 import { safeFileExists } from "../safe-file-exists";
 import type { BaseContext } from "clipanion";
 
@@ -28,8 +28,9 @@ export async function getKubeUserStateHash({
   }
 
   if (await safeFileExists(userConfigFilePath)) {
+    const userConfigFileBlob = Bun.file(userConfigFilePath);
     const hasher = new Bun.CryptoHasher("md5");
-    userConfigHash = hasher.update(Bun.file(userConfigFilePath)).digest("hex");
+    userConfigHash = hasher.update(userConfigFileBlob).digest("hex");
   }
 
   const hasher = new Bun.CryptoHasher("md5");

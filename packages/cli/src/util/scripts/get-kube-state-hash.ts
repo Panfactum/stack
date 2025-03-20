@@ -1,5 +1,5 @@
 import { getRepoVariables } from "./get-repo-variables";
-import { updateKubeHash } from "./update-kube";
+import { updateKubeHash } from "./shared-constants";
 import type { BaseContext } from "clipanion";
 
 export const getKubeStateHash = async ({

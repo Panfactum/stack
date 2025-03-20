@@ -1,7 +1,13 @@
+import pc from "picocolors";
 import { getRepoVariables } from "./get-repo-variables";
 import { getSSHStateHash } from "./get-ssh-state-hash";
-import { safeExists } from "./safe-exists";
 import envrcTemplate from "../../files/direnv/envrc" with { type: "file" };
+import { safeFileExists } from "../safe-file-exists";
+import { getAWSStateHash } from "./get-aws-state-hash";
+import { getBuildkitStateHash } from "./get-buildkit-state-hash";
+import { getBuildkitUserStateHash } from "./get-buildkit-user-state-hash";
+import { getKubeStateHash } from "./get-kube-state-hash";
+import { getKubeUserStateHash } from "./get-kube-user-state-hash";
 import type { BaseContext } from "clipanion";
 
 // Purpose: to check if two files are equal byte by byte
@@ -61,6 +67,7 @@ async function areDirectoriesEqual(
 // Purpose: There are many setup steps that are required to ensure that users of the Panfactum stack have
 // a smooth experience. This utility function should be run every time the devenv gets launched in order
 // to ensure that the setup steps have been completed properly.
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function checkRepoSetup({ context }: { context: BaseContext }) {
   // Aggregate all of the error messages here and print them all at the end
   const errors = [];
@@ -131,14 +138,12 @@ export async function checkRepoSetup({ context }: { context: BaseContext }) {
   //####################################################################
   const sshDir = repoVariables.ssh_dir;
   if (!(await areDirectoriesEqual("../../files/ssh", sshDir))) {
-    errors.push(
-      `SSH files are out of date. Run pf update-ssh to update.\n\n`
-    );
+    errors.push(`SSH files are out of date. Run pf update-ssh to update.\n\n`);
   } else if (
-    (await getSSHStateHash()) !==
+    (await getSSHStateHash({ context })) !==
     (await Bun.file(sshDir + "/state.lock").text())
   ) {
-    if (await safeExists(sshDir + "/config.yaml")) {
+    if (await safeFileExists(sshDir + "/config.yaml")) {
       hasBuildRequiredError = 1;
       errors.push(
         `Generated SSH config files are out of date. A superuser must run 'pf update-ssh --build' to update.\n\n`
@@ -148,5 +153,103 @@ export async function checkRepoSetup({ context }: { context: BaseContext }) {
         `SSH files are out of date. Run pf update-ssh to update.\n\n`
       );
     }
+  }
+
+  //####################################################################
+  // Check kube setup
+  //####################################################################
+  const kubeDir = repoVariables.kube_dir;
+  if (!(await areDirectoriesEqual("../../files/kube", kubeDir))) {
+    errors.push(
+      `Kubernetes config files are out of date. Run pf update-kube to update.\n\n`
+    );
+  } else if (
+    (await getKubeStateHash({ context })) !==
+    (await Bun.file(kubeDir + "/state.lock").text())
+  ) {
+    if (await safeFileExists(kubeDir + "/config.yaml")) {
+      hasBuildRequiredError = 1;
+      errors.push(
+        `Kubernetes config files are out of date. A superuser must run 'pf update-kube --build' to update.\n\n`
+      );
+    } else {
+      errors.push(
+        `kubeconfig is out of date. Run pf update-kube to update.\n\n`
+      );
+    }
+  } else if (
+    (await getKubeUserStateHash({ context })) !==
+    (await Bun.file(kubeDir + "/state.user.lock").text())
+  ) {
+    errors.push(`kubeconfig is out of date. Run pf update-kube to update.\n\n`);
+  }
+
+  //####################################################################
+  // Check aws setup
+  //####################################################################
+  const awsDir = repoVariables.aws_dir;
+  if (!(await areDirectoriesEqual("../../files/aws", awsDir))) {
+    errors.push(
+      `AWS config files are out of date. Run pf update-aws to update.\n\n`
+    );
+  } else if (
+    (await getAWSStateHash({ context })) !==
+    (await Bun.file(awsDir + "/state.lock").text())
+  ) {
+    if (await safeFileExists(awsDir + "/config.yaml")) {
+      hasBuildRequiredError = 1;
+      errors.push(
+        `Generated AWS config files are out of date. A superuser must run 'pf update-aws --build' to update.\n\n`
+      );
+    } else {
+      errors.push(
+        `AWS config files are out of date. Run pf update-aws to update.\n\n`
+      );
+    }
+  }
+
+  //####################################################################
+  // Check BuildKit setup
+  //####################################################################
+  const buildkitDir = repoVariables.buildkit_dir;
+  if (!(await areDirectoriesEqual("../../files/buildkit", buildkitDir))) {
+    errors.push(
+      `BuildKit config files are out of date. Run pf update-buildkit to update.\n\n`
+    );
+  } else if (
+    (await getBuildkitStateHash({ context })) !==
+    (await Bun.file(buildkitDir + "/state.lock").text())
+  ) {
+    errors.push(
+      `BuildKit config files are out of date. Run pf update-buildkit to update.\n\n`
+    );
+  } else if (
+    (await getBuildkitUserStateHash({ context })) !==
+    (await Bun.file(buildkitDir + "/state.user.lock").text())
+  ) {
+    errors.push(
+      `BuildKit config is out of date. Run pf update-buildkit to update.\n\n`
+    );
+  }
+
+  //####################################################################
+  // Print Error Messages
+  //####################################################################
+  if (hasBuildRequiredError === 0) {
+    context.stderr.write(
+      pc.yellow(
+        `Your repository files are out-of-date with the current version of the Panfactum stack.\n\n`
+      )
+    );
+    context.stderr.write(
+      pc.yellow(
+        `Run 'pf update' to update your files and resolve this warning.\n\n`
+      )
+    );
+  } else if (errors.length > 0) {
+    context.stderr.write(
+      pc.yellow(`Issues detected with your repository setup:\n\n`)
+    );
+    context.stderr.write(pc.yellow(errors.join("")));
   }
 }

@@ -4,7 +4,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "build:binary": "bun build --compile --minify --sourcemap ./src/index.ts ./src/files/**/* --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
+    "build:binary": "bun build --compile --minify --sourcemap ./src/index.ts ./src/files/**/*.* --define \"process.env.VERSION=\\\"$(jq -r .version package.json)\\\"\" --outfile ./bin/pf",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
