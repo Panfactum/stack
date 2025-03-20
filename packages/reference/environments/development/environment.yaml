@@ -18,3 +18,4 @@ tf_state_profile: "development-superuser" # AWS profile to assume for working wi
 sla_target: 1
 
 pf_stack_version: "edge.25-02-10"
+version: "40b40dbe93c68794803097d6f0d233f51ccd71e9"
