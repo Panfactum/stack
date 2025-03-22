@@ -256,6 +256,14 @@ resource "helm_release" "airbyte" {
 
         auth = {
           enabled = false
+
+          instanceAdmin = {
+            secretName        = kubernetes_secret.airbyte_secrets.metadata[0].name
+            emailSecretKey    = "instance-admin-email"
+            passwordSecretKey = "instance-admin-password"
+            firstName         = "boot"
+            lastName          = "loader"
+          }
         }
 
         enterprise = {
