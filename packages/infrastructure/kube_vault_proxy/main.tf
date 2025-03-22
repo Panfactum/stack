@@ -30,21 +30,18 @@ terraform {
 locals {
   path_prefix = replace(var.path_prefix, "////", "/") # //// required because // triggers regex matching
   proxy_path  = replace("${var.path_prefix}/oauth2", "////", "/")
+
+  service_name = "oauth2-proxy-${substr(sha256("${var.namespace}-${var.domain}"), 0, 8)}"
 }
 
 data "pf_kube_labels" "labels" {
   module = "kube_vault_proxy"
 }
 
-resource "random_id" "oauth2_proxy" {
-  byte_length = 8
-  prefix      = "oauth2-proxy-"
-}
-
 module "util" {
   source = "../kube_workload_utility"
 
-  workload_name                        = random_id.oauth2_proxy.hex
+  workload_name                        = local.service_name
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -64,7 +61,7 @@ module "constants" {
 ***************************************/
 
 resource "vault_identity_oidc_key" "oidc" {
-  name               = random_id.oauth2_proxy.hex
+  name               = local.service_name
   allowed_client_ids = ["*"]
   rotation_period    = 60 * 60 * 8
   verification_ttl   = 60 * 60 * 24
@@ -76,12 +73,12 @@ data "vault_identity_group" "rbac_groups" {
 }
 
 resource "vault_identity_oidc_assignment" "oidc" {
-  name      = random_id.oauth2_proxy.hex
+  name      = local.service_name
   group_ids = [for group in data.vault_identity_group.rbac_groups : group.id]
 }
 
 resource "vault_identity_oidc_client" "oidc" {
-  name = random_id.oauth2_proxy.hex
+  name = local.service_name
   key  = vault_identity_oidc_key.oidc.name
   redirect_uris = [
     "https://${var.domain}${local.proxy_path}/callback",
@@ -94,7 +91,7 @@ resource "vault_identity_oidc_client" "oidc" {
 }
 
 resource "vault_identity_oidc_provider" "oidc" {
-  name = random_id.oauth2_proxy.hex
+  name = local.service_name
 
   https_enabled = true
   issuer_host   = var.vault_domain
@@ -129,7 +126,7 @@ resource "kubernetes_secret" "oauth2_proxy" {
 
 resource "helm_release" "oauth2_proxy" {
   namespace       = var.namespace
-  name            = random_id.oauth2_proxy.hex
+  name            = local.service_name
   repository      = "https://oauth2-proxy.github.io/manifests"
   chart           = "oauth2-proxy"
   version         = var.oauth2_proxy_helm_version
@@ -201,7 +198,7 @@ resource "kubectl_manifest" "pdb" {
     apiVersion = "policy/v1"
     kind       = "PodDisruptionBudget"
     metadata = {
-      name      = random_id.oauth2_proxy.hex
+      name      = local.service_name
       namespace = var.namespace
       labels    = module.util.labels
     }
@@ -224,7 +221,7 @@ resource "kubectl_manifest" "vpa" {
     apiVersion = "autoscaling.k8s.io/v1"
     kind       = "VerticalPodAutoscaler"
     metadata = {
-      name      = random_id.oauth2_proxy.hex
+      name      = local.service_name
       namespace = var.namespace
       labels    = module.util.labels
     }
@@ -239,7 +236,7 @@ resource "kubectl_manifest" "vpa" {
       targetRef = {
         apiVersion = "apps/v1"
         kind       = "Deployment"
-        name       = random_id.oauth2_proxy.hex
+        name       = local.service_name
       }
     }
   })
@@ -259,7 +256,7 @@ module "ingress" {
   name      = "oauth2-proxy"
   domains   = [var.domain]
   ingress_configs = [{
-    service      = random_id.oauth2_proxy.hex
+    service      = local.service_name
     service_port = 80
     path_prefix  = local.proxy_path
   }]

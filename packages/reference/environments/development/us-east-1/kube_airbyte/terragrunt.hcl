@@ -18,6 +18,7 @@ dependency "kyverno" {
 
 inputs = {
   domain       = "airbyte.seth.panfactum.com"
+  vault_domain = dependency.vault.outputs.vault_domain
   wait         = false
   auth_enabled = false
 }

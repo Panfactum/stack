@@ -255,14 +255,7 @@ resource "helm_release" "airbyte" {
         airbyteUrl         = var.domain != "" ? "https://${var.domain}" : ""
 
         auth = {
-          enabled = var.auth_enabled
-          instanceAdmin = {
-            secretName        = kubernetes_secret.airbyte_secrets.metadata[0].name
-            emailSecretKey    = "instance-admin-email"
-            passwordSecretKey = "instance-admin-password"
-            firstName         = var.admin_first_name
-            lastName          = var.admin_last_name
-          }
+          enabled = false
         }
 
         enterprise = {
@@ -498,6 +491,24 @@ resource "helm_release" "airbyte" {
 * Airbyte Ingress
 ***************************************/
 
+module "authenticating_proxy" {
+  count     = var.ingress_enabled ? 1 : 0
+  source = "../kube_vault_proxy"
+
+  namespace                            = local.namespace
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  vpa_enabled                          = var.vpa_enabled
+  domain                               = var.domain
+  vault_domain                         = var.vault_domain
+  instance_type_anti_affinity_required = var.sla_target == 3
+  az_spread_preferred                  = var.sla_target >= 2
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  wait                                 = var.wait
+}
+
 module "ingress" {
   count     = var.ingress_enabled ? 1 : 0
   source    = "../kube_ingress"
@@ -507,23 +518,8 @@ module "ingress" {
   ingress_configs = [{
     service      = "${local.name}-airbyte-webapp-svc"
     service_port = 80
-
-    cdn = {
-      default_cache_behavior = {
-        caching_enabled = false
-      }
-      path_match_behavior = {
-        # Static assets can be cached
-        "/static*" = {
-          caching_enabled            = true
-          cookies_in_cache_key       = []
-          query_strings_in_cache_key = []
-        }
-      }
-    }
   }]
 
-  cdn_mode_enabled               = var.cdn_mode_enabled
   rate_limiting_enabled          = true
   cross_origin_isolation_enabled = false
   cross_origin_embedder_policy   = "credentialless"
@@ -536,19 +532,9 @@ module "ingress" {
   csp_script_src = "'self' 'unsafe-inline'"
   csp_img_src    = "'self' data:"
 
+  extra_annotations = module.authenticating_proxy[0].upstream_ingress_annotations
+
   depends_on = [helm_release.airbyte]
-}
-
-# Add CDN if enabled
-module "cdn" {
-  count  = var.ingress_enabled && var.cdn_mode_enabled ? 1 : 0
-  source = "../kube_aws_cdn"
-  providers = {
-    aws.global = aws.global
-  }
-
-  name           = "airbyte"
-  origin_configs = module.ingress[0].cdn_origin_configs
 }
 
 /***************************************

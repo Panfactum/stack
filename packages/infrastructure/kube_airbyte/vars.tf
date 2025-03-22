@@ -48,28 +48,10 @@ variable "sla_target" {
   }
 }
 
-variable "auth_enabled" {
-  description = "Whether to enable authentication for Airbyte"
-  type        = bool
-  default     = false
-}
-
 variable "admin_email" {
   description = "Email for the admin user when auth is enabled"
   type        = string
   default     = "admin@example.com"
-}
-
-variable "admin_first_name" {
-  description = "First name for the admin user when auth is enabled"
-  type        = string
-  default     = "Admin"
-}
-
-variable "admin_last_name" {
-  description = "Last name for the admin user when auth is enabled"
-  type        = string
-  default     = "User"
 }
 
 variable "ingress_enabled" {
@@ -363,4 +345,9 @@ variable "tolerations" {
     tolerationSeconds = optional(number)
   }))
   default = []
+}
+
+variable "vault_domain" {
+  description = "The domain where Vault is accessible"
+  type        = string
 }
