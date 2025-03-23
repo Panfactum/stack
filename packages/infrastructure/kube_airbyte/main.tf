@@ -540,7 +540,15 @@ module "ingress" {
   csp_script_src = "'self' 'unsafe-inline'"
   csp_img_src    = "'self' data:"
 
-  extra_annotations = module.authenticating_proxy[0].upstream_ingress_annotations
+  extra_annotations = merge(
+    module.authenticating_proxy[0].upstream_ingress_annotations,
+    {
+      "nginx.ingress.kubernetes.io/proxy-connect-timeout" = "300"
+      "nginx.ingress.kubernetes.io/proxy-send-timeout"    = "300"
+      "nginx.ingress.kubernetes.io/proxy-read-timeout"    = "300"
+      "nginx.ingress.kubernetes.io/proxy-body-size"       = "50m"
+    }
+  )
 
   depends_on = [helm_release.airbyte]
 }
