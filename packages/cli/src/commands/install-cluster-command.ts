@@ -70,9 +70,10 @@ export class InstallClusterCommand extends Command {
       context: this.context,
     });
 
-    this.context.stdout.write(
-      `Terragrunt variables: ${JSON.stringify(terragruntVariables, null, 2)}\n`
-    );
+    this.verbose &&
+      this.context.stdout.write(
+        `Terragrunt variables: ${JSON.stringify(terragruntVariables, null, 2)}\n`
+      );
 
     const environmentsDir = terragruntVariables["environment"];
     // If the environments_dir set incorrectly in the panfactum.yaml file they need to complete the initial setup step
@@ -210,7 +211,7 @@ export class InstallClusterCommand extends Command {
       context: this.context,
     });
 
-    if (vpcSetupComplete !== true) {
+    if (vpcSetupComplete === true) {
       this.context.stdout.write(
         "Skipping VPC setup as it's already complete.\n"
       );
@@ -261,7 +262,7 @@ export class InstallClusterCommand extends Command {
       context: this.context,
     });
 
-    if (vpcNetworkTestComplete !== true) {
+    if (vpcNetworkTestComplete === true) {
       this.context.stdout.write(
         "Skipping VPC network test as it's already complete.\n"
       );
@@ -291,131 +292,131 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    const ecrPullThroughCacheSetupComplete = await getConfigFileKey({
-      key: "setupEcrPullThroughCache",
-      configPath,
-      context: this.context,
-    });
+    // const ecrPullThroughCacheSetupComplete = await getConfigFileKey({
+    //   key: "setupEcrPullThroughCache",
+    //   configPath,
+    //   context: this.context,
+    // });
 
-    if (ecrPullThroughCacheSetupComplete !== true) {
-      this.context.stdout.write(
-        "Skipping ECR pull through cache setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        "Setting up the AWS ECR pull through cache...\n"
-      );
+    // if (ecrPullThroughCacheSetupComplete === true) {
+    //   this.context.stdout.write(
+    //     "Skipping ECR pull through cache setup as it's already complete.\n"
+    //   );
+    // } else {
+    //   this.context.stdout.write(
+    //     "Setting up the AWS ECR pull through cache...\n"
+    //   );
 
-      const { dockerHubUsername, githubUsername } =
-        await ecrPullThroughCachePrompts({
-          context: this.context,
-        });
+    //   const { dockerHubUsername, githubUsername } =
+    //     await ecrPullThroughCachePrompts({
+    //       context: this.context,
+    //     });
 
-      await updateConfigFile({
-        updates: {
-          dockerHubUsername,
-          githubUsername,
-        },
-        configPath,
-        context: this.context,
-      });
+    //   await updateConfigFile({
+    //     updates: {
+    //       dockerHubUsername,
+    //       githubUsername,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
 
-      try {
-        await setupEcrPullThroughCache({
-          context: this.context,
-          dockerHubUsername,
-          githubUsername,
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        this.context.stderr.write(
-          pc.red(
-            `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        return 1;
-      }
+    //   try {
+    //     await setupEcrPullThroughCache({
+    //       context: this.context,
+    //       dockerHubUsername,
+    //       githubUsername,
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error setting up the AWS ECR pull through cache: ${String(error)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     return 1;
+    //   }
 
-      try {
-        await replaceYamlValue(
-          "./region.yaml",
-          "extra_inputs.pull_through_cache_enabled",
-          true
-        );
-      } catch (error) {
-        this.context.stderr.write(
-          pc.red(
-            `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
-          )
-        );
-        printHelpInformation(this.context);
-        return 1;
-      }
+    //   try {
+    //     await replaceYamlValue(
+    //       "./region.yaml",
+    //       "extra_inputs.pull_through_cache_enabled",
+    //       true
+    //     );
+    //   } catch (error) {
+    //     this.context.stderr.write(
+    //       pc.red(
+    //         `Error updating region.yaml to enable the AWS ECR pull through cache: ${String(error)}\n`
+    //       )
+    //     );
+    //     printHelpInformation(this.context);
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          setupEcrPullThroughCache: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       setupEcrPullThroughCache: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
-    const kubernetesClusterSetupComplete = await getConfigFileKey({
-      key: "setupEks",
-      configPath,
-      context: this.context,
-    });
+    // const kubernetesClusterSetupComplete = await getConfigFileKey({
+    //   key: "setupEks",
+    //   configPath,
+    //   context: this.context,
+    // });
 
-    if (kubernetesClusterSetupComplete !== true) {
-      this.context.stdout.write(
-        "Skipping EKS cluster setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write("Setting up the AWS EKS cluster...\n");
-      this.context.stdout.write(
-        pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
-      );
+    // if (kubernetesClusterSetupComplete === true) {
+    //   this.context.stdout.write(
+    //     "Skipping EKS cluster setup as it's already complete.\n"
+    //   );
+    // } else {
+    //   this.context.stdout.write("Setting up the AWS EKS cluster...\n");
+    //   this.context.stdout.write(
+    //     pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
+    //   );
 
-      const { clusterName, clusterDescription } =
-        await kubernetesClusterPrompts({
-          environment: String(environment),
-        });
+    //   const { clusterName, clusterDescription } =
+    //     await kubernetesClusterPrompts({
+    //       environment: String(environment),
+    //     });
 
-      await updateConfigFile({
-        updates: {
-          clusterName,
-          clusterDescription,
-        },
-        configPath,
-        context: this.context,
-      });
+    //   await updateConfigFile({
+    //     updates: {
+    //       clusterName,
+    //       clusterDescription,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
 
-      try {
-        await setupEks({
-          context: this.context,
-          clusterName,
-          clusterDescription,
-          slaLevel: slaTarget || (terragruntSlaTarget as 1 | 2 | 3), // This is validated in the code earlier
-          verbose: this.verbose,
-        });
-      } catch (error) {
-        this.context.stderr.write(
-          pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
-        );
-        printHelpInformation(this.context);
-        return 1;
-      }
+    //   try {
+    //     await setupEks({
+    //       context: this.context,
+    //       clusterName,
+    //       clusterDescription,
+    //       slaLevel: slaTarget || (terragruntSlaTarget as 1 | 2 | 3), // This is validated in the code earlier
+    //       verbose: this.verbose,
+    //     });
+    //   } catch (error) {
+    //     this.context.stderr.write(
+    //       pc.red(`Error setting up the AWS EKS cluster: ${String(error)}\n`)
+    //     );
+    //     printHelpInformation(this.context);
+    //     return 1;
+    //   }
 
-      await updateConfigFile({
-        updates: {
-          setupEks: true,
-        },
-        configPath,
-        context: this.context,
-      });
-    }
+    //   await updateConfigFile({
+    //     updates: {
+    //       setupEks: true,
+    //     },
+    //     configPath,
+    //     context: this.context,
+    //   });
+    // }
 
     return 0;
   }
