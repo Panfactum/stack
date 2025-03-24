@@ -57,7 +57,7 @@ export function tfInit({
 
     !verbose &&
       context.stdout.write(
-        pc.green("Successfully initialized infrastructure modules\n")
+        pc.green("Successfully initialized infrastructure modules\n\n")
       );
 
     let tfLockProgress: globalThis.Timer | undefined;
@@ -105,7 +105,7 @@ export function tfInit({
     }
 
     !verbose &&
-      context.stdout.write(pc.green("Successfully updated platform locks\n"));
+      context.stdout.write(pc.green("Successfully updated platform locks\n\n"));
     return 0;
   } catch (error: unknown) {
     const errorMessage =

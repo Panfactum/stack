@@ -48,7 +48,7 @@ export function apply({
 
     !verbose &&
       context.stdout.write(
-        pc.green("Successfully applied all infrastructure modules\n")
+        pc.green("Successfully applied all infrastructure modules\n\n")
       );
 
     return 0;

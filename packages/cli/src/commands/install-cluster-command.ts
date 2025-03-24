@@ -128,7 +128,7 @@ export class InstallClusterCommand extends Command {
       );
     }
 
-    this.context.stdout.write("Starting AWS networking installation...\n");
+    this.context.stdout.write("Starting AWS networking installation...\n\n");
 
     try {
       if (!terragruntSlaTarget) {
@@ -156,10 +156,10 @@ export class InstallClusterCommand extends Command {
 
     if (vpcSetupComplete === true) {
       this.context.stdout.write(
-        "Skipping VPC setup as it's already complete.\n"
+        "Skipping VPC setup as it's already complete.\n\n"
       );
     } else {
-      this.context.stdout.write("Setting up the AWS VPC\n");
+      this.context.stdout.write("Setting up the AWS VPC\n\n");
 
       const { vpcName, vpcDescription } = await vpcPrompts({
         environment,
@@ -208,11 +208,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupEcrPullThroughCacheComplete === true) {
       this.context.stdout.write(
-        "Skipping ECR pull through cache setup as it's already complete.\n"
+        "Skipping ECR pull through cache setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
-        "Setting up the AWS ECR pull through cache...\n"
+        "Setting up the AWS ECR pull through cache...\n\n"
       );
 
       const { dockerHubUsername, githubUsername } =

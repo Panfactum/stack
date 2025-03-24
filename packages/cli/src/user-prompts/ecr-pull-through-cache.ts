@@ -15,7 +15,7 @@ export async function ecrPullThroughCachePrompts({
         "This will allow us to cache images from public registries and pull them from our private registry.\n" +
         "Eventhough these are public registries, we will need to provide credentials for them.\n" +
         "For more information see our documentation:\n" +
-        "https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache\n"
+        "https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache\n\n"
     )
   );
 
@@ -43,7 +43,7 @@ export async function ecrPullThroughCachePrompts({
     mask: true,
   });
 
-  context.stdout.write("Encrypting secrets with SOPS...\n");
+  context.stdout.write("\nEncrypting secrets with SOPS...\n\n");
 
   const tempSecretsFilePath = "./.tmp-ecr-pull-through-cache-secrets.yaml";
   await Bun.write(
