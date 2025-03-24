@@ -48,7 +48,7 @@ export class GetKubeTokenCommand extends Command {
         `Error getting kube token: ${error instanceof Error ? error.message : String(error)}\n`
       );
       if (this.verbose) {
-        this.context.stderr.write(error);
+        this.context.stderr.write(JSON.stringify(error, null, 2));
       }
       return 1;
     }

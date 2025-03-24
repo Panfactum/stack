@@ -6,14 +6,23 @@ export const getSsmCommandOutput = async ({
   awsProfile,
   awsRegion,
   context,
+  verbose = false,
 }: {
   commandId: string;
   instanceId: string;
   awsProfile: string;
   awsRegion: string;
   context: BaseContext;
+  verbose?: boolean;
 }): Promise<string> => {
   let status = "";
+
+  if (verbose) {
+    context.stdout.write("AWS Region: " + awsRegion + "\n");
+    context.stdout.write("AWS Profile: " + awsProfile + "\n");
+    context.stdout.write("Instance ID: " + instanceId + "\n");
+    context.stdout.write("Command ID: " + commandId + "\n");
+  }
 
   while (true) {
     context.stdout.write("Waiting for test to complete...\n");
@@ -37,9 +46,22 @@ export const getSsmCommandOutput = async ({
       ],
       {
         stdout: "pipe",
-        stderr: "ignore",
+        stderr: "pipe",
       }
     );
+
+    if (verbose) {
+      context.stdout.write(
+        "getSsmCommandOutput STDOUT: " +
+          (process.stdout?.toString() ?? "") +
+          "\n"
+      );
+      context.stderr.write(
+        "getSsmCommandOutput STDERR: " +
+          (process.stderr?.toString() ?? "") +
+          "\n"
+      );
+    }
 
     status = process.stdout.toString().trim();
 
@@ -78,8 +100,16 @@ export const getSsmCommandOutput = async ({
       }
     );
 
+    if (verbose) {
+      context.stdout.write(
+        "getSsmCommandOutput FailedSTDOUT: " +
+          (process.stdout?.toString() ?? "") +
+          "\n"
+      );
+    }
+
     const error = process.stdout.toString().trim();
-    context.stderr.write(`\tTest failed: ${error}\n`);
+    context.stderr.write(`Test failed: ${error}\n`);
     throw new Error("Failed to execute SSM command after multiple retries");
   }
 
@@ -107,5 +137,15 @@ export const getSsmCommandOutput = async ({
     }
   );
 
-  return process.stdout.toString().trim();
+  if (verbose) {
+    context.stdout.write(
+      "getSsmCommandOutput Success STDOUT: " +
+        (process.stdout?.toString() ?? "") +
+        "\n"
+    );
+  }
+
+  const output = process.stdout.toString().trim();
+
+  return output;
 };

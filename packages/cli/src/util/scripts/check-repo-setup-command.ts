@@ -18,13 +18,14 @@ export class CheckRepoSetupCommand extends Command {
     try {
       await checkRepoSetup({
         context: this.context,
+        verbose: this.verbose,
       });
     } catch (error: unknown) {
       this.context.stderr.write(
         `Error checking repo setup: ${error instanceof Error ? error.message : String(error)}\n`
       );
       if (this.verbose) {
-        this.context.stderr.write(error);
+        this.context.stderr.write(JSON.stringify(error, null, 2));
       }
       return 1;
     }

@@ -1,3 +1,4 @@
+import pc from "picocolors";
 import type { BaseContext } from "clipanion";
 
 export const runSsmCommand = async ({
@@ -5,11 +6,13 @@ export const runSsmCommand = async ({
   awsProfile,
   awsRegion,
   context,
+  verbose = false,
 }: {
   instanceId: string;
   awsProfile: string;
   awsRegion: string;
   context: BaseContext;
+  verbose?: boolean;
 }): Promise<string> => {
   let commandId = "";
   const retries = 20;
@@ -45,13 +48,23 @@ export const runSsmCommand = async ({
 
     commandId = process.stdout.toString().trim();
 
-    if (!commandId) {
-      context.stdout.write("\tTest started.\n");
-      context.stdout.write(commandId);
+    if (verbose) {
+      context.stdout.write(
+        "runSsmCommand STDOUT: " + (process.stdout?.toString() ?? "") + "\n"
+      );
+    }
+
+    if (commandId) {
+      context.stdout.write(pc.green("Test started.\n"));
+      if (verbose) {
+        context.stdout.write(
+          "runSsmCommand Command ID: " + commandId + "\n"
+        );
+      }
       return commandId;
     } else {
       context.stdout.write(
-        `\tWaiting for instance ${instanceId} to become ready...\n`
+        `Waiting for instance ${instanceId} to become ready...\n`
       );
     }
 
@@ -62,6 +75,6 @@ export const runSsmCommand = async ({
   }
 
   // If we get here, we've exceeded our retries
-  context.stderr.write("\tTimeout exceeded. Failed to execute test!\n");
+  context.stderr.write("Timeout exceeded. Failed to execute test!\n");
   throw new Error("Failed to execute SSM command after multiple retries");
 };

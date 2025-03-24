@@ -26,7 +26,7 @@ export class GetAWSStateHashCommand extends Command {
         `Error getting aws state hash: ${error instanceof Error ? error.message : String(error)}\n`
       );
       if (this.verbose) {
-        this.context.stderr.write(error);
+        this.context.stderr.write(JSON.stringify(error, null, 2));
       }
       return 1;
     }

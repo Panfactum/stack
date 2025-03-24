@@ -70,7 +70,7 @@ async function areDirectoriesEqual(
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function checkRepoSetup({ context }: { context: BaseContext }) {
   // Aggregate all of the error messages here and print them all at the end
-  const errors = [];
+  const errors: string[] = [];
   let hasBuildRequiredError = 0;
   //####################################################################
   // Get Repo Variables
@@ -235,7 +235,7 @@ export async function checkRepoSetup({ context }: { context: BaseContext }) {
   //####################################################################
   // Print Error Messages
   //####################################################################
-  if (hasBuildRequiredError === 0) {
+  if (errors.length > 0 && hasBuildRequiredError === 0) {
     context.stderr.write(
       pc.yellow(
         `Your repository files are out-of-date with the current version of the Panfactum stack.\n\n`
@@ -250,6 +250,6 @@ export async function checkRepoSetup({ context }: { context: BaseContext }) {
     context.stderr.write(
       pc.yellow(`Issues detected with your repository setup:\n\n`)
     );
-    context.stderr.write(pc.yellow(errors.join("")));
+    context.stderr.write(pc.yellow(errors.join("\n")));
   }
 }

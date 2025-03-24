@@ -1,0 +1,11 @@
+---
+description: Rules applied to the cli package.
+globs: packages/cli/src/**/*
+---
+# Your rule content
+
+- always order function parameters alphabetically
+- always order object keys alphabetically
+- when replicating shell functionality look for already written helper functions to accomplish the task before writing new code
+- add JSDoc compliant comments to all functions
+- ensure all classes extending Command are registered with the clipanion cli at ./index.ts

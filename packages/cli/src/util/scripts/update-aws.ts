@@ -47,17 +47,17 @@ async function appendToConfig({
     const roles = cliConfig[i]?.roles;
 
     if (accountName === undefined || accountName === null) {
-      context.stderr.write(`Error: account_name is not set at index ${i}.`);
+      context.stderr.write(`Error: account_name is not set at index ${i}.\n`);
       throw new Error(`Error: account_name is not set at index ${i}.`);
     }
 
     if (accountId === undefined || accountId === null) {
-      context.stderr.write(`Error: account_id is not set at index ${i}.`);
+      context.stderr.write(`Error: account_id is not set at index ${i}.\n`);
       throw new Error(`Error: account_id is not set at index ${i}.`);
     }
 
     if (roles === undefined || roles === null) {
-      context.stderr.write(`Error: roles is not set at index ${i}.`);
+      context.stderr.write(`Error: roles is not set at index ${i}.\n`);
       throw new Error(`Error: roles is not set at index ${i}.`);
     }
 
@@ -65,7 +65,7 @@ async function appendToConfig({
     for (let j = 0; j < numberOfRoles; j++) {
       const role = roles[j];
       if (role === undefined || role === null) {
-        context.stderr.write(`Error: role is not set at index ${i}.`);
+        context.stderr.write(`Error: role is not set at index ${i}.\n`);
         throw new Error(`Error: role is not set at index ${i}.`);
       }
       const profileName = `${camelToSnakeCase(accountName)}-${camelToSnakeCase(role)}`;
@@ -189,7 +189,7 @@ export async function updateAWS({
         context.stdout.write("Roles retrieved.\n");
       } else {
         context.stdout.write(
-          "Warning: module not specified. Not retrieving dynamic roles."
+          "Warning: module not specified. Not retrieving dynamic roles.\n"
         );
       }
 
@@ -214,18 +214,18 @@ export async function updateAWS({
       const destinationFile = Bun.file(awsConfigFilePath);
       await destinationFile.write(await sourceFile.text());
       await sourceFile.delete();
+    } else {
+      context.stdout.write(
+        `Warning: No configuration file exists at ${awsConfigFilePath} Skipping config setup...\n`
+      );
     }
-  } else {
-    context.stdout.write(
-      "Warning: No configuration file exists at $CONFIG_FILE Skipping config setup..."
-    );
   }
 
   // Save the state hash
   const stateHash = await getAWSStateHash({ context });
   await Bun.write(Bun.file(awsDir + "/state.lock"), stateHash);
 
-  context.stdout.write("AWS config files in $AWS_DIR were updated.\n");
+  context.stdout.write(`AWS config files in ${awsDir} were updated.\n`);
 
   if (process.env["PF_SKIP_CHECK_REPO_SETUP"] !== "1") {
     await checkRepoSetup({ context });

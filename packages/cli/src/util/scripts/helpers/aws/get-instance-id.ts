@@ -6,11 +6,13 @@ export async function getInstanceId({
   awsProfile,
   awsRegion,
   context,
+  verbose = false,
 }: {
   asgName: string;
   awsProfile: string;
   awsRegion: string;
   context: BaseContext;
+  verbose?: boolean;
 }) {
   let instanceId: string | null = null;
   const instanceIdProgress = progressMessage({
@@ -44,6 +46,15 @@ export async function getInstanceId({
         stdout: "pipe",
       }
     );
+
+    if (verbose) {
+      context.stdout.write(
+        "getInstanceId STDOUT: " + (result.stdout?.toString() ?? "") + "\n"
+      );
+      context.stderr.write(
+        "getInstanceId STDERR: " + (result.stderr?.toString() ?? "") + "\n"
+      );
+    }
 
     instanceId = result.stdout.toString().trim();
   }

@@ -134,16 +134,17 @@ export async function updateKube({
 
         context.stdout.write("Done!\n");
       }
+
+      context.stdout.write("cluster_info updated!\n");
+      context.stdout.write("-----------------------------------\n");
+    } else {
+      context.stderr.write(
+        `Error: No configuration file exists at ${configFilePath}. See https://panfactum.com/docs/reference/configuration/kubernetes.\n`
+      );
+      throw new Error(
+        `No configuration file exists at ${configFilePath}. See https://panfactum.com/docs/reference/configuration/kubernetes.`
+      );
     }
-    context.stdout.write("cluster_info updated!\n");
-    context.stdout.write("-----------------------------------\n");
-  } else {
-    context.stderr.write(
-      `Error: No configuration file exists at ${configFilePath}. See https://panfactum.com/docs/reference/configuration/kubernetes.\n`
-    );
-    throw new Error(
-      `No configuration file exists at ${configFilePath}. See https://panfactum.com/docs/reference/configuration/kubernetes.`
-    );
   }
 
   // ############################################################

@@ -43,5 +43,5 @@ export const selectAwsProfile = async ({
     },
   });
 
-  return selectedAwsProfile;
+  return selectedAwsProfile.replace("[", "").replace("]", "").split(" ")[1];
 };

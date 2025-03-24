@@ -83,76 +83,108 @@ export const vpcNetworkTest = async ({
   const subnets = moduleOutputs.test_config.value.subnets;
   const numberOfSubnets = subnets.length;
 
-  // Run the tests sequentially for all subnets
+  try {
+    // Run the tests sequentially for all subnets
+    for (let i = 0; i < numberOfSubnets; i++) {
+      const subnet = subnets[i];
+      // This should never happen, but just in case
+      if (!subnet) {
+        context.stderr.write(pc.red(`Error: No subnet found at index ${i}.`));
+        throw new Error(`No subnet found at index ${i}.`);
+      }
 
-  for (let i = 0; i < numberOfSubnets; i++) {
-    const subnet = subnets[i];
-    // This should never happen, but just in case
-    if (!subnet) {
-      context.stderr.write(pc.red(`Error: No subnet found at index ${i}.`));
-      throw new Error(`No subnet found at index ${i}.`);
-    }
+      const asg = subnet.asg;
+      const natIp = subnet.nat_ip;
 
-    const asg = subnet.asg;
-    const natIp = subnet.nat_ip;
-
-    context.stdout.write(
-      pc.green(`Running test for subnet: ${subnet.subnet}...`)
-    );
-
-    // Step 1: Create a test instance
-    context.stdout.write(pc.green(`\tScaling ASG ${asg} to 1...`));
-    scaleAsg({
-      asgName: asg,
-      awsProfile: selectedAwsProfile,
-      awsRegion: moduleOutputs.test_config.value.region,
-      desiredCapacity: 1,
-    });
-
-    // Step 2: Get the instance id
-    const instanceId = await getInstanceId({
-      asgName: asg,
-      awsProfile: selectedAwsProfile,
-      awsRegion: moduleOutputs.test_config.value.region,
-      context,
-    });
-
-    // Step 3: Run the network test
-    const commandId = await runSsmCommand({
-      instanceId,
-      awsProfile: selectedAwsProfile,
-      awsRegion: moduleOutputs.test_config.value.region,
-      context,
-    });
-
-    // Step 4: Get the result of the network test
-    const publicIp = await getSsmCommandOutput({
-      commandId,
-      instanceId,
-      awsProfile: selectedAwsProfile,
-      awsRegion: moduleOutputs.test_config.value.region,
-      context,
-    });
-
-    // Step 5: Ensure the public IP is correct
-    if (publicIp !== natIp) {
-      context.stderr.write(
-        pc.red(`${instanceId} is NOT connecting through NAT!`)
+      context.stdout.write(
+        pc.green(`Running test for subnet: ${subnet.subnet}...\n`)
       );
-      throw new Error("Public IP does not match NAT IP");
+
+      // Step 1: Create a test instance
+      context.stdout.write(pc.green(`Scaling ASG ${asg} to 1...\n`));
+      scaleAsg({
+        asgName: asg,
+        awsProfile: selectedAwsProfile,
+        awsRegion: moduleOutputs.test_config.value.region,
+        context,
+        desiredCapacity: 1,
+        verbose,
+      });
+
+      // Step 2: Get the instance id
+      const instanceId = await getInstanceId({
+        asgName: asg,
+        awsProfile: selectedAwsProfile,
+        awsRegion: moduleOutputs.test_config.value.region,
+        context,
+        verbose,
+      });
+
+      context.stdout.write(pc.green(`Instance ID: ${instanceId}\n`));
+      context.stdout.write(
+        pc.green(`Executing network test on ${instanceId}...\n`)
+      );
+
+      // Step 3: Run the network test
+      const commandId = await runSsmCommand({
+        instanceId,
+        awsProfile: selectedAwsProfile,
+        awsRegion: moduleOutputs.test_config.value.region,
+        context,
+        verbose,
+      });
+
+      // Step 4: Get the result of the network test
+      const publicIp = await getSsmCommandOutput({
+        commandId,
+        instanceId,
+        awsProfile: selectedAwsProfile,
+        awsRegion: moduleOutputs.test_config.value.region,
+        context,
+        verbose,
+      });
+
+      context.stdout.write(
+        pc.green(`Public IP for instance ${instanceId}: ${publicIp}\n`)
+      );
+
+      // Step 5: Ensure the public IP is correct
+      if (publicIp !== natIp) {
+        context.stderr.write(
+          pc.red(`${instanceId} is NOT connecting through NAT!\n`)
+        );
+        throw new Error("Public IP does not match NAT IP");
+      }
+
+      // Step 6: Ensure that the NAT_IP rejects inbound traffic
+      await testVpcNetworkBlocking({
+        natIp,
+        context,
+        verbose,
+      });
+
+      context.stdout.write(
+        pc.green(`Test completed successfully for ${subnet.subnet}.\n`)
+      );
+      context.stdout.write(
+        pc.green("-----------------------------------------------------\n")
+      );
     }
-
-    // Step 6: Ensure that the NAT_IP rejects inbound traffic
-    await testVpcNetworkBlocking({
-      natIp,
-      context,
-    });
-
-    context.stdout.write(
-      pc.green(`Test completed successfully for ${subnet.subnet}.\n`)
-    );
-    context.stdout.write(
-      pc.green("-----------------------------------------------------\n")
-    );
+  } finally {
+    // scale down all ASGs no matter what
+    for (let i = 0; i < numberOfSubnets; i++) {
+      const subnet = subnets[i];
+      if (!subnet) {
+        continue;
+      }
+      scaleAsg({
+        asgName: subnet.asg,
+        awsProfile: selectedAwsProfile,
+        awsRegion: moduleOutputs.test_config.value.region,
+        context,
+        desiredCapacity: 0,
+        verbose,
+      });
+    }
   }
 };

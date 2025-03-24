@@ -29,13 +29,14 @@ export class VpcNetworkTestCommand extends Command {
       await vpcNetworkTest({
         context: this.context,
         modulePath: this.modulePath,
+        verbose: this.verbose,
       });
     } catch (error: unknown) {
       this.context.stderr.write(
         `Error testing VPC network connectivity: ${error instanceof Error ? error.message : String(error)}\n`
       );
       if (this.verbose) {
-        this.context.stderr.write(error);
+        this.context.stderr.write(JSON.stringify(error, null, 2));
       }
       return 1;
     }

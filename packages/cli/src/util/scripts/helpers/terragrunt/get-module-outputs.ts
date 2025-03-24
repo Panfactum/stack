@@ -31,7 +31,7 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
   const moduleOutputs = Bun.spawnSync(
     ["terragrunt", "output", "--json", "--terragrunt-working-dir", modulePath],
     {
-      stdout: verbose ? "inherit" : "ignore",
+      stdout: "pipe",
       stderr: "pipe",
     }
   );
@@ -39,11 +39,17 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
   !verbose && globalThis.clearInterval(moduleOutputProgress);
 
   if (verbose) {
-    context.stdout.write(moduleOutputs.stdout);
-    context.stderr.write(moduleOutputs.stderr);
+    context.stdout.write("STDOUT: " + (moduleOutputs.stdout?.toString() ?? ""));
+    context.stderr.write("STDERR: " + (moduleOutputs.stderr?.toString() ?? ""));
   }
 
-  const validatedModuleOutputs = parseData(moduleOutputs, validationSchema);
+  const parsedModuleOutputs = JSON.parse(
+    moduleOutputs.stdout?.toString() ?? ""
+  );
+  const validatedModuleOutputs = parseData(
+    parsedModuleOutputs,
+    validationSchema
+  );
 
   if (verbose) {
     context.stdout.write("Done.\n");
