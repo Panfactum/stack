@@ -17,6 +17,7 @@ import { replaceYamlValue } from "../util/replace-yaml-value";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { vpcNetworkTest } from "../util/scripts/vpc-network-test";
 import { updateConfigFile } from "../util/update-config-file";
+import { safeFileExists } from "../util/safe-file-exists";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -174,9 +175,11 @@ export class InstallClusterCommand extends Command {
       currentDirectory,
       ".tmp-panfactum-install-config.json"
     );
-    await Bun.write(
-      configPath,
-      JSON.stringify(
+    const configurationTempFileExists = await safeFileExists(configPath);
+    if (!configurationTempFileExists) {
+      await Bun.write(
+        configPath,
+        JSON.stringify(
         {
           slaTarget,
         },
