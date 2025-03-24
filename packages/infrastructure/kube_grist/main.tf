@@ -68,7 +68,9 @@ module "database" {
   pg_minimum_memory_mb                 = 500
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = false // should not run on controller nodes which can cause disruptions
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
@@ -91,8 +93,9 @@ module "redis" {
 
   namespace                            = local.namespace
   replica_count                        = 3
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   vpa_enabled                          = var.vpa_enabled
   monitoring_enabled                   = var.monitoring_enabled
@@ -245,8 +248,9 @@ module "grist" {
   namespace                            = local.namespace
   name                                 = local.name
   replicas                             = 1 // For realtime collaboration to work, there can only be a single instance running
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   instance_type_anti_affinity_required = false
   az_spread_preferred                  = false
   host_anti_affinity_required          = false

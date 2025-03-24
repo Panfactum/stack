@@ -153,7 +153,9 @@ module "scheduler" {
   name      = local.name
 
   replicas                             = var.sla_target >= 2 ? 2 : 1
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   controller_nodes_required            = var.sla_target >= 2 ? false : true
   instance_type_anti_affinity_required = var.sla_target == 3
   az_spread_preferred                  = var.sla_target >= 2

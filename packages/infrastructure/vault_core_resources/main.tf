@@ -203,9 +203,9 @@ module "util_secrets_operator" {
   source = "../kube_workload_utility"
 
   workload_name                        = "vault-secrets-operator"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   host_anti_affinity_required          = false
   instance_type_anti_affinity_required = false // single replica
   az_spread_preferred                  = false // single replica

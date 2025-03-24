@@ -120,6 +120,11 @@ variable "backups_cron_schedule" {
   description = "The cron schedule on which to create CNPG Backup resources"
   type        = string
   default     = "0 0 0 * * *" // every day at midnight
+
+  validation {
+    condition     = length(split(" ", var.backups_cron_schedule)) == 6
+    error_message = "backups_cron_schedule must contain 6 fields. See the [go cron documentation](https://pkg.go.dev/github.com/robfig/cron) for more information."
+  }
 }
 
 variable "backups_retention_days" {
@@ -149,7 +154,7 @@ variable "arm_nodes_enabled" {
 variable "burstable_nodes_enabled" {
   description = "Whether the database pods can be scheduled on burstable nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "pull_through_cache_enabled" {
@@ -161,11 +166,11 @@ variable "pull_through_cache_enabled" {
 variable "pg_minimum_memory_mb" {
   description = "The minimum amount of memory to allocate to the postgres pods (in Mi)"
   type        = number
-  default     = 400
+  default     = 500
 
   validation {
-    condition     = var.pg_minimum_memory_mb >= 400
-    error_message = "Must provide at least 400MB of memory"
+    condition     = var.pg_minimum_memory_mb >= 500
+    error_message = "Must provide at least 500MB of memory"
   }
 }
 
@@ -526,9 +531,15 @@ variable "pg_recovery_target_time" {
 }
 
 variable "pg_recovery_directory" {
-  description = "The name of the directory in the backup bucket containing the recovery files."
+  description = "The name of the directory in the backup bucket containing the backup files which the database will bootstrap from."
   type        = string
   default     = null
+}
+
+variable "pg_backup_directory" {
+  description = "The name of the directory in the backup bucket containing the backups files."
+  type        = string
+  default     = "initial"
 }
 
 variable "vault_credential_lifetime_hours" {
@@ -571,4 +582,10 @@ variable "pg_max_slot_wal_keep_size_gb" {
   description = "Maximum size in gigabytes of WAL files that replication slots can retain before old segments are removed."
   type        = number
   default     = 10
+}
+
+variable "gc_failed_backups" {
+  description = "Whether to delete failed backups after backups_retention_days. By default, CNPG does not delete failed backups."
+  type        = bool
+  default     = true
 }

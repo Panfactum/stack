@@ -124,6 +124,12 @@ variable "db_recovery_directory" {
   default     = null
 }
 
+variable "db_backup_directory" {
+  description = "The name of the directory in the backup bucket containing the backups files."
+  type        = string
+  default     = "initial"
+}
+
 variable "db_recovery_target_time" {
   description = "If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data."
   type        = string
@@ -138,6 +144,24 @@ variable "node_image_cached_enabled" {
 
 variable "wait" {
   description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
+}
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
   default     = true
 }

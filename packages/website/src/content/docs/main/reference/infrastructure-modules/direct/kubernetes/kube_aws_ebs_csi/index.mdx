@@ -101,6 +101,22 @@ Type: `list(string)`
 
 Default: `[]`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow controller pods to schedule on burstable nodes. Does not affect DaemonSet pods.
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow controller pods to schedule on EKS Node Group nodes (controller nodes). Does not affect DaemonSet pods.
+
+Type: `bool`
+
+Default: `true`
+
 ### monitoring\_enabled
 
 Description: Whether to add active monitoring to the deployed systems
@@ -140,6 +156,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow controller pods to schedule on spot nodes. Does not affect DaemonSet pods.
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 

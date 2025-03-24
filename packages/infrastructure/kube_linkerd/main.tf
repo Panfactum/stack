@@ -46,8 +46,9 @@ module "util_cni" {
   source = "../kube_workload_utility"
 
   workload_name                        = "linkerd-cni"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = true  // always true because needs to run on all nodes
+  controller_nodes_enabled             = true  // always true because needs to run on all nodes
+  spot_nodes_enabled                   = true  // always true because needs to run on all nodes
   panfactum_scheduler_enabled          = false // ds
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // ds
@@ -80,8 +81,9 @@ module "util_destination" {
   source = "../kube_workload_utility"
 
   workload_name                        = "linkerd-destination"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
@@ -93,8 +95,9 @@ module "util_identity" {
   source = "../kube_workload_utility"
 
   workload_name                        = "linkerd-identity"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
@@ -106,8 +109,9 @@ module "util_proxy_injector" {
   source = "../kube_workload_utility"
 
   workload_name                        = "linkerd-proxy-injector"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
@@ -121,8 +125,9 @@ module "util_proxy" {
   workload_name               = "linkerd-proxy"
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 
 }
@@ -133,8 +138,9 @@ module "util_viz" {
   workload_name               = "linkerd-viz"
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
 }
 

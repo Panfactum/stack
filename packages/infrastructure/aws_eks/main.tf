@@ -571,7 +571,7 @@ resource "aws_eks_node_group" "controllers" {
   # During bootstrapping, we should prevent disruptions as much as possible
   # but after Karpenter is running, we should make the EKS nodes spot as
   # they can already be disrupted at inconvenient times due to 'force_update_version = true'
-  capacity_type = var.bootstrap_mode_enabled ? "ON_DEMAND" : "SPOT"
+  capacity_type = var.bootstrap_mode_enabled || !var.spot_nodes_enabled ? "ON_DEMAND" : "SPOT"
 
   tags = merge(local.instance_tags, {
     description = local.controller_nodes_description
@@ -586,7 +586,7 @@ resource "aws_eks_node_group" "controllers" {
     value  = module.constants.cilium_taint.value
   }
   dynamic "taint" {
-    for_each = var.bootstrap_mode_enabled ? toset(["arm64"]) : toset(["burstable", "spot", "arm64"])
+    for_each = var.bootstrap_mode_enabled ? toset(["arm64"]) : (var.spot_nodes_enabled ? toset(["spot", "burstable", "arm64"]) : toset(["burstable", "arm64"]))
     content {
       effect = "NO_SCHEDULE"
       key    = taint.key

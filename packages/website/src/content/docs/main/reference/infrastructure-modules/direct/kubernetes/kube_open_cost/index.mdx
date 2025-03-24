@@ -60,6 +60,22 @@ Type: `list(string)`
 
 Default: `[]`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### open\_cost\_helm\_version
 
 Description: The image version of the stakater/reloader helm chart
@@ -79,6 +95,14 @@ Default: `true`
 ### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `true`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 

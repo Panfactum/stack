@@ -212,7 +212,8 @@ words: [
   "astro",
   "shellsession",
   "downscaling",
-  "mongodbatlas"
+  "mongodbatlas",
+  "PersistentVolumes",
 ]
 languageSettings:
   - languageId: markdown,mdx

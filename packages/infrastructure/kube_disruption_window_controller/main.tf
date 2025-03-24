@@ -78,8 +78,10 @@ module "disruption_window_enabler" {
   name                        = "disruption-window-enabler-${random_id.window_id.hex}"
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
-  burstable_nodes_enabled     = true
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = var.cron_schedule
@@ -106,8 +108,9 @@ module "disruption_window_disabler" {
   namespace                   = var.namespace
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   vpa_enabled                 = var.vpa_enabled
 
   cron_schedule = "0/15 * * * *" # Every 15 minutes

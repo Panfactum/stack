@@ -148,9 +148,9 @@ module "util_webhook" {
   source = "../kube_workload_utility"
 
   workload_name                        = "prometheus-operator-webhook"
-  burstable_nodes_enabled              = true
-  arm_nodes_enabled                    = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -162,8 +162,9 @@ module "util_operator" {
   source = "../kube_workload_utility"
 
   workload_name                        = "prometheus-operator"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // only runs one copy
@@ -175,8 +176,9 @@ module "util_grafana" {
   source = "../kube_workload_utility"
 
   workload_name                        = "grafana"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -188,8 +190,9 @@ module "util_prometheus" {
   source = "../kube_workload_utility"
 
   workload_name                        = "prometheus"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -202,8 +205,9 @@ module "util_node_exporter" {
   source = "../kube_workload_utility"
 
   workload_name                        = "node-exporter"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   az_spread_preferred                  = false // daemonset
   instance_type_anti_affinity_required = false // daemonset
   panfactum_scheduler_enabled          = false
@@ -215,8 +219,9 @@ module "util_ksm" {
   source = "../kube_workload_utility"
 
   workload_name                        = "kube-state-metrics"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -228,7 +233,9 @@ module "util_thanos_compactor" {
   source = "../kube_workload_utility"
 
   workload_name                        = "thanos-compactor"
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = false
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = false // single pod
@@ -240,8 +247,9 @@ module "util_thanos_store_gateway" {
   source = "../kube_workload_utility"
 
   workload_name                        = "thanos-store-gateway"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -253,8 +261,9 @@ module "util_thanos_ruler" {
   source = "../kube_workload_utility"
 
   workload_name                        = "thanos-ruler"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -267,8 +276,9 @@ module "util_thanos_query" {
   source = "../kube_workload_utility"
 
   workload_name                        = "thanos-query"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -280,8 +290,9 @@ module "util_thanos_frontend" {
   source = "../kube_workload_utility"
 
   workload_name                        = "thanos-frontend"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -293,8 +304,9 @@ module "util_thanos_bucket_web" {
   source = "../kube_workload_utility"
 
   workload_name                        = "thanos-bucket-web"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -306,8 +318,9 @@ module "util_alertmanager" {
   source = "../kube_workload_utility"
 
   workload_name                        = "alertmanager"
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
@@ -343,12 +356,15 @@ module "grafana_db" {
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   pgbouncer_pool_mode                  = "session"
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = false // should not run on controller nodes which can cause disruptions
   backups_force_delete                 = true
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.enhanced_ha_enabled
 
+  pg_backup_directory      = var.grafana_db_backup_directory
   pg_recovery_mode_enabled = var.grafana_db_recovery_mode_enabled
   pg_recovery_directory    = var.grafana_db_recovery_directory
   pg_recovery_target_time  = var.grafana_db_recovery_target_time
@@ -364,8 +380,9 @@ module "thanos_redis_cache" {
   namespace                            = local.namespace
   replica_count                        = 3
   lfu_cache_enabled                    = true
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   vpa_enabled                          = var.vpa_enabled
   minimum_memory_mb                    = 1000
@@ -2398,6 +2415,9 @@ module "authenticating_proxy" {
   source = "../kube_vault_proxy"
 
   namespace                            = local.namespace
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   vpa_enabled                          = var.vpa_enabled
   domain                               = local.bucket_web_domain

@@ -38,11 +38,6 @@ output "admin_role" {
   value       = module.redis.admin_role
 }
 
-output "testing" {
-  description = "The value for the master set to use when configuring Sentinel-aware Redis clients"
-  value       = "tesitng"
-}
-
 output "master_set" {
   description = "The value for the master set to use when configuring Sentinel-aware Redis clients"
   value       = module.redis.master_set

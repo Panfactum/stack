@@ -38,8 +38,9 @@ module "util_crd_migrate" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-crd-migrate"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -49,8 +50,9 @@ module "util_admission_controller" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-admission-controller"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
   az_spread_required          = var.sla_target >= 2
@@ -68,8 +70,9 @@ module "util_background_controller" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-background-controller"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -89,8 +92,9 @@ module "util_cleanup_controller" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-cleanup-controller"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -100,8 +104,9 @@ module "util_reports_controller" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-reports-controller"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -111,8 +116,9 @@ module "util_webhooks_cleanup" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-webhooks-cleanup"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -122,8 +128,9 @@ module "util_policy_reports_cleanup" {
   source = "../kube_workload_utility"
 
   workload_name               = "kyverno-policy-reports-cleanup"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = true
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   az_spread_preferred         = var.sla_target >= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   extra_labels                = data.pf_kube_labels.labels.labels
@@ -490,7 +497,7 @@ resource "kubernetes_cluster_role" "extra_permissions" {
   rule {
     api_groups = [""]
     verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
-    resources  = ["configmaps", "secrets", "nodes", "pods", "persistentvolumeclaims", "namespaces"]
+    resources  = ["configmaps", "secrets", "nodes", "pods", "persistentvolumeclaims", "namespaces", "persistentvolumes"]
   }
   rule {
     api_groups = ["apiextensions.k8s.io"]
@@ -516,6 +523,11 @@ resource "kubernetes_cluster_role" "extra_permissions" {
     api_groups = ["admissionregistration.k8s.io"]
     verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
     resources  = ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
+  }
+  rule {
+    api_groups = ["kyverno.io"]
+    verbs      = ["get", "list", "watch", "create", "update", "delete", "patch"]
+    resources  = ["updaterequests"]
   }
 }
 

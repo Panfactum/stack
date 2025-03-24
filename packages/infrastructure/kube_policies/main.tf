@@ -74,7 +74,6 @@ resource "kubectl_manifest" "panfactum_policies" {
         local.rule_use_pull_through_image_cache,
         local.rule_use_panfactum_scheduler,
         local.rule_add_default_tolerations,
-        local.rule_add_extra_tolerations_if_burstable_toleration,
         local.rule_add_extra_tolerations_if_controller_toleration,
         local.rule_add_environment_variables,
         local.rule_add_pod_label

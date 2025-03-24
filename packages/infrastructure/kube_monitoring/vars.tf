@@ -263,6 +263,12 @@ variable "grafana_db_recovery_target_time" {
   default     = null
 }
 
+variable "grafana_db_backup_directory" {
+  description = "The name of the directory in the backup bucket containing the backups files for the Grafana PostgreSQL database."
+  type        = string
+  default     = "initial"
+}
+
 variable "node_image_cached_enabled" {
   description = "Whether to add the container images to the node image cache for faster startup times"
   type        = bool
@@ -275,5 +281,22 @@ variable "wait" {
   default     = true
 }
 
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
+  type        = bool
+  default     = true
+}
 
 

@@ -31,6 +31,14 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### canary\_enabled
 
 Description: Whether to add canary checks to the deployed systems
@@ -46,6 +54,14 @@ Description: The version of cert-manager to deploy
 Type: `string`
 
 Default: `"1.16.3"`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
 
 ### log\_verbosity
 
@@ -94,6 +110,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 

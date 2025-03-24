@@ -26,3 +26,21 @@ variable "cron_schedule" {
   type        = string
   default     = "0 4 * * *"
 }
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
+  type        = bool
+  default     = true
+}

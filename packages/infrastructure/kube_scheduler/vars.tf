@@ -42,3 +42,22 @@ variable "log_verbosity" {
     error_message = "Log verbosity must be less than or equal to 10"
   }
 }
+
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
+  type        = bool
+  default     = true
+}

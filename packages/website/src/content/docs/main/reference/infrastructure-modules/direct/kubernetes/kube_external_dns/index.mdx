@@ -103,6 +103,14 @@ Type: `list(string)`
 
 Default: `[]`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### cloudflare\_api\_token
 
 Description: Cloudflare API Token
@@ -124,6 +132,14 @@ map(object({
 ```
 
 Default: `{}`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
 
 ### external\_dns\_helm\_version
 
@@ -179,6 +195,14 @@ map(object({
 ```
 
 Default: `{}`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### sync\_policy
 

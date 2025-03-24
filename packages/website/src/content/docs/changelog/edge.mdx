@@ -19,9 +19,39 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Breaking Changes
+
+* Across all Panfactum modules, `burstabled_nodes_enabled` no longer automatically adds a spot instance toleration. This enables users to run on-demand, [burstable](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
+  instances when appropriate. This means that `spot_nodes_enabled` must now be set to `true` explicitly if [spot instances](https://aws.amazon.com/ec2/spot/) are desired.
+
+* The backup directory for [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) is now explicitly specified by
+`pg_backup_directory` instead of being randomly generated. This release will automatically restart your backup history unless you explicitly set `pg_backup_directory`
+to the `recovery_directory` output value from the previous release. You should ensure that backups are working correctly after upgrading to this release.
+
+  Additionally, the `recovery_directory` output has been renamed to `backup_directory` to better reflect its purpose. This has been updated
+  in the [recovery documentation](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster#recovery).
+
 ### Added
 
 * Adds support for accepting the `transform` parameter in [kube_argo_sensor dependencies](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_sensor#dependencies) input to allow for custom transformations of incoming events.
+
+* Adds support for `spot_nodes_enabled`, `burstable_nodes_enabled`, and `controller_nodes_enabled` inputs to all direct Kubernetes modules.
+
+* Adds a `spot_nodes_enabled` (default `true`) input to [aws_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module to disable spot instances for controller nodes.
+
+* Adds support for automatically preventing disruptions when backups are running in [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+
+* Adds automatic garbage collection of orphaned persistent volumes via [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies).
+
+* Adds automatic garbage collection of failed backups in [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pg_cluster).
+
+### Fixed
+
+* Optimizes the backup process for [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to provide a 100x improvement in backup throughput.
+
+* Upgrades the `kubectl-cnpg` plugin in the devShell to be compatible with the latest version of the CNPG operator in the cluster.
+
+* Fixes version pinning on first party modules [issue 237](https://github.com/Panfactum/stack/issues/237)
 
 ## edge.25-03-04
 

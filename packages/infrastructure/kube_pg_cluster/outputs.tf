@@ -139,8 +139,13 @@ output "db_reader_role" {
   value       = vault_database_secret_backend_role.reader.name
 }
 
-output "recovery_directory" {
+output "backup_bucket_name" {
+  description = "The name of the backup bucket"
+  value       = module.s3_bucket.bucket_name
+}
+
+output "backup_directory" {
   description = "The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives"
-  value       = random_id.recovery_directory.hex
+  value       = var.pg_backup_directory
 }
 

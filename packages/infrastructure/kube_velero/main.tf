@@ -43,7 +43,6 @@ module "util" {
   source = "../kube_workload_utility"
 
   workload_name                        = "velero"
-  burstable_nodes_enabled              = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   instance_type_anti_affinity_required = false // single replica

@@ -157,6 +157,14 @@ Type: `map(number)`
 
 Default: `{}`
 
+### gc\_released\_volumes\_after\_days
+
+Description: The number of days to wait before deleting released PersistentVolumes (PVs). These are volumes that are no longer used but may contain recovery data. Set to -1 to disable.
+
+Type: `number`
+
+Default: `30`
+
 ### panfactum\_node\_image\_cache\_enabled
 
 Description: Whether support for the node-local image cache should be enabled

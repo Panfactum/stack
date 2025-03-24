@@ -109,8 +109,9 @@ module "core_dns" {
   }
 
   replicas                             = 2
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   instance_type_anti_affinity_required = true // If DNS goes down, the cluster is borked so ensure this won't be affected by spot scale-in
   az_spread_preferred                  = true
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled

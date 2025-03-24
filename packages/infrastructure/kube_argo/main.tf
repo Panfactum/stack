@@ -55,8 +55,9 @@ module "util_controller" {
   az_spread_required                   = false // single instance
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -68,8 +69,9 @@ module "util_server" {
   az_spread_preferred                  = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -82,8 +84,9 @@ module "util_events_controller" {
   instance_type_anti_affinity_required = false // single instance
   az_spread_preferred                  = false // single instance
   az_spread_required                   = false // single instance
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -95,8 +98,9 @@ module "util_webhook" {
   az_spread_preferred                  = var.sla_target >= 2
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
-  controller_nodes_enabled             = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
   extra_labels                         = data.pf_kube_labels.labels.labels
 }
 
@@ -258,7 +262,9 @@ module "database" {
   pg_smart_shutdown_timeout            = 2
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  burstable_nodes_enabled              = true
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  controller_nodes_enabled             = false // should not run on controller nodes which can cause disruptions
   backups_force_delete                 = true
   monitoring_enabled                   = var.monitoring_enabled
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
@@ -274,6 +280,7 @@ module "database" {
   pgbouncer_minimum_memory_mb      = var.pgbouncer_minimum_memory_mb
   pgbouncer_maximum_memory_mb      = var.pgbouncer_maximum_memory_mb
 
+  pg_backup_directory      = var.db_backup_directory
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
   pg_recovery_directory    = var.db_recovery_directory
   pg_recovery_target_time  = var.db_recovery_target_time

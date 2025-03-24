@@ -69,8 +69,9 @@ module "util" {
   source = "../kube_workload_utility"
 
   workload_name               = "nginx-ingress"
-  burstable_nodes_enabled     = true
-  controller_nodes_enabled    = var.sla_target <= 2
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled || var.sla_target <= 2
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
   lifetime_evictions_enabled  = false

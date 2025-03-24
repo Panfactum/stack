@@ -104,6 +104,12 @@ variable "db_recovery_directory" {
   default     = null
 }
 
+variable "db_backup_directory" {
+  description = "The name of the directory in the backup bucket containing the backups files for the database."
+  type        = string
+  default     = "initial"
+}
+
 variable "db_recovery_target_time" {
   description = "If provided, will recover the PostgreSQL database to the indicated target time in RFC 3339 format rather than to the latest data."
   type        = string
@@ -113,11 +119,11 @@ variable "db_recovery_target_time" {
 variable "pg_minimum_memory_mb" {
   description = "The minimum amount of memory to allocate to the postgres pods (in Mi)"
   type        = number
-  default     = 400
+  default     = 500
 
   validation {
-    condition     = var.pg_minimum_memory_mb >= 400
-    error_message = "Must provide at least 400MB of memory"
+    condition     = var.pg_minimum_memory_mb >= 500
+    error_message = "Must provide at least 500MB of memory"
   }
 }
 
@@ -186,6 +192,24 @@ variable "pgbouncer_maximum_cpu_millicores" {
 
 variable "wait" {
   description = "Wait for resources to be in a ready state before proceeding. Disabling this flag will allow upgrades to proceed faster but will disable automatic rollbacks. As a result, manual intervention may be required for deployment failures."
+  type        = bool
+  default     = true
+}
+
+variable "spot_nodes_enabled" {
+  description = "Whether to allow pods to schedule on spot nodes"
+  type        = bool
+  default     = true
+}
+
+variable "burstable_nodes_enabled" {
+  description = "Whether to allow pods to schedule on burstable nodes"
+  type        = bool
+  default     = true
+}
+
+variable "controller_nodes_enabled" {
+  description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
   default     = true
 }
