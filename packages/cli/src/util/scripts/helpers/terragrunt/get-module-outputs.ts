@@ -38,6 +38,11 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
 
   !verbose && globalThis.clearInterval(moduleOutputProgress);
 
+  if (verbose) {
+    context.stdout.write(moduleOutputs.stdout);
+    context.stderr.write(moduleOutputs.stderr);
+  }
+
   const validatedModuleOutputs = parseData(moduleOutputs, validationSchema);
 
   if (verbose) {
