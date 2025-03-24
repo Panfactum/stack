@@ -31,7 +31,7 @@ export class GetAWSStateHashCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(awsStateHash);
+    this.context.stdout.write(awsStateHash + "\n");
 
     return 0;
   }

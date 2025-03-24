@@ -1,32 +1,24 @@
 import { getRepoVariables } from "./get-repo-variables";
 import { updateKubeHash } from "./shared-constants";
+import { safeDirectoryExists } from "../safe-directory-exists";
+import { getFileMd5Hash } from "./helpers/get-file-md5-hash";
 import type { BaseContext } from "clipanion";
 
-export const getKubeStateHash = async ({
-  context,
-}: {
-  context: BaseContext;
-}) => {
+/**
+ * Generates a hash based on the Kubernetes configuration state
+ * @param context - The base context for the CLI command
+ * @returns A promise that resolves to the MD5 hash of the Kubernetes state
+ */
+export async function getKubeStateHash({ context }: { context: BaseContext }) {
   const repoVariables = await getRepoVariables({ context });
   const kubeDir = repoVariables.kube_dir;
+  const configFilePath = `${kubeDir}/config.yaml`;
 
-  // The original script has a check to ensure kubeDir exists here
-  // However, getRepoVariables sets this value with a default if it doesn't exist
-  // so there is no need to do that anymore
-  const configFile = `${kubeDir}/config.yaml`;
-  let configFileExists = false;
-  try {
-    configFileExists = await Bun.file(configFile).exists();
-  } catch {
-    // Ignore any errors, just keep configFileExists as false
-  }
   let configFileHash;
-  if (configFileExists) {
-    const configFileBlob = Bun.file(configFile);
-    const hasher = new Bun.CryptoHasher("md5");
-    configFileHash = hasher.update(configFileBlob).digest("hex");
+  if (await safeDirectoryExists(kubeDir)) {
+    configFileHash = await getFileMd5Hash(configFilePath);
   }
 
   const hasher = new Bun.CryptoHasher("md5");
   return hasher.update(`${updateKubeHash}${configFileHash}`).digest("hex");
-};
+}

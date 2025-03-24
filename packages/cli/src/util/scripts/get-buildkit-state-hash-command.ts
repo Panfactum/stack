@@ -31,7 +31,7 @@ export class GetBuildkitStateHashCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(buildkitStateHash);
+    this.context.stdout.write(buildkitStateHash + "\n");
 
     return 0;
   }

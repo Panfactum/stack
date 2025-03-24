@@ -31,7 +31,7 @@ export class GetKubeStateHashCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(kubeStateHash);
+    this.context.stdout.write(kubeStateHash + "\n");
 
     return 0;
   }

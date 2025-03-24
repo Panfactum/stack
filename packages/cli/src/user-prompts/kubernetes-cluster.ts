@@ -9,6 +9,15 @@ export async function kubernetesClusterPrompts({
   const clusterName = await input({
     message: "Enter a name for your Kubernetes cluster:",
     default: `panfactum-${environment}`,
+    validate: (value) => {
+      if (value.length > 100) {
+        return "Cluster name must be less than 100 characters";
+      }
+      if (value.includes(" ")) {
+        return "Cluster name cannot contain spaces";
+      }
+      return true;
+    },
   });
 
   const clusterDescription = await input({

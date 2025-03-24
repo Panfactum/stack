@@ -14,6 +14,7 @@ export class GetKubeUserStateHashCommand extends Command {
       "Returns a state hash used to determine if pf update-kube needs to be rerun.",
     examples: [["Get kube user state hash", "pf get-kube-user-state-hash"]],
   });
+
   async execute(): Promise<number> {
     let hash;
     try {
@@ -30,7 +31,7 @@ export class GetKubeUserStateHashCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(hash);
+    this.context.stdout.write(hash + "\n");
 
     return 0;
   }

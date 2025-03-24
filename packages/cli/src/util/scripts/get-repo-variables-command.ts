@@ -35,7 +35,7 @@ export class GetRepoVariablesCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(JSON.stringify(repoVariables, null, 2));
+    this.context.stdout.write(JSON.stringify(repoVariables, null, 2) + "\n");
 
     return 0;
   }

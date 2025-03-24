@@ -11,6 +11,19 @@ import { safeDirectoryExists } from "../safe-directory-exists";
 import { checkRepoSetup } from "./check-repo-setup";
 import type { BaseContext } from "clipanion";
 
+/**
+ * Updates Kubernetes configuration files and settings.
+ *
+ * This function performs several tasks:
+ * 1. Copies static configuration example files to the Kubernetes directory
+ * 2. Builds the cluster_info file with information about available Kubernetes clusters
+ * 3. Dynamically configures user-specific kubeconfig based on user preferences
+ *
+ * @param {Object} options - Function options
+ * @param {boolean} [options.buildConfig] - Whether to build the cluster_info file
+ * @param {BaseContext} options.context - The CLI context for logging
+ * @throws {Error} If required files are missing or configuration is invalid
+ */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function updateKube({
   buildConfig,

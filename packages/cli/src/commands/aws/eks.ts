@@ -1,7 +1,9 @@
 import path from "node:path";
 import yaml from "yaml";
+import { z } from "zod";
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
+import { eksReset } from "../../util/scripts/eks-reset";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
 import { getRoot } from "../../util/scripts/helpers/get-root";
 import { tfInit } from "../../util/scripts/tf-init";
@@ -110,14 +112,59 @@ export async function setupEks(input: EksSetupInput) {
   });
 
   // Setup kubeconfig
-  //https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig
+  const kubeUserConfigPath = path.join(root, ".kube", "config.yaml");
+  const kubeUserConfigExists = await Bun.file(kubeUserConfigPath).exists();
+  if (!kubeUserConfigExists) {
+    await Bun.write(
+      kubeUserConfigPath,
+      `# A list of all clusters to add to your kubeconfig (clusters must be present in cluster_info file)\n` +
+        `clusters:\n` +
+        `  - name: "${input.clusterName}"\n` +
+        `    aws_profile: "${input.clusterName}"`
+    );
+  } else {
+    const kubeUserConfig = await Bun.file(kubeUserConfigPath).text();
+    const jsonUserConfig = yaml.parse(kubeUserConfig);
+    const jsonUserConfigSchema = z.object({
+      clusters: z.array(
+        z.object({
+          name: z.string(),
+          aws_profile: z.string(),
+        })
+      ),
+    });
+    const parsedUserConfig = jsonUserConfigSchema.parse(jsonUserConfig);
+    if (
+      parsedUserConfig.clusters.some(
+        (cluster) => cluster.name === input.clusterName
+      )
+    ) {
+      return;
+    }
+    parsedUserConfig.clusters.push({
+      name: input.clusterName,
+      aws_profile: input.clusterName,
+    });
+    await Bun.write(kubeUserConfigPath, yaml.stringify(parsedUserConfig));
+  }
 
-  // verify connection to the cluster
-  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+  await updateKube({
+    context: input.context,
+  });
 
   // Reset EKS cluster
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#reset-eks-cluster
+  await eksReset({
+    context: input.context,
+  });
 
   // Prepare to deploy kubernetes modules
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#prepare-to-deploy-kubernetes-modules
+
+  // verify connection to the cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+  // Should probably tell the user something here about trying in a different terminal window
+  // Use the confirm prompt here.
+  // Enter to continue type of thing...
 }

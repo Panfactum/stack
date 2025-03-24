@@ -33,7 +33,7 @@ export class GetBuildkitUserStateHashCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(buildkitUserStateHash);
+    this.context.stdout.write(buildkitUserStateHash + "\n");
 
     return 0;
   }

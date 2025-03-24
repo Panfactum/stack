@@ -1,9 +1,13 @@
 import { getRepoVariables } from "./get-repo-variables";
+import { getFileMd5Hash } from "./helpers/get-file-md5-hash";
 import { updateKubeHash } from "./shared-constants";
-import { safeFileExists } from "../safe-file-exists";
 import type { BaseContext } from "clipanion";
 
-// Purpose: Returns a state hash used to determine if pf update-kube needs to be rerun.
+/**
+ * Generates a hash based on the Kubernetes configuration state
+ * @param context - The base context for the CLI command
+ * @returns A promise that resolves to the MD5 hash of the Kubernetes state
+ */
 
 export async function getKubeUserStateHash({
   context,
@@ -17,23 +21,10 @@ export async function getKubeUserStateHash({
 
   const clusterInfoFilePath = `${kubeDir}/cluster_info`;
   const userConfigFilePath = `${kubeDir}/config.user.yaml`;
-  let clusterInfoHash = "";
-  let userConfigHash = "";
 
-  if (await safeFileExists(clusterInfoFilePath)) {
-    const hasher = new Bun.CryptoHasher("md5");
-    clusterInfoHash = hasher
-      .update(Bun.file(clusterInfoFilePath))
-      .digest("hex");
-  }
-
-  if (await safeFileExists(userConfigFilePath)) {
-    const userConfigFileBlob = Bun.file(userConfigFilePath);
-    const hasher = new Bun.CryptoHasher("md5");
-    userConfigHash = hasher.update(userConfigFileBlob).digest("hex");
-  }
+  const clusterInfoHash = await getFileMd5Hash(clusterInfoFilePath);
+  const userConfigHash = await getFileMd5Hash(userConfigFilePath);
 
   const hasher = new Bun.CryptoHasher("md5");
-  hasher.update(`${updateKubeHash}${userConfigHash}${clusterInfoHash}`);
-  return hasher.digest("hex");
+  return hasher.update(`${updateKubeHash}${userConfigHash}${clusterInfoHash}`).digest("hex");
 }

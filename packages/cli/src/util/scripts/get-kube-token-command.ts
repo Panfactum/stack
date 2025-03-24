@@ -53,7 +53,7 @@ export class GetKubeTokenCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(token);
+    this.context.stdout.write(token + "\n");
 
     return 0;
   }

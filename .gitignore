@@ -19,3 +19,6 @@ node_modules/
 
 .DS_Store
 .vscode
+
+# https://docs.cursor.com/context/codebase-indexing#working-with-large-monorepos
+.cursorignore

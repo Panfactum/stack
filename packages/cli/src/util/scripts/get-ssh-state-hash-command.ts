@@ -30,7 +30,7 @@ export class GetSSHStateHashCommand extends Command {
       return 1;
     }
 
-    this.context.stdout.write(hash);
+    this.context.stdout.write(hash + "\n");
 
     return 0;
   }
