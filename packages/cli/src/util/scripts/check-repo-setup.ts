@@ -243,7 +243,7 @@ export async function checkRepoSetup({ context }: { context: BaseContext }) {
     );
     context.stderr.write(
       pc.yellow(
-        `Run 'pf update' to update your files and resolve this warning.\n\n`
+        `Run 'pf update' to update your files and resolve this warning.\n`
       )
     );
   } else if (errors.length > 0) {
