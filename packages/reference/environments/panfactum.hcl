@@ -161,11 +161,7 @@ locals {
   # The terraform.source for the first-party IaC
   # Note that the location of the // is intentional and changes depending on whether local or not.
   # Additionally note the difference b/w iac_dir_from_root and iac_dir_from_git_root -- This is also intentional as hack to workaround the fact that the reference repo isn't at the git root.
-  source = (
-    local.use_local_iac ?
-    "${local.repo_root}/${local.repo_vars.iac_dir_from_root}//${local.module}" :
-    "${local.authenticated_repo_url}//${local.repo_vars.iac_dir_from_git_root}/${local.module}?ref=${local.version_hash}"
-  )
+  source = local.use_local_iac ? "${local.repo_root}/${local.repo_vars.iac_dir_from_root}//${local.module}" : "${local.authenticated_repo_url}//${local.repo_vars.iac_dir_from_git_root}/${local.module}"
 
   ############################################################################################
   # Vault Token Sourcing
