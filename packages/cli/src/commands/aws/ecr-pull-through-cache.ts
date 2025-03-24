@@ -1,3 +1,4 @@
+import ecrPullThroughCacheTemplate from "../../templates/aws_ecr_pull_through_cache_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { tfInit } from "../../util/scripts/tf-init";
@@ -17,9 +18,7 @@ export async function setupEcrPullThroughCache(
   await ensureFileExists({
     context: input.context,
     destinationFile: "./aws_ecr_pull_through_cache/terragrunt.hcl",
-    sourceFile: await Bun.file(
-      import.meta.dir + "/templates/aws_ecr_pull_through_cache_terragrunt.hcl"
-    ).text(),
+    sourceFile: await Bun.file(ecrPullThroughCacheTemplate).text(),
   });
 
   await replaceHclValue(

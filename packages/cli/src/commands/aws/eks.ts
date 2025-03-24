@@ -1,6 +1,8 @@
 import path from "node:path";
 import yaml from "yaml";
 import { z } from "zod";
+import awsEksSla1Template from "../../templates/aws_eks_sla_1_terragrunt.hcl" with { type: "file" };
+import awsEksSla2Template from "../../templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { eksReset } from "../../util/scripts/eks-reset";
@@ -21,16 +23,12 @@ interface EksSetupInput {
 
 export async function setupEks(input: EksSetupInput) {
   const templateName =
-    input.slaLevel === 1
-      ? "aws_eks_sla_1_terragrunt.hcl"
-      : "aws_eks_sla_2_terragrunt.hcl";
+    input.slaLevel === 1 ? awsEksSla1Template : awsEksSla2Template;
 
   await ensureFileExists({
     context: input.context,
     destinationFile: "./aws_eks/terragrunt.hcl",
-    sourceFile: await Bun.file(
-      import.meta.dir + `/templates/${templateName}`
-    ).text(),
+    sourceFile: await Bun.file(templateName).text(),
   });
 
   await replaceHclValue(
@@ -62,12 +60,7 @@ export async function setupEks(input: EksSetupInput) {
   const terragruntVariables = await getTerragruntVariables({
     context: input.context,
   });
-  if (typeof terragruntVariables["environment"] !== "string") {
-    throw new Error("Environment not correctly set for Terragrunt");
-  }
-  if (typeof terragruntVariables["region"] !== "string") {
-    throw new Error("Region not correctly set for Terragrunt");
-  }
+
   const { root } = await getRoot();
   const kubeConfigPath = path.join(root, ".kube", "config.yaml");
   const configExists = await Bun.file(kubeConfigPath).exists();

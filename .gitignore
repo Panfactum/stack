@@ -22,3 +22,5 @@ node_modules/
 
 # https://docs.cursor.com/context/codebase-indexing#working-with-large-monorepos
 .cursorignore
+
+.tmp-panfactum-install-config.json

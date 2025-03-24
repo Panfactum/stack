@@ -39,8 +39,12 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
   !verbose && globalThis.clearInterval(moduleOutputProgress);
 
   if (verbose) {
-    context.stdout.write("STDOUT: " + (moduleOutputs.stdout?.toString() ?? ""));
-    context.stderr.write("STDERR: " + (moduleOutputs.stderr?.toString() ?? ""));
+    context.stdout.write(
+      "STDOUT: " + (moduleOutputs.stdout?.toString() ?? "") + "\n"
+    );
+    context.stderr.write(
+      "STDERR: " + (moduleOutputs.stderr?.toString() ?? "") + "\n"
+    );
   }
 
   const parsedModuleOutputs = JSON.parse(

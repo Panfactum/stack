@@ -1,4 +1,5 @@
 import { input, password } from "@inquirer/prompts";
+import pc from "picocolors";
 import { ensureFileExists } from "../util/ensure-file-exists";
 import type { BaseContext } from "clipanion";
 
@@ -8,12 +9,14 @@ export async function ecrPullThroughCachePrompts({
   context: BaseContext;
 }) {
   context.stdout.write(
-    "To address issues with public image registry issues (rate limits, download sizes, service outages, etc.),\n" +
-      "we will use a private image registry and a pull through cache.\n" +
-      "This will allow us to cache images from public registries and pull them from our private registry.\n" +
-      "Eventhough these are public registries, we will need to provide credentials for them.\n" +
-      "For more information see our documentation:\n" +
-      "https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache\n"
+    pc.blue(
+      "To address public image registry issues (rate limits, download sizes, service outages, etc...),\n" +
+        "we will use a private image registry and a pull through cache.\n" +
+        "This will allow us to cache images from public registries and pull them from our private registry.\n" +
+        "Eventhough these are public registries, we will need to provide credentials for them.\n" +
+        "For more information see our documentation:\n" +
+        "https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache\n"
+    )
   );
 
   // Prompt for GitHub PAT for Kubernetes Cluster
@@ -24,8 +27,7 @@ export async function ecrPullThroughCachePrompts({
   });
 
   const githubPat = await password({
-    message:
-      "Enter your classic GitHub Personal Access Token with 'read:packages' scope (this will be encrypted with SOPS and stored securely):",
+    message: `Enter your classic GitHub Personal Access Token with 'read:packages' scope\nFor more details on how to create one,see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n${pc.red("this will be encrypted with SOPS and stored securely")}:`,
     mask: true,
   });
 
@@ -37,8 +39,7 @@ export async function ecrPullThroughCachePrompts({
   });
 
   const dockerHubPat = await password({
-    message:
-      "Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions (this will be encrypted with SOPS and stored securely):",
+    message: `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\nFor more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n${pc.red("this will be encrypted with SOPS and stored securely")}:`,
     mask: true,
   });
 

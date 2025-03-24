@@ -1,6 +1,44 @@
 import { dirname } from "node:path";
 import * as yaml from "yaml";
+import { z } from "zod";
 import type { BaseContext } from "clipanion";
+
+// See https://panfactum.com/docs/edge/reference/configuration/terragrunt-variables
+const terragruntVariablesSchema = z.object({
+  // Metadata
+  environment: z.string(),
+  region: z.string(),
+  sla_target: z.number().int().min(1).max(3).optional(),
+  extra_tags: z.record(z.string(), z.any()).optional(),
+  // Inputs
+  extra_inputs: z.record(z.string(), z.any()).optional(),
+  // Module Source
+  version: z.string().optional(),
+  pf_stack_version: z.string().optional(),
+  pf_stack_local_path: z.string().optional(),
+  pf_stack_local_use_relative: z.boolean().optional(),
+  module: z.string().optional(),
+  // State Backend Setup
+  tf_state_account_id: z.string(),
+  tf_state_profile: z.string(),
+  tf_state_region: z.string(),
+  tf_state_bucket: z.string(),
+  tf_state_lock_table: z.string(),
+  // AWS Provider
+  aws_account_id: z.string(),
+  aws_profile: z.string(),
+  aws_region: z.string(),
+  aws_secondary_account_id: z.string().optional(),
+  aws_secondary_profile: z.string().optional(),
+  aws_secondary_region: z.string().optional(),
+  // Kubernetes Provider
+  kube_api_server: z.string(),
+  kube_config_context: z.string(),
+  // Vault Provider
+  vault_addr: z.string(),
+  // Authentik Provider
+  authentik_url: z.string(),
+});
 
 /**
  * Returns a JSON object containing the Terragrunt variables that Terragrunt would use
@@ -13,7 +51,7 @@ export const getTerragruntVariables = async ({
   context,
 }: {
   context: BaseContext;
-}): Promise<Record<string, unknown>> => {
+}): Promise<z.infer<typeof terragruntVariablesSchema>> => {
   const files = await getFiles(process.cwd());
 
   // If YAML files are found, merge and convert to JSON
@@ -51,10 +89,12 @@ export const getTerragruntVariables = async ({
       }
     }
 
-    return merged;
+    const validatedVariables = terragruntVariablesSchema.parse(merged);
+
+    return validatedVariables;
   } else {
     context.stdout.write("Warning: No configuration files found.");
-    return {};
+    throw new Error("No configuration files found.");
   }
 };
 
