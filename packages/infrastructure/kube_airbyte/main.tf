@@ -175,14 +175,20 @@ data "aws_iam_policy_document" "airbyte_bucket" {
       "s3:GetObject",
       "s3:DeleteObject"
     ]
-    resources = ["${module.airbyte_bucket.bucket_arn}/*"]
+    resources = concat(
+      ["${module.airbyte_bucket.bucket_arn}/*"],
+      [for arn in var.additional_s3_bucket_arns : "${arn}/*"]
+    )
   }
   statement {
     effect = "Allow"
     actions = [
       "s3:ListBucket"
     ]
-    resources = [module.airbyte_bucket.bucket_arn]
+    resources = concat(
+      [module.airbyte_bucket.bucket_arn],
+      var.additional_s3_bucket_arns
+    )
   }
   statement {
     effect = "Allow"
@@ -190,6 +196,20 @@ data "aws_iam_policy_document" "airbyte_bucket" {
       "s3:GetBucketLocation"
     ]
     resources = ["arn:aws:s3:::*"]
+  }
+
+  # Add multipart upload permissions which are needed by the S3 destination
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListMultipartUploadParts",
+      "s3:AbortMultipartUpload",
+      "s3:ListBucketMultipartUploads"
+    ]
+    resources = concat(
+      [module.airbyte_bucket.bucket_arn, "${module.airbyte_bucket.bucket_arn}/*"],
+      flatten([for arn in var.additional_s3_bucket_arns : [arn, "${arn}/*"]])
+    )
   }
 }
 
@@ -543,9 +563,9 @@ module "ingress" {
   extra_annotations = merge(
     module.authenticating_proxy[0].upstream_ingress_annotations,
     {
-      "nginx.ingress.kubernetes.io/proxy-connect-timeout" = "300"
-      "nginx.ingress.kubernetes.io/proxy-send-timeout"    = "300"
-      "nginx.ingress.kubernetes.io/proxy-read-timeout"    = "300"
+      "nginx.ingress.kubernetes.io/proxy-connect-timeout" = "600"
+      "nginx.ingress.kubernetes.io/proxy-send-timeout"    = "600"
+      "nginx.ingress.kubernetes.io/proxy-read-timeout"    = "600"
       "nginx.ingress.kubernetes.io/proxy-body-size"       = "50m"
     }
   )

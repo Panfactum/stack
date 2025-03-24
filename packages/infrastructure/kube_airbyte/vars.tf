@@ -351,3 +351,9 @@ variable "vault_domain" {
   description = "The domain where Vault is accessible"
   type        = string
 }
+
+variable "additional_s3_bucket_arns" {
+  description = "Additional S3 bucket ARNs to grant permissions to the Airbyte service account"
+  type        = list(string)
+  default     = []
+}

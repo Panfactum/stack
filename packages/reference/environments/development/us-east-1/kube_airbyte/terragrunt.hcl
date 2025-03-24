@@ -16,9 +16,17 @@ dependency "kyverno" {
   skip_outputs = true
 }
 
+dependency "s3_destination" {
+  config_path  = "../airbyte_s3_destination"
+}
+
 inputs = {
   domain       = "airbyte.seth.panfactum.com"
   vault_domain = dependency.vault.outputs.vault_domain
   wait         = false
   auth_enabled = false
+
+  additional_s3_bucket_arns = [
+    dependency.s3_destination.outputs.bucket_arn
+  ]
 }
