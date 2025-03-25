@@ -396,7 +396,7 @@ resource "helm_release" "airbyte" {
               cpu    = "${var.jobs_cpu_request_millicores}m"
             }
             limits = {
-              memory = "${var.jobs_min_memory_mb * local.memory_limit_multiplier}Gi"
+              memory = "${var.jobs_min_memory_mb * local.memory_limit_multiplier}Mi"
             }
           }
           kube = {
