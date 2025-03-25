@@ -12,7 +12,7 @@ The CLI uses the [picocolors](https://github.com/picocolors/picocolors) library 
 
 The general theme is as follows:
 
-1. For general infomation and blocks of text use `pc.blue`.
+1. For general information and blocks of text use `pc.blue`.
 2. For prompts use `pc.magenta`.
 3. For errors use `pc.red`.
 4. For directing the user to take and action use `pc.cyan`.
