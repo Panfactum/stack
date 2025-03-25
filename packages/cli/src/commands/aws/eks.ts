@@ -161,10 +161,12 @@ export async function setupEks(input: EksSetupInput) {
   const kubeConfigContext = terragruntVariables["kube_config_context"];
   const kubeApiServer = terragruntVariables["kube_api_server"];
   const regionFile = Bun.file(
-    repoVariables.environments_dir +
-      terragruntVariables["environment"] +
-      terragruntVariables["region"] +
-      "/region.yaml"
+    path.join(
+      repoVariables.environments_dir,
+      terragruntVariables["environment"],
+      terragruntVariables["region"],
+      "region.yaml"
+    )
   );
   const regionFileExists = await regionFile.exists();
   if (!regionFileExists) {
