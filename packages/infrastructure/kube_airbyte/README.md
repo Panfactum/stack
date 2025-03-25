@@ -2,17 +2,22 @@
 
 This module deploys Airbyte onto a Kubernetes cluster with a focus on AWS infrastructure, though it can be adapted for other cloud providers. The module follows the Panfactum module infrastructure pattern.
 
-## Features
+I'll create a clear blurb about the module's scope regarding connectors for your README.
 
-- Configurable deployment of Airbyte Community or Enterprise edition
-- Support for high availability configurations through SLA targeting
-- S3 integration for logs, state, and workload output storage
-- PostgreSQL database with backup and recovery capabilities
-- Built-in ingress configuration with Vault-based authentication
-- Vertical Pod Autoscaler (VPA) support for efficient resource allocation
-- Pod Disruption Budgets for high availability guarantees
-- Node image caching for faster deployments
-- Configurable resource allocation for all Airbyte components
+## Scope and Connectors
+
+This module deploys only the core Airbyte engine components required for the platform to function. It does not include or configure any source or destination connectors, which must be installed separately after deployment. The Airbyte platform provides a connector catalog within its user interface where administrators can install the specific connectors needed for their data integration workflows.
+
+For organizations requiring specific connectors:
+
+1. After deployment, log in to the Airbyte UI using the credentials provided
+2. Navigate to the "Sources" or "Destinations" section
+3. Search for and install the required connectors from the catalog
+4. Alternatively, use the Airbyte API to automate connector installation
+
+For custom connector development, this module includes the Connector Builder Server component (enabled by default), which provides a development environment for creating and testing custom connectors to meet specialized integration needs.
+
+If you need to pre-install specific connectors or automate connector configuration, consider implementing additional Terraform modules that interact with the Airbyte API after core deployment is complete.
 
 ## Usage
 
