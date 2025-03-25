@@ -24,7 +24,7 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
 
   if (verbose) {
     context.stdout.write(
-      `Retrieving test configuration from ${modulePath}...\n`
+      `Retrieving module outputs from ${modulePath}...\n`
     );
   }
 
