@@ -9,7 +9,7 @@ export class UpdateAWSCommand extends Command {
   });
 
   build = Option.Boolean("-b,--build", {
-    description: "Build the ssh config",
+    description: "Build the AWS config",
   });
 
   static override usage = Command.Usage({
