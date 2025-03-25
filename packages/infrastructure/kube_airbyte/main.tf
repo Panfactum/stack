@@ -11,7 +11,6 @@ terraform {
     aws = {
       source                = "hashicorp/aws"
       version               = "5.80.0"
-      configuration_aliases = [aws.global]
     }
     random = {
       source  = "hashicorp/random"
@@ -91,6 +90,81 @@ module "util_temporal" {
   source = "../kube_workload_utility"
 
   workload_name                        = "airbyte-temporal"
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  az_spread_preferred                  = var.sla_target >= 2
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
+module "util_connector_builder" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "airbyte-connector-builder-server"
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  az_spread_preferred                  = var.sla_target >= 2
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
+module "util_cron" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "airbyte-cron"
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  az_spread_preferred                  = var.sla_target >= 2
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
+module "util_pod_sweeper" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "airbyte-pod-sweeper"
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  az_spread_preferred                  = var.sla_target >= 2
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
+module "util_workload_api_server" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "airbyte-workload-api-server"
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  az_spread_preferred                  = var.sla_target >= 2
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
+module "util_workload_launcher" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "airbyte-workload-launcher"
   host_anti_affinity_required          = var.sla_target >= 2
   instance_type_anti_affinity_required = var.sla_target == 3
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
@@ -354,12 +428,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = var.webapp_memory_request
-            cpu    = var.webapp_cpu_request
+            memory = "${var.webapp_memory_request_mb}Mi"
+            cpu    = "${var.webapp_cpu_request_millicores}m"
           }
           limits = {
-            memory = var.webapp_memory_limit
-            cpu    = var.webapp_cpu_limit
+            memory = "${var.webapp_memory_request_mb * var.memory_limit_multiplier}Mi"
           }
         }
 
@@ -391,11 +464,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = var.server_memory_request
-            cpu    = var.server_cpu_request
+            memory = "${var.server_memory_request_mb}Mi"
+            cpu    = "${var.server_cpu_request_millicores}m"
           }
           limits = {
-            memory = var.server_memory_limit
+            memory = "${var.server_memory_request_mb * var.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -417,11 +490,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = var.worker_memory_request
-            cpu    = var.worker_cpu_request
+            memory = "${var.worker_memory_request_mb}Mi"
+            cpu    = "${var.worker_cpu_request_millicores}"
           }
           limits = {
-            memory = var.worker_memory_limit
+            memory = "${var.worker_memory_request_mb * var.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -440,11 +513,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = var.temporal_memory_request
-            cpu    = var.temporal_cpu_request
+            memory = "${var.temporal_memory_request_mb}Mi"
+            cpu    = "${var.temporal_cpu_request_millicores}m"
           }
           limits = {
-            memory = var.temporal_memory_limit
+            memory = "${var.temporal_memory_request_mb * var.memory_limit_multiplier}Mi"
           }
         }
 
@@ -474,16 +547,75 @@ resource "helm_release" "airbyte" {
         ]
       }
 
-      # Pod sweeper to clean up completed jobs
+      # Pod sweeper configuration
       "pod-sweeper" = {
         enabled        = true
-        podLabels      = data.pf_kube_labels.labels.labels
+        podLabels      = module.util_pod_sweeper.labels
         podAnnotations = var.pod_annotations
+
+        affinity     = module.util_pod_sweeper.affinity
+        tolerations  = module.util_pod_sweeper.tolerations
+        nodeSelector = var.node_selector
+
+        resources = {
+          requests = {
+            memory = "${var.pod_sweeper_memory_request_mb}Mi"
+            cpu    = "${var.pod_sweeper_min_cpu_millicores}m"
+          }
+          limits = {
+            memory = "${var.pod_sweeper_memory_request_mb * var.memory_limit_multiplier}Mi"
+          }
+        }
       }
 
-      # Connector builder server for custom connectors
+      # Connector builder server configuration
       "connector-builder-server" = {
-        enabled = var.connector_builder_enabled
+        enabled        = var.connector_builder_enabled
+        podLabels      = module.util_connector_builder.labels
+        podAnnotations = var.pod_annotations
+
+        affinity     = module.util_connector_builder.affinity
+        tolerations  = module.util_connector_builder.tolerations
+        nodeSelector = var.node_selector
+
+        log = {
+          level = var.log_level
+        }
+
+        resources = {
+          requests = {
+            memory = "${var.connector_builder_memory_request_mb}Mi"
+            cpu    = "${var.connector_builder_cpu_request_millicores}m"
+          }
+          limits = {
+            memory = "${var.connector_builder_memory_request_mb * var.memory_limit_multiplier}Mi"
+          }
+        }
+      }
+
+      # Cron configuration
+      "cron" = {
+        enabled        = true
+        podLabels      = module.util_cron.labels
+        podAnnotations = var.pod_annotations
+
+        affinity     = module.util_cron.affinity
+        tolerations  = module.util_cron.tolerations
+        nodeSelector = var.node_selector
+
+        log = {
+          level = var.log_level
+        }
+
+        resources = {
+          requests = {
+            memory = "${var.cron_memory_request_mb}Mi"
+            cpu    = "${var.cron_cpu_request_millicores}m"
+          }
+          limits = {
+            memory = "${var.cron_memory_request_mb * var.memory_limit_multiplier}Mi"
+          }
+        }
       }
 
       # Disable MinIO since we're using S3
@@ -491,14 +623,46 @@ resource "helm_release" "airbyte" {
         enabled = false
       }
 
-      # Workload API server
+      # Workload API server configuration
       "workload-api-server" = {
-        enabled = true
+        enabled        = true
+        podLabels      = module.util_workload_api_server.labels
+        podAnnotations = var.pod_annotations
+
+        affinity     = module.util_workload_api_server.affinity
+        tolerations  = module.util_workload_api_server.tolerations
+        nodeSelector = var.node_selector
+
+        resources = {
+          requests = {
+            memory = "${var.workload_api_server_memory_request_mb}Mi"
+            cpu    = "${var.workload_api_server_cpu_request_millicores}m"
+          }
+          limits = {
+            memory = "${var.workload_api_server_memory_request_mb * var.memory_limit_multiplier}Mi"
+          }
+        }
       }
 
-      # Workload launcher
+      # Workload launcher configuration
       "workload-launcher" = {
-        enabled = true
+        enabled        = true
+        podLabels      = module.util_workload_launcher.labels
+        podAnnotations = var.pod_annotations
+
+        affinity     = module.util_workload_launcher.affinity
+        tolerations  = module.util_workload_launcher.tolerations
+        nodeSelector = var.node_selector
+
+        resources = {
+          requests = {
+            memory = "${var.workload_launcher_memory_request_mb}Mi"
+            cpu    = "${var.workload_launcher_cpu_request_millicores}m"
+          }
+          limits = {
+            memory = "${var.workload_launcher_memory_request_mb * var.memory_limit_multiplier}Mi"
+          }
+        }
       }
 
       # Bootloader configuration
@@ -643,6 +807,138 @@ resource "kubectl_manifest" "pdb_worker" {
   depends_on        = [helm_release.airbyte]
 }
 
+resource "kubectl_manifest" "pdb_connector_builder" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-connector-builder-server"
+      namespace = local.namespace
+      labels    = module.util_connector_builder.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_connector_builder.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "pdb_cron" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-cron"
+      namespace = local.namespace
+      labels    = module.util_cron.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_cron.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "pdb_pod_sweeper" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-pod-sweeper"
+      namespace = local.namespace
+      labels    = module.util_pod_sweeper.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_pod_sweeper.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "pdb_temporal" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-temporal"
+      namespace = local.namespace
+      labels    = module.util_temporal.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_temporal.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "pdb_workload_api_server" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-workload-api-server"
+      namespace = local.namespace
+      labels    = module.util_workload_api_server.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_workload_api_server.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "pdb_workload_launcher" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-workload-launcher"
+      namespace = local.namespace
+      labels    = module.util_workload_launcher.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = module.util_workload_launcher.match_labels
+      }
+      maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
 /***************************************
 * Vertical Pod Autoscalers (Optional)
 ***************************************/
@@ -662,7 +958,7 @@ resource "kubectl_manifest" "vpa_webapp" {
         containerPolicies = [{
           containerName = "webapp"
           minAllowed = {
-            memory = var.webapp_memory_request
+            memory = "${var.webapp_memory_request_mb}Mi"
           }
         }]
       }
@@ -700,7 +996,7 @@ resource "kubectl_manifest" "vpa_server" {
         containerPolicies = [{
           containerName = "server"
           minAllowed = {
-            memory = var.server_memory_request
+            memory = "${var.server_memory_request_mb}Mi"
           }
         }]
       }
@@ -738,7 +1034,7 @@ resource "kubectl_manifest" "vpa_worker" {
         containerPolicies = [{
           containerName = "worker"
           minAllowed = {
-            memory = var.worker_memory_request
+            memory = "${var.worker_memory_request_mb}Mi"
           }
         }]
       }
@@ -753,6 +1049,234 @@ resource "kubectl_manifest" "vpa_worker" {
         apiVersion = "apps/v1"
         kind       = "Deployment"
         name       = "airbyte-worker"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "vpa_connector_builder" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "airbyte-connector-builder-server"
+      namespace = local.namespace
+      labels    = module.util_connector_builder.labels
+    }
+    spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "airbyte-connector-builder-server"
+          minAllowed = {
+            memory = "${var.connector_builder_memory_request_mb}Mi"
+          }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "airbyte-connector-builder-server"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "vpa_cron" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "airbyte-cron"
+      namespace = local.namespace
+      labels    = module.util_cron.labels
+    }
+    spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "airbyte-cron"
+          minAllowed = {
+            memory = "${var.cron_memory_request_mb}Mi"
+          }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "airbyte-cron"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "vpa_pod_sweeper" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "airbyte-pod-sweeper"
+      namespace = local.namespace
+      labels    = module.util_pod_sweeper.labels
+    }
+    spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "airbyte-pod-sweeper"
+          minAllowed = {
+            memory = "${var.pod_sweeper_memory_request_mb}Mi"
+          }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "airbyte-pod-sweeper"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "vpa_temporal" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "airbyte-temporal"
+      namespace = local.namespace
+      labels    = module.util_temporal.labels
+    }
+    spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "airbyte-temporal"
+          minAllowed = {
+            memory = "${var.temporal_memory_request_mb}Mi"
+          }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "airbyte-temporal"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "vpa_workload_api_server" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "airbyte-workload-api-server"
+      namespace = local.namespace
+      labels    = module.util_workload_api_server.labels
+    }
+    spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "airbyte-workload-api-server"
+          minAllowed = {
+            memory = "${var.workload_api_server_memory_request_mb}Mi"
+          }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "airbyte-workload-api-server"
+      }
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "vpa_workload_launcher" {
+  count = var.vpa_enabled ? 1 : 0
+  yaml_body = yamlencode({
+    apiVersion = "autoscaling.k8s.io/v1"
+    kind       = "VerticalPodAutoscaler"
+    metadata = {
+      name      = "airbyte-workload-launcher"
+      namespace = local.namespace
+      labels    = module.util_workload_launcher.labels
+    }
+    spec = {
+      resourcePolicy = {
+        containerPolicies = [{
+          containerName = "airbyte-workload-launcher"
+          minAllowed = {
+            memory = "${var.workload_launcher_memory_request_mb}Mi"
+          }
+        }]
+      }
+      updatePolicy = {
+        updateMode = "Auto"
+        evictionRequirements = [{
+          resources         = ["cpu", "memory"]
+          changeRequirement = "TargetHigherThanRequests"
+        }]
+      }
+      targetRef = {
+        apiVersion = "apps/v1"
+        kind       = "Deployment"
+        name       = "airbyte-workload-launcher"
       }
     }
   })

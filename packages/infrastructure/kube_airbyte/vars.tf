@@ -60,12 +60,6 @@ variable "ingress_enabled" {
   default     = true
 }
 
-variable "cdn_mode_enabled" {
-  description = "Whether to enable CDN mode for the ingress"
-  type        = bool
-  default     = false
-}
-
 variable "connector_builder_enabled" {
   description = "Whether to enable the connector builder server"
   type        = bool
@@ -149,15 +143,7 @@ variable "db_recovery_target_time" {
 }
 
 # Component replicas
-variable "webapp_replicas" {
-  description = "Number of webapp replicas"
-  type        = number
-  default     = 1
-  validation {
-    condition     = var.webapp_replicas >= 1
-    error_message = "The webapp_replicas value must be at least 1."
-  }
-}
+
 
 variable "server_replicas" {
   description = "Number of server replicas"
@@ -227,100 +213,129 @@ variable "aws_iam_ip_allow_list" {
 }
 
 # Resource configurations
-variable "webapp_memory_request" {
+variable "memory_limit_multiplier" {
+  description = "Multiplier for memory limits"
+  type        = number
+  default     = 1.3
+}
+
+# Webapp configuration
+variable "webapp_memory_request_mb" {
   description = "Memory request for webapp containers"
-  type        = string
-  default     = "512Mi"
+  type        = number
+  default     = 512
 }
 
-variable "webapp_memory_limit" {
-  description = "Memory limit for webapp containers"
-  type        = string
-  default     = "1Gi"
-}
-
-variable "webapp_cpu_request" {
+variable "webapp_cpu_request_millicores" {
   description = "CPU request for webapp containers"
-  type        = string
-  default     = "200m"
+  type        = number
+  default     = 200
 }
 
-variable "webapp_cpu_limit" {
-  description = "CPU limit for webapp containers"
-  type        = string
-  default     = "500m"
+variable "webapp_replicas" {
+  description = "Number of webapp replicas"
+  type        = number
+  default     = 1
+  validation {
+    condition     = var.webapp_replicas >= 1
+    error_message = "The webapp_replicas value must be at least 1."
+  }
 }
 
-variable "server_memory_request" {
+variable "server_memory_request_mb" {
   description = "Memory request for server containers"
-  type        = string
-  default     = "512Mi"
+  type        = number
+  default     = 512
 }
 
-variable "server_memory_limit" {
-  description = "Memory limit for server containers"
-  type        = string
-  default     = "1Gi"
-}
-
-variable "server_cpu_request" {
+variable "server_cpu_request_millicores" {
   description = "CPU request for server containers"
-  type        = string
-  default     = "200m"
+  type        = number
+  default     = 200
 }
 
-variable "server_cpu_limit" {
-  description = "CPU limit for server containers"
-  type        = string
-  default     = "500m"
-}
-
-variable "worker_memory_request" {
+variable "worker_memory_request_mb" {
   description = "Memory request for worker containers"
-  type        = string
-  default     = "512Mi"
+  type        = number
+  default     = 512
 }
 
-variable "worker_memory_limit" {
-  description = "Memory limit for worker containers"
-  type        = string
-  default     = "1Gi"
-}
-
-variable "worker_cpu_request" {
+variable "worker_cpu_request_millicores" {
   description = "CPU request for worker containers"
-  type        = string
-  default     = "200m"
+  type        = number
+  default     = 200
 }
 
-variable "worker_cpu_limit" {
-  description = "CPU limit for worker containers"
-  type        = string
-  default     = "500m"
-}
-
-variable "temporal_memory_request" {
+variable "temporal_memory_request_mb" {
   description = "Memory request for temporal containers"
-  type        = string
-  default     = "512Mi"
+  type        = number
+  default     = 512
 }
 
-variable "temporal_memory_limit" {
-  description = "Memory limit for temporal containers"
-  type        = string
-  default     = "1Gi"
-}
-
-variable "temporal_cpu_request" {
+variable "temporal_cpu_request_millicores" {
   description = "CPU request for temporal containers"
-  type        = string
-  default     = "200m"
+  type        = number
+  default     = 200
 }
 
-variable "temporal_cpu_limit" {
-  description = "CPU limit for temporal containers"
-  type        = string
-  default     = "500m"
+variable "connector_builder_memory_request_mb" {
+  description = "Memory request for connector builder containers"
+  type        = number
+  default     = 256
+}
+
+variable "connector_builder_cpu_request_millicores" {
+  description = "CPU request for connector builder containers"
+  type        = number
+  default     = 100
+}
+
+variable "pod_sweeper_memory_request_mb" {
+  description = "Memory request for pod sweeper containers"
+  type        = number
+  default     = 128
+}
+
+variable "pod_sweeper_min_cpu_millicores" {
+  description = "CPU request for pod sweeper containers"
+  type        = number
+  default     = 50
+}
+
+variable "cron_memory_request_mb" {
+  description = "Memory request for cron containers"
+  type        = number
+  default     = 256
+}
+
+variable "cron_cpu_request_millicores" {
+  description = "CPU request for cron containers"
+  type        = number
+  default     = 100
+}
+
+variable "workload_api_server_memory_request_mb" {
+  description = "Memory request for workload API server containers"
+  type        = number
+  default     = 256
+}
+
+variable "workload_api_server_cpu_request_millicores" {
+  description = "CPU request for workload API server containers"
+  type        = number
+  default     = 100
+}
+
+variable "workload_launcher_memory_request_mb" {
+  description = "Memory request for workload launcher containers"
+  type        = number
+  default     = 256
+}
+
+variable "workload_launcher_cpu_request_millicores" {
+  description = "CPU request for workload launcher containers"
+  type        = number
+  default     = 100
 }
 
 variable "pod_annotations" {
