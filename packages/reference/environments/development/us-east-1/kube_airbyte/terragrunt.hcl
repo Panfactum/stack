@@ -17,7 +17,7 @@ dependency "kyverno" {
 }
 
 dependency "s3_destination" {
-  config_path  = "../airbyte_s3_destination"
+  config_path = "../airbyte_s3_destination"
 }
 
 inputs = {

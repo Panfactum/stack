@@ -8,7 +8,7 @@ I'll create a clear blurb about the module's scope regarding connectors for your
 
 This module deploys only the core Airbyte engine components required for the platform to function. It does not include or configure any source or destination connectors, which must be installed separately after deployment. The Airbyte platform provides a connector catalog within its user interface where administrators can install the specific connectors needed for their data integration workflows.
 
-For organizations requiring specific connectors:
+To install connectors:
 
 1. After deployment, log in to the Airbyte UI using the credentials provided
 2. Navigate to the "Sources" or "Destinations" section

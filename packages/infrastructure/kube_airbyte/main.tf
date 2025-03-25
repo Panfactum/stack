@@ -9,8 +9,8 @@ terraform {
       version = "2.12.1"
     }
     aws = {
-      source                = "hashicorp/aws"
-      version               = "5.80.0"
+      source  = "hashicorp/aws"
+      version = "5.80.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -684,7 +684,7 @@ resource "helm_release" "airbyte" {
 ***************************************/
 
 module "authenticating_proxy" {
-  count     = var.ingress_enabled ? 1 : 0
+  count  = var.ingress_enabled ? 1 : 0
   source = "../kube_vault_proxy"
 
   namespace                            = local.namespace
