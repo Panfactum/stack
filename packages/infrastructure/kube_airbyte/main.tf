@@ -418,7 +418,7 @@ resource "helm_release" "airbyte" {
       # Webapp configuration
       webapp = {
         enabled        = true
-        replicaCount   = var.webapp_replicas
+        replicaCount   = var.sla_target >= 2 ? 2 : 1
         podLabels      = module.util_webapp.labels
         podAnnotations = var.pod_annotations
 
@@ -450,7 +450,7 @@ resource "helm_release" "airbyte" {
       # Server configuration
       server = {
         enabled        = true
-        replicaCount   = var.server_replicas
+        replicaCount   = var.sla_target >= 2 ? 2 : 1
         podLabels      = module.util_server.labels
         podAnnotations = var.pod_annotations
 
@@ -503,7 +503,7 @@ resource "helm_release" "airbyte" {
       # Temporal is used for workflow management
       temporal = {
         enabled        = true
-        replicaCount   = var.temporal_replicas
+        replicaCount   = var.sla_target >= 2 ? 2 : 1
         podLabels      = module.util_temporal.labels
         podAnnotations = var.pod_annotations
 

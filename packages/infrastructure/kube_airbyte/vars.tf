@@ -143,18 +143,6 @@ variable "db_recovery_target_time" {
 }
 
 # Component replicas
-
-
-variable "server_replicas" {
-  description = "Number of server replicas"
-  type        = number
-  default     = 1
-  validation {
-    condition     = var.server_replicas >= 1
-    error_message = "The server_replicas value must be at least 1."
-  }
-}
-
 variable "worker_replicas" {
   description = "Number of worker replicas"
   type        = number
@@ -162,16 +150,6 @@ variable "worker_replicas" {
   validation {
     condition     = var.worker_replicas >= 1
     error_message = "The worker_replicas value must be at least 1."
-  }
-}
-
-variable "temporal_replicas" {
-  description = "Number of temporal replicas"
-  type        = number
-  default     = 1
-  validation {
-    condition     = var.temporal_replicas >= 1
-    error_message = "The temporal_replicas value must be at least 1."
   }
 }
 
@@ -230,16 +208,6 @@ variable "webapp_cpu_request_millicores" {
   description = "CPU request for webapp containers"
   type        = number
   default     = 200
-}
-
-variable "webapp_replicas" {
-  description = "Number of webapp replicas"
-  type        = number
-  default     = 1
-  validation {
-    condition     = var.webapp_replicas >= 1
-    error_message = "The webapp_replicas value must be at least 1."
-  }
 }
 
 variable "server_memory_request_mb" {
