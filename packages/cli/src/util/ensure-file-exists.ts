@@ -23,6 +23,6 @@ export async function ensureFileExists({
 
     await Bun.write(destinationFile, Bun.file(sourceFile));
     verbose &&
-      context.stdout.write(`Downloaded ${destinationFile} successfully`);
+      context.stdout.write(`Wrote ${destinationFile} successfully`);
   }
 }
