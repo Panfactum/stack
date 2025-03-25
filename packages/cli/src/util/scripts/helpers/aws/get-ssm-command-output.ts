@@ -109,7 +109,7 @@ export const getSsmCommandOutput = async ({
     }
 
     const error = process.stdout.toString().trim();
-    context.stderr.write(`Test failed: ${error}\n`);
+    context.stderr.write(`SSM command failed: ${error}\n`);
     throw new Error("Failed to execute SSM command after multiple retries");
   }
 
