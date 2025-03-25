@@ -65,8 +65,8 @@ async function appendToConfig({
     for (let j = 0; j < numberOfRoles; j++) {
       const role = roles[j];
       if (role === undefined || role === null) {
-        context.stderr.write(`Error: role is not set at index ${i}.\n`);
-        throw new Error(`Error: role is not set at index ${i}.`);
+        context.stderr.write(`Error: role is not set at index ${i}, ${j}.\n`);
+        throw new Error(`Error: role is not set at index ${i}, ${j}.`);
       }
       const profileName = `${camelToSnakeCase(accountName)}-${camelToSnakeCase(role)}`;
       appendFileSync(awsTmpFilePath, `[profile ${profileName}]\n`);
