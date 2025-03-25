@@ -38,7 +38,7 @@ export async function eksReset({ context }: { context: BaseContext }) {
   }
 
   const kubeConfigPath = process.env["KUBE_CONFIG_PATH"];
-  if (!kubeConfigPath || !safeDirectoryExists(kubeConfigPath)) {
+  if (!kubeConfigPath || !(await safeDirectoryExists(kubeConfigPath))) {
     context.stderr.write(
       `Error: No kube directory found at ${kubeConfigPath}. Create it with 'pf update-kube' first!`
     );
