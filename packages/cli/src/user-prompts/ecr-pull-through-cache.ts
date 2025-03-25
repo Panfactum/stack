@@ -13,7 +13,7 @@ export async function ecrPullThroughCachePrompts({
       "To address public image registry issues (rate limits, download sizes, service outages, etc...),\n" +
         "we will use a private image registry and a pull through cache.\n" +
         "This will allow us to cache images from public registries and pull them from our private registry.\n" +
-        "Eventhough these are public registries, we will need to provide credentials for them.\n" +
+        "Even though these are public registries, we will need to provide credentials for them.\n" +
         "For more information see our documentation:\n" +
         "https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#configure-pull-through-cache\n\n"
     )
