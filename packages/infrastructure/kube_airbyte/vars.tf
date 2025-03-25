@@ -23,13 +23,12 @@ variable "airbyte_helm_version" {
 variable "airbyte_version" {
   description = "The version of Airbyte to deploy (for image caching)"
   type        = string
-  default     = "latest"
+  default     = "1.3.1"
 }
 
 variable "domain" {
   description = "The domain to access Airbyte (e.g., airbyte.example.com)"
   type        = string
-  default     = ""
 }
 
 variable "wait" {
@@ -51,7 +50,6 @@ variable "sla_target" {
 variable "admin_email" {
   description = "Email for the admin user when auth is enabled"
   type        = string
-  default     = "admin@example.com"
 }
 
 variable "ingress_enabled" {
@@ -63,19 +61,19 @@ variable "ingress_enabled" {
 variable "connector_builder_enabled" {
   description = "Whether to enable the connector builder server"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "node_image_cached_enabled" {
   description = "Whether to enable node image caching"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "vpa_enabled" {
   description = "Whether to enable Vertical Pod Autoscaler"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "monitoring_enabled" {
@@ -100,16 +98,6 @@ variable "license_key" {
   default     = ""
   sensitive   = true
 }
-
-# S3 Storage Configuration (required for AWS deployments)
-
-variable "aws_region" {
-  description = "The AWS region to use for S3"
-  type        = string
-  default     = "us-east-1"
-}
-
-# External DB Configuration is removed as we always use kube_pg_cluster
 
 # Database backup/restore options for internal PostgreSQL
 variable "pg_initial_storage_gb" {
@@ -157,44 +145,37 @@ variable "worker_replicas" {
 variable "panfactum_scheduler_enabled" {
   description = "Whether to enable the Panfactum scheduler"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "pull_through_cache_enabled" {
   description = "Whether to enable pull-through cache for container images"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "spot_nodes_enabled" {
   description = "Whether to allow scheduling on spot nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "burstable_nodes_enabled" {
   description = "Whether to allow scheduling on burstable nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "controller_nodes_enabled" {
   description = "Whether to allow scheduling on controller nodes"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "aws_iam_ip_allow_list" {
   description = "List of IPs to allow for AWS IAM access"
   type        = list(string)
   default     = []
-}
-
-# Resource configurations
-variable "memory_limit_multiplier" {
-  description = "Multiplier for memory limits"
-  type        = number
-  default     = 1.3
 }
 
 # Webapp configuration
@@ -310,24 +291,6 @@ variable "pod_annotations" {
   description = "Additional pod annotations to add to all pods"
   type        = map(string)
   default     = {}
-}
-
-variable "node_selector" {
-  description = "Node selector for Airbyte pods"
-  type        = map(string)
-  default     = {}
-}
-
-variable "tolerations" {
-  description = "Tolerations for Airbyte pods"
-  type = list(object({
-    key               = string
-    operator          = string
-    value             = optional(string)
-    effect            = string
-    tolerationSeconds = optional(number)
-  }))
-  default = []
 }
 
 variable "vault_domain" {

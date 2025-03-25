@@ -537,10 +537,10 @@ will now deduplicate images that are added to the cache by [kube\_node\_image\_c
 us to install rules onto the cluster to automatically generate, mutate, or validate resources based on a powerful, Kubernetes-native expression
 language. This provides several benefits:
 
-  * Provides a unified control plane for adding functionality that previously required managing additional controllers or custom scripts.
-  * Allows us to simplify several parts of our IaC modules by offloading resource management to global Kyverno policies.
-  * Allows us to add Panfactum-compatible, sensible defaults to Kubernetes resources that are not created by Panfactum modules.
-  * Allows users to add management logic to their clusters that was previously only possible by building and deploying custom controllers. See the [example policies.](https://kyverno.io/policies/)
+* Provides a unified control plane for adding functionality that previously required managing additional controllers or custom scripts.
+* Allows us to simplify several parts of our IaC modules by offloading resource management to global Kyverno policies.
+* Allows us to add Panfactum-compatible, sensible defaults to Kubernetes resources that are not created by Panfactum modules.
+* Allows users to add management logic to their clusters that was previously only possible by building and deploying custom controllers. See the [example policies.](https://kyverno.io/policies/)
 
 **You must install Kyverno by following this [new bootstrapping guide section.](/docs/edge/guides/bootstrapping/policy-controller)** Many modules
 now depend on Kyverno and will not function without it.
@@ -548,10 +548,10 @@ now depend on Kyverno and will not function without it.
 * `kube_fledged` has been removed in favor of a new node-local image caching mechanism built by Panfactum on top of Kyverno. The new mechanism has the following
 benefits over `kube_fledged`:
 
-  * The node's image cache will be created immediately when a node launches, concurrently with other node setup steps.
-  * Cached images will never be removed from the node's image store.
-  * Overall controller performance is significantly improved reducing the overall resource requirements for caching.
-  * The caching mechanism no longer generates pods that prevent Karpenter from disrupting underutilized nodes.
+* The node's image cache will be created immediately when a node launches, concurrently with other node setup steps.
+* Cached images will never be removed from the node's image store.
+* Overall controller performance is significantly improved reducing the overall resource requirements for caching.
+* The caching mechanism no longer generates pods that prevent Karpenter from disrupting underutilized nodes.
 
 To install the new mechanism, please follow [this guide.](/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches) To start caching images, you may use the new
 [kube\_node\_image\_cache](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_node_image_cache) module. Additionally,

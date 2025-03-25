@@ -30,6 +30,7 @@ terraform {
 locals {
   name      = "airbyte"
   namespace = module.namespace.namespace
+  memory_limit_multiplier = 1.3
 }
 
 data "pf_kube_labels" "labels" {
@@ -346,7 +347,7 @@ resource "helm_release" "airbyte" {
       global = {
         serviceAccountName = kubernetes_service_account.airbyte_sa.metadata[0].name
         edition            = var.airbyte_edition
-        airbyteUrl         = var.domain != "" ? "https://${var.domain}" : ""
+        airbyteUrl         = "https://${var.domain}"
 
         auth = {
           enabled = false
@@ -401,8 +402,6 @@ resource "helm_release" "airbyte" {
           kube = {
             annotations  = {}
             labels       = {}
-            nodeSelector = var.node_selector
-            tolerations  = var.tolerations
           }
         }
 
@@ -424,7 +423,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_webapp.affinity
         tolerations  = module.util_webapp.tolerations
-        nodeSelector = var.node_selector
 
         resources = {
           requests = {
@@ -432,7 +430,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.webapp_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.webapp_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.webapp_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
 
@@ -456,7 +454,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_server.affinity
         tolerations  = module.util_server.tolerations
-        nodeSelector = var.node_selector
 
         log = {
           level = var.log_level
@@ -468,7 +465,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.server_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.server_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.server_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -482,7 +479,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_worker.affinity
         tolerations  = module.util_worker.tolerations
-        nodeSelector = var.node_selector
 
         log = {
           level = var.log_level
@@ -494,7 +490,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.worker_cpu_request_millicores}"
           }
           limits = {
-            memory = "${var.worker_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.worker_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -509,7 +505,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_temporal.affinity
         tolerations  = module.util_temporal.tolerations
-        nodeSelector = var.node_selector
 
         resources = {
           requests = {
@@ -517,7 +512,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.temporal_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.temporal_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.temporal_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
 
@@ -555,7 +550,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_pod_sweeper.affinity
         tolerations  = module.util_pod_sweeper.tolerations
-        nodeSelector = var.node_selector
 
         resources = {
           requests = {
@@ -563,7 +557,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.pod_sweeper_min_cpu_millicores}m"
           }
           limits = {
-            memory = "${var.pod_sweeper_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.pod_sweeper_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -576,7 +570,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_connector_builder.affinity
         tolerations  = module.util_connector_builder.tolerations
-        nodeSelector = var.node_selector
 
         log = {
           level = var.log_level
@@ -588,7 +581,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.connector_builder_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.connector_builder_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.connector_builder_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -601,7 +594,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_cron.affinity
         tolerations  = module.util_cron.tolerations
-        nodeSelector = var.node_selector
 
         log = {
           level = var.log_level
@@ -613,7 +605,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.cron_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.cron_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.cron_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -631,7 +623,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_workload_api_server.affinity
         tolerations  = module.util_workload_api_server.tolerations
-        nodeSelector = var.node_selector
 
         resources = {
           requests = {
@@ -639,7 +630,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.workload_api_server_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.workload_api_server_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.workload_api_server_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -652,7 +643,6 @@ resource "helm_release" "airbyte" {
 
         affinity     = module.util_workload_launcher.affinity
         tolerations  = module.util_workload_launcher.tolerations
-        nodeSelector = var.node_selector
 
         resources = {
           requests = {
@@ -660,7 +650,7 @@ resource "helm_release" "airbyte" {
             cpu    = "${var.workload_launcher_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.workload_launcher_memory_request_mb * var.memory_limit_multiplier}Mi"
+            memory = "${var.workload_launcher_memory_request_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -820,28 +810,6 @@ resource "kubectl_manifest" "pdb_connector_builder" {
       unhealthyPodEvictionPolicy = "AlwaysAllow"
       selector = {
         matchLabels = module.util_connector_builder.match_labels
-      }
-      maxUnavailable = 1
-    }
-  })
-  force_conflicts   = true
-  server_side_apply = true
-  depends_on        = [helm_release.airbyte]
-}
-
-resource "kubectl_manifest" "pdb_cron" {
-  yaml_body = yamlencode({
-    apiVersion = "policy/v1"
-    kind       = "PodDisruptionBudget"
-    metadata = {
-      name      = "airbyte-cron"
-      namespace = local.namespace
-      labels    = module.util_cron.labels
-    }
-    spec = {
-      unhealthyPodEvictionPolicy = "AlwaysAllow"
-      selector = {
-        matchLabels = module.util_cron.match_labels
       }
       maxUnavailable = 1
     }

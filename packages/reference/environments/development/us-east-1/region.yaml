@@ -10,7 +10,8 @@ kube_config_context: "development-seth"
 kube_api_server: "https://A22CD77150C602866DD723DDBB7E1BAA.gr7.us-east-1.eks.amazonaws.com"
 
 # Vault
-vault_addr: "https://vault.seth.panfactum.com"
+#vault_addr: "https://vault.seth.panfactum.com"
+vault_addr: "http://localhost:8200"
 
 # Extra inputs
 extra_inputs:
