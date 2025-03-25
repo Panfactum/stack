@@ -179,6 +179,18 @@ variable "aws_iam_ip_allow_list" {
 }
 
 # Webapp configuration
+variable "jobs_memory_request_mb" {
+  description = "Memory request for jobs containers"
+  type        = number
+  default     = 1024
+}
+
+variable "jobs_cpu_request_millicores" {
+  description = "CPU request for jobs containers"
+  type        = number
+  default     = 250
+}
+
 variable "webapp_memory_request_mb" {
   description = "Memory request for webapp containers"
   type        = number

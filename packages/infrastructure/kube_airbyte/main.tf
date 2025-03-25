@@ -392,11 +392,11 @@ resource "helm_release" "airbyte" {
         jobs = {
           resources = {
             requests = {
-              memory = "256Mi"
-              cpu    = "250m"
+              memory = "${var.jobs_memory_request_mb}Mi"
+              cpu    = "${var.jobs_cpu_request_millicores}m"
             }
             limits = {
-              memory = "1Gi"
+              memory = "${var.jobs_memory_request_mb * local.memory_limit_multiplier}Gi"
             }
           }
           kube = {
