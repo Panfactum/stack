@@ -392,11 +392,11 @@ resource "helm_release" "airbyte" {
         jobs = {
           resources = {
             requests = {
-              memory = "${var.jobs_memory_request_mb}Mi"
+              memory = "${var.jobs_min_memory_mb}Mi"
               cpu    = "${var.jobs_cpu_request_millicores}m"
             }
             limits = {
-              memory = "${var.jobs_memory_request_mb * local.memory_limit_multiplier}Gi"
+              memory = "${var.jobs_min_memory_mb * local.memory_limit_multiplier}Gi"
             }
           }
           kube = {
@@ -426,11 +426,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.webapp_memory_request_mb}Mi"
+            memory = "${var.webapp_min_memory_mb}Mi"
             cpu    = "${var.webapp_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.webapp_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.webapp_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
 
@@ -461,11 +461,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.server_memory_request_mb}Mi"
+            memory = "${var.server_min_memory_mb}Mi"
             cpu    = "${var.server_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.server_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.server_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -486,11 +486,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.worker_memory_request_mb}Mi"
+            memory = "${var.worker_min_memory_mb}Mi"
             cpu    = "${var.worker_cpu_request_millicores}"
           }
           limits = {
-            memory = "${var.worker_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.worker_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -508,11 +508,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.temporal_memory_request_mb}Mi"
+            memory = "${var.temporal_min_memory_mb}Mi"
             cpu    = "${var.temporal_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.temporal_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.temporal_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
 
@@ -553,11 +553,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.pod_sweeper_memory_request_mb}Mi"
+            memory = "${var.pod_min_sweeper_memory_mb}Mi"
             cpu    = "${var.pod_sweeper_min_cpu_millicores}m"
           }
           limits = {
-            memory = "${var.pod_sweeper_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.pod_min_sweeper_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -577,11 +577,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.connector_builder_memory_request_mb}Mi"
+            memory = "${var.connector_min_builder_memory_mb}Mi"
             cpu    = "${var.connector_builder_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.connector_builder_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.connector_min_builder_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -601,11 +601,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.cron_memory_request_mb}Mi"
+            memory = "${var.cron_min_memory_mb}Mi"
             cpu    = "${var.cron_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.cron_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.cron_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -626,11 +626,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.workload_api_server_memory_request_mb}Mi"
+            memory = "${var.workload_min_api_server_memory_mb}Mi"
             cpu    = "${var.workload_api_server_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.workload_api_server_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.workload_min_api_server_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -646,11 +646,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.workload_launcher_memory_request_mb}Mi"
+            memory = "${var.workload_min_launcher_memory_mb}Mi"
             cpu    = "${var.workload_launcher_cpu_request_millicores}m"
           }
           limits = {
-            memory = "${var.workload_launcher_memory_request_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.workload_min_launcher_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -926,7 +926,7 @@ resource "kubectl_manifest" "vpa_webapp" {
         containerPolicies = [{
           containerName = "webapp"
           minAllowed = {
-            memory = "${var.webapp_memory_request_mb}Mi"
+            memory = "${var.webapp_min_memory_mb}Mi"
           }
         }]
       }
@@ -964,7 +964,7 @@ resource "kubectl_manifest" "vpa_server" {
         containerPolicies = [{
           containerName = "server"
           minAllowed = {
-            memory = "${var.server_memory_request_mb}Mi"
+            memory = "${var.server_min_memory_mb}Mi"
           }
         }]
       }
@@ -1002,7 +1002,7 @@ resource "kubectl_manifest" "vpa_worker" {
         containerPolicies = [{
           containerName = "worker"
           minAllowed = {
-            memory = "${var.worker_memory_request_mb}Mi"
+            memory = "${var.worker_min_memory_mb}Mi"
           }
         }]
       }
@@ -1040,7 +1040,7 @@ resource "kubectl_manifest" "vpa_connector_builder" {
         containerPolicies = [{
           containerName = "airbyte-connector-builder-server"
           minAllowed = {
-            memory = "${var.connector_builder_memory_request_mb}Mi"
+            memory = "${var.connector_min_builder_memory_mb}Mi"
           }
         }]
       }
@@ -1078,7 +1078,7 @@ resource "kubectl_manifest" "vpa_cron" {
         containerPolicies = [{
           containerName = "airbyte-cron"
           minAllowed = {
-            memory = "${var.cron_memory_request_mb}Mi"
+            memory = "${var.cron_min_memory_mb}Mi"
           }
         }]
       }
@@ -1116,7 +1116,7 @@ resource "kubectl_manifest" "vpa_pod_sweeper" {
         containerPolicies = [{
           containerName = "airbyte-pod-sweeper"
           minAllowed = {
-            memory = "${var.pod_sweeper_memory_request_mb}Mi"
+            memory = "${var.pod_min_sweeper_memory_mb}Mi"
           }
         }]
       }
@@ -1154,7 +1154,7 @@ resource "kubectl_manifest" "vpa_temporal" {
         containerPolicies = [{
           containerName = "airbyte-temporal"
           minAllowed = {
-            memory = "${var.temporal_memory_request_mb}Mi"
+            memory = "${var.temporal_min_memory_mb}Mi"
           }
         }]
       }
@@ -1192,7 +1192,7 @@ resource "kubectl_manifest" "vpa_workload_api_server" {
         containerPolicies = [{
           containerName = "airbyte-workload-api-server"
           minAllowed = {
-            memory = "${var.workload_api_server_memory_request_mb}Mi"
+            memory = "${var.workload_min_api_server_memory_mb}Mi"
           }
         }]
       }
@@ -1230,7 +1230,7 @@ resource "kubectl_manifest" "vpa_workload_launcher" {
         containerPolicies = [{
           containerName = "airbyte-workload-launcher"
           minAllowed = {
-            memory = "${var.workload_launcher_memory_request_mb}Mi"
+            memory = "${var.workload_min_launcher_memory_mb}Mi"
           }
         }]
       }

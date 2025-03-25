@@ -179,7 +179,7 @@ variable "aws_iam_ip_allow_list" {
 }
 
 # Webapp configuration
-variable "jobs_memory_request_mb" {
+variable "jobs_min_memory_mb" {
   description = "Memory request for jobs containers"
   type        = number
   default     = 1024
@@ -191,7 +191,7 @@ variable "jobs_cpu_request_millicores" {
   default     = 250
 }
 
-variable "webapp_memory_request_mb" {
+variable "webapp_min_memory_mb" {
   description = "Memory request for webapp containers"
   type        = number
   default     = 512
@@ -203,7 +203,7 @@ variable "webapp_cpu_request_millicores" {
   default     = 200
 }
 
-variable "server_memory_request_mb" {
+variable "server_min_memory_mb" {
   description = "Memory request for server containers"
   type        = number
   default     = 512
@@ -215,7 +215,7 @@ variable "server_cpu_request_millicores" {
   default     = 200
 }
 
-variable "worker_memory_request_mb" {
+variable "worker_min_memory_mb" {
   description = "Memory request for worker containers"
   type        = number
   default     = 512
@@ -227,7 +227,7 @@ variable "worker_cpu_request_millicores" {
   default     = 200
 }
 
-variable "temporal_memory_request_mb" {
+variable "temporal_min_memory_mb" {
   description = "Memory request for temporal containers"
   type        = number
   default     = 512
@@ -239,7 +239,7 @@ variable "temporal_cpu_request_millicores" {
   default     = 200
 }
 
-variable "connector_builder_memory_request_mb" {
+variable "connector_min_builder_memory_mb" {
   description = "Memory request for connector builder containers"
   type        = number
   default     = 256
@@ -251,7 +251,7 @@ variable "connector_builder_cpu_request_millicores" {
   default     = 100
 }
 
-variable "pod_sweeper_memory_request_mb" {
+variable "pod_min_sweeper_memory_mb" {
   description = "Memory request for pod sweeper containers"
   type        = number
   default     = 128
@@ -263,7 +263,7 @@ variable "pod_sweeper_min_cpu_millicores" {
   default     = 50
 }
 
-variable "cron_memory_request_mb" {
+variable "cron_min_memory_mb" {
   description = "Memory request for cron containers"
   type        = number
   default     = 256
@@ -275,7 +275,7 @@ variable "cron_cpu_request_millicores" {
   default     = 100
 }
 
-variable "workload_api_server_memory_request_mb" {
+variable "workload_min_api_server_memory_mb" {
   description = "Memory request for workload API server containers"
   type        = number
   default     = 256
@@ -287,7 +287,7 @@ variable "workload_api_server_cpu_request_millicores" {
   default     = 100
 }
 
-variable "workload_launcher_memory_request_mb" {
+variable "workload_min_launcher_memory_mb" {
   description = "Memory request for workload launcher containers"
   type        = number
   default     = 256
