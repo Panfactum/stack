@@ -1,3 +1,5 @@
+import pc from "picocolors";
+import { progressMessage } from "../../../progress-message";
 import type { BaseContext } from "clipanion";
 
 export const getSsmCommandOutput = async ({
@@ -24,8 +26,13 @@ export const getSsmCommandOutput = async ({
     context.stdout.write("Command ID: " + commandId + "\n");
   }
 
+  const commandOutputProgress = progressMessage({
+    context,
+    message: "Waiting for test to complete",
+    interval: 5000,
+  });
+
   while (true) {
-    context.stdout.write("Waiting for test to complete...\n");
     const process = Bun.spawnSync(
       [
         "aws",
@@ -66,6 +73,8 @@ export const getSsmCommandOutput = async ({
     status = process.stdout.toString().trim();
 
     if (status === "Success" || status === "Failed") {
+      globalThis.clearInterval(commandOutputProgress);
+      context.stdout.write("\n");
       break;
     }
 
@@ -109,7 +118,7 @@ export const getSsmCommandOutput = async ({
     }
 
     const error = process.stdout.toString().trim();
-    context.stderr.write(`SSM command failed: ${error}\n`);
+    context.stderr.write(pc.red(`SSM command failed: ${error}\n`));
     throw new Error("Failed to execute SSM command after multiple retries");
   }
 

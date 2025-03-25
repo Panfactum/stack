@@ -3,12 +3,12 @@ import path from "node:path";
 import pc from "picocolors";
 import { z } from "zod";
 import { getRepoVariables } from "./get-repo-variables";
+import { getTerragruntVariables } from "./get-terragrunt-variables";
 import { getInstanceId } from "./helpers/aws/get-instance-id";
 import { getSsmCommandOutput } from "./helpers/aws/get-ssm-command-output";
 import { runSsmCommand } from "./helpers/aws/run-ssm-command";
 import { scaleAsg } from "./helpers/aws/scale-asg";
 import { testVpcNetworkBlocking } from "./helpers/aws/test-vpc-network-blocking";
-import { selectAwsProfile } from "./helpers/select-aws-profile";
 import { getModuleOutputs } from "./helpers/terragrunt/get-module-outputs";
 import type { BaseContext } from "clipanion";
 
@@ -64,16 +64,10 @@ export const vpcNetworkTest = async ({
   //####################################################################
   // Step 2: Select AWS profile to use to run the test
   //####################################################################
-  const selectedAwsProfile = await selectAwsProfile({
+  const terragruntVariables = await getTerragruntVariables({
     context,
-    awsConfigFilePath: awsConfigFile,
-    message: "Select AWS profile for VPC network test:",
   });
-
-  if (!selectedAwsProfile) {
-    context.stderr.write(pc.red("No profile selected. Exiting.\n"));
-    throw new Error("No profile selected. Exiting.");
-  }
+  const awsProfile = terragruntVariables.aws_profile;
 
   //####################################################################
   // Step 3: Run the tests
@@ -97,14 +91,14 @@ export const vpcNetworkTest = async ({
       const natIp = subnet.nat_ip;
 
       context.stdout.write(
-        pc.green(`Running test for subnet: ${subnet.subnet}...\n`)
+        `1.b.${i + 1}.a. Running test for subnet: ${subnet.subnet}...\n`
       );
 
       // Step 1: Create a test instance
-      context.stdout.write(pc.green(`Scaling ASG ${asg} to 1...\n`));
+      context.stdout.write(`1.b.${i + 1}.b. Scaling ASG ${asg} to 1...\n`);
       scaleAsg({
         asgName: asg,
-        awsProfile: selectedAwsProfile,
+        awsProfile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         desiredCapacity: 1,
@@ -114,21 +108,21 @@ export const vpcNetworkTest = async ({
       // Step 2: Get the instance id
       const instanceId = await getInstanceId({
         asgName: asg,
-        awsProfile: selectedAwsProfile,
+        awsProfile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         verbose,
       });
 
-      context.stdout.write(pc.green(`Instance ID: ${instanceId}\n`));
+      context.stdout.write(`1.b.${i + 1}.c. Instance ID: ${instanceId}\n`);
       context.stdout.write(
-        pc.green(`Executing network test on ${instanceId}...\n`)
+        `1.b.${i + 1}.d. Executing network test on ${instanceId}...\n`
       );
 
       // Step 3: Run the network test
       const commandId = await runSsmCommand({
         instanceId,
-        awsProfile: selectedAwsProfile,
+        awsProfile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         verbose,
@@ -138,14 +132,14 @@ export const vpcNetworkTest = async ({
       const publicIp = await getSsmCommandOutput({
         commandId,
         instanceId,
-        awsProfile: selectedAwsProfile,
+        awsProfile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         verbose,
       });
 
       context.stdout.write(
-        pc.green(`Public IP for instance ${instanceId}: ${publicIp}\n`)
+        `1.b.${i + 1}.e. Public IP for instance ${instanceId}: ${publicIp}\n`
       );
 
       // Step 5: Ensure the public IP is correct
@@ -167,7 +161,7 @@ export const vpcNetworkTest = async ({
         pc.green(`Test completed successfully for ${subnet.subnet}.\n`)
       );
       context.stdout.write(
-        pc.green("-----------------------------------------------------\n")
+        "-----------------------------------------------------\n"
       );
     }
   } finally {
@@ -179,7 +173,7 @@ export const vpcNetworkTest = async ({
       }
       scaleAsg({
         asgName: subnet.asg,
-        awsProfile: selectedAwsProfile,
+        awsProfile,
         awsRegion: moduleOutputs.test_config.value.region,
         context,
         desiredCapacity: 0,

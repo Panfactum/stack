@@ -32,6 +32,7 @@ export function apply({
 
     // Clear the progress interval
     !verbose && globalThis.clearInterval(tfApplyProgress);
+    context.stdout.write("\n");
 
     // Check if the init process failed
     if (initProcess.exitCode !== 0) {
@@ -48,7 +49,7 @@ export function apply({
 
     !verbose &&
       context.stdout.write(
-        pc.green("Successfully applied all infrastructure modules\n\n")
+        pc.green("Successfully applied all infrastructure modules\n")
       );
 
     return 0;

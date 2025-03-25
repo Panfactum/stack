@@ -39,6 +39,7 @@ export function tfInit({
 
     // Clear the progress interval
     !verbose && globalThis.clearInterval(tfInitProgress);
+    context.stdout.write("\n");
 
     // Check if the init process failed
     if (initProcess.exitCode !== 0) {
@@ -57,7 +58,7 @@ export function tfInit({
 
     !verbose &&
       context.stdout.write(
-        pc.green("Successfully initialized infrastructure modules\n\n")
+        pc.green("Successfully initialized infrastructure modules\n")
       );
 
     let tfLockProgress: globalThis.Timer | undefined;
@@ -90,6 +91,7 @@ export function tfInit({
 
     // Clear the progress interval
     !verbose && globalThis.clearInterval(tfLockProgress);
+    context.stdout.write("\n");
 
     // Check if the lock process failed
     if (lockProcess.exitCode !== 0) {
@@ -105,7 +107,7 @@ export function tfInit({
     }
 
     !verbose &&
-      context.stdout.write(pc.green("Successfully updated platform locks\n\n"));
+      context.stdout.write(pc.green("Successfully updated platform locks\n"));
     return 0;
   } catch (error: unknown) {
     const errorMessage =

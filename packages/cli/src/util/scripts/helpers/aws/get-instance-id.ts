@@ -60,6 +60,7 @@ export async function getInstanceId({
   }
 
   globalThis.clearInterval(instanceIdProgress);
+  context.stdout.write("\n");
 
   return instanceId;
 }

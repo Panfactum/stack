@@ -22,28 +22,32 @@ export async function ecrPullThroughCachePrompts({
   // Prompt for GitHub PAT for Kubernetes Cluster
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials
   const githubUsername = await input({
-    message: "Enter your GitHub username:",
+    message: pc.magenta("Enter your GitHub username:"),
     required: true,
   });
 
   const githubPat = await password({
-    message: `Enter your classic GitHub Personal Access Token with 'read:packages' scope\nFor more details on how to create one,see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n${pc.red("this will be encrypted with SOPS and stored securely")}:`,
+    message: pc.magenta(
+      `Enter your classic GitHub Personal Access Token with 'read:packages' scope\nFor more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n${pc.red("this will be encrypted and stored securely")}:`
+    ),
     mask: true,
   });
 
   // Prompt for Docker Hub PAT for Kubernetes Cluster
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials
   const dockerHubUsername = await input({
-    message: "Enter your Docker Hub username:",
+    message: pc.magenta("Enter your Docker Hub username:"),
     required: true,
   });
 
   const dockerHubPat = await password({
-    message: `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\nFor more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n${pc.red("this will be encrypted with SOPS and stored securely")}:`,
+    message: pc.magenta(
+      `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\nFor more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n${pc.red("this will be encrypted and stored securely")}:`
+    ),
     mask: true,
   });
 
-  context.stdout.write("\nEncrypting secrets with SOPS...\n\n");
+  context.stdout.write("\n2.a. 🔒 Encrypting secrets\n\n");
 
   const tempSecretsFilePath = "./.tmp-ecr-pull-through-cache-secrets.yaml";
   await Bun.write(

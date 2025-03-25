@@ -1,4 +1,5 @@
 import { confirm, select } from "@inquirer/prompts";
+import pc from "picocolors";
 import type { BaseContext } from "clipanion";
 
 export async function slaPrompts({
@@ -12,8 +13,9 @@ export async function slaPrompts({
   let slaTarget: 1 | 2 | 3 | undefined;
   if (needSlaTarget) {
     slaTarget = await select({
-      message:
-        "Select your SLA target (affects high availability configuration). We recommend level 1 for test / development environments and level 2 or above for environments running live workloads.",
+      message: pc.magenta(
+        "Select your SLA target (affects high availability configuration). We recommend level 1 for test / development environments and level 2 or above for environments running live workloads."
+      ),
       choices: [
         {
           name: "Level 1: 99.9% uptime (< 45 minutes of downtime / month) — Lowest cost",
@@ -33,14 +35,18 @@ export async function slaPrompts({
 
     // Warn about SLA target being difficult to change
     context.stdout.write(
-      "\n\u26A0\uFE0F WARNING: SLA target affects your network architecture and is not easily changed later.\n"
+      pc.red(
+        "\n⚠️ WARNING: SLA target affects your network architecture and is not easily changed later.\n"
+      )
     );
     context.stdout.write(
-      "This determines how many availability zones your infrastructure will span.\n"
+      pc.red(
+        "This determines how many availability zones your infrastructure will span.\n"
+      )
     );
 
     const proceed = await confirm({
-      message: "Do you want to proceed with the installation?",
+      message: pc.magenta("Do you want to proceed with the installation?"),
       default: true,
     });
 

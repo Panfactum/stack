@@ -33,6 +33,8 @@ export async function setupEcrPullThroughCache(
     input.githubUsername
   );
 
+  input.context.stdout.write("2.b. Setting up infrastructure as code\n");
+
   tfInit({
     context: input.context,
     verbose: input.verbose,

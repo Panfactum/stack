@@ -35,6 +35,8 @@ export async function setupVpc({
     vpcDescription
   );
 
+  context.stdout.write("1.a. Setting up infrastructure as code\n");
+
   tfInit({
     context,
     verbose,
@@ -47,7 +49,7 @@ export async function setupVpc({
     workingDirectory: "./aws_vpc",
   });
 
-  context.stdout.write("Running VPC network test...\n");
+  context.stdout.write("1.b. Running VPC network tests\n");
 
   const repoVariables = await getRepoVariables({ context });
   const terragruntVariables = await getTerragruntVariables({

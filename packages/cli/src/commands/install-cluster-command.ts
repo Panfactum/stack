@@ -35,7 +35,7 @@ export class InstallClusterCommand extends Command {
   // eslint-disable-next-line sonarjs/cognitive-complexity
   async execute(): Promise<number> {
     this.context.stdout.write(
-      "Starting Panfactum cluster installation process...\n"
+      pc.blue(pc.bold("Starting Panfactum cluster installation process\n\n"))
     );
 
     // Check if they're using the devShell
@@ -128,8 +128,6 @@ export class InstallClusterCommand extends Command {
       );
     }
 
-    this.context.stdout.write("Starting AWS networking installation...\n\n");
-
     try {
       if (!terragruntSlaTarget) {
         // If sla_target doesn't exist, append it to the environment.yaml file
@@ -159,7 +157,7 @@ export class InstallClusterCommand extends Command {
         "Skipping VPC setup as it's already complete.\n\n"
       );
     } else {
-      this.context.stdout.write("Setting up the AWS VPC\n\n");
+      this.context.stdout.write(pc.blue("1. Setting up the AWS VPC\n"));
 
       const { vpcName, vpcDescription } = await vpcPrompts({
         environment,
@@ -212,7 +210,7 @@ export class InstallClusterCommand extends Command {
       );
     } else {
       this.context.stdout.write(
-        "Setting up the AWS ECR pull through cache...\n\n"
+        pc.blue("\n2. Setting up the AWS ECR pull through cache\n")
       );
 
       const { dockerHubUsername, githubUsername } =
@@ -282,9 +280,13 @@ export class InstallClusterCommand extends Command {
         "Skipping EKS cluster setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write("Setting up the AWS EKS cluster...\n");
+      this.context.stdout.write(pc.blue("3. Setting up the AWS EKS cluster\n"));
       this.context.stdout.write(
-        pc.bold("NOTE: This may take up to 20 minutes to complete.\n")
+        pc.red(
+          pc.bold(
+            "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer two short questions\n"
+          )
+        )
       );
 
       const { clusterName, clusterDescription } =

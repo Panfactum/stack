@@ -1,4 +1,4 @@
-import pc from "picocolors";
+import { progressMessage } from "../../../progress-message";
 import type { BaseContext } from "clipanion";
 
 export const runSsmCommand = async ({
@@ -16,6 +16,12 @@ export const runSsmCommand = async ({
 }): Promise<string> => {
   let commandId = "";
   const retries = 20;
+
+  const commandIdProgress = progressMessage({
+    context,
+    message: `Waiting for instance ${instanceId} to become ready`,
+    interval: 5000,
+  });
 
   for (let i = 1; i <= retries; i++) {
     const process = Bun.spawnSync(
@@ -55,17 +61,12 @@ export const runSsmCommand = async ({
     }
 
     if (commandId) {
-      context.stdout.write(pc.green("Test started.\n"));
+      globalThis.clearInterval(commandIdProgress);
+      context.stdout.write("\n");
       if (verbose) {
-        context.stdout.write(
-          "runSsmCommand Command ID: " + commandId + "\n"
-        );
+        context.stdout.write("runSsmCommand Command ID: " + commandId + "\n");
       }
       return commandId;
-    } else {
-      context.stdout.write(
-        `Waiting for instance ${instanceId} to become ready...\n`
-      );
     }
 
     // Wait 5 seconds before trying again
@@ -73,6 +74,9 @@ export const runSsmCommand = async ({
       globalThis.setTimeout(resolve, 5000);
     });
   }
+
+  globalThis.clearInterval(commandIdProgress);
+  context.stdout.write("\n");
 
   // If we get here, we've exceeded our retries
   context.stderr.write("Timeout exceeded. Failed to execute test!\n");

@@ -23,9 +23,7 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
   }
 
   if (verbose) {
-    context.stdout.write(
-      `Retrieving module outputs from ${modulePath}...\n`
-    );
+    context.stdout.write(`Retrieving module outputs from ${modulePath}...\n`);
   }
 
   const moduleOutputs = Bun.spawnSync(
@@ -37,6 +35,7 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
   );
 
   !verbose && globalThis.clearInterval(moduleOutputProgress);
+  context.stdout.write("\n");
 
   if (verbose) {
     context.stdout.write(
