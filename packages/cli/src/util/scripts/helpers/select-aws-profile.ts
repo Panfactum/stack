@@ -16,7 +16,7 @@ export const selectAwsProfile = async ({
   const awsProfiles =
     awsConfigText
       .match(/^\[profile (.*)\]$/gm)
-      ?.map((profile) => profile.replace(/^\[profile (.*)]\$/, "$1")) || [];
+      ?.map((profile) => profile.replace(/^\[profile (.*)\]\$/, "$1")) || [];
 
   if (awsProfiles.length === 0) {
     context.stderr.write(
