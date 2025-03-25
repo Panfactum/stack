@@ -32,12 +32,12 @@ const terragruntVariablesSchema = z.object({
   aws_secondary_profile: z.string().optional(),
   aws_secondary_region: z.string().optional(),
   // Kubernetes Provider
-  kube_api_server: z.string(),
-  kube_config_context: z.string(),
+  kube_api_server: z.string().optional(),
+  kube_config_context: z.string().optional(),
   // Vault Provider
-  vault_addr: z.string(),
+  vault_addr: z.string().optional(),
   // Authentik Provider
-  authentik_url: z.string(),
+  authentik_url: z.string().optional(),
 });
 
 /**

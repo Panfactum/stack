@@ -36,13 +36,13 @@ export async function setupEks(input: EksSetupInput) {
 
   await replaceHclValue(
     "./aws_eks/terragrunt.hcl",
-    "cluster_name",
+    "inputs.cluster_name",
     input.clusterName
   );
 
   await replaceHclValue(
     "./aws_eks/terragrunt.hcl",
-    "cluster_description",
+    "inputs.cluster_description",
     input.clusterDescription
   );
 
@@ -82,6 +82,9 @@ export async function setupEks(input: EksSetupInput) {
   } else {
     // If the config.yaml file already exists, we need to verify if it contains the cluster and if not, add it
     const config = await Bun.file(kubeConfigPath).text();
+    if (input.verbose) {
+      input.context.stdout.write(`setupEks kube config: ${config}`);
+    }
     const jsonConfig: Record<string, unknown> = yaml.parse(config);
     // If the clusters key is not defined, initialize it as an empty array
     if (jsonConfig["clusters"] === undefined) {
@@ -90,14 +93,21 @@ export async function setupEks(input: EksSetupInput) {
     if (!Array.isArray(jsonConfig["clusters"])) {
       throw new Error("Clusters key is not an array");
     }
+    if (input.verbose) {
+      input.context.stdout.write(
+        `setupEks kube config clusters: ${JSON.stringify(jsonConfig["clusters"])}`
+      );
+    }
     if (
-      !jsonConfig["clusters"].includes(
-        `{module: "${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"}`
+      !jsonConfig["clusters"].some(
+        (cluster: { module: string }) =>
+          cluster.module ===
+          `${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks`
       )
     ) {
-      jsonConfig["clusters"].push(
-        `{module: "${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks"}`
-      );
+      jsonConfig["clusters"].push({
+        module: `${terragruntVariables["environment"]}/${terragruntVariables["region"]}/aws_eks`,
+      });
       await Bun.write(kubeConfigPath, yaml.stringify(jsonConfig));
     }
   }
@@ -105,11 +115,12 @@ export async function setupEks(input: EksSetupInput) {
   await updateKube({
     context: input.context,
     buildConfig: true,
+    verbose: input.verbose,
   });
 
   // Setup kubeconfig
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#set-up-kubeconfig
-  const kubeUserConfigPath = path.join(root, ".kube", "config.yaml");
+  const kubeUserConfigPath = path.join(root, ".kube", "config.user.yaml");
   const kubeUserConfigExists = await Bun.file(kubeUserConfigPath).exists();
   if (!kubeUserConfigExists) {
     await Bun.write(
@@ -117,7 +128,7 @@ export async function setupEks(input: EksSetupInput) {
       `# A list of all clusters to add to your kubeconfig (clusters must be present in cluster_info file)\n` +
         `clusters:\n` +
         `  - name: "${input.clusterName}"\n` +
-        `    aws_profile: "${input.clusterName}"`
+        `    aws_profile: ${terragruntVariables["aws_profile"]}`
     );
   } else {
     const kubeUserConfig = await Bun.file(kubeUserConfigPath).text();
@@ -132,21 +143,21 @@ export async function setupEks(input: EksSetupInput) {
     });
     const parsedUserConfig = jsonUserConfigSchema.parse(jsonUserConfig);
     if (
-      parsedUserConfig.clusters.some(
+      !parsedUserConfig.clusters.some(
         (cluster) => cluster.name === input.clusterName
       )
     ) {
-      return;
+      parsedUserConfig.clusters.push({
+        name: input.clusterName,
+        aws_profile: terragruntVariables["aws_profile"],
+      });
+      await Bun.write(kubeUserConfigPath, yaml.stringify(parsedUserConfig));
     }
-    parsedUserConfig.clusters.push({
-      name: input.clusterName,
-      aws_profile: input.clusterName,
-    });
-    await Bun.write(kubeUserConfigPath, yaml.stringify(parsedUserConfig));
   }
 
   await updateKube({
     context: input.context,
+    verbose: input.verbose,
   });
 
   // Reset EKS cluster
@@ -182,7 +193,7 @@ export async function setupEks(input: EksSetupInput) {
   regionFileJson["kube_api_server"] = kubeApiServer;
   await Bun.write(regionFile, yaml.stringify(regionFileJson));
 
-  // verify connection to the cluster
+  // Verify connection to the cluster
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
   input.context.stdout.write(
     pc.green(

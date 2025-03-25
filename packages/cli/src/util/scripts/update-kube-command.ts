@@ -22,6 +22,7 @@ export class UpdateKubeCommand extends Command {
       await updateKube({
         buildConfig: this.build,
         context: this.context,
+        verbose: this.verbose,
       });
     } catch (error: unknown) {
       this.context.stderr.write(

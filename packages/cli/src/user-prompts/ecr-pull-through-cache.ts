@@ -67,7 +67,7 @@ export async function ecrPullThroughCachePrompts({
     await ensureFileExists({
       context,
       destinationFile: "./aws_ecr_pull_through_cache/secrets.yaml",
-      sourceFile: tempSecretsFilePath,
+      sourceFile: await Bun.file(tempSecretsFilePath).text(),
     });
   } finally {
     const file = Bun.file(tempSecretsFilePath);

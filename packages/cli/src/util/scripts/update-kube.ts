@@ -1,4 +1,6 @@
+import { appendFileSync } from "fs";
 import { mkdir } from "fs/promises";
+import pc from "picocolors";
 import yaml from "yaml";
 import { z } from "zod";
 import { getRepoVariables } from "./get-repo-variables";
@@ -28,9 +30,11 @@ import type { BaseContext } from "clipanion";
 export async function updateKube({
   buildConfig,
   context,
+  verbose,
 }: {
   buildConfig?: boolean;
   context: BaseContext;
+  verbose?: boolean;
 }) {
   // ############################################################
   // ## Step 1: Copy the static files
@@ -101,7 +105,7 @@ export async function updateKube({
           throw new Error(`No cluster specified in ${configFilePath}!`);
         }
         const modulePath = `${environmentsDir}/${cluster.module}`;
-        context.stdout.write(`Adding cluster at ${modulePath}... `);
+        context.stdout.write(`Adding cluster at ${modulePath}...\n`);
         if (!(await safeDirectoryExists(modulePath))) {
           context.stderr.write(`Error: No module at ${modulePath}!\n`);
           throw new Error(`No module at ${modulePath}!`);
@@ -110,16 +114,23 @@ export async function updateKube({
           context,
           modulePath,
           validationSchema: z.object({
-            cluster_ca_data: z.string().base64(),
-            cluster_url: z.string(),
-            cluster_name: z.string(),
-            cluster_region: z.string(),
+            cluster_ca_data: z.object({
+              sensitive: z.boolean(),
+              type: z.string(),
+              value: z.string().base64(),
+            }),
+            cluster_url: z.object({ value: z.string() }),
+            cluster_name: z.object({ value: z.string() }),
+            cluster_region: z.object({ value: z.string() }),
           }),
+          verbose,
         });
-        const clusterCaData = globalThis.atob(moduleOutput.cluster_ca_data);
-        const clusterUrl = moduleOutput.cluster_url;
-        const clusterName = moduleOutput.cluster_name;
-        const clusterRegion = moduleOutput.cluster_region;
+        const clusterCaData = globalThis.atob(
+          moduleOutput.cluster_ca_data.value
+        );
+        const clusterUrl = moduleOutput.cluster_url.value;
+        const clusterName = moduleOutput.cluster_name.value;
+        const clusterRegion = moduleOutput.cluster_region.value;
 
         const clusterCaDataFile = `${kubeDir}/${clusterName}.crt`;
         await Bun.write(Bun.file(clusterCaDataFile), clusterCaData);
@@ -127,12 +138,19 @@ export async function updateKube({
         const hasher = new Bun.CryptoHasher("md5");
         const clusterCaDataHash = hasher.update(clusterCaData).digest("hex");
 
-        await Bun.write(
-          Bun.file(clusterInfoFilePath),
-          `${clusterName} ${clusterRegion} ${clusterUrl} ${clusterCaDataHash}`
-        );
+        if (i === 0) {
+          await Bun.write(
+            Bun.file(clusterInfoFilePath),
+            `${clusterName} ${clusterRegion} ${clusterUrl} ${clusterCaDataHash}`
+          );
+        } else {
+          appendFileSync(
+            clusterInfoFilePath,
+            `\n${clusterName} ${clusterRegion} ${clusterUrl} ${clusterCaDataHash}`
+          );
+        }
 
-        context.stdout.write("Done!\n");
+        context.stdout.write(pc.green("Cluster added successfully!\n"));
       }
 
       context.stdout.write("cluster_info updated!\n");
@@ -191,7 +209,7 @@ export async function updateKube({
       const awsProfile = cluster.aws_profile;
 
       context.stdout.write(
-        `Adding ${clusterName} using ${awsProfile} for authentication... `
+        `Adding ${clusterName} using ${awsProfile} for authentication...\n`
       );
 
       // Validate the AWS profile

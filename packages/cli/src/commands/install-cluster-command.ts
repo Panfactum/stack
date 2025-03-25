@@ -34,6 +34,13 @@ export class InstallClusterCommand extends Command {
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   async execute(): Promise<number> {
+    process.env["PF_SKIP_CHECK_REPO_SETUP"] = "1";
+    this.context.stdout.write("██████╗  █████╗ ███╗   ██╗███████╗ █████╗  ██████╗████████╗██╗   ██╗███╗   ███╗\n") // prettier-ignore
+    this.context.stdout.write("██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔══██╗██╔════╝╚══██╔══╝██║   ██║████╗ ████║\n") // prettier-ignore
+    this.context.stdout.write("██████╔╝███████║██╔██╗ ██║█████╗  ███████║██║        ██║   ██║   ██║██╔████╔██║\n") // prettier-ignore
+    this.context.stdout.write("██╔═══╝ ██╔══██║██║╚██╗██║██╔══╝  ██╔══██║██║        ██║   ██║   ██║██║╚██╔╝██║\n") // prettier-ignore
+    this.context.stdout.write("██║     ██║  ██║██║ ╚████║██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║ ╚═╝ ██║\n") // prettier-ignore
+    this.context.stdout.write("╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝\n") // prettier-ignore
     this.context.stdout.write(
       pc.blue(pc.bold("Starting Panfactum cluster installation process\n\n"))
     );

@@ -21,8 +21,7 @@ export async function ensureFileExists({
     // Make sure the directory exists
     await mkdir(dirname(destinationFile), { recursive: true });
 
-    await Bun.write(destinationFile, Bun.file(sourceFile));
-    verbose &&
-      context.stdout.write(`Wrote ${destinationFile} successfully`);
+    await Bun.write(destinationFile, sourceFile);
+    verbose && context.stdout.write(`Wrote ${destinationFile} successfully`);
   }
 }

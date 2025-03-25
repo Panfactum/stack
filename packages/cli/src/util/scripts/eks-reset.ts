@@ -1,7 +1,6 @@
 import { input, search } from "@inquirer/prompts";
 import yaml from "yaml";
 import { z } from "zod";
-import { safeDirectoryExists } from "../safe-directory-exists";
 import { safeFileExists } from "../safe-file-exists";
 import { getRepoVariables } from "./get-repo-variables";
 import type { BaseContext } from "clipanion";
@@ -38,7 +37,7 @@ export async function eksReset({ context }: { context: BaseContext }) {
   }
 
   const kubeConfigPath = process.env["KUBE_CONFIG_PATH"];
-  if (!kubeConfigPath || !(await safeDirectoryExists(kubeConfigPath))) {
+  if (!kubeConfigPath || !(await safeFileExists(kubeConfigPath))) {
     context.stderr.write(
       `Error: No kube directory found at ${kubeConfigPath}. Create it with 'pf update-kube' first!`
     );
@@ -56,8 +55,10 @@ export async function eksReset({ context }: { context: BaseContext }) {
     clusters: z.array(
       z.object({
         name: z.string(),
-        cluster: z.string(),
-        user: z.string(),
+        cluster: z.object({
+          "certificate-authority-data": z.string().base64(),
+          server: z.string(),
+        }),
       })
     ),
   });
