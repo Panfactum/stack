@@ -178,7 +178,6 @@ variable "aws_iam_ip_allow_list" {
   default     = []
 }
 
-# Webapp configuration
 variable "jobs_min_memory_mb" {
   description = "Memory request for jobs containers"
   type        = number
@@ -189,6 +188,28 @@ variable "jobs_cpu_request_millicores" {
   description = "CPU request for jobs containers"
   type        = number
   default     = 250
+}
+
+variable "jobs_env_env" {
+  description = "Additional environment variables for Airbyte jobs configuration (e.g. SYNC_JOB_MAX_ATTEMPTS, JOB_MAIN_CONTAINER_MEMORY_LIMIT, etc.)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "jobs_extra_env_vars" {
+  description = "Environment variables to pass to Airbyte jobs"
+  type = list(object({
+    name = string
+    value = optional(string)
+    valueFrom = optional(object({
+      secretKeyRef = optional(object({
+        name = string
+        key = string
+      }))
+      # Add other valueFrom options if needed
+    }))
+  }))
+  default = []
 }
 
 variable "webapp_min_memory_mb" {

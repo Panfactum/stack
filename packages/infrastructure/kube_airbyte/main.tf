@@ -405,8 +405,8 @@ resource "helm_release" "airbyte" {
           }
         }
 
-        extraEnv = []
-        env_vars = {}
+        extraEnv = var.jobs_extra_env_vars
+        env_vars = var.jobs_env_env
       }
 
       # Disable the default PostgreSQL since we're using our own
