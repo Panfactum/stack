@@ -539,6 +539,14 @@ resource "helm_release" "airbyte" {
             name  = "DB_PORT"
             value = tostring(module.database.rw_service_port)
           },
+          {
+            name  = "SQL_MAX_IDLE_CONNS"
+            value = tostring(var.temporal_db_max_idle_conns)
+          },
+          {
+            name  = "SQL_MAX_CONNS"
+            value = tostring(var.temporal_db_max_conns)
+          }
         ]
       }
 

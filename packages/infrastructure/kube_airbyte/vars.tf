@@ -239,6 +239,22 @@ variable "temporal_cpu_request_millicores" {
   default     = 200
 }
 
+variable "temporal_db_max_idle_conns" {
+  description = "Maximum number of idle connections for Temporal database (SQL_MAX_IDLE_CONNS)"
+  type        = number
+  default     = 20
+}
+
+variable "temporal_db_max_conns" {
+  description = "Maximum number of connections for Temporal database (SQL_MAX_CONNS)"
+  type        = number
+  default     = 100  # Higher than max_idle_conns, as recommended
+  validation {
+    condition     = var.temporal_db_max_conns >= var.temporal_db_max_idle_conns
+    error_message = "temporal_db_max_conns must be greater than or equal to temporal_db_max_idle_conns"
+  }
+}
+
 variable "connector_min_builder_memory_mb" {
   description = "Memory request for connector builder containers"
   type        = number
