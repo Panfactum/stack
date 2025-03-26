@@ -2,7 +2,15 @@ import pc from "picocolors";
 import { printHelpInformation } from "./print-help-information";
 import type { BaseContext } from "clipanion";
 
-// Helper function to update the configuration file
+/**
+ * Updates the specified configuration file with the provided key-value pairs
+ *
+ * @param options - The options object
+ * @param options.updates - Record of key-value pairs to update in the config file
+ * @param options.configPath - Path to the configuration file
+ * @param options.context - Clipanion base context for error handling
+ * @returns void on success, 1 on failure
+ */
 export const updateConfigFile = async ({
   updates,
   configPath,
