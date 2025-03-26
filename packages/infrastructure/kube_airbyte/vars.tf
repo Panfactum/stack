@@ -191,13 +191,13 @@ variable "jobs_cpu_request_millicores" {
 }
 
 variable "jobs_env_env" {
-  description = "Additional environment variables for Airbyte jobs configuration (e.g. SYNC_JOB_MAX_ATTEMPTS, JOB_MAIN_CONTAINER_MEMORY_LIMIT, etc.)"
+  description = "Additional environment variables for Airbyte jobs configuration (e.g. SYNC_JOB_MAX_ATTEMPTS, JOB_MAIN_CONTAINER_MEMORY_LIMIT, etc.) https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs"
   type        = map(string)
   default     = {}
 }
 
 variable "jobs_extra_env_vars" {
-  description = "Environment variables to pass to Airbyte jobs"
+  description = "Environment variables to pass to Airbyte jobs https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs"
   type = list(object({
     name = string
     value = optional(string)
