@@ -1,0 +1,7 @@
+# Copy this file to `config.yaml`
+# `config.yaml` file should be committed to version control (automatically setup via .gitignore)
+# More information can be found here: https://panfactum.com/docs/edge/reference/configuration/kubernetes
+
+# A list of all clusters deployed via aws_eks
+clusters:
+  - module: "production/us-east-2/aws_eks" # Path to the module within your $PF_ENVIRONMENTS_DIR folder

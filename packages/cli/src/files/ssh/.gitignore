@@ -1,0 +1,7 @@
+*
+!known_hosts
+!.gitignore
+!config.yaml
+!connection_info
+!config.example.yaml
+!state.lock

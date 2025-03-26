@@ -9,5 +9,5 @@ terraform {
 
 inputs = {
   vpc_name        = "DEVELOPMENT_PRIMARY"
-  vpc_description = "VPC for the primary development environment."
+  vpc_description = "Panfactum VPC for the development environment"
 }

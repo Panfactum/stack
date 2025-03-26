@@ -1,5 +1,3 @@
-# This file is maintained automatically by "tofu init".
-# Manual edits may be lost in future updates.
 
 provider "registry.opentofu.org/hashicorp/aws" {
   version     = "5.80.0"

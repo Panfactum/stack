@@ -32,6 +32,7 @@ export function apply({
 
     // Clear the progress interval
     !verbose && globalThis.clearInterval(tfApplyProgress);
+    context.stdout.write("\n");
 
     // Check if the init process failed
     if (initProcess.exitCode !== 0) {

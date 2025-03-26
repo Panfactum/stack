@@ -1,0 +1,8 @@
+# Copy this file to `config.user.yaml`
+# `config.user.yaml` file should NOT be committed to version control (automatically setup via .gitignore)
+# More information can be found here: https://panfactum.com/docs/edge/reference/configuration/kubernetes
+
+# A list of all clusters to add to your kubeconfig (clusters must be present in cluster_info file)
+clusters:
+  - name: "production-primary" # Name of the cluster in the cluster_info file
+    aws_profile: "production-superuser" # The AWS profile to use when authenticating with the cluster
