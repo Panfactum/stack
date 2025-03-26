@@ -12,6 +12,7 @@ globs: packages/cli/src/**/*
 - The primary runtime is Bun.
 - Use the @Bun docs to get the latest info on Bun.
 - If you identify code that is being re-used more than 3 times suggest a helper/utility function be written.
+- Use picocolors magenta for all @inquirer/prompts messages to users.
 
 # Following conventions
 When making changes to files, first understand the file's code conventions. Mimic code style, use existing libraries and utilities, and follow existing patterns.

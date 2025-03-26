@@ -270,7 +270,7 @@ export async function updateKube({
           "--exec-api-version",
           "client.authentication.k8s.io/v1beta1",
           "--exec-command",
-          "pf get-kube-token",
+          "pf-get-kube-token",
           "--exec-arg",
           `--region,${clusterInfoRegion},--cluster-name,${clusterName},--profile,${awsProfile}`,
         ],

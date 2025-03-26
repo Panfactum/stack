@@ -18,7 +18,9 @@ export class EksResetCommand extends Command {
   async execute(): Promise<number> {
     try {
       await eksReset({
+        commandInvocation: true,
         context: this.context,
+        verbose: this.verbose,
       });
     } catch (error: unknown) {
       this.context.stderr.write(

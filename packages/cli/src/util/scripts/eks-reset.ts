@@ -9,7 +9,15 @@ import type { BaseContext } from "clipanion";
 // cluster so that we can install our hardened replacements. Unfortunately, this is not
 // possible via tf so we create this convenience script to run as a part of the bootstrapping
 // guide
-export async function eksReset({ context }: { context: BaseContext }) {
+export async function eksReset({
+  commandInvocation,
+  context,
+  verbose = false,
+}: {
+  commandInvocation: boolean;
+  context: BaseContext;
+  verbose?: boolean;
+}) {
   // ############################################################
   // ## Step 0: Validation
   // ############################################################
@@ -46,53 +54,57 @@ export async function eksReset({ context }: { context: BaseContext }) {
     );
   }
 
-  // ############################################################
-  // ## Step 1: Select the cluster
-  // ############################################################
-  const kubectlConfig = await Bun.file(kubeConfigPath).text();
-  const jsonKubectlConfig = yaml.parse(kubectlConfig);
-  const kubectlConfigSchema = z.object({
-    clusters: z.array(
-      z.object({
-        name: z.string(),
-        cluster: z.object({
-          "certificate-authority-data": z.string().base64(),
-          server: z.string(),
-        }),
-      })
-    ),
-  });
-  const parsedKubectlConfig = kubectlConfigSchema.parse(jsonKubectlConfig);
-  const clusterNames = parsedKubectlConfig.clusters.map(
-    (cluster) => cluster.name
-  );
-  const cluster = await search({
-    message: "Select a Kubernetes cluster:",
-    source: async (input) => {
-      if (!input) {
-        return clusterNames.map((name) => ({ name: name, value: name }));
-      }
-      return clusterNames
-        .filter((name) => name.toLowerCase().includes(input.toLowerCase()))
-        .map((name) => ({ name: name, value: name }));
-    },
-  });
+  let cluster: string = "";
 
-  // ############################################################
-  // ## Step 2: Confirmation
-  // ############################################################
-  context.stderr.write(`You selected: ${cluster}\n`);
-  context.stderr.write(
-    `WARNING: This will reset core cluster utilities. This should only be done as a part of cluster bootstrapping.\n`
-  );
-  const confirmCluster = await input({
-    message: "Enter name of cluster to confirm:",
-  });
-  if (confirmCluster !== cluster) {
-    context.stderr.write(
-      `${confirmCluster} does not match ${cluster}. Exiting.\n`
+  if (commandInvocation) {
+    // ############################################################
+    // ## Step 1: Select the cluster
+    // ############################################################
+    const kubectlConfig = await Bun.file(kubeConfigPath).text();
+    const jsonKubectlConfig = yaml.parse(kubectlConfig);
+    const kubectlConfigSchema = z.object({
+      clusters: z.array(
+        z.object({
+          name: z.string(),
+          cluster: z.object({
+            "certificate-authority-data": z.string().base64(),
+            server: z.string(),
+          }),
+        })
+      ),
+    });
+    const parsedKubectlConfig = kubectlConfigSchema.parse(jsonKubectlConfig);
+    const clusterNames = parsedKubectlConfig.clusters.map(
+      (cluster) => cluster.name
     );
-    throw new Error(`${confirmCluster} does not match ${cluster}. Exiting.`);
+    cluster = await search({
+      message: "Select a Kubernetes cluster:",
+      source: async (input) => {
+        if (!input) {
+          return clusterNames.map((name) => ({ name: name, value: name }));
+        }
+        return clusterNames
+          .filter((name) => name.toLowerCase().includes(input.toLowerCase()))
+          .map((name) => ({ name: name, value: name }));
+      },
+    });
+
+    // ############################################################
+    // ## Step 2: Confirmation
+    // ############################################################
+    context.stderr.write(`You selected: ${cluster}\n`);
+    context.stderr.write(
+      `WARNING: This will reset core cluster utilities. This should only be done as a part of cluster bootstrapping.\n`
+    );
+    const confirmCluster = await input({
+      message: "Enter name of cluster to confirm:",
+    });
+    if (confirmCluster !== cluster) {
+      context.stderr.write(
+        `${confirmCluster} does not match ${cluster}. Exiting.\n`
+      );
+      throw new Error(`${confirmCluster} does not match ${cluster}. Exiting.`);
+    }
   }
 
   // ############################################################
@@ -152,15 +164,22 @@ export async function eksReset({ context }: { context: BaseContext }) {
     "list-addons",
     "--cluster-name",
     cluster,
+    "--region",
+    clusterRegion,
+    "--output",
+    "json",
   ]);
   const addonsOutput = awsAddons.stdout.toString();
+  if (verbose) {
+    context.stderr.write(`AWS addons: ${addonsOutput}\n`);
+  }
+  const addonsToDisable = ["coredns", "kube-proxy", "vpc-cni"];
   const addons = JSON.parse(addonsOutput);
   const addonsJson = z
     .object({
       addons: z.array(z.string()),
     })
     .parse(addons);
-  const addonsToDisable = ["coredns", "kube-proxy", "vpc-cni"];
   for (const addon of addonsJson.addons) {
     if (addonsToDisable.includes(addon)) {
       Bun.spawnSync([
@@ -177,12 +196,11 @@ export async function eksReset({ context }: { context: BaseContext }) {
         addon,
         "--no-preserve",
       ]);
-      context.stderr.write(`EKS addon disabled: ${addon}`);
+      context.stderr.write(`EKS addon disabled: ${addon}\n`);
     } else {
-      context.stderr.write(`EKS addon not enabled: ${addon}`);
+      context.stderr.write(`EKS addon not enabled: ${addon}\n`);
     }
   }
-
   // ############################################################
   // ## Step 6: Delete any lingering resources in the cluster itself
   // ############################################################
@@ -255,6 +273,6 @@ export async function eksReset({ context }: { context: BaseContext }) {
       "--instance-ids",
       instanceIdsArray.join(","),
     ]);
-    context.stderr.write(`Nodes terminated to reset node-local settings.`);
+    context.stderr.write(`Nodes terminated to reset node-local settings.\n`);
   }
 }

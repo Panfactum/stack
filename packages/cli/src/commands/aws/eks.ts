@@ -24,6 +24,8 @@ interface EksSetupInput {
   slaLevel: 1 | 2 | 3;
 }
 
+// @ts-ignore - ignoring "Not all code paths return a value" which is fine as only if the user does not confirm readiness to continue, we return an explicit code of 0
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function setupEks(input: EksSetupInput) {
   const templateName =
     input.slaLevel === 1 ? awsEksSla1Template : awsEksSla2Template;
@@ -160,10 +162,61 @@ export async function setupEks(input: EksSetupInput) {
     verbose: input.verbose,
   });
 
+  // Verify connection to the cluster
+  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+  input.context.stdout.write(
+    pc.green(
+      "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
+    ) +
+      pc.blue(
+        "Before continuing, please verify the connection to the cluster.\n\n" +
+          "Open a new terminal but in this project's root directory and run:\n" +
+          pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+          "You should receive a response similar to the following:\n\n"
+      ) +
+      "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
+      "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
+      pc.blue(
+        "The Panfactum devShell ships with a TUI called k9s.\n" +
+          "To verify what pods are running in the cluster do the following:\n" +
+          `1. In the separate terminal window run ${pc.bold(pc.cyan("k9s"))}.\n` +
+          `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
+          `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
+          `4. You should see a minimal list of pods running in the cluster\n` +
+          `5. If you don't see any pods, please reach out to us on Discord\n` +
+          `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
+      )
+  );
+
+  const readyToContinue = await confirm({
+    message: pc.magenta(
+      "When you are ready to continue, press enter. Otherwise, press ctrl+c to exit."
+    ),
+  });
+
+  if (!readyToContinue) {
+    input.context.stderr.write(
+      pc.red(
+        "Exiting cluster setup as user did not confirm readiness to continue."
+      )
+    );
+    return 0;
+  }
+
+  input.context.stdout.write(
+    pc.blue(
+      "AWS installs various utilities such as coredns and kube-proxy to every new EKS cluster." +
+        "We provide hardened alternatives to these defaults, and their presence will conflict with Panfactum resources in later guide steps." +
+        "As a result, we need to reset the cluster to a clean state before we continue."
+    )
+  );
+
   // Reset EKS cluster
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#reset-eks-cluster
   await eksReset({
+    commandInvocation: false,
     context: input.context,
+    verbose: input.verbose,
   });
 
   // Prepare to deploy kubernetes modules
@@ -192,34 +245,4 @@ export async function setupEks(input: EksSetupInput) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   regionFileJson["kube_api_server"] = kubeApiServer;
   await Bun.write(regionFile, yaml.stringify(regionFileJson));
-
-  // Verify connection to the cluster
-  // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
-  input.context.stdout.write(
-    pc.green(
-      "🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
-    ) +
-      pc.blue(
-        "Before continuing, please verify the connection to the cluster.\n\n" +
-          "Open a new terminal and run:\n" +
-          pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
-          "You should receive a response similar to the following:\n\n"
-      ) +
-      "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
-      "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
-      pc.blue(
-        "The Panfactum devShell ships with a TUI called k9s.\n" +
-          "To verify what pods are running in the cluster do the following:\n" +
-          `1. In a separate terminal window but in this project's root directory run ${pc.bold(pc.cyan("k9s"))}.\n` +
-          `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
-          `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
-          `4. You should see a minimal list of pods running in the cluster\n` +
-          `5. If you don't see any pods, please reach out to us on Discord\n` +
-          `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
-      )
-  );
-
-  await confirm({
-    message: "When you are ready to continue, press enter.",
-  });
 }
