@@ -12,7 +12,7 @@ To install connectors:
 2. Navigate to the "Sources" or "Destinations" section
 3. Search for and install the required connectors from the catalog
 
-For custom connector development, this module includes the Connector Builder Server component (disabled by default), which provides a development environment for creating and testing custom connectors to meet specialized integration needs.
+For custom connector development, this module includes the Connector Builder Server component, which provides a development environment for creating and testing custom connectors to meet specialized integration needs.
 
 If you need to pre-install specific connectors or automate connector configuration, consider implementing additional Terraform modules that interact with the Airbyte API after core deployment is complete.
 

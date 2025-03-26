@@ -340,6 +340,13 @@ resource "helm_release" "airbyte" {
   wait_for_jobs   = true
   max_history     = 5
 
+  lifecycle {
+    precondition {
+      condition     = var.temporal_db_max_conns >= var.temporal_db_max_idle_conns
+      error_message = "temporal_db_max_conns must be greater than or equal to temporal_db_max_idle_conns"
+    }
+  }
+
   values = [
     yamlencode({
       fullnameOverride = "airbyte"

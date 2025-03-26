@@ -61,7 +61,7 @@ variable "ingress_enabled" {
 variable "connector_builder_enabled" {
   description = "Whether to enable the connector builder server"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "node_image_cached_enabled" {
@@ -270,10 +270,6 @@ variable "temporal_db_max_conns" {
   description = "Maximum number of connections for Temporal database (SQL_MAX_CONNS)"
   type        = number
   default     = 100  # Higher than max_idle_conns, as recommended
-  validation {
-    condition     = var.temporal_db_max_conns >= var.temporal_db_max_idle_conns
-    error_message = "temporal_db_max_conns must be greater than or equal to temporal_db_max_idle_conns"
-  }
 }
 
 variable "connector_min_builder_memory_mb" {
