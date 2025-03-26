@@ -56,21 +56,29 @@ export async function setupPolicyController({
   });
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/policy-controller#run-network-tests
-  // context.stdout.write("5.c. Running network tests\n");
-  // context.stdout.write(
-  //   pc.red(
-  //     pc.bold(
-  //       "⏰ NOTE: The network tests may take up to 30 minutes to complete\n"
-  //     )
-  //   )
-  // );
-  // Bun.spawnSync(
-  //   ["cilium", "connectivity", "test", "--test", "'!pod-to-pod-encryption'"],
-  //   {
-  //     stdout: "inherit",
-  //     stderr: "inherit",
-  //   }
-  // );
+  context.stdout.write("5.c. Running network tests\n");
+  context.stdout.write(
+    pc.red(
+      pc.bold(
+        "⏰ NOTE: The network tests may take up to 30 minutes to complete\n"
+      )
+    )
+  );
+  Bun.spawnSync(
+    [
+      "cilium",
+      "connectivity",
+      "test",
+      "--test",
+      "'!pod-to-pod-encryption'",
+      "--test",
+      "!health",
+    ],
+    {
+      stdout: "inherit",
+      stderr: "inherit",
+    }
+  );
 
   // Cleanup, need to get all the namespaces as JSON and find the cilium tests one.
 }
