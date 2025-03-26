@@ -15,8 +15,11 @@ import { vpcPrompts } from "../user-prompts/vpc";
 import { getConfigFileKey } from "../util/get-config-file-key";
 import { replaceYamlValue } from "../util/replace-yaml-value";
 import { safeFileExists } from "../util/safe-file-exists";
+import { setupCSIDrivers } from "./kube/csi-drivers";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { updateConfigFile } from "../util/update-config-file";
+import { setupInternalClusterNetworking } from "./kube/internal-cluster-networking";
+import { setupPolicyController } from "./kube/policy-controller";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -284,7 +287,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupEksComplete === true) {
       this.context.stdout.write(
-        "Skipping EKS cluster setup as it's already complete.\n"
+        "Skipping EKS cluster setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("3. Setting up the AWS EKS cluster\n"));
@@ -331,6 +334,123 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           setupEks: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupInternalClusterNetworkingComplete = await getConfigFileKey({
+      key: "internalClusterNetworking",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupInternalClusterNetworkingComplete === true) {
+      this.context.stdout.write(
+        "Skipping internal cluster networking setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(
+        pc.blue("4. Setting up the internal cluster networking\n")
+      );
+
+      try {
+        await setupInternalClusterNetworking({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the internal cluster networking: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          internalClusterNetworking: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupPolicyControllerComplete = await getConfigFileKey({
+      key: "policyController",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupPolicyControllerComplete === true) {
+      this.context.stdout.write(
+        "Skipping policy controller setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(
+        pc.blue("5. Setting up the policy controller\n")
+      );
+
+      try {
+        await setupPolicyController({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the policy controller: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          policyController: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupCSIDriversComplete = await getConfigFileKey({
+      key: "csiDrivers",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupCSIDriversComplete === true) {
+      this.context.stdout.write(
+        "Skipping CSI drivers setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(
+        pc.blue("6. Setting up the Container Storage Interface (CSI) drivers\n")
+      );
+
+      try {
+        await setupCSIDrivers({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the Container Storage Interface (CSI) drivers: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          csiDrivers: true,
         },
         configPath,
         context: this.context,

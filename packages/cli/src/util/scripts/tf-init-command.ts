@@ -1,6 +1,5 @@
 import { Command, Option } from "clipanion";
 import { tfInit } from "./tf-init";
-
 export class TerragruntInitCommand extends Command {
   static override paths = [["tf-init"]];
 
@@ -18,6 +17,21 @@ export class TerragruntInitCommand extends Command {
     examples: [["Initialize all infrastructure modules", "pf tf-init"]],
   });
   async execute(): Promise<number> {
-    return tfInit({ context: this.context, verbose: this.verbose });
+    try {
+      await tfInit({
+        context: this.context,
+        verbose: this.verbose,
+      });
+    } catch (error: unknown) {
+      this.context.stderr.write(
+        `Error initializing infrastructure modules: ${error instanceof Error ? error.message : String(error)}\n`
+      );
+      if (this.verbose) {
+        this.context.stderr.write(JSON.stringify(error, null, 2));
+      }
+      return 1;
+    }
+
+    return 0;
   }
 }

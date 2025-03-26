@@ -7,6 +7,7 @@ import awsEksSla1Template from "../../templates/aws_eks_sla_1_terragrunt.hcl" wi
 import awsEksSla2Template from "../../templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
+import { safeFileExists } from "../../util/safe-file-exists";
 import { eksReset } from "../../util/scripts/eks-reset";
 import { getRepoVariables } from "../../util/scripts/get-repo-variables";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
@@ -189,9 +190,7 @@ export async function setupEks(input: EksSetupInput) {
   );
 
   const readyToContinue = await confirm({
-    message: pc.magenta(
-      "When you are ready to continue, press enter. Otherwise, press ctrl+c to exit."
-    ),
+    message: pc.magenta("When you are ready to continue, press enter."),
   });
 
   if (!readyToContinue) {
@@ -205,15 +204,16 @@ export async function setupEks(input: EksSetupInput) {
 
   input.context.stdout.write(
     pc.blue(
-      "AWS installs various utilities such as coredns and kube-proxy to every new EKS cluster." +
-        "We provide hardened alternatives to these defaults, and their presence will conflict with Panfactum resources in later guide steps." +
-        "As a result, we need to reset the cluster to a clean state before we continue."
+      "\nAWS installs various utilities such as coredns and kube-proxy to every new EKS cluster. " +
+        "We provide hardened alternatives to these defaults, and their presence will conflict with Panfactum resources in later guide steps. " +
+        "As a result, we need to reset the cluster to a clean state before we continue.\n"
     )
   );
 
   // Reset EKS cluster
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#reset-eks-cluster
   await eksReset({
+    clusterName: input.clusterName,
     commandInvocation: false,
     context: input.context,
     verbose: input.verbose,
@@ -222,22 +222,49 @@ export async function setupEks(input: EksSetupInput) {
   // Prepare to deploy kubernetes modules
   // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#prepare-to-deploy-kubernetes-modules
   const repoVariables = await getRepoVariables({ context: input.context });
-  const kubeConfigContext = terragruntVariables["kube_config_context"];
-  const kubeApiServer = terragruntVariables["kube_api_server"];
-  const regionFile = Bun.file(
-    path.join(
-      repoVariables.environments_dir,
-      terragruntVariables["environment"],
-      terragruntVariables["region"],
-      "region.yaml"
-    )
+  const clusterInfoFilePath = `${repoVariables.kube_dir}/cluster_info`;
+  const clusterInfoFile = await Bun.file(clusterInfoFilePath).text();
+  const clusterInfoLines = clusterInfoFile.split("\n");
+  const clusterInfo = clusterInfoLines.find((line) =>
+    line.startsWith(`${input.clusterName} `)
   );
-  const regionFileExists = await regionFile.exists();
+  if (!clusterInfo) {
+    input.context.stderr.write(
+      `Error: Cluster not found in ${clusterInfoFilePath}`
+    );
+    throw new Error(`Error: Cluster not found in ${clusterInfoFilePath}`);
+  }
+  const [kubeConfigContext, , kubeApiServer] = clusterInfo.split(" ");
+  if (!kubeConfigContext) {
+    input.context.stderr.write(
+      `Error: kube_config_context not found in ${clusterInfoFilePath}`
+    );
+    throw new Error(
+      `Error: kube_config_context not found in ${clusterInfoFilePath}`
+    );
+  }
+  if (!kubeApiServer) {
+    input.context.stderr.write(
+      `Error: kube_api_server not found in ${clusterInfoFilePath}`
+    );
+    throw new Error(
+      `Error: kube_api_server not found in ${clusterInfoFilePath}`
+    );
+  }
+
+  const regionFilePath = path.join(
+    repoVariables.environments_dir,
+    terragruntVariables["environment"],
+    terragruntVariables["region"],
+    "region.yaml"
+  );
+  const regionFileExists = await safeFileExists(regionFilePath);
   if (!regionFileExists) {
     throw new Error(
       `Region file not found for ${terragruntVariables["environment"]}/${terragruntVariables["region"]}`
     );
   }
+  const regionFile = Bun.file(regionFilePath);
   const regionFileText = await regionFile.text();
   const regionFileJson = yaml.parse(regionFileText);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
