@@ -285,7 +285,7 @@ variable "webapp_min_cpu_millicores" {
 variable "server_min_memory_mb" {
   description = "Memory request for server containers"
   type        = number
-  default     = 128
+  default     = 512
 }
 
 variable "server_min_cpu_millicores" {
@@ -297,7 +297,7 @@ variable "server_min_cpu_millicores" {
 variable "worker_min_memory_mb" {
   description = "Memory request for worker containers"
   type        = number
-  default     = 256
+  default     = 512
 }
 
 variable "worker_min_cpu_millicores" {
@@ -333,7 +333,7 @@ variable "temporal_db_max_conns" {
 variable "connector_min_builder_memory_mb" {
   description = "Memory request for connector builder containers"
   type        = number
-  default     = 64
+  default     = 300
 }
 
 variable "connector_builder_min_cpu_millicores" {
@@ -357,7 +357,7 @@ variable "pod_sweeper_min_cpu_millicores" {
 variable "cron_min_memory_mb" {
   description = "Memory request for cron containers"
   type        = number
-  default     = 64
+  default     = 368
 }
 
 variable "cron_min_cpu_millicores" {
@@ -366,10 +366,10 @@ variable "cron_min_cpu_millicores" {
   default     = 25
 }
 
-variable "workload_min_api_server_memory_mb" {
+variable "workload_api_min_server_memory_mb" {
   description = "Memory request for workload API server containers"
   type        = number
-  default     = 64
+  default     = 325
 }
 
 variable "workload_api_server_min_cpu_millicores" {
@@ -381,7 +381,7 @@ variable "workload_api_server_min_cpu_millicores" {
 variable "workload_min_launcher_memory_mb" {
   description = "Memory request for workload launcher containers"
   type        = number
-  default     = 64
+  default     = 350
 }
 
 variable "workload_launcher_min_cpu_millicores" {

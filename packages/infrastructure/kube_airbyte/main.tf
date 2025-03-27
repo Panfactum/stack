@@ -518,7 +518,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.worker_min_memory_mb}Mi"
-            cpu    = "${var.worker_min_cpu_millicores}"
+            cpu    = "${var.worker_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.worker_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -532,7 +532,12 @@ resource "helm_release" "airbyte" {
         enabled        = true
         replicaCount   = var.sla_target >= 2 ? 2 : 1
         podLabels      = module.util_temporal.labels
-        podAnnotations = var.pod_annotations
+        podAnnotations = merge(var.pod_annotations, {
+          # Explicitly disable Linkerd injection due to failure in communication amongst replicas
+          "linkerd.io/inject" = "disabled"
+          "config.linkerd.io/skip-inbound" = "true"
+          "config.linkerd.io/skip-outbound" = "true"
+        })
 
         affinity     = module.util_temporal.affinity
         tolerations  = module.util_temporal.tolerations
@@ -577,6 +582,24 @@ resource "helm_release" "airbyte" {
           {
             name  = "SQL_MAX_CONNS"
             value = tostring(var.temporal_db_max_conns)
+          },
+          {
+            name  = "TEMPORAL_BROADCAST_ADDRESS"
+            valueFrom = {
+              fieldRef = {
+                fieldPath = "status.podIP"
+              }
+            }
+          },
+          # Ensure proper service addressing
+          {
+            name  = "TEMPORAL_ADDRESS"
+            value = "airbyte-temporal:7233"
+          },
+          # Set appropriate timeouts to avoid protocol errors
+          {
+            name  = "TEMPORAL_CLI_TIMEOUT"
+            value = "60s"
           }
         ]
       }
@@ -665,11 +688,11 @@ resource "helm_release" "airbyte" {
 
         resources = {
           requests = {
-            memory = "${var.workload_min_api_server_memory_mb}Mi"
+            memory = "${var.workload_api_min_server_memory_mb}Mi"
             cpu    = "${var.workload_api_server_min_cpu_millicores}m"
           }
           limits = {
-            memory = "${var.workload_min_api_server_memory_mb * local.memory_limit_multiplier}Mi"
+            memory = "${var.workload_api_min_server_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
       }
@@ -1228,7 +1251,7 @@ resource "kubectl_manifest" "vpa_workload_api_server" {
         containerPolicies = [{
           containerName = "airbyte-workload-api-server"
           minAllowed = {
-            memory = "${var.workload_min_api_server_memory_mb}Mi"
+            memory = "${var.workload_api_min_server_memory_mb}Mi"
           }
         }]
       }
