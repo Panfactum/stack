@@ -181,7 +181,7 @@ variable "jobs_min_memory_mb" {
 variable "jobs_cpu_min_millicores" {
   description = "The minimum amount of cpu millicores for jobs containers"
   type        = number
-  default     = 250
+  default     = 100
 }
 
 variable "jobs_env_env" {
@@ -193,37 +193,37 @@ variable "jobs_env_env" {
 variable "webapp_min_memory_mb" {
   description = "Memory request for webapp containers"
   type        = number
-  default     = 512
+  default     = 128
 }
 
 variable "webapp_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores webapp containers"
   type        = number
-  default     = 200
+  default     = 50
 }
 
 variable "server_min_memory_mb" {
   description = "Memory request for server containers"
   type        = number
-  default     = 512
+  default     = 128
 }
 
 variable "server_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for server containers"
   type        = number
-  default     = 200
+  default     = 50
 }
 
 variable "worker_min_memory_mb" {
   description = "Memory request for worker containers"
   type        = number
-  default     = 512
+  default     = 256
 }
 
 variable "worker_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for worker containers"
   type        = number
-  default     = 200
+  default     = 100
 }
 
 variable "temporal_min_memory_mb" {
@@ -235,7 +235,7 @@ variable "temporal_min_memory_mb" {
 variable "temporal_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for temporal containers"
   type        = number
-  default     = 200
+  default     = 150
 }
 
 variable "temporal_db_max_idle_conns" {
@@ -253,61 +253,61 @@ variable "temporal_db_max_conns" {
 variable "connector_min_builder_memory_mb" {
   description = "Memory request for connector builder containers"
   type        = number
-  default     = 256
+  default     = 64
 }
 
 variable "connector_builder_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for connector builder containers"
   type        = number
-  default     = 100
+  default     = 25
 }
 
 variable "pod_min_sweeper_memory_mb" {
   description = "Memory request for pod sweeper containers"
   type        = number
-  default     = 128
+  default     = 32
 }
 
 variable "pod_sweeper_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for pod sweeper containers"
   type        = number
-  default     = 50
+  default     = 10
 }
 
 variable "cron_min_memory_mb" {
   description = "Memory request for cron containers"
   type        = number
-  default     = 256
+  default     = 64
 }
 
 variable "cron_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for cron containers"
   type        = number
-  default     = 100
+  default     = 25
 }
 
 variable "workload_min_api_server_memory_mb" {
   description = "Memory request for workload API server containers"
   type        = number
-  default     = 256
+  default     = 64
 }
 
 variable "workload_api_server_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for workload API server containers"
   type        = number
-  default     = 100
+  default     = 25
 }
 
 variable "workload_min_launcher_memory_mb" {
   description = "Memory request for workload launcher containers"
   type        = number
-  default     = 256
+  default     = 64
 }
 
 variable "workload_launcher_min_cpu_millicores" {
   description = "The minimum amount of cpu millicores for workload launcher containers"
   type        = number
-  default     = 100
+  default     = 25
 }
 
 variable "pod_annotations" {
