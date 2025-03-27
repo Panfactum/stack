@@ -100,6 +100,81 @@ variable "pg_initial_storage_gb" {
   default     = 20
 }
 
+variable "pg_minimum_memory_mb" {
+  description = "The minimum amount of memory to allocate to the postgres pods (in Mi)"
+  type        = number
+  default     = 500
+
+  validation {
+    condition     = var.pg_minimum_memory_mb >= 500
+    error_message = "Must provide at least 500MB of memory"
+  }
+}
+
+variable "pg_maximum_memory_mb" {
+  description = "The maximum amount of memory to allocate to the postgres pods (in Mi)"
+  type        = number
+  default     = 128000
+}
+
+variable "pg_minimum_cpu_millicores" {
+  description = "The minimum amount of cpu to allocate to the postgres pods (in millicores)"
+  type        = number
+  default     = 50
+
+  validation {
+    condition     = var.pg_minimum_cpu_millicores >= 50
+    error_message = "Must provide at least 50m of CPU"
+  }
+}
+
+variable "pg_maximum_cpu_millicores" {
+  description = "The maximum amount of cpu to allocate to the postgres pods (in millicores)"
+  type        = number
+  default     = 10000
+}
+
+variable "pg_minimum_cpu_update_millicores" {
+  description = "The CPU settings for the Postgres won't be updated until the recommendations from the VPA (if enabled) differ from the current settings by at least this many millicores. This prevents autoscaling thrash."
+  type        = number
+  default     = 250
+}
+
+variable "pgbouncer_minimum_memory_mb" {
+  description = "The minimum amount of memory to allocate to the pgbouncer pods (in Mi)"
+  type        = number
+  default     = 25
+
+  validation {
+    condition     = var.pgbouncer_minimum_memory_mb >= 25
+    error_message = "Must provide at least 25MB of memory"
+  }
+}
+
+variable "pgbouncer_maximum_memory_mb" {
+  description = "The maximum amount of memory to allocate to the pgbouncer pods (in Mi)"
+  type        = number
+  default     = 32000
+}
+
+variable "pgbouncer_minimum_cpu_millicores" {
+  description = "The minimum amount of cpu to allocate to the pgbouncer pods (in millicores)"
+  type        = number
+  default     = 15
+
+  validation {
+    condition     = var.pgbouncer_minimum_cpu_millicores >= 10
+    error_message = "Must provide at least 10m of CPU"
+  }
+}
+
+variable "pgbouncer_maximum_cpu_millicores" {
+  description = "The maximum amount of cpu to allocate to the pgbouncer pods (in millicores)"
+  type        = number
+  default     = 10000
+}
+
+
 variable "db_backup_directory" {
   description = "Directory to store database backups (if enabled)"
   type        = string
@@ -321,8 +396,8 @@ variable "vault_domain" {
   type        = string
 }
 
-variable "additional_s3_bucket_arns" {
-  description = "Additional S3 bucket ARNs to grant permissions to the Airbyte service account"
+variable "connected_s3_bucket_arns" {
+  description = "List of S3 bucket ARNs that airbyte will use as connector destinations"
   type        = list(string)
   default     = []
 }

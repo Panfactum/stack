@@ -195,10 +195,10 @@ module "database" {
   pg_initial_storage_gb                = var.pg_initial_storage_gb
   pg_instances                         = var.sla_target >= 2 ? 2 : 1
   pg_smart_shutdown_timeout            = 1
-  pg_minimum_memory_mb                 = 500
+  pgbouncer_pool_mode                  = "session"
+
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
-  pgbouncer_pool_mode                  = "session"
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   controller_nodes_enabled             = false
@@ -206,6 +206,16 @@ module "database" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   instance_type_anti_affinity_required = var.sla_target == 3
   vpa_enabled                          = var.vpa_enabled
+
+  pg_minimum_cpu_millicores        = var.pg_minimum_cpu_millicores
+  pg_maximum_cpu_millicores        = var.pg_maximum_cpu_millicores
+  pg_minimum_cpu_update_millicores = var.pg_minimum_cpu_update_millicores
+  pg_minimum_memory_mb             = var.pg_minimum_memory_mb
+  pg_maximum_memory_mb             = var.pg_maximum_memory_mb
+  pgbouncer_minimum_cpu_millicores = var.pgbouncer_minimum_cpu_millicores
+  pgbouncer_maximum_cpu_millicores = var.pgbouncer_maximum_cpu_millicores
+  pgbouncer_minimum_memory_mb      = var.pgbouncer_minimum_memory_mb
+  pgbouncer_maximum_memory_mb      = var.pgbouncer_maximum_memory_mb
 
   pg_backup_directory      = var.db_backup_directory
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
@@ -219,7 +229,7 @@ module "database" {
 
 resource "kubernetes_service_account" "airbyte_sa" {
   metadata {
-    name      = "airbyte-admin"
+    name      = "airbyte"
     namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
@@ -240,6 +250,7 @@ module "airbyte_bucket" {
   description = "Airbyte storage for logs state and workload output"
 
   intelligent_transitions_enabled = true
+  expire_after_days  = 7
 }
 
 data "aws_iam_policy_document" "airbyte_bucket" {
@@ -252,7 +263,7 @@ data "aws_iam_policy_document" "airbyte_bucket" {
     ]
     resources = concat(
       ["${module.airbyte_bucket.bucket_arn}/*"],
-      [for arn in var.additional_s3_bucket_arns : "${arn}/*"]
+      [for arn in var.connected_s3_bucket_arns : "${arn}/*"]
     )
   }
   statement {
@@ -262,7 +273,7 @@ data "aws_iam_policy_document" "airbyte_bucket" {
     ]
     resources = concat(
       [module.airbyte_bucket.bucket_arn],
-      var.additional_s3_bucket_arns
+      var.connected_s3_bucket_arns
     )
   }
   statement {
@@ -283,7 +294,7 @@ data "aws_iam_policy_document" "airbyte_bucket" {
     ]
     resources = concat(
       [module.airbyte_bucket.bucket_arn, "${module.airbyte_bucket.bucket_arn}/*"],
-      flatten([for arn in var.additional_s3_bucket_arns : [arn, "${arn}/*"]])
+      flatten([for arn in var.connected_s3_bucket_arns : [arn, "${arn}/*"]])
     )
   }
 }
@@ -355,6 +366,10 @@ resource "helm_release" "airbyte" {
         serviceAccountName = kubernetes_service_account.airbyte_sa.metadata[0].name
         edition            = var.airbyte_edition
         airbyteUrl         = "https://${var.domain}"
+
+        image = {
+          tag = var.airbyte_version
+        }
 
         auth = {
           enabled = false
@@ -1277,23 +1292,23 @@ module "image_cache" {
 
   images = [
     {
-      registry   = "airbyte"
-      repository = "webapp"
+      registry   = "docker.io"
+      repository = "airbyte/webapp"
       tag        = var.airbyte_version
     },
     {
-      registry   = "airbyte"
-      repository = "server"
+      registry   = "docker.io"
+      repository = "airbyte/server"
       tag        = var.airbyte_version
     },
     {
-      registry   = "airbyte"
-      repository = "worker"
+      registry   = "docker.io"
+      repository = "airbyte/worker"
       tag        = var.airbyte_version
     },
     {
-      registry   = "temporalio"
-      repository = "auto-setup"
+      registry   = "docker.io"
+      repository = "temporalio/auto-setup"
       tag        = "1.26"
     }
   ]
