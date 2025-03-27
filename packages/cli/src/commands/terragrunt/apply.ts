@@ -5,10 +5,12 @@ import type { BaseContext } from "clipanion";
 
 export function apply({
   context,
+  suppressErrors = false,
   verbose = false,
   workingDirectory = ".",
 }: {
   context: BaseContext;
+  suppressErrors?: boolean;
   verbose?: boolean;
   workingDirectory?: string;
 }): 0 | 1 {
@@ -54,11 +56,15 @@ export function apply({
 
     return 0;
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error
-        ? `Error applying infrastructure modules: ${error.message}`
-        : "Error applying infrastructure modules";
-    context.stderr.write(`${pc.red(errorMessage)}\n`);
+    // The only current use case for this and when we're first applying the Vault module which may fail initially.
+    // We won't write anything to the console and handle the thrown error in the calling function.
+    if (!suppressErrors) {
+      const errorMessage =
+        error instanceof Error
+          ? `Error applying infrastructure modules: ${error.message}`
+          : "Error applying infrastructure modules";
+      context.stderr.write(`${pc.red(errorMessage)}\n`);
+    }
     throw new Error("Failed to apply infrastructure modules");
   }
 }

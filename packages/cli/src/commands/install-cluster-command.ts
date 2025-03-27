@@ -20,6 +20,8 @@ import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables
 import { updateConfigFile } from "../util/update-config-file";
 import { setupInternalClusterNetworking } from "./kube/internal-cluster-networking";
 import { setupPolicyController } from "./kube/policy-controller";
+import { setupVault } from "./kube/vault";
+import { vaultPrompts } from "../user-prompts/vault";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -294,7 +296,7 @@ export class InstallClusterCommand extends Command {
       this.context.stdout.write(
         pc.red(
           pc.bold(
-            "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer two short questions\n"
+            "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer a couple questions\n"
           )
         )
       );
@@ -451,6 +453,66 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           csiDrivers: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupVaultComplete = await getConfigFileKey({
+      key: "vault",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupVaultComplete === true) {
+      this.context.stdout.write(
+        "Skipping Vault setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(pc.blue("7. Setting up Vault\n\n"));
+
+      this.context.stdout.write(
+        pc.blue(
+          "Vault serves several important purposes in the Panfactum stack:\n" +
+            "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
+            "2. Authorizes SSH authentication to our bastion hosts\n" +
+            "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n" +
+            pc.red(
+              pc.bold(
+                "⏰ NOTE: The Vault setup may take up to 20 minutes to complete after you answer a few questions\n"
+              )
+            )
+        )
+      );
+
+      const { vaultDomain, recoveryShares, recoveryThreshold } =
+        await vaultPrompts();
+
+      try {
+        await setupVault({
+          context: this.context,
+          vaultDomain,
+          recoveryShares: recoveryShares!, // This is required by the prompt which means it can't be undefined. The typing is wrong.
+          recoveryThreshold: recoveryThreshold!, // This is required by the prompt which means it can't be undefined. The typing is wrong.
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the Vault: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          vaultDomain,
+          recoveryShares,
+          recoveryThreshold,
+          vault: true,
         },
         configPath,
         context: this.context,
