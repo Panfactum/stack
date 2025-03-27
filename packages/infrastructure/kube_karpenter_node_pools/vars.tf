@@ -51,22 +51,28 @@ variable "node_security_group_id" {
   type        = string
 }
 
+variable "min_node_memory_mb" {
+  description = "The minimum memory for any single provisioned node (in MB)"
+  type        = number
+  default     = 2500
+}
+
 variable "max_node_memory_mb" {
   description = "The maximum memory for any single provisioned node (in MB)"
   type        = number
   default     = 65536
 }
 
-variable "max_node_cpu" {
-  description = "The maximum number of CPUs for any single provisioned node (in MB)"
+variable "min_node_cpu" {
+  description = "The minimum number of vCPUs for any single provisioned node"
   type        = number
-  default     = 32
+  default     = 0.5  # To allow smaller instances
 }
 
-variable "min_node_memory_mb" {
-  description = "The minimum memory for any single provisioned node (in MB)"
+variable "max_node_cpu" {
+  description = "The maximum number of vCPUs for any single provisioned node"
   type        = number
-  default     = 2500
+  default     = 32
 }
 
 variable "arm64_node_ami_name" {

@@ -76,14 +76,19 @@ locals {
 
   shared_requirements = [
     {
-      key      = "karpenter.k8s.aws/instance-memory"
-      operator = "Lt"
-      values   = [tostring(var.max_node_memory_mb + 1)]
-    },
-    {
       key      = "karpenter.k8s.aws/instance-cpu"
       operator = "Lt"
       values   = [tostring(var.max_node_cpu + 1)]
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-cpu"
+      operator = "Gt"
+      values   = [tostring(var.min_node_cpu)]
+    },
+    {
+      key      = "karpenter.k8s.aws/instance-memory"
+      operator = "Lt"
+      values   = [tostring(var.max_node_memory_mb + 1)]
     },
     {
       key      = "karpenter.k8s.aws/instance-memory"
