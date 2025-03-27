@@ -1,4 +1,3 @@
-import pc from "picocolors";
 import kyvernoTerragruntHcl from "../../templates/kube_kyverno_terragrunt.hcl" with { type: "file" };
 import kubePoliciesTerragruntHcl from "../../templates/kube_policies_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
@@ -56,29 +55,30 @@ export async function setupPolicyController({
   });
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/policy-controller#run-network-tests
-  context.stdout.write("5.c. Running network tests\n");
-  context.stdout.write(
-    pc.red(
-      pc.bold(
-        "⏰ NOTE: The network tests may take up to 30 minutes to complete\n"
-      )
-    )
-  );
-  Bun.spawnSync(
-    [
-      "cilium",
-      "connectivity",
-      "test",
-      "--test",
-      "'!pod-to-pod-encryption'",
-      "--test",
-      "!health",
-    ],
-    {
-      stdout: "inherit",
-      stderr: "inherit",
-    }
-  );
+  // Not doing cilium tests at this time as there's an upstream issue with the tests. Will revisit when the issue is resolved.
+  // context.stdout.write("5.c. Running network tests\n");
+  // context.stdout.write(
+  //   pc.red(
+  //     pc.bold(
+  //       "⏰ NOTE: The network tests may take up to 30 minutes to complete\n"
+  //     )
+  //   )
+  // );
+  // Bun.spawnSync(
+  //   [
+  //     "cilium",
+  //     "connectivity",
+  //     "test",
+  //     "--test",
+  //     "'!pod-to-pod-encryption'",
+  //     "--test",
+  //     "'!health'",
+  //   ],
+  //   {
+  //     stdout: "inherit",
+  //     stderr: "inherit",
+  //   }
+  // );
 
-  // Cleanup, need to get all the namespaces as JSON and find the cilium tests one.
+  // Cleanup, need to get all the namespaces as JSON, find the cilium tests one, and delete it.
 }
