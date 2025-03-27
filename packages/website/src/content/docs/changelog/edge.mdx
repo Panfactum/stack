@@ -45,6 +45,8 @@ to the `recovery_directory` output value from the previous release. You should e
 
 * Adds automatic garbage collection of failed backups in [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pg_cluster).
 
+* Adds `min_node_memory_mb` to [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) to set a minimum memory threshold for nodes.
+
 ### Fixed
 
 * Optimizes the backup process for [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster) to provide a 100x improvement in backup throughput.
