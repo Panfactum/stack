@@ -103,6 +103,22 @@ Type: `list(string)`
 
 Default: `[]`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### enhanced\_ha\_enabled
 
 Description: Whether to add extra high-availability scheduling constraints at the trade-off of increased cost
@@ -118,6 +134,14 @@ Description: Whether to enable username and password authentication. Should only
 Type: `bool`
 
 Default: `true`
+
+### grafana\_db\_backup\_directory
+
+Description: The name of the directory in the backup bucket containing the backups files for the Grafana PostgreSQL database.
+
+Type: `string`
+
+Default: `"initial"`
 
 ### grafana\_db\_recovery\_directory
 
@@ -295,6 +319,14 @@ Type: `bool`
 
 Default: `true`
 
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### thanos\_bucket\_web\_domain
 
 Description: Domain to host the Thanos bucket web UI on. If not provided, will be on the same subdomain as grafana but with the thanos-bucket identifier (thanos-bucket.\<grafana-subdomain\>)
@@ -391,13 +423,17 @@ The following outputs are exported:
 
 Description: n/a
 
+### db\_backup\_bucket
+
+Description: The name of the S3 bucket that contains the PostgreSQL backups and WAL archives for Grafana
+
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives for Grafana
+
 ### grafana\_admin\_password
 
 Description: n/a
-
-### grafana\_db\_recovery\_directory
-
-Description: The name of the directory in the backup bucket that contains the Grafana PostgreSQL backups and WAL archives
 
 ### namespace
 

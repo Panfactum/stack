@@ -37,6 +37,22 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### ingress\_timeout\_seconds
 
 Description: The maximum number of seconds that request may take.
@@ -92,6 +108,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### tls\_1\_2\_enabled
 

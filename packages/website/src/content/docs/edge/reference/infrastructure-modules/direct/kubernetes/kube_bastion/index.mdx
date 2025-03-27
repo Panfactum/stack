@@ -59,6 +59,22 @@ Type: `number`
 
 Default: `45459`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
@@ -82,6 +98,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### ssh\_cert\_lifetime\_seconds
 

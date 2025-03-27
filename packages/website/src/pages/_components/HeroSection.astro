@@ -9,15 +9,19 @@ import {DISCORD_URL, SIGNUP_LINK} from "../../lib/constants";
 const pathname = new URL(Astro.request.url).pathname;
 ---
 
-<section class="flex flex-col items-center py-16">
-  <div class="container px-4 xl:px-8">
-    <div class="container flex flex-col items-center gap-8 px-4 xl:px-8">
+<section class="flex flex-col items-center py-8 lg:py-16">
+  <div class="xl:px-8">
+    <div class="flex flex-col items-center gap-8 xl:px-8">
       <div
         class="flex flex-col items-center gap-6 text-center"
       >
-          <h1 class="text-display-xl font-machina font-bold !leading-normal tracking-wider">The Open-Source Framework for<br/>Cloud Infrastructure</h1>
-        <p class="text-display-sm max-w-[600px] font-semibold">
-          Launch faster. Scale easier. Save 75%.
+          <h1 class="text-display-lg lg:text-display-xl font-machina font-bold !leading-normal tracking-wider">The Open-Source Framework for<br/>Cloud 
+            <span class="md:hidden">Infra</span>
+            <span class="hidden md:inline">Infrastructure</span>
+
+          </h1>
+        <p class="text-display-sm max-w-[600px]">
+          Launch <span class="font-bold">faster</span>. Scale <span class="font-bold">easier</span>. Save <span class="font-bold">75%</span>.
         </p>
       </div>
 

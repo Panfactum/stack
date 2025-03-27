@@ -19,6 +19,8 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+## edge.25-03-26
+
 ### Breaking Changes
 
 * Across all Panfactum modules, `burstabled_nodes_enabled` no longer automatically adds a spot instance toleration. This enables users to run on-demand, [burstable](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html)
@@ -44,6 +46,8 @@ to the `recovery_directory` output value from the previous release. You should e
 * Adds automatic garbage collection of orphaned persistent volumes via [kube_policies](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_policies).
 
 * Adds automatic garbage collection of failed backups in [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_pg_cluster).
+
+* Adds `min_node_memory_mb` to [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) to set a minimum memory threshold for nodes.
 
 ### Fixed
 
