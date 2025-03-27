@@ -412,7 +412,6 @@ resource "helm_release" "airbyte" {
           }
         }
 
-        extraEnv = var.jobs_extra_env_vars
         env_vars = var.jobs_env_env
       }
 
