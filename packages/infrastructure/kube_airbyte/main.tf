@@ -400,7 +400,7 @@ resource "helm_release" "airbyte" {
           resources = {
             requests = {
               memory = "${var.jobs_min_memory_mb}Mi"
-              cpu    = "${var.jobs_cpu_request_millicores}m"
+              cpu    = "${var.jobs_cpu_min_millicores}m"
             }
             limits = {
               memory = "${var.jobs_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -434,7 +434,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.webapp_min_memory_mb}Mi"
-            cpu    = "${var.webapp_cpu_request_millicores}m"
+            cpu    = "${var.webapp_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.webapp_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -469,7 +469,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.server_min_memory_mb}Mi"
-            cpu    = "${var.server_cpu_request_millicores}m"
+            cpu    = "${var.server_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.server_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -494,7 +494,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.worker_min_memory_mb}Mi"
-            cpu    = "${var.worker_cpu_request_millicores}"
+            cpu    = "${var.worker_min_cpu_millicores}"
           }
           limits = {
             memory = "${var.worker_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -516,7 +516,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.temporal_min_memory_mb}Mi"
-            cpu    = "${var.temporal_cpu_request_millicores}m"
+            cpu    = "${var.temporal_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.temporal_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -579,7 +579,7 @@ resource "helm_release" "airbyte" {
 
       # Connector builder server configuration
       "connector-builder-server" = {
-        enabled        = var.connector_builder_enabled
+        enabled        = true # required to be on https://github.com/airbytehq/airbyte/issues/25174
         podLabels      = module.util_connector_builder.labels
         podAnnotations = var.pod_annotations
 
@@ -593,7 +593,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.connector_min_builder_memory_mb}Mi"
-            cpu    = "${var.connector_builder_cpu_request_millicores}m"
+            cpu    = "${var.connector_builder_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.connector_min_builder_memory_mb * local.memory_limit_multiplier}Mi"
@@ -617,7 +617,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.cron_min_memory_mb}Mi"
-            cpu    = "${var.cron_cpu_request_millicores}m"
+            cpu    = "${var.cron_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.cron_min_memory_mb * local.memory_limit_multiplier}Mi"
@@ -642,7 +642,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.workload_min_api_server_memory_mb}Mi"
-            cpu    = "${var.workload_api_server_cpu_request_millicores}m"
+            cpu    = "${var.workload_api_server_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.workload_min_api_server_memory_mb * local.memory_limit_multiplier}Mi"
@@ -662,7 +662,7 @@ resource "helm_release" "airbyte" {
         resources = {
           requests = {
             memory = "${var.workload_min_launcher_memory_mb}Mi"
-            cpu    = "${var.workload_launcher_cpu_request_millicores}m"
+            cpu    = "${var.workload_launcher_min_cpu_millicores}m"
           }
           limits = {
             memory = "${var.workload_min_launcher_memory_mb * local.memory_limit_multiplier}Mi"

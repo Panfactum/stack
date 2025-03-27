@@ -58,12 +58,6 @@ variable "ingress_enabled" {
   default     = true
 }
 
-variable "connector_builder_enabled" {
-  description = "Whether to enable the connector builder server"
-  type        = bool
-  default     = true
-}
-
 variable "node_image_cached_enabled" {
   description = "Whether to enable node image caching"
   type        = bool
@@ -85,7 +79,7 @@ variable "monitoring_enabled" {
 variable "log_level" {
   description = "The log level for Airbyte components"
   type        = string
-  default     = "INFO"
+  default     = "WARN"
   validation {
     condition     = contains(["DEBUG", "INFO", "WARN", "ERROR"], var.log_level)
     error_message = "The log_level must be one of: DEBUG, INFO, WARN, ERROR."
@@ -184,8 +178,8 @@ variable "jobs_min_memory_mb" {
   default     = 1024
 }
 
-variable "jobs_cpu_request_millicores" {
-  description = "CPU request for jobs containers"
+variable "jobs_cpu_min_millicores" {
+  description = "The minimum amount of cpu millicores for jobs containers"
   type        = number
   default     = 250
 }
@@ -196,30 +190,14 @@ variable "jobs_env_env" {
   default     = {}
 }
 
-variable "jobs_extra_env_vars" {
-  description = "Environment variables to pass to Airbyte jobs https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs"
-  type = list(object({
-    name = string
-    value = optional(string)
-    valueFrom = optional(object({
-      secretKeyRef = optional(object({
-        name = string
-        key = string
-      }))
-      # Add other valueFrom options if needed
-    }))
-  }))
-  default = []
-}
-
 variable "webapp_min_memory_mb" {
   description = "Memory request for webapp containers"
   type        = number
   default     = 512
 }
 
-variable "webapp_cpu_request_millicores" {
-  description = "CPU request for webapp containers"
+variable "webapp_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores webapp containers"
   type        = number
   default     = 200
 }
@@ -230,8 +208,8 @@ variable "server_min_memory_mb" {
   default     = 512
 }
 
-variable "server_cpu_request_millicores" {
-  description = "CPU request for server containers"
+variable "server_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for server containers"
   type        = number
   default     = 200
 }
@@ -242,8 +220,8 @@ variable "worker_min_memory_mb" {
   default     = 512
 }
 
-variable "worker_cpu_request_millicores" {
-  description = "CPU request for worker containers"
+variable "worker_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for worker containers"
   type        = number
   default     = 200
 }
@@ -254,8 +232,8 @@ variable "temporal_min_memory_mb" {
   default     = 512
 }
 
-variable "temporal_cpu_request_millicores" {
-  description = "CPU request for temporal containers"
+variable "temporal_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for temporal containers"
   type        = number
   default     = 200
 }
@@ -278,8 +256,8 @@ variable "connector_min_builder_memory_mb" {
   default     = 256
 }
 
-variable "connector_builder_cpu_request_millicores" {
-  description = "CPU request for connector builder containers"
+variable "connector_builder_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for connector builder containers"
   type        = number
   default     = 100
 }
@@ -291,7 +269,7 @@ variable "pod_min_sweeper_memory_mb" {
 }
 
 variable "pod_sweeper_min_cpu_millicores" {
-  description = "CPU request for pod sweeper containers"
+  description = "The minimum amount of cpu millicores for pod sweeper containers"
   type        = number
   default     = 50
 }
@@ -302,8 +280,8 @@ variable "cron_min_memory_mb" {
   default     = 256
 }
 
-variable "cron_cpu_request_millicores" {
-  description = "CPU request for cron containers"
+variable "cron_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for cron containers"
   type        = number
   default     = 100
 }
@@ -314,8 +292,8 @@ variable "workload_min_api_server_memory_mb" {
   default     = 256
 }
 
-variable "workload_api_server_cpu_request_millicores" {
-  description = "CPU request for workload API server containers"
+variable "workload_api_server_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for workload API server containers"
   type        = number
   default     = 100
 }
@@ -326,8 +304,8 @@ variable "workload_min_launcher_memory_mb" {
   default     = 256
 }
 
-variable "workload_launcher_cpu_request_millicores" {
-  description = "CPU request for workload launcher containers"
+variable "workload_launcher_min_cpu_millicores" {
+  description = "The minimum amount of cpu millicores for workload launcher containers"
   type        = number
   default     = 100
 }
