@@ -82,6 +82,14 @@ Type: `list(string)`
 
 Default: `[]`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### cdn\_mode\_enabled
 
 Description: Whether to enable CDN mode for the Vault ingress
@@ -89,6 +97,22 @@ Description: Whether to enable CDN mode for the Vault ingress
 Type: `bool`
 
 Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket containing the backups files.
+
+Type: `string`
+
+Default: `"initial"`
 
 ### db\_recovery\_directory
 
@@ -194,6 +218,14 @@ Type: `number`
 
 Default: `3`
 
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### vpa\_enabled
 
 Description: Whether the VPA resources should be enabled
@@ -234,13 +266,17 @@ Description: n/a
 
 Description: n/a
 
+### db\_backup\_bucket
+
+Description: The name of the S3 bucket that contains the PostgreSQL backups and WAL archives
+
+### db\_backup\_directory
+
+Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
+
 ### db\_reader\_role
 
 Description: n/a
-
-### db\_recovery\_directory
-
-Description: The name of the directory in the backup bucket that contains the PostgreSQL backups and WAL archives
 
 ### db\_superuser\_role
 

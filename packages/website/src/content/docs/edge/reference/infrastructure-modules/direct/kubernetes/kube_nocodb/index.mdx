@@ -85,9 +85,25 @@ Type: `list(string)`
 
 Default: `[]`
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### cdn\_mode\_enabled
 
 Description: Whether to enable CDN mode for the Vault ingress
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
 
 Type: `bool`
 
@@ -188,6 +204,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 

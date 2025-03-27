@@ -33,6 +33,14 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
 ### cloudnative\_pg\_helm\_version
 
 Description: The version of the cloudnative-pg helm chart to deploy
@@ -40,6 +48,14 @@ Description: The version of the cloudnative-pg helm chart to deploy
 Type: `string`
 
 Default: `"v0.22.1"`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
 
 ### log\_level
 
@@ -88,6 +104,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 

@@ -29,6 +29,22 @@ No required inputs.
 
 The following input variables are optional (have default values):
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### core\_dns\_image\_version
 
 Description: The version of the image to use for the deployment
@@ -68,6 +84,14 @@ Description: The IP address that the DNS service will be exposed on
 Type: `string`
 
 Default: `"172.20.0.10"`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 

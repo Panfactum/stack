@@ -8,15 +8,18 @@ interface Props {
 const { title, content, background = "dark" } = Astro.props;
 ---
 
-<div class="flex max-w-96 flex-col items-center gap-2 text-center">
+<div class="flex items-center gap-x-8 gap-y-2 sm:max-w-96 sm:flex-col sm:text-center">
   <div
     class:list={[
-      "border-primary flex size-12 items-center justify-center rounded-md border p-3 shadow mb-2",
+      "border-primary flex size-16 sm:size-12 items-center justify-center rounded-md border p-5 sm:p-3 shadow mb-2",
       background === "dark" ? "bg-accent-dark dark:bg-secondary" : "bg-primary"
     ]}
   >
     <slot />
   </div>
-  {title && (<h4 class="text-lg font-semibold">{title}</h4>)}
-  <p class="text-tertiary max-w-96 text-balance">{content}</p>
+  <div class="flex flex-col gap-2">
+    {title && (<h4 class="text-lg font-semibold">{title}</h4>)}
+    <p class="text-tertiary max-w-96 md:text-balance">{content}</p>
+  </div>
+
 </div>

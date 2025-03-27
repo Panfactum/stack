@@ -1,42 +1,20 @@
 # Panfactum CLI
 
-A command-line interface for Panfactum.
+A command-line interface for Panfactum that helps with infrastructure setup and management.
 
 ## Prerequisites
 
-This CLI requires the following dependencies to develop:
+This CLI expects to be run in the Panfactum devShell and is built primarily with Bun.
 
-- [Bun](https://bun.sh) - Fast all-in-one JavaScript runtime
-- [jq](https://jqlang.github.io/jq/) - Lightweight and flexible command-line JSON processor
+## Theme
 
-## Installation
+The CLI uses the [picocolors](https://github.com/picocolors/picocolors) library to colorize the output.
 
-```bash
-bun install
-```
+The general theme is as follows:
 
-## Development
-
-```bash
-bun run src/index.ts
-```
-
-## Build
-
-```bash
-bun build src/index.ts
-```
-
-This will create an executable at `./bin/pf`.
-
-## Linting
-
-```bash
-bun run lint
-```
-
-## Fixing linting errors
-
-```bash
-bun run lint:fix
-```
+1. For general information and blocks of text use `pc.blue`.
+2. For prompts use `pc.magenta`.
+3. For errors use `pc.red`.
+4. For directing the user to take an action use `pc.cyan`. 
+   4.a. For example, "To see your pods run `k9s` in a new terminal window."
+5. For successes use `pc.green`.

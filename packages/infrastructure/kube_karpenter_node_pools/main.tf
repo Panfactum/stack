@@ -33,7 +33,7 @@ locals {
   // (2) If monitoring has been deployed, this gets even worse as we have monitoring systems
   // deployed on each node. As a result, increase the minimum node size even further to improve
   // efficiency
-  min_instance_memory = var.monitoring_enabled ? 2500 : 2500 // TODO: For now keep it low as we experiment
+  min_instance_memory = var.min_node_memory_mb
 
   // Explicitly listing allows us to expand
   // the number of instance families allowed in each node pool

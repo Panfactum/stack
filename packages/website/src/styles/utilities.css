@@ -109,7 +109,7 @@ the website.
   /* Light grey / dark grey */
   /* Use when you need a subtle contrast with the primary background */
   .bg-tertiary {
-    @apply bg-gray-light-mode-300 dark:bg-gray-neutral-900;
+    @apply bg-gray-light-mode-300 dark:bg-gray-modern-900;
     @apply text-primary-on-light;
   }
 

@@ -10,10 +10,10 @@ export function progressMessage({
   interval?: number;
 }) {
   let dots = 0;
-  context.stdout.write(`${message}\n`);
+  context.stdout.write(`${message}`);
   return globalThis.setInterval(() => {
     dots = (dots + 1) % 5;
     const progressText = `${message}${".".repeat(dots)}`;
-    context.stdout.write(`${progressText}\n`);
+    context.stdout.write(`\r${progressText}`);
   }, interval);
 }

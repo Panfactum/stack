@@ -63,6 +63,12 @@ variable "max_node_cpu" {
   default     = 32
 }
 
+variable "min_node_memory_mb" {
+  description = "The minimum memory for any single provisioned node (in MB)"
+  type        = number
+  default     = 2500
+}
+
 variable "arm64_node_ami_name" {
   description = "The name of the AMI to use for the amd64 nodes that Karpenter creates."
   type        = string

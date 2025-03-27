@@ -43,6 +43,7 @@ list(object({
     name                   = string
     eventSourceName        = string
     eventName              = optional(string, "default")
+    transform              = optional(any)
     filtersLogicalOperator = optional(string, "and")
     filters = optional(object({
       dataLogicalOperator = optional(string, "and")
@@ -101,6 +102,22 @@ Type: `any`
 
 The following input variables are optional (have default values):
 
+### burstable\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
 ### event\_bus\_name
 
 Description: The EventBus to read from. Should almost always be 'default'.
@@ -112,6 +129,14 @@ Default: `"default"`
 ### panfactum\_scheduler\_enabled
 
 Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
 
 Type: `bool`
 

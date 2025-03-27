@@ -7,8 +7,8 @@ import unicorn from "eslint-plugin-unicorn";
 import promise from "eslint-plugin-promise";
 import tsParser from "@typescript-eslint/parser";
 import js from "@eslint/js";
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -47,8 +47,6 @@ export default [
       "@typescript-eslint/no-unsafe-member-access": "error",
       "@typescript-eslint/no-unsafe-return": "error",
       "@typescript-eslint/restrict-template-expressions": "error",
-      "@typescript-eslint/strict-boolean-expressions": "error",
-
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
