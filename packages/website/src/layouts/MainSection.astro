@@ -18,10 +18,11 @@ const { background = "primary", title, subtitle, id } = Astro.props;
   ]}
 >
   <div
-    class="container mx-auto flex max-w-screen-xl flex-col items-center px-4 py-16 md:px-8"
+    class="mx-auto flex max-w-screen-xl flex-col items-center px-4 pb-8 pt-12 md:px-8"
     id={id ?? title?.replaceAll(" ", "-").toLowerCase()}
   >
-    <div class="mb-8">
+    <slot name="chip" />
+    <div class="mb-4">
       {title && <MainSectionTitle title={title} background={background} />}
       {subtitle && <MainSectionSubtitle subtitle={subtitle} />}
     </div>

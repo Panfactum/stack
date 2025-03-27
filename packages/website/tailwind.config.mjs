@@ -131,7 +131,7 @@ export default {
           600: "#4b5565",
           700: "#364152",
           800: "#202939",
-          900: "#121926",
+          900: "#111927",
           950: "#0d121c",
         },
         "neutral": {
@@ -193,6 +193,20 @@ export default {
         "content-fixed-navigation": 407,
         "fixed-side-panel": 410,
         drawer: 500,
+      },
+      keyframes: {
+        "kobalte-collapsible-down": {
+          from: { height: "0" },
+          to: { height: "var(--kb-collapsible-content-height)" },
+        },
+        "kobalte-collapsible-up": {
+          from: { height: "var(--kb-collapsible-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "kobalte-collapsible-down": "kobalte-collapsible-down 0.4s ease-out",
+        "kobalte-collapsible-up": "kobalte-collapsible-up 0.4s ease-in",
       },
     },
   },

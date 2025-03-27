@@ -8,6 +8,7 @@ import {
 
 interface TooltipProps {
   content: Component | string;
+  placement?: "top" | "bottom" | "left" | "right";
 }
 
 const Tooltip: ParentComponent<TooltipProps> = (props) => {
@@ -19,6 +20,7 @@ const Tooltip: ParentComponent<TooltipProps> = (props) => {
 
   return (
     <KobalteTooltip
+      placement={props.placement}
       open={open()}
       onOpenChange={(val) => {
         if (!val && clickOpen()) {

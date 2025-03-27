@@ -175,6 +175,9 @@ importers:
       '@unpic/astro':
         specifier: ^1.0.0
         version: 1.0.0(astro@5.1.9(@types/node@22.10.5)(ioredis@5.4.2)(jiti@1.21.7)(lightningcss@1.28.2)(rollup@4.32.0)(terser@5.37.0)(tsx@4.19.1)(typescript@5.2.2)(yaml@2.7.0))
+      '@unpic/solid':
+        specifier: ^1.0.0
+        version: 1.0.0(solid-js@1.9.4)
       accordian:
         specifier: link:@kobalte/core/accordian
         version: link:@kobalte/core/accordian
@@ -247,6 +250,9 @@ importers:
       nanostores:
         specifier: ^0.11.3
         version: 0.11.3
+      number-field:
+        specifier: link:@kobalte/core/number-field
+        version: link:@kobalte/core/number-field
       postcss-import:
         specifier: ^16.1.0
         version: 16.1.0(postcss@8.5.1)
@@ -295,6 +301,9 @@ importers:
       solid-popper:
         specifier: ^0.3.0
         version: 0.3.0(@popperjs/core@2.11.8)(solid-js@1.9.4)
+      switch:
+        specifier: link:@kobalte/core/switch
+        version: link:@kobalte/core/switch
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.0
@@ -1693,6 +1702,11 @@ packages:
 
   '@unpic/placeholder@0.1.2':
     resolution: {integrity: sha512-O++tS97biojo5sqn5TeTt+jUjl5gWOdIQuOXe8YluTJWq4L0GM6VuTkaspNpsmxHfioJw/6YBirzOpG4t87l8Q==}
+
+  '@unpic/solid@1.0.0':
+    resolution: {integrity: sha512-aokmADdrmoMLt8N0vDJw6dptbdYsKIKQtrGjYowVhgxYxDjjrTuJA/7JMQDKtcf7Is4xW5xkAWBau7/KceQJxw==}
+    peerDependencies:
+      solid-js: ^1.0.0
 
   '@vercel/ncc@0.38.2':
     resolution: {integrity: sha512-3yel3jaxUg9pHBv4+KeC9qlbdZPug+UMtUOlhvpDYCMSgcNSrS2Hv1LoqMsOV7hf2lYscx+BESfJOIla1WsmMQ==}
@@ -7930,6 +7944,11 @@ snapshots:
   '@unpic/placeholder@0.1.2':
     dependencies:
       blurhash: 2.0.5
+
+  '@unpic/solid@1.0.0(solid-js@1.9.4)':
+    dependencies:
+      '@unpic/core': 1.0.0
+      solid-js: 1.9.4
 
   '@vercel/ncc@0.38.2': {}
 
