@@ -51,6 +51,7 @@ module "util_webapp" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -66,6 +67,7 @@ module "util_server" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -81,6 +83,7 @@ module "util_worker" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -96,6 +99,7 @@ module "util_temporal" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -111,6 +115,7 @@ module "util_connector_builder" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -126,6 +131,7 @@ module "util_cron" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -141,6 +147,7 @@ module "util_pod_sweeper" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -156,6 +163,7 @@ module "util_workload_api_server" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -171,6 +179,7 @@ module "util_workload_launcher" {
   panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -200,6 +209,7 @@ module "database" {
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   controller_nodes_enabled             = false
   monitoring_enabled                   = var.monitoring_enabled

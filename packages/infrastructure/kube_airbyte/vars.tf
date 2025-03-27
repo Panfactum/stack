@@ -174,7 +174,6 @@ variable "pgbouncer_maximum_cpu_millicores" {
   default     = 10000
 }
 
-
 variable "db_backup_directory" {
   description = "Directory to store database backups (if enabled)"
   type        = string
@@ -219,6 +218,12 @@ variable "panfactum_scheduler_enabled" {
 
 variable "pull_through_cache_enabled" {
   description = "Whether to enable pull-through cache for container images"
+  type        = bool
+  default     = true
+}
+
+variable "arm_nodes_enabled" {
+  description = "Whether to allow scheduling on arm nodes"
   type        = bool
   default     = true
 }
