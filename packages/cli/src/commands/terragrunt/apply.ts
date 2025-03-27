@@ -44,7 +44,7 @@ export function apply({
         )
       );
       printHelpInformation(context);
-      return 1;
+      throw new Error("Failed to apply infrastructure modules");
     }
 
     !verbose &&
@@ -59,6 +59,6 @@ export function apply({
         ? `Error applying infrastructure modules: ${error.message}`
         : "Error applying infrastructure modules";
     context.stderr.write(`${pc.red(errorMessage)}\n`);
-    return 1;
+    throw new Error("Failed to apply infrastructure modules");
   }
 }

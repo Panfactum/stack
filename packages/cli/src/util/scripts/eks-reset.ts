@@ -10,10 +10,12 @@ import type { BaseContext } from "clipanion";
 // possible via tf so we create this convenience script to run as a part of the bootstrapping
 // guide
 export async function eksReset({
+  clusterName,
   commandInvocation,
   context,
   verbose = false,
 }: {
+  clusterName?: string;
   commandInvocation: boolean;
   context: BaseContext;
   verbose?: boolean;
@@ -105,6 +107,12 @@ export async function eksReset({
       );
       throw new Error(`${confirmCluster} does not match ${cluster}. Exiting.`);
     }
+  } else {
+    if (!clusterName) {
+      context.stderr.write(`Error: Cluster name not provided. Exiting.\n`);
+      throw new Error(`Error: Cluster name not provided. Exiting.`);
+    }
+    cluster = clusterName;
   }
 
   // ############################################################
@@ -126,7 +134,7 @@ export async function eksReset({
   )?.aws_profile;
   if (!awsProfile) {
     context.stderr.write(
-      `Error: AWS profile not found in ${userConfigFilePath}`
+      `Error: AWS profile not found in ${userConfigFilePath}\n`
     );
     throw new Error(`Error: AWS profile not found in ${userConfigFilePath}`);
   }

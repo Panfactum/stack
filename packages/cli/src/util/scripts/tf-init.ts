@@ -53,7 +53,7 @@ export function tfInit({
         )
       );
       printHelpInformation(context);
-      return 1;
+      throw new Error("Failed to initialize infrastructure modules");
     }
 
     !verbose &&
@@ -103,7 +103,7 @@ export function tfInit({
         )
       );
       printHelpInformation(context);
-      return 1;
+      throw new Error("Failed to update platform locks");
     }
 
     !verbose &&
@@ -115,6 +115,6 @@ export function tfInit({
         ? `Error initializing infrastructure modules: ${error.message}`
         : "Error initializing infrastructure modules";
     context.stderr.write(`${pc.red(errorMessage)}\n`);
-    return 1;
+    throw new Error("Failed to initialize infrastructure modules");
   }
 }

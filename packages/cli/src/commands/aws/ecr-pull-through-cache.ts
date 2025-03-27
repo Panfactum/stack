@@ -23,13 +23,13 @@ export async function setupEcrPullThroughCache(
 
   await replaceHclValue(
     "./aws_ecr_pull_through_cache/terragrunt.hcl",
-    "docker_hub_username",
+    "inputs.docker_hub_username",
     input.dockerHubUsername
   );
 
   await replaceHclValue(
     "./aws_ecr_pull_through_cache/terragrunt.hcl",
-    "github_username",
+    "inputs.github_username",
     input.githubUsername
   );
 
