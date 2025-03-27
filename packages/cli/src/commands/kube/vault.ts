@@ -128,7 +128,7 @@ export const setupVault = async ({
   context.stdout.write("7.b. Initializing Vault\n");
 
   const recoveryKeysSchema = z.object({
-    unseal_sahres: z.number(),
+    unseal_shares: z.number(),
     unseal_threshold: z.number(),
     recovery_keys_b64: z.array(z.string().base64()),
     recovery_keys_hex: z.array(z.string()),
