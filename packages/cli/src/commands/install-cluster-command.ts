@@ -1,5 +1,6 @@
 import { appendFileSync } from "node:fs";
 import path from "node:path";
+import { $ } from "bun";
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import { awsRegions } from "../util/aws-regions";
@@ -22,6 +23,7 @@ import { setupInternalClusterNetworking } from "./kube/internal-cluster-networki
 import { setupPolicyController } from "./kube/policy-controller";
 import { setupVault } from "./kube/vault";
 import { vaultPrompts } from "../user-prompts/vault";
+import { backgroundProcessIds } from "../util/start-background-process";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -477,12 +479,7 @@ export class InstallClusterCommand extends Command {
           "Vault serves several important purposes in the Panfactum stack:\n" +
             "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
             "2. Authorizes SSH authentication to our bastion hosts\n" +
-            "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n" +
-            pc.red(
-              pc.bold(
-                "⏰ NOTE: The Vault setup may take up to 20 minutes to complete after you answer a few questions\n"
-              )
-            )
+            "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n"
         )
       );
 
@@ -504,6 +501,7 @@ export class InstallClusterCommand extends Command {
           )
         );
         printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => process.kill(pid));
         return 1;
       }
 
@@ -519,6 +517,8 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    // Reloads quietly to keep the terminal cleaner
+    await $`direnv reload`.quiet();
     return 0;
   }
 }

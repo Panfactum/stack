@@ -1,6 +1,8 @@
 import pc from "picocolors";
 import type { BaseContext } from "clipanion";
 
+export const backgroundProcessIds: number[] = [];
+
 export function startBackgroundProcess({
   args,
   command,
@@ -17,6 +19,7 @@ export function startBackgroundProcess({
       stderr: "ignore",
     });
 
+    backgroundProcessIds.push(proc.pid);
     return proc.pid;
   } catch (error) {
     const errorMessage =

@@ -60,6 +60,8 @@ export const setupVault = async ({
     // We'll ignore this and do more checks below to see if the vault was instantiated successfully
   }
 
+  await replaceHclValue("./kube_vault/terragrunt.hcl", "inputs.wait", true);
+
   const vaultPodNames = [];
 
   // We'll check to see if the pods are running
@@ -79,34 +81,15 @@ export const setupVault = async ({
       throw new Error("Vault pods failed to start");
     }
 
-    const result = Bun.spawnSync(
-      [
-        "kubectl",
-        "get",
-        "pods",
-        "--all-namespaces",
-        "-o",
-        "json",
-        "|",
-        "jq",
-        "'[.items[] | select(.metadata.name | startswith(\"vault\")) | {name: .metadata.name, namespace: .metadata.namespace, status: .status.phase}]'",
-      ],
-      {
-        encoding: "utf-8",
-        stdout: "pipe",
-      }
-    );
+    const result =
+      await $`kubectl get pods --all-namespaces -o json | jq '[.items[] | select(.metadata.name | startswith("vault")) | {name: .metadata.name, namespace: .metadata.namespace, status: .status.phase}]'`.text();
 
     if (verbose) {
-      context.stdout.write(
-        "getInstanceId STDOUT: " + (result.stdout?.toString() ?? "") + "\n"
-      );
-      context.stderr.write(
-        "getInstanceId STDERR: " + (result.stderr?.toString() ?? "") + "\n"
-      );
+      context.stdout.write("getInstanceId STDOUT: " + result + "\n");
+      context.stderr.write("getInstanceId STDERR: " + result + "\n");
     }
 
-    const pods = JSON.parse(result.stdout?.toString() ?? "");
+    const pods = JSON.parse(result.trim());
     const podsSchema = z.array(
       z.object({
         name: z.string(),
@@ -128,12 +111,14 @@ export const setupVault = async ({
   context.stdout.write("7.b. Initializing Vault\n");
 
   const recoveryKeysSchema = z.object({
+    unseal_keys_b64: z.array(z.string().base64()),
+    unseal_keys_hex: z.array(z.string()),
     unseal_shares: z.number(),
     unseal_threshold: z.number(),
     recovery_keys_b64: z.array(z.string().base64()),
     recovery_keys_hex: z.array(z.string()),
-    recovery_key_shares: z.number(),
-    recovery_key_threshold: z.number(),
+    recovery_keys_shares: z.number(),
+    recovery_keys_threshold: z.number(),
     root_token: z.string(),
   });
 
@@ -141,11 +126,14 @@ export const setupVault = async ({
   try {
     // Run the vault init command in the pod
     const result =
-      await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator init -recovery-shares=${recoveryShares} -recovery-threshold=${recoveryThreshold} -format=json`;
+      await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator init -recovery-shares=${recoveryShares} -recovery-threshold=${recoveryThreshold} -format=json`.text();
 
-    // Parse the JSON response
-    const output = result.toString().trim();
-    const data = JSON.parse(output);
+    if (verbose) {
+      context.stdout.write("vault operator init STDOUT: " + result + "\n");
+      context.stderr.write("vault operator init STDERR: " + result + "\n");
+    }
+
+    const data = JSON.parse(result.trim());
     recoveryKeys = recoveryKeysSchema.parse(data);
   } catch (error) {
     const errorMessage =
@@ -161,8 +149,8 @@ export const setupVault = async ({
   try {
     for (const key of recoveryKeys.recovery_keys_hex) {
       const statusResult =
-        await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator unseal -format=json ${key}`;
-      const statusData = JSON.parse(statusResult.toString().trim());
+        await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator unseal -format=json ${key}`.text();
+      const statusData = JSON.parse(statusResult.trim());
       const unsealOutputSchema = z.object({
         type: z.string(),
         initialized: z.boolean(),
@@ -210,6 +198,10 @@ export const setupVault = async ({
     throw new Error("Failed to unseal Vault after applying all recovery keys");
   }
 
+  // Set environment variable programmatically
+  process.env["VAULT_ADDR"] = "http://127.0.0.1:8200";
+  process.env["VAULT_TOKEN"] = recoveryKeys.root_token;
+
   context.stdout.write("\n7.c. 🔒 Encrypting secrets\n\n");
 
   const tempSecretsFilePath = "./.tmp-vault-secrets.yaml";
@@ -255,11 +247,6 @@ export const setupVault = async ({
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#configure-vault
   context.stdout.write("7.d. Configuring Vault\n");
-  const pid = startBackgroundProcess({
-    args: ["-n", "vault", "port-forward", "svc/vault-active", "8200:8200"],
-    command: "kubectl",
-    context,
-  });
 
   const repoVariables = await getRepoVariables({
     context,
@@ -312,8 +299,25 @@ export const setupVault = async ({
   // Write to .env file
   await Bun.write(envFilePath, envContent);
 
+  // Reload direnv to ensure the new environment variables are loaded
+  await $`direnv reload`.quiet();
+
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#deploy-configuration-module
   context.stdout.write("7.e. Deploying Vault configuration module\n");
+
+  const pid = startBackgroundProcess({
+    args: [
+      "-n",
+      "vault",
+      "port-forward",
+      "--address",
+      "0.0.0.0",
+      "svc/vault-active",
+      "8200:8200",
+    ],
+    command: "kubectl",
+    context,
+  });
 
   await ensureFileExists({
     context,
