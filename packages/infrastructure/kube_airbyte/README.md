@@ -19,7 +19,7 @@ If you need to pre-install specific connectors or automate connector configurati
 ## Usage
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_airbyte`.
-2. Add a `terragrunt.hcl` file to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/development/us-east-1/kube_airbyte/terragrunt.hcl).
+2. Add a `terragrunt.hcl` file to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_airbyte/terragrunt.hcl).
 3. Run `pf-tf-init` to enable the required providers
 4. Run `terragrunt apply`.
 
