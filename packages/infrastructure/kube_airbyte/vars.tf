@@ -17,13 +17,13 @@ variable "airbyte_edition" {
 variable "airbyte_helm_version" {
   description = "The version of the Airbyte Helm chart to deploy"
   type        = string
-  default     = "1.3.1"
+  default     = "1.5.1"
 }
 
 variable "airbyte_version" {
   description = "The version of Airbyte to deploy (for image caching)"
   type        = string
-  default     = "1.3.1"
+  default     = "1.5.1"
 }
 
 variable "domain" {
@@ -100,75 +100,75 @@ variable "pg_initial_storage_gb" {
   default     = 20
 }
 
-variable "pg_minimum_memory_mb" {
+variable "pg_min_memory_mb" {
   description = "The minimum amount of memory to allocate to the postgres pods (in Mi)"
   type        = number
   default     = 500
 
   validation {
-    condition     = var.pg_minimum_memory_mb >= 500
+    condition     = var.pg_min_memory_mb >= 500
     error_message = "Must provide at least 500MB of memory"
   }
 }
 
-variable "pg_maximum_memory_mb" {
+variable "pg_max_memory_mb" {
   description = "The maximum amount of memory to allocate to the postgres pods (in Mi)"
   type        = number
   default     = 128000
 }
 
-variable "pg_minimum_cpu_millicores" {
+variable "pg_min_cpu_millicores" {
   description = "The minimum amount of cpu to allocate to the postgres pods (in millicores)"
   type        = number
   default     = 50
 
   validation {
-    condition     = var.pg_minimum_cpu_millicores >= 50
+    condition     = var.pg_min_cpu_millicores >= 50
     error_message = "Must provide at least 50m of CPU"
   }
 }
 
-variable "pg_maximum_cpu_millicores" {
+variable "pg_max_cpu_millicores" {
   description = "The maximum amount of cpu to allocate to the postgres pods (in millicores)"
   type        = number
   default     = 10000
 }
 
-variable "pg_minimum_cpu_update_millicores" {
+variable "pg_min_cpu_update_millicores" {
   description = "The CPU settings for the Postgres won't be updated until the recommendations from the VPA (if enabled) differ from the current settings by at least this many millicores. This prevents autoscaling thrash."
   type        = number
   default     = 250
 }
 
-variable "pgbouncer_minimum_memory_mb" {
+variable "pgbouncer_min_memory_mb" {
   description = "The minimum amount of memory to allocate to the pgbouncer pods (in Mi)"
   type        = number
   default     = 25
 
   validation {
-    condition     = var.pgbouncer_minimum_memory_mb >= 25
+    condition     = var.pgbouncer_min_memory_mb >= 25
     error_message = "Must provide at least 25MB of memory"
   }
 }
 
-variable "pgbouncer_maximum_memory_mb" {
+variable "pgbouncer_max_memory_mb" {
   description = "The maximum amount of memory to allocate to the pgbouncer pods (in Mi)"
   type        = number
   default     = 32000
 }
 
-variable "pgbouncer_minimum_cpu_millicores" {
+variable "pgbouncer_min_cpu_millicores" {
   description = "The minimum amount of cpu to allocate to the pgbouncer pods (in millicores)"
   type        = number
   default     = 15
 
   validation {
-    condition     = var.pgbouncer_minimum_cpu_millicores >= 10
+    condition     = var.pgbouncer_min_cpu_millicores >= 10
     error_message = "Must provide at least 10m of CPU"
   }
 }
 
-variable "pgbouncer_maximum_cpu_millicores" {
+variable "pgbouncer_max_cpu_millicores" {
   description = "The maximum amount of cpu to allocate to the pgbouncer pods (in millicores)"
   type        = number
   default     = 10000
@@ -268,6 +268,54 @@ variable "jobs_env_env" {
   description = "Additional environment variables for Airbyte jobs configuration (e.g. SYNC_JOB_MAX_ATTEMPTS, JOB_MAIN_CONTAINER_MEMORY_LIMIT, etc.) https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs"
   type        = map(string)
   default     = {}
+}
+
+variable "jobs_sync_job_retries_complete_failures_max_successive" {
+  description = "Defines the max number of successive attempts in which no data was synchronized before failing the job."
+  type        = number
+  default     = 3
+}
+
+variable "jobs_sync_job_retries_complete_failures_max_total" {
+  description = "Defines the max number of attempts in which no data was synchronized before failing the job."
+  type        = number
+  default     = 30
+}
+
+variable "jobs_sync_job_retries_complete_failures_backoff_min_interval_s" {
+  description = "Defines the minimum backoff interval in seconds between failed attempts in which no data was synchronized."
+  type        = number
+  default     = 60
+}
+
+variable "jobs_sync_job_retries_complete_failures_backoff_max_interval_s" {
+  description = "Defines the maximum backoff interval in seconds between failed attempts in which no data was synchronized."
+  type        = number
+  default     = 3600
+}
+
+variable "jobs_sync_job_retries_complete_failures_backoff_base" {
+  description = "Defines the exponential base of the backoff interval between failed attempts in which no data was synchronized."
+  type        = number
+  default     = 2
+}
+
+variable "jobs_sync_job_retries_partial_failures_max_successive" {
+  description = "Defines the max number of attempts in which some data was synchronized before failing the job."
+  type        = number
+  default     = 3
+}
+
+variable "jobs_sync_job_retries_partial_failures_max_total" {
+  description = "Defines the max number of attempts in which some data was synchronized before failing the job."
+  type        = number
+  default     = 30
+}
+
+variable "jobs_sync_max_timeout_days" {
+  description = "Defines the number of days a sync job will execute for before timing out."
+  type        = number
+  default     = 1
 }
 
 variable "webapp_min_memory_mb" {

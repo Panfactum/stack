@@ -233,15 +233,15 @@ module "database" {
   instance_type_anti_affinity_required = var.sla_target == 3
   vpa_enabled                          = var.vpa_enabled
 
-  pg_minimum_cpu_millicores        = var.pg_minimum_cpu_millicores
-  pg_maximum_cpu_millicores        = var.pg_maximum_cpu_millicores
-  pg_minimum_cpu_update_millicores = var.pg_minimum_cpu_update_millicores
-  pg_minimum_memory_mb             = var.pg_minimum_memory_mb
-  pg_maximum_memory_mb             = var.pg_maximum_memory_mb
-  pgbouncer_minimum_cpu_millicores = var.pgbouncer_minimum_cpu_millicores
-  pgbouncer_maximum_cpu_millicores = var.pgbouncer_maximum_cpu_millicores
-  pgbouncer_minimum_memory_mb      = var.pgbouncer_minimum_memory_mb
-  pgbouncer_maximum_memory_mb      = var.pgbouncer_maximum_memory_mb
+  pg_minimum_cpu_millicores        = var.pg_min_cpu_millicores
+  pg_maximum_cpu_millicores        = var.pg_max_cpu_millicores
+  pg_minimum_cpu_update_millicores = var.pg_min_cpu_update_millicores
+  pg_minimum_memory_mb             = var.pg_min_memory_mb
+  pg_maximum_memory_mb             = var.pg_max_memory_mb
+  pgbouncer_minimum_cpu_millicores = var.pgbouncer_min_cpu_millicores
+  pgbouncer_maximum_cpu_millicores = var.pgbouncer_max_cpu_millicores
+  pgbouncer_minimum_memory_mb      = var.pgbouncer_min_memory_mb
+  pgbouncer_maximum_memory_mb      = var.pgbouncer_max_memory_mb
 
   pg_backup_directory      = var.db_backup_directory
   pg_recovery_mode_enabled = var.db_recovery_mode_enabled
