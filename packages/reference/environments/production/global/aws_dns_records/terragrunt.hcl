@@ -212,13 +212,13 @@ inputs = {
         {
           subdomain = ""
           records = [
-            "MS=ms89071327",                                                                        // AAD Domain Ownership
-            "v=spf1 mx include:_spf.google.com include:47029925.spf06.hubspotemail.net include:amazonses.com ~all",       // SPF record authorizing email senders
-            "zoho-verification=zb69684923.zmverify.zoho.com",                                       // Zoho Domain Ownership
-            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                 // Panfactum.com Google Search Console
-            "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                           // Panfactum.com MongoDB Atlas SSO
-            "stripe-verification=e974df024c29569f82cceeacf4f0bbe7f6abace14bc538961a2076d26513afa9", // Stripe domain verification (email sending)
-            "asv=8aac24d1b02697630a27d2337948e5e8"                                                  // Asana domain verification
+            "MS=ms89071327",                                                                                        // AAD Domain Ownership
+            "v=spf1 mx include:_spf.google.com include:47029925.spf06.hubspotemail.net include:amazonses.com ~all", // SPF record authorizing email senders
+            "zoho-verification=zb69684923.zmverify.zoho.com",                                                       // Zoho Domain Ownership
+            "google-site-verification=wqLBavRglKYaCzJSVSswEgSagHgrul-N4lgAyMxG_YQ",                                 // Panfactum.com Google Search Console
+            "mongodb-site-verification=xKjI6laWuGX2iX9pOyXnVqJt7BxrgvVt",                                           // Panfactum.com MongoDB Atlas SSO
+            "stripe-verification=e974df024c29569f82cceeacf4f0bbe7f6abace14bc538961a2076d26513afa9",                 // Stripe domain verification (email sending)
+            "asv=8aac24d1b02697630a27d2337948e5e8"                                                                  // Asana domain verification
           ]
         },
         // GitHub Verification

@@ -28,8 +28,8 @@ terraform {
 }
 
 locals {
-  name      = "airbyte"
-  namespace = module.namespace.namespace
+  name                    = "airbyte"
+  namespace               = module.namespace.namespace
   memory_limit_multiplier = 1.3
 }
 
@@ -215,12 +215,12 @@ module "namespace" {
 module "database" {
   source = "../kube_pg_cluster"
 
-  pg_version                           = "14.17" # based on minimum supported version https://docs.temporal.io/clusters#dependency-versions
-  pg_cluster_namespace                 = local.namespace
-  pg_initial_storage_gb                = var.pg_initial_storage_gb
-  pg_instances                         = var.sla_target >= 2 ? 2 : 1
-  pg_smart_shutdown_timeout            = 1
-  pgbouncer_pool_mode                  = "session"
+  pg_version                = "14.17" # based on minimum supported version https://docs.temporal.io/clusters#dependency-versions
+  pg_cluster_namespace      = local.namespace
+  pg_initial_storage_gb     = var.pg_initial_storage_gb
+  pg_instances              = var.sla_target >= 2 ? 2 : 1
+  pg_smart_shutdown_timeout = 1
+  pgbouncer_pool_mode       = "session"
 
   aws_iam_ip_allow_list                = var.aws_iam_ip_allow_list
   pull_through_cache_enabled           = var.pull_through_cache_enabled
@@ -276,7 +276,7 @@ module "airbyte_bucket" {
   description = "Airbyte storage for logs state and workload output"
 
   intelligent_transitions_enabled = true
-  expire_after_days  = 7
+  expire_after_days               = 7
 }
 
 data "aws_iam_policy_document" "airbyte_bucket" {
@@ -448,9 +448,9 @@ resource "helm_release" "airbyte" {
             }
           }
           kube = {
-            annotations  = var.pod_annotations
-            labels       = module.util_jobs.labels
-            tolerations  = module.util_jobs.tolerations
+            annotations = var.pod_annotations
+            labels      = module.util_jobs.labels
+            tolerations = module.util_jobs.tolerations
           }
         }
 
@@ -469,8 +469,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_webapp.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_webapp.affinity
-        tolerations  = module.util_webapp.tolerations
+        affinity    = module.util_webapp.affinity
+        tolerations = module.util_webapp.tolerations
 
         resources = {
           requests = {
@@ -500,8 +500,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_server.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_server.affinity
-        tolerations  = module.util_server.tolerations
+        affinity    = module.util_server.affinity
+        tolerations = module.util_server.tolerations
 
         log = {
           level = var.log_level
@@ -525,8 +525,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_worker.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_worker.affinity
-        tolerations  = module.util_worker.tolerations
+        affinity    = module.util_worker.affinity
+        tolerations = module.util_worker.tolerations
 
         log = {
           level = var.log_level
@@ -546,15 +546,15 @@ resource "helm_release" "airbyte" {
       # Temporal configuration
       # Temporal is used for workflow management
       temporal = {
-        enabled        = true
-        replicaCount   = var.sla_target >= 2 ? 2 : 1
-        podLabels      = module.util_temporal.labels
+        enabled      = true
+        replicaCount = var.sla_target >= 2 ? 2 : 1
+        podLabels    = module.util_temporal.labels
         podAnnotations = {
           "config.linkerd.io/opaque-ports" = "7233"
         }
 
-        affinity     = module.util_temporal.affinity
-        tolerations  = module.util_temporal.tolerations
+        affinity    = module.util_temporal.affinity
+        tolerations = module.util_temporal.tolerations
 
         resources = {
           requests = {
@@ -598,7 +598,7 @@ resource "helm_release" "airbyte" {
             value = tostring(var.temporal_db_max_conns)
           },
           {
-            name  = "TEMPORAL_BROADCAST_ADDRESS"
+            name = "TEMPORAL_BROADCAST_ADDRESS"
             valueFrom = {
               fieldRef = {
                 fieldPath = "status.podIP"
@@ -624,8 +624,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_pod_sweeper.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_pod_sweeper.affinity
-        tolerations  = module.util_pod_sweeper.tolerations
+        affinity    = module.util_pod_sweeper.affinity
+        tolerations = module.util_pod_sweeper.tolerations
 
         resources = {
           requests = {
@@ -644,8 +644,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_connector_builder.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_connector_builder.affinity
-        tolerations  = module.util_connector_builder.tolerations
+        affinity    = module.util_connector_builder.affinity
+        tolerations = module.util_connector_builder.tolerations
 
         log = {
           level = var.log_level
@@ -668,8 +668,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_cron.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_cron.affinity
-        tolerations  = module.util_cron.tolerations
+        affinity    = module.util_cron.affinity
+        tolerations = module.util_cron.tolerations
 
         log = {
           level = var.log_level
@@ -697,8 +697,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_workload_api_server.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_workload_api_server.affinity
-        tolerations  = module.util_workload_api_server.tolerations
+        affinity    = module.util_workload_api_server.affinity
+        tolerations = module.util_workload_api_server.tolerations
 
         resources = {
           requests = {
@@ -717,8 +717,8 @@ resource "helm_release" "airbyte" {
         podLabels      = module.util_workload_launcher.labels
         podAnnotations = var.pod_annotations
 
-        affinity     = module.util_workload_launcher.affinity
-        tolerations  = module.util_workload_launcher.tolerations
+        affinity    = module.util_workload_launcher.affinity
+        tolerations = module.util_workload_launcher.tolerations
 
         resources = {
           requests = {

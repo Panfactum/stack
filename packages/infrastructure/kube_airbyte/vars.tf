@@ -375,7 +375,7 @@ variable "temporal_db_max_idle_conns" {
 variable "temporal_db_max_conns" {
   description = "Maximum number of connections for Temporal database (SQL_MAX_CONNS)"
   type        = number
-  default     = 100  # Higher than max_idle_conns, as recommended
+  default     = 100 # Higher than max_idle_conns, as recommended
 }
 
 variable "connector_min_builder_memory_mb" {
