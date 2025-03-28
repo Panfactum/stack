@@ -549,12 +549,9 @@ resource "helm_release" "airbyte" {
         enabled        = true
         replicaCount   = var.sla_target >= 2 ? 2 : 1
         podLabels      = module.util_temporal.labels
-        podAnnotations = merge(var.pod_annotations, {
-          # Explicitly disable Linkerd injection due to failure in communication amongst replicas
-          "linkerd.io/inject" = "disabled"
-          "config.linkerd.io/skip-inbound" = "true"
-          "config.linkerd.io/skip-outbound" = "true"
-        })
+        podAnnotations = {
+          "config.linkerd.io/opaque-ports" = "7233"
+        }
 
         affinity     = module.util_temporal.affinity
         tolerations  = module.util_temporal.tolerations
