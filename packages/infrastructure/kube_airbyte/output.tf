@@ -73,6 +73,11 @@ output "temporal_labels" {
   value       = module.util_temporal.labels
 }
 
+output "jobs_labels" {
+  description = "Labels applied to the jobs component"
+  value       = module.util_jobs.labels
+}
+
 output "service_account_name" {
   description = "The name of the Kubernetes service account used by Airbyte pods"
   value       = kubernetes_service_account.airbyte_sa.metadata[0].name

@@ -42,6 +42,22 @@ module "constants" {
 }
 
 # Generate labels for different Airbyte components
+module "util_jobs" {
+  source = "../kube_workload_utility"
+
+  workload_name                        = "airbyte-job"
+  host_anti_affinity_required          = var.sla_target >= 2
+  instance_type_anti_affinity_required = var.sla_target == 3
+  panfactum_scheduler_enabled          = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled           = var.pull_through_cache_enabled
+  az_spread_preferred                  = var.sla_target >= 2
+  arm_nodes_enabled                    = var.arm_nodes_enabled
+  spot_nodes_enabled                   = var.spot_nodes_enabled
+  burstable_nodes_enabled              = var.burstable_nodes_enabled
+  controller_nodes_enabled             = var.controller_nodes_enabled
+  extra_labels                         = data.pf_kube_labels.labels.labels
+}
+
 module "util_webapp" {
   source = "../kube_workload_utility"
 
@@ -239,7 +255,7 @@ module "database" {
 
 resource "kubernetes_service_account" "airbyte_sa" {
   metadata {
-    name      = "airbyte"
+    name      = "airbyte-admin"
     namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
@@ -357,7 +373,7 @@ resource "helm_release" "airbyte" {
   atomic          = var.wait
   cleanup_on_fail = var.wait
   wait            = var.wait
-  force_update    = true
+  force_update    = false
   wait_for_jobs   = true
   max_history     = 5
 
@@ -428,12 +444,13 @@ resource "helm_release" "airbyte" {
               cpu    = "${var.jobs_cpu_min_millicores}m"
             }
             limits = {
-              memory = "${var.jobs_min_memory_mb * local.memory_limit_multiplier}Mi"
+              memory = "${floor(var.jobs_min_memory_mb * local.memory_limit_multiplier)}Mi"
             }
           }
           kube = {
-            annotations  = {}
-            labels       = {}
+            annotations  = var.pod_annotations
+            labels       = module.util_jobs.labels
+            tolerations  = module.util_jobs.tolerations
           }
         }
 
@@ -959,6 +976,30 @@ resource "kubectl_manifest" "pdb_workload_launcher" {
         matchLabels = module.util_workload_launcher.match_labels
       }
       maxUnavailable = 1
+    }
+  })
+  force_conflicts   = true
+  server_side_apply = true
+  depends_on        = [helm_release.airbyte]
+}
+
+resource "kubectl_manifest" "pdb_job_pods" {
+  yaml_body = yamlencode({
+    apiVersion = "policy/v1"
+    kind       = "PodDisruptionBudget"
+    metadata = {
+      name      = "airbyte-job-pods"
+      namespace = local.namespace
+      labels    = data.pf_kube_labels.labels.labels
+    }
+    spec = {
+      unhealthyPodEvictionPolicy = "AlwaysAllow"
+      selector = {
+        matchLabels = {
+          airbyte = "job-pod"
+        }
+      }
+      maxUnavailable = 0
     }
   })
   force_conflicts   = true

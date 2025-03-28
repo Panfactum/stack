@@ -243,7 +243,7 @@ variable "burstable_nodes_enabled" {
 variable "controller_nodes_enabled" {
   description = "Whether to allow scheduling on controller nodes"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "aws_iam_ip_allow_list" {

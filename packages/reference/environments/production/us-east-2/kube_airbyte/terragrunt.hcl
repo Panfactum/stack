@@ -21,13 +21,15 @@ dependency "s3_destination" {
 }
 
 inputs = {
-  domain       = "airbyte.seth.panfactum.com"
+  domain       = "airbyte.prod.panfactum.com"
   vault_domain = dependency.vault.outputs.vault_domain
   wait         = false
   auth_enabled = false
   admin_email  = "james@panfactum.com"
 
-  additional_s3_bucket_arns = [
+  connected_s3_bucket_arns = [
     dependency.s3_destination.outputs.bucket_arn
   ]
+
+  jobs_min_memory_mb = 1024
 }
