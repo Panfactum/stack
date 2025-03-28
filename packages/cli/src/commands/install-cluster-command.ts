@@ -1,5 +1,6 @@
 import { appendFileSync } from "node:fs";
 import path from "node:path";
+import { $ } from "bun";
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import { awsRegions } from "../util/aws-regions";
@@ -20,6 +21,9 @@ import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables
 import { updateConfigFile } from "../util/update-config-file";
 import { setupInternalClusterNetworking } from "./kube/internal-cluster-networking";
 import { setupPolicyController } from "./kube/policy-controller";
+import { setupVault } from "./kube/vault";
+import { vaultPrompts } from "../user-prompts/vault";
+import { backgroundProcessIds } from "../util/start-background-process";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -294,7 +298,7 @@ export class InstallClusterCommand extends Command {
       this.context.stdout.write(
         pc.red(
           pc.bold(
-            "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer two short questions\n"
+            "⏰ NOTE: The cluster may take up to 20 minutes to be created after you answer a couple questions\n"
           )
         )
       );
@@ -457,6 +461,69 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    const setupVaultComplete = await getConfigFileKey({
+      key: "vault",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupVaultComplete === true) {
+      this.context.stdout.write(
+        "Skipping Vault setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(pc.blue("7. Setting up Vault\n\n"));
+
+      this.context.stdout.write(
+        pc.blue(
+          "Vault serves several important purposes in the Panfactum stack:\n" +
+            "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
+            "2. Authorizes SSH authentication to our bastion hosts\n" +
+            "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n"
+        )
+      );
+
+      const { vaultDomain, recoveryShares, recoveryThreshold } =
+        await vaultPrompts();
+
+      try {
+        await setupVault({
+          context: this.context,
+          vaultDomain,
+          recoveryShares,
+          recoveryThreshold,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the Vault: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+      }
+
+      await updateConfigFile({
+        updates: {
+          vaultDomain,
+          recoveryShares,
+          recoveryThreshold,
+          vault: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    // Reloads quietly to keep the terminal cleaner
+    await $`direnv reload`.quiet();
     return 0;
   }
 }

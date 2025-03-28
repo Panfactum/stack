@@ -11,10 +11,15 @@
 export async function replaceHclValue(
   filePath: string,
   key: string,
-  newValue: string
+  newValue: string | boolean | number
 ): Promise<void> {
   const content = await Bun.file(filePath).text();
   let updatedContent = content;
+  
+  // Format the new value based on its type
+  const formattedValue = typeof newValue === "boolean" || typeof newValue === "number" 
+    ? String(newValue) 
+    : `"${newValue}"`;
 
   if (key.includes(".")) {
     // Handle keys within blocks (e.g., "inputs.cluster_name")
@@ -28,11 +33,11 @@ export async function replaceHclValue(
       "g"
     );
 
-    updatedContent = content.replace(blockRegex, `$1$2"${newValue}"$4`);
+    updatedContent = content.replace(blockRegex, `$1$2${formattedValue}$4`);
   } else {
     // Handle top-level keys
     const regex = new RegExp(`(${key}\\s*=\\s*)(".+?"|\\d+|true|false)`, "g");
-    updatedContent = content.replace(regex, `$1"${newValue}"`);
+    updatedContent = content.replace(regex, `$1${formattedValue}`);
   }
 
   // Write the updated content back to the file
