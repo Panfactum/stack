@@ -45,7 +45,7 @@ output "database_credentials_secret" {
 
 output "airbyte_url" {
   description = "The URL to access Airbyte"
-  value       = var.domain != "" ? "https://${var.domain}" : null
+  value       = "https://${var.domain}"
 }
 
 output "airbyte_config_secret" {
@@ -54,27 +54,27 @@ output "airbyte_config_secret" {
 }
 
 output "webapp_labels" {
-  description = "Labels applied to the webapp component"
+  description = "Labels applied to the webapp pods"
   value       = module.util_webapp.labels
 }
 
 output "server_labels" {
-  description = "Labels applied to the server component"
+  description = "Labels applied to the server pods"
   value       = module.util_server.labels
 }
 
 output "worker_labels" {
-  description = "Labels applied to the worker component"
+  description = "Labels applied to the worker pods"
   value       = module.util_worker.labels
 }
 
 output "temporal_labels" {
-  description = "Labels applied to the temporal component"
+  description = "Labels applied to the temporal pods"
   value       = module.util_temporal.labels
 }
 
 output "jobs_labels" {
-  description = "Labels applied to the jobs component"
+  description = "Labels applied to the jobs pods"
   value       = module.util_jobs.labels
 }
 

@@ -373,7 +373,7 @@ resource "helm_release" "airbyte" {
   atomic          = var.wait
   cleanup_on_fail = var.wait
   wait            = var.wait
-  force_update    = false
+  force_update    = true
   wait_for_jobs   = true
   max_history     = 5
 
@@ -730,11 +730,6 @@ resource "helm_release" "airbyte" {
           }
         }
       }
-
-      # Bootloader configuration
-      "airbyte-bootloader" = {
-        env_vars = {}
-      }
     })
   ]
 
@@ -754,6 +749,7 @@ module "authenticating_proxy" {
   source = "../kube_vault_proxy"
 
   namespace                            = local.namespace
+  arm_nodes_enabled                    = var.arm_nodes_enabled
   spot_nodes_enabled                   = var.spot_nodes_enabled
   burstable_nodes_enabled              = var.burstable_nodes_enabled
   controller_nodes_enabled             = var.controller_nodes_enabled
@@ -790,8 +786,8 @@ module "ingress" {
   csp_script_src = "'self' 'unsafe-inline'"
   csp_img_src    = "'self' data:"
 
-  connection_timeout_seconds = 600
-  body_size_limit_mb         = 50
+  idle_timeout_seconds = 600
+  body_size_limit_mb   = 50
 
   extra_annotations = merge(
     module.authenticating_proxy[0].upstream_ingress_annotations

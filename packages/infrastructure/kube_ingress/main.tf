@@ -182,10 +182,9 @@ locals {
       "nginx.ingress.kubernetes.io/limit-whitelist"        = join(", ", [])
     },
 
-    var.connection_timeout_seconds == null ? null : {
-      "nginx.ingress.kubernetes.io/proxy-connect-timeout" = tostring(var.connection_timeout_seconds)
-      "nginx.ingress.kubernetes.io/proxy-read-timeout"    = tostring(var.connection_timeout_seconds)
-      "nginx.ingress.kubernetes.io/proxy-send-timeout"    = tostring(var.connection_timeout_seconds)
+    var.idle_timeout_seconds == null ? null : {
+      "nginx.ingress.kubernetes.io/proxy-read-timeout"    = tostring(var.idle_timeout_seconds)
+      "nginx.ingress.kubernetes.io/proxy-send-timeout"    = tostring(var.idle_timeout_seconds)
     },
 
     var.body_size_limit_mb == null ? null : {

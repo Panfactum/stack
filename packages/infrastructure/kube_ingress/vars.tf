@@ -127,7 +127,7 @@ variable "rate_limiting_enabled" {
   default     = true
 }
 
-variable "connection_timeout_seconds" {
+variable "idle_timeout_seconds" {
   description = "The connection timeout in seconds"
   type        = number
   default     = null
