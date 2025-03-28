@@ -346,5 +346,11 @@ export const setupVault = async ({
 
   // To mitigate the long-running background process dying over time, we'll kill it here
   // and restart it when we need it.
-  if (pid > 0) process.kill(pid);
+  if (pid > 0) {
+    try {
+      process.kill(pid);
+    } catch {
+      // Do nothing as it's already dead
+    }
+  }
 };

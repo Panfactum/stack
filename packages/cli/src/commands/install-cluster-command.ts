@@ -501,8 +501,13 @@ export class InstallClusterCommand extends Command {
           )
         );
         printHelpInformation(this.context);
-        backgroundProcessIds.forEach((pid) => process.kill(pid));
-        return 1;
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
       }
 
       await updateConfigFile({
