@@ -65,27 +65,75 @@ export const setupCertManagement = async ({
   try {
     // Get all environment directories
     const entries = await readdir(environmentDir, { withFileTypes: true });
+    if (verbose) {
+      context.stdout.write(`entries: ${JSON.stringify(entries, null, 2)}\n`);
+    }
     const envDirs = entries
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
+    if (verbose) {
+      context.stdout.write(`envDirs: ${JSON.stringify(envDirs, null, 2)}\n`);
+    }
 
     // Check each environment directory
     for (const envName of envDirs) {
       const envPath = `${environmentDir}/${envName}`;
+      if (verbose) {
+        context.stdout.write(`envPath: ${envPath}\n`);
+      }
 
       // Get all folders in this environment directory
-      const envSubDirs = await readdir(envPath, { withFileTypes: true });
-      const subDirs = envSubDirs
+      const envSubEntries = await readdir(envPath, { withFileTypes: true });
+      if (verbose) {
+        context.stdout.write(
+          `envSubEntries: ${JSON.stringify(envSubEntries, null, 2)}\n`
+        );
+      }
+      const subDirs = envSubEntries
         .filter((entry) => entry.isDirectory())
         .map((entry) => entry.name);
+      if (verbose) {
+        context.stdout.write(`subDirs: ${JSON.stringify(subDirs, null, 2)}\n`);
+      }
 
-      // Look for aws_delegated_zones_ prefixed folders
+      // Check each region directory
       for (const subDir of subDirs) {
-        if (subDir.startsWith("aws_delegated_zones_")) {
-          delegatedZonesFolders.push({
-            path: `${envPath}/${subDir}`,
-            folderName: subDir,
-          });
+        const regionDirPath = `${envPath}/${subDir}`;
+        if (verbose) {
+          context.stdout.write(`regionDirPath: ${regionDirPath}\n`);
+        }
+
+        // Get all folders in this region directory
+        const regionSubEntries = await readdir(regionDirPath, {
+          withFileTypes: true,
+        });
+        if (verbose) {
+          context.stdout.write(
+            `regionSubEntries: ${JSON.stringify(regionSubEntries, null, 2)}\n`
+          );
+        }
+
+        // Get all folders in this region directory
+        const zoneSubEntries = regionSubEntries
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name);
+        if (verbose) {
+          context.stdout.write(
+            `zoneSubEntries: ${JSON.stringify(zoneSubEntries, null, 2)}\n`
+          );
+        }
+
+        // Look for aws_delegated_zones_ prefixed folders
+        for (const zone of zoneSubEntries) {
+          if (zone.startsWith("aws_delegated_zones_")) {
+            if (verbose) {
+              context.stdout.write(`zone: ${zone}\n`);
+            }
+            delegatedZonesFolders.push({
+              path: `${envPath}/${subDir}/${zone}`,
+              folderName: `${zone}`,
+            });
+          }
         }
       }
     }
@@ -98,9 +146,25 @@ export const setupCertManagement = async ({
     throw new Error("Failed to find delegated zones folders");
   }
 
+  if (verbose) {
+    context.stdout.write(
+      `delegatedZonesFolders: ${JSON.stringify(delegatedZonesFolders, null, 2)}\n`
+    );
+  }
+
   const delegatedZoneForCurrentEnvironment = delegatedZonesFolders.find(
     (folder) => folder.folderName === `aws_delegated_zones_${environment}`
   );
+
+  if (verbose) {
+    context.stdout.write(
+      `delegatedZoneForCurrentEnvironment: ${JSON.stringify(
+        delegatedZoneForCurrentEnvironment,
+        null,
+        2
+      )}\n`
+    );
+  }
 
   let userSelectedDelegatedZone: string = "";
   if (!delegatedZoneForCurrentEnvironment) {
@@ -130,13 +194,25 @@ export const setupCertManagement = async ({
       .includes(environment);
   }
 
+  if (verbose) {
+    context.stdout.write(
+      `isProductionEnvironment: ${isProductionEnvironment}\n`
+    );
+  }
+
   const zoneOutputProcess = Bun.spawnSync(["terragrunt", "output", "-json"], {
     cwd: delegatedZoneForCurrentEnvironment?.path || userSelectedDelegatedZone,
-    stdout: verbose ? "inherit" : "pipe",
+    stdout: "pipe",
     stderr: "pipe",
   });
 
-  const zoneOutput = JSON.parse(zoneOutputProcess.stdout?.toString() || "{}");
+  if (verbose) {
+    context.stdout.write(
+      `zoneOutputProcess: ${JSON.stringify(zoneOutputProcess, null, 2)}\n`
+    );
+  }
+
+  const zoneOutput = JSON.parse(zoneOutputProcess.stdout.toString());
   const zoneOutputSchema = z.object({
     zones: z.object({
       sensitive: z.boolean(),
@@ -154,6 +230,11 @@ export const setupCertManagement = async ({
     }),
   });
   const validatedZoneOutput = zoneOutputSchema.parse(zoneOutput);
+
+  // Should we ask the user which zones they want to include?
+  // I think so because these may be split across multiple "regions".
+
+  context.stdout.write("checkpoint 8\n");
 
   const templateHcl = await Bun.file(kubeCertIssuersTerragruntHclPath).text();
   let updatedTemplateHcl = "";
@@ -219,6 +300,8 @@ export const setupCertManagement = async ({
     }
     updatedTemplateHcl = updatedLines.join("\n");
   }
+
+  context.stdout.write("checkpoint 9\n");
 
   // Write the updated template HCL to the file
   await Bun.write(kubeCertIssuersTerragruntHclPath, updatedTemplateHcl);
