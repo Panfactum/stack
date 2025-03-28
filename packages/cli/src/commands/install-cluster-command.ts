@@ -9,6 +9,7 @@ import { printHelpInformation } from "../util/print-help-information";
 import { setupEcrPullThroughCache } from "./aws/ecr-pull-through-cache";
 import { setupEks } from "./aws/eks";
 import { setupVpc } from "./aws/vpc";
+import { certManagerPrompts } from "../user-prompts/cert-manager";
 import { ecrPullThroughCachePrompts } from "../user-prompts/ecr-pull-through-cache";
 import { kubernetesClusterPrompts } from "../user-prompts/kubernetes-cluster";
 import { slaPrompts } from "../user-prompts/sla";
@@ -24,6 +25,7 @@ import { setupPolicyController } from "./kube/policy-controller";
 import { setupVault } from "./kube/vault";
 import { vaultPrompts } from "../user-prompts/vault";
 import { backgroundProcessIds } from "../util/start-background-process";
+import { setupCertManagement } from "./kube/cert-management";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -516,6 +518,55 @@ export class InstallClusterCommand extends Command {
           recoveryShares,
           recoveryThreshold,
           vault: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupCertManagementComplete = await getConfigFileKey({
+      key: "certManagement",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupCertManagementComplete === true) {
+      this.context.stdout.write(
+        "Skipping certificate management setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(
+        pc.blue("8. Setting up certificate management\n\n")
+      );
+
+      const { alertEmail } = await certManagerPrompts();
+
+      try {
+        await setupCertManagement({
+          context: this.context,
+          alertEmail,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+      }
+
+      await updateConfigFile({
+        updates: {
+          alertEmail,
+          certManagement: true,
         },
         configPath,
         context: this.context,
