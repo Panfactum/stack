@@ -173,7 +173,7 @@ export const setupCertManagement = async ({
         for (const zoneName of zonesNames) {
           // add the raw string as we will call hclfmt on the file later
           updatedLines.push(
-            `"${zoneName}" = {\nzone_id = dependency.delegated_zones.outputs.zones["${zoneName}"].zone_id}\nrecord_manager_role_arn=dependency.delegated_zones.outputs.record_manager_role_arn`
+            `"${zoneName}" = {\nzone_id = dependency.delegated_zones.outputs.zones["${zoneName}"].zone_id\nrecord_manager_role_arn=dependency.delegated_zones.outputs.record_manager_role_arn\n}`
           );
         }
         startWriting = false;
@@ -206,7 +206,7 @@ export const setupCertManagement = async ({
           const zoneId = validatedZoneOutput.zones.value[zoneName]?.zone_id;
           // add the raw string as we will call hclfmt on the file later
           updatedLines.push(
-            `"${zoneName}" = {\nzone_id = ${zoneId}\nrecord_manager_role_arn=${recordManagerRoleArn}`
+            `"${zoneName}" = {\nzone_id = ${zoneId}\nrecord_manager_role_arn=${recordManagerRoleArn}\n}`
           );
         }
         startWriting = false;
