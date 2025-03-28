@@ -34,7 +34,7 @@ export async function vaultPrompts() {
     },
   });
 
-  const recoveryShares = await number({
+  let recoveryShares = await number({
     message: pc.magenta(
       "Enter how many people do you want to be superusers of Vault.\n" +
         "This is highly dependent on organization size, but we recommend the following:\n" +
@@ -48,7 +48,7 @@ export async function vaultPrompts() {
     max: 5,
   });
 
-  const recoveryThreshold = await number({
+  let recoveryThreshold = await number({
     message: pc.magenta(
       "Enter how many superusers must work together to gain root access to Vault.\n" +
         "It can be tempting to make this a high number,\n" +
@@ -60,6 +60,14 @@ export async function vaultPrompts() {
     required: true,
     min: recoveryShares! > 1 ? 2 : 1,
   });
+
+  if (recoveryShares === undefined) {
+    recoveryShares = 2;
+  }
+
+  if (recoveryThreshold === undefined) {
+    recoveryThreshold = 2;
+  }
 
   return { vaultDomain, recoveryShares, recoveryThreshold };
 }

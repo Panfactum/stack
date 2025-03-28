@@ -490,8 +490,8 @@ export class InstallClusterCommand extends Command {
         await setupVault({
           context: this.context,
           vaultDomain,
-          recoveryShares: recoveryShares!, // This is required by the prompt which means it can't be undefined. The typing is wrong.
-          recoveryThreshold: recoveryThreshold!, // This is required by the prompt which means it can't be undefined. The typing is wrong.
+          recoveryShares,
+          recoveryThreshold,
           verbose: this.verbose,
         });
       } catch (error) {
