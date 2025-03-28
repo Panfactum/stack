@@ -510,6 +510,7 @@ export class InstallClusterCommand extends Command {
             // Do nothing as it's already dead
           }
         });
+        return 1;
       }
 
       await updateConfigFile({
@@ -554,13 +555,7 @@ export class InstallClusterCommand extends Command {
           )
         );
         printHelpInformation(this.context);
-        backgroundProcessIds.forEach((pid) => {
-          try {
-            process.kill(pid);
-          } catch {
-            // Do nothing as it's already dead
-          }
-        });
+        return 1;
       }
 
       await updateConfigFile({
