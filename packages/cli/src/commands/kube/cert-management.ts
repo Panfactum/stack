@@ -39,7 +39,6 @@ export const setupCertManagement = async ({
 
   apply({
     context,
-    suppressErrors: true,
     verbose,
     workingDirectory: "./kube_cert_manager",
   });
