@@ -127,6 +127,18 @@ variable "rate_limiting_enabled" {
   default     = true
 }
 
+variable "idle_timeout_seconds" {
+  description = "The idle timeout in seconds"
+  type        = number
+  default     = null
+}
+
+variable "body_size_limit_mb" {
+  description = "The maximum body size in MB"
+  type        = number
+  default     = null
+}
+
 variable "csp_enabled" {
   description = "Whether the Content-Security-Policy header should be added to responses"
   type        = bool

@@ -77,6 +77,12 @@ variable "wait" {
   default     = true
 }
 
+variable "arm_nodes_enabled" {
+  description = "Whether to allow pods to schedule on ARM nodes"
+  type        = bool
+  default     = true
+}
+
 variable "spot_nodes_enabled" {
   description = "Whether to allow pods to schedule on spot nodes"
   type        = bool

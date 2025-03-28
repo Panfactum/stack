@@ -181,6 +181,16 @@ locals {
       "nginx.ingress.kubernetes.io/limit-burst-multiplier" = "3"
       "nginx.ingress.kubernetes.io/limit-whitelist"        = join(", ", [])
     },
+
+    var.idle_timeout_seconds == null ? null : {
+      "nginx.ingress.kubernetes.io/proxy-read-timeout" = tostring(var.idle_timeout_seconds)
+      "nginx.ingress.kubernetes.io/proxy-send-timeout" = tostring(var.idle_timeout_seconds)
+    },
+
+    var.body_size_limit_mb == null ? null : {
+      "nginx.ingress.kubernetes.io/proxy-body-size" = "${var.body_size_limit_mb}m"
+    },
+
     var.extra_annotations
   )
 
