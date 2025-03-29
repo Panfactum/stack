@@ -4,6 +4,12 @@ variable "namespace" {
   default     = "airbyte"
 }
 
+variable "helm_timeout_seconds" {
+  description = "The timeout in seconds for Helm operations"
+  type        = number
+  default     = 600
+}
+
 variable "airbyte_edition" {
   description = "The edition of Airbyte to deploy (community or enterprise)"
   type        = string

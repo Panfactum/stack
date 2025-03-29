@@ -376,6 +376,7 @@ resource "helm_release" "airbyte" {
   force_update    = true
   wait_for_jobs   = true
   max_history     = 5
+  timeout         = var.helm_timeout_seconds
 
   lifecycle {
     precondition {
