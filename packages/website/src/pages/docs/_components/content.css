@@ -25,7 +25,7 @@
   }
 
   ul, ol {
-    @apply ml-4
+    @apply ml-6 md:ml-8
   }
 
   li {
