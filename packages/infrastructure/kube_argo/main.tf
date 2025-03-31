@@ -708,6 +708,10 @@ resource "helm_release" "argo_events" {
 
       webhook = {
         enabled = true
+        image = {
+          repository = "${module.constants.images.argo-events.registry}/${module.constants.images.argo-events.repository}"
+          tag        = module.constants.images.argo-events.tag
+        }
         podLabels = merge(
           module.util_webhook.labels,
           {

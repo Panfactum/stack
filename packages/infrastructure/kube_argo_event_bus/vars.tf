@@ -42,7 +42,7 @@ variable "arm_nodes_enabled" {
 variable "controller_nodes_enabled" {
   description = "Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "minimum_memory_mb" {
@@ -249,4 +249,28 @@ variable "vault_internal_pki_backend_mount_path" {
   description = "The mount path of the PKI backend for internal certificates."
   type        = string
   default     = "pki/internal"
+}
+
+variable "max_age_hours" {
+  description = "The maximum age of a message in the stream in hours. -1 for unlimited."
+  type        = number
+  default     = -1
+}
+
+variable "max_messages" {
+  description = "The maximum number of messages in the stream. -1 for unlimited."
+  type        = number
+  default     = -1
+}
+
+variable "max_size_mb" {
+  description = "The maximum size of the stream in MB. -1 for unlimited."
+  type        = number
+  default     = -1
+}
+
+variable "duplicate_window_seconds" {
+  description = "The window of time in seconds to consider for duplicate message detection."
+  type        = number
+  default     = 60 * 2
 }
