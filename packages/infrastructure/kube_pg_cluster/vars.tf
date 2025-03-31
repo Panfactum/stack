@@ -536,6 +536,13 @@ variable "pg_recovery_directory" {
   default     = null
 }
 
+variable "pg_recovery_bucket" {
+  description = "The name of the S3 bucket containing the backup files which the database will bootstrap from. If not provided, will default to the randomly generated backup bucket."
+  type        = string
+  default     = null
+}
+
+
 variable "pg_backup_directory" {
   description = "The name of the directory in the backup bucket containing the backups files."
   type        = string
