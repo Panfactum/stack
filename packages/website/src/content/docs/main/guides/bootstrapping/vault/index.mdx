@@ -35,13 +35,15 @@ Let's do this now:
 
 2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_vault/terragrunt.hcl).
 
-3. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
+3. For now, set `wait` to `false`. This will enable `terragrunt apply` to succeed even though the Vault pods will not be ready. See below for more details.
 
-4. Run `pf-tf-init` to enable the required providers.
+4. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
 
-5. Run `terragrunt apply`.
+5. Run `pf-tf-init` to enable the required providers.
 
-6. Note that this deployment **may not succeed,** but you should see three vault instances which are in the unready state:
+6. Run `terragrunt apply`.
+
+7. Note that this deployment **will not succeed,** and you should see three vault instances which are in the unready state:
 
    <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
 
@@ -264,13 +266,15 @@ Here is how we will work around this issue:
 
 Let's now deploy [vault\_core\_resources](/docs/main/reference/infrastructure-modules/direct/vault/vault_core_resources):
 
-1. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
+1. Before proceeding, set `wait` to `true` in the `kube_vault` module. It is now expected that future `kube_vault` deployments should succeed.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/vault_core_resources/terragrunt.hcl).
+2. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
 
-3. Run `pf-tf-init` to enable the required providers.
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/vault_core_resources/terragrunt.hcl).
 
-4. Run `terragrunt apply`.
+4. Run `pf-tf-init` to enable the required providers.
+
+5. Run `terragrunt apply`.
 
 ## Testing
 
