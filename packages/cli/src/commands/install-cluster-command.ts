@@ -26,6 +26,7 @@ import { setupVault } from "./kube/vault";
 import { vaultPrompts } from "../user-prompts/vault";
 import { backgroundProcessIds } from "../util/start-background-process";
 import { setupCertManagement } from "./kube/cert-management";
+import { setupLinkerd } from "./kube/linkerd";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -564,6 +565,50 @@ export class InstallClusterCommand extends Command {
         updates: {
           alertEmail,
           certManagement: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupServiceMeshComplete = await getConfigFileKey({
+      key: "serviceMesh",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupServiceMeshComplete === true) {
+      this.context.stdout.write(
+        "9. Skipping service mesh setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(pc.blue("9. Setting up the service mesh\n\n"));
+
+      try {
+        await setupLinkerd({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          serviceMesh: true,
         },
         configPath,
         context: this.context,
