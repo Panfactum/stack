@@ -5,11 +5,13 @@ import type { BaseContext } from "clipanion";
 
 export async function apply({
   context,
+  env,
   suppressErrors = false,
   verbose = false,
   workingDirectory = ".",
 }: {
   context: BaseContext;
+  env?: Record<string, string | undefined>;
   suppressErrors?: boolean;
   verbose?: boolean;
   workingDirectory?: string;
@@ -27,6 +29,7 @@ export async function apply({
       ["terragrunt", "apply", "-auto-approve"],
       {
         cwd: workingDirectory,
+        env,
         stdout: verbose ? "inherit" : "ignore",
         stderr: "pipe",
       }

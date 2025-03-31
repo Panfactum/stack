@@ -24,6 +24,28 @@ export const setupCertManagement = async ({
   verbose?: boolean;
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
+  // Until the devShell fully reloads this must be explicitly set in the spawned processes
+  const env = {
+    ...process.env,
+    VAULT_ADDR: "http://127.0.0.1:8200",
+    VAULT_TOKEN: process.env["VAULT_TOKEN"],
+  };
+
+  const pid = startBackgroundProcess({
+    args: [
+      "-n",
+      "vault",
+      "port-forward",
+      "--address",
+      "0.0.0.0",
+      "svc/vault-active",
+      "8200:8200",
+    ],
+    command: "kubectl",
+    context,
+    env,
+  });
+
   // https://panfactum.com/docs/edge/guides/bootstrapping/certificate-management#deploy-cert-manger
   context.stdout.write(pc.blue("8.a. Setting up Kubernetes cert manager\n"));
 
@@ -35,12 +57,14 @@ export const setupCertManagement = async ({
 
   tfInit({
     context,
+    env,
     verbose,
     workingDirectory: "./kube_cert_manager",
   });
 
   apply({
     context,
+    env,
     verbose,
     workingDirectory: "./kube_cert_manager",
   });
@@ -327,28 +351,16 @@ export const setupCertManagement = async ({
     alertEmail
   );
 
-  const pid = startBackgroundProcess({
-    args: [
-      "-n",
-      "vault",
-      "port-forward",
-      "--address",
-      "0.0.0.0",
-      "svc/vault-active",
-      "8200:8200",
-    ],
-    command: "kubectl",
-    context,
-  });
-
   tfInit({
     context,
+    env,
     verbose,
     workingDirectory: "./kube_cert_issuers",
   });
 
   apply({
     context,
+    env,
     verbose,
     workingDirectory: "./kube_cert_issuers",
   });
@@ -364,6 +376,7 @@ export const setupCertManagement = async ({
 
   apply({
     context,
+    env,
     verbose,
     workingDirectory: "./kube_cert_manager",
   });

@@ -5,10 +5,12 @@ import type { BaseContext } from "clipanion";
 
 export function tfInit({
   context,
+  env,
   verbose = false,
   workingDirectory = ".",
 }: {
   context: BaseContext;
+  env?: Record<string, string | undefined>;
   verbose?: boolean;
   workingDirectory?: string;
 }): 0 | 1 {
@@ -32,6 +34,7 @@ export function tfInit({
       ],
       {
         cwd: workingDirectory,
+        env,
         stdout: verbose ? "inherit" : "ignore",
         stderr: "pipe",
       }
@@ -84,6 +87,7 @@ export function tfInit({
       ],
       {
         cwd: workingDirectory,
+        env,
         stdout: verbose ? "inherit" : "ignore",
         stderr: "pipe",
       }

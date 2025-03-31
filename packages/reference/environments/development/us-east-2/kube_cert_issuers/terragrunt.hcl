@@ -21,6 +21,14 @@ dependency "vault" {
   config_path = "../kube_vault"
 }
 
+dependency "registered_domains" {
+  config_path = "../../../production/global/aws_registered_domains"
+}
+
+dependency "delegated_zones" {
+  config_path = "../../../PRODUCTION_FOLDER_NAME/global/aws_delegated_zones_production"
+}
+
 inputs = {
   alert_email        = "it@panfactum.com"
   vault_internal_url = dependency.vault.outputs.vault_internal_url

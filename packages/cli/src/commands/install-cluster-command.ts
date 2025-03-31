@@ -170,7 +170,7 @@ export class InstallClusterCommand extends Command {
 
     if (vpcSetupComplete === true) {
       this.context.stdout.write(
-        "Skipping VPC setup as it's already complete.\n\n"
+        "1. Skipping VPC setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("1. Setting up the AWS VPC\n"));
@@ -222,7 +222,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupEcrPullThroughCacheComplete === true) {
       this.context.stdout.write(
-        "Skipping ECR pull through cache setup as it's already complete.\n\n"
+        "2. Skipping ECR pull through cache setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -293,7 +293,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupEksComplete === true) {
       this.context.stdout.write(
-        "Skipping EKS cluster setup as it's already complete.\n\n"
+        "3. Skipping EKS cluster setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("3. Setting up the AWS EKS cluster\n"));
@@ -354,7 +354,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupInternalClusterNetworkingComplete === true) {
       this.context.stdout.write(
-        "Skipping internal cluster networking setup as it's already complete.\n\n"
+        "4. Skipping internal cluster networking setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -393,7 +393,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupPolicyControllerComplete === true) {
       this.context.stdout.write(
-        "Skipping policy controller setup as it's already complete.\n\n"
+        "5. Skipping policy controller setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -432,7 +432,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupCSIDriversComplete === true) {
       this.context.stdout.write(
-        "Skipping CSI drivers setup as it's already complete.\n\n"
+        "6. Skipping CSI drivers setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -471,29 +471,26 @@ export class InstallClusterCommand extends Command {
 
     if (setupVaultComplete === true) {
       this.context.stdout.write(
-        "Skipping Vault setup as it's already complete.\n\n"
+        "7. Skipping Vault setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("7. Setting up Vault\n\n"));
 
       this.context.stdout.write(
         pc.blue(
-          "Vault serves several important purposes in the Panfactum stack:\n" +
+          "Vault serves several important purposes in the Panfactum framework:\n" +
             "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
             "2. Authorizes SSH authentication to our bastion hosts\n" +
             "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n"
         )
       );
 
-      const { vaultDomain, recoveryShares, recoveryThreshold } =
-        await vaultPrompts();
+      const { vaultDomain } = await vaultPrompts();
 
       try {
         await setupVault({
           context: this.context,
           vaultDomain,
-          recoveryShares,
-          recoveryThreshold,
           verbose: this.verbose,
         });
       } catch (error) {
@@ -516,8 +513,6 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           vaultDomain,
-          recoveryShares,
-          recoveryThreshold,
           vault: true,
         },
         configPath,
@@ -533,7 +528,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupCertManagementComplete === true) {
       this.context.stdout.write(
-        "Skipping certificate management setup as it's already complete.\n\n"
+        "8. Skipping certificate management setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
