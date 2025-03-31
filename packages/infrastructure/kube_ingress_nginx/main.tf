@@ -395,7 +395,7 @@ resource "helm_release" "nginx_ingress" {
     binary_path = "${path.module}/kustomize/kustomize.sh"
   }
 
-  timeout    = 60 * 30
+  timeout    = 60 * 60
   depends_on = [module.webhook_cert]
 }
 
