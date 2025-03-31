@@ -7,16 +7,19 @@ export function startBackgroundProcess({
   args,
   command,
   context,
+  env,
 }: {
   args: string[];
   command: string;
   context: BaseContext;
+  env?: Record<string, string | undefined>;
 }) {
   try {
     const proc = Bun.spawn([command, ...args], {
       stdin: "ignore",
       stdout: "ignore",
       stderr: "ignore",
+      env,
     });
 
     backgroundProcessIds.push(proc.pid);

@@ -9,6 +9,7 @@ import { printHelpInformation } from "../util/print-help-information";
 import { setupEcrPullThroughCache } from "./aws/ecr-pull-through-cache";
 import { setupEks } from "./aws/eks";
 import { setupVpc } from "./aws/vpc";
+import { certManagerPrompts } from "../user-prompts/cert-manager";
 import { ecrPullThroughCachePrompts } from "../user-prompts/ecr-pull-through-cache";
 import { kubernetesClusterPrompts } from "../user-prompts/kubernetes-cluster";
 import { slaPrompts } from "../user-prompts/sla";
@@ -24,6 +25,7 @@ import { setupPolicyController } from "./kube/policy-controller";
 import { setupVault } from "./kube/vault";
 import { vaultPrompts } from "../user-prompts/vault";
 import { backgroundProcessIds } from "../util/start-background-process";
+import { setupCertManagement } from "./kube/cert-management";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -168,7 +170,7 @@ export class InstallClusterCommand extends Command {
 
     if (vpcSetupComplete === true) {
       this.context.stdout.write(
-        "Skipping VPC setup as it's already complete.\n\n"
+        "1. Skipping VPC setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("1. Setting up the AWS VPC\n"));
@@ -220,7 +222,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupEcrPullThroughCacheComplete === true) {
       this.context.stdout.write(
-        "Skipping ECR pull through cache setup as it's already complete.\n\n"
+        "2. Skipping ECR pull through cache setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -291,7 +293,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupEksComplete === true) {
       this.context.stdout.write(
-        "Skipping EKS cluster setup as it's already complete.\n\n"
+        "3. Skipping EKS cluster setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("3. Setting up the AWS EKS cluster\n"));
@@ -352,7 +354,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupInternalClusterNetworkingComplete === true) {
       this.context.stdout.write(
-        "Skipping internal cluster networking setup as it's already complete.\n\n"
+        "4. Skipping internal cluster networking setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -391,7 +393,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupPolicyControllerComplete === true) {
       this.context.stdout.write(
-        "Skipping policy controller setup as it's already complete.\n\n"
+        "5. Skipping policy controller setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -430,7 +432,7 @@ export class InstallClusterCommand extends Command {
 
     if (setupCSIDriversComplete === true) {
       this.context.stdout.write(
-        "Skipping CSI drivers setup as it's already complete.\n\n"
+        "6. Skipping CSI drivers setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(
@@ -469,29 +471,26 @@ export class InstallClusterCommand extends Command {
 
     if (setupVaultComplete === true) {
       this.context.stdout.write(
-        "Skipping Vault setup as it's already complete.\n\n"
+        "7. Skipping Vault setup as it's already complete.\n\n"
       );
     } else {
       this.context.stdout.write(pc.blue("7. Setting up Vault\n\n"));
 
       this.context.stdout.write(
         pc.blue(
-          "Vault serves several important purposes in the Panfactum stack:\n" +
+          "Vault serves several important purposes in the Panfactum framework:\n" +
             "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
             "2. Authorizes SSH authentication to our bastion hosts\n" +
-            "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n"
+            "3. Provisions (and de-provisions) dynamic credentials for the framework’s supported databases\n"
         )
       );
 
-      const { vaultDomain, recoveryShares, recoveryThreshold } =
-        await vaultPrompts();
+      const { vaultDomain } = await vaultPrompts();
 
       try {
         await setupVault({
           context: this.context,
           vaultDomain,
-          recoveryShares,
-          recoveryThreshold,
           verbose: this.verbose,
         });
       } catch (error) {
@@ -508,14 +507,63 @@ export class InstallClusterCommand extends Command {
             // Do nothing as it's already dead
           }
         });
+        return 1;
       }
 
       await updateConfigFile({
         updates: {
           vaultDomain,
-          recoveryShares,
-          recoveryThreshold,
           vault: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupCertManagementComplete = await getConfigFileKey({
+      key: "certManagement",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupCertManagementComplete === true) {
+      this.context.stdout.write(
+        "8. Skipping certificate management setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(
+        pc.blue("8. Setting up certificate management\n\n")
+      );
+
+      const { alertEmail } = await certManagerPrompts();
+
+      try {
+        await setupCertManagement({
+          context: this.context,
+          alertEmail,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          alertEmail,
+          certManagement: true,
         },
         configPath,
         context: this.context,

@@ -16,14 +16,10 @@ import type { BaseContext } from "clipanion";
 export const setupVault = async ({
   context,
   vaultDomain,
-  recoveryShares,
-  recoveryThreshold,
   verbose = false,
 }: {
   context: BaseContext;
   vaultDomain: string;
-  recoveryShares: number;
-  recoveryThreshold: number;
   verbose?: boolean;
   // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
@@ -59,8 +55,6 @@ export const setupVault = async ({
     // It's okay if this fails as we must manually initialize the vault on first use
     // We'll ignore this and do more checks below to see if the vault was instantiated successfully
   }
-
-  await replaceHclValue("./kube_vault/terragrunt.hcl", "inputs.wait", true);
 
   const vaultPodNames = [];
 
@@ -107,6 +101,10 @@ export const setupVault = async ({
   globalThis.clearInterval(vaultStatusProgress);
   context.stdout.write("\n");
 
+  if (verbose) {
+    context.stdout.write("Vault pods: " + vaultPodNames.join(", ") + "\n");
+  }
+
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#initialize-vault
   context.stdout.write("7.b. Initializing Vault\n");
 
@@ -124,9 +122,16 @@ export const setupVault = async ({
 
   let recoveryKeys: z.infer<typeof recoveryKeysSchema>;
   try {
-    // Run the vault init command in the pod
-    const result =
-      await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator init -recovery-shares=${recoveryShares} -recovery-threshold=${recoveryThreshold} -format=json`.text();
+    // Run the vault operator init command in the pod
+    let result = "";
+    try {
+      result =
+        await $`kubectl exec -i ${vaultPodNames[0]} --namespace=vault -- vault operator init -recovery-shares=1 -recovery-threshold=1 -format=json`.text();
+    } catch (error) {
+      context.stderr.write(
+        pc.red("Failed to initialize vault.\n" + JSON.stringify(error, null, 2))
+      );
+    }
 
     if (verbose) {
       context.stdout.write("vault operator init STDOUT: " + result + "\n");
@@ -138,8 +143,8 @@ export const setupVault = async ({
   } catch (error) {
     const errorMessage =
       error instanceof Error
-        ? `Error applying infrastructure modules: ${error.message}`
-        : "Error applying infrastructure modules";
+        ? `Error running vault operator init: ${error.message}`
+        : "Error running vault operator init";
     context.stderr.write(`${pc.red(errorMessage)}\n`);
     throw new Error("Failed to initialize vault");
   }
@@ -202,6 +207,9 @@ export const setupVault = async ({
   process.env["VAULT_ADDR"] = "http://127.0.0.1:8200";
   process.env["VAULT_TOKEN"] = recoveryKeys.root_token;
 
+  await replaceHclValue("./kube_vault/terragrunt.hcl", "inputs.wait", true);
+  // Check to make sure all the vault pods are running and healthy
+
   context.stdout.write("\n7.c. 🔒 Encrypting secrets\n\n");
 
   const tempSecretsFilePath = "./.tmp-vault-secrets.yaml";
@@ -241,7 +249,7 @@ export const setupVault = async ({
         "Decide how your organization recommends superusers store these keys.\n" +
         "This should " +
         pc.bold("not ") +
-        "be in a location that is accessible by all superusers (e.g. a company password vault).\n"
+        "be in a location that is accessible by all superusers (e.g. a company password vault).\n\n"
     )
   );
 
@@ -299,13 +307,19 @@ export const setupVault = async ({
   // Write to .env file
   await Bun.write(envFilePath, envContent);
 
-  // Reload direnv to ensure the new environment variables are loaded
-  await $`direnv reload`.quiet();
-
   // https://panfactum.com/docs/edge/guides/bootstrapping/vault#deploy-configuration-module
   context.stdout.write("7.e. Deploying Vault configuration module\n");
 
+  // The spawned processes need to inherit the environment variables
+  // so we'll merge the current environment variables with the new ones
+  const env = {
+    ...process.env,
+    VAULT_ADDR: "http://127.0.0.1:8200",
+    VAULT_TOKEN: recoveryKeys.root_token,
+  };
+
   const pid = startBackgroundProcess({
+    command: "kubectl",
     args: [
       "-n",
       "vault",
@@ -315,8 +329,8 @@ export const setupVault = async ({
       "svc/vault-active",
       "8200:8200",
     ],
-    command: "kubectl",
     context,
+    env,
   });
 
   await ensureFileExists({
@@ -325,14 +339,9 @@ export const setupVault = async ({
     sourceFile: await Bun.file(vaultCoreResourcesTerragruntHcl).text(),
   });
 
-  await replaceHclValue(
-    "./vault_core_resources/terragrunt.hcl",
-    "inputs.vault_domain",
-    vaultDomain
-  );
-
   tfInit({
     context,
+    env,
     verbose,
     workingDirectory: "./vault_core_resources",
   });
@@ -341,6 +350,7 @@ export const setupVault = async ({
     context,
     suppressErrors: true,
     verbose,
+    env,
     workingDirectory: "./vault_core_resources",
   });
 

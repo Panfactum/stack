@@ -11,7 +11,7 @@ export class CheckRepoSetupCommand extends Command {
   static override usage = Command.Usage({
     description: "Checks the repo setup.",
     details:
-      "There are many setup steps that are required to ensure that users of the Panfactum stack have a smooth experience. This utility function should be run every time the devenv gets launched in order to ensure that the setup steps have been completed properly.",
+      "There are many setup steps that are required to ensure that users of the Panfactum framework have a smooth experience. This utility function should be run every time the devenv gets launched in order to ensure that the setup steps have been completed properly.",
     examples: [["Check repo setup", "pf check-repo-setup"]],
   });
   async execute(): Promise<number> {

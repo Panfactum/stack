@@ -1,4 +1,4 @@
-import { input, number } from "@inquirer/prompts";
+import { input } from "@inquirer/prompts";
 import pc from "picocolors";
 
 export async function vaultPrompts() {
@@ -34,40 +34,5 @@ export async function vaultPrompts() {
     },
   });
 
-  let recoveryShares = await number({
-    message: pc.magenta(
-      "Enter how many people do you want to be superusers of Vault.\n" +
-        "This is highly dependent on organization size, but we recommend the following:\n" +
-        "1 if you are a solo operator\n" +
-        "2 if you have at least one other person working on infrastructure (to reduce your bus factor)\n" +
-        "and no more than 5 at the largest organization size (to minimize the burden of regular key rotation).\n" +
-        "->"
-    ),
-    required: true,
-    min: 1,
-    max: 5,
-  });
-
-  let recoveryThreshold = await number({
-    message: pc.magenta(
-      "Enter how many superusers must work together to gain root access to Vault.\n" +
-        "It can be tempting to make this a high number,\n" +
-        "but you will need these keys fairly regularly (expect about once per quarter).\n" +
-        "We recommend in sensitive environments you use 2 so there is at least one check on root access.\n" +
-        "In less sensitive environments, you can make this 1 for convenience.\n" +
-        "->"
-    ),
-    required: true,
-    min: recoveryShares! > 1 ? 2 : 1,
-  });
-
-  if (recoveryShares === undefined) {
-    recoveryShares = 2;
-  }
-
-  if (recoveryThreshold === undefined) {
-    recoveryThreshold = 2;
-  }
-
-  return { vaultDomain, recoveryShares, recoveryThreshold };
+  return { vaultDomain };
 }

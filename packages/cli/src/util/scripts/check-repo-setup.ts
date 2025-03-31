@@ -64,11 +64,17 @@ async function areDirectoriesEqual(
   }
 }
 
-// Purpose: There are many setup steps that are required to ensure that users of the Panfactum stack have
+// Purpose: There are many setup steps that are required to ensure that users of the Panfactum framework have
 // a smooth experience. This utility function should be run every time the devenv gets launched in order
 // to ensure that the setup steps have been completed properly.
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export async function checkRepoSetup({ context }: { context: BaseContext }) {
+export async function checkRepoSetup({
+  context,
+  verbose = false,
+}: {
+  context: BaseContext;
+  verbose?: boolean;
+}) {
   // Aggregate all of the error messages here and print them all at the end
   const errors: string[] = [];
   let hasBuildRequiredError = 0;
@@ -238,7 +244,7 @@ export async function checkRepoSetup({ context }: { context: BaseContext }) {
   if (errors.length > 0 && hasBuildRequiredError === 0) {
     context.stderr.write(
       pc.yellow(
-        `Your repository files are out-of-date with the current version of the Panfactum stack.\n\n`
+        `Your repository files are out-of-date with the current version of the Panfactum framework.\n\n`
       )
     );
     context.stderr.write(

@@ -4,7 +4,7 @@ import type { BaseContext } from "clipanion";
 
 // This function is intended to support getting an EKS auth token
 // We use this thin wrapper over the AWS CLI as
-// users of the Panfactum stack seem to get confused about needing to run aws sso login prior
+// users of the Panfactum framework seem to get confused about needing to run aws sso login prior
 // to attempting to interact with EKS clusters
 
 const getToken = ({
