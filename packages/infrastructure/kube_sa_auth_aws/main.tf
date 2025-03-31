@@ -119,8 +119,61 @@ data "aws_iam_policy_document" "ip_blocks" {
   }
 
   statement {
-    effect    = "Deny"
-    actions   = ["s3:*"]
+    effect = "Deny"
+    actions = concat(
+      [
+        "s3:AbortMultipartUpload",
+        "s3:AssociateAccessGrantsIdentityCenter",
+        "s3:BypassGovernanceRetention",
+        "s3:Create*",
+        "s3:Delete*",
+        "s3:Describe*",
+        "s3:DissociateAccessGrantsIdentityCenter",
+        "s3:GetAccess*",
+        "s3:GetAccountPublicAccessBlock",
+        "s3:GetAnalyticsConfiguration",
+        "s3:GetBucket*",
+        "s3:GetData*",
+        "s3:GetEncryptionConfiguration",
+        "s3:GetIntelligentTieringConfiguration",
+        "s3:GetInventoryConfiguration",
+        "s3:GetInventoryReport",
+        "s3:GetJob*",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetMetricsConfiguration",
+        "s3:GetMulti*",
+        "s3:GetReplicationConfiguration",
+        "s3:GetStorage*",
+        "s3:Initiate*",
+        "s3:List*",
+        "s3:ObjectOwnerOverrideToBucketOwner",
+        "s3:Pause*",
+        "s3:PutAccelerateConfiguration",
+        "s3:PutAccess*",
+        "s3:PutAccountPublicAccessBlock",
+        "s3:PutAnalyticsConfiguration",
+        "s3:PutBucket*",
+        "s3:PutData*",
+        "s3:PutEncryptionConfiguration",
+        "s3:PutIntelligentTieringConfiguration",
+        "s3:PutInventoryConfiguration",
+        "s3:PutJob*",
+        "s3:PutLifecycleConfiguration",
+        "s3:PutMetricsConfiguration",
+        "s3:PutMulti*",
+        "s3:PutReplicationConfiguration",
+        "s3:PutStorage*",
+        "s3:PutTagging",
+        "s3:PutVersioning",
+        "s3:Replicat*",
+        "s3:Restore*",
+        "s3:Submit*",
+        "s3:TagResource",
+        "s3:UntagResource",
+        "s3:Update*"
+      ],
+      var.allow_public_s3_presigned_urls ? [] : ["s3:GetObject*", "s3:PutObject*"]
+    )
     resources = ["*"]
 
     // Only allow access from inside our cluster

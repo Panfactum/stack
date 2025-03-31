@@ -130,10 +130,11 @@ resource "kubernetes_service_account" "velero" {
 module "aws_permissions" {
   source = "../kube_sa_auth_aws"
 
-  service_account           = kubernetes_service_account.velero.metadata[0].name
-  service_account_namespace = local.namespace
-  iam_policy_json           = data.aws_iam_policy_document.velero.json
-  ip_allow_list             = var.aws_iam_ip_allow_list
+  service_account                = kubernetes_service_account.velero.metadata[0].name
+  service_account_namespace      = local.namespace
+  iam_policy_json                = data.aws_iam_policy_document.velero.json
+  ip_allow_list                  = var.aws_iam_ip_allow_list
+  allow_public_s3_presigned_urls = true // Velero uses presigned URLs to show backup status and logs
 }
 
 

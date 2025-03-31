@@ -34,6 +34,8 @@ count is now configurable via the `retry_max_attempts` input.
 
 * Adds support for restoring from an alternate backup bucket in [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
 
+* Adds support for unrestricted S3 presigned URLs in [kube_sa_auth_aws](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws).
+
 ### Fixed
 
 * Event streams in [kube_argo_event_bus](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo_event_bus) are now properly replicated across all NATS servers.
@@ -47,6 +49,8 @@ this could result in an inability to publish events at all until either the publ
 
 * Fixes a problem in [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) that caused the workflow 
 to fail if the image already existed in the ECR repository. Moving forward, the workflow will simply skip the build step if the image already exists.
+
+* Velero backup logs are now available in the `velero` CLI.
 
 ## edge.25-03-26
 

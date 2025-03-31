@@ -24,3 +24,10 @@ variable "ip_allow_list" {
   type        = list(string)
   default     = []
 }
+
+variable "allow_public_s3_presigned_urls" {
+  description = "Whether to allow the service account to generate presigned URLs that will be publicly accessible"
+  type        = bool
+  default     = false
+}
+

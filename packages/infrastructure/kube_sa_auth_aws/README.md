@@ -61,6 +61,18 @@ configured by the [aws_eks](/docs/main/reference/infrastructure-modules/submodul
 If you need to allow additional entities to use these credentials, you must manually
 add their CIDRs to the `ip_allow_list` input.
 
+### Presigned S3 URLs
+
+AWS allows you to generate presigned URLs for S3 objects which can be a convenient way to give
+users the ability to access specific files without needing to set up file-streaming infrastructure.
+
+However, presigned URLs won't work outside of the cluster's VPC since the 
+[the capabilities of a presigned URL are limited by the permissions of the entity that created it,](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html#PresignedUrlUploadObject-LimitCapabilities) and Kubernetes service accounts
+are IP-restricted to only work from within the cluster.
+
+To work around this, you can set the `allow_public_s3_presigned_urls` input to `true`. This will slightly weaken this module's
+security controls to allow the service account to generate presigned URLs that can be used without IP restriction.
+
 ### Debugging
 
 To verify that this module has created the correct permissions, you should check
