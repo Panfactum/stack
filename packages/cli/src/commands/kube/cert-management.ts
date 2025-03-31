@@ -1,14 +1,16 @@
 import { readdir } from "fs/promises";
-import { select } from "@inquirer/prompts";
+import { checkbox, select } from "@inquirer/prompts";
 import pc from "picocolors";
 import { z } from "zod";
-import kubeCertIssuersTerragruntHcl from "../../templates/kube_cert_issuers_terragrunt.hcl" with { type: "file" };
+import kubeCertIssuersTerragruntHclNonProduction from "../../templates/kube_cert_issuers_non_production_terragrunt.hcl" with { type: "file" };
+import kubeCertIssuersTerragruntHclProduction from "../../templates/kube_cert_issuers_production_terragrunt.hcl" with { type: "file" };
 import kubeCertManagerTerragruntHcl from "../../templates/kube_cert_manager_terragrunt.hcl" with { type: "file" };
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { replaceHclValue } from "../../util/replace-hcl-value";
 import { getRepoVariables } from "../../util/scripts/get-repo-variables";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
 import { tfInit } from "../../util/scripts/tf-init";
+import { startBackgroundProcess } from "../../util/start-background-process";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -45,13 +47,6 @@ export const setupCertManagement = async ({
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/certificate-management#deploy-issuers
   context.stdout.write(pc.green("8.b. Setting up certificate issuers\n"));
-
-  const kubeCertIssuersTerragruntHclPath = "./kube_cert_issuers/terragrunt.hcl";
-  await ensureFileExists({
-    context,
-    destinationFile: kubeCertIssuersTerragruntHclPath,
-    sourceFile: await Bun.file(kubeCertIssuersTerragruntHcl).text(),
-  });
 
   // Find the delegated zones folders and see if this environment matches one of them
   const repoVariables = await getRepoVariables({ context });
@@ -231,10 +226,23 @@ export const setupCertManagement = async ({
   });
   const validatedZoneOutput = zoneOutputSchema.parse(zoneOutput);
 
-  // Should we ask the user which zones they want to include?
-  // I think so because these may be split across multiple "regions".
+  const userSelectedZones = await checkbox({
+    message: pc.magenta(
+      "Select the zones you want to include with this cluster:"
+    ),
+    choices: Object.keys(validatedZoneOutput.zones.value).map((zone) => zone),
+    required: true,
+  });
 
-  context.stdout.write("checkpoint 8\n");
+  const kubeCertIssuersTerragruntHclPath = "./kube_cert_issuers/terragrunt.hcl";
+  const templateFile = isProductionEnvironment
+    ? kubeCertIssuersTerragruntHclProduction
+    : kubeCertIssuersTerragruntHclNonProduction;
+  await ensureFileExists({
+    context,
+    destinationFile: kubeCertIssuersTerragruntHclPath,
+    sourceFile: await Bun.file(templateFile).text(),
+  });
 
   const templateHcl = await Bun.file(kubeCertIssuersTerragruntHclPath).text();
   let updatedTemplateHcl = "";
@@ -251,6 +259,9 @@ export const setupCertManagement = async ({
         // set startWriting back to false to conitue
         const zonesNames = Object.keys(validatedZoneOutput.zones.value);
         for (const zoneName of zonesNames) {
+          if (!userSelectedZones.includes(zoneName)) {
+            continue;
+          }
           // add the raw string as we will call hclfmt on the file later
           updatedLines.push(
             `"${zoneName}" = {\nzone_id = dependency.delegated_zones.outputs.zones["${zoneName}"].zone_id\nrecord_manager_role_arn=dependency.delegated_zones.outputs.record_manager_role_arn\n}`
@@ -283,10 +294,13 @@ export const setupCertManagement = async ({
           validatedZoneOutput.record_manager_role_arn.value;
         const zonesNames = Object.keys(validatedZoneOutput.zones.value);
         for (const zoneName of zonesNames) {
+          if (!userSelectedZones.includes(zoneName)) {
+            continue;
+          }
           const zoneId = validatedZoneOutput.zones.value[zoneName]?.zone_id;
           // add the raw string as we will call hclfmt on the file later
           updatedLines.push(
-            `"${zoneName}" = {\nzone_id = ${zoneId}\nrecord_manager_role_arn=${recordManagerRoleArn}\n}`
+            `"${zoneName}" = {\nzone_id = "${zoneId}"\nrecord_manager_role_arn = "${recordManagerRoleArn}"\n}`
           );
         }
         startWriting = false;
@@ -301,8 +315,6 @@ export const setupCertManagement = async ({
     updatedTemplateHcl = updatedLines.join("\n");
   }
 
-  context.stdout.write("checkpoint 9\n");
-
   // Write the updated template HCL to the file
   await Bun.write(kubeCertIssuersTerragruntHclPath, updatedTemplateHcl);
 
@@ -314,6 +326,20 @@ export const setupCertManagement = async ({
     "inputs.alert_email",
     alertEmail
   );
+
+  const pid = startBackgroundProcess({
+    args: [
+      "-n",
+      "vault",
+      "port-forward",
+      "--address",
+      "0.0.0.0",
+      "svc/vault-active",
+      "8200:8200",
+    ],
+    command: "kubectl",
+    context,
+  });
 
   tfInit({
     context,
@@ -341,4 +367,14 @@ export const setupCertManagement = async ({
     verbose,
     workingDirectory: "./kube_cert_manager",
   });
+
+  // To mitigate the long-running background process dying over time, we'll kill it here
+  // and restart it when we need it.
+  if (pid > 0) {
+    try {
+      process.kill(pid);
+    } catch {
+      // Do nothing as it's already dead
+    }
+  }
 };
