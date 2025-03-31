@@ -102,7 +102,7 @@ Default: `"bottlerocket-aws-k8s-1.30-aarch64-v1.28.0-0ab4fab4"`
 
 ### max\_node\_cpu
 
-Description: The maximum number of CPUs for any single provisioned node (in MB)
+Description: The maximum number of vCPUs for any single provisioned node
 
 Type: `number`
 
@@ -115,6 +115,22 @@ Description: The maximum memory for any single provisioned node (in MB)
 Type: `number`
 
 Default: `65536`
+
+### min\_node\_cpu
+
+Description: The minimum number of vCPUs for any single provisioned node
+
+Type: `number`
+
+Default: `0.5`
+
+### min\_node\_memory\_mb
+
+Description: The minimum memory for any single provisioned node (in MB)
+
+Type: `number`
+
+Default: `2500`
 
 ### monitoring\_enabled
 

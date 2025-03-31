@@ -116,3 +116,15 @@ variable "extra_ecr_repo_arns_for_pull_access" {
   type        = list(string)
   default     = []
 }
+
+variable "arm_builder_enabled" {
+  description = "Whether to build arm64 images."
+  type        = bool
+  default     = true
+}
+
+variable "amd_builder_enabled" {
+  description = "Whether to build amd64 images."
+  type        = bool
+  default     = true
+}

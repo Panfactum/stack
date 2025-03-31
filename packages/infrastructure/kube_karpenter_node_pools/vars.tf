@@ -66,7 +66,7 @@ variable "max_node_memory_mb" {
 variable "min_node_cpu" {
   description = "The minimum number of vCPUs for any single provisioned node"
   type        = number
-  default     = 0.5  # To allow smaller instances
+  default     = 0.5 # To allow smaller instances
 }
 
 variable "max_node_cpu" {

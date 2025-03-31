@@ -72,3 +72,8 @@ actually occur directly in the BuildKit instances.
 If you are finding you need to increase the resource requests or limits for your build processes, you
 will need to adjust the parameters of the [kube_buildkit](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube_buildkit) module.
 
+### Single Platform Images
+
+By default, this module will build a multi-platform image that can run on both arm64 and amd64 architectures. However, if
+you are running in an environment where you only need to support a single architecture, you can set either `arm_builder_enabled`
+or `amd_builder_enabled` to `false`.

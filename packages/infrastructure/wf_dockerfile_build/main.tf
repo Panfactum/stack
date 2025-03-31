@@ -168,6 +168,7 @@ module "image_builder_workflow" {
     BUILDKIT_BUCKET_REGION = data.aws_region.current.name
     SECRET_ARGS            = join(" ", [for id, val in var.secrets : "--secret id=${id},env=${id}"])
     BUILD_ARGS             = join(" ", [for arg, val in var.args : "--opt build-arg:${arg}=${val}"])
+    IMAGE_TAG_PREFIX       = var.image_tag_prefix
   }
   common_secrets = merge(
     var.secrets,
@@ -191,52 +192,56 @@ module "image_builder_workflow" {
       name    = local.entrypoint
       volumes = module.image_builder_workflow.volumes
       containerSet = {
-        containers = [
-          {
-            name    = "scale-buildkit"
-            command = ["/bin/pf-buildkit-scale-up", "--wait"]
-          },
-          {
-            name    = "clone"
-            command = ["/scripts/clone.sh"]
-          },
-          {
-            name    = "build-amd64"
-            command = ["/scripts/build.sh"]
-            env = concat(
-              module.image_builder_workflow.env,
-              [
-                { name = "ARCH", value = "amd64" },
-                { name = "IMAGE_TAG_PREFIX", value = var.image_tag_prefix }
-              ]
-            )
-            dependencies = ["scale-buildkit", "clone"]
-          },
-          {
-            name    = "build-arm64"
-            command = ["/scripts/build.sh"]
-            env = concat(
-              module.image_builder_workflow.env,
-              [
-                { name = "ARCH", value = "arm64" },
-                { name = "IMAGE_TAG_PREFIX", value = var.image_tag_prefix }
-              ]
-            )
-            dependencies = ["scale-buildkit", "clone"]
-          },
-          {
-            name         = "merge-manifests"
-            command      = ["/scripts/merge-manifests.sh"]
-            dependencies = ["build-arm64", "build-amd64"]
-            env = concat(
-              module.image_builder_workflow.env,
-              [
-                { name = "ARCH", value = "arm64" },
-                { name = "IMAGE_TAG_PREFIX", value = var.image_tag_prefix }
-              ]
-            )
-          }
-        ]
+        containers = concat(
+          [
+            {
+              name = "scale-buildkit"
+              command = [for arg in [
+                "/bin/pf-buildkit-scale-up",
+                var.amd_builder_enabled ? null : "--only=arm64",
+                var.arm_builder_enabled ? null : "--only=amd64",
+                "--wait"
+              ] : arg if arg != null]
+            },
+            {
+              name    = "clone"
+              command = ["/scripts/clone.sh"]
+            }
+          ],
+          var.amd_builder_enabled ? [
+            {
+              name    = "build-amd64"
+              command = ["/scripts/build.sh"]
+              env = concat(
+                module.image_builder_workflow.env,
+                [
+                  { name = "ARCH", value = "amd64" },
+                  { name = "USE_ARCH_SUFFIX", value = var.arm_builder_enabled ? "1" : "0" },
+                ]
+              )
+              dependencies = ["scale-buildkit", "clone"]
+          }] : [],
+          var.arm_builder_enabled ? [
+            {
+              name    = "build-arm64"
+              command = ["/scripts/build.sh"]
+              env = concat(
+                module.image_builder_workflow.env,
+                [
+                  { name = "ARCH", value = "arm64" },
+                  { name = "USE_ARCH_SUFFIX", value = var.amd_builder_enabled ? "1" : "0" },
+                ]
+              )
+              dependencies = ["scale-buildkit", "clone"]
+          }] : [],
+          var.arm_builder_enabled && var.amd_builder_enabled ? [
+            {
+              name         = "merge-manifests"
+              command      = ["/scripts/merge-manifests.sh"]
+              dependencies = ["build-arm64", "build-amd64"]
+            }
+          ] : []
+        )
       }
     }
   ]
@@ -277,5 +282,12 @@ resource "kubectl_manifest" "workflow_template" {
 
   server_side_apply = true
   force_conflicts   = true
+
+  lifecycle {
+    precondition {
+      condition     = var.arm_builder_enabled || var.amd_builder_enabled
+      error_message = "At least one of arm_builder_enabled or amd_builder_enabled must be true."
+    }
+  }
 }
 

@@ -121,6 +121,11 @@
       "group": "aws"
     },
     {
+      "module": "kube_airbyte",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_alloy",
       "type": "direct",
       "group": "kubernetes"

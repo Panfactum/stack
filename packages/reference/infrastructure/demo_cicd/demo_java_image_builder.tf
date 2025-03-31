@@ -4,6 +4,7 @@ module "demo_java_service_builder" {
   name = "demo-java-service-builder"
   namespace = local.namespace
   pull_through_cache_enabled = var.pull_through_cache_enabled
+  amd_builder_enabled = false
 
   code_repo = "github.com/panfactum/stack.git"
   dockerfile_path = "./packages/reference/services/demo-java-service/Containerfile"

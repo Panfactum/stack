@@ -103,10 +103,10 @@ resource "kubectl_manifest" "event_bus" {
           }
         }
         streamConfig = yamlencode({
-          replicas = 3
-          maxAge = var.max_age_hours == -1 ? "0h0m0s" : "${var.max_age_hours}h0m0s"
-          maxMsgs = var.max_messages
-          maxBytes = var.max_size_mb == -1 ? -1 : var.max_size_mb * 1024 * 1024
+          replicas   = 3
+          maxAge     = var.max_age_hours == -1 ? "0h0m0s" : "${var.max_age_hours}h0m0s"
+          maxMsgs    = var.max_messages
+          maxBytes   = var.max_size_mb == -1 ? -1 : var.max_size_mb * 1024 * 1024
           duplicates = "${var.duplicate_window_seconds}s"
         })
       }

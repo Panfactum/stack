@@ -79,6 +79,12 @@ actually occur directly in the BuildKit instances.
 If you are finding you need to increase the resource requests or limits for your build processes, you
 will need to adjust the parameters of the [kube\_buildkit](/docs/main/reference/infrastructure-modules/direct/kubernetes/kube\_buildkit) module.
 
+### Single Platform Images
+
+By default, this module will build a multi-platform image that can run on both arm64 and amd64 architectures. However, if
+you are running in an environment where you only need to support a single architecture, you can set either `arm_builder_enabled`
+or `amd_builder_enabled` to `false`.
+
 ## Providers
 
 The following providers are needed by this module:
@@ -123,6 +129,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### amd\_builder\_enabled
+
+Description: Whether to build amd64 images.
+
+Type: `bool`
+
+Default: `true`
+
 ### args
 
 Description: A mapping of build-time arguments to their respective values
@@ -130,6 +144,14 @@ Description: A mapping of build-time arguments to their respective values
 Type: `map(string)`
 
 Default: `{}`
+
+### arm\_builder\_enabled
+
+Description: Whether to build arm64 images.
+
+Type: `bool`
+
+Default: `true`
 
 ### build\_context
 

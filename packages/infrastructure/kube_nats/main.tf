@@ -59,7 +59,7 @@ module "constants" {
 }
 
 locals {
-  cluster_name = nonsensitive(random_id.id.hex)
+  cluster_name  = nonsensitive(random_id.id.hex)
   replica_count = 3
 }
 
@@ -68,23 +68,23 @@ locals {
 ***************************************/
 
 module "cluster_certs" {
-  source        = "../kube_internal_cert"
-  secret_name   = "${random_id.id.hex}-cluster-certs"
-  namespace     = var.namespace
-  usages        = ["client auth", "server auth"]
-  service_names     = concat(
+  source      = "../kube_internal_cert"
+  secret_name = "${random_id.id.hex}-cluster-certs"
+  namespace   = var.namespace
+  usages      = ["client auth", "server auth"]
+  service_names = concat(
     [local.cluster_name],
     [for i in range(local.replica_count) : "${local.cluster_name}-${i}.${local.cluster_name}-headless"]
   )
-  duration      = "720h0m0s"
+  duration = "720h0m0s"
 }
 
 module "server_certs" {
-  source            = "../kube_internal_cert"
-  secret_name       = "${local.cluster_name}-server-certs"
-  namespace         = var.namespace
-  usages            = ["server auth"]
-  service_names     = concat(
+  source      = "../kube_internal_cert"
+  secret_name = "${local.cluster_name}-server-certs"
+  namespace   = var.namespace
+  usages      = ["server auth"]
+  service_names = concat(
     [local.cluster_name],
     [for i in range(local.replica_count) : "${local.cluster_name}-${i}.${local.cluster_name}-headless"]
   )
