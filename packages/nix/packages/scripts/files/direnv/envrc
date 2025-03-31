@@ -24,7 +24,9 @@ nix_version_ge() {
 }
 
 # Get the current version of nix
-current_nix_version=$(nix --version | awk '{print $3}')
+# Start of Selection
+current_nix_version=$(nix --version | awk '{print $NF}')
+# End of Selection
 
 # Required version of nix
 required_nix_version="2.23"

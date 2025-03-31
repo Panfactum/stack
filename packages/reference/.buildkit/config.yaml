@@ -1,0 +1,6 @@
+# Copy this file to `config.yaml`
+# `config.yaml` file should be committed to version control (automatically setup via .gitignore)
+# More information can be found here: https://panfactum.com/docs/edge/reference/configuration/buildkit
+
+bastion: production-primary # The name of the bastion in `.ssh/config.yaml` that will be used to establish a connection to BuildKit
+module: production/us-east-2/kube_buildkit  # Path to the kube_buildkit IaC module

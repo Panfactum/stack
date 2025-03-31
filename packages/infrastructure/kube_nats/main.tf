@@ -60,6 +60,7 @@ module "constants" {
 
 locals {
   cluster_name = nonsensitive(random_id.id.hex)
+  replica_count = 3
 }
 
 /***************************************
@@ -71,16 +72,22 @@ module "cluster_certs" {
   secret_name   = "${random_id.id.hex}-cluster-certs"
   namespace     = var.namespace
   usages        = ["client auth", "server auth"]
-  service_names = [random_id.id.hex]
+  service_names     = concat(
+    [local.cluster_name],
+    [for i in range(local.replica_count) : "${local.cluster_name}-${i}.${local.cluster_name}-headless"]
+  )
   duration      = "720h0m0s"
 }
 
 module "server_certs" {
   source            = "../kube_internal_cert"
-  secret_name       = "${random_id.id.hex}-server-certs"
+  secret_name       = "${local.cluster_name}-server-certs"
   namespace         = var.namespace
   usages            = ["server auth"]
-  service_names     = [random_id.id.hex]
+  service_names     = concat(
+    [local.cluster_name],
+    [for i in range(local.replica_count) : "${local.cluster_name}-${i}.${local.cluster_name}-headless"]
+  )
   include_localhost = true
   duration          = "720h0m0s"
 }
@@ -114,7 +121,7 @@ resource "helm_release" "nats" {
       podLabels    = module.util.labels
       commonLabels = data.pf_kube_labels.labels.labels
 
-      replicaCount              = 3 # Always use 3 as this uses RAFT consensus
+      replicaCount              = local.replica_count # Always use 3 as this uses RAFT consensus
       resourceType              = "statefulset"
       tolerations               = module.util.tolerations
       topologySpreadConstraints = module.util.topology_spread_constraints
@@ -184,6 +191,8 @@ resource "helm_release" "nats" {
       }
 
       configuration = templatefile("${path.module}/nats.conf", {
+        replica_count           = local.replica_count
+        namespace               = var.namespace
         cluster_name            = local.cluster_name
         debug_logs_enabled      = var.log_level == "debug" || var.log_level == "trace"
         trace_logs_enabled      = var.log_level == "trace"
