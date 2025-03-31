@@ -481,7 +481,7 @@ export class InstallClusterCommand extends Command {
           "Vault serves several important purposes in the Panfactum framework:\n" +
             "1. Acts as the root certificate authority for each environment’s X.509 certificate infrastructure\n" +
             "2. Authorizes SSH authentication to our bastion hosts\n" +
-            "3. Provisions (and de-provisions) dynamic credentials for stack’s supported databases\n"
+            "3. Provisions (and de-provisions) dynamic credentials for the framework’s supported databases\n"
         )
       );
 
