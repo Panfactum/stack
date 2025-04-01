@@ -119,7 +119,7 @@ We provide two [terragrunt variables](/docs/main/reference/configuration/terragr
 
 ### Deploying Panfactum Modules
 
-[Example](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_delegated_zones_production/terragrunt.hcl)
+[Example](https://github.com/Panfactum/reference-infrastructure/tree/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_delegated_zones_production/terragrunt.hcl)
 
 If you are deploying a [Panfactum module](/docs/main/reference/infrastructure-modules/overview), use
 `include.panfactum.locals.pf_stack_source` to dynamically construct the `terraform.source`. This adds version management,
@@ -159,7 +159,7 @@ in the `environment.yaml` or `region.yaml` files).
 
 ### Using Secrets
 
-[Example](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/management/global/aws_account/terragrunt.hcl)
+[Example](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/management/global/aws_account/terragrunt.hcl)
 
 Secrets are encrypted and stored directly inside the repository just like any other configuration setting.
 The Panfactum stack uses [sops](https://github.com/getsops/sops) for ensuring this is done securely and in a manner
@@ -183,7 +183,7 @@ inputs = {
 
 ### Defining the Dependency Graph
 
-[Example](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl)
+[Example](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/aws_eks/terragrunt.hcl)
 
 Typically, there will be an order in which your infrastructure modules
 must be deployed and updated. For example, you will need to launch your Kubernetes cluster before you can deploy

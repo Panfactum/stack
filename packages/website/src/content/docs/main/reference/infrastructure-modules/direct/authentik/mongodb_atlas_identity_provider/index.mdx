@@ -60,7 +60,7 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 ### Deploy a new DNS TXT Record & Verify
 
 1. Add a text record to your `global/aws_dns/terragrunt.hcl` file that looks
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
+   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_dns_records/terragrunt.hcl).
 2. Run `terragrunt apply`
 3. Go back to MongoDB Atlas and click on `Verify` next to the domain you added
 4. Confirm verification
@@ -119,7 +119,7 @@ We will first create the resource through the UI and then import it to configure
 
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
 2. Add a new a `terragrunt.hcl` file that looks
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
+   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
 3. Set the `federation_settings_id` to the value from above
 4. Set the `organization_id` to the value from above
 5. Set the `idp_id` to the value from above
@@ -134,13 +134,13 @@ If you have CICD setup and deploying infrastructure using the [wf\_tf\_deploy]()
 keys.
 
 1. Update your CICD module var to accept the keys as inputs
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo-cicd/vars.tf)
+   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/infrastructure/demo-cicd/vars.tf)
 2. Update the `wf_tf_deploy` module and pass in the secrets inputs
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo-cicd/tf_deploy.tf)
+   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/infrastructure/demo-cicd/tf_deploy.tf)
 3. Add them to the `secrets.yaml`
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/demo-cicd/secrets.yaml)
+   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/demo-cicd/secrets.yaml)
 4. Utilize and pass them in as inputs
-   like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/demo-cicd/terragrunt.hcl)
+   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/demo-cicd/terragrunt.hcl)
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
 the [Sync Authentik with the Atlas Settings](/docs/main/reference/infrastructure-modules/direct/authentik/authentik\_mongodb\_atlas\_sso)

@@ -86,13 +86,13 @@ The following instructions apply for **every** environment-region combination wh
 
 2. Add an `aws_ecr_pull_through_cache` directory to that region.
 
-3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
 
 4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
 
-6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml).
+6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/region.yaml).
    This ensures all modules deployed in this environment will utilize the cache.
 
 <MarkdownAlert severity="warning">
@@ -108,7 +108,7 @@ The following instructions apply for **every** environment-region combination wh
 
 2. Add an `aws_eks` directory to that region.
 
-3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl).
+3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/aws_eks/terragrunt.hcl).
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -271,7 +271,7 @@ In the `region.yaml` file for the region where you deployed the cluster, add the
   If this was set up using `pf-update-kube`, this is just the name of the cluster.
 * `kube_api_server`: This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
 
-See [this file](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
+See [this file](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/region.yaml) as an example.
 
 The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
 

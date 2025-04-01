@@ -73,7 +73,7 @@ Let's deploy it now:
 
 1. In the region with the cluster you wish to deploy BuildKit to, add a new directory called `kube_buildkit`.
 
-2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_buildkit/terragrunt.hcl).
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_buildkit/terragrunt.hcl).
 
 3. Run `pf-tf-init` to enable the required providers.
 
@@ -104,7 +104,7 @@ Let's set up a test image repository, so we can demonstrate how to build images 
 
 1. Adjacent to your `kube_buildkit` directory, add a new directory called `aws_ecr_repos`.
 
-2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ecr_repos/terragrunt.hcl).
+2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/aws_ecr_repos/terragrunt.hcl).
 
 3. For now, set `ecr_repositories` to `{ test = {} }`. This creates a test repository that you can push images to. You can add additional repositories later.
 

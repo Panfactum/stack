@@ -96,7 +96,7 @@ Let's deploy it now:
 
 1. Add a new `authentik_aws_sso` folder adjacent to your `authentik_core_resources` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_aws_sso/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/authentik_aws_sso/terragrunt.hcl).
 
    1. Set the `aws_acs_url` as the "IAM Identity Center Assertion Consumer Service (ACS) URL" from the page you
       opened in the prior section.
@@ -182,7 +182,7 @@ Let's deploy it now:
 
 1. Add a new `aws_iam_identity_center_permissions` folder to **management** environment in the **global** region.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/management/global/aws_iam_identity_center_permissions/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/management/global/aws_iam_identity_center_permissions/terragrunt.hcl).
 
 3. For the `acccount_access_configuration`, we recommend setting this up according to our [RBAC recommendations](/docs/main/reference/rbac),
    but you have the flexibility to choose what works best for your organization.
@@ -244,7 +244,7 @@ provisioned SSO credentials and roles and stop using your static root access key
 
 5. Set up `config.yaml` according to [these reference docs](/docs/main/reference/configuration/aws).
 
-   1. We provide an example file [here.](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/.aws/config.yaml)
+   1. We provide an example file [here.](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/.aws/config.yaml)
 
    2. The `sso_region` can be found in your AWS IAM Identity Center dashboard page.
 
@@ -302,7 +302,7 @@ Let's deploy it now:
 
 1. For **every** Vault cluster, add a `authentik_vault_sso_<cluster_name>` folder adjacent to your `authentik_core_resources` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_vault_sso_production/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/authentik_vault_sso_production/terragrunt.hcl).
 
    1. Every Vault cluster must have a unique `vault_name`.
 
@@ -324,7 +324,7 @@ Let's deploy it now:
 
 1. For **every** Vault cluster, add a `vault_auth_oidc` folder adjacent to its `kube_vault` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/vault_auth_oidc/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/vault_auth_oidc/terragrunt.hcl).
 
    Note that while this example module is connected to `authentik_vault_sso` via `dependency` blocks, this is only possible
    because they are in the same environment. If the modules are not in the same environment, you will need to copy
