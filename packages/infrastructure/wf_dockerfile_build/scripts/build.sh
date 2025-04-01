@@ -3,24 +3,39 @@
 set -eo pipefail
 
 ###########################################################
+## Step 0: Check if the image already exists
+###########################################################
+if [[ -f "/tmp/exists" ]]; then
+  echo "Skipping. Image already exists in the ECR repository."
+  exit 0
+fi
+
+###########################################################
 ## Step 1: CD to the codebase
 ###########################################################
 cd /code/repo || exit
 
 ###########################################################
-## Step 2: Set the image tag as the commit sha
+## Step 2: Create the image tag (with arch suffix if needed)
 ###########################################################
-COMMIT_HASH=$(pf-get-commit-hash --repo "https://$CODE_REPO" --ref "$GIT_REF" --no-verify)
-TAG="${IMAGE_TAG_PREFIX:+$IMAGE_TAG_PREFIX-}$COMMIT_HASH$([ "$USE_ARCH_SUFFIX" = "1" ] && echo "-$ARCH" || echo "")"
+TAG="$(cat /tmp/tag)$([ "$USE_ARCH_SUFFIX" = "1" ] && echo "-$ARCH" || echo "")"
 
 ###########################################################
-## Step 3: Get BuildKit address
+## Step 3: Check if the image already exists
+###########################################################
+if aws ecr describe-images --repository-name "$IMAGE_REPO" --image-ids imageTag="$TAG" --region "$IMAGE_REGION" >/dev/null 2>&1; then
+  echo "Skipping. Platform-specific image already exists in the ECR repository."
+  exit 0
+fi
+
+###########################################################
+## Step 4: Get BuildKit address
 ###########################################################
 BUILDKIT_HOST=$(pf-buildkit-get-address --arch="$ARCH")
 export BUILDKIT_HOST
 
 ###########################################################
-## Step 4: Get the ECR credentials
+## Step 5: Get the ECR credentials
 ###########################################################
 
 ECR_PASSWORD=$(aws ecr get-login-password --region "$IMAGE_REGION")
@@ -36,12 +51,12 @@ cat >"/.docker/config.json" <<EOF
 EOF
 
 ###########################################################
-## Step 5: Record the build
+## Step 6: Record the build
 ###########################################################
 pf-buildkit-record-build --arch="$ARCH"
 
 ###########################################################
-## Step 6: Build the image
+## Step 7: Build the image
 ###########################################################
 # shellcheck disable=SC2086
 buildctl \

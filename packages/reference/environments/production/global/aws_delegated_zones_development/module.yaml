@@ -1,3 +1,0 @@
-aws_account_id: '471112902605'
-aws_profile: development-superuser
-module: aws_delegated_zones

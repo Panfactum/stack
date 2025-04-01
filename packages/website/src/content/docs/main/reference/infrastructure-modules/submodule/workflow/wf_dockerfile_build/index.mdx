@@ -37,7 +37,7 @@ In particular, generated Workflows will perform the following actions:
 
 ## Usage
 
-We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/website_image_builder.tf).
+We provide an example of using this module [here](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/infrastructure/demo_cicd/website_image_builder.tf).
 
 The critical configuration values are:
 
@@ -256,6 +256,14 @@ Description: True iff images should be pushed to ECR in addition to being built
 Type: `bool`
 
 Default: `true`
+
+### retry\_max\_attempts
+
+Description: The maximum number of allowable retries
+
+Type: `number`
+
+Default: `2`
 
 ### secrets
 

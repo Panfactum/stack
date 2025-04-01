@@ -438,7 +438,7 @@ resource "kubernetes_manifest" "postgres_cluster" {
       externalClusters = var.pg_recovery_mode_enabled ? [{
         name = var.pg_recovery_directory
         barmanObjectStore = {
-          destinationPath = "s3://${module.s3_bucket.bucket_name}/"
+          destinationPath = "s3://${var.pg_recovery_bucket != null ? var.pg_recovery_bucket : module.s3_bucket.bucket_name}/"
           serverName      = var.pg_recovery_directory
           s3Credentials = {
             inheritFromIAMRole = true

@@ -134,6 +134,8 @@ resource "kubernetes_config_map" "scripts" {
     "build.sh"           = file("${path.module}/scripts/build.sh")
     "clone.sh"           = file("${path.module}/scripts/clone.sh")
     "merge-manifests.sh" = file("${path.module}/scripts/merge-manifests.sh")
+    "setup.sh"           = file("${path.module}/scripts/setup.sh")
+    "scale-buildkit.sh"  = file("${path.module}/scripts/scale-buildkit.sh")
   }
 }
 
@@ -145,6 +147,7 @@ module "image_builder_workflow" {
   burstable_nodes_enabled = true
   active_deadline_seconds = var.build_timeout
   workflow_parallelism    = 10
+  retry_max_attempts      = 1
 
   entrypoint = local.entrypoint
   passthrough_parameters = [
@@ -192,20 +195,30 @@ module "image_builder_workflow" {
       name    = local.entrypoint
       volumes = module.image_builder_workflow.volumes
       containerSet = {
+        retry_strategy = {
+          duration = "60s"
+          retries  = var.retry_max_attempts
+        }
         containers = concat(
           [
             {
+              name    = "setup"
+              command = ["/scripts/setup.sh"]
+            },
+            {
               name = "scale-buildkit"
               command = [for arg in [
-                "/bin/pf-buildkit-scale-up",
+                "/scripts/scale-buildkit.sh",
                 var.amd_builder_enabled ? null : "--only=arm64",
                 var.arm_builder_enabled ? null : "--only=amd64",
                 "--wait"
               ] : arg if arg != null]
+              dependencies = ["setup"]
             },
             {
-              name    = "clone"
-              command = ["/scripts/clone.sh"]
+              name         = "clone"
+              command      = ["/scripts/clone.sh"]
+              dependencies = ["setup"]
             }
           ],
           var.amd_builder_enabled ? [
@@ -258,6 +271,11 @@ module "image_builder_workflow" {
     aws = {
       mount_path = "/.aws"
       size_mb    = 10
+      node_local = true
+    }
+    tmp = {
+      mount_path = "/tmp"
+      size_mb    = 1
       node_local = true
     }
   }

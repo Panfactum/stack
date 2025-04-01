@@ -19,17 +19,26 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Changed
+
+* [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) will now have faster retry logic for failed builds, and the retry
+count is now configurable via the `retry_max_attempts` input.
+
 ### Added
 
 * Adds new var for `min_node_cpu` to [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) to set a minimum CPU threshold for nodes.
 
-* Provides the capability to configure many JetStream Stream settings in [kube_argo_event_bus](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo_event_bus).
+* Provides the capability to configure many JetStream Stream settings in [kube_argo_event_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus).
 
 * Adds support for single-platform images in [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build).
 
+* Adds support for restoring from an alternate backup bucket in [kube_pg_cluster](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_pg_cluster).
+
+* Adds support for unrestricted S3 presigned URLs in [kube_sa_auth_aws](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_sa_auth_aws).
+
 ### Fixed
 
-* Event streams in [kube_argo_event_bus](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo_event_bus) are now properly replicated across all NATS servers.
+* Event streams in [kube_argo_event_bus](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo_event_bus) are now properly replicated across all NATS servers.
 
 * Resolves issue in [kube_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) that prevented ACKs from being sent when synchronously publishing events in some cases. In the degenerate cases,
 this could result in an inability to publish events at all until either the publisher or the NATS server was restarted. This had significant impact on the overall availability of Argo Events.
@@ -37,6 +46,11 @@ this could result in an inability to publish events at all until either the publ
 * Resolves issue in [kube_argo](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo) that prevented resources controlled by Argo Events from being updated without a controller restart.
 
 * Fixes the nix version check to take into account the new version format provided by the Determinate Systems nix installer.
+
+* Fixes a problem in [wf_dockerfile_build](/docs/edge/reference/infrastructure-modules/submodule/workflow/wf_dockerfile_build) that caused the workflow 
+to fail if the image already existed in the ECR repository. Moving forward, the workflow will simply skip the build step if the image already exists.
+
+* Velero backup logs are now available in the `velero` CLI.
 
 ## edge.25-03-26
 

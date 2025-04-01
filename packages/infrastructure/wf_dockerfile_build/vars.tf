@@ -128,3 +128,10 @@ variable "amd_builder_enabled" {
   type        = bool
   default     = true
 }
+
+variable "retry_max_attempts" {
+  description = "The maximum number of allowable retries"
+  type        = number
+  default     = 2
+}
+

@@ -224,8 +224,7 @@ Recoverability".
 
 3. Delete the cluster resource manually via `kubectl delete clusters.postgresql.cnpg.io -n <cluster_namespace> <cluster>`.
 
-4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `backup_directory`
-output you retrieved in step 2.
+4. Set the `pg_recovery_mode_enabled` module input to `true` and the `pg_recovery_directory` to the `backup_directory` output you retrieved in step 2.
 
     Optionally, you can set the `pg_recovery_target_time` to an [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
     timestamp (e.g., `2023-08-11T11:14:21.00000+00`) to recover the database to a particular point in time. This
@@ -257,7 +256,10 @@ provided by the `backup_bucket_name` output. This can save space as that old bac
   [recovery documentation](https://cloudnative-pg.io/documentation/1.25/recovery/).
 </MarkdownAlert>
 
-
+<MarkdownAlert severity="info">
+  Note that you can optionally restore from an alternate backup bucket by setting the `pg_recovery_bucket` input.
+  This can be useful if you are trying to set up a new forked database from running system.
+</MarkdownAlert>
 
 ### Disruptions
 

@@ -117,7 +117,7 @@ Let's deploy it now:
 
 1. In **every** environment's `global` region, create an `aws_account` directory.
 
-2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/management/global/aws_account/terragrunt.hcl).
 
    Note the addition of this line `secrets = yamldecode(sops_decrypt_file("secrets.yaml"))` which demonstrates how
    terragrunt and sops integrate with one another.

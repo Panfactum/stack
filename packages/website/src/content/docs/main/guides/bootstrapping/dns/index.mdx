@@ -83,7 +83,7 @@ Let's deploy the module now:
 
 2. Add a new `aws_registered_domains` folder to your `production` environment in the `global` region.
 
-3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_registered_domains/terragrunt.hcl).
+3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_registered_domains/terragrunt.hcl).
 
    Note that we use sops-encrypted values here as we did in the `aws_account` module. It is up to you what you
    leave encrypted / unencrypted throughout this guide. However,
@@ -170,7 +170,7 @@ Let's do this now for **every** environment:
 2. Add a new directory in `production/global` called `aws_delegated_zones_<environment>` where `<environment>` is replaced
    with the environment name for this set of subdomains.
 
-3. Create a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_delegated_zones_production/terragrunt.hcl). [^4]
+3. Create a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_delegated_zones_production/terragrunt.hcl). [^4]
    Use the appropriate `subdomain_identifiers` for your environment.
 
 4. Create a `module.yaml`.

@@ -87,7 +87,7 @@ Let's deploy the module now:
 
 2. Add a new `aws_ses_domain` folder to your `production` environment in the region where you plan to deploy Authentik (requires a Kubernetes cluster).
 
-3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl).
+3. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/aws_ses_domain/terragrunt.hcl).
 
 4. Run `pf-tf-init` to enable the required providers.
 
@@ -104,7 +104,7 @@ Let's deploy the module now:
 7. (Optional) This module does not configure your DMARC record as you would typically only have one DMARC record
    that covers all of your email sending systems. We recommend following [this guide](https://docs.aws.amazon.com/ses/latest/dg/send-email-authentication-dmarc.html)
    to set this up. You can use the [aws\_dns\_records](/docs/main/reference/infrastructure-modules/direct/aws/aws_dns_records) module to
-   deploy the record like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/global/aws_dns_records/terragrunt.hcl).
+   deploy the record like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_dns_records/terragrunt.hcl).
 
 ### Deploy Authentik
 
@@ -112,7 +112,7 @@ We are now ready to deploy Authentik:
 
 1. Add a new `kube_authentik` folder adjacent to your `aws_ses_domain` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_authentik/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_authentik/terragrunt.hcl).
 
    1. The `domain` should be a subdomain of one of the domains available in this environment.
 
@@ -167,7 +167,7 @@ Let's deploy this configuration now:
 
 1. Add a new `authentik_core_resources` folder adjacent to your `kube_authentik` folder.
 
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_core_resources/terragrunt.hcl).
+2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/authentik_core_resources/terragrunt.hcl).
 
    1. `organization_name` should be how you want your organization to be referenced on the Authentik web UI.
 

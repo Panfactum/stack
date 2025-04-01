@@ -11,12 +11,6 @@ if [[ -f "/tmp/exists" ]]; then
 fi
 
 ###########################################################
-## Step 1: Clone the codebase
+## Step 1: Scale up buildkit
 ###########################################################
-cd /code
-pf-wf-git-checkout \
-  -r "$CODE_REPO" \
-  -c "$GIT_REF" \
-  -u "$GIT_USERNAME" \
-  -p "$GIT_PASSWORD"
-cd repo
+/bin/pf-buildkit-scale-up "$@"

@@ -1,8 +1,0 @@
-# These are the standard repo variables required by
-# https://panfactum.com/docs/reference/repo-variables
-
-environments_dir: environments
-iac_dir: infrastructure
-repo_url: git::https://github.com/panfactum/stack.git
-repo_name: stack
-repo_primary_branch: main

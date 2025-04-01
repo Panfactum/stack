@@ -32,7 +32,7 @@ Let's deploy it now:
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_external_dns`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_external_dns/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_external_dns/terragrunt.hcl).
 
 3. The syntax for `route53_zones` is the same as it was for `kube_cert_issuers`. You may reference [that guide](/docs/main/guides/bootstrapping/certificate-management#deploy-issuers)
    for more information, but unless you have a specific reason not to, simply copy that input into this module.
@@ -67,7 +67,7 @@ Let's deploy it now:
 
 1. Create a new directory adjacent to your `kube_external_dns` module called `kube_aws_lb_controller`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_aws_lb_controller/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_aws_lb_controller/terragrunt.hcl).
 
 3. Select the **public** subnets that you want AWS load balancers to be able to use. We suggest passing in **all**
    the public subnets created in your `aws_vpc` deployment.
@@ -111,7 +111,7 @@ We provide a module to deploy it: [kube\_ingress\_nginx](/docs/main/reference/in
 
 1. Create a new directory adjacent to your `kube_external_dns` module called `kube_ingress_nginx`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_ingress_nginx/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_ingress_nginx/terragrunt.hcl).
 
    1. For `ingress_domains` select **all** the domains that the cluster can use to serve traffic. Each domain
       listed here **must** have been configured in the `kube_external_dns` and `kube_cert_issuers` modules.
@@ -254,7 +254,7 @@ Let's deploy the bastion now:
 
 1. Create a new directory adjacent to your `kube_ingress_nginx` module called `kube_bastion`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_bastion/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_bastion/terragrunt.hcl).
 
    1. For `bastion_domains` select the domain names that you want to be able to access the bastion
       hosts at.
