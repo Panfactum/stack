@@ -6,12 +6,12 @@
 
   /* Default styles for text */
   *, *::marker {
-    @apply text-primary-on-light;
+    @apply text-primary-on-light ;
   }
 
   /* Paragraph Styles */
-  p {
-    @apply my-4
+  p, li {
+    @apply my-4 !leading-relaxed dark:text-gray-dark-mode-300
   }
 
   /* List Styles */
@@ -26,10 +26,6 @@
 
   ul, ol {
     @apply ml-6 md:ml-8
-  }
-
-  li {
-    @apply my-4
   }
 
   /* Header Styles */
@@ -87,10 +83,10 @@
 
   code:not(pre > code)::before, code:not(pre > code)::after {
     content: "`";
-    @apply text-brand-600 dark:text-brand-300;
+    @apply text-brand-600 dark:text-brand-200;
   }
   code:not(pre > code) {
-    @apply text-brand-600 dark:text-brand-300;
+    @apply text-brand-600 dark:text-brand-200;
   }
 
   figure {
@@ -104,8 +100,12 @@
   }
 
   /* Emphasis Styles */
+  em {
+    @apply dark:text-gray-dark-mode-300;
+  }
+
   strong {
-    @apply font-semibold;
+    @apply font-medium text-brand-600 dark:text-brand-200;
   }
 
   /* Footnote Styles */
@@ -131,8 +131,8 @@
   }
 
   /* Link Styles */
-  a {
-    @apply underline underline-offset-4 cursor-pointer text-brand-600 dark:text-brand-300;
+  a, a>em {
+    @apply underline underline-offset-4 decoration-1 cursor-pointer text-brand-600 dark:!text-brand-200 dark:hover:!text-brand-300;
   }
 
   /* Copy Header Link Styles */
