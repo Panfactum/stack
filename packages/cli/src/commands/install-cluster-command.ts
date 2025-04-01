@@ -627,7 +627,7 @@ export class InstallClusterCommand extends Command {
         "10. Skipping autoscaling setup as it's already complete.\n\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("10. Setting up the autoscaling\n\n"));
+      this.context.stdout.write(pc.blue("10. Setting up autoscaling\n\n"));
 
       try {
         await setupAutoscaling({

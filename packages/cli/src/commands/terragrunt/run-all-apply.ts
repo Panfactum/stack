@@ -26,7 +26,7 @@ export async function runAllApply({
     }
 
     const initProcess = Bun.spawnSync(
-      ["terragrunt", "run-all", "apply", "-auto-approve"],
+      ["terragrunt", "run-all", "apply", "--terragrunt-non-interactive"],
       {
         cwd: workingDirectory,
         env,

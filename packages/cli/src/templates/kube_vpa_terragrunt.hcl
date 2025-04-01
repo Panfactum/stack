@@ -12,13 +12,7 @@ dependency "cert_issuers" {
   skip_outputs = true
 }
 
-# Alpha: Do not use
-dependency "monitoring" {
-  config_path = "../kube_monitoring"
-}
-
 inputs = {
   # Alpha: Do not use
-  prometheus_enabled        = false
-  thanos_query_frontend_url = dependency.monitoring.outputs.thanos_query_frontend_url
+  prometheus_enabled = false
 }

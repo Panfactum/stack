@@ -1,5 +1,6 @@
 import path from "path";
 import yaml from "yaml";
+import kubeKarpenterNodePoolsTerragruntHcl from "../../templates/kube_karpenter_node_pools_terragrunt.hcl" with { type: "file" };
 import kubeKarpenterTerragruntHcl from "../../templates/kube_karpenter_terragrunt.hcl" with { type: "file" };
 import kubeMetricsServerTerragruntHcl from "../../templates/kube_metrics_server_terragrunt.hcl" with { type: "file" };
 import kubeSchedulerTerragruntHcl from "../../templates/kube_scheduler_terragrunt.hcl" with { type: "file" };
@@ -63,7 +64,7 @@ export const setupAutoscaling = async ({
   });
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/autoscaling#deploy-the-vertical-pod-autoscaler
-  context.stdout.write("10.b. Setting up the vertical pod   autoscaler\n");
+  context.stdout.write("10.b. Setting up the vertical pod autoscaler\n");
 
   await ensureFileExists({
     context,
@@ -153,7 +154,7 @@ export const setupAutoscaling = async ({
   await ensureFileExists({
     context,
     destinationFile: "./kube_karpenter_node_pools/terragrunt.hcl",
-    sourceFile: await Bun.file(kubeKarpenterTerragruntHcl).text(),
+    sourceFile: await Bun.file(kubeKarpenterNodePoolsTerragruntHcl).text(),
   });
 
   const nodeSubnets: string[] = [];
@@ -166,7 +167,7 @@ export const setupAutoscaling = async ({
       if (line.includes("]")) {
         break;
       }
-      nodeSubnets.push(line.replace(",", "").replace('"', "").trim());
+      nodeSubnets.push(line.replace(",", "").trim());
     }
     if (line.includes("node_subnets")) {
       startCopying = true;
@@ -176,11 +177,11 @@ export const setupAutoscaling = async ({
   // take in the template HCL and iterate through the subnets writing the subnets
   // Read existing content
   const updatedKarpenterNodePoolsTerragruntHclLines: string[] = [];
-  const kubeKarpenterNodepoolsTerragruntHcl = await Bun.file(
+  const kubeKarpenterNodepoolsTerragruntHclCopy = await Bun.file(
     "./kube_karpenter_node_pools/terragrunt.hcl"
   ).text();
   const kubeKarpenterNodepoolsTerragruntHclLines =
-    kubeKarpenterNodepoolsTerragruntHcl.split("\n");
+    kubeKarpenterNodepoolsTerragruntHclCopy.split("\n");
   let writeNodePools = false;
 
   for (const line of kubeKarpenterNodepoolsTerragruntHclLines) {
@@ -189,7 +190,7 @@ export const setupAutoscaling = async ({
       // set startWriting back to false to conitue
       // add the raw string as we will call hclfmt on the file later
       updatedKarpenterNodePoolsTerragruntHclLines.push(
-        nodeSubnets.map((subnet) => `"${subnet}"`).join(", ")
+        nodeSubnets.map((subnet) => `${subnet}`).join(", ")
       );
       writeNodePools = false;
     }
