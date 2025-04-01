@@ -9,6 +9,7 @@ import { replaceHclValue } from "../../util/replace-hcl-value";
 import { safeFileExists } from "../../util/safe-file-exists";
 import { getRepoVariables } from "../../util/scripts/get-repo-variables";
 import { tfInit } from "../../util/scripts/tf-init";
+import { sopsEncrypt } from "../../util/sops-encrypt";
 import { startBackgroundProcess } from "../../util/start-background-process";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
@@ -212,30 +213,13 @@ export const setupVault = async ({
 
   context.stdout.write("\n7.c. 🔒 Encrypting secrets\n\n");
 
-  const tempSecretsFilePath = "./.tmp-vault-secrets.yaml";
-  await Bun.write(
-    tempSecretsFilePath,
-    `root_token: ${recoveryKeys.root_token}\nrecovery_keys:\n${recoveryKeys.recovery_keys_hex.map((key) => `  - ${key}`).join("\n")}`
-  );
-
-  const result = Bun.spawnSync(["sops", "encrypt", "-i", tempSecretsFilePath]);
-  if (!result.success) {
-    context.stderr.write(result.stderr.toString());
-    const file = Bun.file(tempSecretsFilePath);
-    await file.delete();
-    throw new Error("Failed to encrypt Vault secrets");
-  }
-
-  try {
-    await ensureFileExists({
-      context,
-      destinationFile: "./kube_vault/secrets.yaml",
-      sourceFile: await Bun.file(tempSecretsFilePath).text(),
-    });
-  } finally {
-    const file = Bun.file(tempSecretsFilePath);
-    await file.delete();
-  }
+  await sopsEncrypt({
+    context,
+    filePath: "./kube_vault/secrets.yaml",
+    fileContents: `root_token: ${recoveryKeys.root_token}\nrecovery_keys:\n${recoveryKeys.recovery_keys_hex.map((key) => `  - ${key}`).join("\n")}`,
+    errorMessage: "Failed to encrypt Vault secrets",
+    tempFilePath: "./.tmp-vault-secrets.yaml",
+  });
 
   context.stdout.write(
     pc.blue(

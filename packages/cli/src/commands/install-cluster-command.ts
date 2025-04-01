@@ -28,6 +28,7 @@ import { vaultPrompts } from "../user-prompts/vault";
 import { backgroundProcessIds } from "../util/start-background-process";
 import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
+import { setupInboundNetworking } from "./kube/inbound-networking";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -654,6 +655,51 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           autoscaling: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupInboundNetworkingComplete = await getConfigFileKey({
+      key: "inboundNetworking",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupInboundNetworkingComplete === true) {
+      this.context.stdout.write(
+        "11. Skipping inbound networking setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(pc.blue("11. Setting up inbound networking\n\n"));
+
+      try {
+        await setupInboundNetworking({
+          configPath,
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          inboundNetworking: true,
         },
         configPath,
         context: this.context,
