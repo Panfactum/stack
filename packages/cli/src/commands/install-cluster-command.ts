@@ -17,6 +17,7 @@ import { vpcPrompts } from "../user-prompts/vpc";
 import { getConfigFileKey } from "../util/get-config-file-key";
 import { replaceYamlValue } from "../util/replace-yaml-value";
 import { safeFileExists } from "../util/safe-file-exists";
+import { setupAutoscaling } from "./kube/autoscaling";
 import { setupCSIDrivers } from "./kube/csi-drivers";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { updateConfigFile } from "../util/update-config-file";
@@ -609,6 +610,50 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           serviceMesh: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupAutoscalingComplete = await getConfigFileKey({
+      key: "autoscaling",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupAutoscalingComplete === true) {
+      this.context.stdout.write(
+        "10. Skipping autoscaling setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(pc.blue("10. Setting up autoscaling\n\n"));
+
+      try {
+        await setupAutoscaling({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          autoscaling: true,
         },
         configPath,
         context: this.context,
