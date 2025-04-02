@@ -120,7 +120,7 @@ export const setupInboundNetworking = async ({
   await sopsEncrypt({
     context,
     filePath: "./kube_ingress_nginx/secrets.yaml",
-    fileContents: `dhparam: ${generatedSecret}`,
+    fileContents: `dhparam: |-\n    ${generatedSecret.split("\n").join("\n    ")}`,
     errorMessage: "Failed to encrypt Ingress secrets",
     tempFilePath: "./.tmp-ingress-secrets.yaml",
   });
@@ -146,7 +146,7 @@ export const setupInboundNetworking = async ({
   replaceHclValue(
     "./kube_ingress_nginx/terragrunt.hcl",
     "inputs.ingress_domains",
-    `[${ingressDomains.join(",")}]`
+    ingressDomains
   );
 
   // Format the file
@@ -278,4 +278,14 @@ export const setupInboundNetworking = async ({
     buildKnownHosts: true,
     context,
   });
+
+  // To mitigate the long-running background process dying over time, we'll kill it here
+  // and restart it when we need it.
+  if (vaultPortForwardPid > 0) {
+    try {
+      process.kill(vaultPortForwardPid);
+    } catch {
+      // Do nothing as it's already dead
+    }
+  }
 };

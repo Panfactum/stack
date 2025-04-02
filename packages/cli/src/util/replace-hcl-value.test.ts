@@ -200,4 +200,90 @@ resource "aws_instance" "example2" {
       "vpc_id     = dependency.aws_vpc.outputs.vpc_id"
     );
   });
+
+  test("replaces value with string array", async () => {
+    // Create test HCL file with a value to be replaced with an array
+    const initialContent = `
+      inputs = {
+        allowed_domains = "example.com"
+      }
+    `;
+    await writeFile(testFilePath, initialContent);
+
+    // Replace with string array
+    await replaceHclValue(testFilePath, "inputs.allowed_domains", [
+      "example.com",
+      "test.com",
+      "dev.example.com",
+    ]);
+
+    // Read the updated file
+    const updatedContent = await readFile(testFilePath, "utf8");
+
+    // Verify the array was properly formatted
+    expect(updatedContent).toContain(
+      'allowed_domains = [\"example.com\", \"test.com\", \"dev.example.com\"]'
+    );
+  });
+
+  test("replaces value with number array", async () => {
+    // Create test HCL file with a value to be replaced with a number array
+    const initialContent = `
+      inputs = {
+        allowed_ports = 80
+      }
+    `;
+    await writeFile(testFilePath, initialContent);
+
+    // Replace with number array
+    await replaceHclValue(testFilePath, "inputs.allowed_ports", [80, 443, 8080]);
+
+    // Read the updated file
+    const updatedContent = await readFile(testFilePath, "utf8");
+
+    // Verify the array was properly formatted
+    expect(updatedContent).toContain('allowed_ports = [80, 443, 8080]');
+  });
+
+  test("replaces value with boolean array", async () => {
+    // Create test HCL file with a value to be replaced with a boolean array
+    const initialContent = `
+      inputs = {
+        feature_flags = true
+      }
+    `;
+    await writeFile(testFilePath, initialContent);
+
+    // Replace with boolean array
+    await replaceHclValue(testFilePath, "inputs.feature_flags", [
+      true,
+      false,
+      true,
+    ]);
+
+    // Read the updated file
+    const updatedContent = await readFile(testFilePath, "utf8");
+
+    // Verify the array was properly formatted
+    expect(updatedContent).toContain('feature_flags = [true, false, true]');
+  });
+
+  test("handles pre-formatted array string", async () => {
+    // Create test HCL file with a value to be replaced
+    const initialContent = `
+      inputs = {
+        ingress_domains = "example.com"
+      }
+    `;
+    await writeFile(testFilePath, initialContent);
+
+    // Replace with a pre-formatted array string (similar to the example in file_context_0)
+    await replaceHclValue(testFilePath, "inputs.ingress_domains", ["[\"domain1.com\",\"domain2.com\"]"]);
+
+    // Read the updated file
+    const updatedContent = await readFile(testFilePath, "utf8");
+
+    // Verify the array was properly formatted
+    expect(updatedContent).toContain('ingress_domains = ["domain1.com","domain2.com"]');
+  });
 });

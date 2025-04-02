@@ -19,6 +19,7 @@ import { replaceYamlValue } from "../util/replace-yaml-value";
 import { safeFileExists } from "../util/safe-file-exists";
 import { setupAutoscaling } from "./kube/autoscaling";
 import { setupCSIDrivers } from "./kube/csi-drivers";
+import { setupInboundNetworking } from "./kube/inbound-networking";
 import { getTerragruntVariables } from "../util/scripts/get-terragrunt-variables";
 import { updateConfigFile } from "../util/update-config-file";
 import { setupInternalClusterNetworking } from "./kube/internal-cluster-networking";
@@ -28,7 +29,6 @@ import { vaultPrompts } from "../user-prompts/vault";
 import { backgroundProcessIds } from "../util/start-background-process";
 import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
-import { setupInboundNetworking } from "./kube/inbound-networking";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -672,7 +672,9 @@ export class InstallClusterCommand extends Command {
         "11. Skipping inbound networking setup as it's already complete.\n\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("11. Setting up inbound networking\n\n"));
+      this.context.stdout.write(
+        pc.blue("11. Setting up inbound networking\n\n")
+      );
 
       try {
         await setupInboundNetworking({
