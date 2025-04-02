@@ -33,12 +33,16 @@ export async function ecrPullThroughCachePrompts({
     ),
     mask: true,
     validate: async (value) => {
-      const result =
-        await $`curl -s -H "Authorization: Bearer ${value}" https://api.github.com/user/packages\?package_type\=container -w "%{http_code}" -o /dev/null`.text();
-      if (result.trim().replace("%", "") !== "200") {
-        return "This does not appear to be a valid GitHub Personal Access Token or the permissions are not correct";
+      try {
+        const result =
+          await $`curl -s -H "Authorization: Bearer ${value}" https://api.github.com/user/packages\?package_type\=container -w "%{http_code}" -o /dev/null`.text();
+        if (result.trim().replace("%", "") !== "200") {
+          return "This does not appear to be a valid GitHub Personal Access Token or the permissions are not correct";
+        }
+        return true;
+      } catch {
+        return "Error validating GitHub Personal Access Token, please try again.";
       }
-      return true;
     },
   });
 
@@ -55,12 +59,16 @@ export async function ecrPullThroughCachePrompts({
     ),
     mask: true,
     validate: async (value) => {
-      const result =
-        await $`curl -s -H "Authorization: Bearer ${value}" https://hub.docker.com/v2/repositories/library/nginx/tags -w "%{http_code}" -o /dev/null`.text();
-      if (result.trim() !== "200") {
-        return "This does not appear to be a valid Docker Hub Access Token or the permissions are not correct";
+      try {
+        const result =
+          await $`curl -s -H "Authorization: Bearer ${value}" https://hub.docker.com/v2/repositories/library/nginx/tags -w "%{http_code}" -o /dev/null`.text();
+        if (result.trim() !== "200") {
+          return "This does not appear to be a valid Docker Hub Access Token or the permissions are not correct";
+        }
+        return true;
+      } catch {
+        return "Error validating Docker Hub Access Token, please try again.";
       }
-      return true;
     },
   });
 
