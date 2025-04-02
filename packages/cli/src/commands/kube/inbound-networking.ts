@@ -228,7 +228,7 @@ export const setupInboundNetworking = async ({
   await replaceHclValue(
     "./kube_bastion/terragrunt.hcl",
     "inputs.bastion_domains",
-    `[${bastionDomain}]`
+    [bastionDomain]
   );
 
   tfInit({
