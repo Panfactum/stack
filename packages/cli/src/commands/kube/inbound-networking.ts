@@ -199,7 +199,13 @@ export const setupInboundNetworking = async ({
     );
   }
 
-  await replaceYamlValue("./region.yaml", "vault_addr", vaultDomain);
+  const vaultDomainWithProtocol = `https://${vaultDomain}`;
+
+  await replaceYamlValue(
+    "./region.yaml",
+    "vault_addr",
+    vaultDomainWithProtocol
+  );
 
   apply({
     context,
