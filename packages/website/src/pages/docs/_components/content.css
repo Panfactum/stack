@@ -13,6 +13,9 @@
   p, li {
     @apply my-4 !leading-relaxed dark:text-gray-dark-mode-300
   }
+  p.subtitle {
+    @apply md:text-lg !-mt-3 font-medium tracking-wide;
+  }
 
   /* List Styles */
 
@@ -89,6 +92,7 @@
     @apply text-brand-600 dark:text-brand-200;
   }
 
+
   figure {
     @apply !shadow-sm !my-4;
   }
@@ -97,6 +101,28 @@
     position: relative;
     width: unset;
     height: unset;
+  }
+
+  .rehype-code-group {
+    figure {
+      @apply !my-0;
+    }
+    pre {
+      @apply rounded-t-none border-t-0;
+    }
+    gap: 0;
+  }
+
+  .rcg-tab-container {
+    @apply bg-none border-0 bg-gray-dark-mode-900 rounded-t-lg;
+  }
+  .rcg-tab {
+    @apply text-sm font-normal;
+  }
+
+  .rcg-tab.active {
+    background-color: #24292e;
+    @apply border-0 rounded-t-lg;
   }
 
   /* Emphasis Styles */
@@ -136,7 +162,7 @@
   }
 
   /* Copy Header Link Styles */
-  .icon.icon-link {
+  *:hover>a>.icon.icon-link {
     display: inline-block; /* Ensures the element behaves like an inline icon */
     width: 1rem; /* Set width for the icon */
     height: 1rem; /* Set height for the icon */

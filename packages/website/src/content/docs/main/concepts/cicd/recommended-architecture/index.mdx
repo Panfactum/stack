@@ -102,7 +102,7 @@ Here are the important notes:
   * A consolidated view of everything that is currently running and an immediate audit log of all changes that have
     ever been made.
   * Much easier coordination and sequencing when deploying interdependent system.
-  * Much easier access control and improved security [^2]
+  * Much easier access control and improved security. [^2]
 
 [^2]: Since your CI / CD system can perform arbitrary changes in *any* environment, the capability to deploy and mutate
     infrastructure should be locked down to a single repository where you can implement the appropriate controls and review
@@ -113,7 +113,7 @@ Here are the important notes:
 
   * Developers can share resources with the CI / CD system (e.g., shared build cache).
   * Since CI workflows are bursty and resource-intensive in nature, running them in development limits any potential
-    disruptions or resource contention with live systems ,
+    disruptions or resource contention with live systems.
   * Since CI systems are an incredibly common threat vector for malicious code, you should run most of your CI code
     in an environment with no access to live system.
 

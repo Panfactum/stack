@@ -57,46 +57,60 @@ available to you when using the Panfactum stack.
 However, to take advantage of the Panfactum functionality, your `terragrunt.hcl` must at minimum have the following `include`
 block:
 
-```hcl
+::: code-group labels=[terragrunt.hcl]
+```hcl {1-4}
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
-```
 
-You will also want to include a `terraform` source such as the following:
-
-```hcl
-# Even though this is "terraform", it can source either Terraform or OpenTofu modules
 terraform {
   source = "github.com/owner/repo.git//some-module"
 }
-```
 
-Finally, you will want an `inputs` field to define the provided inputs to the sourced infrastructure module:
-
-```hcl
 inputs = {
   foo = "bar"
 }
 ```
+:::
 
-A simple, but complete example might look something like this:
+You will also want to include a `terraform` source such as the following:
 
-```hcl
+::: code-group labels=[terragrunt.hcl]
+```hcl {6-8}
 include "panfactum" {
-  path = find_in_parent_folders("panfactum.hcl")
+  path   = find_in_parent_folders("panfactum.hcl")
   expose = true
 }
 
 terraform {
-   source = "github.com/owner/repo.git//some-module"
+  source = "github.com/owner/repo.git//some-module"
 }
 
 inputs = {
   foo = "bar"
 }
 ```
+:::
+
+Finally, you will want an `inputs` field to define the provided inputs to the sourced infrastructure module:
+
+::: code-group labels=[terragrunt.hcl]
+```hcl {10-12}
+include "panfactum" {
+  path   = find_in_parent_folders("panfactum.hcl")
+  expose = true
+}
+
+terraform {
+  source = "github.com/owner/repo.git//some-module"
+}
+
+inputs = {
+  foo = "bar"
+}
+```
+:::
 
 ### Versioning
 
@@ -119,25 +133,32 @@ We provide two [terragrunt variables](/docs/main/reference/configuration/terragr
 
 ### Deploying Panfactum Modules
 
-[Example](https://github.com/Panfactum/reference-infrastructure/tree/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_delegated_zones_production/terragrunt.hcl)
-
 If you are deploying a [Panfactum module](/docs/main/reference/infrastructure-modules/overview), use
 `include.panfactum.locals.pf_stack_source` to dynamically construct the `terraform.source`. This adds version management,
 caching, and other convenience functionality. For example:
 
-```hcl
+::: code-group labels=[terragrunt.hcl]
+```hcl {6-8}
+include "panfactum" {
+  path   = find_in_parent_folders("panfactum.hcl")
+  expose = true
+}
+
 terraform {
   source = include.panfactum.locals.pf_stack_source
 }
+
+inputs = {}
 ```
+:::
 
 We use the following [terragrunt variables](/docs/main/reference/configuration/terragrunt-variables) to construct `include.panfactum.locals.pf_stack_source`:
+
+* `module`: The name of the module to deploy. **Defaults to the directory name if not provided.** Can be overridden in `module.yaml`.
 
 * `pf_stack_version`: Check [here](/docs/main/reference/releases) for the full list of available releases. This should
   be the same version as used for the Panfactum devShell. We recommend setting this in your `environment.yaml` so that functionality
   remains consistent across an entire environment.
-
-* `module`: The name of the module to deploy. Defaults to the directory name if not provided. Should be set in the `module.yaml`.
 
 ### Setting up Providers
 
@@ -159,7 +180,6 @@ in the `environment.yaml` or `region.yaml` files).
 
 ### Using Secrets
 
-[Example](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/management/global/aws_account/terragrunt.hcl)
 
 Secrets are encrypted and stored directly inside the repository just like any other configuration setting.
 The Panfactum stack uses [sops](https://github.com/getsops/sops) for ensuring this is done securely and in a manner
@@ -168,7 +188,17 @@ that integrates with terragrunt. See our [guide for setting up sops](/docs/main/
 Assuming you have an encrypted file called `secrets.yaml` adjacent to your `terragrunt.hcl`, you
 can access its values using the following syntax: [^2]
 
-```hcl
+::: code-group labels=[terragrunt.hcl, secrets.yaml]
+```hcl {10-12} collapse={1-8}
+include "panfactum" {
+  path   = find_in_parent_folders("panfactum.hcl")
+  expose = true
+}
+
+terraform {
+  source = include.panfactum.locals.pf_stack_source
+}
+
 locals {
   secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
 }
@@ -177,13 +207,35 @@ inputs = {
   secret_input = local.secrets.my_secret
 }
 ```
+```yaml
+my_secret: ENC[AES256_GCM,data:UgDQGz6lZ0ecxQh2ofbIcpw0dhKwl8SfkjaGSh4Re9PWmROrSDwbRAcH9X1PwgOPK/5/3qC6YRnv856m1Y69W+NuK2QwxOqEaoPg5N8kRw9nDsDSjORVFG6Mov697h86wtyLlqGNwIpxFzr0OSgNsL4nPRj/lSnW9ViB3xdin57Y+sA3X7AuKX5ANq4taTRKzn0C5UCkNJ9wyzcjLZ/3Jcu+FztWk9gxSMfvYRJFONxGdTEMGvxl+6NGAW4PP+0+XyEXQpvIs26oWj66Hu5I7TjkO1KTWRFweUByKfLFRlyy/a/f0maJoDYIusrp/OA/o98VVf4BmpeOF8Pb8Hln3YrIGMMgusOD+MTX4XVV5xYelSXMCM6m1459Kceof5VsYqZMbweGJlM78pf5QxSn5KsSy+PaLPnjoeXGCBLV7zpZ7YeXk/db5BtRo6zV4P4/nHTGwPTTzXTTqcuqTwCwhwJlkj5H+DLHfofRbJE6HELj7H0BXYI5Ugxan4aHZ+9ZUKtF6q1MP5IXRP7ZeUFlLIuF9HpTpQb/3tI0UvxVhyDVeGIkf1KQ0KfPkEcjPnWlqhxfw5qXDFKjm7KmSyEt7hDYwQuwtSawM8CiVUNT1pNfdyuiG6uuRv/8gQfVyYRH2W6o01FUaOsOaOtRMDTpZ+c4j8QgaX3KDWzsp9QLBD6IVainxyNytkt4N/18Xt6KbEadYLVVFajJnmhKzZke3JY3D/EHpncIe/VJqUUdgOfjUEZPCP4zd7C+gWyCAAalBdvRXsI0B0PUjsrjt43PE0G5WZqrCulDJv11DlnXVKaj2gmpSl+f4qPmMyNJhBptxZ3Uz4n7X9ATS6qdOnsECzrrmwjn3vFSRtGAOm6YrFEvIllSEQF9wVYP5ItfRJXXbs41DwQYtGDdbwf1j6YJDNGJZeAMVw1NOb0B97wUEM1fnMFqE6glTBvzYzMufm4oOXoyGhhZy6HhgBHy7c+PNO8W+bDqRaGFUk+mro/tnkMKeSJaAelnIE0aR9d7P9pG,iv:YWLR1xWVUsXR2HpAW4VfELsqK/M++0Bm/aInl95Shrs=,tag:6Ay9c71F96pCgeCvntCN8g==,type:str]
+sops:
+    kms:
+        - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+          created_at: "2024-04-05T18:34:19Z"
+          enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQGxqVCKuWah+8jEkLsOchKKAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMM3qHKs26LMy7egLHAgEQgDstPa/gui8Shl75g7OipBMovxod1opdqYPqFtU/hIHFZnUO4/DP837Oi4tDh+HHcXpsGw7YE9GllTep0w==
+          aws_profile: production-superuser
+        - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+          created_at: "2024-04-05T18:34:19Z"
+          enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQHbPyAK0so8v2DC73PM1ye4AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMR6Ummawos5Zyabs7AgEQgDvu9ySvUjYkKIjsrTRF5dkfIpe4S3Rd79eOsC1Om5hWqlRxJqoH1SGwgHOht79zx5WVQgUkh9oRh4dR7Q==
+          aws_profile: production-superuser
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-04-05T18:34:19Z"
+    mac: ENC[AES256_GCM,data:ukTaPDHpMFdRbbOo8VUGTWoTkHL1LP+CbpOC3wRzR14nn2NbAJMEvItyTXXVuCu8/5ApL8hHjnu0b+PJvri0M8HI5Znh6GQGhhEdkWD3ss5qNP0GzSohlFwn7CGWQqzyE/w7+0UhhZjYPvFyM882IVW40F0DnOPgXMGA/vWwcxw=,iv:S0Nq6m5wYA5ftxUp8rMBjl634eSyP5qD6K3IDQSC2xM=,tag:x0y3l4P5ZlLhmHe6UfP6SQ==,type:str]
+    pgp: []
+    unencrypted_suffix: _unencrypted
+    version: 3.8.1
+```
+:::
+
 
 [^2]: Note that you must use the `get_terragrunt_dir()` function to resolve the filepath. This will
     ensure a stable location regardless of how terragrunt is run.
 
 ### Defining the Dependency Graph
-
-[Example](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/aws_eks/terragrunt.hcl)
 
 Typically, there will be an order in which your infrastructure modules
 must be deployed and updated. For example, you will need to launch your Kubernetes cluster before you can deploy
@@ -193,6 +245,33 @@ You should explicitly declare these dependencies via terragrunt `dependency` blo
 
 This will ensure that modules are always updated in the desired order. Additionally, you can use this functionality
 to pass the outputs of one module into the inputs of another.
+
+::: code-group labels=[terragrunt.hcl]
+```hcl {10-13, 15-17} collapse={1-8} "dependency.vault.outputs.vault_internal_url"
+include "panfactum" {
+  path   = find_in_parent_folders("panfactum.hcl")
+  expose = true
+}
+
+terraform {
+  source = include.panfactum.locals.pf_stack_source
+}
+
+dependency "cert_manager" {
+  config_path  = "../kube_cert_manager"
+  skip_outputs = true // MUST be present if outputs are not used
+}
+
+dependency "vault" {
+  config_path = "../kube_vault"
+}
+
+inputs = {
+  alert_email        = "it@panfactum.com"
+  vault_internal_url = dependency.vault.outputs.vault_internal_url
+}
+```
+:::
 
 <MarkdownAlert severity="warning">
   Do not add dependencies that cross environment boundaries. Our CI paradigm scopes permissions to a single
@@ -233,7 +312,7 @@ For a list of all the common input variables see this [reference list.](/docs/ma
 
 ### Using a Local Copy of Panfactum Modules
 
-You may want to make modifications to Panfactum modules found in the [Stack repository](https://github.com/Panfactum/stack/tree/main/packages/infrastructure)
+You may want to make modifications to Panfactum modules found in the [framework repository](https://github.com/Panfactum/stack/tree/main/packages/infrastructure)
 and deploy them to your infrastructure.
 
 You can easily do this for any set of modules by manipulating a few [Terragrunt variables](/docs/main/reference/configuration/terragrunt-variables#module-source):

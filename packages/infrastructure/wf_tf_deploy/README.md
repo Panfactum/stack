@@ -24,7 +24,22 @@ In particular, generated Workflows will perform the following actions:
 
 ## Usage
 
-We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/tf_deploy.tf).
+Here is an example of using this module:
+
+    ::: code-group labels=[infrastructure/cicd/tf_deploy.tf]
+    ```hcl {7-9} "REPLACE_ME"
+    module "tf_deploy" {
+      source = "${var.pf_module_source}wf_tf_deploy${var.pf_module_ref}"
+
+      name        = "tf-deploy-prod"
+      namespace   = local.namespace
+
+      repo         = "github.com/example-org/infrastructure.git"
+      tf_apply_dir = "environments/production"
+      git_ref      = "main"
+    }
+    ```
+    :::
 
 The critical configuration values are:
 

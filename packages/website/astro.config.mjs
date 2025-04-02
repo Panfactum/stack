@@ -19,6 +19,7 @@ import tailwindcss from 'tailwindcss'
 import tailwindcssNesting from 'tailwindcss/nesting'
 import autoprefixer from 'autoprefixer'
 import postcssImporter from 'postcss-import';
+import rehypeCodeGroup from "rehype-code-group";
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
@@ -128,6 +129,7 @@ export default defineConfig({
         rehypeWrap,
         { selector: "table", wrapper: "div.overflow-x-scroll mb-4" },
       ],
+      rehypeCodeGroup,
       rehypeKatex,
     ],
     shikiConfig: {

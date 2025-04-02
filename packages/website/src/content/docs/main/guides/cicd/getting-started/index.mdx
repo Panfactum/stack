@@ -8,9 +8,7 @@ import GitHubWebhookImg from './github-webhook.jpg'
 
 # Getting Started with CI / CD
 
-## Objective
-
-Set up a CI / CD system that deploys IaC when committing changes to your stack repository.
+<p class="subtitle">Set up a CI / CD system that deploys IaC when committing changes to your stack repository.</p>
 
 ## Prerequisites
 
@@ -26,7 +24,8 @@ Set up a CI / CD system that deploys IaC when committing changes to your stack r
 
 <MarkdownAlert severity="info">
   Our recommended architecture uses Argo Workflows and Events as the basis for the CI / CD system. That said,
-  we do offer alternative modules for [self-hosted GitHub Actions](/docs/main/guides/addons/github-actions/installing).
+  we do offer alternative modules for [self-hosted GitHub Actions](/docs/main/guides/addons/github-actions/installing). However,
+  unlike Argo Workflows, we do not provide robust support beyond the foundational components.
 </MarkdownAlert>
 
 We will be deploying our [recommended CI / CD architecture](/docs/main/concepts/cicd/recommended-architecture). Please
@@ -36,7 +35,7 @@ concrete understanding of the end state for this guide.
 This guide will focus on setting up CI / CD in a *single* cluster; however, you will likely want to repeat
 these steps for every region / environment.
 
-We provide a complete example the IaC of a fully functional CI / CD system [here](https://github.com/Panfactum/reference-infrastructure/tree/__PANFACTUM_VERSION_MAIN__/infrastructure/demo_cicd).
+We provide a complete example the IaC of a fully functional CI / CD system [here](https://github.com/Panfactum/reference-infrastructure/blob/main/infrastructure/demo_cicd).
 
 ## Deploy an Event Bus
 
@@ -123,7 +122,7 @@ module "tf_deploy" {
   repo = "github.com/panfactum/stack"
 
   # All modules in this directory of the repository will be deployed
-  tf_apply_dir = "packages/reference/environments/production/us-east-2"
+  tf_apply_dir = "environments/production/us-east-2"
 
   # These secrets will be exposed as environment variables during the
   # `terragrunt apply`. This can be used to supply credentials to
