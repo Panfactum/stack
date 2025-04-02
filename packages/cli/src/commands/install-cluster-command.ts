@@ -31,6 +31,7 @@ import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
 import { setupMaintenanceControllers } from "./kube/maintenance-controllers";
 import { setupCloudNativePG } from "./kube/postgres";
+import { generateProgressString } from "../util/generate-progress-string";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -175,10 +176,10 @@ export class InstallClusterCommand extends Command {
 
     if (vpcSetupComplete === true) {
       this.context.stdout.write(
-        "1. Skipping VPC setup as it's already complete.\n\n"
+        "1/13 Skipping VPC setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("1. Setting up the AWS VPC\n"));
+      this.context.stdout.write(pc.blue("1/13 Setting up the AWS VPC\n\n"));
 
       const { vpcName, vpcDescription } = await vpcPrompts({
         environment,
@@ -219,6 +220,13 @@ export class InstallClusterCommand extends Command {
       context: this.context,
     });
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 1,
+        totalSteps: 13,
+      })
+    );
+
     const setupEcrPullThroughCacheComplete = await getConfigFileKey({
       key: "setupEcrPullThroughCache",
       configPath,
@@ -227,11 +235,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupEcrPullThroughCacheComplete === true) {
       this.context.stdout.write(
-        "2. Skipping ECR pull through cache setup as it's already complete.\n\n"
+        "2/13 Skipping ECR pull through cache setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("\n2. Setting up the AWS ECR pull through cache\n")
+        pc.blue("2/13 Setting up the AWS ECR pull through cache\n\n")
       );
 
       const { dockerHubUsername, githubUsername } =
@@ -290,6 +298,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 2,
+        totalSteps: 13,
+      })
+    );
+
     const setupEksComplete = await getConfigFileKey({
       key: "setupEks",
       configPath,
@@ -298,10 +313,12 @@ export class InstallClusterCommand extends Command {
 
     if (setupEksComplete === true) {
       this.context.stdout.write(
-        "3. Skipping EKS cluster setup as it's already complete.\n\n"
+        "3/13 Skipping EKS cluster setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("3. Setting up the AWS EKS cluster\n"));
+      this.context.stdout.write(
+        pc.blue("3/13 Setting up the AWS EKS cluster\n\n")
+      );
       this.context.stdout.write(
         pc.red(
           pc.bold(
@@ -351,6 +368,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 3,
+        totalSteps: 13,
+      })
+    );
+
     const setupInternalClusterNetworkingComplete = await getConfigFileKey({
       key: "internalClusterNetworking",
       configPath,
@@ -359,11 +383,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupInternalClusterNetworkingComplete === true) {
       this.context.stdout.write(
-        "4. Skipping internal cluster networking setup as it's already complete.\n\n"
+        "4/13 Skipping internal cluster networking setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("4. Setting up the internal cluster networking\n")
+        pc.blue("4/13 Setting up the internal cluster networking\n\n")
       );
 
       try {
@@ -390,6 +414,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 4,
+        totalSteps: 13,
+      })
+    );
+
     const setupPolicyControllerComplete = await getConfigFileKey({
       key: "policyController",
       configPath,
@@ -398,11 +429,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupPolicyControllerComplete === true) {
       this.context.stdout.write(
-        "5. Skipping policy controller setup as it's already complete.\n\n"
+        "5/13 Skipping policy controller setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("5. Setting up the policy controller\n")
+        pc.blue("5/13 Setting up the policy controller\n\n")
       );
 
       try {
@@ -429,6 +460,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 5,
+        totalSteps: 13,
+      })
+    );
+
     const setupCSIDriversComplete = await getConfigFileKey({
       key: "csiDrivers",
       configPath,
@@ -437,11 +475,13 @@ export class InstallClusterCommand extends Command {
 
     if (setupCSIDriversComplete === true) {
       this.context.stdout.write(
-        "6. Skipping CSI drivers setup as it's already complete.\n\n"
+        "6/13 Skipping CSI drivers setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("6. Setting up the Container Storage Interface (CSI) drivers\n")
+        pc.blue(
+          "6/13 Setting up the Container Storage Interface (CSI) drivers\n\n"
+        )
       );
 
       try {
@@ -468,6 +508,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 6,
+        totalSteps: 13,
+      })
+    );
+
     const setupVaultComplete = await getConfigFileKey({
       key: "vault",
       configPath,
@@ -476,10 +523,10 @@ export class InstallClusterCommand extends Command {
 
     if (setupVaultComplete === true) {
       this.context.stdout.write(
-        "7. Skipping Vault setup as it's already complete.\n\n"
+        "7/13 Skipping Vault setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("7. Setting up Vault\n\n"));
+      this.context.stdout.write(pc.blue("7/13 Setting up Vault\n\n"));
 
       this.context.stdout.write(
         pc.blue(
@@ -525,6 +572,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 7,
+        totalSteps: 13,
+      })
+    );
+
     const setupCertManagementComplete = await getConfigFileKey({
       key: "certManagement",
       configPath,
@@ -533,11 +587,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupCertManagementComplete === true) {
       this.context.stdout.write(
-        "8. Skipping certificate management setup as it's already complete.\n\n"
+        "8/13 Skipping certificate management setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("8. Setting up certificate management\n\n")
+        pc.blue("8/13 Setting up certificate management\n\n")
       );
 
       const { alertEmail } = await certManagerPrompts();
@@ -575,6 +629,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 8,
+        totalSteps: 13,
+      })
+    );
+
     const setupServiceMeshComplete = await getConfigFileKey({
       key: "serviceMesh",
       configPath,
@@ -583,10 +644,12 @@ export class InstallClusterCommand extends Command {
 
     if (setupServiceMeshComplete === true) {
       this.context.stdout.write(
-        "9. Skipping service mesh setup as it's already complete.\n\n"
+        "9/13 Skipping service mesh setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("9. Setting up the service mesh\n\n"));
+      this.context.stdout.write(
+        pc.blue("9/13 Setting up the service mesh\n\n")
+      );
 
       try {
         await setupLinkerd({
@@ -619,6 +682,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 9,
+        totalSteps: 13,
+      })
+    );
+
     const setupAutoscalingComplete = await getConfigFileKey({
       key: "autoscaling",
       configPath,
@@ -627,10 +697,10 @@ export class InstallClusterCommand extends Command {
 
     if (setupAutoscalingComplete === true) {
       this.context.stdout.write(
-        "10. Skipping autoscaling setup as it's already complete.\n\n"
+        "10/13 Skipping autoscaling setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("10. Setting up autoscaling\n\n"));
+      this.context.stdout.write(pc.blue("10/13 Setting up autoscaling\n\n"));
 
       try {
         await setupAutoscaling({
@@ -663,6 +733,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 10,
+        totalSteps: 13,
+      })
+    );
+
     const setupInboundNetworkingComplete = await getConfigFileKey({
       key: "inboundNetworking",
       configPath,
@@ -671,11 +748,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupInboundNetworkingComplete === true) {
       this.context.stdout.write(
-        "11. Skipping inbound networking setup as it's already complete.\n\n"
+        "11/13 Skipping inbound networking setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("11. Setting up inbound networking\n\n")
+        pc.blue("11/13 Setting up inbound networking\n\n")
       );
 
       try {
@@ -710,6 +787,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 11,
+        totalSteps: 13,
+      })
+    );
+
     const setupMaintenanceControllersComplete = await getConfigFileKey({
       key: "maintenanceControllers",
       configPath,
@@ -718,11 +802,11 @@ export class InstallClusterCommand extends Command {
 
     if (setupMaintenanceControllersComplete === true) {
       this.context.stdout.write(
-        "12. Skipping maintenance controllers setup as it's already complete.\n\n"
+        "12/13 Skipping maintenance controllers setup as it's already complete.\n"
       );
     } else {
       this.context.stdout.write(
-        pc.blue("12. Setting up maintenance controllers\n\n")
+        pc.blue("12/13 Setting up maintenance controllers\n\n")
       );
 
       try {
@@ -749,6 +833,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 12,
+        totalSteps: 13,
+      })
+    );
+
     const setupCloudNativePGComplete = await getConfigFileKey({
       key: "cloudNativePG",
       configPath,
@@ -757,10 +848,10 @@ export class InstallClusterCommand extends Command {
 
     if (setupCloudNativePGComplete === true) {
       this.context.stdout.write(
-        "13. Skipping CloudNativePG setup as it's already complete.\n\n"
+        "13/13 Skipping CloudNativePG setup as it's already complete.\n"
       );
     } else {
-      this.context.stdout.write(pc.blue("13. Setting up CloudNativePG\n\n"));
+      this.context.stdout.write(pc.blue("13/13 Setting up CloudNativePG\n\n"));
 
       try {
         await setupCloudNativePG({
@@ -786,8 +877,38 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    // Reloads quietly to keep the terminal cleaner
-    await $`direnv reload`.quiet();
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 13,
+        totalSteps: 13,
+      })
+    );
+
+    // Verify connection to the cluster
+    // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+    this.context.stdout.write(
+      pc.green(
+        "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
+      ) +
+        pc.blue(
+          "Run: " +
+            pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+            "You should receive a response similar to the following:\n\n"
+        ) +
+        "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
+        "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
+        pc.blue(
+          "The Panfactum devShell ships with a TUI called k9s.\n" +
+            "To verify what pods are running in the cluster do the following:\n" +
+            `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
+            `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
+            `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
+            `4. You should see a minimal list of pods running in the cluster\n` +
+            `5. If you don't see any pods, please reach out to us on Discord\n` +
+            `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
+        )
+    );
+
     return 0;
   }
 }
