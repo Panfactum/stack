@@ -29,6 +29,7 @@ import { vaultPrompts } from "../user-prompts/vault";
 import { backgroundProcessIds } from "../util/start-background-process";
 import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
+import { setupMaintenanceControllers } from "./kube/maintenance-controllers";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -702,6 +703,45 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           inboundNetworking: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupMaintenanceControllersComplete = await getConfigFileKey({
+      key: "maintenanceControllers",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupMaintenanceControllersComplete === true) {
+      this.context.stdout.write(
+        "12. Skipping maintenance controllers setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(
+        pc.blue("12. Setting up maintenance controllers\n\n")
+      );
+
+      try {
+        await setupMaintenanceControllers({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          maintenanceControllers: true,
         },
         configPath,
         context: this.context,
