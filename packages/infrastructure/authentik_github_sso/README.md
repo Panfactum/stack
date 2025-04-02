@@ -39,11 +39,41 @@ This module configures Authentik for integration with GitHub SAML single sign-on
 ### Deploy GitHub Provider & Application in Authentik
 
 1. Add a new `authentik_github_sso` folder adjacent to your `authentik_core_resources` folder.
-2. Add a new `terragrunt.hcl` file that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/authentik_github_sso/terragrunt.hcl).
-3. Set the `acs_url` input using the `assertion consumer service URL` from above.
-4. Run `pf-tf-init`.
-5. Run `terragrunt apply`.
-6. Note the output as you'll use it in the following steps.
+2. Add a new `terragrunt.hcl` file that looks like this:
+
+    ::: code-group labels=[authentik_github_sso/terragrunt.hcl]
+    ```hcl collapse={1-9} "REPLACE_ME"
+    include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+    }
+
+    terraform {
+      source = include.panfactum.locals.pf_stack_source
+    }
+
+    dependency "authentik_core" {
+      config_path = "../authentik_core_resources"
+    }
+
+    dependency "kube_authentik" {
+      config_path = "../kube_authentik"
+    }
+
+    inputs = {
+      organization_name = dependency.authentik_core.outputs.organization_name
+      authentik_domain  = dependency.kube_authentik.outputs.domain
+
+      // Set to the `assertion consumer service URL` from above.
+      // Example: https://github.com/enterprises/Panfactum/saml/consume
+      acs_url = "REPLACE_ME"
+    }
+    ```
+    :::  
+
+3. Run `pf-tf-init`.
+4. Run `terragrunt apply`.
+5. Note the output as you'll use it in the following steps.
 
 ### Complete GitHub SAML single sign-on
 

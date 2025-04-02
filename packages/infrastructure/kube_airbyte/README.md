@@ -19,7 +19,38 @@ If you need to pre-install specific connectors or automate connector configurati
 ## Usage
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_airbyte`.
-2. Add a `terragrunt.hcl` file to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/environments/production/us-east-2/kube_airbyte/terragrunt.hcl).
+2. Add a `terragrunt.hcl` file to the directory that looks like this:
+
+    ::: code-group labels=[kube_airbyte/terragrunt.hcl]
+    ```hcl collapse={1-9} "REPLACE_ME"
+    include "panfactum" {
+        path   = find_in_parent_folders("panfactum.hcl")
+        expose = true
+    }
+
+    terraform {
+        source = include.panfactum.locals.pf_stack_source
+    }
+
+    dependency "vault" {
+        config_path = "../kube_vault"
+    }
+
+    inputs = {
+        vault_domain = dependency.vault.outputs.vault_domain
+
+        # Must be domain available to the cluster
+        # Example: airbyte.prod.panfactum.com
+        domain       = "REPLACE_ME"
+
+
+        # Must be an email address that you have access to
+        # Example: james@panfactum.com
+        admin_email  = "REPLACE_ME"
+    }
+    ```
+    :::  
+
 3. Run `pf-tf-init` to enable the required providers
 4. Run `terragrunt apply`.
 

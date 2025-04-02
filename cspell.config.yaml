@@ -214,7 +214,8 @@ words: [
   "downscaling",
   "mongodbatlas",
   "PersistentVolumes",
-  "Airbyte"
+  "Airbyte",
+  "workflowtemplate"
 ]
 languageSettings:
   - languageId: markdown,mdx

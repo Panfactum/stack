@@ -9,10 +9,8 @@ import WorkflowsImg from './workflows.jpg'
 
 # Installing the Workflow Engine
 
-## Objective
-
-Install the management controllers and Web dashboard for [Argo Workflows](https://argoproj.github.io/workflows/)
-and [Argo Events](https://argoproj.github.io/argo-events/).
+<p class="subtitle">Install the management controllers and Web dashboard for [Argo Workflows](https://argoproj.github.io/workflows/)
+and [Argo Events](https://argoproj.github.io/argo-events/).</p>
 
 ## Background
 
@@ -69,17 +67,68 @@ Let's deploy it now:
 
 1. In the region with the cluster that you wish to deploy the workflow engine to, add a new directory called `kube_argo`.
 
-2. Add a `terragrunt.hcl` that looks like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/kube_argo/terragrunt.hcl).
+2. Add a `terragrunt.hcl` that looks like this:
 
-   1. The `argo_domain` will be the domain where the Argo web UI will be exposed.
+      ::: code-group labels=[kube_argo/terragrunt.hcl]
+      ```hcl collapse={1-9} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
 
-   2. Set `test_workflow_enabled` to `false` as it cannot be deployed until the controllers are running.
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      dependency "vault" {
+         config_path = "../kube_vault"
+      }
+
+      inputs = {
+         vault_domain = dependency.vault.outputs.vault_domain
+
+         // Where the Argo web UI will be exposed.
+         // Example: "argo.prod.panfactum.com"
+         argo_domain  = "REPLACE_ME"
+
+         // Initially set to `false` as it cannot be deployed until the controllers are running.
+         test_workflow_enabled = false
+      }
+      ```
+      :::
 
 3. Run `pf-tf-init` to enable the required providers.
 
 4. Run `terragrunt apply`.
 
 5. Change `test_workflow_enabled` to `true` and re-run `terragrunt apply`.
+
+      ::: code-group labels=[kube_argo/terragrunt.hcl]
+      ```hcl collapse={1-13,15-20} {21} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      dependency "vault" {
+         config_path = "../kube_vault"
+      }
+
+      inputs = {
+         vault_domain = dependency.vault.outputs.vault_domain
+
+         // Where the Argo web UI will be exposed.
+         // Example: "argo.prod.panfactum.com"
+         argo_domain  = "REPLACE_ME"
+
+         test_workflow_enabled = true
+      }
+      ```
+      :::
 
 ## Testing the Workflow Engine
 
@@ -138,7 +187,7 @@ in the Panfactum devShell:
 
    like this:
 
-   ```shellsession
+   ```shellsession "message:           Hi!"
    Name:                test-w9vtr
    Namespace:           argo
    ServiceAccount:      unset
@@ -154,7 +203,7 @@ in the Panfactum devShell:
 4. Run `argo logs -n argo <workflow-name>` where `<workflow-name>` is the generated name from step 2. Verify that
    your message was successfully printed:
 
-   ```shellsession
+   ```shellsession "You entered: Hi!"
    test-w9vtr-test-1726256991: {"argo":true,"level":"info","msg":"capturing logs","time":"2024-07-25T20:09:37.490Z"}
    test-w9vtr-test-1726256991: You entered: Hi!
    test-w9vtr-test-1726256991: Workflow completed successfully.

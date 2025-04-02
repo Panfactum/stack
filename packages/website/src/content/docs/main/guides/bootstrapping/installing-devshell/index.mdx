@@ -4,10 +4,8 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Installing the Development Shell
 
-## Objective
-
-Configure a `git` repository in your organization to use the Panfactum "devShell"
-which automatically installs all the necessary tooling to launch and work with the stack.
+<p class="subtitle">Configure a `git` repository in your organization to use the Panfactum "devShell"
+which automatically installs all the necessary tooling to launch and work with the framework.</p>
 
 ## Install Prerequisite Tooling
 
@@ -15,14 +13,14 @@ Follow this [guide section](/docs/main/guides/getting-started/install-tooling?bo
 
 ## Choosing a Repository
 
-In the Panfactum stack, everything required to set up your developer environments and live infrastructure
+In the Panfactum framework, everything required to set up your developer environments and live infrastructure
 is defined in code.
 
 As you begin, you must choose a repository where you want this code to live.
 
 We **strongly** recommend a [monorepo](https://en.wikipedia.org/wiki/Monorepo) setup where all application, tooling,
 and infrastructure code gets versioned together. [^1] However, if you already have many repositories, we recommend
-setting up a dedicated "stack" repository where this code can live.
+setting up a dedicated "infrastructure" repository where this code can live.
 
 [^1]: Yes, even if you are developing microservices.
 
@@ -34,16 +32,12 @@ This repository will contain the following pieces of functionality:
 * All of your local developer tooling
 * All of your immediate integration tooling for local development
 
-<MarkdownAlert severity="info">
-  We provide a [reference repository setup](https://github.com/Panfactum/reference-infrastructure/tree/__PANFACTUM_VERSION_MAIN__) that you can benchmark against as you progress through the setup documentation.
-</MarkdownAlert>
-
 ## Integrate the Panfactum devShell
 
 We use [Nix](https://nix.dev/index.html), a package manager and programming language, to codify your local developer environment.
 
 Using Nix, we provide a foundational devShell that automatically installs all tooling that you need to work on
-the Panfactum stack. These tools are versioned in tandem with the live infrastructure to ensure compatibility. They are installed in
+the Panfactum framework. These tools are versioned in tandem with the live infrastructure to ensure compatibility. They are installed in
 an isolated directory that won't interfere with other tooling on your local system.
 
 The following steps will integrate the Panfactum tooling into your repository:
@@ -51,22 +45,27 @@ The following steps will integrate the Panfactum tooling into your repository:
 1. Create a [Nix flake](https://zero-to-nix.com/concepts/flakes) in the root of your repo by creating a `flake.nix` file
    with the following content:
 
-   ```nix
+    ::: code-group labels=[flake.nix]
+    ```nix
     {
-    inputs = {
-      flake-utils.url = "github:numtide/flake-utils"; # Utility for generating flakes that are compatible with all operating systems
-      panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_EDGE__"; # Make sure this matches your version of the Panfactum Stack
-    };
+      inputs = {
+         # Utility for generating flakes that are compatible with all operating systems
+        flake-utils.url = "github:numtide/flake-utils";
 
-    outputs = { panfactum, flake-utils, ... }@inputs:
-      flake-utils.lib.eachDefaultSystem
-      (system:
-        {
-          devShell = panfactum.lib.${system}.mkDevShell { };
-        }
-      );
+        # Make sure this matches your version of the Panfactum Stack
+        panfactum.url = "github:panfactum/stack/__PANFACTUM_VERSION_MAIN__"; 
+      };
+
+      outputs = { panfactum, flake-utils, ... }@inputs:
+        flake-utils.lib.eachDefaultSystem
+        (system:
+          {
+            devShell = panfactum.lib.${system}.mkDevShell { };
+          }
+        );
     }
    ```
+   :::
 
 2. Run `git add flake.nix` to register the flake.
 
@@ -86,12 +85,28 @@ The following steps will integrate the Panfactum tooling into your repository:
 ## Setting Repository Configuration Variables
 
 A handful of repository variables need to be set in order to tailor the behavior
-of the Panfactum stack in your repo and organization.
+of the Panfactum framework in your repo and organization.
 
 ### Shared Configuration
 
 We expect you to provide some top-level configuration values in a `panfactum.yaml` file in the root of your repository.
-See an example file [here.](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/panfactum.yaml)
+
+    ::: code-group labels=[panfactum.yaml]
+    ```yaml "REPLACE_ME"
+    # The URL of YOUR git repository for storing infrastructure-as-code for Panfactum
+    # Note that this MUST be prefixed with `git::https://`
+    # Example: git::https://github.com/your-organization/your-infrastructure-repo.git
+    repo_url: REPLACE_ME
+
+    # The name of your infrastructure repository
+    # Example: your-infrastructure-repo
+    repo_name: REPLACE_ME
+
+    # The name of the primary branch for your git repository
+    # Example: main
+    repo_primary_branch: REPLACE_ME
+   ```
+   :::
 
 For the full list of available values and their behavior, please refer to [these reference docs](/docs/main/reference/configuration/repo-variables).
 
@@ -132,12 +147,12 @@ to automatically instantiate.
 ## Scaffold Standard Files
 
 You now have the local development environment configured and are ready to begin deploying the live infrastructure
-that powers the Panfactum stack.
+that powers the Panfactum framework.
 
 Notice that you still have a shell warning that look like the following:
 
 ```shellsession
-Your repository files are out-of-date with the current version of the Panfactum stack.
+Your repository files are out-of-date with the current version of the Panfactum framework.
 
 Run 'pf-update' to updates your files and resolve this warning.
 ```

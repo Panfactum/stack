@@ -13,3 +13,8 @@ output "smtp_host" {
   description = "The SMTP server for sending email"
   value       = "email-smtp.${data.aws_region.current.name}.amazonaws.com"
 }
+
+output "domain" {
+  description = "Domain name that will send emails"
+  value       = var.domain
+}

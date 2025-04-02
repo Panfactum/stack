@@ -34,7 +34,7 @@ variable "associated_domains" {
 variable "sso_debug_enabled" {
   description = "Enable SSO debug. This allows users to login with a password bypassing the SSO flow."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "active" {

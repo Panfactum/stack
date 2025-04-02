@@ -31,8 +31,6 @@ locals {
   role_mappings = merge(local.default_role_mappings, local.allowed_custom_mappings)
 }
 
-
-
 resource "mongodbatlas_federated_settings_identity_provider" "identity_provider" {
   federation_settings_id       = var.federation_settings_id
   name                         = var.name

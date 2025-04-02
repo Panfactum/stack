@@ -30,11 +30,30 @@ In particular, generated Workflows will perform the following actions:
 
 ## Usage
 
-We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_MAIN__/packages/reference/infrastructure/demo_cicd/website_image_builder.tf).
+Here is an example of using the module:
+
+    ::: code-group labels=[infrastructure/cicd/builder.tf]
+    ```hcl {7-12} "REPLACE_ME"
+    module "image_builder" {
+      source = "${var.pf_module_source}wf_dockerfile_build${var.pf_module_ref}"
+
+      name = "image-builder"
+      namespace = local.namespace
+
+      code_repo = "github.com/example-org/service.git"
+      dockerfile_path = "./Dockerfile"
+      build_context = "."
+      image_repo = "example-service"
+      args = {}
+      secrets = {}
+    }
+    ```
+    :::  
 
 The critical configuration values are:
 
 - `code_repo`: The repository containing your Dockerfile and code to build.
+- `image_repo`: The AWS ECR repository where the container images will be pushed.
 - `dockerfile_path`: (Optional) A relative path from the root of the repo to your Dockerfile (or Containerfile).
 - `build_context`: (Optional) The [build context](https://docs.docker.com/build/building/context/) to submit to BuildKit.
 - `args`: (Optional) The [build arguments](https://docs.docker.com/build/guide/build-args/) to set.

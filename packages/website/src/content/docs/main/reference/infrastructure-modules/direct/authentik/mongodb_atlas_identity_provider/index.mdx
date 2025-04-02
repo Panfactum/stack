@@ -59,8 +59,39 @@ For more details on MongoDB Atlas roles, refer to the official documentation:
 
 ### Deploy a new DNS TXT Record & Verify
 
-1. Add a text record to your `global/aws_dns/terragrunt.hcl` file that looks
-   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/global/aws_dns_records/terragrunt.hcl).
+1. Add a text record to your `production/global/aws_dns/terragrunt.hcl` file that looks
+   like this:
+
+      ::: code-group labels=[production/global/aws\_dns/terragrunt.hcl]
+      ```hcl collapse={1-9} ins={19} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      inputs = {
+         zones = {
+            // Replace with the domain from
+            // "Setup MongoDB Atlas Identity Provider Domain Verification"
+            "REPLACE_ME" = {
+               txt_records = [
+                  {
+                     subdomain = ""
+                     records = [
+                        "mongodb-site-verification=REPLACE_ME", // MongoDB Atlas SSO
+                     ]
+                  }
+               ]
+            }
+         }
+      }
+      ```
+      :::
+
 2. Run `terragrunt apply`
 3. Go back to MongoDB Atlas and click on `Verify` next to the domain you added
 4. Confirm verification
@@ -118,29 +149,84 @@ We will first create the resource through the UI and then import it to configure
 #### 3. From the terminal
 
 1. Add a new a `mongodb_atlas_identity_provider` folder adjacent to your `authentik_core_resources` folder
-2. Add a new a `terragrunt.hcl` file that looks
-   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/mongodb_atlas_identity_provider/terragrunt.hcl)
-3. Set the `federation_settings_id` to the value from above
-4. Set the `organization_id` to the value from above
-5. Set the `idp_id` to the value from above
-6. Set the `associated_domains` by adding the domain you verified above to the list
-7. Set the `sso_debug_enabled` to `true`
-8. Run `pf-tf-init`
-9. Run `terragrunt apply`
+2. Add a new a `terragrunt.hcl` file that looks like this:
+
+      ::: code-group labels=[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
+      ```hcl collapse={1-9} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      dependency "authentik_atlas_mongodb_sso" {
+         config_path = "../authentik_mongodb_atlas_sso"
+      }
+
+      inputs = {
+         issuer_url = dependency.authentik_atlas_mongodb_sso.outputs.issuer_url
+         sso_url    = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
+
+         // Set to "Organization ID" from step 1.2
+         // Example: 679ac9030691076f53402259
+         organization_id = "REPLACE_ME"
+
+         // Set to "Federation Settings ID" from step 1.12
+         // Example: 679ac90e37161e292db2780e
+         federation_settings_id = "REPLACE_ME"
+
+         // Set to "IdP ID" from step 1.12
+         // Example: 67a80b37499ddf3676fa8f2b
+         idp_id = "REPLACE_ME"
+
+         // Set to the domain you verified in the prerequisite step:
+         // "Setup MongoDB Atlas Identity Provider Domain Verification"
+         // Example: panfactum.com
+         associated_domains = [REPLACE_ME]
+
+         sso_debug_enabled  = true
+      }
+      ```
+      :::  
+
+3. Run `pf-tf-init`
+4. Run `terragrunt apply`
 
 #### 4. CICD (Optional)
 
-If you have CICD setup and deploying infrastructure using the [wf\_tf\_deploy]() module, you will also need to pass in the
-keys.
+If you have CICD setup and are deploying infrastructure using the [wf\_tf\_deploy](/docs/main/reference/infrastructure-modules/submodule/workflow/wf\_tf\_deploy) module,
+you will also need to pass in the keys:
 
-1. Update your CICD module var to accept the keys as inputs
-   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/infrastructure/demo-cicd/vars.tf)
-2. Update the `wf_tf_deploy` module and pass in the secrets inputs
-   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/infrastructure/demo-cicd/tf_deploy.tf)
-3. Add them to the `secrets.yaml`
-   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/demo-cicd/secrets.yaml)
-4. Utilize and pass them in as inputs
-   like [this](https://github.com/Panfactum/reference-infrastructure/blob/__PANFACTUM_VERSION_MAIN__/environments/production/us-east-2/demo-cicd/terragrunt.hcl)
+::: code-group labels=[infrastructure/cicd/deploy.hcl]
+```hcl "REPLACE_ME" ins={18-19}
+module "tf_deploy" {
+  source = "${var.pf_module_source}wf_tf_deploy${var.pf_module_ref}"
+
+  name = "tf-deploy"
+  namespace = local.namespace
+
+  # This is the repository url for that contains your terragrunt configuration files
+  repo = "github.com/panfactum/stack"
+
+  # All modules in this directory of the repository will be deployed
+  tf_apply_dir = "environments/production/us-east-2"
+
+  # These secrets will be exposed as environment variables during the
+  # `terragrunt apply`. This can be used to supply credentials to
+  # the OpenTofu providers.
+  secrets = {
+      AUTHENTIK_TOKEN = var.authentik_token
+      MONGODB_ATLAS_PUBLIC_KEY  = var.mongodb_atlas_public_key
+      MONGODB_ATLAS_PRIVATE_KEY = var.mongodb_atlas_private_key
+  }
+}
+```
+:::
+
+#### 5. Finish Authentik Setup
 
 If you are following the `authentik_mongodb_atlas_sso` module guide, please return and resume
 the [Sync Authentik with the Atlas Settings](/docs/main/reference/infrastructure-modules/direct/authentik/authentik\_mongodb\_atlas\_sso)
@@ -153,7 +239,49 @@ section.
   If you do lock yourself out, rest assured you can still recover by contacting their support, but it can take 1-2 days.
 </MarkdownAlert>
 
-After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle by updating the `sso_debug_enabled` to `false` in the `mongodb_atlas_identity_provider` module.
+After you have confirmed and validated that SSO is working through Authentik, disable the Bypass SAML Mode toggle by removing the `sso_debug_enabled`
+in the `mongodb_atlas_identity_provider` module.
+
+      ::: code-group labels=[mongodb\_atlas\_identity\_provider/terragrunt.hcl]
+      ```hcl collapse={1-9, 15-33} del={35} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      dependency "authentik_atlas_mongodb_sso" {
+         config_path = "../authentik_mongodb_atlas_sso"
+      }
+
+      inputs = {
+         issuer_url = dependency.authentik_atlas_mongodb_sso.outputs.issuer_url
+         sso_url    = dependency.authentik_atlas_mongodb_sso.outputs.url_sso_post
+
+         // Set to "Organization ID" from step 1.2
+         // Example: 679ac9030691076f53402259
+         organization_id = "REPLACE_ME"
+
+         // Set to "Federation Settings ID" from step 1.12
+         // Example: 679ac90e37161e292db2780e
+         federation_settings_id = "REPLACE_ME"
+
+         // Set to "IdP ID" from step 1.12
+         // Example: 67a80b37499ddf3676fa8f2b
+         idp_id = "REPLACE_ME"
+
+         // Set to the domain you verified in the prerequisite step:
+         // "Setup MongoDB Atlas Identity Provider Domain Verification"
+         // Example: panfactum.com
+         associated_domains = [REPLACE_ME]
+
+         sso_debug_enabled  = true
+      }
+      ```
+      :::  
 
 ## Providers
 
@@ -239,7 +367,7 @@ Description: Enable SSO debug. This allows users to login with a password bypass
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ## Outputs
 
