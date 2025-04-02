@@ -22,6 +22,7 @@ export class UpdateSSHCommand extends Command {
       await updateSSH({
         buildKnownHosts: this.build,
         context: this.context,
+        verbose: this.verbose,
       });
     } catch (error: unknown) {
       this.context.stderr.write(
