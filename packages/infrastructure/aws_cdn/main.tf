@@ -29,6 +29,9 @@ locals {
   domain_to_zone_index_of_longest_candidate = { for domain, candidate_lengths in local.domain_to_zone_candidates_name_length : domain => index(candidate_lengths, max(candidate_lengths...)) }
   domain_to_zone                            = { for domain, candidates in local.domain_to_zone_candidates : domain => [for zone in data.aws_route53_zone.zones : zone.zone_id if zone.name == candidates[local.domain_to_zone_index_of_longest_candidate[domain]]][0] }
 
+  // Should be used for resources that need to be globally unique
+  default_suffix = substr(sha256("${var.name}${join("", var.domains)}"), 0, 6)
+
   // See https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html#choose-origin-shield-region
   origin_shield_region_mappings = {
     "us-east-2"      = "us-east-2"
@@ -111,7 +114,7 @@ locals {
     remove_prefix            = config.remove_prefix
   }] : config.origin_id => config }
 
-  origin_configs_by_path_behavior = { for config in flatten([for config in local.origin_configs : [for path, behavior in config.path_match_behavior : merge({ origin_id = config.origin_id, origin_path_prefix : config.path_prefix, path : path, origin_access_control_id = config.origin_access_control_id }, behavior)]]) : substr(sha256("${config.origin_id}-${config.path}"), 0, 12) => config }
+  origin_configs_by_path_behavior = { for config in flatten([for config in local.origin_configs : [for path, behavior in config.path_match_behavior : merge({ origin_id = config.origin_id, origin_path_prefix = config.path_prefix, path = path, origin_access_control_id = config.origin_access_control_id }, behavior)]]) : substr(sha256("${config.origin_id}-${config.path}"), 0, 12) => config }
 
   // This ensures that longer prefixes are always first when applied to the CDN cache configs; this is important
   // because we prioritize specificity (otherwise /a might take precedence over /abc)
@@ -196,7 +199,7 @@ resource "aws_acm_certificate_validation" "cert" {
 ///////////////////////////////////////////////////
 
 resource "aws_cloudfront_cache_policy" "root" {
-  name        = "default-${var.name}"
+  name        = "default-${var.name}-${local.default_suffix}"
   comment     = "Default cache behaviors for CDN ${var.name}"
   min_ttl     = 0
   default_ttl = 86400
@@ -215,7 +218,7 @@ resource "aws_cloudfront_cache_policy" "root" {
 }
 
 resource "aws_cloudfront_origin_request_policy" "root" {
-  name    = "default-${var.name}"
+  name    = "default-${var.name}-${local.default_suffix}"
   comment = "Default origin request policy for CDN ${var.name}"
   cookies_config {
     cookie_behavior = "all"
