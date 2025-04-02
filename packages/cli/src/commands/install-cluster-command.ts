@@ -31,6 +31,7 @@ import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
 import { setupMaintenanceControllers } from "./kube/maintenance-controllers";
 import { setupCloudNativePG } from "./kube/postgres";
+import { generateProgressString } from "../util/generate-progress-string";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -219,7 +220,12 @@ export class InstallClusterCommand extends Command {
       context: this.context,
     });
 
-    this.context.stdout.write("[==                        ] 8% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 1,
+        totalSteps: 13,
+      })
+    );
 
     const setupEcrPullThroughCacheComplete = await getConfigFileKey({
       key: "setupEcrPullThroughCache",
@@ -292,7 +298,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[====                      ] 15% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 2,
+        totalSteps: 13,
+      })
+    );
 
     const setupEksComplete = await getConfigFileKey({
       key: "setupEks",
@@ -357,7 +368,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[======                    ] 23% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 3,
+        totalSteps: 13,
+      })
+    );
 
     const setupInternalClusterNetworkingComplete = await getConfigFileKey({
       key: "internalClusterNetworking",
@@ -398,7 +414,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[========                  ] 31% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 4,
+        totalSteps: 13,
+      })
+    );
 
     const setupPolicyControllerComplete = await getConfigFileKey({
       key: "policyController",
@@ -439,7 +460,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[==========              ] 38% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 5,
+        totalSteps: 13,
+      })
+    );
 
     const setupCSIDriversComplete = await getConfigFileKey({
       key: "csiDrivers",
@@ -482,7 +508,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[============              ] 46% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 6,
+        totalSteps: 13,
+      })
+    );
 
     const setupVaultComplete = await getConfigFileKey({
       key: "vault",
@@ -541,7 +572,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[==============            ] 54% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 7,
+        totalSteps: 13,
+      })
+    );
 
     const setupCertManagementComplete = await getConfigFileKey({
       key: "certManagement",
@@ -593,7 +629,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[================          ] 62% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 8,
+        totalSteps: 13,
+      })
+    );
 
     const setupServiceMeshComplete = await getConfigFileKey({
       key: "serviceMesh",
@@ -641,7 +682,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[==================        ] 69% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 9,
+        totalSteps: 13,
+      })
+    );
 
     const setupAutoscalingComplete = await getConfigFileKey({
       key: "autoscaling",
@@ -687,7 +733,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[====================      ] 77% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 10,
+        totalSteps: 13,
+      })
+    );
 
     const setupInboundNetworkingComplete = await getConfigFileKey({
       key: "inboundNetworking",
@@ -736,7 +787,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[======================    ] 85% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 11,
+        totalSteps: 13,
+      })
+    );
 
     const setupMaintenanceControllersComplete = await getConfigFileKey({
       key: "maintenanceControllers",
@@ -777,7 +833,12 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    this.context.stdout.write("[========================  ] 92% complete\n\n");
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 12,
+        totalSteps: 13,
+      })
+    );
 
     const setupCloudNativePGComplete = await getConfigFileKey({
       key: "cloudNativePG",
@@ -816,6 +877,13 @@ export class InstallClusterCommand extends Command {
       });
     }
 
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 13,
+        totalSteps: 13,
+      })
+    );
+
     // Verify connection to the cluster
     // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
     this.context.stdout.write(
@@ -841,8 +909,6 @@ export class InstallClusterCommand extends Command {
         )
     );
 
-    // Reloads quietly to keep the terminal cleaner
-    await $`direnv reload`.quiet();
     return 0;
   }
 }
