@@ -30,6 +30,7 @@ import { backgroundProcessIds } from "../util/start-background-process";
 import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
 import { setupMaintenanceControllers } from "./kube/maintenance-controllers";
+import { setupCloudNativePG } from "./kube/postgres";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -742,6 +743,43 @@ export class InstallClusterCommand extends Command {
       await updateConfigFile({
         updates: {
           maintenanceControllers: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
+
+    const setupCloudNativePGComplete = await getConfigFileKey({
+      key: "cloudNativePG",
+      configPath,
+      context: this.context,
+    });
+
+    if (setupCloudNativePGComplete === true) {
+      this.context.stdout.write(
+        "13. Skipping CloudNativePG setup as it's already complete.\n\n"
+      );
+    } else {
+      this.context.stdout.write(pc.blue("13. Setting up CloudNativePG\n\n"));
+
+      try {
+        await setupCloudNativePG({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
+
+      await updateConfigFile({
+        updates: {
+          cloudNativePG: true,
         },
         configPath,
         context: this.context,
