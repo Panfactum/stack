@@ -3,7 +3,7 @@ import { printHelpInformation } from "../../util/print-help-information";
 import { progressMessage } from "../../util/progress-message";
 import type { BaseContext } from "clipanion";
 
-export async function apply({
+export function apply({
   context,
   env,
   suppressErrors = false,
@@ -15,7 +15,7 @@ export async function apply({
   suppressErrors?: boolean;
   verbose?: boolean;
   workingDirectory?: string;
-}): Promise<0 | 1> {
+}): 0 | never {
   try {
     let tfApplyProgress: globalThis.Timer | undefined;
     if (!verbose) {
