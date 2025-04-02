@@ -15,7 +15,7 @@ interface ProgressOptions {
  * @returns Formatted progress string with visual bar and percentage
  *
  * @example
- * // Returns "[======    ] 75%"
+ * // Returns "[======    ] 75% complete\n\n"
  * generateProgressString({ completedSteps: 3, totalSteps: 4 });
  */
 export function generateProgressString({
@@ -23,7 +23,8 @@ export function generateProgressString({
   totalSteps,
 }: ProgressOptions): string {
   // Calculate the percentage (rounded to whole number)
-  const percentage = totalSteps === 0 ? 0 : Math.round((completedSteps / totalSteps) * 100);
+  const percentage =
+    totalSteps === 0 ? 0 : Math.round((completedSteps / totalSteps) * 100);
 
   // Generate the progress bar parts
   const completedPart = "=".repeat(completedSteps * 2);
