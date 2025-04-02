@@ -15,7 +15,7 @@ export function apply({
   suppressErrors?: boolean;
   verbose?: boolean;
   workingDirectory?: string;
-}) {
+}): 0 | never {
   try {
     let tfApplyProgress: globalThis.Timer | undefined;
     if (!verbose) {

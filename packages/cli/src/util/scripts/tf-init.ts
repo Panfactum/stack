@@ -13,7 +13,7 @@ export function tfInit({
   env?: Record<string, string | undefined>;
   verbose?: boolean;
   workingDirectory?: string;
-}): 0 | 1 {
+}): 0 | never {
   try {
     let tfInitProgress: globalThis.Timer | undefined;
     if (!verbose) {

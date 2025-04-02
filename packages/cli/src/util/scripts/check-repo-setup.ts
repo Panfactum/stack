@@ -81,6 +81,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Get Repo Variables
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Getting repo variables\n");
+  }
+
   const repoVariables = await getRepoVariables({ context });
   if (!repoVariables) {
     context.stderr.write(
@@ -96,6 +100,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check Top-level .gitignore setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking top-level .gitignore setup\n");
+  }
+
   function isIgnored(path: string) {
     return Bun.spawnSync([
       "git",
@@ -120,6 +128,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check envrc setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking .envrc setup\n");
+  }
+
   if (!(await areFilesEqual(`${repoRoot}/.envrc`, envrcTemplate))) {
     errors.push(
       `Error: .envrc file is out of date. Run pf update-envrc to update.\n\n`
@@ -129,6 +141,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check terragrunt setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking terragrunt setup\n");
+  }
+
   const environmentsDir = repoVariables.environments_dir;
   // See: https://bun.sh/docs/bundler/executables#embed-directories
   // This static path will remain constant even if the CLI is bundled though don't want to rely on it
@@ -142,6 +158,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check ssh setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking ssh setup\n");
+  }
+
   const sshDir = repoVariables.ssh_dir;
   if (!(await areDirectoriesEqual("../../files/ssh", sshDir))) {
     errors.push(`SSH files are out of date. Run pf update-ssh to update.\n\n`);
@@ -164,6 +184,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check kube setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking kube setup\n");
+  }
+
   const kubeDir = repoVariables.kube_dir;
   if (!(await areDirectoriesEqual("../../files/kube", kubeDir))) {
     errors.push(
@@ -193,6 +217,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check aws setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking aws setup\n");
+  }
+
   const awsDir = repoVariables.aws_dir;
   if (!(await areDirectoriesEqual("../../files/aws", awsDir))) {
     errors.push(
@@ -217,6 +245,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Check BuildKit setup
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Checking buildkit setup\n");
+  }
+
   const buildkitDir = repoVariables.buildkit_dir;
   if (!(await areDirectoriesEqual("../../files/buildkit", buildkitDir))) {
     errors.push(
@@ -241,6 +273,10 @@ export async function checkRepoSetup({
   //####################################################################
   // Print Error Messages
   //####################################################################
+  if (verbose) {
+    context.stdout.write("Printing error messages\n");
+  }
+
   if (errors.length > 0 && hasBuildRequiredError === 0) {
     context.stderr.write(
       pc.yellow(
