@@ -1,4 +1,5 @@
 import { input, password } from "@inquirer/prompts";
+import { $ } from "bun";
 import pc from "picocolors";
 import { ensureFileExists } from "../util/ensure-file-exists";
 import type { BaseContext } from "clipanion";
@@ -31,6 +32,14 @@ export async function ecrPullThroughCachePrompts({
       `Enter your classic GitHub Personal Access Token with 'read:packages' scope\nFor more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#github-credentials\n${pc.red("this will be encrypted and stored securely")}:`
     ),
     mask: true,
+    validate: async (value) => {
+      const result =
+        await $`curl -s -H "Authorization: Bearer ${value}" https://api.github.com/user/packages\?package_type\=container -w "%{http_code}" -o /dev/null`.text();
+      if (result.trim().replace("%", "") !== "200") {
+        return "This does not appear to be a valid GitHub Personal Access Token or the permissions are not correct";
+      }
+      return true;
+    },
   });
 
   // Prompt for Docker Hub PAT for Kubernetes Cluster
@@ -45,6 +54,14 @@ export async function ecrPullThroughCachePrompts({
       `Enter your Docker Hub Access Token with 'Public Repo Read-only' permissions\nFor more details on how to create one, see our documentation: https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#docker-hub-credentials\n${pc.red("this will be encrypted and stored securely")}:`
     ),
     mask: true,
+    validate: async (value) => {
+      const result =
+        await $`curl -s -H "Authorization: Bearer ${value}" https://hub.docker.com/v2/repositories/library/nginx/tags -w "%{http_code}" -o /dev/null`.text();
+      if (result.trim() !== "200") {
+        return "This does not appear to be a valid Docker Hub Access Token or the permissions are not correct";
+      }
+      return true;
+    },
   });
 
   context.stdout.write("\n2.a. 🔒 Encrypting secrets\n\n");
