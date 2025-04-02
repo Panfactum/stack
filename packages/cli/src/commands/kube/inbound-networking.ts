@@ -223,8 +223,9 @@ export const setupInboundNetworking = async ({
     sourceFile: await Bun.file(kubeBastionTerragruntHcl).text(),
   });
 
-  const bastionDomain = `bastion.${vaultDomain.split(".").slice(-2).join(".")}`;
-  await replaceYamlValue(
+  // Remove the vault prefix from the domain and add a bastion prefix
+  const bastionDomain = `bastion.${vaultDomain.split(".").slice(1).join(".")}`;
+  await replaceHclValue(
     "./kube_bastion/terragrunt.hcl",
     "inputs.bastion_domains",
     `[${bastionDomain}]`
