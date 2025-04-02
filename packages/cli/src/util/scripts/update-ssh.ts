@@ -15,9 +15,11 @@ import type { BaseContext } from "clipanion";
 export async function updateSSH({
   buildKnownHosts,
   context,
+  verbose,
 }: {
   buildKnownHosts?: boolean;
   context: BaseContext;
+  verbose?: boolean;
 }) {
   const repoVariables = await getRepoVariables({ context });
   const sshDir = repoVariables.ssh_dir;
@@ -81,24 +83,37 @@ export async function updateSSH({
         }
 
         context.stderr.write(
-          `Updating ${sshDir}/known_hosts and ${sshDir}/connection_info with values from ${modulePath}...`
+          `Updating ${sshDir}/known_hosts and ${sshDir}/connection_info with values from ${modulePath}...\n`
         );
 
         const moduleOutputs = getModuleOutputs({
           context,
           modulePath,
           validationSchema: z.object({
-            bastion_host_public_key: z.string(),
-            bastion_domains: z.array(z.string()),
-            bastion_port: z.number(),
+            bastion_host_public_key: z.object({
+              sensitive: z.boolean(),
+              type: z.string(),
+              value: z.string(),
+            }),
+            bastion_domains: z.object({
+              sensitive: z.boolean(),
+              type: z.array(z.string()),
+              value: z.array(z.string()),
+            }),
+            bastion_port: z.object({
+              sensitive: z.boolean(),
+              type: z.string(),
+              value: z.number(),
+            }),
           }),
+          verbose,
         });
 
-        const numberOfDomains = moduleOutputs.bastion_domains.length;
+        const numberOfDomains = moduleOutputs.bastion_domains.value.length;
         for (let j = 0; j < numberOfDomains; j++) {
-          const domain = moduleOutputs.bastion_domains[j];
-          const publicKey = moduleOutputs.bastion_host_public_key;
-          const port = moduleOutputs.bastion_port;
+          const domain = moduleOutputs.bastion_domains.value[j];
+          const publicKey = moduleOutputs.bastion_host_public_key.value;
+          const port = moduleOutputs.bastion_port.value;
 
           appendFileSync(
             sshDir + "/known_hosts",
@@ -112,11 +127,11 @@ export async function updateSSH({
       }
 
       context.stderr.write(
-        `All hosts in ${sshDir}/known_hosts and ${sshDir}/connection_info updated.`
+        `All hosts in ${sshDir}/known_hosts and ${sshDir}/connection_info updated.\n`
       );
     } else {
       context.stderr.write(
-        `Warning: No configuration file exists at ${sshDir}/config.yaml Skipping credential setup...`
+        `Warning: No configuration file exists at ${sshDir}/config.yaml Skipping credential setup...\n`
       );
     }
   }

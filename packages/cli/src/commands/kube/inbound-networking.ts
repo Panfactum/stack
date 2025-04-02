@@ -250,6 +250,7 @@ export const setupInboundNetworking = async ({
 
   await updateSSH({
     context,
+    verbose,
   });
 
   const clusterName = await getConfigFileKey({
@@ -284,6 +285,7 @@ export const setupInboundNetworking = async ({
   await updateSSH({
     buildKnownHosts: true,
     context,
+    verbose,
   });
 
   // To mitigate the long-running background process dying over time, we'll kill it here
