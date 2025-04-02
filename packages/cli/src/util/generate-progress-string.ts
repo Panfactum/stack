@@ -23,7 +23,7 @@ export function generateProgressString({
   totalSteps,
 }: ProgressOptions): string {
   // Ensure completedSteps doesn't exceed totalSteps
-  const validCompletedSteps = Math.min(completedSteps, totalSteps);
+  const validCompletedSteps = Math.max(0, Math.min(completedSteps, totalSteps));
   
   // Calculate the percentage (rounded to whole number)
   const percentage =
