@@ -22,13 +22,16 @@ export function generateProgressString({
   completedSteps,
   totalSteps,
 }: ProgressOptions): string {
+  // Ensure completedSteps doesn't exceed totalSteps
+  const validCompletedSteps = Math.min(completedSteps, totalSteps);
+  
   // Calculate the percentage (rounded to whole number)
   const percentage =
-    totalSteps === 0 ? 0 : Math.round((completedSteps / totalSteps) * 100);
+    totalSteps === 0 ? 0 : Math.round((validCompletedSteps / totalSteps) * 100);
 
   // Generate the progress bar parts
-  const completedPart = "=".repeat(completedSteps * 2);
-  const remainingPart = " ".repeat((totalSteps - completedSteps) * 2);
+  const completedPart = "=".repeat(validCompletedSteps * 2);
+  const remainingPart = " ".repeat((totalSteps - validCompletedSteps) * 2);
 
   // Combine parts into the final string
   return `[${completedPart}${remainingPart}] ${percentage}% complete\n\n`;
