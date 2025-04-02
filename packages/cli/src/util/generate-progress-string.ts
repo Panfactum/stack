@@ -23,7 +23,7 @@ export function generateProgressString({
   totalSteps,
 }: ProgressOptions): string {
   // Calculate the percentage (rounded to whole number)
-  const percentage = Math.round((completedSteps / totalSteps) * 100);
+  const percentage = totalSteps === 0 ? 0 : Math.round((completedSteps / totalSteps) * 100);
 
   // Generate the progress bar parts
   const completedPart = "=".repeat(completedSteps * 2);
