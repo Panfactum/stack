@@ -129,6 +129,9 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.17)
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@typescript-eslint/eslint-plugin':
         specifier: 6.5.0
         version: 6.5.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1)(typescript@5.2.2)
@@ -204,6 +207,12 @@ importers:
       eslint-plugin-unused-imports:
         specifier: 3.0.0
         version: 3.0.0(@typescript-eslint/eslint-plugin@6.5.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1)
+      hast:
+        specifier: ^1.0.0
+        version: 1.0.0
+      hast-util-to-string:
+        specifier: ^3.0.1
+        version: 3.0.1
       mdx:
         specifier: ^0.3.1
         version: 0.3.1
@@ -282,6 +291,9 @@ importers:
       typescript:
         specifier: 5.2.2
         version: 5.2.2
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -3172,6 +3184,10 @@ packages:
 
   hast-util-whitespace@3.0.0:
     resolution: {integrity: sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw==}
+
+  hast@1.0.0:
+    resolution: {integrity: sha512-vFUqlRV5C+xqP76Wwq2SrM0kipnmpxJm7OfvVXpB35Fp+Fn4MV+ozr+JZr5qFvyR1q/U+Foim2x+3P+x9S1PLA==}
+    deprecated: Renamed to rehype
 
   hastscript@9.0.0:
     resolution: {integrity: sha512-jzaLBGavEDKHrc5EfFImKN7nZKKBdSLIdGvCwDZ9TfzbF2ffXiov8CKE445L2Z1Ek2t/m4SKQ2j6Ipv7NyUolw==}
@@ -9636,6 +9652,8 @@ snapshots:
   hast-util-whitespace@3.0.0:
     dependencies:
       '@types/hast': 3.0.4
+
+  hast@1.0.0: {}
 
   hastscript@9.0.0:
     dependencies:

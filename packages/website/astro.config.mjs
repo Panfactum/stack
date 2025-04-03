@@ -19,7 +19,7 @@ import tailwindcss from 'tailwindcss'
 import tailwindcssNesting from 'tailwindcss/nesting'
 import autoprefixer from 'autoprefixer'
 import postcssImporter from 'postcss-import';
-import rehypeCodeGroup from "rehype-code-group";
+import rehypeCodeGroup from "./src/lib/plugins/codeGroups.ts";
 
 const DEFAULT_SITE_URL = "http://localhost:4321"
 
