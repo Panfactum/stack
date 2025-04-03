@@ -285,6 +285,9 @@ importers:
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^4.3.0
@@ -2580,6 +2583,15 @@ packages:
       eslint-plugin-import: ^2.25.2
       eslint-plugin-n: '^15.0.0 || ^16.0.0 '
       eslint-plugin-promise: ^6.0.0
+    peerDependenciesMeta:
+      eslint:
+        optional: true
+      eslint-plugin-import:
+        optional: true
+      eslint-plugin-n:
+        optional: true
+      eslint-plugin-promise:
+        optional: true
 
   eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
@@ -2705,6 +2717,8 @@ packages:
       eslint: ^8.0.0
     peerDependenciesMeta:
       '@typescript-eslint/eslint-plugin':
+        optional: true
+      eslint:
         optional: true
 
   eslint-rule-composer@0.3.0:
@@ -5974,8 +5988,8 @@ packages:
       typescript: ^4.9.4 || ^5.0.2
       zod: ^3
 
-  zod@3.24.1:
-    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+  zod@3.24.2:
+    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
   zwitch@1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
@@ -6106,7 +6120,7 @@ snapshots:
     dependencies:
       sitemap: 8.0.0
       stream-replace-string: 2.0.0
-      zod: 3.24.1
+      zod: 3.24.2
 
   '@astrojs/solid-js@5.0.4(@types/node@22.10.5)(jiti@1.21.7)(lightningcss@1.28.2)(solid-devtools@0.33.0(solid-js@1.9.4)(vite@6.0.11(@types/node@22.10.5)(jiti@1.21.7)(lightningcss@1.28.2)(terser@5.37.0)(tsx@4.19.1)(yaml@2.7.0)))(solid-js@1.9.4)(terser@5.37.0)(tsx@4.19.1)(yaml@2.7.0)':
     dependencies:
@@ -7847,9 +7861,9 @@ snapshots:
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.1.2
-      zod: 3.24.1
-      zod-to-json-schema: 3.24.1(zod@3.24.1)
-      zod-to-ts: 1.2.0(typescript@5.2.2)(zod@3.24.1)
+      zod: 3.24.2
+      zod-to-json-schema: 3.24.1(zod@3.24.2)
+      zod-to-ts: 1.2.0(typescript@5.2.2)(zod@3.24.2)
     optionalDependencies:
       sharp: 0.33.5
     transitivePeerDependencies:
@@ -8744,7 +8758,7 @@ snapshots:
       semver: 7.6.3
 
   eslint-config-standard@17.1.0(eslint-plugin-import@2.28.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1))(eslint-plugin-n@16.0.1(eslint@8.57.1))(eslint-plugin-promise@6.1.1(eslint@8.57.1))(eslint@8.57.1):
-    dependencies:
+    optionalDependencies:
       eslint: 8.57.1
       eslint-plugin-import: 2.28.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1)
       eslint-plugin-n: 16.0.1(eslint@8.57.1)
@@ -8959,17 +8973,17 @@ snapshots:
 
   eslint-plugin-unused-imports@3.0.0(@typescript-eslint/eslint-plugin@6.5.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1):
     dependencies:
-      eslint: 8.57.1
       eslint-rule-composer: 0.3.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 6.5.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1)(typescript@4.9.5)
+      eslint: 8.57.1
 
   eslint-plugin-unused-imports@3.0.0(@typescript-eslint/eslint-plugin@6.5.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1):
     dependencies:
-      eslint: 8.57.1
       eslint-rule-composer: 0.3.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 6.5.0(@typescript-eslint/parser@6.5.0(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1)(typescript@5.2.2)
+      eslint: 8.57.1
 
   eslint-rule-composer@0.3.0: {}
 
@@ -12947,16 +12961,16 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zod-to-json-schema@3.24.1(zod@3.24.1):
+  zod-to-json-schema@3.24.1(zod@3.24.2):
     dependencies:
-      zod: 3.24.1
+      zod: 3.24.2
 
-  zod-to-ts@1.2.0(typescript@5.2.2)(zod@3.24.1):
+  zod-to-ts@1.2.0(typescript@5.2.2)(zod@3.24.2):
     dependencies:
       typescript: 5.2.2
-      zod: 3.24.1
+      zod: 3.24.2
 
-  zod@3.24.1: {}
+  zod@3.24.2: {}
 
   zwitch@1.0.5: {}
 

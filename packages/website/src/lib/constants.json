@@ -1,4 +1,16 @@
 {
-  "panfactum_version_main": "main",
-  "panfactum_version_edge": "edge.25-04-03"
+  "versions": {
+    "main": {
+      "ref": "main",
+      "placeholder": "__PANFACTUM_VERSION_MAIN__",
+      "label": "Unreleased",
+      "slug": "main"
+    },
+    "edge": {
+      "placeholder": "__PANFACTUM_VERSION_EDGE__",
+      "ref": "edge.25-04-03",
+      "label": "Edge",
+      "slug": "edge"
+    }
+  }
 }

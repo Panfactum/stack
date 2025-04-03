@@ -14,7 +14,7 @@ import {
 } from "solid-js";
 
 import { algoliaClient } from "@/lib/algolia-client.ts";
-import { algoliaEnv, Versions } from "@/lib/constants.ts";
+import { algoliaEnv } from "@/lib/constants.ts";
 import { DocsVersionProvider, useDocsVersion } from "@/state/docsVersion.tsx";
 
 import { isSearchModalOpen } from "./SearchDialogState.ts";
@@ -60,7 +60,7 @@ const client = algoliaClient(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
 
 const fetchSearchResults = async (input: {
   query: string;
-  version: Versions;
+  version: string;
 }) => {
   if (input.query == "") {
     return [];

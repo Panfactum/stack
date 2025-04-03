@@ -80,7 +80,8 @@
     "tailwindcss-animate": "^1.0.7",
     "tooltip": "link:@kobalte/core/tooltip",
     "typescript": "5.2.2",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.0.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",

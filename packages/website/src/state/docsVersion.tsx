@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 import { isServer } from "solid-js/web";
 
-import { Versions } from "@/lib/constants.ts";
 import { DOCS_BASE_PATH } from "@/pages/docs/_components/constants.ts";
 import { getDocsPathComponents } from "@/pages/docs/_components/util/getDocsPathComponents.ts";
 
@@ -30,7 +29,7 @@ import { getDocsPathComponents } from "@/pages/docs/_components/util/getDocsPath
   2. You should ALWAYS set the docs version via the `setDocsVersion` function.
  */
 
-type DocsVersionContext = [() => Versions, (v: Versions) => void];
+type DocsVersionContext = [() => string, (v: string) => void];
 const docsVersionContext = createContext<DocsVersionContext>();
 const STATE_KEY = "pf-active-version";
 export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
@@ -38,9 +37,9 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
 ) => {
   const versionFromPath = () => getDocsPathComponents(props.fullPath).version;
 
-  const [_docsVersion, _setDocsVersion] = createSignal<Versions>(Versions.edge);
+  const [_docsVersion, _setDocsVersion] = createSignal<string>("edge");
 
-  const setDocsVersion = (newVersion: Versions) => {
+  const setDocsVersion = (newVersion: string) => {
     if (!isServer) {
       const pathname = window.location.pathname;
       if (pathname.startsWith(`${DOCS_BASE_PATH}/${_docsVersion()}`)) {
@@ -69,7 +68,7 @@ export const DocsVersionProvider: ParentComponent<{ fullPath: string }> = (
       setTimeout(() => {
         const savedVersion = window.localStorage.getItem(STATE_KEY);
         if (savedVersion) {
-          _setDocsVersion(savedVersion as Versions);
+          _setDocsVersion(savedVersion);
         }
       }, 0);
     }
