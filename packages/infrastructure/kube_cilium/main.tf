@@ -171,6 +171,12 @@ resource "helm_release" "cilium" {
         mode    = "eni"
         iamRole = module.aws_permissions.role_arn
       }
+
+      // No need to masquerade as the host node since each pod
+      // gets a VPC IP address in AWS. This also prevents
+      // NLB hairpinning issues if multiple ENIs ever get attached.
+      enableIPv4Masquerade = false
+
       egressMasqueradeInterfaces = "eth0"
       routingMode                = "native"
 
