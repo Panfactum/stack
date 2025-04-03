@@ -409,6 +409,18 @@ variable "temporal_db_max_conns" {
   default     = 100 # Higher than max_idle_conns, as recommended
 }
 
+variable "temporal_env" {
+  description = "Additional temporal env variables"
+  type        = map(string)
+  default     = {}
+}
+
+variable "temporal_history_retention_in_days" {
+  description = "TEMPORAL_HISTORY_RETENTION_IN_DAYS"
+  type = number
+  default = 30
+}
+
 variable "connector_min_builder_memory_mb" {
   description = "Memory request for connector builder containers"
   type        = number
