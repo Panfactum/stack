@@ -455,7 +455,20 @@ resource "helm_release" "airbyte" {
           }
         }
 
-        env_vars = var.jobs_env_env
+        env_vars = merge(
+          var.global_env,
+          {
+            # Job sync configuration
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_MAX_SUCCESSIVE         = tostring(var.jobs_sync_job_retries_complete_failures_max_successive)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_MAX_TOTAL              = tostring(var.jobs_sync_job_retries_complete_failures_max_total)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_MIN_INTERVAL_S = tostring(var.jobs_sync_job_retries_complete_failures_backoff_min_interval_s)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_MAX_INTERVAL_S = tostring(var.jobs_sync_job_retries_complete_failures_backoff_max_interval_s)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_BASE           = tostring(var.jobs_sync_job_retries_complete_failures_backoff_base)
+            SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_SUCCESSIVE          = tostring(var.jobs_sync_job_retries_partial_failures_max_successive)
+            SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_TOTAL               = tostring(var.jobs_sync_job_retries_partial_failures_max_total)
+            SYNC_JOB_MAX_TIMEOUT_DAYS                                 = tostring(var.jobs_sync_max_timeout_days)
+          }
+        )
       }
 
       # Disable the default PostgreSQL since we're using our own

@@ -270,8 +270,8 @@ variable "jobs_cpu_min_millicores" {
   default     = 100
 }
 
-variable "jobs_env_env" {
-  description = "Additional environment variables for Airbyte jobs configuration (e.g. SYNC_JOB_MAX_ATTEMPTS, JOB_MAIN_CONTAINER_MEMORY_LIMIT, etc.) https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs"
+variable "global_env" {
+  description = "Additional global environment variables for Airbyte configuration https://docs.airbyte.com/operator-guides/configuring-airbyte"
   type        = map(string)
   default     = {}
 }
@@ -285,7 +285,7 @@ variable "jobs_sync_job_retries_complete_failures_max_successive" {
 variable "jobs_sync_job_retries_complete_failures_max_total" {
   description = "Defines the max number of attempts in which no data was synchronized before failing the job."
   type        = number
-  default     = 30
+  default     = 9
 }
 
 variable "jobs_sync_job_retries_complete_failures_backoff_min_interval_s" {
@@ -315,7 +315,7 @@ variable "jobs_sync_job_retries_partial_failures_max_successive" {
 variable "jobs_sync_job_retries_partial_failures_max_total" {
   description = "Defines the max number of attempts in which some data was synchronized before failing the job."
   type        = number
-  default     = 30
+  default     = 9
 }
 
 variable "jobs_sync_max_timeout_days" {
