@@ -1,0 +1,479 @@
+{
+  "modules": [
+    {
+      "module": "authentik_aws_sso",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_core_resources",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_mongodb_atlas_sso_x",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_vault_sso",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
+      "module": "authentik_zoho_sso",
+      "type": "direct",
+      "group": "authentik"
+    },
+    {
+      "module": "aws_account",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_cdn",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_cloudwatch_log_group",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_delegated_zones",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_dns_records",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_dns_zones",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ecr_public_repos",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ecr_pull_through_cache",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ecr_pull_through_cache_addresses",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ecr_repos",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_eks",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_iam_identity_center_permissions",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_kms_encrypt_key",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_registered_domains",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_s3_private_bucket",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_s3_public_website",
+      "type": "submodule",
+      "group": "aws"
+    },
+    {
+      "module": "aws_ses_domain",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "aws_vpc",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "kube_alloy",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo_event_bus",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo_event_source",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_argo_sensor",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_authentik",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_cdn",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_creds",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_ebs_csi",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_aws_lb_controller",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_bastion",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_buildkit",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cert_issuers",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cert_manager",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cilium",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cloudnative_pg",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_constants",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_core_dns",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_cron_job",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_daemon_set",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_deployment",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_descheduler",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_disruption_window_controller",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_external_dns",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_external_snapshotter",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_gha",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_gha_runners",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_grist",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_ingress",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_ingress_nginx",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_internal_cert",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_karpenter",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_karpenter_node_pools",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_kyverno",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_linkerd",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_logging",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_metrics_server",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_monitoring",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_namespace",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_nats",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_nocodb",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_node_image_cache",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_node_image_cache_controller",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_open_cost",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pg_cluster",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pod",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_policies",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pvc_annotator",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_pvc_autoresizer",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_redis_sentinel",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_reloader",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sa_auth_aws",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sa_auth_vault",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sa_auth_workflow",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_scheduler",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_service",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_stateful_set",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sync_config_map",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_sync_secret",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_vault",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_vault_proxy",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_velero",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_vpa",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
+      "module": "kube_workload_utility",
+      "type": "submodule",
+      "group": "kubernetes"
+    },
+    {
+      "module": "mongodb_atlas_identity_provider",
+      "type": "direct",
+      "group": "mongodb"
+    },
+    {
+      "module": "test_kube_pg_cluster",
+      "type": "direct",
+      "group": "example"
+    },
+    {
+      "module": "tf_bootstrap_resources",
+      "type": "direct",
+      "group": "aws"
+    },
+    {
+      "module": "vault_auth_oidc",
+      "type": "direct",
+      "group": "vault"
+    },
+    {
+      "module": "vault_core_resources",
+      "type": "direct",
+      "group": "vault"
+    },
+    {
+      "module": "wf_dockerfile_build",
+      "type": "submodule",
+      "group": "workflow"
+    },
+    {
+      "module": "wf_spec",
+      "type": "submodule",
+      "group": "workflow"
+    },
+    {
+      "module": "wf_tf_deploy",
+      "type": "submodule",
+      "group": "workflow"
+    }
+  ]
+}
