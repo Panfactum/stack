@@ -1,0 +1,177 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="authentik_mongodb_atlas_sso" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/authentik_mongodb_atlas_sso" status="beta" type="direct"/>
+
+# Authentik MongoDB Atlas SSO
+
+This module configures Authentik for integration with MongoDB Atlas.
+
+## Guide
+
+### Deploy MongoDB Atlas Provider & Application in Authentik
+
+1. Add a new a `authentik_mongodb_atlas_sso` folder adjacent to your `authentik_core_resources` folder.
+2. Add a new a `terragrunt.hcl` file that looks like this:
+
+    ::: code-group labels=[authentik\_mongodb\_atlas\_sso/terragrunt.hcl]
+    ```hcl collapse={1-9} "REPLACE_ME"
+    include "panfactum" {
+        path   = find_in_parent_folders("panfactum.hcl")
+        expose = true
+    }
+
+    terraform {
+        source = include.panfactum.locals.pf_stack_source
+    }
+
+    dependency "authentik_core" {
+        config_path = "../authentik_core_resources"
+    }
+
+    dependency "kube_authentik" {
+        config_path = "../kube_authentik"
+    }
+
+    inputs = {
+        organization_name = dependency.authentik_core.outputs.organization_name
+        authentik_domain  = dependency.kube_authentik.outputs.domain
+        
+        # Replace AFTER "Setup MongoDB Atlas Identity Provider"
+        # with the `ACS URL`
+        # Example: https://auth.mongodb.com/sso/saml2/0oaw7vqdsehzxtqZ1297
+        acs_url  = "REPLACE_ME"
+
+        # Replace AFTER "Setup MongoDB Atlas Identity Provider"
+        # with the `Audience URI`
+        # Example: https://www.okta.com/saml2/service-provider/spzsbkposqvrzhbjcdnz
+        audience = "REPLACE_ME"
+
+    }
+    ```
+    :::  
+
+3. Run `pf-tf-init`
+4. Run `terragrunt apply`
+
+### Setup MongoDB Atlas Identity Provider
+
+Please follow the steps defined in the [MongoDB Atlas Identity Provider](/docs/stable-25-04/reference/infrastructure-modules/direct/authentik/mongodb\_atlas\_identity\_provider) and resume here.
+
+### Sync Authentik with the Atlas Settings
+
+![ACS & Audience URL](doc\_images/mongodb-atlas-identity-providers-acs-url.png)
+
+1. Copy and set the `ACS URL` from the MongoDB Atlas Identity Provider setup to the `acs_url` input.
+2. Copy and set the `Audience URI` from the MongoDB Atlas Identity Provider setup to the `audience` input.
+3. Run `terragrunt apply`
+
+### Test the Integration
+
+1. Go to your Authentik instance
+2. Find the mongodb atlas application
+3. Click and confirm that you are able to login
+
+## Providers
+
+The following providers are needed by this module:
+
+- [authentik](https://registry.terraform.io/providers/goauthentik/authentik/2024.8.4/docs) (2024.8.4)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [tls](https://registry.terraform.io/providers/hashicorp/tls/4.0.6/docs) (4.0.6)
+
+## Required Inputs
+
+The following input variables are required:
+
+### acs\_url
+
+Description: The ACS url provided by Mongo Atlas when configuring an external identity provider
+
+Type: `string`
+
+### audience
+
+Description: The Entity URL provided by the Service Provider
+
+Type: `string`
+
+### authentik\_domain
+
+Description: The domain name of the authentik instance
+
+Type: `string`
+
+### organization\_name
+
+Description: The name of your organization
+
+Type: `string`
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### allowed\_groups
+
+Description: Only members of these groups can access MongoDB
+
+Type: `set(string)`
+
+Default: `[]`
+
+### authentik\_namespace
+
+Description: The kubernetes namespace where Authentik is deployed
+
+Type: `string`
+
+Default: `"authentik"`
+
+### media\_configmap
+
+Description: The configmap holding the static media that Authentik will use
+
+Type: `string`
+
+Default: `"media"`
+
+### ui\_description
+
+Description: The description to display in the Authentik web dashboard
+
+Type: `string`
+
+Default: `"MongoDB Atlas"`
+
+## Outputs
+
+The following outputs are exported:
+
+### issuer\_url
+
+Description: The Authentik issuer URL for the MongoDB Atlas provider
+
+### saml\_metadata
+
+Description: The SAML metadata for the MongoDB Atlas provider
+
+### url\_sso\_post
+
+Description: The SSO POST URL for the MongoDB Atlas provider
+
+## Maintainer Notes
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

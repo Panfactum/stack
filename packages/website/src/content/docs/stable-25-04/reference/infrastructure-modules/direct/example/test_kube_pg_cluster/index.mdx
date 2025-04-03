@@ -1,0 +1,156 @@
+import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
+
+{/* lint disable no-duplicate-headings */}
+
+{/* eslint-disable import/order */}
+<ModuleHeader name="test_kube_pg_cluster" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure/test_kube_pg_cluster" status="stable" type="direct"/>
+
+# Test Postgres Cluster on Kubernetes
+
+Used in the [bootstrapping guide](/docs/stable-25-04/guides/bootstrapping/databases) to demonstrate the capabilities of the PostgreSQL cluster.
+
+## Providers
+
+The following providers are needed by this module:
+
+- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
+
+- [kubectl](https://registry.terraform.io/providers/alekc/kubectl/2.1.3/docs) (2.1.3)
+
+- [kubernetes](https://registry.terraform.io/providers/hashicorp/kubernetes/2.34.0/docs) (2.34.0)
+
+- [pf](https://registry.terraform.io/providers/panfactum/pf/0.0.7/docs) (0.0.7)
+
+- [random](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs) (3.6.3)
+
+- [time](https://registry.terraform.io/providers/hashicorp/time/0.10.0/docs) (0.10.0)
+
+- [vault](https://registry.terraform.io/providers/hashicorp/vault/4.5.0/docs) (4.5.0)
+
+## Required Inputs
+
+No required inputs.
+
+## Optional Inputs
+
+The following input variables are optional (have default values):
+
+### aws\_iam\_ip\_allow\_list
+
+Description: A list of IPs that can use the service account token to authenticate with AWS API
+
+Type: `list(string)`
+
+Default: `[]`
+
+### backups\_enabled
+
+Description: Whether this database has backups enabled
+
+Type: `bool`
+
+Default: `true`
+
+### backups\_force\_delete
+
+Description: Whether to delete backups on destroy
+
+Type: `bool`
+
+Default: `false`
+
+### log\_connections\_enabled
+
+Description: Whether to log each connection
+
+Type: `bool`
+
+Default: `false`
+
+### pg\_cpu\_millicores
+
+Description: The amount of cpu to allocate to the postgres pods (in millicores)
+
+Type: `number`
+
+Default: `250`
+
+### pg\_instances
+
+Description: The number of instances to deploy in the postgres cluster
+
+Type: `number`
+
+Default: `2`
+
+### pg\_memory\_mb
+
+Description: The amount of memory to allocate to the postgres pods (in Mi)
+
+Type: `number`
+
+Default: `1000`
+
+### pg\_version
+
+Description: The version of postgres to deploy
+
+Type: `string`
+
+Default: `"16.2-10"`
+
+### pgbouncer\_pool\_mode
+
+Description: What pool\_mode to run pgbouncer in
+
+Type: `string`
+
+Default: `"session"`
+
+### pgbouncer\_version
+
+Description: The version of the cloudnative-pg/pgbouncer image to use
+
+Type: `string`
+
+Default: `"1.22.1"`
+
+### pull\_through\_cache\_enabled
+
+Description: Whether to use the ECR pull through cache for the deployed images
+
+Type: `bool`
+
+Default: `false`
+
+### vpa\_enabled
+
+Description: Whether to enable the vertical pod autoscaler
+
+Type: `bool`
+
+Default: `true`
+
+## Outputs
+
+The following outputs are exported:
+
+### db\_admin\_role
+
+Description: n/a
+
+### db\_reader\_role
+
+Description: n/a
+
+### db\_superuser\_role
+
+Description: n/a
+
+## Usage
+
+No notes
+
+{/* eslint-enable import/order */}
+
+{/* lint enable no-duplicate-headings */}

@@ -31,6 +31,9 @@ elif [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
+# Remove existing release docs (if exists)
+rm -rf "$DOCS_DIR/$RELEASE_SLUG"
+
 # Copy the edge docs
 cp -r "$DOCS_DIR/edge" "$DOCS_DIR/$RELEASE_SLUG"
 
@@ -48,14 +51,16 @@ jq --arg slug "$RELEASE_SLUG" \
   '.versions[$slug] = {"ref": $ref, "placeholder": $placeholder, "label": $label, "slug": $slug}' \
   "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
-# Commit the changes and create the tag
-git checkout -b "$STABLE_BRANCH"
+# Commit the docs changes
 git add "$REPO_ROOT"
 git commit -m "release-channel: $STABLE_BRANCH"
+
+# Commit the changes and create the tag
+git checkout -b "$STABLE_BRANCH"
 git tag --force "$STABLE_VERSION_TAG"
 
 # Push the changes
-git push --atomic origin "$STABLE_BRANCH" "$STABLE_VERSION_TAG"
+git push --atomic origin main "$STABLE_BRANCH" "$STABLE_VERSION_TAG"
 
 # Checkout main
 git checkout main

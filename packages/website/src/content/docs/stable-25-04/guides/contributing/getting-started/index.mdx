@@ -1,0 +1,44 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+<MarkdownAlert severity="info">
+  By contributing to this project, you implicitly agree to follow our [Code of Conduct](https://github.com/Panfactum/stack/blob/main/CODE_OF_CONDUCT.md).
+</MarkdownAlert>
+
+# Getting Started
+
+All the utilities associated with the Panfactum stack are contained in the [stack git repository](https://github.com/Panfactum/stack)
+which is hosted by GitHub. This includes the local development environment, the infrastructure modules, and the documentation
+website. Making changes to the Panfactum stack means updating this repository.
+
+## Setting Up Developer Environment
+
+1. Follow GitHub's instructions for [forking the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
+   If you plan on being a regular contributor, make sure you follow the instructions for syncing the fork with the upstream repo.
+
+2. Follow the installation steps outlined in the Stack's [getting started guide](/docs/stable-25-04/guides/getting-started/install-tooling)
+   to ensure that you have the necessary utilities to launch the Stack's developer environment. You do NOT need
+   to do any of the subsequent steps in that guide.
+
+3. You will have the `direnv allow` the repo's `.envrc` file. Once you do this, all the stack's development utilities
+   should be automatically installed, and you are ready to begin development.
+
+## Understanding Project Setup
+
+The project is broken into "packages" which can be found under the [packages directory](https://github.com/Panfactum/stack/tree/main/packages).
+
+We currently have the following packages:
+
+* [nix](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/nix): Contains both the local devShell for
+  users of the Panfactum stack and the local devShell for Panfactum developers.
+
+* [cli](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/cli): The next-generation CLI for the Panfactum framework. Will
+  eventually reflect the bash scripts in the devShell that run most automations.
+
+* [infrastructure](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/infrastructure): Contains all the
+  infrastructure-as-code modules that comprise the Panfactum stack.
+
+* [website](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_STABLE_25_04__/packages/website): Contains the source code for this website.
+
+## Next Steps
+
+* [Open a pull request](/docs/stable-25-04/guides/contributing/pull-requests)

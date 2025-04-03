@@ -1,0 +1,162 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+# Terragrunt Variables
+
+## Folder Setup
+
+<MarkdownAlert severity="info">
+  For a complete example, see [our reference infrastructure repository](https://github.com/Panfactum/reference-infrastructure).
+</MarkdownAlert>
+
+Your environments folder at `environments_dir` **must** have three levels of scoping for the [configuration-as-code](/docs/stable-25-04/concepts/iac#configuration-as-code):
+
+* environment: A separation of your deployments according to your SDLC conventions (e.g., `development`, `staging`, `production`, etc.)
+
+  * region: A separation of your deployments according to their physical location (e.g., `us-west-2`)
+
+    * module: A separation of your deployments based on the specific infrastructures module being deployed
+
+Accordingly, there are four levels of configuration for parameterizing the behavior of `panfactum.hcl`:
+
+* `global.yaml`: Found at the root of `environments_dir`
+
+* `environment.yaml`: Found at the root of each environment subdirectory
+
+* `region.yaml`: Found at the root of each region subdirectory
+
+* `module.yaml`: Found in each module subdirectory
+
+A few rules about these files:
+
+* These files are optional, but you will use them to configure your providers and other behavior.
+
+* They can each contain *any and every key* found below.
+
+* You should commit these files to version control.
+
+* Conflicts are resolved via specificity (e.g., conflicting `module.yaml` values will override `region.yaml` values which in turn will override `environment.yaml` values, etc.).
+
+* Each file has an optional, user-specific counterpart named `*.user.yaml` (e.g., `region.user.yaml`).
+
+  * Values in these files override the values in their counterparts for local development purposes (e.g., `region.user.yaml` overrides values in `region.yaml`).
+
+  * These files are not committed to version-control; each user will have their own set of values.
+
+**Ultimately your environments folder should look something like this:**
+
+```text
+- environments/
+    - global.yaml
+    - panfactum.hcl
+    - providers/
+      - aws.tftpl
+      - kubernetes.tftpl
+      ***
+    - [environment_1]/
+      - environment.yaml
+      - environment.user.yaml
+      - [region_1]/
+        - region.yaml
+        - region.user.yaml
+        - [module_1]/
+          - module.yaml
+        - [module_2]/
+          - module.yaml
+      - [region_2]/
+        ***
+    - [environment_2]/
+      - environment.yaml
+      - [region_1]/
+         ***
+      - [region_2]/
+        ***
+```
+
+## Variables
+
+These are variables that can be found in the `global.yaml`, `environment.yaml`, `region.yaml` or `module.yaml`
+files (or their `*.user.yaml` counterparts) inside the environments directory.
+
+### Metadata
+
+Sets properties that will impact all Panfactum modules in the module tree.
+
+| Variable      | Type                      | Description                                                                                                                                                                                            | Recommended File   |
+|:--------------|:--------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------|
+| `environment` | string                    | The name of the environment. Used for descriptions and tags.                                                                                                                                           | `environment.yaml` |
+| `region`      | string                    | The name of the region. Used for descriptions and tags.                                                                                                                                                | `region.yaml`      |
+| `sla_target`  | number (`1`, `2`, or `3`) | Sets the desired [SLA Level](https://panfactum.com/docs/edge/guides/deploying-workloads/high-availability). The defaults for Panfactum modules will be automatically adjusted based on the SLA target. Defaults to `3`. | `environment.yaml` |
+| `extra_tags`  | map(string)               | An object containing extra tags to add to all resources in the current scope                                                                                                                           | Any                |
+
+### Inputs
+
+Used to pass extra inputs to all modules in the scope.
+
+| Variable       | Type     | Description                                                                   | Recommended File |
+| :------------- | :------- | :---------------------------------------------------------------------------- | :--------------- |
+| `extra_inputs` | map(any) | An object containing extra inputs to pass to all modules in the current scope | Any              |
+
+### Module Source
+
+Used to configure the `terraform.source` [option](https://terragrunt.gruntwork.io/docs/reference/config-blocks-and-attributes/#terraform) when deploying a module.
+
+| Variable                      | Type    | Description                                                                                                                                                                                                                                                                                                                                              | Recommended File   |
+| :---------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `version`                     | string  | Configures `include.panfactum.locals.source`. The version of the local modules from the `iac_dir` directory you are using.  Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in your infrastructure repo (`repo_url` in `panfactum.yaml`) or `local` to indicate you want to deploy the local version of the code. | `environment.yaml` |
+| `pf_stack_version`            | string  | Configures `include.panfactum.locals.pf_stack_source`. The version of the Panfactum stack you are using. Must be a valid [git ref](https://git-scm.com/book/en/v2/Git-Internals-Git-References) in the [Panfactum Stack repo.](https://github.com/Panfactum/stack)                                                                                       | `environment.yaml` |
+| `pf_stack_local_path`         | string  | Iff `pf_stack_version` is `local`, then this should be an ABSOLUTE path to root of a local copy of the `https://github.com/Panfactum/stack` repository on your local filesystem. The code from this local repository will be used when you deploy Panfactum modules or submodules.                                                                       | `global.user.yaml` |
+| `pf_stack_local_use_relative` | boolean | Controls whether Terragrunt provides `pf_module_source` as an absolute or relative path when `pf_stack_version` is `local`. By default this is `true` as this improves performance and allows automatic code updates. However, relative paths will not work if using Panfactum submodules in first-party IaC submodules.                                 | `global.user.yaml` |
+| `module`                      | string  | If using `include.panfactum.locals.source`, defines which module from the `iac_dir` directory to use. If using, `include.panfactum.locals.pf_stack_source`, defines which module from `packages/infrastructure` to use. Defaults to the name of the module directory.                                                                                    | `module.yaml`      |
+
+### State Backend Setup
+
+Each environment will have its own, **independent** [OpenTofu backend](https://opentofu.org/docs/language/settings/backends/configuration/)
+for storing information about the tracked infrastructure resources. We utilize the [S3 backend](https://opentofu.org/docs/language/settings/backends/s3/)
+and store the state for each environment inside of that environment's AWS account.
+
+| Variable              | Type   | Description                                                   | Recommended File   |
+| :-------------------- | :----- | :------------------------------------------------------------ | :----------------- |
+| `tf_state_account_id` | string | The AWS account ID for the account containing the S3 backend  | `environment.yaml` |
+| `tf_state_profile`    | string | The AWS profile to use for authenticating with the S3 backend | `environment.yaml` |
+| `tf_state_region`     | string | The AWS region to use for the S3 bucket                       | `environment.yaml` |
+| `tf_state_bucket`     | string | The name of the state bucket                                  | `environment.yaml` |
+| `tf_state_lock_table` | string | The name of the DynamoDB table for the state locks            | `environment.yaml` |
+
+### Providers
+
+Some providers have additional configuration values that must be set.
+
+#### `aws` Provider
+
+| Variable                   | Type   | Description                                                             | Recommended File   |
+| :------------------------- | :----- | :---------------------------------------------------------------------- | :----------------- |
+| `aws_account_id`           | string | The AWS account ID to use for the provider                              | `environment.yaml` |
+| `aws_profile`              | string | The AWS profile that will be used for provider authentication           | `environment.yaml` |
+| `aws_region`               | string | The AWS region to use for the provider                                  | `region.yaml`      |
+| `aws_secondary_account_id` | string | The AWS account ID to use for the secondary provider                    | `environment.yaml` |
+| `aws_secondary_profile`    | string | The AWS profile that will be used for secondary provider authentication | `environment.yaml` |
+| `aws_secondary_region`     | string | The AWS region to use for the secondary provider                        | `region.yaml`      |
+
+*Note: The `aws` provider is actually a set of two different `aws` provider configurations: a primary and secondary.
+The secondary is used in some Panfactum modules to configure things like backups in a secondary region.*
+
+#### `kubernetes` Provider
+
+| Variable              | Type   | Description                                                                             | Recommended File   |
+| :-------------------- | :----- | :-------------------------------------------------------------------------------------- | :----------------- |
+| `kube_api_server`     | string | The `https` URL of the Kubernetes API server the provider should connect to             | `region.yaml`      |
+| `kube_config_context` | string | The name of the context the provider should use in your repo's `kubeconfig` file        | `region.yaml`      |
+
+#### `vault` Provider
+
+| Variable     | Type   | Description                                                        | Recommended File |
+| :----------- | :----- | :----------------------------------------------------------------- | :--------------- |
+| `vault_addr` | string | The `https` URL of the Vault server the provider should connect to. Will fallback to the `VAULD_ADDR` if not provided. | `region.yaml`    |
+
+#### `authentik` Provider
+
+| Variable            | Type   | Description                                                                                        | Recommended File   |
+| :------------------ | :----- | :------------------------------------------------------------------------------------------------- | :----------------- |
+| `authentik_url`     | string | The `https` URL of the Authenik server the provider should connect to                              | `global.yaml`      |
+
+*To apply modules that use the Authentik provider, you will also need to have `AUTHENTIK_TOKEN` set in [your .env file.](/docs/stable-25-04/reference/configuration/dotenv)*
