@@ -555,6 +555,12 @@ resource "helm_release" "airbyte" {
             memory = "${var.worker_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        env_vars = merge(var.worker_env, {
+          DISCOVER_REFRESH_WINDOW_MINUTES = tostring(var.worker_discovery_refresh_window_minutes)
+          MAX_CHECK_WORKERS = tostring(var.worker_max_check_workers)
+          MAX_SYNC_WORKERS = tostring(var.worker_max_sync_workers)
+        })
       }
 
       # Temporal configuration
