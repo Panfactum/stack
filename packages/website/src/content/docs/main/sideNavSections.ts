@@ -541,6 +541,10 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
       {
         text: "Edge",
         path: "/edge",
+      },
+      {
+        text: "Stable.25-04",
+        path: "/stable-25-04"
       }
     ],
   },

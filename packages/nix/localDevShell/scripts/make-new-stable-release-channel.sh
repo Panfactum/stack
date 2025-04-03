@@ -12,7 +12,7 @@ fi
 
 RELEASE_SLUG="stable-$1"
 RELEASE_PLACEHODLER="__PANFACTUM_VERSION_STABLE_${1//-/_}__"
-CHANNEL_LABEL="Stable $1"
+CHANNEL_LABEL="Stable.$1"
 STABLE_BRANCH="stable.$1"
 STABLE_VERSION_TAG="$STABLE_BRANCH.0"
 
@@ -48,10 +48,14 @@ jq --arg slug "$RELEASE_SLUG" \
    '.versions[$slug] = {"ref": $ref, "placeholder": $placeholder, "label": $label, "slug": $slug}' \
    "$CONSTANTS_FILE" > "$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
-# # Commit the changes and create the tag
-# git add "$REPO_ROOT"
-# git commit -m "release: $VERSION_TAG"
-# git tag --force "$VERSION_TAG"
+# Commit the changes and create the tag
+git checkout -b "$STABLE_BRANCH"
+git add "$REPO_ROOT"
+git commit -m "release-channel: $STABLE_BRANCH"
+git tag --force "$VERSION_TAG"
 
-# # Push the changes
-# git push --atomic origin main "$VERSION_TAG"
+# Push the changes
+git push --atomic origin "$STABLE_BRANCH" "$VERSION_TAG"
+
+# Checkout main
+git checkout main
