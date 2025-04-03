@@ -768,30 +768,6 @@ resource "helm_release" "airbyte" {
         # Add temporal-specific env vars
         extraEnv = [
           {
-            name  = "TEMPORAL_DB_HOST"
-            value = module.database.rw_service_name # Direct connection for Temporal
-          },
-          {
-            name  = "TEMPORAL_DB_PORT"
-            value = tostring(module.database.rw_service_port)
-          },
-          {
-            name  = "POSTGRES_SEEDS"
-            value = module.database.rw_service_name # Direct connection
-          },
-          {
-            name  = "DB_PORT"
-            value = tostring(module.database.rw_service_port)
-          },
-          {
-            name  = "SQL_MAX_IDLE_CONNS"
-            value = tostring(var.temporal_db_max_idle_conns)
-          },
-          {
-            name  = "SQL_MAX_CONNS"
-            value = tostring(var.temporal_db_max_conns)
-          },
-          {
             name = "TEMPORAL_BROADCAST_ADDRESS"
             valueFrom = {
               fieldRef = {
@@ -799,17 +775,19 @@ resource "helm_release" "airbyte" {
               }
             }
           },
-          # Ensure proper service addressing
-          {
-            name  = "TEMPORAL_ADDRESS"
-            value = "airbyte-temporal:7233"
-          },
-          # Set appropriate timeouts to avoid protocol errors
-          {
-            name  = "TEMPORAL_CLI_TIMEOUT"
-            value = "60s"
-          }
         ]
+
+        env_vars = merge(var.temporal_env, {
+          TEMPORAL_HISTORY_RETENTION_IN_DAYS = tostring(var.temporal_history_retention_in_days)
+          TEMPORAL_DB_HOST = module.database.rw_service_name
+          TEMPORAL_DB_PORT = tostring(module.database.rw_service_port)
+          POSTGRES_SEEDS = module.database.rw_service_name
+          DB_PORT = tostring(module.database.rw_service_port)
+          SQL_MAX_IDLE_CONNS = tostring(var.temporal_db_max_idle_conns)
+          SQL_MAX_CONNS = tostring(var.temporal_db_max_conns)
+          TEMPORAL_ADDRESS = "airbyte-temporal:7233"
+          TEMPORAL_CLI_TIMEOUT = "60s"
+        })
       }
 
       # Pod sweeper configuration
