@@ -133,17 +133,17 @@ export const styles = `
   cursor: pointer;
   border: none;
   background: none;
-  &.${defaultClassNames.activeTabClass} {
-    border-bottom: 2px solid;
-    font-weight: bold;
-  }
+}
+.${defaultClassNames.tabClass}.${defaultClassNames.activeTabClass} {
+  border-bottom: 2px solid;
+  font-weight: bold;
 }
 .${defaultClassNames.blockContainerClass} {
   display: none;
   overflow-x: auto;
-  &.${defaultClassNames.activeBlockClass} {
-    display: block;
-  }
+}
+.${defaultClassNames.blockContainerClass}.${defaultClassNames.activeBlockClass} {
+  display: block;
 }
 `;
 
