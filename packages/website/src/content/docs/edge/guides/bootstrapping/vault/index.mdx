@@ -10,9 +10,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Hashicorp Vault
 
-## Objective
-
-Deploy and configure a highly available [Hashicorp Vault](https://www.vaultproject.io/) cluster.
+<p class="subtitle">Deploy and configure a highly available [Hashicorp Vault](https://www.vaultproject.io/) cluster.</p>
 
 ## Background
 
@@ -33,15 +31,43 @@ Let's do this now:
 
 1. Create a new directory adjacent to your `aws_eks` module called `kube_vault`.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/kube_vault/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to that directory that looks like this:
 
-3. For now, set `ingress_enabled` to `false`. We will enable it when we install the ingress subsystem.
+      ::: code-group labels=[kube_vault/terragrunt.hcl]
+      ```hcl collapse={1-14} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
 
-4. Run `pf-tf-init` to enable the required providers.
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
 
-5. Run `terragrunt apply`.
+      dependency "ebs_csi" {
+         config_path  = "../kube_aws_ebs_csi"
+         skip_outputs = true
+      }
 
-6. Note that this deployment **may not succeed,** but you should see three vault instances which are in the unready state:
+      inputs = {
+
+         // Must be a subdomain of the environment.
+         // Example: vault.prod.panfactum.com
+         vault_domain    = "REPLACE_ME"
+
+         // This allows the Vault installation to continue even though
+         // there will be errors since it hasn't been manually
+         // initilaized yet. We will do that in subsequent steps.
+         wait            = false
+      }
+      ```
+      :::
+
+5. Run `pf-tf-init` to enable the required providers.
+
+6. Run `terragrunt apply`.
+
+7. Note that this deployment **will not succeed,** and you should see three vault instances which are in the unready state:
 
    <MarkdownImage src={unreadyVaultImg} alt="Vault pods are in the unready state" />
 
@@ -123,8 +149,8 @@ a remote terminal session to perform the initialization:
 3. Run `vault operator init -recovery-shares=<...> -recovery-threshold=<...>`. Set `recovery-shares` and
    `recovery-threshold` to the values you decided above. You should see a message like the following:
 
-   ```shellsession
-   Recovery Key 1: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
+   ```shellsession "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" "hvs.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+   Recovery Key 1: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
    Initial Root Token: hvs.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -141,7 +167,7 @@ a remote terminal session to perform the initialization:
    step when prompted. After each unseal operation you should see the below message. **Continue running unseal operations until you
    you see `Sealed` as `false` in the output** (using a different recovery key each time).
 
-   ```shellsession
+   ```shellsession "Sealed                   false"
    Key                      Value
    ---                      -----
    Recovery Seal Type       shamir
@@ -219,15 +245,20 @@ Here is how we will work around this issue:
 
 2. Set the `VAULT_ADDR` in your `.env` file as follows:
 
-   ```dotenv
+   ::: code-group labels=[.env]
+   ```dotenv ins={1}
    VAULT_ADDR=http://127.0.0.1:8200
    ```
+   :::
 
 3. Use the root token you received in the previous section to set the `VAULT_TOKEN` in your `.env` file as follows:
 
-   ```dotenv
+   ::: code-group labels=[.env]
+   ```dotenv ins={2}
+   VAULT_ADDR=http://127.0.0.1:8200
    VAULT_TOKEN=hvs.xxxxxxxxxxxxxxxxxxxxxxx
    ```
+   :::
 
 4. Run `vault status` to verify you are able to connect to the cluster. You should receive an output that looks
    similar to below:
@@ -264,13 +295,65 @@ Here is how we will work around this issue:
 
 Let's now deploy [vault\_core\_resources](/docs/edge/reference/infrastructure-modules/direct/vault/vault_core_resources):
 
-1. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
+1. Before proceeding, remove `wait = false` from the `kube_vault` module. It is now expected that future `kube_vault` deployments should succeed.
 
-2. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/vault_core_resources/terragrunt.hcl).
+      ::: code-group labels=[kube_vault/terragrunt.hcl]
+      ```hcl collapse={1-14,16-17} del={18} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
 
-3. Run `pf-tf-init` to enable the required providers.
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
 
-4. Run `terragrunt apply`.
+      dependency "ebs_csi" {
+         config_path  = "../kube_aws_ebs_csi"
+         skip_outputs = true
+      }
+
+      inputs = {
+         vault_domain    = "REPLACE_ME"
+
+         wait            = false
+      }
+      ```
+      :::
+
+2. Create a new directory adjacent to your `kube_vault` module called `vault_core_resources`.
+
+3. Add a `terragrunt.hcl` to that directory that looks like this:
+
+      ::: code-group labels=[vault_core_resources/terragrunt.hcl]
+      ```hcl collapse={1-9}  "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      dependency "cluster" {
+         config_path = "../aws_eks"
+      }
+
+      dependency "vault" {
+         config_path = "../kube_vault"
+      }
+
+      inputs = {
+         vault_internal_url = dependency.vault.outputs.vault_internal_url
+         kubernetes_url     = dependency.cluster.outputs.cluster_url
+      }
+      ```
+      :::
+
+4. Run `pf-tf-init` to enable the required providers.
+
+5. Run `terragrunt apply`.
 
 ## Testing
 

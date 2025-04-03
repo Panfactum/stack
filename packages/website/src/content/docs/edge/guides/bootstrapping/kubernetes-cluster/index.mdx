@@ -9,11 +9,9 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Kubernetes Cluster
 
-## Objective
-
-Deploy a Kubernetes cluster on
+<p class="subtitle">Deploy a Kubernetes cluster on
 [AWS EKS](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/amazon-elastic-kubernetes-service.html)
-using our [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module.
+using our [aws\_eks](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) module.</p>
 
 ## A Quick Note
 
@@ -86,14 +84,58 @@ The following instructions apply for **every** environment-region combination wh
 
 2. Add an `aws_ecr_pull_through_cache` directory to that region.
 
-3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_ecr_pull_through_cache/terragrunt.hcl).
+3. Add a `terragrunt.hcl` and sops-encrypted `secrets.yaml` to that directory that looks like this:
+
+      ::: code-group labels=[aws_ecr_pull_through_cache/terragrunt.hcl, aws_ecr_pull_through_cache/secrets.yaml]
+      ```hcl collapse={1-9} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      locals {
+         secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+      }
+
+      inputs = {
+         docker_hub_username     = "REPLACE_ME"
+         docker_hub_access_token = local.secrets.docker_hub_access_token
+         github_username         = "REPLACE_ME"
+         github_access_token     = local.secrets.github_access_token
+      }
+      ```
+      ```yaml
+      docker_hub_access_token: ENC[AES256_GCM,data:sfHAIQE6UMhj8Nt4t6h58wCsaXxrvVswDQS090i1K4f7VmmR,iv:8pJWO4ezmNg2gOf2oUbiqJbaJIChTT6Lc5OUiZ1BjC8=,tag:6+NxD3Ucl1i2hwfInkRQHg==,type:str]
+      github_access_token: ENC[AES256_GCM,data:MWfsW39UGATwIfDe/w77ed3DOXndvDaZPherUsXqzqUE5LYOfMAsDw==,iv:N9CfuhTIJ+dZNP0Ngq+EKCUSdpIXZSChaw7I5H38ZxI=,tag:/OfLsqED51L3Ji6iyGRhUg==,type:str]
+      sops:
+         kms:
+            - arn: arn:aws:kms:us-east-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+               created_at: "2024-04-05T14:51:33Z"
+               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQEiLGnxR5S0pzjrxVdwE2M4AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMkkLy3mUgU3uwpptXAgEQgDvRj3ydpGP8B0cjHLGDWepyqFIA+2XJaNkgqfWUY8CVIFCP7YSeUIOIv34UUt2uts2e94wQTYAxS4ITWw==
+               aws_profile: production-superuser
+            - arn: arn:aws:kms:us-west-2:891377197483:key/mrk-d8075b5c1dc8468db33448f40ae92b5c
+               created_at: "2024-04-05T14:51:33Z"
+               enc: AQICAHiO33BhcW4FdrQk4VmdZqD44nTqvEUzee/kwr4reXJeMQGrVJHw9Bkv7OZzsX7WCo+vAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMN3rRF+6gxTL8REbXAgEQgDuObzBPe+Ahl7lJ9zvbX2toJgsvuzJQh6rKHCld1tslbODg/C0/0vRjEShF1waw3U3R3wLRLpxumv3Blw==
+               aws_profile: production-superuser
+         gcp_kms: []
+         azure_kv: []
+         hc_vault: []
+         age: []
+         lastmodified: "2024-04-05T14:51:34Z"
+         mac: ENC[AES256_GCM,data:suw9298kNaX+Kg35Zny2xhEFKcTzioLrv/kfqyoZ+TjxCogJQdadzemjv3rlInQC3u8AGMEaN0qClYa6d1M/7Qc5t666zpETsSmRHfsD7tY33z0HDvDmAp43ADWPdI9Wv+G8RMJ3fs9/MI6FU4AGZlfhE+HC5TKs7oIV6BlQWPM=,iv:3VGtu70GZneuhnqiO6s53B+HQeUybrrGM46XDzQcr6Y=,tag:1fVWus0UDxKS5FmqqspZIQ==,type:str]
+         pgp: []
+         unencrypted_suffix: _unencrypted
+         version: 3.8.1
+      ```
+      :::
 
 4. Run `pf-tf-init` to enable the required providers.
 
 5. Run `terragrunt apply`.
-
-6. In your `region.yaml`, set `extra_inputs.pull_through_cache_enabled` to `true` like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml).
-   This ensures all modules deployed in this environment will utilize the cache.
 
 <MarkdownAlert severity="warning">
   This should only be deployed *once* per environment-region combination. If you have multiple clusters
@@ -108,29 +150,46 @@ The following instructions apply for **every** environment-region combination wh
 
 2. Add an `aws_eks` directory to that region.
 
-3. Add a `terragrunt.hcl` to that directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/aws_eks/terragrunt.hcl).
+3. Add a `terragrunt.hcl` to that directory that looks like this:
+
+      ::: code-group labels=[aws_eks/terragrunt.hcl]
+      ```hcl collapse={1-9} "REPLACE_ME"
+      include "panfactum" {
+         path   = find_in_parent_folders("panfactum.hcl")
+         expose = true
+      }
+
+      terraform {
+         source = include.panfactum.locals.pf_stack_source
+      }
+
+      dependency "aws_vpc" {
+         config_path = "../aws_vpc"
+      }
+
+      inputs = {
+         vpc_id     = dependency.aws_vpc.outputs.vpc_id
+         egress_ips = dependency.aws_vpc.outputs.nat_ips
+
+         // Can be named anything but MUST be unique within your organization.
+         // We recommend "<environment_name>-<region_name>"
+         // Example: "production-us-east-2"
+         cluster_name        = "REPLACE_ME"
+         cluster_description = "REPLACE_ME"
+
+         // Should contain one subnet if sla_target was set to `1`, and three subnets otherwise.
+         // These should be private subnets unless you have a specific need for public nodes --
+         // note that public subnets are a security risk.
+         // Example: ["PRIVATE_A", "PRIVATE_B", "PRIVATE_C"]
+         node_subnets = [REPLACE_ME]
+
+         // We will disable this once more cluster utilities are installed
+         bootstrap_mode_enabled = true 
+      }
+      ```
+      :::
 
 4. Run `pf-tf-init` to enable the required providers.
-
-5. Do **NOT** apply the module yet.
-
-### Choose a Cluster Name
-
-Your cluster name should be globally unique within your organization and descriptive. We will use it
-as an identifier in many tools, and it should be immediately apparent which cluster is being referred to if
-referenced by name. A good name would look like `production-primary` indicating that this cluster is the
-primary cluster in the production environment.
-
-### Choose Kubernetes Version
-
-We *strongly* recommend leaving this as the module default. The version was specifically chosen for compatibility
-with the rest of the Panfactum stack. See the [module documentation](/docs/edge/reference/infrastructure-modules/direct/aws/aws_eks) if
-you need to override either the control plane or node group versions.
-
-### Enable Bootstrapping Mode
-
-Set `bootstrap_mode_enabled` to `true`. This will ensure your node count and type is sufficient to complete the
-bootstrapping guide. Once autoscaling is installed, this can be set to `false` to reduce resource usage.
 
 ### Deploy the Cluster
 
@@ -145,7 +204,7 @@ issues.
 
 ## Connect to the Cluster
 
-### Set Up cluster\_info Metadata and CA Certs
+### Set Up Metadata and CA Certs
 
 The Panfactum devShell comes with utilities that make connecting to your cluster a breeze.
 
@@ -154,17 +213,17 @@ even if they do not have permissions to interact directly with the infrastructur
 
 To download this metadata:
 
-1. Add a `config.yaml` file to your `kube_dir` directory: [^20]
+1. Add a `config.yaml` file to the repo's `.kube` directory:
 
-   [^20]: By default, this is set to `.kube` in the root of your repository.
-
+   ::: code-group labels=[.kube/config.yaml]
    ```yaml
    clusters:
      - module: "production/us-east-2/aws_eks"
    ```
+   :::
 
    Every entry under `clusters` defines a new cluster that you want to be able to connect to. `module` points to its
-   terragrunt directory under `environments_dir`.
+   terragrunt directory under `environments`.
 
 2. Replace `module` with the appropriate path for the cluster you just launched.
 
@@ -191,11 +250,13 @@ To generate your kubeconfig:
    [^7]: This file is specific to every user as different users will have different access levels to the various
        clusters. Every user will need to set up their own `<kube_dir>/config.user.yaml`. This file is not committed to version control.
 
+   ::: code-group labels=[.kube/config.user.yaml]
    ```yaml
    clusters:
      - name: "production-primary"
        aws_profile: "production-superuser"
    ```
+   :::
 
 2. Replace `name` with the name of the EKS cluster which can be found in `cluster_info`.
 
@@ -252,7 +313,7 @@ provide hardened alternatives to these defaults, and their presence will conflic
 
 As a result, we need to reset the cluster to a clean state before we continue.
 
-We provide a convenience command `pf-eks-reset` to perform the reset. Run this command now.
+We provide a convenience command `pf-eks-reset` to perform the reset. **Run this command now.**
 
 ## Prepare to Deploy Kubernetes Modules
 
@@ -267,11 +328,19 @@ some additional [terragrunt variables](/docs/edge/reference/configuration/terrag
 
 In the `region.yaml` file for the region where you deployed the cluster, add the following fields:
 
-* `kube_config_context`: The context in your `kubeconfig` file to use for connecting to the cluster in this region.
-  If this was set up using `pf-update-kube`, this is just the name of the cluster.
-* `kube_api_server`: This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
 
-See [this file](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/production/us-east-2/region.yaml) as an example.
+   ::: code-group labels=[region.yaml]
+   ```yaml ins={4,8}
+   # The context in your `kubeconfig` file to use for connecting to the cluster in this region.
+   # If this was set up using `pf-update-kube`, this is just the name of the cluster.
+   # Example: production-us-east-2
+   kube_config_context: REPLACE_ME
+
+   # This is the `https` address of the `Kubernetes control plane` when you run `kubectl cluster-info`
+   # Example: https://6B4CCB112AD882D9XXXX73BA90CB8F80.yl4.us-east-2.eks.amazonaws.com
+   kube_api_server: REPLACE_ME
+   ```
+   :::
 
 The Kubernetes modules deployed in this region will now appropriately deploy to this cluster.
 

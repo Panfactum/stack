@@ -4,9 +4,7 @@ import BootstrappingGuideNav from "../BootstrappingGuideNav";
 
 # Bootstrapping Infrastructure-as-Code
 
-## Objective
-
-Deploy your first modules using Terragrunt and OpenTofu (Terraform).
+<p class="subtitle">Deploy your first modules using Terragrunt and OpenTofu (Terraform).</p>
 
 ## Set Up State Management
 
@@ -25,7 +23,7 @@ We provide a helper script `pf-env-bootstrap` that takes care of the initial set
 
 For **every** environment:
 
-1. Open its directory in your terminal (for example, `<environments_dir>/production`).
+1. Open its directory in your terminal (for example, `environments/production`).
 
 2. Run `pf-env-bootstrap`.
 
@@ -65,13 +63,13 @@ KMS provides several benefits:
 
 Let's perform a quick test to ensure sops is working properly.
 
-1. Create a new file at `environments/management/test.yaml`:
+1. Create a new file at `environments/management/secrets.yaml`:
 
    ```yaml
    foo: bar
    ```
 
-2. Run `sops -e -i test.yaml` {/* spellchecker: disable */}((e)ncrypt (i)n-place).{/* spellchecker: enable */} The file contents should be transformed into something like the following:
+2. Run `sops -e -i secrets.yaml` {/* spellchecker: disable */}((e)ncrypt (i)n-place).{/* spellchecker: enable */} The file contents should be transformed into something like the following:
    {/* spellchecker: disable */}
    ```yaml
    foo: ENC[AES256_GCM,data:JJWK,iv:iF2zywZM3DWObiJCPsaPzETwnlQ1q2lh+zgHfCmk/PM=,tag:m2Ii1IlH05fT/TE4SStWIA==,type:str]
@@ -98,7 +96,7 @@ Let's perform a quick test to ensure sops is working properly.
    {/* spellchecker: enable */}
    This file is now **safe** to commit to version control.
 
-3. Run `sops -d test.yaml` {/* spellchecker: disable */}((d)ecrypt){/* spellchecker: enable */}. Notice the original file contents should have been output to your terminal.
+3. Run `sops -d secrets.yaml` {/* spellchecker: disable */}((d)ecrypt){/* spellchecker: enable */}. Notice the original file contents should have been output to your terminal.
 
 4. Delete the file.
 
@@ -117,26 +115,68 @@ Let's deploy it now:
 
 1. In **every** environment's `global` region, create an `aws_account` directory.
 
-2. Add a `terragrunt.hcl` to the directory that looks like [this](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/environments/management/global/aws_account/terragrunt.hcl).
+2. Add a `terragrunt.hcl` to the directory that looks like this:
 
-   Note the addition of this line `secrets = yamldecode(sops_decrypt_file("secrets.yaml"))` which demonstrates how
-   terragrunt and sops integrate with one another.
+    ::: code-group labels=[management/global/aws_account/terragrunt.hcl]
+    ```hcl collapse={1-9} "REPLACE_ME"
+    include "panfactum" {
+      path   = find_in_parent_folders("panfactum.hcl")
+      expose = true
+    }
 
-   Replace the values as needed for your organization. Feel free to also change what values are secret or not.
+    terraform {
+      source = include.panfactum.locals.pf_stack_source
+    }
+
+    locals {
+      // Note that this is the standard way to read encrypted files into terragrunt.
+      secrets = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/secrets.yaml"))
+    }
+
+    // Replace the values as needed for your organization. Feel free to also change what values are secret or not.
+    inputs = {
+      contact_company_name       = "REPLACE_ME"
+      contact_website            = "REPLACE_ME"
+      contact_full_name          = "REPLACE_ME"
+      contact_address_line_1     = local.secrets.address_line_1
+      contact_city               = local.secrets.city
+      contact_district_or_county = local.secrets.district_or_county
+      contact_state_or_region    = local.secrets.state_or_region
+      contact_postal_code        = local.secrets.postal_code
+      contact_country_code       = "REPLACE_ME"
+      contact_phone_number       = local.secrets.phone_number
+
+      security_full_name         = "REPLACE_ME"
+      security_title             = "REPLACE_ME"
+      security_phone_number      = local.secrets.phone_number
+      security_email_address     = local.secrets.email_address
+
+      billing_full_name          = "REPLACE_ME"
+      billing_title              = "REPLACE_ME"
+      billing_phone_number       = local.secrets.phone_number
+      billing_email_address      = local.secrets.email_address
+
+      operations_full_name       = "REPLACE_ME"
+      operations_title           = "REPLACE_ME"
+      operations_phone_number    = local.secrets.phone_number
+      operations_email_address   = local.secrets.email_address
+    }
+    ```
+    :::
 
 3. Add a `secrets.yaml` to the directory:
 
-   ```yaml
-   address_line_1: 1234 Platform Engineering Way
-   city: Developer Junction
-   district_or_county: Marion
-   state_or_region: CA
-   postal_code: "12345"
-   phone_number: "+15555555555"
-   email_address: spam@panfactum.com
-   ```
-
-   Adjust the values as necessary.
+    ::: code-group labels=[management/global/aws_account/secrets.yaml]
+    ```yaml "REPLACE_ME"
+    address_line_1: REPLACE_ME
+    city: REPLACE_ME
+    district_or_county: REPLACE_ME
+    state_or_region: REPLACE_ME
+    postal_code: REPLACE_ME
+    phone_number: REPLACE_ME # Needs to be of format "+15555555555"
+    email_address: REPLACE_ME
+    ```
+    :::
 
 4. Run `sops -e -i secrets.yaml` to encrypt the file.
 
@@ -145,7 +185,7 @@ Let's deploy it now:
 6. Run `terragrunt apply` in the module directory.
 
 <MarkdownAlert severity="warning">
-  Because the KMS key ARNs are embedded in every encrypted sops file, you **cannot** simply copy and paste the secrets files
+  Because the KMS key ARNs are embedded in every encrypted sops file, you **cannot** simply copy and paste the **encrypted** secrets files
   across environments as they will still be bound to the original environment. If you need to copy secrets to another
   environment, first decrypt the file (`sops -d`), then copy it to the proper directory, then encrypt it (`sops -e -i`).
 </MarkdownAlert>

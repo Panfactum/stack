@@ -79,7 +79,15 @@ Description: Whether to allow pods to schedule on EKS Node Group nodes (controll
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
+
+### duplicate\_window\_seconds
+
+Description: The window of time in seconds to consider for duplicate message detection.
+
+Type: `number`
+
+Default: `120`
 
 ### fsync\_interval\_seconds
 
@@ -113,6 +121,14 @@ Type: `string`
 
 Default: `"info"`
 
+### max\_age\_hours
+
+Description: The maximum age of a message in the stream in hours. -1 for unlimited.
+
+Type: `number`
+
+Default: `-1`
+
 ### max\_connections
 
 Description: The maximum number of client connections to the NATS cluster
@@ -129,6 +145,14 @@ Type: `number`
 
 Default: `4`
 
+### max\_messages
+
+Description: The maximum number of messages in the stream. -1 for unlimited.
+
+Type: `number`
+
+Default: `-1`
+
 ### max\_outstanding\_catchup\_mb
 
 Description: The maximum in-flight bytes for stream catch-up.
@@ -144,6 +168,14 @@ Description: The maximum size of a message payload (in MB).
 Type: `number`
 
 Default: `8`
+
+### max\_size\_mb
+
+Description: The maximum size of the stream in MB. -1 for unlimited.
+
+Type: `number`
+
+Default: `-1`
 
 ### minimum\_memory\_mb
 

@@ -37,11 +37,30 @@ In particular, generated Workflows will perform the following actions:
 
 ## Usage
 
-We provide an example of using this module [here](https://github.com/Panfactum/stack/blob/__PANFACTUM_VERSION_EDGE__/packages/reference/infrastructure/demo_cicd/website_image_builder.tf).
+Here is an example of using the module:
+
+    ::: code-group labels=[infrastructure/cicd/builder.tf]
+    ```hcl {7-12} "REPLACE_ME"
+    module "image_builder" {
+      source = "${var.pf_module_source}wf_dockerfile_build${var.pf_module_ref}"
+
+      name = "image-builder"
+      namespace = local.namespace
+
+      code_repo = "github.com/example-org/service.git"
+      dockerfile_path = "./Dockerfile"
+      build_context = "."
+      image_repo = "example-service"
+      args = {}
+      secrets = {}
+    }
+    ```
+    :::  
 
 The critical configuration values are:
 
 - `code_repo`: The repository containing your Dockerfile and code to build.
+- `image_repo`: The AWS ECR repository where the container images will be pushed.
 - `dockerfile_path`: (Optional) A relative path from the root of the repo to your Dockerfile (or Containerfile).
 - `build_context`: (Optional) The [build context](https://docs.docker.com/build/building/context/) to submit to BuildKit.
 - `args`: (Optional) The [build arguments](https://docs.docker.com/build/guide/build-args/) to set.
@@ -78,6 +97,12 @@ actually occur directly in the BuildKit instances.
 
 If you are finding you need to increase the resource requests or limits for your build processes, you
 will need to adjust the parameters of the [kube\_buildkit](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube\_buildkit) module.
+
+### Single Platform Images
+
+By default, this module will build a multi-platform image that can run on both arm64 and amd64 architectures. However, if
+you are running in an environment where you only need to support a single architecture, you can set either `arm_builder_enabled`
+or `amd_builder_enabled` to `false`.
 
 ## Providers
 
@@ -123,6 +148,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### amd\_builder\_enabled
+
+Description: Whether to build amd64 images.
+
+Type: `bool`
+
+Default: `true`
+
 ### args
 
 Description: A mapping of build-time arguments to their respective values
@@ -130,6 +163,14 @@ Description: A mapping of build-time arguments to their respective values
 Type: `map(string)`
 
 Default: `{}`
+
+### arm\_builder\_enabled
+
+Description: Whether to build arm64 images.
+
+Type: `bool`
+
+Default: `true`
 
 ### build\_context
 
@@ -234,6 +275,14 @@ Description: True iff images should be pushed to ECR in addition to being built
 Type: `bool`
 
 Default: `true`
+
+### retry\_max\_attempts
+
+Description: The maximum number of allowable retries
+
+Type: `number`
+
+Default: `2`
 
 ### secrets
 
