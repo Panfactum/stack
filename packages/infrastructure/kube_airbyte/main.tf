@@ -749,6 +749,10 @@ resource "helm_release" "airbyte" {
             memory = "${var.workload_min_launcher_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        env_vars = merge(var.launcher_env, {
+          WORKLOAD_LAUNCHER_PARALLELISM = var.launcher_workload_launcher_parallelism
+        })
       }
     })
   ]
