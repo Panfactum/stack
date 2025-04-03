@@ -360,6 +360,29 @@ variable "worker_min_cpu_millicores" {
   default     = 100
 }
 
+variable "worker_discovery_refresh_window_minutes" {
+  description = "The minimum number of minutes Airbyte will wait to refresh a schema. By setting a larger number, you delay automatic schema refreshes and improve sync performance. The default in self-managed instances is 1440 (once per day), and in Cloud it's 15 (every 15 minutes). The lowest interval you can set is 1 (once per minute). Set this to 0 to disable automatic schema refreshes."
+  type        = number
+  default     = 15
+}
+
+variable "worker_env" {
+  description = "Additional env for the worker container"
+}
+
+variable "worker_max_check_workers" {
+  description = "Maximum amount of check instances to be running"
+  type        = number
+  default     = 5
+}
+
+variable "worker_max_sync_workers" {
+  description = "Maximum amount of sync instances to be running"
+  type        = number
+  default     = 10
+}
+
+
 variable "temporal_min_memory_mb" {
   description = "Memory request for temporal containers"
   type        = number
