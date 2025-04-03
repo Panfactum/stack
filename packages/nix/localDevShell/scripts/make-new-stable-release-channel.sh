@@ -52,10 +52,10 @@ jq --arg slug "$RELEASE_SLUG" \
 git checkout -b "$STABLE_BRANCH"
 git add "$REPO_ROOT"
 git commit -m "release-channel: $STABLE_BRANCH"
-git tag --force "$VERSION_TAG"
+git tag --force "$STABLE_VERSION_TAG"
 
 # Push the changes
-git push --atomic origin "$STABLE_BRANCH" "$VERSION_TAG"
+git push --atomic origin "$STABLE_BRANCH" "$STABLE_VERSION_TAG"
 
 # Checkout main
 git checkout main
