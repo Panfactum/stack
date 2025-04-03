@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
-
+import { NODE_ENV } from "astro:env/client";
 
 import MarkdownAnchorTag from "@/components/markdown/MarkdownAnchorTag.astro";
 import { DOCS_VERSIONS } from "@/lib/constants";
@@ -20,7 +20,10 @@ export async function getStaticPaths() {
 ] as const))))
 
   const docs = await getCollection("docs");
-  return Promise.all(docs.map(async (doc) => {
+  const validSlugs = DOCS_VERSIONS.map(v => v.slug)
+  return Promise.all(docs
+  .filter(doc => validSlugs.some(slug => doc.id.startsWith(slug)))
+  .map(async (doc) => {
     return {
       params: { path: doc.id },
       props: { 

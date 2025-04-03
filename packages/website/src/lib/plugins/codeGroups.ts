@@ -359,7 +359,6 @@ export const handleStartDelimiter = (
  * @param {Element | Root} parent - The parent of the current node.
  * @param {CodeGroup[]} codeGroups - The stack to keep track of the last found start delimiter.
  * @param {ClassNames} classNames - The class names for styling code group elements.
- * @returns {Object} An object containing the found status and the skip index.
  */
 export const handleEndDelimiter = (
   index: number,
@@ -502,6 +501,7 @@ const rehypeCodeGroup: Plugin<[RehypeCodeGroupOptions], Root> = (
      * @param {Element} parent - The parent of the current node.
      */
     visit(tree, "element", (node, index, parent) => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (node.type !== "element" || index === undefined) {
         return;
       }

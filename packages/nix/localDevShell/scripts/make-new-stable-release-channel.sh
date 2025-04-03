@@ -42,11 +42,11 @@ find "$DOCS_DIR/$RELEASE_SLUG" -type f -exec sed -i -E "s|__PANFACTUM_VERSION_ED
 
 # Update the constants.json file to include the new stable release channel
 jq --arg slug "$RELEASE_SLUG" \
-   --arg ref "$STABLE_VERSION_TAG" \
-   --arg label "$CHANNEL_LABEL" \
-   --arg placeholder "$RELEASE_PLACEHODLER" \
-   '.versions[$slug] = {"ref": $ref, "placeholder": $placeholder, "label": $label, "slug": $slug}' \
-   "$CONSTANTS_FILE" > "$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
+  --arg ref "$STABLE_VERSION_TAG" \
+  --arg label "$CHANNEL_LABEL" \
+  --arg placeholder "$RELEASE_PLACEHODLER" \
+  '.versions[$slug] = {"ref": $ref, "placeholder": $placeholder, "label": $label, "slug": $slug}' \
+  "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
 
 # Commit the changes and create the tag
 git checkout -b "$STABLE_BRANCH"
