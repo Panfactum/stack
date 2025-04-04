@@ -1,17 +1,16 @@
 /* eslint-disable */
 import { visit } from 'unist-util-visit';
-import constants from "../constants.json";
+import type { Root } from 'hast';
+import { replaceVersionPlaceholders } from '../versions.ts';
 
 /**
  * Rehype plugin to replace all text strings with a given replacement.
  * @param {string} replacement The string to replace all text nodes with.
  */
 export default function rehypeReplaceStrings() {
-    return (tree) => {
+    return (tree: Root) => {
         visit(tree, 'text', (node) => {
-            node.value = node.value
-                .replaceAll("__PANFACTUM_VERSION_EDGE__", constants.panfactum_version_edge)
-                .replaceAll("__PANFACTUM_VERSION_MAIN__", constants.panfactum_version_main);
+            node.value = replaceVersionPlaceholders(node.value);
         });
     };
 }

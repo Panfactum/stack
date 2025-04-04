@@ -14,7 +14,7 @@ import compress from "@playform/compress"
 import criticalCSS from "astro-critical-css";
 import { imageService } from "@unpic/astro/service";
 import { visualizer } from "rollup-plugin-visualizer";
-import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.js";
+import rehypeReplaceStrings from "./src/lib/plugins/rehypeStringReplace.ts";
 import tailwindcss from 'tailwindcss'
 import tailwindcssNesting from 'tailwindcss/nesting'
 import autoprefixer from 'autoprefixer'
