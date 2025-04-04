@@ -1,0 +1,66 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint-spellcheck
+        name: Spellcheck
+        entry: cspell lint --no-progress --gitignore
+        language: system
+        files: \.(md|mdx)$
+        pass_filenames: true
+        description: "Runs spellcheck on markdown files"
+        fail_fast: true
+
+      - id: shellcheck
+        name: Shellcheck
+        entry: shellcheck
+        language: system
+        files: ^packages/nix/.*\.sh$
+        pass_filenames: true
+        description: "Runs shellcheck on shell scripts"
+        fail_fast: true
+
+      - id: shellfmt
+        name: Shell Format
+        entry: shfmt --diff -i 2
+        language: system
+        files: ^packages/nix/.*\.sh$
+        pass_filenames: true
+        description: "Runs shfmt on shell scripts"
+        fail_fast: true
+
+      - id: tf-fmt
+        name: Tofu Format
+        entry: tofu fmt -diff -check
+        language: system
+        files: ^packages/infrastructure/
+        pass_filenames: true
+        description: "Runs tofu fmt on the infrastructure code"
+        fail_fast: false
+
+      - id: tf-generate-docs
+        name: Generate Terraform Docs
+        entry: generate-tf-docs
+        language: system
+        files: ^packages/infrastructure/
+        pass_filenames: false
+        description: "Generates the IaC docs for the website"
+        fail_fast: true
+
+      - id: typecheck-website
+        name: Typecheck Website
+        entry: precommit-typecheck-website
+        language: system
+        files: ^packages/website/
+        pass_filenames: false
+        description: "Runs a typecheck on the website code"
+        fail_fast: true
+
+      - id: lint-website
+        name: Lint Website
+        entry: precommit-lint-website
+        language: system
+        files: ^packages/website/
+        pass_filenames: true
+        description: "Runs linting for the website code"
+        fail_fast: true
+

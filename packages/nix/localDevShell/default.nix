@@ -7,6 +7,7 @@
     export PF_IAC_DIR="$REPO_ROOT/packages/infrastructure";
     export GOBIN="$REPO_ROOT/go/bin";
     export GOPATH="$REPO_ROOT/go";
+    pre-commit install -c "$REPO_ROOT/.pre-commit-config.yaml"
   '';
 
   packages = with pkgs; [
@@ -41,16 +42,10 @@
     shfmt
     nixfmt-rfc-style
     nodePackages.cspell
+    pre-commit
   ];
 
   pre-commit.hooks = {
-    terraform-custom = {
-      enable = true;
-      fail_fast = true;
-      entry = "precommit-terraform-fmt";
-      description = "Terraform linting";
-      files = "^packages/infrastructure/(.*).tf$";
-    };
     terragrunt-custom = {
       enable = true;
       fail_fast = true;
@@ -58,44 +53,10 @@
       description = "Terragrunt linting";
       files = "^packages/(nix|reference)/(.*).hcl$";
     };
-    terraform-docs = {
-      enable = true;
-      fail_fast = true;
-      entry = "precommit-terraform-docs";
-      description = "Terraform documentation generate";
-      files = "^packages/infrastructure/(.*)$";
-      pass_filenames = false;
-    };
     nixfmt = {
       enable = true;
       fail_fast = true;
       description = "Nix linting";
-    };
-    shellcheck = {
-      enable = true;
-      fail_fast = true;
-      description = "Shell code linting";
-    };
-    shfmt = {
-      enable = true;
-      fail_fast = true;
-      description = "Shell code formatting";
-    };
-    website = {
-      enable = true;
-      fail_fast = true;
-      entry = "precommit-website";
-      description = "Checks for website";
-      files = "^packages/(website|eslint)/(.*)";
-      pass_filenames = false;
-    };
-    cspell-custom = {
-      enable = true;
-      fail_fast = true;
-      entry = "precommit-spellcheck";
-      description = "Spellchecker";
-      files = "(.*).(md|mdx)$";
-      pass_filenames = false;
     };
   };
 }

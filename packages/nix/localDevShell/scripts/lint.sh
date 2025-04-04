@@ -56,7 +56,7 @@ echo >&2 "Finished shell linting!"
 ## Spell Check
 #######################################
 echo >&2 "Starting spellcheck linting..."
-precommit-spellcheck
+lint-spellcheck
 echo >&2 "Finished spellcheck linting!"
 
 #######################################
@@ -64,10 +64,6 @@ echo >&2 "Finished spellcheck linting!"
 #######################################
 echo >&2 "Starting website linting..."
 (
-  cd "$REPO_ROOT/packages/website"
-  export NODE_OPTIONS=--max-old-space-size=8192
-  export LINT=true
-  pnpm check
-  pnpm lint
+  lint-website
 )
 echo >&2 "Finished website linting!"

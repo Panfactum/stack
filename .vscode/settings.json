@@ -15,5 +15,8 @@
     "eslint.codeActionsOnSave.rules": null,
     "files.associations": {
         "packages/website/**/*.css": "tailwindcss"
+    },
+    "files.exclude": {
+        "**/.git": false
     }
 }

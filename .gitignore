@@ -2,7 +2,6 @@
 .devenv/
 .direnv/
 .idea
-.pre-commit-config.yaml
 .env
 .podman
 go
