@@ -25,6 +25,7 @@ import { setupInternalClusterNetworking } from "./kube/internal-cluster-networki
 import { setupPolicyController } from "./kube/policy-controller";
 import { setupVault } from "./kube/vault";
 import { vaultPrompts } from "../user-prompts/vault";
+import { checkStepCompletion } from "../util/check-step-completion";
 import { backgroundProcessIds } from "../util/start-background-process";
 import { setupCertManagement } from "./kube/cert-management";
 import { setupLinkerd } from "./kube/linkerd";
@@ -172,19 +173,21 @@ export class InstallClusterCommand extends Command {
       return 1;
     }
 
-    const vpcSetupComplete = await getConfigFileKey({
-      key: "setupVpc",
-      configPath,
-      context: this.context,
-    });
+    let vpcSetupComplete = false;
+    try {
+      vpcSetupComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "setupVpc",
+        stepCompleteMessage:
+          "1/13 Skipping VPC setup as it's already complete.\n",
+        stepNotCompleteMessage: "1/13 Setting up the AWS VPC\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (vpcSetupComplete === true) {
-      this.context.stdout.write(
-        "1/13 Skipping VPC setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(pc.blue("1/13 Setting up the AWS VPC\n\n"));
-
+    if (!vpcSetupComplete) {
       const { vpcName, vpcDescription } = await vpcPrompts({
         environment,
       });
@@ -235,21 +238,22 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupEcrPullThroughCacheComplete = await getConfigFileKey({
-      key: "setupEcrPullThroughCache",
-      configPath,
-      context: this.context,
-    });
+    let setupEcrPullThroughCacheComplete = false;
+    try {
+      setupEcrPullThroughCacheComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "setupEcrPullThroughCache",
+        stepCompleteMessage:
+          "2/13 Skipping ECR pull through cache setup as it's already complete.\n",
+        stepNotCompleteMessage:
+          "2/13 Setting up the AWS ECR pull through cache\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupEcrPullThroughCacheComplete === true) {
-      this.context.stdout.write(
-        "2/13 Skipping ECR pull through cache setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("2/13 Setting up the AWS ECR pull through cache\n\n")
-      );
-
+    if (!setupEcrPullThroughCacheComplete) {
       const { dockerHubUsername, githubUsername } =
         await ecrPullThroughCachePrompts({
           context: this.context,
@@ -321,20 +325,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupEksComplete = await getConfigFileKey({
-      key: "setupEks",
-      configPath,
-      context: this.context,
-    });
+    let setupEksComplete = false;
+    try {
+      setupEksComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "setupEks",
+        stepCompleteMessage:
+          "3/13 Skipping EKS cluster setup as it's already complete.\n",
+        stepNotCompleteMessage: "3/13 Setting up the AWS EKS cluster\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupEksComplete === true) {
-      this.context.stdout.write(
-        "3/13 Skipping EKS cluster setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("3/13 Setting up the AWS EKS cluster\n\n")
-      );
+    if (!setupEksComplete) {
       this.context.stdout.write(
         pc.red(
           pc.bold(
@@ -395,27 +400,28 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupInternalClusterNetworkingComplete = await getConfigFileKey({
-      key: "internalClusterNetworking",
-      configPath,
-      context: this.context,
-    });
+    let setupInternalClusterNetworkingComplete = false;
+    try {
+      setupInternalClusterNetworkingComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "internalClusterNetworking",
+        stepCompleteMessage:
+          "4/13 Skipping internal cluster networking setup as it's already complete.\n",
+        stepNotCompleteMessage:
+          "4/13 Setting up the internal cluster networking\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupInternalClusterNetworkingComplete === true) {
-      this.context.stdout.write(
-        "4/13 Skipping internal cluster networking setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("4/13 Setting up the internal cluster networking\n\n")
-      );
-
+    if (!setupInternalClusterNetworkingComplete) {
       try {
         await setupInternalClusterNetworking({
           context: this.context,
           verbose: this.verbose,
         });
-        } catch (error) {
+      } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
           error: `Error setting up the internal cluster networking: ${JSON.stringify(error, null, 2)}`,
@@ -445,21 +451,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupPolicyControllerComplete = await getConfigFileKey({
-      key: "policyController",
-      configPath,
-      context: this.context,
-    });
+    let setupPolicyControllerComplete = false;
+    try {
+      setupPolicyControllerComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "policyController",
+        stepCompleteMessage:
+          "5/13 Skipping policy controller setup as it's already complete.\n",
+        stepNotCompleteMessage: "5/13 Setting up the policy controller\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupPolicyControllerComplete === true) {
-      this.context.stdout.write(
-        "5/13 Skipping policy controller setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("5/13 Setting up the policy controller\n\n")
-      );
-
+    if (!setupPolicyControllerComplete) {
       try {
         await setupPolicyController({
           context: this.context,
@@ -495,23 +501,22 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupCSIDriversComplete = await getConfigFileKey({
-      key: "csiDrivers",
-      configPath,
-      context: this.context,
-    });
+    let setupCSIDriversComplete = false;
+    try {
+      setupCSIDriversComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "csiDrivers",
+        stepCompleteMessage:
+          "6/13 Skipping CSI drivers setup as it's already complete.\n",
+        stepNotCompleteMessage:
+          "6/13 Setting up the Container Storage Interface (CSI) drivers\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupCSIDriversComplete === true) {
-      this.context.stdout.write(
-        "6/13 Skipping CSI drivers setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue(
-          "6/13 Setting up the Container Storage Interface (CSI) drivers\n\n"
-        )
-      );
-
+    if (!setupCSIDriversComplete) {
       try {
         await setupCSIDrivers({
           context: this.context,
@@ -547,19 +552,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupVaultComplete = await getConfigFileKey({
-      key: "vault",
-      configPath,
-      context: this.context,
-    });
+    let setupVaultComplete = false;
+    try {
+      setupVaultComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "vault",
+        stepCompleteMessage:
+          "7/13 Skipping Vault setup as it's already complete.\n",
+        stepNotCompleteMessage: "7/13 Setting up Vault\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupVaultComplete === true) {
-      this.context.stdout.write(
-        "7/13 Skipping Vault setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(pc.blue("7/13 Setting up Vault\n\n"));
-
+    if (!setupVaultComplete) {
       this.context.stdout.write(
         pc.blue(
           "Vault serves several important purposes in the Panfactum framework:\n" +
@@ -615,21 +622,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupCertManagementComplete = await getConfigFileKey({
-      key: "certManagement",
-      configPath,
-      context: this.context,
-    });
+    let setupCertManagementComplete = false;
+    try {
+      setupCertManagementComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "certManagement",
+        stepCompleteMessage:
+          "8/13 Skipping certificate management setup as it's already complete.\n",
+        stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupCertManagementComplete === true) {
-      this.context.stdout.write(
-        "8/13 Skipping certificate management setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("8/13 Setting up certificate management\n\n")
-      );
-
+    if (!setupCertManagementComplete) {
       const { alertEmail } = await certManagerPrompts();
 
       try {
@@ -676,21 +683,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupServiceMeshComplete = await getConfigFileKey({
-      key: "serviceMesh",
-      configPath,
-      context: this.context,
-    });
+    let setupServiceMeshComplete = false;
+    try {
+      setupServiceMeshComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "serviceMesh",
+        stepCompleteMessage:
+          "9/13 Skipping service mesh setup as it's already complete.\n",
+        stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupServiceMeshComplete === true) {
-      this.context.stdout.write(
-        "9/13 Skipping service mesh setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("9/13 Setting up the service mesh\n\n")
-      );
-
+    if (!setupServiceMeshComplete) {
       try {
         await setupLinkerd({
           context: this.context,
@@ -733,19 +740,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupAutoscalingComplete = await getConfigFileKey({
-      key: "autoscaling",
-      configPath,
-      context: this.context,
-    });
+    let setupAutoscalingComplete = false;
+    try {
+      setupAutoscalingComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "autoscaling",
+        stepCompleteMessage:
+          "10/13 Skipping autoscaling setup as it's already complete.\n",
+        stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupAutoscalingComplete === true) {
-      this.context.stdout.write(
-        "10/13 Skipping autoscaling setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(pc.blue("10/13 Setting up autoscaling\n\n"));
-
+    if (!setupAutoscalingComplete) {
       try {
         await setupAutoscaling({
           context: this.context,
@@ -788,21 +797,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupInboundNetworkingComplete = await getConfigFileKey({
-      key: "inboundNetworking",
-      configPath,
-      context: this.context,
-    });
+    let setupInboundNetworkingComplete = false;
+    try {
+      setupInboundNetworkingComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "inboundNetworking",
+        stepCompleteMessage:
+          "11/13 Skipping inbound networking setup as it's already complete.\n",
+        stepNotCompleteMessage: "11/13 Setting up inbound networking\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupInboundNetworkingComplete === true) {
-      this.context.stdout.write(
-        "11/13 Skipping inbound networking setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("11/13 Setting up inbound networking\n\n")
-      );
-
+    if (!setupInboundNetworkingComplete) {
       try {
         await setupInboundNetworking({
           configPath,
@@ -846,21 +855,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupMaintenanceControllersComplete = await getConfigFileKey({
-      key: "maintenanceControllers",
-      configPath,
-      context: this.context,
-    });
+    let setupMaintenanceControllersComplete = false;
+    try {
+      setupMaintenanceControllersComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "maintenanceControllers",
+        stepCompleteMessage:
+          "12/13 Skipping maintenance controllers setup as it's already complete.\n",
+        stepNotCompleteMessage: "12/13 Setting up maintenance controllers\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupMaintenanceControllersComplete === true) {
-      this.context.stdout.write(
-        "12/13 Skipping maintenance controllers setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(
-        pc.blue("12/13 Setting up maintenance controllers\n\n")
-      );
-
+    if (!setupMaintenanceControllersComplete) {
       try {
         await setupMaintenanceControllers({
           context: this.context,
@@ -896,19 +905,21 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    const setupCloudNativePGComplete = await getConfigFileKey({
-      key: "cloudNativePG",
-      configPath,
-      context: this.context,
-    });
+    let setupCloudNativePGComplete = false;
+    try {
+      setupCloudNativePGComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "cloudNativePG",
+        stepCompleteMessage:
+          "13/13 Skipping CloudNativePG setup as it's already complete.\n",
+        stepNotCompleteMessage: "13/13 Setting up CloudNativePG\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    if (setupCloudNativePGComplete === true) {
-      this.context.stdout.write(
-        "13/13 Skipping CloudNativePG setup as it's already complete.\n"
-      );
-    } else {
-      this.context.stdout.write(pc.blue("13/13 Setting up CloudNativePG\n\n"));
-
+    if (!setupCloudNativePGComplete) {
       try {
         await setupCloudNativePG({
           context: this.context,
