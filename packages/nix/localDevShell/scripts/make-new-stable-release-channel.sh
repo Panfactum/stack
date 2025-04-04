@@ -5,15 +5,11 @@
 DOCS_DIR="$REPO_ROOT/packages/website/src/content/docs"
 CONSTANTS_FILE="$REPO_ROOT/packages/website/src/lib/constants.json"
 
-if [[ ! "$1" =~ ^[0-9]{2}-[0-9]{2}$ ]]; then
-  echo "Error: The first argument must be in the format ##-## (e.g., 25-04)."
-  exit 1
-fi
-
-RELEASE_SLUG="stable-$1"
-RELEASE_PLACEHODLER="__PANFACTUM_VERSION_STABLE_${1//-/_}__"
-CHANNEL_LABEL="Stable.$1"
-STABLE_BRANCH="stable.$1"
+DATE=$(date +'%y-%m')
+RELEASE_SLUG="stable-$DATE"
+RELEASE_PLACEHODLER="__PANFACTUM_VERSION_STABLE_${DATE//-/_}__"
+CHANNEL_LABEL="Stable.$DATE"
+STABLE_BRANCH="stable.$DATE"
 STABLE_VERSION_TAG="$STABLE_BRANCH.0"
 
 # Get the current branch name
@@ -31,8 +27,28 @@ elif [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
+# Get the latest edge tag
+LATEST_EDGE_TAG=$(git tag -l "edge.*" --sort=-v:refname | grep -e "^edge\.[0-9]{2}-[0-9]{2}-[0-9]{2}$" | head -n 1)
+
+if [[ -z "$LATEST_EDGE_TAG" ]]; then
+  echo "Error: No edge tags found. Cannot create a stable release channel without an edge release."
+  exit 1
+fi
+
+# Check if the latest edge tag is on the current commit
+CURRENT_COMMIT=$(git rev-parse HEAD)
+EDGE_TAG_COMMIT=$(git rev-list -n 1 "$LATEST_EDGE_TAG")
+
+if [[ "$CURRENT_COMMIT" != "$EDGE_TAG_COMMIT" ]]; then
+  echo "Error: The latest edge tag ($LATEST_EDGE_TAG) is not on the current commit."
+  echo "Current commit: $CURRENT_COMMIT"
+  echo "Edge tag commit: $EDGE_TAG_COMMIT"
+  echo "Please run make-new-edge-release before creating a stable release channel."
+  exit 1
+fi
+
 # Remove existing release docs (if exists)
-rm -rf "$DOCS_DIR/$RELEASE_SLUG"
+rm -rf "${DOCS_DIR:?}/$RELEASE_SLUG"
 
 # Copy the edge docs
 cp -r "$DOCS_DIR/edge" "$DOCS_DIR/$RELEASE_SLUG"
@@ -50,6 +66,31 @@ jq --arg slug "$RELEASE_SLUG" \
   --arg placeholder "$RELEASE_PLACEHODLER" \
   '.versions[$slug] = {"ref": $ref, "placeholder": $placeholder, "label": $label, "slug": $slug}' \
   "$CONSTANTS_FILE" >"$CONSTANTS_FILE.tmp" && mv "$CONSTANTS_FILE.tmp" "$CONSTANTS_FILE"
+
+# Create a new changelog file for the stable release channel
+cat >"$DOCS_DIR/changelog/$RELEASE_SLUG.mdx" <<EOF
+---
+title: "$CHANNEL_LABEL Changelog"
+---
+
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+# $CHANNEL_LABEL Releases
+
+{/* lint disable no-duplicate-headings */}
+
+## $STABLE_VERSION_TAG
+
+This release was forked from the $($LATEST_EDGE_TAG) edge release.
+EOF
+
+# Find the header line for the latest edge tag and add the alert below it
+sed -i "/^## $LATEST_EDGE_TAG$/a\\
+\\
+<MarkdownAlert severity=\"info\">\\
+  This release serves as the base for the \`$STABLE_BRANCH\` release channel.\\
+</MarkdownAlert>\\
+" "$DOCS_DIR/changelog/edge.mdx"
 
 # Commit the docs changes
 git add "$REPO_ROOT"

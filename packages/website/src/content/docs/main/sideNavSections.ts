@@ -421,6 +421,10 @@ export const SIDENAV_SECTIONS: TopLevelDocsSectionMetadata[] = [
             text: "Pull Requests",
             path: "/pull-requests",
           },
+          {
+            text: "Releasing",
+            path: "/releasing",
+          },
         ],
       },
     ],
