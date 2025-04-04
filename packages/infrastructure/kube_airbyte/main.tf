@@ -626,7 +626,7 @@ resource "helm_release" "airbyte" {
             SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_SUCCESSIVE          = tostring(var.jobs_sync_job_retries_partial_failures_max_successive)
             SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_TOTAL               = tostring(var.jobs_sync_job_retries_partial_failures_max_total)
             SYNC_JOB_MAX_TIMEOUT_DAYS                                 = tostring(var.jobs_sync_max_timeout_days)
-            VAULT_ADDRESS                                             = "https://${vault_domain}"
+            VAULT_ADDRESS                                             = "https://${var.vault_domain}"
             VAULT_PREFIX                                              = local.vault_env_prefix
             VAULT_AUTH_METHOD                                         = "token"
           }
