@@ -1,0 +1,19 @@
+{
+    "eslint.workingDirectories": [
+        "./packages/website",
+    ],
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    },
+    "[tsx]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    },
+    "[astro]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "eslint.format.enable": true,
+    "eslint.codeActionsOnSave.rules": null,
+    "files.associations": {
+        "packages/website/**/*.css": "tailwindcss"
+    }
+}
