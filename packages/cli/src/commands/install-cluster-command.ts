@@ -1,4 +1,5 @@
 import { appendFileSync } from "node:fs";
+import path from "node:path";
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import { awsRegions } from "../util/aws-regions";
@@ -30,6 +31,7 @@ import { setupLinkerd } from "./kube/linkerd";
 import { setupMaintenanceControllers } from "./kube/maintenance-controllers";
 import { setupCloudNativePG } from "./kube/postgres";
 import { generateProgressString } from "../util/generate-progress-string";
+import { writeErrorToDebugFile } from "../util/write-error-to-debug-file";
 
 export class InstallClusterCommand extends Command {
   static override paths = [["install-cluster"]];
@@ -157,6 +159,10 @@ export class InstallClusterCommand extends Command {
         );
       }
     } catch (error) {
+      writeErrorToDebugFile({
+        context: this.context,
+        error: `Error writing sla_target to environment.yaml: ${JSON.stringify(error, null, 2)}`,
+      });
       this.context.stderr.write(
         pc.red(
           `Error writing sla_target to environment.yaml: ${JSON.stringify(error, null, 2)}\n`
@@ -200,6 +206,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the AWS VPC: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the AWS VPC: ${JSON.stringify(error, null, 2)}\n`
@@ -262,6 +272,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the AWS ECR pull through cache: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the AWS ECR pull through cache: ${JSON.stringify(error, null, 2)}\n`
@@ -278,6 +292,10 @@ export class InstallClusterCommand extends Command {
           true
         );
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error updating region.yaml to enable the AWS ECR pull through cache: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error updating region.yaml to enable the AWS ECR pull through cache: ${JSON.stringify(error, null, 2)}\n`
@@ -348,6 +366,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the AWS EKS cluster: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the AWS EKS cluster: ${JSON.stringify(error, null, 2)}\n`
@@ -393,7 +415,11 @@ export class InstallClusterCommand extends Command {
           context: this.context,
           verbose: this.verbose,
         });
-      } catch (error) {
+        } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the internal cluster networking: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the internal cluster networking: ${JSON.stringify(error, null, 2)}\n`
@@ -440,6 +466,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the policy controller: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the policy controller: ${JSON.stringify(error, null, 2)}\n`
@@ -488,6 +518,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the Container Storage Interface (CSI) drivers: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the Container Storage Interface (CSI) drivers: ${JSON.stringify(error, null, 2)}\n`
@@ -544,6 +578,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the Vault: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the Vault: ${JSON.stringify(error, null, 2)}\n`
@@ -601,6 +639,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the certificate management: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
@@ -655,6 +697,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
@@ -706,6 +752,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
@@ -760,6 +810,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}\n`
@@ -813,6 +867,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}\n`
@@ -857,6 +915,10 @@ export class InstallClusterCommand extends Command {
           verbose: this.verbose,
         });
       } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}`,
+        });
         this.context.stderr.write(
           pc.red(
             `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}\n`
