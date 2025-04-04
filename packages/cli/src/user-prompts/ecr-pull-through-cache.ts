@@ -2,6 +2,7 @@ import { input, password } from "@inquirer/prompts";
 import { $ } from "bun";
 import pc from "picocolors";
 import { ensureFileExists } from "../util/ensure-file-exists";
+import { writeErrorToDebugFile } from "../util/write-error-to-debug-file";
 import type { BaseContext } from "clipanion";
 
 export async function ecrPullThroughCachePrompts({
@@ -82,9 +83,13 @@ export async function ecrPullThroughCachePrompts({
 
   const result = Bun.spawnSync(["sops", "encrypt", "-i", tempSecretsFilePath]);
   if (!result.success) {
-    context.stderr.write(result.stderr.toString());
+    context.stderr.write(pc.red(result.stderr.toString()));
     const file = Bun.file(tempSecretsFilePath);
     await file.delete();
+    writeErrorToDebugFile({
+      context,
+      error: `Failed to encrypt ECR pull through cache secrets: ${result.stderr.toString()}`,
+    });
     throw new Error("Failed to encrypt ECR pull through cache secrets");
   }
 

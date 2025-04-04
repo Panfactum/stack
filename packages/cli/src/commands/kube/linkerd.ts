@@ -3,6 +3,7 @@ import kubeLinkerdTerragruntHcl from "../../templates/kube_linkerd_terragrunt.hc
 import { ensureFileExists } from "../../util/ensure-file-exists";
 import { tfInit } from "../../util/scripts/tf-init";
 import { startBackgroundProcess } from "../../util/start-background-process";
+import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -66,8 +67,12 @@ export const setupLinkerd = async ({
     !checkProcess.stdout.toString().includes("Status check results are √")
   ) {
     context.stderr.write(pc.red("Linkerd control plane checks failed.\n"));
-    context.stderr.write(checkProcess.stdout.toString());
-    context.stderr.write(checkProcess.stderr.toString());
+    context.stderr.write(pc.red(checkProcess.stdout.toString()));
+    context.stderr.write(pc.red(checkProcess.stderr.toString()));
+    writeErrorToDebugFile({
+      context,
+      error: `Linkerd control plane checks failed: ${checkProcess.stdout.toString()}\n${checkProcess.stderr.toString()}`,
+    });
     throw new Error("Linkerd control plane checks failed");
   }
 

@@ -12,6 +12,7 @@ import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variab
 import { getRoot } from "../../util/scripts/helpers/get-root";
 import { tfInit } from "../../util/scripts/tf-init";
 import { updateKube } from "../../util/scripts/update-kube";
+import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -92,6 +93,10 @@ export async function setupEks(input: EksSetupInput) {
       jsonConfig["clusters"] = [];
     }
     if (!Array.isArray(jsonConfig["clusters"])) {
+      writeErrorToDebugFile({
+        context: input.context,
+        error: `Clusters key is not an array: ${JSON.stringify(jsonConfig["clusters"])}`,
+      });
       throw new Error("Clusters key is not an array");
     }
     if (input.verbose) {

@@ -17,6 +17,7 @@ import { tfInit } from "../../util/scripts/tf-init";
 import { updateSSH } from "../../util/scripts/update-ssh";
 import { sopsEncrypt } from "../../util/sops-encrypt";
 import { startBackgroundProcess } from "../../util/start-background-process";
+import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -28,6 +29,7 @@ export const setupInboundNetworking = async ({
   context: BaseContext;
   configPath: string;
   verbose?: boolean;
+  // eslint-disable-next-line sonarjs/cognitive-complexity
 }) => {
   const env = process.env;
   const vaultPortForwardPid = startBackgroundProcess({
@@ -186,20 +188,64 @@ export const setupInboundNetworking = async ({
     workingDirectory: "./kube_vault",
   });
 
-  context.stdout.write("11.f. Updating resources with new public Vault URL\n");
   const vaultDomain = await getConfigFileKey({
     key: "vaultDomain",
     configPath,
     context,
   });
-
   if (typeof vaultDomain !== "string") {
     throw new Error(
       "Vault domain is not a string and can't be used to update the region.yaml file"
     );
   }
-
   const vaultDomainWithProtocol = `https://${vaultDomain}`;
+
+  // Wait for DNS propagation before continuing
+  let dnsResolved = false;
+  let count = 0;
+  const maxRetries = 30; // 5 minutes (30 * 10 seconds)
+
+  while (!dnsResolved) {
+    // Wait for 10 seconds between checks
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 10000));
+
+    // Check if we've exceeded the timeout
+    if (count >= maxRetries) {
+      throw new Error(
+        `DNS propagation for ${vaultDomainWithProtocol} failed after 5 minutes`
+      );
+    }
+
+    try {
+      // Use delv to check DNS resolution
+      const result = await $`delv @1.1.1.1 ${vaultDomain}`.text();
+
+      if (verbose) {
+        context.stdout.write(`DNS check result: ${result}\n`);
+      }
+
+      // Check for successful validation without negative response
+      if (
+        result.includes("; fully validated") &&
+        !result.includes("; negative response, fully validated")
+      ) {
+        dnsResolved = true;
+      }
+    } catch (error) {
+      writeErrorToDebugFile({
+        context,
+        error,
+      });
+      if (verbose) {
+        context.stderr.write(`DNS check error: ${JSON.stringify(error)}\n`);
+      }
+      // Continue trying even if the command fails
+    }
+
+    count++;
+  }
+
+  context.stdout.write("11.f. Updating resources with new public Vault URL\n");
 
   await replaceYamlValue(
     "./region.yaml",

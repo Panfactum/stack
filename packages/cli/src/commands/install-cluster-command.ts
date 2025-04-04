@@ -1,6 +1,4 @@
 import { appendFileSync } from "node:fs";
-import path from "node:path";
-import { $ } from "bun";
 import { Command, Option } from "clipanion";
 import pc from "picocolors";
 import { awsRegions } from "../util/aws-regions";

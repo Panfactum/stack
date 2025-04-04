@@ -11,6 +11,7 @@ import { getRepoVariables } from "../../util/scripts/get-repo-variables";
 import { tfInit } from "../../util/scripts/tf-init";
 import { sopsEncrypt } from "../../util/sops-encrypt";
 import { startBackgroundProcess } from "../../util/start-background-process";
+import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -57,7 +58,7 @@ export const setupVault = async ({
     // We'll ignore this and do more checks below to see if the vault was instantiated successfully
   }
 
-  const vaultPodNames = [];
+  let vaultPodNames: string[] = [];
 
   // We'll check to see if the pods are running
   // If they are, we'll assume that the vault was instantiated successfully and we can proceed
@@ -95,7 +96,9 @@ export const setupVault = async ({
     const parsedPods = podsSchema.parse(pods);
 
     allPodsRunning = parsedPods.every((pod) => pod.status === "Running");
-    vaultPodNames.push(...parsedPods.map((pod) => pod.name));
+    if (allPodsRunning) {
+      vaultPodNames = parsedPods.map((pod) => pod.name);
+    }
     count++;
   }
 
@@ -147,6 +150,10 @@ export const setupVault = async ({
         ? `Error running vault operator init: ${error.message}`
         : "Error running vault operator init";
     context.stderr.write(`${pc.red(errorMessage)}\n`);
+    writeErrorToDebugFile({
+      context,
+      error,
+    });
     throw new Error("Failed to initialize vault");
   }
 
@@ -194,6 +201,10 @@ export const setupVault = async ({
         ? `Error unsealing Vault: ${error.message}`
         : "Error unsealing Vault";
     context.stderr.write(`${pc.red(errorMessage)}\n`);
+    writeErrorToDebugFile({
+      context,
+      error,
+    });
     throw new Error("Failed to unseal Vault");
   }
 

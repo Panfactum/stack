@@ -11,6 +11,7 @@ import { getRepoVariables } from "../../util/scripts/get-repo-variables";
 import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
 import { tfInit } from "../../util/scripts/tf-init";
 import { startBackgroundProcess } from "../../util/start-background-process";
+import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import { apply } from "../terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
@@ -157,6 +158,10 @@ export const setupCertManagement = async ({
       }
     }
   } catch (error) {
+    writeErrorToDebugFile({
+      context,
+      error,
+    });
     const errorMessage =
       error instanceof Error
         ? `Error finding delegated zones folders: ${error.message}`

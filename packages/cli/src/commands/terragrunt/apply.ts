@@ -1,6 +1,7 @@
 import pc from "picocolors";
 import { printHelpInformation } from "../../util/print-help-information";
 import { progressMessage } from "../../util/progress-message";
+import { writeErrorToDebugFile } from "../../util/write-error-to-debug-file";
 import type { BaseContext } from "clipanion";
 
 export function apply({
@@ -41,7 +42,7 @@ export function apply({
 
     // Check if the init process failed
     if (initProcess.exitCode !== 0) {
-      context.stderr.write(initProcess.stderr.toString());
+      context.stderr.write(pc.red(initProcess.stderr.toString()));
       context.stdout.write(pc.red("Failed to apply infrastructure modules.\n"));
       context.stdout.write(
         pc.red(
@@ -49,6 +50,10 @@ export function apply({
         )
       );
       printHelpInformation(context);
+      writeErrorToDebugFile({
+        context,
+        error: `Failed to apply infrastructure modules: ${initProcess.stderr.toString()}`,
+      });
       throw new Error("Failed to apply infrastructure modules");
     }
 
@@ -68,6 +73,10 @@ export function apply({
           : "Error applying infrastructure modules";
       context.stderr.write(`${pc.red(errorMessage)}\n`);
     }
+    writeErrorToDebugFile({
+      context,
+      error,
+    });
     throw new Error("Failed to apply infrastructure modules");
   }
 }
