@@ -31,6 +31,15 @@ locals {
   name                    = "airbyte"
   namespace               = module.namespace.namespace
   memory_limit_multiplier = 1.3
+
+  vault_mount      = "secret"                  # The secret engine mount point
+  vault_prefix     = "airbyte"                 # The base path under the mount
+  vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
+  vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
+
+  # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
+  vault_env_prefix    = "${local.vault_mount}/data/${local.vault_prefix}"
 }
 
 data "pf_kube_labels" "labels" {
@@ -357,6 +366,156 @@ resource "kubernetes_secret" "airbyte_secrets" {
   }
 }
 
+resource "vault_policy" "airbyte" {
+  name = "airbyte-secrets-policy"
+
+  policy = <<-EOT
+    # List secrets
+    path "${local.vault_metadata_path}/*" {
+      capabilities = ["list"]
+    }
+
+    # Read secrets
+    path "${local.vault_data_path}/*" {
+      capabilities = ["read"]
+    }
+
+    # Create and update secrets
+    path "${local.vault_data_path}/*" {
+      capabilities = ["create", "update"]
+    }
+
+    # Delete secrets if needed
+    path "${local.vault_delete_path}/*" {
+      capabilities = ["update"]
+    }
+
+    # Read secret metadata
+    path "${local.vault_metadata_path}/*" {
+      capabilities = ["read"]
+    }
+
+    # Allow Airbyte to check its token
+    path "auth/token/lookup-self" {
+      capabilities = ["read"]
+    }
+
+    # Allow Airbyte to renew its token if needed
+    path "auth/token/renew-self" {
+      capabilities = ["update"]
+    }
+  EOT
+}
+
+resource "vault_token" "airbyte" {
+  policies  = [vault_policy.airbyte.name]
+  renewable = true
+
+  // 768 hours = 32 days
+  ttl       = "768h"
+  period    = "768h"
+
+  metadata = {
+    created_by = "terraform"
+    purpose    = "airbyte_secrets_management"
+  }
+}
+
+resource "kubernetes_secret" "airbyte_vault_token" {
+  metadata {
+    name      = "airbyte-vault-token"
+    namespace = local.namespace
+    labels    = data.pf_kube_labels.labels.labels
+  }
+
+  data = {
+    token = vault_token.airbyte.client_token
+  }
+}
+
+module "vault_token_renewer" {
+  source = "../kube_cron_job"
+
+  namespace = local.namespace
+  name      = "airbyte-vault-token-renewer"
+
+  // Run every sunday at midnight
+  cron_schedule = "0 0 * * 0"
+
+  // Important config to ensure job runs successfully
+  restart_policy             = "OnFailure"
+  backoff_limit              = 3
+  active_deadline_seconds    = 900
+  concurrency_policy         = "Forbid"
+  pod_parallelism            = 1
+  pod_completions            = 1
+  failed_jobs_history_limit  = 3
+  successful_jobs_history_limit = 1
+
+  // Scheduling params
+  burstable_nodes_enabled    = var.burstable_nodes_enabled
+  spot_nodes_enabled         = var.spot_nodes_enabled
+  arm_nodes_enabled          = var.arm_nodes_enabled
+  controller_nodes_enabled   = var.controller_nodes_enabled
+  panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
+  pull_through_cache_enabled = var.pull_through_cache_enabled
+
+  // Configure the container
+  containers = [
+    {
+      name             = "vault-renewer"
+      image_registry   = "docker.io"
+      image_repository = "hashicorp/vault"
+      image_tag        = "1.15.2"
+      image_pin_enabled = false // Don't need this pinned since it runs infrequently
+      image_prepull_enabled = false // Don't need this pinned since it runs infrequently
+
+      command = [
+        "/bin/sh",
+        "-c",
+        <<-EOT
+        # Get the token from the mounted secret
+        TOKEN=$(cat /vault/token/token)
+
+        # Configure Vault CLI
+        export VAULT_ADDR="${var.vault_domain}"
+        export VAULT_TOKEN="$TOKEN"
+
+        # Log token info (TTL, etc.) before renewal
+        echo "Current token info:"
+        vault token lookup
+
+        # Renew token
+        echo "Renewing Vault token..."
+        vault token renew
+
+        # Verify renewal was successful
+        echo "Token info after renewal:"
+        vault token lookup
+
+        echo "Token renewal completed successfully"
+        EOT
+      ]
+
+      minimum_memory = 128
+      minimum_cpu    = 100
+
+      privileged  = false
+      run_as_root = false
+      readonly    = false # so vault can create .vault-token
+    }
+  ]
+
+  // Mount the token secret
+  secret_mounts = {
+    "airbyte-vault-token" = {
+      mount_path = "/vault/token"
+      optional   = false
+    }
+  }
+}
+
+
 /***************************************
 * Airbyte Helm Chart
 ***************************************/
@@ -455,7 +614,35 @@ resource "helm_release" "airbyte" {
           }
         }
 
-        env_vars = var.jobs_env_env
+        env_vars = merge(
+          var.global_env,
+          {
+            # Job sync configuration
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_MAX_SUCCESSIVE         = tostring(var.jobs_sync_job_retries_complete_failures_max_successive)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_MAX_TOTAL              = tostring(var.jobs_sync_job_retries_complete_failures_max_total)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_MIN_INTERVAL_S = tostring(var.jobs_sync_job_retries_complete_failures_backoff_min_interval_s)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_MAX_INTERVAL_S = tostring(var.jobs_sync_job_retries_complete_failures_backoff_max_interval_s)
+            SYNC_JOB_RETRIES_COMPLETE_FAILURES_BACKOFF_BASE           = tostring(var.jobs_sync_job_retries_complete_failures_backoff_base)
+            SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_SUCCESSIVE          = tostring(var.jobs_sync_job_retries_partial_failures_max_successive)
+            SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_TOTAL               = tostring(var.jobs_sync_job_retries_partial_failures_max_total)
+            SYNC_JOB_MAX_TIMEOUT_DAYS                                 = tostring(var.jobs_sync_max_timeout_days)
+            VAULT_ADDRESS                                             = "https://${var.vault_domain}"
+            VAULT_PREFIX                                              = local.vault_env_prefix
+            VAULT_AUTH_METHOD                                         = "token"
+          }
+        )
+
+        extraEnv = [
+          {
+            name = "VAULT_AUTH_TOKEN"
+            valueFrom = {
+              secretKeyRef = {
+                name = kubernetes_secret.airbyte_vault_token.metadata[0].name
+                key  = "token"
+              }
+            }
+          }
+        ]
       }
 
       # Disable the default PostgreSQL since we're using our own
@@ -542,6 +729,12 @@ resource "helm_release" "airbyte" {
             memory = "${var.worker_min_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        env_vars = merge(var.worker_env, {
+          DISCOVER_REFRESH_WINDOW_MINUTES = tostring(var.worker_discovery_refresh_window_minutes)
+          MAX_CHECK_WORKERS = tostring(var.worker_max_check_workers)
+          MAX_SYNC_WORKERS = tostring(var.worker_max_sync_workers)
+        })
       }
 
       # Temporal configuration
@@ -575,30 +768,6 @@ resource "helm_release" "airbyte" {
         # Add temporal-specific env vars
         extraEnv = [
           {
-            name  = "TEMPORAL_DB_HOST"
-            value = module.database.rw_service_name # Direct connection for Temporal
-          },
-          {
-            name  = "TEMPORAL_DB_PORT"
-            value = tostring(module.database.rw_service_port)
-          },
-          {
-            name  = "POSTGRES_SEEDS"
-            value = module.database.rw_service_name # Direct connection
-          },
-          {
-            name  = "DB_PORT"
-            value = tostring(module.database.rw_service_port)
-          },
-          {
-            name  = "SQL_MAX_IDLE_CONNS"
-            value = tostring(var.temporal_db_max_idle_conns)
-          },
-          {
-            name  = "SQL_MAX_CONNS"
-            value = tostring(var.temporal_db_max_conns)
-          },
-          {
             name = "TEMPORAL_BROADCAST_ADDRESS"
             valueFrom = {
               fieldRef = {
@@ -606,17 +775,19 @@ resource "helm_release" "airbyte" {
               }
             }
           },
-          # Ensure proper service addressing
-          {
-            name  = "TEMPORAL_ADDRESS"
-            value = "airbyte-temporal:7233"
-          },
-          # Set appropriate timeouts to avoid protocol errors
-          {
-            name  = "TEMPORAL_CLI_TIMEOUT"
-            value = "60s"
-          }
         ]
+
+        env_vars = merge(var.temporal_env, {
+          TEMPORAL_HISTORY_RETENTION_IN_DAYS = tostring(var.temporal_history_retention_in_days)
+          TEMPORAL_DB_HOST = module.database.rw_service_name
+          TEMPORAL_DB_PORT = tostring(module.database.rw_service_port)
+          POSTGRES_SEEDS = module.database.rw_service_name
+          DB_PORT = tostring(module.database.rw_service_port)
+          SQL_MAX_IDLE_CONNS = tostring(var.temporal_db_max_idle_conns)
+          SQL_MAX_CONNS = tostring(var.temporal_db_max_conns)
+          TEMPORAL_ADDRESS = "airbyte-temporal:7233"
+          TEMPORAL_CLI_TIMEOUT = "60s"
+        })
       }
 
       # Pod sweeper configuration
@@ -730,6 +901,10 @@ resource "helm_release" "airbyte" {
             memory = "${var.workload_min_launcher_memory_mb * local.memory_limit_multiplier}Mi"
           }
         }
+
+        env_vars = merge(var.launcher_env, {
+          WORKLOAD_LAUNCHER_PARALLELISM = var.launcher_workload_launcher_parallelism
+        })
       }
     })
   ]
@@ -737,7 +912,8 @@ resource "helm_release" "airbyte" {
   depends_on = [
     module.database,
     kubernetes_secret.airbyte_secrets,
-    module.aws_permissions
+    module.aws_permissions,
+    kubernetes_secret.airbyte_vault_token,
   ]
 }
 
