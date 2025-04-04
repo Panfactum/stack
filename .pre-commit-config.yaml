@@ -28,6 +28,24 @@ repos:
         description: "Runs shfmt on shell scripts"
         fail_fast: true
 
+      - id: nixfmt
+        name: Nix Format
+        entry: nixfmt -c
+        language: system
+        files: ^packages/nix/.*\.nix$
+        pass_filenames: true
+        description: "Runs nixfmt on Nix files"
+        fail_fast: true
+
+      - id: hcl-fmt
+        name: HCL Format
+        entry: terragrunt hclfmt --terragrunt-check --terragrunt-diff --terragrunt-hclfmt-file
+        language: system
+        files: ^packages/nix/.*\.hcl$
+        pass_filenames: true
+        description: "Runs hclfmt on HCL files"
+        fail_fast: true
+
       - id: tf-fmt
         name: Tofu Format
         entry: tofu fmt -diff -check

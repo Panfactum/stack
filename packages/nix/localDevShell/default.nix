@@ -44,19 +44,4 @@
     nodePackages.cspell
     pre-commit
   ];
-
-  pre-commit.hooks = {
-    terragrunt-custom = {
-      enable = true;
-      fail_fast = true;
-      entry = "precommit-terragrunt-fmt";
-      description = "Terragrunt linting";
-      files = "^packages/(nix|reference)/(.*).hcl$";
-    };
-    nixfmt = {
-      enable = true;
-      fail_fast = true;
-      description = "Nix linting";
-    };
-  };
 }
