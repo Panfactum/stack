@@ -32,14 +32,14 @@ locals {
   namespace               = module.namespace.namespace
   memory_limit_multiplier = 1.3
 
-  vault_mount      = "secret"                  # The secret engine mount point
-  vault_prefix     = "airbyte"                 # The base path under the mount
+  vault_mount         = "secret"  # The secret engine mount point
+  vault_prefix        = "airbyte" # The base path under the mount
   vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
   vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
   vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
 
   # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
-  vault_env_prefix    = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_env_prefix = "${local.vault_mount}/data/${local.vault_prefix}"
 }
 
 data "pf_kube_labels" "labels" {
@@ -412,8 +412,8 @@ resource "vault_token" "airbyte" {
   renewable = true
 
   // 768 hours = 32 days
-  ttl       = "768h"
-  period    = "768h"
+  ttl    = "768h"
+  period = "768h"
 
   metadata = {
     created_by = "terraform"
@@ -443,31 +443,31 @@ module "vault_token_renewer" {
   cron_schedule = "0 0 * * 0"
 
   // Important config to ensure job runs successfully
-  restart_policy             = "OnFailure"
-  backoff_limit              = 3
-  active_deadline_seconds    = 900
-  concurrency_policy         = "Forbid"
-  pod_parallelism            = 1
-  pod_completions            = 1
-  failed_jobs_history_limit  = 3
+  restart_policy                = "OnFailure"
+  backoff_limit                 = 3
+  active_deadline_seconds       = 900
+  concurrency_policy            = "Forbid"
+  pod_parallelism               = 1
+  pod_completions               = 1
+  failed_jobs_history_limit     = 3
   successful_jobs_history_limit = 1
 
   // Scheduling params
-  burstable_nodes_enabled    = var.burstable_nodes_enabled
-  spot_nodes_enabled         = var.spot_nodes_enabled
-  arm_nodes_enabled          = var.arm_nodes_enabled
-  controller_nodes_enabled   = var.controller_nodes_enabled
+  burstable_nodes_enabled     = var.burstable_nodes_enabled
+  spot_nodes_enabled          = var.spot_nodes_enabled
+  arm_nodes_enabled           = var.arm_nodes_enabled
+  controller_nodes_enabled    = var.controller_nodes_enabled
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
-  pull_through_cache_enabled = var.pull_through_cache_enabled
+  pull_through_cache_enabled  = var.pull_through_cache_enabled
 
   // Configure the container
   containers = [
     {
-      name             = "vault-renewer"
-      image_registry   = "docker.io"
-      image_repository = "hashicorp/vault"
-      image_tag        = "1.15.2"
-      image_pin_enabled = false // Don't need this pinned since it runs infrequently
+      name                  = "vault-renewer"
+      image_registry        = "docker.io"
+      image_repository      = "hashicorp/vault"
+      image_tag             = "1.15.2"
+      image_pin_enabled     = false // Don't need this pinned since it runs infrequently
       image_prepull_enabled = false // Don't need this pinned since it runs infrequently
 
       command = [
@@ -629,6 +629,7 @@ resource "helm_release" "airbyte" {
             VAULT_ADDRESS                                             = "https://${var.vault_domain}"
             VAULT_PREFIX                                              = local.vault_env_prefix
             VAULT_AUTH_METHOD                                         = "token"
+            SPEC_CACHE_BUCKET                                         = module.airbyte_bucket.bucket_name
           }
         )
 
@@ -732,8 +733,8 @@ resource "helm_release" "airbyte" {
 
         env_vars = merge(var.worker_env, {
           DISCOVER_REFRESH_WINDOW_MINUTES = tostring(var.worker_discovery_refresh_window_minutes)
-          MAX_CHECK_WORKERS = tostring(var.worker_max_check_workers)
-          MAX_SYNC_WORKERS = tostring(var.worker_max_sync_workers)
+          MAX_CHECK_WORKERS               = tostring(var.worker_max_check_workers)
+          MAX_SYNC_WORKERS                = tostring(var.worker_max_sync_workers)
         })
       }
 
@@ -779,14 +780,14 @@ resource "helm_release" "airbyte" {
 
         env_vars = merge(var.temporal_env, {
           TEMPORAL_HISTORY_RETENTION_IN_DAYS = tostring(var.temporal_history_retention_in_days)
-          TEMPORAL_DB_HOST = module.database.rw_service_name
-          TEMPORAL_DB_PORT = tostring(module.database.rw_service_port)
-          POSTGRES_SEEDS = module.database.rw_service_name
-          DB_PORT = tostring(module.database.rw_service_port)
-          SQL_MAX_IDLE_CONNS = tostring(var.temporal_db_max_idle_conns)
-          SQL_MAX_CONNS = tostring(var.temporal_db_max_conns)
-          TEMPORAL_ADDRESS = "airbyte-temporal:7233"
-          TEMPORAL_CLI_TIMEOUT = "60s"
+          TEMPORAL_DB_HOST                   = module.database.rw_service_name
+          TEMPORAL_DB_PORT                   = tostring(module.database.rw_service_port)
+          POSTGRES_SEEDS                     = module.database.rw_service_name
+          DB_PORT                            = tostring(module.database.rw_service_port)
+          SQL_MAX_IDLE_CONNS                 = tostring(var.temporal_db_max_idle_conns)
+          SQL_MAX_CONNS                      = tostring(var.temporal_db_max_conns)
+          TEMPORAL_ADDRESS                   = "airbyte-temporal:7233"
+          TEMPORAL_CLI_TIMEOUT               = "60s"
         })
       }
 

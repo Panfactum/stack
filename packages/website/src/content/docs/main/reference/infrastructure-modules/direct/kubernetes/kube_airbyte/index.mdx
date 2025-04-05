@@ -234,6 +234,14 @@ Type: `string`
 
 Default: `null`
 
+### global\_env
+
+Description: Additional global environment variables for Airbyte configuration https://docs.airbyte.com/operator-guides/configuring-airbyte
+
+Type: `map(string)`
+
+Default: `{}`
+
 ### helm\_timeout\_seconds
 
 Description: The timeout in seconds for Helm operations
@@ -257,14 +265,6 @@ Description: The minimum amount of cpu millicores for jobs containers
 Type: `number`
 
 Default: `100`
-
-### jobs\_env\_env
-
-Description: Additional environment variables for Airbyte jobs configuration (e.g. SYNC\_JOB\_MAX\_ATTEMPTS, JOB\_MAIN\_CONTAINER\_MEMORY\_LIMIT, etc.) https://docs.airbyte.com/operator-guides/configuring-airbyte#jobs
-
-Type: `map(string)`
-
-Default: `{}`
 
 ### jobs\_min\_memory\_mb
 
@@ -312,7 +312,7 @@ Description: Defines the max number of attempts in which no data was synchronize
 
 Type: `number`
 
-Default: `30`
+Default: `9`
 
 ### jobs\_sync\_job\_retries\_partial\_failures\_max\_successive
 
@@ -328,7 +328,7 @@ Description: Defines the max number of attempts in which some data was synchroni
 
 Type: `number`
 
-Default: `30`
+Default: `9`
 
 ### jobs\_sync\_max\_timeout\_days
 
@@ -337,6 +337,22 @@ Description: Defines the number of days a sync job will execute for before timin
 Type: `number`
 
 Default: `1`
+
+### launcher\_env
+
+Description: Additional env vars for the launcher container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### launcher\_workload\_launcher\_parallelism
+
+Description: Defines the number of jobs that can be started at once.
+
+Type: `number`
+
+Default: `10`
 
 ### license\_key
 
@@ -546,6 +562,22 @@ Type: `number`
 
 Default: `20`
 
+### temporal\_env
+
+Description: Additional temporal env variables
+
+Type: `map(string)`
+
+Default: `{}`
+
+### temporal\_history\_retention\_in\_days
+
+Description: TEMPORAL\_HISTORY\_RETENTION\_IN\_DAYS
+
+Type: `number`
+
+Default: `30`
+
 ### temporal\_min\_cpu\_millicores
 
 Description: The minimum amount of cpu millicores for temporal containers
@@ -593,6 +625,38 @@ Description: Memory request for webapp containers
 Type: `number`
 
 Default: `128`
+
+### worker\_discovery\_refresh\_window\_minutes
+
+Description: The minimum number of minutes Airbyte will wait to refresh a schema. By setting a larger number, you delay automatic schema refreshes and improve sync performance. The lowest interval you can set is 1 (once per minute). Set this to 0 to disable automatic schema refreshes.
+
+Type: `number`
+
+Default: `15`
+
+### worker\_env
+
+Description: Additional env for the worker container
+
+Type: `map(string)`
+
+Default: `{}`
+
+### worker\_max\_check\_workers
+
+Description: Maximum amount of check instances to be running
+
+Type: `number`
+
+Default: `5`
+
+### worker\_max\_sync\_workers
+
+Description: Maximum amount of sync instances to be running
+
+Type: `number`
+
+Default: `10`
 
 ### worker\_min\_cpu\_millicores
 

@@ -417,8 +417,8 @@ variable "temporal_env" {
 
 variable "temporal_history_retention_in_days" {
   description = "TEMPORAL_HISTORY_RETENTION_IN_DAYS"
-  type = number
-  default = 30
+  type        = number
+  default     = 30
 }
 
 variable "connector_min_builder_memory_mb" {
