@@ -40,6 +40,7 @@ locals {
 
   # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
   vault_env_prefix = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_address    = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
 data "pf_kube_labels" "labels" {
@@ -264,7 +265,7 @@ module "database" {
 
 resource "kubernetes_service_account" "airbyte_sa" {
   metadata {
-    name      = "airbyte-admin"
+    name      = local.name
     namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
@@ -366,83 +367,171 @@ resource "kubernetes_secret" "airbyte_secrets" {
   }
 }
 
-resource "vault_policy" "airbyte" {
-  name = "airbyte-secrets-policy"
+/***************************************
+* Vault Policy for Airbyte
+***************************************/
 
-  policy = <<-EOT
-    # List secrets
-    path "${local.vault_metadata_path}/*" {
-      capabilities = ["list"]
-    }
+data "vault_policy_document" "airbyte" {
+  rule {
+    path         = "${local.vault_metadata_path}/*"
+    capabilities = ["list"]
+    description  = "List secrets"
+  }
 
-    # Read secrets
-    path "${local.vault_data_path}/*" {
-      capabilities = ["read"]
-    }
+  rule {
+    path         = "${local.vault_data_path}/*"
+    capabilities = ["read"]
+    description  = "Read secrets"
+  }
 
-    # Create and update secrets
-    path "${local.vault_data_path}/*" {
-      capabilities = ["create", "update"]
-    }
+  rule {
+    path         = "${local.vault_data_path}/*"
+    capabilities = ["create", "update"]
+    description  = "Create and update secrets"
+  }
 
-    # Delete secrets if needed
-    path "${local.vault_delete_path}/*" {
-      capabilities = ["update"]
-    }
+  rule {
+    path         = "${local.vault_delete_path}/*"
+    capabilities = ["update"]
+    description  = "Delete secrets if needed"
+  }
 
-    # Read secret metadata
-    path "${local.vault_metadata_path}/*" {
-      capabilities = ["read"]
-    }
-
-    # Allow Airbyte to check its token
-    path "auth/token/lookup-self" {
-      capabilities = ["read"]
-    }
-
-    # Allow Airbyte to renew its token if needed
-    path "auth/token/renew-self" {
-      capabilities = ["update"]
-    }
-  EOT
-}
-
-resource "vault_token" "airbyte" {
-  policies  = [vault_policy.airbyte.name]
-  renewable = true
-
-  // 768 hours = 32 days
-  ttl    = "768h"
-  period = "768h"
-
-  metadata = {
-    created_by = "terraform"
-    purpose    = "airbyte_secrets_management"
+  rule {
+    path         = "${local.vault_metadata_path}/*"
+    capabilities = ["read"]
+    description  = "Read secret metadata"
   }
 }
 
-resource "kubernetes_secret" "airbyte_vault_token" {
+module "vault_auth_airbyte" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = kubernetes_service_account.airbyte_sa.metadata[0].name
+  service_account_namespace = local.namespace
+  vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
+}
+
+# Define the Kubernetes Role for allowing the airbyte service account to manage secrets
+resource "kubernetes_role" "airbyte_secrets_writer" {
   metadata {
-    name      = "airbyte-vault-token"
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer"
+  }
+  rule {
+    api_groups = [""]
+    resources  = ["secrets"]
+    verbs      = ["get", "create", "update", "patch"]
+  }
+}
+
+# Define the Kubernetes RoleBinding to bind the Role to the airbyte service account
+resource "kubernetes_role_binding" "airbyte_secrets_writer_binding" {
+  metadata {
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer-binding"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.airbyte_sa.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    kind      = "Role"
+    name      = kubernetes_role.airbyte_secrets_writer.metadata[0].name
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+
+/***************************************
+* Vault Secrets Operator Resources
+***************************************/
+
+resource "kubernetes_job" "vault_token_init" {
+  metadata {
+    name      = "airbyte-vault-token-init"
     namespace = local.namespace
     labels    = data.pf_kube_labels.labels.labels
   }
 
-  data = {
-    token = vault_token.airbyte.client_token
+  spec {
+    template {
+      metadata {
+        labels = data.pf_kube_labels.labels.labels
+      }
+
+      spec {
+        service_account_name = kubernetes_service_account.airbyte_sa.metadata[0].name
+
+        container {
+          name  = "vault-token-generator"
+          image = "curlimages/curl:8.5.0" # Official curl image based on Alpine
+
+          env {
+            name  = "VAULT_ADDR"
+            value = local.vault_address
+          }
+
+          env {
+            name  = "VAULT_ROLE"
+            value = module.vault_auth_airbyte.role_name
+          }
+
+          env {
+            name  = "NAMESPACE"
+            value = local.namespace
+          }
+
+          command = [
+            "/bin/sh",
+            "-c",
+            file("${path.module}/scripts/vault_token_rotate.sh")
+          ]
+
+          security_context {
+            run_as_non_root           = true
+            run_as_user               = 1000
+            read_only_root_filesystem = true
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
+
+          resources {
+            requests = {
+              memory = "30Mi"
+              cpu    = "25m"
+            }
+            limits = {
+              memory = "40Mi"
+            }
+          }
+        }
+
+        restart_policy = "OnFailure"
+      }
+    }
+
+    backoff_limit              = 5
+    ttl_seconds_after_finished = 3600 # Clean up after 1 hour
   }
+
+  depends_on = [
+    module.vault_auth_airbyte
+  ]
 }
 
-module "vault_token_renewer" {
+/***************************************
+* Vault Token Rotation CronJob
+***************************************/
+
+module "vault_token_rotator" {
   source = "../kube_cron_job"
 
-  namespace = local.namespace
-  name      = "airbyte-vault-token-renewer"
+  namespace     = local.namespace
+  name          = "airbyte-vault-token-rotator"
+  cron_schedule = "0 */8 * * 0" # every 8 hours
 
-  // Run every sunday at midnight
-  cron_schedule = "0 0 * * 0"
-
-  // Important config to ensure job runs successfully
+  # Important parameters for the job
   restart_policy                = "OnFailure"
   backoff_limit                 = 3
   active_deadline_seconds       = 900
@@ -452,7 +541,7 @@ module "vault_token_renewer" {
   failed_jobs_history_limit     = 3
   successful_jobs_history_limit = 1
 
-  // Scheduling params
+  # Scheduling params to match your settings
   burstable_nodes_enabled     = var.burstable_nodes_enabled
   spot_nodes_enabled          = var.spot_nodes_enabled
   arm_nodes_enabled           = var.arm_nodes_enabled
@@ -460,61 +549,38 @@ module "vault_token_renewer" {
   panfactum_scheduler_enabled = var.panfactum_scheduler_enabled
   pull_through_cache_enabled  = var.pull_through_cache_enabled
 
-  // Configure the container
+  # Use the existing airbyte service account
+  common_env = {
+    VAULT_ADDR = local.vault_address
+    VAULT_ROLE = module.vault_auth_airbyte.role_name
+    NAMESPACE  = local.namespace
+  }
+
+  # Container configuration
   containers = [
     {
-      name                  = "vault-renewer"
+      name                  = "vault-token-rotator"
       image_registry        = "docker.io"
-      image_repository      = "hashicorp/vault"
-      image_tag             = "1.15.2"
-      image_pin_enabled     = false // Don't need this pinned since it runs infrequently
-      image_prepull_enabled = false // Don't need this pinned since it runs infrequently
+      image_repository      = "curlimages/curl"
+      image_tag             = "8.12.1"
+      image_pin_enabled     = true
+      image_prepull_enabled = false
 
       command = [
         "/bin/sh",
         "-c",
-        <<-EOT
-        # Get the token from the mounted secret
-        TOKEN=$(cat /vault/token/token)
-
-        # Configure Vault CLI
-        export VAULT_ADDR="${var.vault_domain}"
-        export VAULT_TOKEN="$TOKEN"
-
-        # Log token info (TTL, etc.) before renewal
-        echo "Current token info:"
-        vault token lookup
-
-        # Renew token
-        echo "Renewing Vault token..."
-        vault token renew
-
-        # Verify renewal was successful
-        echo "Token info after renewal:"
-        vault token lookup
-
-        echo "Token renewal completed successfully"
-        EOT
+        file("${path.module}/scripts/vault_token_rotate.sh")
       ]
 
-      minimum_memory = 128
-      minimum_cpu    = 100
+      minimum_memory = 32
+      minimum_cpu    = 25
 
       privileged  = false
       run_as_root = false
-      readonly    = false # so vault can create .vault-token
+      readonly    = true
     }
   ]
-
-  // Mount the token secret
-  secret_mounts = {
-    "airbyte-vault-token" = {
-      mount_path = "/vault/token"
-      optional   = false
-    }
-  }
 }
-
 
 /***************************************
 * Airbyte Helm Chart
@@ -608,9 +674,10 @@ resource "helm_release" "airbyte" {
             }
           }
           kube = {
-            annotations = var.pod_annotations
-            labels      = module.util_jobs.labels
-            tolerations = module.util_jobs.tolerations
+            annotations        = var.pod_annotations
+            labels             = module.util_jobs.labels
+            tolerations        = module.util_jobs.tolerations
+            serviceAccountName = kubernetes_service_account.airbyte_sa.metadata[0].name
           }
         }
 
@@ -626,7 +693,7 @@ resource "helm_release" "airbyte" {
             SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_SUCCESSIVE          = tostring(var.jobs_sync_job_retries_partial_failures_max_successive)
             SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_TOTAL               = tostring(var.jobs_sync_job_retries_partial_failures_max_total)
             SYNC_JOB_MAX_TIMEOUT_DAYS                                 = tostring(var.jobs_sync_max_timeout_days)
-            VAULT_ADDRESS                                             = "https://${var.vault_domain}"
+            VAULT_ADDRESS                                             = local.vault_address
             VAULT_PREFIX                                              = local.vault_env_prefix
             VAULT_AUTH_METHOD                                         = "token"
             SPEC_CACHE_BUCKET                                         = module.airbyte_bucket.bucket_name
@@ -638,7 +705,7 @@ resource "helm_release" "airbyte" {
             name = "VAULT_AUTH_TOKEN"
             valueFrom = {
               secretKeyRef = {
-                name = kubernetes_secret.airbyte_vault_token.metadata[0].name
+                name = "airbyte-vault-token"
                 key  = "token"
               }
             }
@@ -914,7 +981,7 @@ resource "helm_release" "airbyte" {
     module.database,
     kubernetes_secret.airbyte_secrets,
     module.aws_permissions,
-    kubernetes_secret.airbyte_vault_token,
+    kubernetes_job.vault_token_init
   ]
 }
 
