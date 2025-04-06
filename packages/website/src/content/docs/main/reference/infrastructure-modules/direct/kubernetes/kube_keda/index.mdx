@@ -3,15 +3,15 @@ import ModuleHeader from "@/components/markdown/ModuleHeader.astro";
 {/* lint disable no-duplicate-headings */}
 
 {/* eslint-disable import/order */}
-<ModuleHeader name="kube_karpenter" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_karpenter" status="stable" type="direct"/>
+<ModuleHeader name="kube_keda" sourceHref="https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure/kube_keda" status="beta" type="direct"/>
 
-# Karpenter
+# KEDA
+
+This module installs the [Kubernetes Event-Driven Autoscaler (KEDA)](https://keda.sh/).
 
 ## Providers
 
 The following providers are needed by this module:
-
-- [aws](https://registry.terraform.io/providers/hashicorp/aws/5.80.0/docs) (5.80.0)
 
 - [helm](https://registry.terraform.io/providers/hashicorp/helm/2.12.1/docs) (2.12.1)
 
@@ -25,13 +25,7 @@ The following providers are needed by this module:
 
 ## Required Inputs
 
-The following input variables are required:
-
-### node\_role\_arn
-
-Description: The arn of the role the EKS cluster roles are assigned
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
@@ -45,21 +39,37 @@ Type: `list(string)`
 
 Default: `[]`
 
-### karpenter\_helm\_version
+### burstable\_nodes\_enabled
 
-Description: The version of the karpenter helm chart to deploy
+Description: Whether to allow pods to schedule on burstable nodes
+
+Type: `bool`
+
+Default: `true`
+
+### controller\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on EKS Node Group nodes (controller nodes)
+
+Type: `bool`
+
+Default: `true`
+
+### keda\_helm\_version
+
+Description: The version of the KEDA helm chart to deploy
 
 Type: `string`
 
-Default: `"1.1.1"`
+Default: `"2.16.1"`
 
 ### log\_level
 
-Description: The log level for the karpenter pods
+Description: The log level for the KEDA pods
 
 Type: `string`
 
-Default: `"warn"`
+Default: `"error"`
 
 ### monitoring\_enabled
 
@@ -69,6 +79,14 @@ Type: `bool`
 
 Default: `false`
 
+### panfactum\_scheduler\_enabled
+
+Description: Whether to use the Panfactum pod scheduler with enhanced bin-packing
+
+Type: `bool`
+
+Default: `true`
+
 ### pull\_through\_cache\_enabled
 
 Description: Whether to use the ECR pull through cache for the deployed images
@@ -77,6 +95,22 @@ Type: `bool`
 
 Default: `false`
 
+### scaled\_job\_max\_concurrent\_reconciles
+
+Description: The maximum number of concurrent reconciliations for ScaledJobs. Raising this will improve throughput but also resource usage.
+
+Type: `number`
+
+Default: `5`
+
+### scaled\_object\_max\_concurrent\_reconciles
+
+Description: The maximum number of concurrent reconciliations for ScaledObjects. Raising this will improve throughput but also resource usage.
+
+Type: `number`
+
+Default: `5`
+
 ### sla\_target
 
 Description: The Panfactum SLA level for the module deployment. 1 = lowest uptime (99.9%), lowest cost -- 3 = highest uptime (99.999%), highest Cost
@@ -84,6 +118,14 @@ Description: The Panfactum SLA level for the module deployment. 1 = lowest uptim
 Type: `number`
 
 Default: `3`
+
+### spot\_nodes\_enabled
+
+Description: Whether to allow pods to schedule on spot nodes
+
+Type: `bool`
+
+Default: `true`
 
 ### vpa\_enabled
 
