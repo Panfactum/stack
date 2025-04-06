@@ -4,6 +4,7 @@
         "astro-build.astro-vscode",
         "bradlc.vscode-tailwindcss",
         "elagil.pre-commit-helper",
-        "gruntfuggly.todo-tree"
+        "gruntfuggly.todo-tree",
+        "timonwong.shellcheck"
     ]
 }
