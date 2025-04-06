@@ -75,6 +75,6 @@ export DOCKER_CONFIG=$BUILDKIT_DIR # Needed for buildkit to work
 ## Run checks
 #############################################
 
-if [[ "$PF_SKIP_REPO_CHECK" != "1" ]]; then
+if [[ $PF_SKIP_CHECK_REPO_SETUP != 1 ]]; then
   pf-check-repo-setup
 fi
