@@ -838,56 +838,56 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    // let setupInboundNetworkingComplete = false;
-    // try {
-    //   setupInboundNetworkingComplete = await checkStepCompletion({
-    //     configFilePath: configPath,
-    //     context: this.context,
-    //     step: "inboundNetworking",
-    //     stepCompleteMessage:
-    //       "11/13 Skipping inbound networking setup as it's already complete.\n",
-    //     stepNotCompleteMessage: "11/13 Setting up inbound networking\n\n",
-    //   });
-    // } catch {
-    //   return 1;
-    // }
+    let setupInboundNetworkingComplete = false;
+    try {
+      setupInboundNetworkingComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "inboundNetworking",
+        stepCompleteMessage:
+          "11/13 Skipping inbound networking setup as it's already complete.\n",
+        stepNotCompleteMessage: "11/13 Setting up inbound networking\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    // if (!setupInboundNetworkingComplete) {
-    //   try {
-    //     await setupInboundNetworking({
-    //       configPath,
-    //       context: this.context,
-    //       verbose: this.verbose,
-    //     });
-    //   } catch (error) {
-    //     writeErrorToDebugFile({
-    //       context: this.context,
-    //       error: `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}`,
-    //     });
-    //     this.context.stderr.write(
-    //       pc.red(
-    //         `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}\n`
-    //       )
-    //     );
-    //     printHelpInformation(this.context);
-    //     backgroundProcessIds.forEach((pid) => {
-    //       try {
-    //         process.kill(pid);
-    //       } catch {
-    //         // Do nothing as it's already dead
-    //       }
-    //     });
-    //     return 1;
-    //   }
+    if (!setupInboundNetworkingComplete) {
+      try {
+        await setupInboundNetworking({
+          configPath,
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}`,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
 
-    //   await updateConfigFile({
-    //     updates: {
-    //       inboundNetworking: true,
-    //     },
-    //     configPath,
-    //     context: this.context,
-    //   });
-    // }
+      await updateConfigFile({
+        updates: {
+          inboundNetworking: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
 
     // let setupMaintenanceControllersComplete = false;
     // try {

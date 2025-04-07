@@ -2,7 +2,7 @@ import path from "path";
 import yaml from "yaml";
 import kubeKarpenterNodePoolsTerragruntHcl from "../../../../templates/kube_karpenter_node_pools_terragrunt.hcl" with { type: "file" };
 import kubeKarpenterTerragruntHcl from "../../../../templates/kube_karpenter_terragrunt.hcl" with { type: "file" };
-import kubeKedaTerragruntHcl from "../../../../templates/kube_keda_terragurnt.hcl" with { type: "file" };
+import kubeKedaTerragruntHcl from "../../../../templates/kube_keda_terragrunt.hcl" with { type: "file" };
 import kubeMetricsServerTerragruntHcl from "../../../../templates/kube_metrics_server_terragrunt.hcl" with { type: "file" };
 import kubeSchedulerTerragruntHcl from "../../../../templates/kube_scheduler_terragrunt.hcl" with { type: "file" };
 import kubeVpaTerragruntHcl from "../../../../templates/kube_vpa_terragrunt.hcl" with { type: "file" };
