@@ -2,7 +2,7 @@ import pc from "picocolors";
 import { progressMessage } from "./progress-message";
 import { tfInit } from "./scripts/tf-init";
 import { writeErrorToDebugFile } from "./write-error-to-debug-file";
-import { apply } from "../commands/terragrunt/apply";
+import { apply } from "../commands/cluster/install/terragrunt/apply";
 import type { BaseContext } from "clipanion";
 
 export async function initAndApplyModule({
@@ -23,7 +23,7 @@ export async function initAndApplyModule({
     if (!verbose) {
       tfInitProgress = progressMessage({
         context,
-        message: `Initializing and upgrading ${moduleName} infrastructure module`,
+        message: `Initializing and upgrading ${moduleName}`,
       });
     }
 

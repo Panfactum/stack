@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { Builtins, Cli } from "clipanion";
-import { InstallClusterCommand } from "./commands/install-cluster-command";
+import { InstallClusterCommand } from "./commands/cluster/install/command";
 import { CheckRepoSetupCommand } from "./util/scripts/check-repo-setup-command";
 import { EksResetCommand } from "./util/scripts/eks-reset-command";
 import { GetAWSStateHashCommand } from "./util/scripts/get-aws-state-hash-command";
