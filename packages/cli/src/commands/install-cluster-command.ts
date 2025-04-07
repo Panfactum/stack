@@ -683,66 +683,78 @@ export class InstallClusterCommand extends Command {
       })
     );
 
-    // let setupCertManagementComplete = false;
-    // try {
-    //   setupCertManagementComplete = await checkStepCompletion({
-    //     configFilePath: configPath,
-    //     context: this.context,
-    //     step: "certManagement",
-    //     stepCompleteMessage:
-    //       "8/13 Skipping certificate management setup as it's already complete.\n",
-    //     stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
-    //   });
-    // } catch {
-    //   return 1;
-    // }
+    let setupCertManagementComplete = false;
+    try {
+      setupCertManagementComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "certManagement",
+        stepCompleteMessage:
+          "8/13 Skipping certificate management setup as it's already complete.\n",
+        stepNotCompleteMessage: "8/13 Setting up certificate management\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    // if (!setupCertManagementComplete) {
-    //   const { alertEmail } = await certManagerPrompts();
+    if (!setupCertManagementComplete) {
+      let alertEmail = "";
+      const alertEmailConfig = await getConfigFileKey({
+        configPath,
+        key: "alertEmail",
+        context: this.context,
+      });
+      if (!alertEmailConfig || typeof alertEmailConfig !== "string") {
+        const { alertEmail: alertEmailInput } = await certManagerPrompts();
+        alertEmail = alertEmailInput;
+      } else {
+        alertEmail = alertEmailConfig;
+      }
 
-    //   try {
-    //     await setupCertManagement({
-    //       context: this.context,
-    //       alertEmail,
-    //       verbose: this.verbose,
-    //     });
-    //   } catch (error) {
-    //     writeErrorToDebugFile({
-    //       context: this.context,
-    //       error: `Error setting up the certificate management: ${JSON.stringify(error, null, 2)}`,
-    //     });
-    //     this.context.stderr.write(
-    //       pc.red(
-    //         `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
-    //       )
-    //     );
-    //     printHelpInformation(this.context);
-    //     backgroundProcessIds.forEach((pid) => {
-    //       try {
-    //         process.kill(pid);
-    //       } catch {
-    //         // Do nothing as it's already dead
-    //       }
-    //     });
-    //     return 1;
-    //   }
+      try {
+        await setupCertManagement({
+          configPath,
+          context: this.context,
+          alertEmail,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the certificate management: ${JSON.stringify(error, null, 2)}`,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up certificate management: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
 
-    //   await updateConfigFile({
-    //     updates: {
-    //       alertEmail,
-    //       certManagement: true,
-    //     },
-    //     configPath,
-    //     context: this.context,
-    //   });
-    // }
+      await updateConfigFile({
+        updates: {
+          alertEmail,
+          certManagement: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
 
-    // this.context.stdout.write(
-    //   generateProgressString({
-    //     completedSteps: 8,
-    //     totalSteps: 13,
-    //   })
-    // );
+    this.context.stdout.write(
+      generateProgressString({
+        completedSteps: 8,
+        totalSteps: 13,
+      })
+    );
 
     // let setupServiceMeshComplete = false;
     // try {
