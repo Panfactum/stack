@@ -233,7 +233,7 @@ create_panfactum_yaml() {
     fi
   done
 
-  default_repo_name=$(basename -s .git "$default_repo_url" 2>/dev/null || echo "")
+  default_repo_name=$(basename -s .git "$repo_url" 2>/dev/null || echo "")
   if [ -n "$default_repo_name" ]; then
     printf "  \033[33mEnter repository name [%s]: \033[0m" "$default_repo_name"
   else
