@@ -100,24 +100,23 @@ check_direnv() {
 
     printf "\n  \033[32mdirenv installed successfully!\033[0m\n" >&2
 
-    # Add direnv hook to shell configuration if not already present
     shell_config=""
-    if [ -n "$BASH_VERSION" ]; then
-      shell_config="$HOME/.bashrc"
-    elif [ -n "$ZSH_VERSION" ]; then
+    if [ -f "$HOME/.zshrc" ]; then
       shell_config="$HOME/.zshrc"
+    elif [ -f "$HOME/.bashrc" ]; then
+      shell_config="$HOME/.bashrc"
     fi
 
-    if [ -n "$shell_config" ] && [ -f "$shell_config" ]; then
+    if [ -n "$shell_config" ]; then
       if ! grep -q "direnv hook" "$shell_config"; then
         # shellcheck disable=SC2016
         echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
-        printf "  \033[31mPlease restart your shell or run 'source %s' to enable direnv.\033[0m\n" "$shell_config" >&2
+        printf "  \033[31mCRITICAL: Restart your shell or run 'source %s' to enable direnv.\033[0m\n" "$shell_config" >&2
         printf "  \033[31mThen, run this script again to install the rest of the dependencies.\033[0m\n" >&2
         exit 1
       fi
     else
-      printf "  \033[31mPlease add the direnv hooks to your shell: https://direnv.net/docs/hook.html\033[0m\n" >&2
+      printf "  \033[31mCRITICAL:Please add the direnv hooks to your shell: https://direnv.net/docs/hook.html\033[0m\n" >&2
       printf "  \033[31mThen restart your shell to enable direnv.\033[0m\n" >&2
       printf "  \033[31mFinally, run this script again to install the rest of the dependencies.\033[0m\n" >&2
       exit 1
@@ -131,13 +130,13 @@ check_direnv() {
       printf "  \033[32mRequired direnv version %s is already installed.\033[0m\n" "$direnv_version" >&2
 
       shell_config=""
-      if [ -n "$BASH_VERSION" ]; then
-        shell_config="$HOME/.bashrc"
-      elif [ -n "$ZSH_VERSION" ]; then
+      if [ -f "$HOME/.zshrc" ]; then
         shell_config="$HOME/.zshrc"
+      elif [ -f "$HOME/.bashrc" ]; then
+        shell_config="$HOME/.bashrc"
       fi
 
-      if [ -n "$shell_config" ] || [ -f "$shell_config" ]; then
+      if [ -n "$shell_config" ]; then
         if ! grep -q "direnv hook" "$shell_config"; then
           # shellcheck disable=SC2016
           echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
