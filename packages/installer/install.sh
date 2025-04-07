@@ -88,8 +88,17 @@ check_nix_version() {
 # Check if the user has direnv installed. If not, install it via nix.
 check_direnv() {
   if ! command -v direnv >/dev/null 2>&1; then
-    printf "\ndirenv is not installed. Installing via Nix..." >&2
-    nix profile install nixpkgs#direnv
+    printf "\ndirenv is not installed. Installing via Nix...\n" >&2
+
+    set +e
+    if ! logs=$(nix profile install nixpkgs#direnv --quiet 2>&1); then
+      printf "  \033[31mError: Failed to install direnv.\033[0m\n" >&2
+      printf "  \033[31mLogs: %s\033[0m\n" "$logs" >&2
+      exit 1
+    fi
+    set -e
+
+    printf "\n  \033[32mdirenv installed successfully!\033[0m\n" >&2
 
     # Add direnv hook to shell configuration if not already present
     shell_config=""
@@ -99,7 +108,7 @@ check_direnv() {
       shell_config="$HOME/.zshrc"
     fi
 
-    if [ -n "$shell_config" ] && [ -f "$shell_config" ]; then
+    if [ -n "$shell_config" ] || [ -f "$shell_config" ]; then
       if ! grep -q "direnv hook" "$shell_config"; then
         # shellcheck disable=SC2016
         echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
@@ -267,13 +276,35 @@ EOF
 run_pf_update() {
   export PF_SKIP_CHECK_REPO_SETUP=1
 
+  # Start a background process to print a progress indicator every 10 seconds
+  (
+    i=0
+    while true; do
+      sleep 10
+      i=$((i + 10))
+      printf "  Still building... %d seconds elapsed\n" "$i" >&2
+    done
+  ) &
+  progress_pid=$!
+
+  # Make sure to kill the progress indicator when this function exits
+  trap 'kill $progress_pid 2>/dev/null || true' EXIT
+
   set +e
   if ! logs=$(nix develop -c pf-update 2>&1); then
+    # Kill the progress indicator
+    kill $progress_pid 2>/dev/null || true
+    trap - EXIT
+
     printf "  \033[31mError: Failed to build the Panfactum DevShell.\033[0m\n" >&2
     printf "  \033[31mLogs: %s\033[0m\n" "$logs" >&2
     return 1
   fi
   set -e
+
+  # Kill the progress indicator
+  kill $progress_pid 2>/dev/null || true
+  trap - EXIT
 
   printf "\n  \033[32mSuccessfully built the Panfactum DevShell.\033[0m\n" >&2
   export PF_SKIP_CHECK_REPO_SETUP=0
