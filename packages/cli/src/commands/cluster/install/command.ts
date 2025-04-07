@@ -161,7 +161,7 @@ export class InstallClusterCommand extends Command {
     } catch (error) {
       writeErrorToDebugFile({
         context: this.context,
-        error: `Error writing sla_target to environment.yaml: ${JSON.stringify(error, null, 2)}`,
+        error,
       });
       this.context.stderr.write(
         pc.red(
@@ -235,7 +235,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the AWS VPC: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -317,7 +317,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the AWS ECR pull through cache: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -337,7 +337,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error updating region.yaml to enable the AWS ECR pull through cache: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -430,7 +430,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the AWS EKS cluster: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -475,7 +475,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the internal cluster networking: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -519,7 +519,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the policy controller: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -637,7 +637,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the Vault: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -709,7 +709,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the certificate management: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -760,7 +760,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -787,55 +787,56 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    // let setupAutoscalingComplete = false;
-    // try {
-    //   setupAutoscalingComplete = await checkStepCompletion({
-    //     configFilePath: configPath,
-    //     context: this.context,
-    //     step: "autoscaling",
-    //     stepCompleteMessage:
-    //       "10/13 Skipping autoscaling setup as it's already complete.\n",
-    //     stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
-    //   });
-    // } catch {
-    //   return 1;
-    // }
+    let setupAutoscalingComplete = false;
+    try {
+      setupAutoscalingComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "autoscaling",
+        stepCompleteMessage:
+          "10/13 Skipping autoscaling setup as it's already complete.\n",
+        stepNotCompleteMessage: "10/13 Setting up autoscaling\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    // if (!setupAutoscalingComplete) {
-    //   try {
-    //     await setupAutoscaling({
-    //       context: this.context,
-    //       verbose: this.verbose,
-    //     });
-    //   } catch (error) {
-    //     writeErrorToDebugFile({
-    //       context: this.context,
-    //       error: `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}`,
-    //     });
-    //     this.context.stderr.write(
-    //       pc.red(
-    //         `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
-    //       )
-    //     );
-    //     printHelpInformation(this.context);
-    //     backgroundProcessIds.forEach((pid) => {
-    //       try {
-    //         process.kill(pid);
-    //       } catch {
-    //         // Do nothing as it's already dead
-    //       }
-    //     });
-    //     return 1;
-    //   }
+    if (!setupAutoscalingComplete) {
+      try {
+        await setupAutoscaling({
+          configPath,
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the autoscaling: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
 
-    //   await updateConfigFile({
-    //     updates: {
-    //       autoscaling: true,
-    //     },
-    //     configPath,
-    //     context: this.context,
-    //   });
-    // }
+      await updateConfigFile({
+        updates: {
+          autoscaling: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
 
     // let setupInboundNetworkingComplete = false;
     // try {

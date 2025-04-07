@@ -59,7 +59,7 @@ export function runAllApply({
 
     !verbose &&
       context.stdout.write(
-        pc.green("Successfully applied all infrastructure modules\n")
+        pc.green("\rSuccessfully applied all infrastructure modules\n")
       );
 
     return 0;
