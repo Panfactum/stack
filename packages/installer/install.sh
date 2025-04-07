@@ -77,7 +77,7 @@ check_nix_version() {
       exit 1
     fi
   else
-    echo "Nix is not installed. Installing using the Determinate Systems installer..." >&2
+    printf "\nNix is not installed. Installing using the Determinate Systems installer..." >&2
   fi
 
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.38.1 | sh -s -- install --no-confirm
@@ -88,8 +88,8 @@ check_nix_version() {
 # Check if the user has direnv installed. If not, install it via nix.
 check_direnv() {
   if ! command -v direnv >/dev/null 2>&1; then
-    printf "  direnv is not installed. Installing via Nix..." >&2
-    nix-env -iA nixpkgs.direnv
+    printf "\ndirenv is not installed. Installing via Nix..." >&2
+    nix profile install nixpkgs#direnv
 
     # Add direnv hook to shell configuration if not already present
     shell_config=""
@@ -108,8 +108,7 @@ check_direnv() {
         exit 1
       fi
     else
-      # shellcheck disable=SC2059
-      printf "  \033[31mPlease add 'eval \"$(direnv hook %s)\"' to your shell configuration file.\033[0m\n" "$(basename "$SHELL")" >&2
+      printf "  \033[31mPlease add the direnv hooks to your shell: https://direnv.net/docs/hook.html\033[0m\n" >&2
       printf "  \033[31mThen restart your shell to enable direnv.\033[0m\n" >&2
       printf "  \033[31mFinally, run this script again to install the rest of the dependencies.\033[0m\n" >&2
       exit 1
@@ -223,7 +222,7 @@ create_panfactum_yaml() {
       printf "\n  \033[33mEnter repository URL: \033[0m"
     fi
 
-    read -r repo_url </dev/tty
+    read -r input_repo_url </dev/tty
     repo_url=${input_repo_url:-$default_repo_url}
 
     # Validate that the URL starts with https:// and ends with .git
