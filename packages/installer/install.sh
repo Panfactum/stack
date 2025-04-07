@@ -54,7 +54,7 @@ check_git_version() {
     exit 1
   fi
 
-  git_version=$(git --version | awk '{print $NF}')
+  git_version=$(git --version | awk '{print $3}')
 
   if [ "$(printf '%s\n' "$GIT_MIN_VERSION" "$git_version" | sort -V | head -n1)" != "$GIT_MIN_VERSION" ]; then
     printf "  \033[31mGit version %s is installed, but version %s or higher is required.\033[0m\n" "$git_version" "$GIT_MIN_VERSION" >&2
@@ -67,7 +67,7 @@ check_git_version() {
 # Check that at least version 2.23 of nix is installed. If not, run the determinate installer.
 check_nix_version() {
   if command -v nix >/dev/null 2>&1; then
-    nix_version=$(nix --version | awk '{print $NF}')
+    nix_version=$(nix --version 2>/dev/null | awk '{print $NF}')
 
     if [ "$(printf '%s\n' "$NIX_MIN_VERSION" "$nix_version" | sort -V | head -n1)" = "$NIX_MIN_VERSION" ]; then
       printf "  \033[32mRequired Nix version %s is already installed.\033[0m\n" "$nix_version" >&2
