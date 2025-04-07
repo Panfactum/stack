@@ -221,7 +221,14 @@ create_panfactum_yaml() {
     else
       printf "  Enter repository URL: "
     fi
-    read -r input_repo_url
+    
+    if [ -t 0 ]; then
+      read -r input_repo_url
+    else
+      printf "\n"
+      input_repo_url=$(sh -c 'read -r line; echo "$line"')
+    fi
+
     repo_url=${input_repo_url:-$default_repo_url}
     
     # Validate that the URL starts with https:// and ends with .git
@@ -238,14 +245,28 @@ create_panfactum_yaml() {
   else
     printf "  Enter repository name: "
   fi
-  read -r input_repo_name
+
+  if [ -t 0 ]; then
+    read -r input_repo_name
+  else
+    printf "\n"
+    input_repo_name=$(sh -c 'read -r line; echo "$line"')
+  fi
+
   repo_name=${input_repo_name:-$default_repo_name}
   
 
   # Try to get the current branch name, fallback to "main" if it fails
   default_repo_primary_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "main")
   printf "  Enter primary branch [%s]: " "$default_repo_primary_branch"
-  read -r input_repo_primary_branch
+  
+  if [ -t 0 ]; then
+    read -r input_repo_primary_branch
+  else
+    printf "\n"
+    input_repo_primary_branch=$(sh -c 'read -r line; echo "$line"')
+  fi
+
   repo_primary_branch=${input_repo_primary_branch:-$default_repo_primary_branch}
   
   # Create the panfactum.yaml file
