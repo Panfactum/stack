@@ -1,7 +1,5 @@
-import { appendFile } from "node:fs/promises";
 import path from "node:path";
 import pc from "picocolors";
-import { safeFileExists } from "./safe-file-exists";
 import type { BaseContext } from "clipanion";
 
 export async function writeErrorToDebugFile({
@@ -12,22 +10,11 @@ export async function writeErrorToDebugFile({
   error: unknown;
 }) {
   const currentDirectory = process.cwd();
-  const debugFilePath = path.join(currentDirectory, "error.log");
-  const debugFileExists = await safeFileExists(debugFilePath);
   const timestamp = new Date().toISOString();
+  const debugFilePath = path.join(currentDirectory, `${timestamp}-error.log`);
 
   try {
-    if (!debugFileExists) {
-      await Bun.write(
-        debugFilePath,
-        `\n${timestamp}\n${JSON.stringify(error, null, 2)}`
-      );
-    } else {
-      await appendFile(
-        debugFilePath,
-        `\n${timestamp}\n${JSON.stringify(error, null, 2)}`
-      );
-    }
+    await Bun.write(debugFilePath, `${JSON.stringify(error, null, 2)}`);
   } catch (error) {
     context.stderr.write(
       pc.red(

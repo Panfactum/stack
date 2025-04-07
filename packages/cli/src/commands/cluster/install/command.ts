@@ -736,55 +736,56 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    // let setupServiceMeshComplete = false;
-    // try {
-    //   setupServiceMeshComplete = await checkStepCompletion({
-    //     configFilePath: configPath,
-    //     context: this.context,
-    //     step: "serviceMesh",
-    //     stepCompleteMessage:
-    //       "9/13 Skipping service mesh setup as it's already complete.\n",
-    //     stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
-    //   });
-    // } catch {
-    //   return 1;
-    // }
+    let setupServiceMeshComplete = false;
+    try {
+      setupServiceMeshComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "serviceMesh",
+        stepCompleteMessage:
+          "9/13 Skipping service mesh setup as it's already complete.\n",
+        stepNotCompleteMessage: "9/13 Setting up the service mesh\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    // if (!setupServiceMeshComplete) {
-    //   try {
-    //     await setupLinkerd({
-    //       context: this.context,
-    //       verbose: this.verbose,
-    //     });
-    //   } catch (error) {
-    //     writeErrorToDebugFile({
-    //       context: this.context,
-    //       error: `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}`,
-    //     });
-    //     this.context.stderr.write(
-    //       pc.red(
-    //         `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
-    //       )
-    //     );
-    //     printHelpInformation(this.context);
-    //     backgroundProcessIds.forEach((pid) => {
-    //       try {
-    //         process.kill(pid);
-    //       } catch {
-    //         // Do nothing as it's already dead
-    //       }
-    //     });
-    //     return 1;
-    //   }
+    if (!setupServiceMeshComplete) {
+      try {
+        await setupLinkerd({
+          configPath,
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}`,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the service mesh: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        backgroundProcessIds.forEach((pid) => {
+          try {
+            process.kill(pid);
+          } catch {
+            // Do nothing as it's already dead
+          }
+        });
+        return 1;
+      }
 
-    //   await updateConfigFile({
-    //     updates: {
-    //       serviceMesh: true,
-    //     },
-    //     configPath,
-    //     context: this.context,
-    //   });
-    // }
+      await updateConfigFile({
+        updates: {
+          serviceMesh: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
 
     // let setupAutoscalingComplete = false;
     // try {
