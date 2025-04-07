@@ -108,7 +108,7 @@ check_direnv() {
       shell_config="$HOME/.zshrc"
     fi
 
-    if [ -n "$shell_config" ] || [ -f "$shell_config" ]; then
+    if [ -n "$shell_config" ] && [ -f "$shell_config" ]; then
       if ! grep -q "direnv hook" "$shell_config"; then
         # shellcheck disable=SC2016
         echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
