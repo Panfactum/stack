@@ -81,6 +81,8 @@ check_nix_version() {
   fi
 
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.38.1 | sh -s -- install --no-confirm
+  # shellcheck disable=SC1091
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 }
 
 # Check if the user has direnv installed. If not, install it via nix.
