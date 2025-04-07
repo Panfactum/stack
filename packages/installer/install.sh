@@ -129,6 +129,24 @@ check_direnv() {
       printf "  \033[31mdirenv version %s is installed, but version %s or higher is required. Upgrade direnv using the package manager that you used to install it.\033[0m\n" "$direnv_version" "$DIRENV_MIN_VERSION" >&2
     else
       printf "  \033[32mRequired direnv version %s is already installed.\033[0m\n" "$direnv_version" >&2
+
+      shell_config=""
+      if [ -n "$BASH_VERSION" ]; then
+        shell_config="$HOME/.bashrc"
+      elif [ -n "$ZSH_VERSION" ]; then
+        shell_config="$HOME/.zshrc"
+      fi
+
+      if [ -n "$shell_config" ] || [ -f "$shell_config" ]; then
+        if ! grep -q "direnv hook" "$shell_config"; then
+          # shellcheck disable=SC2016
+          echo 'eval "$(direnv hook $(basename $SHELL))"' >>"$shell_config"
+          printf "  \033[31mMissing direnv hook added to %s.\033[0m\n" "$shell_config" >&2
+          printf "  \033[31mPlease restart your shell or run 'source %s' to enable direnv.\033[0m\n" "$shell_config" >&2
+          printf "  \033[31mThen, run this script again to install the rest of the dependencies.\033[0m\n" >&2
+          exit 1
+        fi
+      fi
     fi
   fi
 }
