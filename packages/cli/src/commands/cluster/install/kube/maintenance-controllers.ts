@@ -4,143 +4,238 @@ import kubeNodeImageCacheControllerTerragruntHcl from "../../../../templates/kub
 import kubePvcAutoresizerTerragruntHcl from "../../../../templates/kube_pvc_autoresizer_terragrunt.hcl" with { type: "file" };
 import kubeReloaderTerragruntHcl from "../../../../templates/kube_reloader_terragrunt.hcl" with { type: "file" };
 import kubeVeleroTerragruntHcl from "../../../../templates/kube_velero_terragrunt.hcl" with { type: "file" };
+import { checkStepCompletion } from "../../../../util/check-step-completion";
 import { ensureFileExists } from "../../../../util/ensure-file-exists";
-import { tfInit } from "../../../../util/scripts/tf-init";
-import { apply } from "../terragrunt/apply";
+import { initAndApplyModule } from "../../../../util/init-and-apply-module";
+import { updateConfigFile } from "../../../../util/update-config-file";
 import type { BaseContext } from "clipanion";
 
 export const setupMaintenanceControllers = async ({
+  configPath,
   context,
   verbose = false,
 }: {
+  configPath: string;
   context: BaseContext;
   verbose?: boolean;
 }) => {
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#reloader
-  context.stdout.write("12.a. Setting up Reloader\n");
+  let reloaderSetupComplete = false;
+  try {
+    reloaderSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "setupReloader",
+      stepCompleteMessage:
+        "12.a. Skipping Reloader setup as it's already complete.\n",
+      stepNotCompleteMessage: "12.a. Setting up Reloader\n",
+    });
+  } catch {
+    throw new Error("Failed to check if Reloader setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_reloader/terragrunt.hcl",
-    sourceFile: await Bun.file(kubeReloaderTerragruntHcl).text(),
-  });
+  if (!reloaderSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_reloader/terragrunt.hcl",
+      sourceFile: await Bun.file(kubeReloaderTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_reloader",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "Reloader",
+      modulePath: "./kube_reloader",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_reloader",
-  });
+    await updateConfigFile({
+      context,
+      configPath,
+      updates: { setupReloader: true },
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#node-image-caches
-  context.stdout.write("12.b. Setting up Node Image Caches\n");
+  let nodeImageCachesSetupComplete = false;
+  try {
+    nodeImageCachesSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "setupNodeImageCaches",
+      stepCompleteMessage:
+        "12.b. Skipping Node Image Caches setup as it's already complete.\n",
+      stepNotCompleteMessage: "12.b. Setting up Node Image Caches\n",
+    });
+  } catch {
+    throw new Error("Failed to check if Node Image Caches setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_node_image_cache_controller/terragrunt.hcl",
-    sourceFile: await Bun.file(
-      kubeNodeImageCacheControllerTerragruntHcl
-    ).text(),
-  });
+  if (!nodeImageCachesSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_node_image_cache_controller/terragrunt.hcl",
+      sourceFile: await Bun.file(
+        kubeNodeImageCacheControllerTerragruntHcl
+      ).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_node_image_cache_controller",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "Node Image Caches",
+      modulePath: "./kube_node_image_cache_controller",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_node_image_cache_controller",
-  });
+    await updateConfigFile({
+      context,
+      configPath,
+      updates: { setupNodeImageCaches: true },
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#pvc-autoresizer
-  context.stdout.write("12.c. Setting up PVC Autoresizer\n");
+  let pvcAutoresizerSetupComplete = false;
+  try {
+    pvcAutoresizerSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "setupPvcAutoresizer",
+      stepCompleteMessage:
+        "12.c. Skipping PVC Autoresizer setup as it's already complete.\n",
+      stepNotCompleteMessage: "12.c. Setting up PVC Autoresizer\n",
+    });
+  } catch {
+    throw new Error("Failed to check if PVC Autoresizer setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_pvc_autoresizer/terragrunt.hcl",
-    sourceFile: await Bun.file(kubePvcAutoresizerTerragruntHcl).text(),
-  });
+  if (!pvcAutoresizerSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_pvc_autoresizer/terragrunt.hcl",
+      sourceFile: await Bun.file(kubePvcAutoresizerTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_pvc_autoresizer",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "PVC Autoresizer",
+      modulePath: "./kube_pvc_autoresizer",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_pvc_autoresizer",
-  });
+    await updateConfigFile({
+      context,
+      configPath,
+      updates: { setupPvcAutoresizer: true },
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#descheduler
-  context.stdout.write("12.d. Setting up Descheduler\n");
+  let deschedulerSetupComplete = false;
+  try {
+    deschedulerSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "setupDescheduler",
+      stepCompleteMessage:
+        "12.d. Skipping Descheduler setup as it's already complete.\n",
+      stepNotCompleteMessage: "12.d. Setting up Descheduler\n",
+    });
+  } catch {
+    throw new Error("Failed to check if Descheduler setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_descheduler/terragrunt.hcl",
-    sourceFile: await Bun.file(kubeDeschedulerTerragruntHcl).text(),
-  });
+  if (!deschedulerSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_descheduler/terragrunt.hcl",
+      sourceFile: await Bun.file(kubeDeschedulerTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_descheduler",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "Descheduler",
+      modulePath: "./kube_descheduler",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_descheduler",
-  });
+    await updateConfigFile({
+      context,
+      configPath,
+      updates: { setupDescheduler: true },
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#deploy-the-external-snapshotter
-  context.stdout.write("12.e. Setting up External Snapshotter\n");
+  let externalSnapshotterSetupComplete = false;
+  try {
+    externalSnapshotterSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "setupExternalSnapshotter",
+      stepCompleteMessage:
+        "12.e. Skipping External Snapshotter setup as it's already complete.\n",
+      stepNotCompleteMessage: "12.e. Setting up External Snapshotter\n",
+    });
+  } catch {
+    throw new Error(
+      "Failed to check if External Snapshotter setup is complete"
+    );
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_external_snapshotter/terragrunt.hcl",
-    sourceFile: await Bun.file(kubeExternalSnapshotterTerragruntHcl).text(),
-  });
+  if (!externalSnapshotterSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_external_snapshotter/terragrunt.hcl",
+      sourceFile: await Bun.file(kubeExternalSnapshotterTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_external_snapshotter",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "External Snapshotter",
+      modulePath: "./kube_external_snapshotter",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_external_snapshotter",
-  });
+    await updateConfigFile({
+      context,
+      configPath,
+      updates: { setupExternalSnapshotter: true },
+    });
+  }
 
   // https://panfactum.com/docs/edge/guides/bootstrapping/maintenance-controllers#deploy-velero
-  context.stdout.write("12.f. Setting up Velero\n");
+  let veleroSetupComplete = false;
+  try {
+    veleroSetupComplete = await checkStepCompletion({
+      configFilePath: configPath,
+      context,
+      step: "setupVelero",
+      stepCompleteMessage:
+        "12.f. Skipping Velero setup as it's already complete.\n",
+      stepNotCompleteMessage: "12.f. Setting up Velero\n",
+    });
+  } catch {
+    throw new Error("Failed to check if Velero setup is complete");
+  }
 
-  await ensureFileExists({
-    context,
-    destinationFile: "./kube_velero/terragrunt.hcl",
-    sourceFile: await Bun.file(kubeVeleroTerragruntHcl).text(),
-  });
+  if (!veleroSetupComplete) {
+    await ensureFileExists({
+      context,
+      destinationFile: "./kube_velero/terragrunt.hcl",
+      sourceFile: await Bun.file(kubeVeleroTerragruntHcl).text(),
+    });
 
-  tfInit({
-    context,
-    verbose,
-    workingDirectory: "./kube_velero",
-  });
+    await initAndApplyModule({
+      context,
+      moduleName: "Velero",
+      modulePath: "./kube_velero",
+      verbose,
+    });
 
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_velero",
-  });
+    await updateConfigFile({
+      context,
+      configPath,
+      updates: { setupVelero: true },
+    });
+  }
 };

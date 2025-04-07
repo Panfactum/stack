@@ -862,7 +862,7 @@ export class InstallClusterCommand extends Command {
       } catch (error) {
         writeErrorToDebugFile({
           context: this.context,
-          error: `Error setting up the inbound networking: ${JSON.stringify(error, null, 2)}`,
+          error,
         });
         this.context.stderr.write(
           pc.red(
@@ -889,116 +889,117 @@ export class InstallClusterCommand extends Command {
       });
     }
 
-    // let setupMaintenanceControllersComplete = false;
-    // try {
-    //   setupMaintenanceControllersComplete = await checkStepCompletion({
-    //     configFilePath: configPath,
-    //     context: this.context,
-    //     step: "maintenanceControllers",
-    //     stepCompleteMessage:
-    //       "12/13 Skipping maintenance controllers setup as it's already complete.\n",
-    //     stepNotCompleteMessage: "12/13 Setting up maintenance controllers\n\n",
-    //   });
-    // } catch {
-    //   return 1;
-    // }
+    let setupMaintenanceControllersComplete = false;
+    try {
+      setupMaintenanceControllersComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "maintenanceControllers",
+        stepCompleteMessage:
+          "12/13 Skipping maintenance controllers setup as it's already complete.\n",
+        stepNotCompleteMessage: "12/13 Setting up maintenance controllers\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    // if (!setupMaintenanceControllersComplete) {
-    //   try {
-    //     await setupMaintenanceControllers({
-    //       context: this.context,
-    //       verbose: this.verbose,
-    //     });
-    //   } catch (error) {
-    //     writeErrorToDebugFile({
-    //       context: this.context,
-    //       error: `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}`,
-    //     });
-    //     this.context.stderr.write(
-    //       pc.red(
-    //         `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}\n`
-    //       )
-    //     );
-    //     printHelpInformation(this.context);
-    //     return 1;
-    //   }
+    if (!setupMaintenanceControllersComplete) {
+      try {
+        await setupMaintenanceControllers({
+          configPath,
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error: `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}`,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the maintenance controllers: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
 
-    //   await updateConfigFile({
-    //     updates: {
-    //       maintenanceControllers: true,
-    //     },
-    //     configPath,
-    //     context: this.context,
-    //   });
-    // }
+      await updateConfigFile({
+        updates: {
+          maintenanceControllers: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
 
-    // let setupCloudNativePGComplete = false;
-    // try {
-    //   setupCloudNativePGComplete = await checkStepCompletion({
-    //     configFilePath: configPath,
-    //     context: this.context,
-    //     step: "cloudNativePG",
-    //     stepCompleteMessage:
-    //       "13/13 Skipping CloudNativePG setup as it's already complete.\n",
-    //     stepNotCompleteMessage: "13/13 Setting up CloudNativePG\n\n",
-    //   });
-    // } catch {
-    //   return 1;
-    // }
+    let setupCloudNativePGComplete = false;
+    try {
+      setupCloudNativePGComplete = await checkStepCompletion({
+        configFilePath: configPath,
+        context: this.context,
+        step: "cloudNativePG",
+        stepCompleteMessage:
+          "13/13 Skipping CloudNativePG setup as it's already complete.\n",
+        stepNotCompleteMessage: "13/13 Setting up CloudNativePG\n\n",
+      });
+    } catch {
+      return 1;
+    }
 
-    // if (!setupCloudNativePGComplete) {
-    //   try {
-    //     await setupCloudNativePG({
-    //       context: this.context,
-    //       verbose: this.verbose,
-    //     });
-    //   } catch (error) {
-    //     writeErrorToDebugFile({
-    //       context: this.context,
-    //       error: `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}`,
-    //     });
-    //     this.context.stderr.write(
-    //       pc.red(
-    //         `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}\n`
-    //       )
-    //     );
-    //     printHelpInformation(this.context);
-    //     return 1;
-    //   }
+    if (!setupCloudNativePGComplete) {
+      try {
+        await setupCloudNativePG({
+          context: this.context,
+          verbose: this.verbose,
+        });
+      } catch (error) {
+        writeErrorToDebugFile({
+          context: this.context,
+          error,
+        });
+        this.context.stderr.write(
+          pc.red(
+            `Error setting up the CloudNativePG: ${JSON.stringify(error, null, 2)}\n`
+          )
+        );
+        printHelpInformation(this.context);
+        return 1;
+      }
 
-    //   await updateConfigFile({
-    //     updates: {
-    //       cloudNativePG: true,
-    //     },
-    //     configPath,
-    //     context: this.context,
-    //   });
-    // }
+      await updateConfigFile({
+        updates: {
+          cloudNativePG: true,
+        },
+        configPath,
+        context: this.context,
+      });
+    }
 
-    // // Verify connection to the cluster
-    // // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
-    // this.context.stdout.write(
-    //   pc.green(
-    //     "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
-    //   ) +
-    //     pc.blue(
-    //       "Run: " +
-    //         pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
-    //         "You should receive a response similar to the following:\n\n"
-    //     ) +
-    //     "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
-    //     "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
-    //     pc.blue(
-    //       "The Panfactum devShell ships with a TUI called k9s.\n" +
-    //         "To verify what pods are running in the cluster do the following:\n" +
-    //         `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
-    //         `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
-    //         `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
-    //         `4. You should see a minimal list of pods running in the cluster\n` +
-    //         `5. If you don't see any pods, please reach out to us on Discord\n` +
-    //         `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
-    //     )
-    // );
+    // Verify connection to the cluster
+    // https://panfactum.com/docs/edge/guides/bootstrapping/kubernetes-cluster#verify-connection
+    this.context.stdout.write(
+      pc.green(
+        "\n🎉 Congrats! You've successfully deployed a Kubernetes cluster using Panfactum! 🎉\n\n"
+      ) +
+        pc.blue(
+          "Run: " +
+            pc.bold(pc.cyan("kubectl cluster-info\n\n")) +
+            "You should receive a response similar to the following:\n\n"
+        ) +
+        "Kubernetes control plane is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com\n" +
+        "CoreDNS is running at https://99DF0D231CAEFBDA815F2D8F26575FB6.gr7.us-east-2.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy\n\n" +
+        pc.blue(
+          "The Panfactum devShell ships with a TUI called k9s.\n" +
+            "To verify what pods are running in the cluster do the following:\n" +
+            `1. Run ${pc.bold(pc.cyan("k9s"))}.\n` +
+            `2. Type ${pc.bold(pc.cyan("':pods⏎'"))} to list all the pods in the cluster.\n` +
+            `3. k9s will filter results by namespace and by default it is set to the default namespace. Press ${pc.bold(pc.cyan("'0'"))} to switch the filter to all namespaces.\n` +
+            `4. You should see a minimal list of pods running in the cluster\n` +
+            `5. If you don't see any pods, please reach out to us on Discord\n` +
+            `6. Type ${pc.bold(pc.cyan("':exit⏎'"))} when ready to exit k9s.\n\n`
+        )
+    );
 
     return 0;
   }

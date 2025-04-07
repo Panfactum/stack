@@ -10,7 +10,7 @@ export async function writeErrorToDebugFile({
   error: unknown;
 }) {
   const currentDirectory = process.cwd();
-  const timestamp = new Date().toISOString();
+  const timestamp = new Date().toISOString().replace(/:/g, '-');
   const debugFilePath = path.join(currentDirectory, `${timestamp}-error.log`);
 
   try {
