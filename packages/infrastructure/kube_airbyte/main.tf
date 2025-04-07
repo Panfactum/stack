@@ -32,15 +32,16 @@ locals {
   namespace               = module.namespace.namespace
   memory_limit_multiplier = 1.3
 
-  vault_mount         = "secret"  # The secret engine mount point
-  vault_prefix        = "airbyte" # The base path under the mount
-  vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
-  vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
-  vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
+  #vault_mount         = "secret"  # The secret engine mount point
+  vault_prefix = "secret/airbyte" # The base path under the mount
+  #vault_data_path     = "${local.vault_mount}/data/${local.vault_prefix}"
+  #vault_metadata_path = "${local.vault_mount}/metadata/${local.vault_prefix}"
+  #vault_delete_path   = "${local.vault_mount}/delete/${local.vault_prefix}"
 
   # Environment variable used by Airbyte - MUST include the /data/ path for KV v2
-  vault_env_prefix = "${local.vault_mount}/data/${local.vault_prefix}"
-  vault_address    = "http://vault-active.vault.svc.cluster.local:8200"
+  # secret/data/airbyte
+  #vault_env_prefix = "${local.vault_mount}/data/${local.vault_prefix}"
+  vault_address = "http://vault-active.vault.svc.cluster.local:8200"
 }
 
 data "pf_kube_labels" "labels" {
@@ -373,40 +374,51 @@ resource "kubernetes_secret" "airbyte_secrets" {
 
 data "vault_policy_document" "airbyte" {
   rule {
-    path         = "${local.vault_metadata_path}/*"
+    path         = "secret/*"
+    capabilities = ["read", "list"]
+    description  = "Temporary broader read access"
+  }
+
+  rule {
+    path         = "secret/*"
     capabilities = ["list"]
     description  = "List secrets"
   }
 
   rule {
-    path         = "${local.vault_data_path}/*"
+    path         = local.vault_prefix
     capabilities = ["read"]
-    description  = "Read secrets"
+    description  = "Read secrets base path"
   }
 
   rule {
-    path         = "${local.vault_data_path}/*"
-    capabilities = ["create", "update"]
+    path         = "${local.vault_prefix}/*"
+    capabilities = ["create", "update", "read"]
     description  = "Create and update secrets"
   }
 
   rule {
-    path         = "${local.vault_delete_path}/*"
-    capabilities = ["update"]
-    description  = "Delete secrets if needed"
-  }
-
-  rule {
-    path         = "${local.vault_metadata_path}/*"
-    capabilities = ["read"]
-    description  = "Read secret metadata"
+    path         = local.vault_prefix
+    capabilities = ["create", "update", "read"]
+    description  = "Create and update secrets"
   }
 }
+
+## todo: need to initialize secret mount with kv 2
+## potentially initialize secrets as well
 
 module "vault_auth_airbyte" {
   source = "../kube_sa_auth_vault"
 
   service_account           = kubernetes_service_account.airbyte_sa.metadata[0].name
+  service_account_namespace = local.namespace
+  vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
+}
+
+module "vault_auth_airbyte_cron" {
+  source = "../kube_sa_auth_vault"
+
+  service_account           = module.vault_token_rotator.service_account_name
   service_account_namespace = local.namespace
   vault_policy_hcl          = data.vault_policy_document.airbyte.hcl
 }
@@ -433,6 +445,23 @@ resource "kubernetes_role_binding" "airbyte_secrets_writer_binding" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.airbyte_sa.metadata[0].name
+    namespace = local.namespace
+  }
+  role_ref {
+    kind      = "Role"
+    name      = kubernetes_role.airbyte_secrets_writer.metadata[0].name
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+
+resource "kubernetes_role_binding" "airbyte_secrets_writer_binding_cron" {
+  metadata {
+    namespace = local.namespace
+    name      = "airbyte-secrets-writer-binding-cron"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = module.vault_token_rotator.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -552,7 +581,7 @@ module "vault_token_rotator" {
   # Use the existing airbyte service account
   common_env = {
     VAULT_ADDR = local.vault_address
-    VAULT_ROLE = module.vault_auth_airbyte.role_name
+    VAULT_ROLE = module.vault_auth_airbyte_cron.role_name
     NAMESPACE  = local.namespace
   }
 
@@ -663,6 +692,17 @@ resource "helm_release" "airbyte" {
           }
         }
 
+        secretsManager = {
+          type                     = "vault"
+          secretsManagerSecretName = "airbyte-vault-secret"
+
+          vault = {
+            address            = local.vault_address
+            prefix             = local.vault_prefix
+            authTokenSecretKey = "token"
+          }
+        }
+
         jobs = {
           resources = {
             requests = {
@@ -693,24 +733,10 @@ resource "helm_release" "airbyte" {
             SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_SUCCESSIVE          = tostring(var.jobs_sync_job_retries_partial_failures_max_successive)
             SYNC_JOB_RETRIES_PARTIAL_FAILURES_MAX_TOTAL               = tostring(var.jobs_sync_job_retries_partial_failures_max_total)
             SYNC_JOB_MAX_TIMEOUT_DAYS                                 = tostring(var.jobs_sync_max_timeout_days)
-            VAULT_ADDRESS                                             = local.vault_address
-            VAULT_PREFIX                                              = local.vault_env_prefix
             VAULT_AUTH_METHOD                                         = "token"
             SPEC_CACHE_BUCKET                                         = module.airbyte_bucket.bucket_name
           }
         )
-
-        extraEnv = [
-          {
-            name = "VAULT_AUTH_TOKEN"
-            valueFrom = {
-              secretKeyRef = {
-                name = "airbyte-vault-token"
-                key  = "token"
-              }
-            }
-          }
-        ]
       }
 
       # Disable the default PostgreSQL since we're using our own
@@ -981,7 +1007,10 @@ resource "helm_release" "airbyte" {
     module.database,
     kubernetes_secret.airbyte_secrets,
     module.aws_permissions,
-    kubernetes_job.vault_token_init
+    kubernetes_job.vault_token_init,
+    module.vault_token_rotator,
+    kubernetes_role_binding.airbyte_secrets_writer_binding_cron,
+    module.vault_auth_airbyte_cron
   ]
 }
 
