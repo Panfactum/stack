@@ -8,6 +8,8 @@ shutdown-grace-period-for-critical-pods = "${SHUTDOWN_GRACE_PERIOD_FOR_CRITICAL_
 image-gc-high-threshold-percent = "${IMAGE_GC_HIGH_THRESHOLD_PERCENT}"
 image-gc-low-threshold-percent = "${IMAGE_GC_LOW_THRESHOLD_PERCENT}"
 max-pods = 110
+registry-qps = 50
+registry-burst = 100
 allowed-unsafe-sysctls = ["net.core.somaxconn"]
 
 [settings.kubernetes.eviction-hard]

@@ -1,0 +1,66 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+# Deploying Workloads: Persistence
+
+## Objective
+
+Learn how to manage storage for the workloads in your cluster.
+
+## Stateful Workloads
+
+If you are trying to deploy a workload where disk state is saved across pod terminations, you should
+use the [kube\_stateful\_set](/docs/stable-25-04/reference/infrastructure-modules/submodule/kubernetes/kube_stateful_set) module.
+
+## Storage Classes
+
+In Kubernetes, *persistent storage* refers to storage that is retained beyond the lifecycle
+of a single pod. The central storage primitive is the [Persistent Volume (PV)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+which are temporarily "claimed" by workloads through [Persistent Volume Claims (PVCs)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims).
+
+The lifecycle of a PV is managed by a controller that implements the [Container Storage Interface (CSI)
+specification.](https://kubernetes-csi.github.io/docs/introduction.html) There are [many such drivers](https://kubernetes-csi.github.io/docs/drivers.html), and the Panfactum
+Stack installs the [AWS Elastic Block Store (EBS) CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver)
+as a part of the [bootstrapping guide.](/docs/stable-25-04/guides/bootstrapping/storage-interfaces)
+
+As you can have many drivers deployed to a single cluster, Kubernetes implements
+[Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/) which are assigned to
+PVs to indicate what driver should manage that PV.
+
+The Panfactum Stack provides the following Storage Classes as a starting point:
+
+* `ebs-standard`: Uses [EBS gp3 volumes](https://aws.amazon.com/ebs/general-purpose/). Is the default
+  Storage Class if none is indicated.
+
+* `ebs-standard-retained`: Uses [EBS gp3 volumes](https://aws.amazon.com/ebs/general-purpose/). Will not be
+  automatically when the underlying workload is deleted which is useful for databases where you do not want to accidentally lose data.
+
+You can create additional EBS-backed storage classes through the `extra_storage_classes` input to the
+[kube\_aws\_ebs\_csi](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module.
+
+You can also install additional drivers and non-EBS storage classes, but you will need to write your
+own modules for these.
+
+## SLAs
+
+The [AWS uptime SLA for EBS volumes](https://aws.amazon.com/ebs/sla/) is 99.9%. This means that you should
+plan for any individual EBS volume to malfunction for 45 minutes / month. In practice, the failure rate
+tends to be significantly lower, but AWS makes no guarantees of this.
+
+As a result, you should always deploy stateful workloads in production with at least one hot failover. All
+Panfactum-provided database modules have this built-in, but if you are deploying custom StatefulSets, the
+responsibility for failovers falls to you.
+
+## Backups
+
+Every hour, every PV in the cluster is [snapshotted](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html)
+by [Velero.](https://velero.io/) which allows you to restore the cluster data to that point in time in case of emergencies.
+
+For more information see, our documentation for working with Velero (TODO).
+
+<MarkdownAlert severity="warning">
+  PV snapshots are a last-resort recovery mechanism and have several drawbacks. For one, they are only
+  retained for an hour due to high costs. Additionally, they have very poor granularity; you can only
+  restore to the moment the snapshot was taken.
+
+  When possible, you should have an alternative, more powerful recovery mechanism in place where data integrity is critical.
+</MarkdownAlert>

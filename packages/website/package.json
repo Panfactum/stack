@@ -29,6 +29,7 @@
     "@solid-primitives/scheduled": "^1.5.0",
     "@solid-primitives/storage": "^4.3.1",
     "@tailwindcss/forms": "^0.5.10",
+    "@types/hast": "^3.0.4",
     "@typescript-eslint/eslint-plugin": "6.5.0",
     "@unpic/astro": "^1.0.0",
     "@unpic/solid": "^1.0.0",
@@ -54,6 +55,8 @@
     "eslint-plugin-solid": "^0.14.5",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "eslint-plugin-unused-imports": "3.0.0",
+    "hast": "^1.0.0",
+    "hast-util-to-string": "^3.0.1",
     "mdx": "^0.3.1",
     "nanostores": "^0.11.3",
     "number-field": "link:@kobalte/core/number-field",
@@ -80,7 +83,9 @@
     "tailwindcss-animate": "^1.0.7",
     "tooltip": "link:@kobalte/core/tooltip",
     "typescript": "5.2.2",
-    "unist-util-visit": "^5.0.0"
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",

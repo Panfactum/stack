@@ -1,0 +1,79 @@
+import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
+
+# Releasing Panfactum Versions
+
+<MarkdownAlert severity="info">
+    Only users with permissions to push to the `main` branch of the framework repository can cut new releases.
+</MarkdownAlert>
+
+## Edge Releases
+
+When you are ready to cut a new edge release:
+
+1. Checkout a clean copy of the `main` branch.
+
+2. Run `make-new-edge-release`.
+
+The release script will automatically perform the following actions:
+
+* Create the new release name based on today's date.
+
+* Copy all the unreleased documentation (under `packages/website/src/content/docs/main`) to the
+  edge documentation (under `packages/website/src/content/docs/edge`).
+
+* Update the Changelog headers to include the new release.
+
+* Create and push the appropriate release tag and commit.
+
+## Stable Releases
+
+### New Stable Release Channel
+
+Every stable release occurs on a stable release "channel" which lives on a dedicated git branch. The base
+of each stable branch is an edge release.
+
+To create a new stable release channel:
+
+1. Checkout a clean copy of the `main` branch.
+
+2. Ensure that commit you are on corresponds to an edge release.
+
+3. Run `make-new-stable-release-channel`.
+
+The release script will automatically perform the following actions:
+
+* Create the new release channel name based on today's date.
+
+* Copy all the edge documentation (under `packages/website/src/content/docs/edge`) to the
+  new stable release channel documentation (under `packages/website/src/content/docs/<stable_release_slug>`).
+
+* Create a Changelog for the stable release channel.
+
+* Update the Edge Changelog to indicate which edge release the new stable channel was forked from.
+
+* Update the metadata files for the documentation site so that the new release channel will appear in the version
+  selector and other relevant locations.
+
+* Create and push the new stable release branch and the initial stable version tag for the release branch.
+
+* Commit and push the documentation updates for the website.
+
+### New Stable Release
+
+A new stable release is a new git tag on the relevant stable release branch.
+
+To cut a new stable release:
+
+1. Checkout the stable release channel: `git checkout stable.<YY-MM>`.
+
+2. Verify the code that you want to release has already been committed to that branch.
+
+3. Create a new patch tag: `git tag <branch-name>.<patch-num>`.
+
+4. Push the patch tag: `git push --atomic origin <branch-name> <tag>`.
+
+5. Checkout the `main` branch: `git checkout main`.
+
+6. Update the release channel's Changelog.
+
+7. Commit and push those documentation updates.

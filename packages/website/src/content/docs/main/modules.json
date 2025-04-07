@@ -291,6 +291,11 @@
       "group": "kubernetes"
     },
     {
+      "module": "kube_keda",
+      "type": "direct",
+      "group": "kubernetes"
+    },
+    {
       "module": "kube_kyverno",
       "type": "direct",
       "group": "kubernetes"

@@ -218,7 +218,7 @@ module "tf_deploy" {
   # `terragrunt apply`. This can be used to supply credentials to
   # the OpenTofu providers.
   secrets = {
-      AUTHENTIK_TOKEN = var.authentik_token
+      AUTHENTIK_TOKEN           = var.authentik_token
       MONGODB_ATLAS_PUBLIC_KEY  = var.mongodb_atlas_public_key
       MONGODB_ATLAS_PRIVATE_KEY = var.mongodb_atlas_private_key
   }

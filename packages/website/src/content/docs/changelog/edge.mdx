@@ -19,7 +19,29 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 ## Unreleased
 
+### Breaking Changes
+
+* We now include KEDA in our base Panfactum clusters and our modules assume that you have it installed. 
+  See the instructions [here](/docs/edge/guides/bootstrapping/autoscaling/#deploy-keda).
+
+### Added
+
+* Adds [KEDA](https://keda.sh/) to the base cluster installation with
+ the [kube_keda](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_keda) module.
+
+### Fixed
+
+* Fixes the default value for `min_node_cpu` of
+  [kube_karpenter_node_pools](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_karpenter_node_pools) so
+  that an error no longer occurs.
+
+* Addressed an issue that slowed down node bootstrapping due to self-imposed rate-limits on image pulling.
+
 ## edge.25-04-03
+
+<MarkdownAlert severity="info">
+  This release serves as the base for the `stable.25-04` release channel.
+</MarkdownAlert>
 
 ### Changed
 
@@ -45,7 +67,7 @@ count is now configurable via the `retry_max_attempts` input.
 * Resolves issue in [kube_nats](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_nats) that prevented ACKs from being sent when synchronously publishing events in some cases. In the degenerate cases,
 this could result in an inability to publish events at all until either the publisher or the NATS server was restarted. This had significant impact on the overall availability of Argo Events.
 
-* Resolves issue in [kube_argo](/docs/edge/reference/infrastructure-modules/submodule/kubernetes/kube_argo) that prevented resources controlled by Argo Events from being updated without a controller restart.
+* Resolves issue in [kube_argo](/docs/edge/reference/infrastructure-modules/direct/kubernetes/kube_argo) that prevented resources controlled by Argo Events from being updated without a controller restart.
 
 * Fixes the nix version check to take into account the new version format provided by the Determinate Systems nix installer.
 

@@ -1,5 +1,5 @@
-import { Versions } from "@/lib/constants.ts";
+import { DOCS_VERSIONS } from "@/lib/constants";
 
-export function isValidVersion(version: string): version is Versions {
-  return Object.values(Versions).includes(version as Versions);
+export function isValidVersion(version: string) {
+  return DOCS_VERSIONS.find(v => v.slug === version);
 }

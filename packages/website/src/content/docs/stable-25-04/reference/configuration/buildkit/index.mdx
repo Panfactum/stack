@@ -1,0 +1,34 @@
+# BuildKit Configuration Files
+
+## config.yaml
+
+This file:
+
+1. Instructs the `pf-update-buildkit --build` command how to generate the registry [credential helpers](https://github.com/docker/docker-credential-helpers) used by BuildKit.
+   This command must be run by a superuser with root access to the BuildKit environment.
+
+2. Instructs the Panfactum BuildKit commands how to connect with BuildKit.
+
+### config.yaml Format
+
+YAML Schema
+
+```hcl
+bastion = string
+module = string
+```
+
+| Value     | Description                                                                                                 | Example                               |
+| --------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `bastion` | The name of the bastion in `<ssh_dir>/config.yaml` that will be used to establish a connection to BuildKit. | `development-primary`                 |
+| `module`  | The path to the `kube_buildkit` module deployment relative to the `<environments_dir>` directory.           | `development/us-east-2/kube_buildkit` |
+
+
+### Example
+<div class="h-4"/>
+::: code-group labels=[.buildkit/config.yaml]
+```yaml
+bastion: production-primary 
+module: production/us-east-2/kube_buildkit
+```
+:::

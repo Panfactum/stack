@@ -17,7 +17,7 @@ import { UpdateAWSCommand } from "./util/scripts/update-aws-command";
 import { UpdateBuildkitCommand } from "./util/scripts/update-buildkit-command";
 import { UpdateKubeCommand } from "./util/scripts/update-kube-command";
 import { UpdateSSHCommand } from "./util/scripts/update-ssh-command";
-import { VpcNetworkTestCommand } from "./util/scripts/vpc-network-test-command";
+import { VpcNetworkTestCommand } from "./util/scripts/vpc-network-test-command.ts";
 
 // @ts-ignore Bun needs the explicit non-index syntax to overwrite this at build time with the --define flag
 const VERSION = process.env.VERSION ?? "unknown";

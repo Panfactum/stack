@@ -1,0 +1,83 @@
+import MarkdownImage from "@/components/markdown/MarkdownImage.astro";
+
+import ebsCSILaunchImg from './ebs-csi-launch.jpg'
+import storageClassesImg from './storage-classes.jpg'
+import BootstrappingGuideNav from "../BootstrappingGuideNav";
+
+# Container Storage Interface (CSI) Drivers
+
+<p class="subtitle">Deploy the various CSI drivers used by the Panfactum framework.</p>
+
+## Background
+
+Compared to networking, storage in Kubernetes is relatively straightforward. Storage is exposed to pods
+via two mechanisms:
+
+* Directly from the available storage on the host operating system [^1]
+* Dynamically, using a [Container Storage Interface (CSI)](https://kubernetes.io/blog/2019/01/15/container-storage-interface-ga/) driver
+
+[^1]: This type of storage should be considered ephemeral (temporary) as it inherently linked to the lifetime of the underlying
+    nodes. In the Panfactum stack, nodes can be replaced at any time.
+
+The primary use case for CSI is for attaching storage managed by cloud providers (e.g., [AWS EBS](https://aws.amazon.com/ebs/)). That said,
+this interface is extremely flexible and can also be used by other utilities to directly mount files inside your pods.
+
+## Deploy AWS EBS CSI Driver
+
+The [AWS EBS CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver) allows you to provision EBS volumes for
+use in your pods. This is the recommended way to store stateful data (i.e., Database storage) within the Panfactum stack.
+
+We provide the [kube\_aws\_ebs\_csi](/docs/stable-25-04/reference/infrastructure-modules/direct/kubernetes/kube_aws_ebs_csi) module to deploy the driver.
+
+Let's deploy it now:
+
+1. Create a new directory adjacent to your `aws_eks` module called `kube_aws_ebs_csi`.
+
+2. Add a `terragrunt.hcl` to that directory that looks like this:
+
+    ::: code-group labels=[kube_aws_ebs_csi/terragrunt.hcl]
+    ```hcl collapse={1-14} "REPLACE_ME"
+    include "panfactum" {
+        path   = find_in_parent_folders("panfactum.hcl")
+        expose = true
+    }
+
+    terraform {
+        source = include.panfactum.locals.pf_stack_source
+    }
+
+    dependency "cluster" {
+      config_path  = "../aws_eks"
+      skip_outputs = true
+    }
+
+    inputs = {}
+    ```
+    :::
+
+3. Run `pf-tf-init` to enable the required providers.
+
+4. Run `terragrunt apply`.
+
+5. Verify the pods deployed successfully:
+   <MarkdownImage src={ebsCSILaunchImg} alt="AWS EBS CSI launched successfully" />
+
+### Storage Classes
+
+Note that there are now a couple [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) resources
+in the cluster:
+
+<MarkdownImage src={storageClassesImg} alt="Storage classes in the cluster" />
+
+The following classes were installed by the `kube_aws_ebs_csi` module:
+
+* `ebs-standard`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes and deletes the volumes automatically
+  when the utilizing resource is deleted (default)
+* `ebs-standard-retained`: Uses [gp3](https://aws.amazon.com/ebs/general-purpose/) volumes but never deletes the underlying
+  volumes (recommended for production databases)
+
+## Next Steps
+
+We will test the storage drivers in the next section where we deploy Vault (which needs persistent storage).
+
+<BootstrappingGuideNav backHref={"/docs/stable-25-04/guides/bootstrapping/policy-controller"} forwardHref={"/docs/stable-25-04/guides/bootstrapping/vault"} stepNumber={11} />

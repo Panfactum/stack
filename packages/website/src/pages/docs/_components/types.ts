@@ -1,7 +1,5 @@
-import { Versions } from "@/lib/constants.ts";
-
 export type DocsMetadata = {
-  [key in Versions]?: TopLevelDocsSectionMetadata[];
+  [key: string]: TopLevelDocsSectionMetadata[] | undefined;
 };
 
 export enum NavIcons {

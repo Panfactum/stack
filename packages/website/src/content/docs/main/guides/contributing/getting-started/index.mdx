@@ -6,38 +6,47 @@ import MarkdownAlert from "@/components/markdown/MarkdownAlert.astro";
 
 # Getting Started
 
-All the utilities associated with the Panfactum stack are contained in the [stack git repository](https://github.com/Panfactum/stack)
+All the utilities associated with the Panfactum framework are contained in the [framework git repository](https://github.com/Panfactum/stack)
 which is hosted by GitHub. This includes the local development environment, the infrastructure modules, and the documentation
-website. Making changes to the Panfactum stack means updating this repository.
+website. Making changes to the Panfactum framework means updating this repository.
 
 ## Setting Up Developer Environment
 
 1. Follow GitHub's instructions for [forking the repository](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
    If you plan on being a regular contributor, make sure you follow the instructions for syncing the fork with the upstream repo.
 
-2. Follow the installation steps outlined in the Stack's [getting started guide](/docs/main/guides/getting-started/install-tooling)
-   to ensure that you have the necessary utilities to launch the Stack's developer environment. You do NOT need
+2. Follow the installation steps outlined in the frameworks's [getting started guide](/docs/main/guides/getting-started/install-tooling)
+   to ensure that you have the necessary utilities to launch the frameworks's devShell. You do NOT need
    to do any of the subsequent steps in that guide.
 
-3. You will have the `direnv allow` the repo's `.envrc` file. Once you do this, all the stack's development utilities
+3. You will have to run `direnv allow` to authorize repo's `.envrc` file. Once you do this, all the framework's development utilities
    should be automatically installed, and you are ready to begin development.
 
-## Understanding Project Setup
+## Project Structure
 
-The project is broken into "packages" which can be found under the [packages directory](https://github.com/Panfactum/stack/tree/main/packages).
+The framework is broken into "packages" which can be found under the [packages directory](https://github.com/Panfactum/stack/tree/main/packages).
 
 We currently have the following packages:
 
 * [nix](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/nix): Contains both the local devShell for
-  users of the Panfactum stack and the local devShell for Panfactum developers.
+  users of the Panfactum framework and the local devShell for Panfactum developers.
 
 * [cli](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/cli): The next-generation CLI for the Panfactum framework. Will
-  eventually reflect the bash scripts in the devShell that run most automations.
+  eventually replace the bash scripts in the devShell that run most automations.
 
 * [infrastructure](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/infrastructure): Contains all the
-  infrastructure-as-code modules that comprise the Panfactum stack.
+  infrastructure-as-code modules that comprise the Panfactum framework.
 
 * [website](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/website): Contains the source code for this website.
+
+* [vault](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/vault): Contains the source code for the Hashicorp Vault images that have
+  been customized with additional extensions for the Panfactum framework.
+
+* [bastion](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/bastion): Contains the source code for the SSH Bastion host that is used to
+  access the Panfactum framework's infrastructure.
+
+* [scraper](https://github.com/Panfactum/stack/tree/__PANFACTUM_VERSION_MAIN__/packages/scraper): The content scraper that scrapes the Panfactum reference materials
+  to generate our search and AI interfaces.
 
 ## Next Steps
 

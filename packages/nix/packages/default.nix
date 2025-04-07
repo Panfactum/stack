@@ -10,6 +10,8 @@
   linkerdPkgs,
   kyvernoPkgs,
   natsPkgs,
+  bunPkgs,
+  bun2nix,
 }:
 let
   # Custom Packages
@@ -52,6 +54,10 @@ with pkgs;
   # Custom Panfactum Scripts
   ####################################
   (import ./scripts { inherit pkgs; })
+  (pkgs.callPackage ../../cli/default.nix {
+    inherit bun2nix;
+    pkgs = bunPkgs;
+  })
 
   ####################################
   # Kubernetes

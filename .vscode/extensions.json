@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "astro-build.astro-vscode",
+        "bradlc.vscode-tailwindcss",
+        "elagil.pre-commit-helper",
+        "gruntfuggly.todo-tree",
+        "timonwong.shellcheck"
+    ]
+}

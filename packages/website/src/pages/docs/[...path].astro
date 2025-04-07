@@ -1,30 +1,46 @@
 ---
 import { getCollection, render } from "astro:content";
 
-
 import MarkdownAnchorTag from "@/components/markdown/MarkdownAnchorTag.astro";
+import { DOCS_VERSIONS } from "@/lib/constants";
 
 import DocumentationLayout from "./_components/DocumentationLayout.astro";
-import type { DocsMetadata } from "./_components/types";
-import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_EDGE } from "../../content/docs/edge/sideNavSections";
-import { SIDENAV_SECTIONS as SIDENAV_SECTIONS_MAIN } from "../../content/docs/main/sideNavSections";
-import { Versions } from "../../lib/constants";
+import type { DocsMetadata, TopLevelDocsSectionMetadata } from "./_components/types";
 
 export async function getStaticPaths() {
+
+  // This is a little bit of a hacky way to import the sidenavs for each docs
+  // version, but works pretty well AFAIK.
+  // It is necessary b/c the docs versions can change dynamically based on our releases
+  // scripts and we do not want our release scripts to have to edit TS files.
+  const metadata = Object.fromEntries(await Promise.all(DOCS_VERSIONS.map(async ({slug}) => ([
+  slug,
+  (await import(`../../content/docs/${slug}/sideNavSections.ts`)).SIDENAV_SECTIONS as TopLevelDocsSectionMetadata[]
+] as const))))
+
   const docs = await getCollection("docs");
-  return docs.map((doc) => {
+  const validSlugs = DOCS_VERSIONS
+    .map(v => v.slug)
+    .concat(["changelog", "maturity"])
+  return Promise.all(docs
+  .filter(doc => validSlugs.some(slug => doc.id.startsWith(slug)))
+  .map(async (doc) => {
     return {
       params: { path: doc.id },
-      props: { entry: doc },
+      props: { 
+        entry: doc,
+        metadata
+      },
     };
-  });
+  }));
 }
 
 interface Props {
-  entry: Parameters<typeof render>[0]
+  entry: Parameters<typeof render>[0],
+  metadata: DocsMetadata
 }
 
-const { entry } = Astro.props;
+const { entry, metadata } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const filteredHeadings = headings.filter(({text}) => {
@@ -33,10 +49,7 @@ const filteredHeadings = headings.filter(({text}) => {
 
 const headingTitle = headings.find(({depth}) => depth === 1)?.text
 
-export const metadata: DocsMetadata = {
-  [Versions.edge]: SIDENAV_SECTIONS_EDGE,
-  [Versions.unreleased]: SIDENAV_SECTIONS_MAIN,
-};
+
 ---
 
 <DocumentationLayout
