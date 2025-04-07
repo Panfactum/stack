@@ -14,7 +14,7 @@ repos:
         name: Shellcheck
         entry: shellcheck
         language: system
-        files: ^packages/nix/.*\.sh$
+        files: ^packages/(nix|installer|infrastructure)/.*\.sh$
         pass_filenames: true
         description: "Runs shellcheck on shell scripts"
         fail_fast: true
@@ -23,7 +23,7 @@ repos:
         name: Shell Format
         entry: shfmt --diff -i 2
         language: system
-        files: ^packages/nix/.*\.sh$
+        files: ^packages/(nix|installer|infrastructure)/.*\.sh$
         pass_filenames: true
         description: "Runs shfmt on shell scripts"
         fail_fast: true

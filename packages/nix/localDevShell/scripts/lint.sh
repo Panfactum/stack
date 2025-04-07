@@ -50,6 +50,7 @@ echo >&2 "Finished Nix linting!"
 echo >&2 "Starting shell linting..."
 shfmt -w "$REPO_ROOT/packages/nix"
 shfmt -w "$REPO_ROOT/packages/infrastructure"
+shfmt -w "$REPO_ROOT/packages/installer"
 echo >&2 "Finished shell linting!"
 
 #######################################
