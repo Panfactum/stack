@@ -6,16 +6,18 @@ import type { BaseContext } from "clipanion";
 export const getModuleOutputs = <T extends z.ZodTypeAny>({
   context,
   modulePath,
+  silent = false,
   validationSchema,
   verbose = false,
 }: {
   context: BaseContext;
   modulePath: string;
+  silent?: boolean;
   validationSchema: T;
   verbose?: boolean;
 }) => {
   let moduleOutputProgress: globalThis.Timer | undefined;
-  if (!verbose) {
+  if (!verbose && !silent) {
     moduleOutputProgress = progressMessage({
       context,
       message: "Getting module outputs",
@@ -34,8 +36,8 @@ export const getModuleOutputs = <T extends z.ZodTypeAny>({
     }
   );
 
-  !verbose && globalThis.clearInterval(moduleOutputProgress);
-  context.stdout.write("\n");
+  !verbose && !silent && globalThis.clearInterval(moduleOutputProgress);
+  !verbose && !silent && context.stdout.write("\n");
 
   if (verbose) {
     context.stdout.write(

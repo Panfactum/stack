@@ -1,9 +1,10 @@
 import pc from "picocolors";
-import { printHelpInformation } from "../../util/print-help-information";
-import { progressMessage } from "../../util/progress-message";
+import { printHelpInformation } from "../../../../util/print-help-information";
+import { progressMessage } from "../../../../util/progress-message";
+import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
 import type { BaseContext } from "clipanion";
 
-export function apply({
+export function runAllApply({
   context,
   env,
   suppressErrors = false,
@@ -21,12 +22,12 @@ export function apply({
     if (!verbose) {
       tfApplyProgress = progressMessage({
         context,
-        message: "Applying infrastructure modules",
+        message: "Applying all infrastructure modules",
       });
     }
 
     const initProcess = Bun.spawnSync(
-      ["terragrunt", "apply", "-auto-approve"],
+      ["terragrunt", "run-all", "apply", "--terragrunt-non-interactive"],
       {
         cwd: workingDirectory,
         env,
@@ -49,12 +50,16 @@ export function apply({
         )
       );
       printHelpInformation(context);
+      writeErrorToDebugFile({
+        context,
+        error: `Failed to apply infrastructure modules: ${initProcess.stderr.toString()}`,
+      });
       throw new Error("Failed to apply infrastructure modules");
     }
 
     !verbose &&
       context.stdout.write(
-        pc.green("Successfully applied all infrastructure modules\n")
+        pc.green("\rSuccessfully applied all infrastructure modules\n")
       );
 
     return 0;
@@ -68,6 +73,10 @@ export function apply({
           : "Error applying infrastructure modules";
       context.stderr.write(`${pc.red(errorMessage)}\n`);
     }
+    writeErrorToDebugFile({
+      context,
+      error,
+    });
     throw new Error("Failed to apply infrastructure modules");
   }
 }

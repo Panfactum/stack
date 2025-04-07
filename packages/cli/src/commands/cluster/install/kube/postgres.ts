@@ -1,7 +1,6 @@
-import postgresTerragruntHcl from "../../templates/kube_cloudnative_pg_terragrunt.hcl" with { type: "file" };
-import { ensureFileExists } from "../../util/ensure-file-exists";
-import { tfInit } from "../../util/scripts/tf-init";
-import { apply } from "../terragrunt/apply";
+import postgresTerragruntHcl from "../../../../templates/kube_cloudnative_pg_terragrunt.hcl" with { type: "file" };
+import { ensureFileExists } from "../../../../util/ensure-file-exists";
+import { initAndApplyModule } from "../../../../util/init-and-apply-module";
 import type { BaseContext } from "clipanion";
 
 export async function setupCloudNativePG({
@@ -19,15 +18,10 @@ export async function setupCloudNativePG({
     sourceFile: await Bun.file(postgresTerragruntHcl).text(),
   });
 
-  tfInit({
+  await initAndApplyModule({
     context,
+    moduleName: "CloudNativePG",
+    modulePath: "./kube_cloudnative_pg",
     verbose,
-    workingDirectory: "./kube_cloudnative_pg",
-  });
-
-  apply({
-    context,
-    verbose,
-    workingDirectory: "./kube_cloudnative_pg",
   });
 }

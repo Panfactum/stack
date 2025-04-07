@@ -1,18 +1,18 @@
 import path from "node:path";
 import yaml from "yaml";
 import { z } from "zod";
-import awsEksSla1Template from "../../templates/aws_eks_sla_1_terragrunt.hcl" with { type: "file" };
-import awsEksSla2Template from "../../templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
-import { ensureFileExists } from "../../util/ensure-file-exists";
-import { replaceHclValue } from "../../util/replace-hcl-value";
-import { safeFileExists } from "../../util/safe-file-exists";
-import { eksReset } from "../../util/scripts/eks-reset";
-import { getRepoVariables } from "../../util/scripts/get-repo-variables";
-import { getTerragruntVariables } from "../../util/scripts/get-terragrunt-variables";
-import { getRoot } from "../../util/scripts/helpers/get-root";
-import { tfInit } from "../../util/scripts/tf-init";
-import { updateKube } from "../../util/scripts/update-kube";
-import { apply } from "../terragrunt/apply";
+import awsEksSla1Template from "../../../../templates/aws_eks_sla_1_terragrunt.hcl" with { type: "file" };
+import awsEksSla2Template from "../../../../templates/aws_eks_sla_2_terragrunt.hcl" with { type: "file" };
+import { ensureFileExists } from "../../../../util/ensure-file-exists";
+import { initAndApplyModule } from "../../../../util/init-and-apply-module";
+import { replaceHclValue } from "../../../../util/replace-hcl-value";
+import { safeFileExists } from "../../../../util/safe-file-exists";
+import { eksReset } from "../../../../util/scripts/eks-reset";
+import { getRepoVariables } from "../../../../util/scripts/get-repo-variables";
+import { getTerragruntVariables } from "../../../../util/scripts/get-terragrunt-variables";
+import { getRoot } from "../../../../util/scripts/helpers/get-root";
+import { updateKube } from "../../../../util/scripts/update-kube";
+import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
 import type { BaseContext } from "clipanion";
 
 interface EksSetupInput {
@@ -47,16 +47,11 @@ export async function setupEks(input: EksSetupInput) {
     input.clusterDescription
   );
 
-  tfInit({
+  await initAndApplyModule({
     context: input.context,
+    moduleName: "AWS EKS",
+    modulePath: "./aws_eks",
     verbose: input.verbose,
-    workingDirectory: "./aws_eks",
-  });
-
-  apply({
-    context: input.context,
-    verbose: input.verbose,
-    workingDirectory: "./aws_eks",
   });
 
   // Setup cluster_info metadata and CA certs
@@ -92,6 +87,10 @@ export async function setupEks(input: EksSetupInput) {
       jsonConfig["clusters"] = [];
     }
     if (!Array.isArray(jsonConfig["clusters"])) {
+      writeErrorToDebugFile({
+        context: input.context,
+        error: `Clusters key is not an array: ${JSON.stringify(jsonConfig["clusters"])}`,
+      });
       throw new Error("Clusters key is not an array");
     }
     if (input.verbose) {
@@ -116,6 +115,7 @@ export async function setupEks(input: EksSetupInput) {
   await updateKube({
     context: input.context,
     buildConfig: true,
+    silent: true,
     verbose: input.verbose,
   });
 
@@ -158,6 +158,7 @@ export async function setupEks(input: EksSetupInput) {
 
   await updateKube({
     context: input.context,
+    silent: true,
     verbose: input.verbose,
   });
 
@@ -167,6 +168,7 @@ export async function setupEks(input: EksSetupInput) {
     clusterName: input.clusterName,
     commandInvocation: false,
     context: input.context,
+    silent: true,
     verbose: input.verbose,
   });
 

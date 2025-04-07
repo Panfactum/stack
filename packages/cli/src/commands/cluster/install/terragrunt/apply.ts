@@ -1,32 +1,35 @@
 import pc from "picocolors";
-import { printHelpInformation } from "../../util/print-help-information";
-import { progressMessage } from "../../util/progress-message";
+import { printHelpInformation } from "../../../../util/print-help-information";
+import { progressMessage } from "../../../../util/progress-message";
+import { writeErrorToDebugFile } from "../../../../util/write-error-to-debug-file";
 import type { BaseContext } from "clipanion";
 
-export function runAllApply({
+export function apply({
   context,
   env,
+  silent = false,
   suppressErrors = false,
   verbose = false,
   workingDirectory = ".",
 }: {
   context: BaseContext;
   env?: Record<string, string | undefined>;
+  silent?: boolean;
   suppressErrors?: boolean;
   verbose?: boolean;
   workingDirectory?: string;
 }): 0 | never {
   try {
     let tfApplyProgress: globalThis.Timer | undefined;
-    if (!verbose) {
+    if (!verbose && !silent) {
       tfApplyProgress = progressMessage({
         context,
-        message: "Applying all infrastructure modules",
+        message: "Applying infrastructure modules",
       });
     }
 
     const initProcess = Bun.spawnSync(
-      ["terragrunt", "run-all", "apply", "--terragrunt-non-interactive"],
+      ["terragrunt", "apply", "-auto-approve"],
       {
         cwd: workingDirectory,
         env,
@@ -36,12 +39,12 @@ export function runAllApply({
     );
 
     // Clear the progress interval
-    !verbose && globalThis.clearInterval(tfApplyProgress);
-    context.stdout.write("\n");
+    !verbose && !silent && globalThis.clearInterval(tfApplyProgress);
+    !verbose && !silent && context.stdout.write("\n");
 
     // Check if the init process failed
     if (initProcess.exitCode !== 0) {
-      context.stderr.write(initProcess.stderr.toString());
+      context.stderr.write(pc.red(initProcess.stderr.toString()));
       context.stdout.write(pc.red("Failed to apply infrastructure modules.\n"));
       context.stdout.write(
         pc.red(
@@ -49,10 +52,14 @@ export function runAllApply({
         )
       );
       printHelpInformation(context);
+      writeErrorToDebugFile({
+        context,
+        error: `Failed to apply infrastructure modules: ${initProcess.stderr.toString()}`,
+      });
       throw new Error("Failed to apply infrastructure modules");
     }
 
-    !verbose &&
+    !verbose && !silent &&
       context.stdout.write(
         pc.green("Successfully applied all infrastructure modules\n")
       );
@@ -68,6 +75,10 @@ export function runAllApply({
           : "Error applying infrastructure modules";
       context.stderr.write(`${pc.red(errorMessage)}\n`);
     }
+    writeErrorToDebugFile({
+      context,
+      error,
+    });
     throw new Error("Failed to apply infrastructure modules");
   }
 }
