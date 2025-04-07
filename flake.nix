@@ -14,6 +14,14 @@
     linkerdPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     kyvernoPkgsSrc.url = "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef";
     natsPkgsSrc.url = "github:NixOS/nixpkgs/34a626458d686f1b58139620a8b2793e9e123bba";
+    bunPkgsSrc.url = "github:NixOS/nixpkgs/573c650e8a14b2faa0041645ab18aed7e60f0c9a";
+    bun2nix = {
+      url = "github:baileyluTCD/bun2nix/b23a63c44bba437a37f012e5bcbf0f06bb902f17";
+      inputs = {
+        nixpkgs.follows = "bunPkgsSrc";
+        flake-utils.follows = "flake-utils";
+      };
+    };
   };
 
   outputs =
@@ -30,6 +38,7 @@
       linkerdPkgsSrc,
       kyvernoPkgsSrc,
       natsPkgsSrc,
+      bunPkgsSrc,
       ...
     }@inputs:
     flake-utils.lib.eachDefaultSystem (
@@ -101,6 +110,13 @@
             allowUnfree = true;
           };
         };
+        bunPkgs = import bunPkgsSrc {
+          inherit system;
+          config = {
+            allowUnfree = true;
+          };
+        };
+        bun2nix = inputs.bun2nix.defaultPackage.${system};
         panfactumPackages = import ./packages/nix/packages {
           inherit
             pkgs
@@ -114,10 +130,12 @@
             linkerdPkgs
             kyvernoPkgs
             natsPkgs
+            bunPkgs
+            bun2nix
             ;
         };
 
-        localDevShell = import ./packages/nix/localDevShell { inherit pkgs; };
+        localDevShell = import ./packages/nix/localDevShell { inherit pkgs bunPkgs bun2nix; };
 
         mkDevShell =
           {

@@ -8,7 +8,8 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "bun test src/**/*.test.ts",
-    "test:watch": "bun test --watch src/**/*.test.ts"
+    "test:watch": "bun test --watch src/**/*.test.ts",
+    "postinstall": "bun2nix -o bun.nix"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",

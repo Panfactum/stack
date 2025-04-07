@@ -32,7 +32,7 @@ repos:
         name: Nix Format
         entry: nixfmt -c
         language: system
-        files: ^packages/nix/.*\.nix$
+        files: ^packages/(nix|cli)/.*\.nix$
         pass_filenames: true
         description: "Runs nixfmt on Nix files"
         fail_fast: true
